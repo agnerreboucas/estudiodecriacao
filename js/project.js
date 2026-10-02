@@ -4,6 +4,43 @@ function metricTotals(p) {
   p.metrics.forEach(m => { t.spend += +m.spend || 0; t.impressions += +m.impressions || 0; t.clicks += +m.clicks || 0; t.leads += +m.leads || 0; t.conversions += +m.conversions || 0; });
   return Object.assign(t, {n: p.metrics.length, cpl: t.leads ? t.spend / t.leads : null, ctr: t.impressions ? t.clicks / t.impressions * 100 : null, clickToLead: t.clicks ? t.leads / t.clicks * 100 : null, cac: t.conversions ? t.spend / t.conversions : null});
 }
+/* ---- fluxo do projeto: do briefing ao aprendizado ---- */
+function projectFlow(p) {
+  const pre = p.pre, cr = creativesOf(p.id), journeyOk = pre.journey.filter(s => ['situacao', 'duvida', 'dor', 'desejo', 'gatilho', 'objecao', 'confianca'].filter(k => s[k]).length >= 3).length >= 3;
+  const st = [
+    ['Briefing', !!(p.brief.original || pre.briefing), 'projectSettings', 'Contexto original do cliente'],
+    ['Diagnóstico e hipóteses', preItems(pre).length > 0, 'preproject', 'Desafios → hipóteses'],
+    ['Pré-Projeto', pre.status === 'APROVADO', 'preproject', pre.status],
+    ['Posicionamento', pre.positioningApproved, 'strategy', 'Gate antes da estratégia'],
+    ['Estratégia', pre.positioningApproved && pre.icps.length > 0 && pre.okr.tr.length > 0, 'strategy', 'ICPs + OKR'],
+    ['Jornada', journeyOk, 'preproject', 'Etapas descritas'],
+    ['Comunicação', false, '', 'Matriz de Comunicação', true],
+    ['Produção', cr.some(c => ['Aprovado', 'Publicado'].includes(c.status)) && p.matrix.concepts.length > 0, 'page:matrix', 'Artes e vídeos'],
+    ['Publicação', p.publications.some(x => x.status === 'Publicado'), 'page:publishingHub', 'Só o que foi aprovado'],
+    ['Resultados', p.metrics.length > 0, 'performance', 'Métricas reais'],
+    ['Aprendizado', learnWeights(p).rows.length > 0, 'performance', 'Pesos da matriz']
+  ];
+  let cur = false;
+  return st.map(([label, done, to, hint, soon]) => { let s = soon ? 'soon' : done ? 'done' : !cur ? (cur = true, 'current') : 'todo'; return {label, state: s, to, hint}; });
+}
+function flowGo(to) {
+  if (!to) { toast('Matriz de Comunicação: próxima etapa do desenvolvimento.'); return; }
+  if (to.startsWith('page:')) go(to.slice(5)); else { ui.tab = to; renderProjectTab(); }
+}
+function flowHTML(p) {
+  const f = projectFlow(p), cur = f.find(x => x.state === 'current');
+  return `<div class="flow-wrap"><div class="section-row"><h3 style="margin:0">Fluxo do projeto</h3><small class="muted">${cur ? 'Agora: <b>' + esc(cur.label) + '</b>' : 'Fluxo completo'}</small></div><div class="flow-steps">${f.map((x, i) => `<button class="fs ${x.state}" onclick="flowGo('${x.to}')" title="${esc(x.hint)}"><i>${x.state === 'done' ? '✓' : i + 1}</i><span>${esc(x.label)}</span><small>${x.state === 'soon' ? 'em breve' : x.state === 'current' ? 'em andamento' : x.state === 'done' ? 'concluído' : 'a fazer'}</small></button>`).join('')}</div></div>`;
+}
+const SRC_LABEL = {livre: 'Briefing escrito', audio: 'Briefing em áudio', entrevista: 'Entrevista guiada'};
+function fichaHTML(p) {
+  const b = p.brief, has = BRIEF_FIELDS.some(([k]) => b[k]);
+  if (p.brief.hasAudio) setTimeout(() => loadBriefAudio(p), 0);
+  return `<div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>Ficha do projeto</h3><p class="muted">${b.source ? SRC_LABEL[b.source] + ' · ' + fmtDate(b.createdAt) : 'Sem briefing estruturado'} ${tag('dado')}</p></div><button class="btn sm" onclick="ui.tab='projectSettings';renderProjectTab()">Editar</button></div>
+    ${has ? BRIEF_FIELDS.filter(([k]) => b[k]).map(([k, l]) => `<div class="kv"><span>${l}</span><strong>${esc(b[k])}</strong></div>`).join('') : '<p class="muted">Preencha a ficha em Configurações do projeto.</p>'}
+    ${p.brief.hasAudio ? `<div class="kv"><span>Áudio original</span><strong><audio id="briefAudio" controls style="width:100%"></audio></strong></div>` : ''}
+    ${b.original ? `<details class="jp-history"><summary>Briefing original (preservado)</summary><div style="white-space:pre-wrap">${esc(b.original)}</div></details>` : ''}</div>`;
+}
+async function loadBriefAudio(p) { const el = $('briefAudio'); if (!el) return; try { const b = await audioGet(p.id); if (b) el.src = URL.createObjectURL(b); else el.replaceWith(Object.assign(document.createElement('small'), {textContent: 'Áudio não encontrado neste navegador (foi gravado em outro).'})); } catch (e) { /* sem IndexedDB */ } }
 const dash = (v, f) => v == null ? '—' : f(v);
 function gateBanner(p) {
   const s = p.pre.status, apr = s === 'APROVADO';
@@ -22,12 +59,12 @@ function nextActions(p) {
 const TABS = {
   overview(p) {
     const t = metricTotals(p), cr = creativesOf(p.id), pre = p.pre, icp = pre.icps[0];
-    return gateBanner(p) + `<div class="cards"><div class="card"><div class="label">Investimento</div><div class="metric">${dash(t.n ? t.spend : null, fmtMoney)}</div><div class="trend">${t.n ? t.n + ' registro(s)' : 'sem métricas ainda'}</div></div>
+    return flowHTML(p) + gateBanner(p) + `<div class="cards"><div class="card"><div class="label">Investimento</div><div class="metric">${dash(t.n ? t.spend : null, fmtMoney)}</div><div class="trend">${t.n ? t.n + ' registro(s)' : 'sem métricas ainda'}</div></div>
       <div class="card"><div class="label">Leads</div><div class="metric">${t.n ? fmtNum(t.leads) : '—'}</div><div class="trend">${t.n ? 'no período registrado' : 'registre em Performance'}</div></div>
       <div class="card"><div class="label">CPL médio</div><div class="metric">${dash(t.cpl, fmtMoney)}</div><div class="trend">investimento ÷ leads</div></div>
       <div class="card"><div class="label">Criações</div><div class="metric">${cr.length}</div><div class="trend">${cr.filter(c => c.status === 'Para aprovação').length} em aprovação</div></div></div>
     <div class="two"><div class="panel"><h3>Próximas ações</h3><div class="list">${nextActions(p).map(x => `<div class="list-item clickable" onclick="${x[2]}"><div><strong>${esc(x[0])}</strong><small>${esc(x[1])}</small></div><span>→</span></div>`).join('') || '<p class="muted">Tudo em dia.</p>'}</div></div>
-      <div class="panel"><h3>Resumo estratégico</h3><div class="kv"><span>ICP principal</span><strong>${esc(icp ? icp.name : 'não definido')}</strong></div><div class="kv"><span>Objetivo ${tag(pre.status === 'APROVADO' ? 'decisao' : 'recomendacao')}</span><strong>${esc(pre.objective) || '<em class="muted">definir no Pré-Projeto</em>'}</strong></div><div class="kv"><span>Posicionamento</span><strong>${esc(pre.positioning) || '<em class="muted">próximo gate</em>'}</strong></div><div class="kv"><span>Context ID</span><strong class="mono">${esc(p.ctx)}</strong></div></div></div>`;
+      <div class="panel"><h3>Resumo estratégico</h3><div class="kv"><span>ICP principal</span><strong>${esc(icp ? icp.name : 'não definido')}</strong></div><div class="kv"><span>Objetivo ${tag(pre.status === 'APROVADO' ? 'decisao' : 'recomendacao')}</span><strong>${esc(pre.objective) || '<em class="muted">definir no Pré-Projeto</em>'}</strong></div><div class="kv"><span>Posicionamento</span><strong>${esc(pre.positioning) || '<em class="muted">próximo gate</em>'}</strong></div><div class="kv"><span>Context ID</span><strong class="mono">${esc(p.ctx)}</strong></div></div></div>` + fichaHTML(p);
   },
   strategy(p) {
     const pre = p.pre, apr = pre.status === 'APROVADO';
@@ -56,7 +93,8 @@ const TABS = {
   performance(p) { return performanceHTML(p); },
   integrations() { return integrationsHTML(); },
   projectSettings(p) {
-    return `<div class="panel"><div class="form-grid"><div class="field"><label>Nome do projeto</label><input id="psName" value="${esc(p.name)}"></div><div class="field"><label>Status</label><select id="psStatus">${['Em desenvolvimento', 'Ativo', 'Pausado', 'Concluído'].map(s => `<option ${s === p.status ? 'selected' : ''}>${s}</option>`).join('')}</select></div><div class="field full"><label>Descrição</label><input id="psDesc" value="${esc(p.desc)}"></div><div class="field full"><label>Objetivo</label><textarea id="psGoal">${esc(p.goal)}</textarea></div></div>
+    return `<div class="panel"><div class="form-grid"><div class="field"><label>Nome do projeto</label><input id="psName" value="${esc(p.name)}"></div><div class="field"><label>Status</label><select id="psStatus">${['Em desenvolvimento', 'Ativo', 'Pausado', 'Concluído'].map(s => `<option ${s === p.status ? 'selected' : ''}>${s}</option>`).join('')}</select></div><div class="field full"><label>Descrição</label><input id="psDesc" value="${esc(p.desc)}"></div><div class="field full"><label>Objetivo do projeto</label><textarea id="psGoal">${esc(p.goal)}</textarea></div><div class="field full"><label>Cliente / empresa</label><input id="psClient" value="${esc(p.client)}"></div></div>
+      <h3 style="margin:18px 0 6px">Ficha do briefing</h3><p class="muted" style="font-size:11px;margin-top:0">Edite o que mudou depois da conversa inicial. O briefing original continua guardado sem alterações.</p><div class="form-grid">${BRIEF_FIELDS.map(([k, l]) => `<div class="field full"><label>${l}</label><textarea id="pb_${k}" rows="2">${esc(p.brief[k])}</textarea></div>`).join('')}<div class="field full"><label>Observações</label><textarea id="pb_notes" rows="2">${esc(p.brief.notes)}</textarea></div></div>
       <div class="actions" style="margin-top:15px;flex-wrap:wrap"><button class="btn dark" onclick="saveProjectSettings()">Salvar projeto</button><button class="btn" onclick="exportProject('${p.id}')">⬇ Exportar projeto</button><button class="btn" onclick="deleteProject('${p.id}')">Excluir projeto</button></div></div>`;
   }
 };
@@ -79,7 +117,7 @@ function approvePositioning() {
   if (!confirm('Aprovar o posicionamento? Isso libera a Estratégia definitiva.')) return;
   pre.positioningApproved = true; pre.history.unshift({at: new Date().toISOString(), action: 'Posicionamento aprovado', note: ''}); persist(); renderProjectTab(); toast('Posicionamento aprovado. Próximo gate: Estratégia.');
 }
-function saveProjectSettings() { const p = curProject(); p.name = $('psName').value.trim() || p.name; p.status = $('psStatus').value; p.desc = $('psDesc').value; p.goal = $('psGoal').value; persist(); renderProjectTab(); updateContextUI(); toast('Projeto salvo.'); }
+function saveProjectSettings() { const p = curProject(); p.name = $('psName').value.trim() || p.name; p.status = $('psStatus').value; p.desc = $('psDesc').value; p.goal = $('psGoal').value; p.client = $('psClient').value; BRIEF_FIELDS.concat([['notes']]).forEach(([k]) => { p.brief[k] = $('pb_' + k).value; }); persist(); renderProjectTab(); updateContextUI(); toast('Projeto salvo.'); }
 function deleteProject(id) {
   const p = projectById(id); if (!confirm(`Excluir "${p.name}" e todas as suas criações? Exporte antes se quiser guardar.`)) return;
   state.projects = state.projects.filter(x => x.id !== id); state.creatives = state.creatives.filter(c => c.projectId !== id);

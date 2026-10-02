@@ -20,9 +20,11 @@ function newProject(name, desc, extra = {}) {
   return mergeDefaults(Object.assign({
     id, ctx: 'CTX-' + id.slice(-6).toUpperCase(), name, desc: desc || '', cover: 'a6',
     icon: (name || 'P').split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(),
-    status: 'Em desenvolvimento', category: 'Marketing', goal: '', created: new Date().toISOString()
+    status: 'Em desenvolvimento', category: 'Marketing', client: '', goal: '', created: new Date().toISOString()
   }, extra), {
     brand: {positioning: '', tone: '', palette: '', visual: '', rule: '', instructions: ''},
+    brief: {source: '', offer: '', audience: '', problem: '', goal: '', channels: '', budget: '', deadline: '', competitors: '', notes: '', original: '', transcript: '', hasAudio: false, audioMs: 0, createdAt: ''},
+    voice: {personality: '', principles: '', vocabulary: '', antivocab: '', rules: '', channels: '', examples: '', checklist: ''},
     pre: newPre(),
     matrix: {duration: 15, sel: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},

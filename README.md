@@ -5,7 +5,9 @@ Sistema de inteligência e produção de marketing orientado por projetos: **Bri
 Documentos de referência em `docs/` (PRD, Guia de Estilo e o protótipo original v3).
 
 ## O que já funciona
-- **Projetos** com Context ID, marca (Brand Brain), assets e tudo ligado ao projeto.
+- **Novo projeto (assistente):** briefing escrito, em **áudio** (grava, guarda o original e transcreve no Chrome) ou **entrevista guiada**; o Studio extrai oferta, público, problema e objetivo, sugere os desafios, aponta lacunas críticas e cria o projeto estruturado (Context ID, briefing original preservado, Pré-Projeto, Brand Brain e Voice Brain).
+- **Fluxo do projeto** do briefing ao aprendizado, com os gates, na visão geral.
+- **Projetos** com Context ID, marca (Brand Brain), Voice Brain, assets e tudo ligado ao projeto.
 - **Pré-Projeto (Journey Architect):** desafios → hipóteses editáveis (DADO/HIPÓTESE) → cruzamento → diagnóstico → justificativa → objetivo → OKR (tração e estruturação) → até 3 ICPs → jornada de 5 etapas → checklist de validação → estados Rascunho / Em revisão / Ajustes / Aprovado. Editar um pré-projeto aprovado o reabre (nenhum gate passa em silêncio). Rastreabilidade DESAFIO-00N → HIP-00N. Apresentação editorial e PDF gerados do projeto.
 - **Gate de Posicionamento** depois da aprovação.
 - **Matriz de Criação** (hooks, ângulos, formatos, CTAs, direção) com funil 100 → 30 → 12 → 6 e envio para produção.
