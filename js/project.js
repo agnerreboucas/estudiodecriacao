@@ -1,139 +1,118 @@
-function renderProjectTab(){
-  if(state.projectTab==='preproject'){renderJourneyArchitect();return;}
-  document.querySelectorAll('#projectNav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.projectTab));
-  const c=$('projectContent');
-  if(state.projectTab==='overview')c.innerHTML=`
-    <div class="cards">
-      <div class="card"><div class="label">Investimento</div><div class="metric">R$ 8,4k</div><div class="trend">↑ 12% no período</div></div>
-      <div class="card"><div class="label">Leads</div><div class="metric">326</div><div class="trend">↑ 18% no período</div></div>
-      <div class="card"><div class="label">CPL médio</div><div class="metric">R$ 25,76</div><div class="trend">↓ 9% no período</div></div>
-      <div class="card"><div class="label">Criativos ativos</div><div class="metric">24</div><div class="trend">8 em teste</div></div>
-    </div>
-    <div class="two">
-      <div class="panel"><h3>Próximas ações</h3><div class="list">
-        <div class="list-item"><div><strong>Produzir lote de 12 criativos</strong><small>Feed criativo · hoje</small></div><span>→</span></div>
-        <div class="list-item"><div><strong>Revisar jornada de compra</strong><small>Estratégia · amanhã</small></div><span>→</span></div>
-        <div class="list-item"><div><strong>Publicar nova landing</strong><small>Conversão · 05/10</small></div><span>→</span></div>
-      </div></div>
-      <div class="panel"><h3>Resumo estratégico</h3><div class="kv"><span>ICP</span><strong>Mutuário em situação de dúvida</strong></div><div class="kv"><span>Canal</span><strong>Meta Ads + WhatsApp</strong></div><div class="kv"><span>Mensagem</span><strong>Clareza antes da decisão</strong></div></div>
-    </div>`;
-  if(state.projectTab==='strategy')c.innerHTML=`<div class="two"><div class="panel"><h3>Estratégia & ICP</h3><div class="kv"><span>Problema</span><strong>Falta de clareza sobre direitos e alternativas</strong></div><div class="kv"><span>Desejo</span><strong>Segurança para decidir</strong></div><div class="kv"><span>Objeção</span><strong>“Não sei se vale a pena buscar ajuda”</strong></div><div class="kv"><span>Prova</span><strong>Conteúdo educativo + autoridade</strong></div></div><div class="panel"><h3>Jornada de compra</h3><div class="list"><div class="list-item"><strong>01 · Descoberta</strong><span>Conteúdo</span></div><div class="list-item"><strong>02 · Problema</strong><span>Diagnóstico</span></div><div class="list-item"><strong>03 · Consideração</strong><span>Prova</span></div><div class="list-item"><strong>04 · Ação</strong><span>WhatsApp</span></div></div></div></div>`;
-  if(state.projectTab==='matrix')c.innerHTML=`<div class="panel"><div class="section-row"><h2>Matriz Combinatória</h2><button class="btn dark" onclick="go('matrix')">Abrir matriz completa</button></div><p>O projeto fornece o briefing; a matriz transforma esse contexto em combinações de hooks, ângulos, formatos, direção e CTA.</p><div class="cards"><div class="card"><div class="label">Hooks</div><div class="metric">12</div></div><div class="card"><div class="label">Ângulos</div><div class="metric">10</div></div><div class="card"><div class="label">Formatos</div><div class="metric">8</div></div><div class="card"><div class="label">Combinações</div><div class="metric">7.680</div></div></div></div>`;
-  if(state.projectTab==='videoLab')c.innerHTML=`<div class="panel"><div class="section-row"><h2>Video Lab</h2><button class="btn dark" onclick="go('videoLab')">Abrir laboratório</button></div><p>Produção modular por cena, com roteiro aprovado, storyboard, direção de fotografia, roteamento de modelo e estimativa de créditos.</p></div>`;
-  if(state.projectTab==='creative')c.innerHTML=`<div class="section-row"><h2>Feed criativo</h2><button class="btn dark" onclick="openModal('creative')">＋ Nova criação</button></div><div class="masonry">${state.creatives.map((x,i)=>artCard(x,i)).join('')}</div>`;
-  if(state.projectTab==='landing')c.innerHTML=`<div class="two"><div class="panel"><h3>Landing Pages</h3><div class="list">${['LP · Proteção patrimonial','LP · Revisão de contrato','LP · Diagnóstico inicial'].map((x,i)=>`<div class="list-item"><div><strong>${x}</strong><small>Conversão · versão ${i+1}</small></div><button class="btn" onclick="openModal('landing')">Abrir</button></div>`).join('')}</div></div><div class="panel"><h3>Estrutura padrão</h3><div class="kv"><span>Hero</span><strong>Problema + promessa</strong></div><div class="kv"><span>Prova</span><strong>Casos e autoridade</strong></div><div class="kv"><span>CTA</span><strong>WhatsApp</strong></div></div></div>`;
-  if(state.projectTab==='ads')c.innerHTML=`<div class="cards"><div class="card"><div class="label">Campanhas</div><div class="metric">6</div></div><div class="card"><div class="label">Conjuntos</div><div class="metric">18</div></div><div class="card"><div class="label">Anúncios</div><div class="metric">72</div></div><div class="card"><div class="label">Testes</div><div class="metric">14</div></div></div><div class="panel" style="margin-top:15px"><div class="section-row"><h2>Campanhas</h2><button class="btn dark" onclick="openModal('campaign')">＋ Nova campanha</button></div><div class="list">${['01 · Educação — Dor','02 · Diagnóstico — Intenção','03 · Conversão — WhatsApp','04 · Remarketing — Prova'].map((x,i)=>`<div class="list-item"><div><strong>${x}</strong><small>${i%2?'R$ 120/dia':'R$ 150/dia'} · ${i+3} conjuntos</small></div><span>${i===2?'● Ativa':'○ Rascunho'}</span></div>`).join('')}</div></div>`;
-  if(state.projectTab==='publishing')c.innerHTML=`<div class="two"><div class="panel"><h3>Calendário editorial</h3><div class="list">${['03/10 · Carrossel educativo','05/10 · Reels — dúvida comum','07/10 · Post — checklist','09/10 · Story — CTA'].map(x=>`<div class="list-item"><strong>${x}</strong><span>Agendar</span></div>`).join('')}</div></div><div class="panel"><h3>Canais</h3><div class="kv"><span>Instagram</span><strong>Conectado</strong></div><div class="kv"><span>Meta Ads</span><strong>Conectado</strong></div><div class="kv"><span>WhatsApp</span><strong>Conectado</strong></div></div></div>`;
-  if(state.projectTab==='performance')c.innerHTML=`<div class="cards"><div class="card"><div class="label">CTR</div><div class="metric">2,84%</div><div class="trend">↑ 0,41 pp</div></div><div class="card"><div class="label">CPL</div><div class="metric">R$ 25,76</div><div class="trend">↓ 9%</div></div><div class="card"><div class="label">Conversão LP</div><div class="metric">8,7%</div><div class="trend">↑ 1,2 pp</div></div><div class="card"><div class="label">WhatsApp</div><div class="metric">41%</div><div class="trend">taxa de avanço</div></div></div><div class="panel" style="margin-top:15px"><h3>Leitura de performance</h3><p>Os melhores sinais estão concentrados em criativos educativos e mensagens que reduzem a incerteza antes do contato. Use este espaço para registrar hipóteses e próximos testes.</p></div>`;
-  if(state.projectTab==='integrations')c.innerHTML=`<div class="integration-grid">${[['Meta Ads','Campanhas e métricas','Conectado'],['Instagram','Publicação e insights','Conectado'],['WhatsApp','Conversas e leads','Conectado'],['Google Analytics','Web e conversões','Conectar'],['Supabase','Dados do workspace','Conectado'],['Webhook','Automação do projeto','Conectar']].map(x=>`<div class="card"><div style="font-size:25px">◈</div><h3>${x[0]}</h3><p>${x[1]}</p><button class="btn ${x[2]==='Conectado'?'':'dark'}" onclick="toast('${x[2]==='Conectado'?'Integração configurada':'Configuração aberta'}')">${x[2]}</button></div>`).join('')}</div>`;
-  if(state.projectTab==='projectSettings')c.innerHTML=`<div class="panel"><div class="form-grid"><div class="field"><label>Nome do projeto</label><input value="Mutuários Brasil"></div><div class="field"><label>Status</label><select><option>Em desenvolvimento</option><option>Ativo</option><option>Pausado</option></select></div><div class="field full"><label>Objetivo</label><textarea>Construir uma máquina de aquisição orientada pela jornada de compra.</textarea></div></div><div style="margin-top:15px"><button class="btn dark" onclick="toast('Projeto salvo')">Salvar projeto</button></div></div>`;
+/* Abas do projeto: visão geral, estratégia, feed, landing pages, anúncios, publicação, performance, integrações, configurações */
+function metricTotals(p) {
+  const t = {spend: 0, impressions: 0, clicks: 0, leads: 0, conversions: 0};
+  p.metrics.forEach(m => { t.spend += +m.spend || 0; t.impressions += +m.impressions || 0; t.clicks += +m.clicks || 0; t.leads += +m.leads || 0; t.conversions += +m.conversions || 0; });
+  return Object.assign(t, {n: p.metrics.length, cpl: t.leads ? t.spend / t.leads : null, ctr: t.impressions ? t.clicks / t.impressions * 100 : null, clickToLead: t.clicks ? t.leads / t.clicks * 100 : null, cac: t.conversions ? t.spend / t.conversions : null});
 }
-function openCreative(i){const x=state.creatives[i]||state.creatives[0];openModal('creativeDetail',x)}
-function openCreate(){openModal('create')}
-function setContext(projectName){
-  const btn=$('contextButton');
-  const hint=$('contextHint');
-  if(projectName){
-    btn.textContent='✓ '+projectName;
-    hint.textContent='A IA vai considerar estratégia, Brand Brain, referências e assets deste projeto.';
-    state.context=projectName;
-  }else{
-    btn.textContent='＋ Escolher projeto';
-    hint.textContent='As novas peças podem usar estratégia, Brand Brain e referências do projeto.';
-    state.context='';
+const dash = (v, f) => v == null ? '—' : f(v);
+function gateBanner(p) {
+  const s = p.pre.status, apr = s === 'APROVADO';
+  return `<div class="gate-banner ${apr ? 'ok' : ''}"><div><b>PRÉ-PROJETO ${esc(s)}</b>${apr ? `<span class="arrow">↓</span><small>Próximo gate: <b>${p.pre.positioningApproved ? 'ESTRATÉGIA' : 'POSICIONAMENTO'}</b></small>` : '<small>A produção pode começar, mas a estratégia definitiva só depois da validação.</small>'}</div><button class="btn sm" onclick="ui.tab='preproject';renderProjectTab()">${apr ? 'Ver pré-projeto' : 'Continuar pré-projeto'}</button></div>`;
+}
+function nextActions(p) {
+  const a = [], pre = p.pre, pend = p.approvals.filter(x => x.status === 'Pendente').length;
+  if (pre.status !== 'APROVADO') a.push(['Concluir e aprovar o Pré-Projeto', 'Status: ' + pre.status, "ui.tab='preproject';renderProjectTab()"]);
+  else if (!pre.positioning) a.push(['Definir o Posicionamento', 'Gate depois do pré-projeto aprovado', "ui.tab='strategy';renderProjectTab()"]);
+  if (!p.matrix.concepts.length) a.push(['Gerar conceitos na Matriz de Criação', 'Primeiro conceito, depois produção', "go('matrix')"]);
+  if (pend) a.push([`Revisar ${pend} item(ns) em Aprovação`, 'Gate antes de publicar', "go('approval')"]);
+  if (!p.metrics.length) a.push(['Registrar as primeiras métricas', 'Alimenta o aprendizado da matriz', "ui.tab='performance';renderProjectTab()"]);
+  if (!p.publications.length) a.push(['Preparar a primeira publicação', 'Só criações aprovadas', "go('publishingHub')"]);
+  return a.slice(0, 4);
+}
+const TABS = {
+  overview(p) {
+    const t = metricTotals(p), cr = creativesOf(p.id), pre = p.pre, icp = pre.icps[0];
+    return gateBanner(p) + `<div class="cards"><div class="card"><div class="label">Investimento</div><div class="metric">${dash(t.n ? t.spend : null, fmtMoney)}</div><div class="trend">${t.n ? t.n + ' registro(s)' : 'sem métricas ainda'}</div></div>
+      <div class="card"><div class="label">Leads</div><div class="metric">${t.n ? fmtNum(t.leads) : '—'}</div><div class="trend">${t.n ? 'no período registrado' : 'registre em Performance'}</div></div>
+      <div class="card"><div class="label">CPL médio</div><div class="metric">${dash(t.cpl, fmtMoney)}</div><div class="trend">investimento ÷ leads</div></div>
+      <div class="card"><div class="label">Criações</div><div class="metric">${cr.length}</div><div class="trend">${cr.filter(c => c.status === 'Para aprovação').length} em aprovação</div></div></div>
+    <div class="two"><div class="panel"><h3>Próximas ações</h3><div class="list">${nextActions(p).map(x => `<div class="list-item clickable" onclick="${x[2]}"><div><strong>${esc(x[0])}</strong><small>${esc(x[1])}</small></div><span>→</span></div>`).join('') || '<p class="muted">Tudo em dia.</p>'}</div></div>
+      <div class="panel"><h3>Resumo estratégico</h3><div class="kv"><span>ICP principal</span><strong>${esc(icp ? icp.name : 'não definido')}</strong></div><div class="kv"><span>Objetivo ${tag(pre.status === 'APROVADO' ? 'decisao' : 'recomendacao')}</span><strong>${esc(pre.objective) || '<em class="muted">definir no Pré-Projeto</em>'}</strong></div><div class="kv"><span>Posicionamento</span><strong>${esc(pre.positioning) || '<em class="muted">próximo gate</em>'}</strong></div><div class="kv"><span>Context ID</span><strong class="mono">${esc(p.ctx)}</strong></div></div></div>`;
+  },
+  strategy(p) {
+    const pre = p.pre, apr = pre.status === 'APROVADO';
+    const posBox = apr ? `<div class="panel"><div class="section-row"><div><h3>Posicionamento ${pre.positioningApproved ? tag('decisao') : tag('recomendacao')}</h3><p class="muted">Como a empresa quer ocupar espaço na mente do mercado. Este gate vem antes da estratégia definitiva.</p></div></div>
+        <textarea class="jp-ta" rows="4" placeholder="Ex.: Para [ICP] que [situação], a [marca] é a [categoria] que [diferencial], porque [prova]." onchange="savePositioning(this.value)">${esc(pre.positioning)}</textarea>
+        <div class="modal-actions" style="justify-content:flex-start"><button class="btn dark" onclick="approvePositioning()" ${pre.positioningApproved ? 'disabled' : ''}>${pre.positioningApproved ? '✓ Posicionamento aprovado' : 'Aprovar posicionamento'}</button></div></div>`
+      : `<div class="panel locked"><h3>Posicionamento 🔒</h3><p>Disponível depois que o Pré-Projeto for aprovado. Status atual: <b>${esc(pre.status)}</b>.</p><button class="btn" onclick="ui.tab='preproject';renderProjectTab()">Ir para o Pré-Projeto</button></div>`;
+    return gateBanner(p) + `<div class="two"><div class="panel"><div class="section-row"><h3>ICPs prioritários</h3><button class="btn sm" onclick="ui.tab='preproject';renderProjectTab()">Editar</button></div>${pre.icps.map((x, i) => `<div class="kv"><span>ICP ${i + 1}</span><strong>${esc(x.name)}${x.need ? `<small class="sub-line">${esc(x.need)}</small>` : ''}</strong></div>`).join('') || '<p class="muted">Defina os ICPs no Pré-Projeto.</p>'}</div>
+      <div class="panel"><div class="section-row"><h3>Jornada ${tag('hipotese')}</h3></div><div class="list">${pre.journey.map((s, i) => `<div class="list-item"><div><strong>${pad(i + 1, 2)} · ${esc(s.name)}</strong>${s.dor ? `<small>Dor: ${esc(s.dor)}</small>` : ''}</div><span>${esc(s.gatilho || '')}</span></div>`).join('')}</div></div></div><div style="margin-top:14px">${posBox}</div>`;
+  },
+  matrix(p) {
+    const m = p.matrix; return `<div class="panel"><div class="section-row"><h2>Matriz Combinatória</h2><button class="btn dark" onclick="go('matrix')">Abrir matriz completa</button></div><p>O projeto fornece o contexto; a matriz transforma esse contexto em combinações de hooks, ângulos, formatos, direção e CTA.</p>
+      <div class="cards"><div class="card"><div class="label">Conceitos gerados</div><div class="metric">${m.concepts.length}</div></div><div class="card"><div class="label">No funil</div><div class="metric">${Math.min(m.stage, m.concepts.length)}</div></div><div class="card"><div class="label">Em produção</div><div class="metric">${m.concepts.filter(c => c.creativeId).length}</div></div><div class="card"><div class="label">Duração</div><div class="metric">${m.duration}s</div></div></div></div>`;
+  },
+  videoLab(p) { return `<div class="panel"><div class="section-row"><h2>Video Lab</h2><button class="btn dark" onclick="go('videoLab')">Abrir laboratório</button></div><p>Produção modular por cena, com roteiro aprovado, storyboard, direção, roteamento de modelo e estimativa de créditos.</p><div class="kv"><span>Cenas planejadas</span><strong>${p.video.scenes.length || '—'}</strong></div></div>`; },
+  creative(p) {
+    const cr = creativesOf(p.id);
+    return `<div class="section-row"><h2>Feed criativo</h2><button class="btn dark" onclick="openModal('creative')">＋ Nova criação</button></div>${cr.length ? `<div class="masonry">${cr.map(artCard).join('')}</div>` : emptyState('Sem criações', 'Registre a primeira criação ou gere conceitos na Matriz.')}`;
+  },
+  landing(p) {
+    return `<div class="two"><div class="panel"><div class="section-row"><h3>Landing Pages</h3><button class="btn dark sm" onclick="landingModal('')">＋ Nova</button></div><div class="list">${p.landings.map(l => `<div class="list-item"><div><strong>${esc(l.name)}</strong><small>${esc(l.goal)} · ${esc(l.status)}</small></div><div class="row-gap"><button class="btn sm" onclick="landingModal('${l.id}')">Editar</button><button class="btn sm" onclick="landingExport('${l.id}')">Exportar HTML</button><button class="btn sm" onclick="landingDelete('${l.id}')">×</button></div></div>`).join('') || '<p class="muted">Nenhuma landing page ainda.</p>'}</div></div>
+      <div class="panel"><h3>Estrutura padrão</h3><div class="kv"><span>Hero</span><strong>Problema + promessa</strong></div><div class="kv"><span>Prova</span><strong>Casos e autoridade</strong></div><div class="kv"><span>CTA</span><strong>Formulário e WhatsApp</strong></div><p class="muted" style="font-size:11px">O HTML exportado já traz um formulário que envia o lead para o seu endpoint (Configurações → URL de captura de leads). Suba o arquivo na Hostinger.</p></div></div>`;
+  },
+  ads(p) { return campaignsHTML(p); },
+  publishing(p) { return publishingHTML(p); },
+  performance(p) { return performanceHTML(p); },
+  integrations() { return integrationsHTML(); },
+  projectSettings(p) {
+    return `<div class="panel"><div class="form-grid"><div class="field"><label>Nome do projeto</label><input id="psName" value="${esc(p.name)}"></div><div class="field"><label>Status</label><select id="psStatus">${['Em desenvolvimento', 'Ativo', 'Pausado', 'Concluído'].map(s => `<option ${s === p.status ? 'selected' : ''}>${s}</option>`).join('')}</select></div><div class="field full"><label>Descrição</label><input id="psDesc" value="${esc(p.desc)}"></div><div class="field full"><label>Objetivo</label><textarea id="psGoal">${esc(p.goal)}</textarea></div></div>
+      <div class="actions" style="margin-top:15px;flex-wrap:wrap"><button class="btn dark" onclick="saveProjectSettings()">Salvar projeto</button><button class="btn" onclick="exportProject('${p.id}')">⬇ Exportar projeto</button><button class="btn" onclick="deleteProject('${p.id}')">Excluir projeto</button></div></div>`;
   }
+};
+function renderProjectTab() {
+  const p = curProject(), c = $('projectContent'); if (!c) return;
+  if (!p) { c.innerHTML = emptyState('Nenhum projeto', 'Crie um projeto para começar.'); return; }
+  const hero = document.querySelector('#page-project .project-hero');
+  hero.querySelector('h2').textContent = p.name;
+  hero.querySelector('p').textContent = (p.desc || '') + (p.goal ? ' · ' + p.goal : '');
+  hero.querySelector('.eyebrow').textContent = 'Projeto · ' + p.ctx;
+  hero.querySelector('.pill-status').textContent = '● ' + p.status;
+  document.querySelectorAll('#projectNav button').forEach(b => b.classList.toggle('active', b.dataset.tab === ui.tab));
+  const arch = $('archOverview'); if (arch) arch.style.display = ui.tab === 'overview' ? '' : 'none';
+  if (ui.tab === 'preproject') { renderPre(); return; }
+  c.innerHTML = (TABS[ui.tab] || TABS.overview)(p);
 }
-function openCreation(type){
-  if(type==='context'){ openModal('context'); return; }
-  openModal('creation', type);
+function savePositioning(v) { const pre = curProject().pre; pre.positioning = v; pre.positioningApproved = false; persist(); }
+function approvePositioning() {
+  const pre = curProject().pre; if (!pre.positioning.trim()) { toast('Escreva o posicionamento antes de aprovar.'); return; }
+  if (!confirm('Aprovar o posicionamento? Isso libera a Estratégia definitiva.')) return;
+  pre.positioningApproved = true; pre.history.unshift({at: new Date().toISOString(), action: 'Posicionamento aprovado', note: ''}); persist(); renderProjectTab(); toast('Posicionamento aprovado. Próximo gate: Estratégia.');
+}
+function saveProjectSettings() { const p = curProject(); p.name = $('psName').value.trim() || p.name; p.status = $('psStatus').value; p.desc = $('psDesc').value; p.goal = $('psGoal').value; persist(); renderProjectTab(); updateContextUI(); toast('Projeto salvo.'); }
+function deleteProject(id) {
+  const p = projectById(id); if (!confirm(`Excluir "${p.name}" e todas as suas criações? Exporte antes se quiser guardar.`)) return;
+  state.projects = state.projects.filter(x => x.id !== id); state.creatives = state.creatives.filter(c => c.projectId !== id);
+  state.activeProjectId = state.projects[0] ? state.projects[0].id : ''; persist(); updateContextUI(); go('projects'); toast('Projeto excluído.');
 }
 
-function openModal(type,data){
-  let title='Nova ação',body='';
-  const creationNames={project:'Projeto',ad:'Anúncio',video:'Vídeo',post:'Post',carousel:'Post Carrossel',story:'Story',stories:'Sequência de Stories'};
-  const creationIcons={project:'□',ad:'◉',video:'▷',post:'▣',carousel:'▤',story:'▯',stories:'▥'};
-  if(type==='creation'){
-    const selected=data||'project';
-    title='Criar '+creationNames[selected];
-    const current=state.context||'Nenhum projeto selecionado';
-    const inherited=(selected!=='project' && state.context) ? `A criação será construída a partir de <strong>${state.context}</strong>, usando o contexto existente.` : 'Escolha um projeto existente ou crie um novo contexto para esta produção.';
-    body=`
-      <div class="creation-modal">
-        <div class="creation-context-box">
-          <span>Projeto de referência</span>
-          <strong>${current}</strong>
-          <button class="btn" onclick="closeModal();openModal('context')">Trocar</button>
-        </div>
-        <p style="color:#777;font-size:12px;line-height:1.6;margin:12px 0 18px">${inherited}</p>
-        <div class="creation-options">
-          ${Object.keys(creationNames).map(k=>`<button class="creation-option ${k===selected?'selected':''}" onclick="closeModal();openCreation('${k}')">
-            <span>${creationIcons[k]}</span><strong>${creationNames[k]}</strong><small>${k==='project'?'Estratégia, ICP e Brand Brain':k==='ad'?'Conceito, copy e variações':k==='video'?'Roteiro, cenas e direção':'Formato pronto para produção'}</small>
-          </button>`).join('')}
-        </div>
-        <div class="creation-form">
-          <div class="field"><label>Nome da criação</label><input id="creationName" value="${creationNames[selected]} — novo conceito"></div>
-          <div class="field"><label>Formato</label><select id="creationFormat">
-            <option>${creationNames[selected]}</option>
-            <option>Variação A</option><option>Variação B</option>
-          </select></div>
-          <div class="field full"><label>O que você quer criar?</label><textarea id="creationBrief" placeholder="Descreva objetivo, público, mensagem, oferta ou deixe a IA decidir com base no projeto."></textarea></div>
-        </div>
-        <div style="margin-top:15px;display:flex;justify-content:flex-end;gap:8px">
-          <button class="btn" onclick="closeModal()">Cancelar</button>
-          <button class="btn orange" onclick="confirmCreation('${selected}')">Criar ${creationNames[selected]}</button>
-        </div>
-      </div>`;
-  }
-  if(type==='context'){
-    title='Escolher projeto';
-    body=`
-      <p style="color:#888;font-size:12px;margin-top:0">Quando você escolhe um projeto, toda nova criação pode herdar o contexto que já existe nele.</p>
-      <div class="context-list">
-        ${state.projects.map(p=>`<button class="context-project" onclick="selectContext('${p.name.replace(/'/g,"\\\\'")}')">
-          <span class="context-cover ${p.cover}">${p.icon}</span>
-          <span><strong>${p.name}</strong><small>${p.desc}</small></span>
-          <b>→</b>
-        </button>`).join('')}
-        <button class="context-project new-context" onclick="closeModal();openModal('newproject')">
-          <span class="context-cover">＋</span><span><strong>Novo projeto</strong><small>Começar um novo contexto</small></span><b>→</b>
-        </button>
-      </div>`;
-  }
-  if(type==='create')body=`<div class="project-grid"><div class="project-card" onclick="closeModal();go('project');state.projectTab='creative';setTimeout(renderProjectTab,0)"><div class="cover a5">✦</div><div class="body"><strong>Peça criativa</strong><small>Gerar uma nova criação</small></div></div><div class="project-card" onclick="closeModal();openModal('newproject')"><div class="cover a3">□</div><div class="body"><strong>Projeto</strong><small>Criar workspace de cliente</small></div></div><div class="project-card" onclick="closeModal();openModal('campaign')"><div class="cover a2">◉</div><div class="body"><strong>Campanha</strong><small>Estruturar mídia paga</small></div></div></div>`;
-  if(type==='newproject'){title='Novo projeto';body=`<div class="form-grid"><div class="field"><label>Nome</label><input id="npName" placeholder="Ex.: Novo cliente"></div><div class="field"><label>Categoria</label><select><option>Marketing</option><option>Branding</option><option>Conteúdo</option></select></div><div class="field full"><label>Objetivo</label><textarea placeholder="O que este projeto precisa alcançar?"></textarea></div></div><div style="margin-top:15px"><button class="btn dark" onclick="createProject()">Criar projeto</button></div>`}
-  if(type==='creative'){title='Nova criação';body=`<div class="form-grid"><div class="field"><label>Nome</label><input id="creativeName" value="Novo conceito — "></div><div class="field"><label>Formato</label><select id="creativeType"><option>Meta Ads</option><option>Instagram</option><option>Stories</option><option>Landing Page</option><option>Vídeo</option></select></div><div class="field full"><label>Briefing</label><textarea placeholder="Descreva a ideia, público, oferta e objetivo."></textarea></div></div><div style="margin-top:15px"><button class="btn orange" onclick="createCreative()">Gerar criação</button></div>`}
-  if(type==='campaign'){title='Nova campanha';body=`<div class="form-grid"><div class="field"><label>Nome</label><input value="Nova campanha"></div><div class="field"><label>Objetivo</label><select><option>Leads</option><option>Tráfego</option><option>Conversões</option></select></div><div class="field"><label>Orçamento</label><input value="R$ 150/dia"></div><div class="field"><label>Canal</label><select><option>Meta Ads</option><option>Google Ads</option></select></div></div><div style="margin-top:15px"><button class="btn dark" onclick="closeModal();toast('Campanha criada como rascunho')">Criar campanha</button></div>`}
-  if(type==='landing'){title='Landing Page';body=`<div class="form-grid"><div class="field"><label>Nome</label><input value="LP — Nova oportunidade"></div><div class="field"><label>Objetivo</label><select><option>Gerar lead</option><option>WhatsApp</option><option>Conteúdo</option></select></div><div class="field full"><label>Headline</label><input value="Entenda seu próximo passo antes de decidir"></div></div><div style="margin-top:15px"><button class="btn dark" onclick="closeModal();toast('Estrutura criada')">Criar estrutura</button></div>`}
-  if(type==='asset'){title='Adicionar asset';body=`<div class="form-grid"><div class="field"><label>Nome</label><input placeholder="Ex.: Logo principal"></div><div class="field"><label>Categoria</label><select><option>Logo</option><option>Foto</option><option>Documento</option><option>Referência</option></select></div></div><div style="margin-top:15px"><button class="btn dark" onclick="closeModal();toast('Asset adicionado')">Adicionar</button></div>`}
-  if(type==='brandEdit'){title='Editar Brand Brain';body=`<div class="form-grid"><div class="field full"><label>Posicionamento</label><input value="Orientação antes da decisão"></div><div class="field"><label>Tom</label><input value="Claro, seguro, humano"></div><div class="field"><label>Paleta</label><input value="Verde · areia · laranja"></div><div class="field full"><label>Instruções</label><textarea>Educar antes de converter. Evitar ruído e promessas absolutas.</textarea></div></div><div style="margin-top:15px"><button class="btn dark" onclick="closeModal();toast('Brand Brain atualizado')">Salvar</button></div>`}
-  if(type==='creativeDetail'){title=data[0];body=`<div class="two"><div class="canvas" style="min-height:370px"><div class="poster" style="width:300px"><h2>${data[0]}</h2><p>Mutuários Brasil · ${data[1]}</p></div></div><div class="panel"><h3>Direção</h3><div class="kv"><span>Formato</span><strong>${data[1]}</strong></div><div class="kv"><span>Objetivo</span><strong>Geração de demanda</strong></div><div class="kv"><span>Conceito</span><strong>Clareza</strong></div><button class="btn dark" style="margin-top:15px" onclick="closeModal();toast('Criação enviada para produção')">Usar criação</button></div></div>`}
-  $('modalBox').innerHTML=`<div class="modal-head"><h2>${title}</h2><button class="close" onclick="closeModal()">×</button></div>${body}`;
-  $('modalBack').classList.add('open')
+/* ---- landing pages exportáveis ---- */
+function landingModal(id) {
+  const l = id ? curProject().landings.find(x => x.id === id) : {name: 'LP — Nova oportunidade', goal: 'Gerar lead', headline: '', sub: '', bullets: '', cta: 'Quero entender meu caso', whatsapp: '', status: 'Rascunho'};
+  showModal(id ? 'Editar landing page' : 'Nova landing page', `<div class="form-grid"><div class="field"><label>Nome interno</label><input id="lpName" value="${esc(l.name)}"></div><div class="field"><label>Objetivo</label><select id="lpGoal">${['Gerar lead', 'WhatsApp', 'Conteúdo'].map(s => `<option ${s === l.goal ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+    <div class="field full"><label>Headline (problema + promessa)</label><input id="lpHead" value="${esc(l.headline)}" placeholder="Entenda seu próximo passo antes de decidir"></div><div class="field full"><label>Subtítulo</label><input id="lpSub" value="${esc(l.sub)}"></div>
+    <div class="field full"><label>Pontos de prova (um por linha)</label><textarea id="lpBullets" rows="3">${esc(l.bullets)}</textarea></div><div class="field"><label>Texto do botão</label><input id="lpCta" value="${esc(l.cta)}"></div><div class="field"><label>WhatsApp (só números, com DDI)</label><input id="lpWa" value="${esc(l.whatsapp)}" placeholder="5511999999999"></div></div>
+    <div class="modal-actions"><button class="btn dark" onclick="landingSave('${id}')">Salvar</button></div>`);
 }
-function closeModal(){$('modalBack').classList.remove('open')}
-
-function selectContext(name){
-  setContext(name);
-  closeModal();
-  toast('Contexto selecionado: '+name);
+function landingSave(id) {
+  const p = curProject(), o = {name: $('lpName').value.trim() || 'Landing', goal: $('lpGoal').value, headline: $('lpHead').value.trim(), sub: $('lpSub').value.trim(), bullets: $('lpBullets').value, cta: $('lpCta').value.trim() || 'Enviar', whatsapp: $('lpWa').value.replace(/\D/g, ''), status: 'Rascunho'};
+  if (id) Object.assign(p.landings.find(x => x.id === id), o); else p.landings.push(Object.assign({id: uid('lp')}, o));
+  persist(); closeModal(); renderProjectTab(); toast('Landing salva.');
 }
-function confirmCreation(type){
-  const names={project:'Projeto',ad:'Anúncio',video:'Vídeo',post:'Post',carousel:'Post Carrossel',story:'Story',stories:'Sequência de Stories'};
-  const name=($('creationName')?.value||names[type]+' — novo conceito').trim();
-  const brief=$('creationBrief')?.value?.trim()||'Criado a partir do contexto atual.';
-  if(type==='project'){
-    state.projects.push({id:Date.now(),name:name,desc:'Projeto criado a partir do briefing',cover:'a6',icon:'＋'});
-    closeModal(); renderProjects(); go('projects'); toast('Projeto criado');
-    return;
-  }
-  const label=state.context?name+' · '+state.context:name;
-  state.creatives.unshift([label,names[type],'a5']);
-  state.credits=Math.max(0,state.credits-1);
-  $('credits').textContent=state.credits;
-  closeModal();
-  renderHome();
-  toast(names[type]+' criado'+(state.context?' a partir de '+state.context:''));
+function landingDelete(id) { if (!confirm('Excluir esta landing page?')) return; const p = curProject(); p.landings = p.landings.filter(x => x.id !== id); persist(); renderProjectTab(); }
+function landingHTML(l, p) {
+  const leadsUrl = state.workspace.leadsUrl || '', b = p.brand;
+  const bullets = l.bullets.split('\n').map(x => x.trim()).filter(Boolean);
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(l.headline || l.name)}</title><style>*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;color:#111;background:#fafafa}main{max-width:720px;margin:0 auto;padding:56px 22px}h1{font-size:clamp(30px,6vw,46px);line-height:1.05;letter-spacing:-1.5px;margin:0 0 14px}p.sub{font-size:18px;color:#555;line-height:1.6}ul{padding:0;list-style:none;margin:26px 0}li{padding:12px 0 12px 28px;position:relative;border-bottom:1px solid #eee;font-size:15px}li:before{content:"✓";position:absolute;left:0;font-weight:700}form{background:#fff;border:1px solid #e6e6e6;border-radius:16px;padding:22px;display:grid;gap:12px}input,textarea{border:1px solid #ddd;border-radius:10px;padding:13px;font:inherit;width:100%}button,a.wa{border:0;border-radius:10px;background:#111;color:#fff;padding:14px;font:inherit;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}a.wa{background:#1f8f4e;display:block;margin-top:12px}.hp{position:absolute;left:-9999px}small{color:#888}#ok{display:none;font-weight:700}</style></head><body><main>
+<small>${esc(p.name)}${b.positioning ? ' · ' + esc(b.positioning) : ''}</small><h1>${esc(l.headline || l.name)}</h1>${l.sub ? `<p class="sub">${esc(l.sub)}</p>` : ''}${bullets.length ? `<ul>${bullets.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+${l.goal !== 'WhatsApp' ? `<form id="f"><input name="name" placeholder="Seu nome" required><input name="phone" placeholder="WhatsApp com DDD" required><input name="email" type="email" placeholder="E-mail (opcional)"><textarea name="message" rows="2" placeholder="Conte brevemente seu caso"></textarea><input class="hp" name="website" tabindex="-1" autocomplete="off"><button>${esc(l.cta)}</button><span id="ok">Recebemos seus dados. Entraremos em contato.</span><small>Usamos seus dados apenas para retornar o contato.</small></form>` : ''}
+${l.whatsapp ? `<a class="wa" href="https://wa.me/${esc(l.whatsapp)}?text=${encodeURIComponent('Olá! Vim pela página: ' + (l.headline || l.name))}">${l.goal === 'WhatsApp' ? esc(l.cta) : 'Falar no WhatsApp'}</a>` : ''}
+</main><script>var f=document.getElementById('f');if(f)f.addEventListener('submit',function(e){e.preventDefault();var d={source:'${esc(l.name).replace(/'/g, '')}'};new FormData(f).forEach(function(v,k){d[k]=v});var q=location.search.slice(1).split('&');q.forEach(function(x){var s=x.split('=');if(s[0].indexOf('utm_')===0)d[s[0]]=decodeURIComponent(s[1]||'')});
+var url=${JSON.stringify(leadsUrl).replace(/</g, '\\u003c')};if(!url){alert('Configure a URL de captura de leads no Studio.');return}
+fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){if(!r.ok)throw 0;f.querySelectorAll('input,textarea,button').forEach(function(x){x.disabled=true});document.getElementById('ok').style.display='block'}).catch(function(){alert('Não foi possível enviar. Tente pelo WhatsApp.')})});</script></body></html>`;
 }
-function createProject(){const n=$('npName').value.trim()||'Novo projeto';state.projects.push({id:Date.now(),name:n,desc:'Projeto criado no Ampliação Studio',cover:'a6',icon:'＋'});closeModal();renderProjects();go('projects');toast('Projeto criado')}
-function createCreative(){const n=$('creativeName').value.trim()||'Novo conceito';state.creatives.unshift([n,'Nova criação','a5']);closeModal();renderHome();if(state.page==='project')renderProjectTab();toast('Criação adicionada ao feed')}
-function saveSettings(){localStorage.setItem('ampliacao_workspace',JSON.stringify({name:$('workspaceName').value,instruction:$('globalInstruction').value}));toast('Configurações salvas')}
+function landingExport(id) {
+  const p = curProject(), l = p.landings.find(x => x.id === id);
+  if (!state.workspace.leadsUrl && l.goal !== 'WhatsApp') toast('Dica: defina a URL de captura de leads em Configurações antes de publicar.');
+  download(`${slug(l.name)}.html`, landingHTML(l, p), 'text/html'); l.status = 'Exportada'; persist(); renderProjectTab();
+}
