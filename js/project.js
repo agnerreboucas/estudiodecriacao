@@ -14,6 +14,7 @@ function projectFlow(p) {
     ['Posicionamento', pre.positioningApproved, 'strategy', 'Gate antes da estratégia'],
     ['Estratégia', pre.positioningApproved && pre.icps.length > 0 && pre.okr.tr.length > 0, 'strategy', 'ICPs + OKR'],
     ['Jornada', journeyOk, 'preproject', 'Etapas descritas'],
+    ['Referências', p.competitors.some(hasTeardown), 'radar', 'Concorrentes analisados'],
     ['Comunicação', false, '', 'Matriz de Comunicação', true],
     ['Produção', cr.some(c => ['Aprovado', 'Publicado'].includes(c.status)) && p.matrix.concepts.length > 0, 'page:matrix', 'Artes e vídeos'],
     ['Publicação', p.publications.some(x => x.status === 'Publicado'), 'page:publishingHub', 'Só o que foi aprovado'],
@@ -80,6 +81,7 @@ const TABS = {
       <div class="cards"><div class="card"><div class="label">Conceitos gerados</div><div class="metric">${m.concepts.length}</div></div><div class="card"><div class="label">No funil</div><div class="metric">${Math.min(m.stage, m.concepts.length)}</div></div><div class="card"><div class="label">Em produção</div><div class="metric">${m.concepts.filter(c => c.creativeId).length}</div></div><div class="card"><div class="label">Duração</div><div class="metric">${m.duration}s</div></div></div></div>`;
   },
   videoLab(p) { return `<div class="panel"><div class="section-row"><h2>Video Lab</h2><button class="btn dark" onclick="go('videoLab')">Abrir laboratório</button></div><p>Produção modular por cena, com roteiro aprovado, storyboard, direção, roteamento de modelo e estimativa de créditos.</p><div class="kv"><span>Cenas planejadas</span><strong>${p.video.scenes.length || '—'}</strong></div></div>`; },
+  radar(p) { return radarHTML(p); },
   creative(p) {
     const cr = creativesOf(p.id);
     return `<div class="section-row"><h2>Feed criativo</h2><button class="btn dark" onclick="openModal('creative')">＋ Nova criação</button></div>${cr.length ? `<div class="masonry">${cr.map(artCard).join('')}</div>` : emptyState('Sem criações', 'Registre a primeira criação ou gere conceitos na Matriz.')}`;

@@ -6,6 +6,7 @@ Documentos de referência em `docs/` (PRD, Guia de Estilo e o protótipo origina
 
 ## O que já funciona
 - **Novo projeto (assistente):** briefing escrito, em **áudio** (grava, guarda o original e transcreve no Chrome) ou **entrevista guiada**; o Studio extrai oferta, público, problema e objetivo, sugere os desafios, aponta lacunas críticas e cria o projeto estruturado (Context ID, briefing original preservado, Pré-Projeto, Brand Brain e Voice Brain).
+- **Radar de concorrentes:** lê uma página pública (título, textos, CTAs, fontes e cores), monta a análise (por IA ou preenchida da leitura) e envia hooks e ângulos do mercado para a Matriz. Serve de referência: as peças geradas devem ser originais. A leitura roda no servidor com proteção contra acesso a endereços internos.
 - **Fluxo do projeto** do briefing ao aprendizado, com os gates, na visão geral.
 - **Projetos** com Context ID, marca (Brand Brain), Voice Brain, assets e tudo ligado ao projeto.
 - **Pré-Projeto (Journey Architect):** desafios → hipóteses editáveis (DADO/HIPÓTESE) → cruzamento → diagnóstico → justificativa → objetivo → OKR (tração e estruturação) → até 3 ICPs → jornada de 5 etapas → checklist de validação → estados Rascunho / Em revisão / Ajustes / Aprovado. Editar um pré-projeto aprovado o reabre (nenhum gate passa em silêncio). Rastreabilidade DESAFIO-00N → HIP-00N. Apresentação editorial e PDF gerados do projeto.
@@ -22,7 +23,7 @@ Sem números inventados: o que não tem dado aparece como "—".
 ## Estrutura
     index.html        casca da aplicação
     css/              base, journey, architecture, studio
-    js/               util, store, integrations, core, preproject, present, project, hubs, app
+    js/               util, store, integrations, core, wizard, preproject, present, radar, project, hubs, app
     api/              PHP (login, workspace, ai, webhook, leads, meta, status)
     docs/             PRD, guia de estilo, protótipo original
 

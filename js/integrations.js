@@ -95,6 +95,7 @@ function projectContext(p) {
     pre.objective ? 'Objetivo estratégico: ' + pre.objective : '',
     pre.icps.length ? 'ICPs:\n' + pre.icps.map(x => `- ${x.name}: ${x.profile} | ${x.situation} | ${x.need}`).join('\n') : '',
     p.brief.offer ? 'Oferta: ' + p.brief.offer : '', p.brief.audience ? 'Público: ' + p.brief.audience : '', p.brief.problem ? 'Problema do cliente: ' + p.brief.problem : '',
+    p.competitors.some(hasTeardown) ? 'O que o mercado faz (referências): ' + p.competitors.filter(hasTeardown).map(c => `${c.name}: hooks ${(c.teardown.hooks || []).join('; ')}; ângulos ${(c.teardown.angles || []).join('; ')}`).join(' | ') : '',
     p.voice.personality ? 'Personalidade da voz: ' + p.voice.personality : '', p.voice.antivocab ? 'Nunca dizer: ' + p.voice.antivocab : '', p.voice.rules ? 'Regras de escrita: ' + p.voice.rules : '',
     p.brand.tone ? `Tom de voz: ${p.brand.tone}. Regra: ${p.brand.rule}` : '', p.brand.instructions ? 'Instruções de marca: ' + p.brand.instructions : '',
     'Regras: não invente dados, números ou resultados; trate interpretações como hipóteses; não faça promessas absolutas.'].filter(Boolean).join('\n');

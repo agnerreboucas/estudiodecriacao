@@ -69,3 +69,9 @@
 
 /* modais longos rolam dentro da tela */
 .modal{max-height:92vh;overflow-y:auto}
+
+/* radar de concorrentes */
+.radar-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}.radar-card{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}
+.block{display:block}.scan-box,.teardown{border-top:1px solid #f0f0f0;margin-top:10px;padding-top:8px}.swatches{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.swatches i{width:16px;height:16px;border-radius:50%;border:1px solid #0002;display:inline-block}.swatches small{font-weight:400;color:#888;font-size:10px}
+.matrix-opt.add{border-style:dashed;color:#999}
+@media(max-width:900px){.radar-grid{grid-template-columns:1fr}}

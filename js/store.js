@@ -26,9 +26,9 @@ function newProject(name, desc, extra = {}) {
     brief: {source: '', offer: '', audience: '', problem: '', goal: '', channels: '', budget: '', deadline: '', competitors: '', notes: '', original: '', transcript: '', hasAudio: false, audioMs: 0, createdAt: ''},
     voice: {personality: '', principles: '', vocabulary: '', antivocab: '', rules: '', channels: '', examples: '', checklist: ''},
     pre: newPre(),
-    matrix: {duration: 15, sel: {}, concepts: [], stage: 100},
+    matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    competitors: [], campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {

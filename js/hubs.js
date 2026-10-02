@@ -11,6 +11,7 @@ const CONCEPT_KEY = {hooks: 'hook', angles: 'angle', formats: 'format', ctas: 'c
 const DURATIONS = [15, 6, 10, 20, 30, 60];
 const FUNNEL = [100, 30, 12, 6];
 
+const optionsOf = (p, k) => MATRIX[k].concat((p.matrix.custom || {})[k] || []);
 function ensureSel(p) { const s = p.matrix.sel; Object.keys(MATRIX).forEach(k => { if (!Array.isArray(s[k])) s[k] = MATRIX[k].slice(0, 3); }); return s; }
 const comboCount = p => Object.keys(MATRIX).reduce((n, k) => n * Math.max(1, ensureSel(p)[k].length), 1);
 
@@ -48,7 +49,7 @@ function renderMatrixPage() {
   const sel = ensureSel(p), m = p.matrix, shown = shownConcepts(p), lw = learnWeights(p);
   r.innerHTML = `<div class="page-head"><div><h1>Matriz de Criação</h1><p>Combine contexto, hooks, ângulos, formatos e direção antes de gastar créditos. Primeiro o conceito, depois a produção.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="generateConcepts()">Gerar conceitos</button></div></div>
   <div class="matrix-toolbar"><div class="matrix-tabs">${DURATIONS.map(d => `<button class="${d === m.duration ? 'active' : ''}" onclick="setDuration(${d})">${d}s</button>`).join('')}</div><span class="badge hot">${esc(p.name)}</span><span class="badge">Contexto herdado do projeto</span>${lw.rows.length ? '<span class="badge">Pesos aprendidos ativos</span>' : ''}</div>
-  <div class="matrix-grid">${Object.keys(MATRIX).map(k => `<div class="matrix-card"><h3>${MATRIX_LABEL[k]}</h3><div class="matrix-options">${MATRIX[k].map((v, i) => `<button class="matrix-opt ${sel[k].includes(v) ? 'selected' : ''}" onclick="toggleMatrix('${k}',${i})">${esc(v)}</button>`).join('')}</div></div>`).join('')}
+  <div class="matrix-grid">${Object.keys(MATRIX).map(k => `<div class="matrix-card"><h3>${MATRIX_LABEL[k]}</h3><div class="matrix-options">${optionsOf(p, k).map((v, i) => `<button class="matrix-opt ${sel[k].includes(v) ? 'selected' : ''}" onclick="toggleMatrix('${k}',${i})">${esc(v)}</button>`).join('')}<button class="matrix-opt add" title="Adicionar opção" onclick="addMatrixOption('${k}')">＋</button></div></div>`).join('')}
     <div class="matrix-card"><h3>Potencial combinatório</h3><div class="matrix-count">${fmtNum(comboCount(p))}</div><div class="matrix-muted">combinações possíveis antes do filtro de conceito.</div><div style="margin-top:12px"><button class="btn" onclick="selectAllMatrix()">Selecionar tudo</button></div></div></div>
   <div class="panel" style="margin-top:12px"><div class="section-row"><h2>Pipeline de conceitos</h2><span class="muted">100 → 30 → 12 → 6 → produção</span></div>
     <div class="funnel">${FUNNEL.map(n => `<button class="${m.stage === n ? 'active' : ''}" onclick="setStage(${n})"><b>${n}</b><small>${n === 100 ? 'conceitos' : n === 6 ? 'finalistas' : 'selecionados'}</small></button>`).join('')}</div>
@@ -58,8 +59,11 @@ function renderMatrixPage() {
   </div>`;
 }
 function setDuration(d) { const p = curProject(); p.matrix.duration = d; p.video.scenes = []; persist(); renderMatrixPage(); }
-function toggleMatrix(k, i) { const p = curProject(), s = ensureSel(p), v = MATRIX[k][i], a = s[k]; if (a.includes(v)) a.splice(a.indexOf(v), 1); else a.push(v); persist(); keepScroll(renderMatrixPage); }
-function selectAllMatrix() { const p = curProject(); Object.keys(MATRIX).forEach(k => p.matrix.sel[k] = MATRIX[k].slice()); persist(); renderMatrixPage(); toast('Núcleo completo selecionado.'); }
+function toggleMatrix(k, i) { const p = curProject(), s = ensureSel(p), v = optionsOf(p, k)[i], a = s[k]; if (a.includes(v)) a.splice(a.indexOf(v), 1); else a.push(v); persist(); keepScroll(renderMatrixPage); }
+function selectAllMatrix() { const p = curProject(); Object.keys(MATRIX).forEach(k => p.matrix.sel[k] = optionsOf(p, k)); persist(); renderMatrixPage(); toast('Núcleo completo selecionado.'); }
+function addMatrixOption(k) {
+  askText('Nova opção · ' + MATRIX_LABEL[k], 'Texto curto (até 40 caracteres)', v => { const p = curProject(); v = v.trim().slice(0, 40); if (optionsOf(p, k).some(x => x.toLowerCase() === v.toLowerCase())) { toast('Essa opção já existe.'); return; } p.matrix.custom = p.matrix.custom || {}; (p.matrix.custom[k] = p.matrix.custom[k] || []).push(v); ensureSel(p)[k].push(v); persist(); renderMatrixPage(); });
+}
 function setStage(n) { curProject().matrix.stage = n; persist(); keepScroll(renderMatrixPage); }
 function pinConcept(id) { const c = curProject().matrix.concepts.find(x => x.id === id); c.pinned = !c.pinned; persist(); keepScroll(renderMatrixPage); }
 function generateConcepts() {
