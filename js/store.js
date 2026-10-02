@@ -1,5 +1,5 @@
 /* Estado do workspace: modelo de dados, persistência local, exportação/importação */
-const STORE_KEY = 'ampliacao_studio_v1';
+const STORE_KEY = window.DEMO_MODE ? 'ampliacao_studio_demo' : 'ampliacao_studio_v1';
 const SCHEMA = 1;
 const ui = {page: 'home', tab: 'overview'};   // estado de tela, não persistido
 

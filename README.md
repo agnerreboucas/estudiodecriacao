@@ -24,6 +24,9 @@ Sem números inventados: o que não tem dado aparece como "—".
     api/              PHP (login, workspace, ai, webhook, leads, meta, status)
     docs/             PRD, guia de estilo, protótipo original
 
+## Demonstração (arquivo único)
+`demo/ampliacao-studio-demo.html` abre com duplo clique, com dados fictícios, sem servidor. Para regenerar depois de mudar o código: `python3 tools/build_demo.py`. Os dados fictícios ficam em `demo/demo.js`.
+
 ## Rodar localmente
 Só o front (modo local, sem login nem IA):
 
