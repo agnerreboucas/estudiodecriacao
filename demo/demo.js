@@ -73,7 +73,10 @@
     mb.competitors = [
       {id: 'cp-1', name: 'Rival Financeira', url: 'https://rivalfinanceira.exemplo.com.br', social: '@rivalfinanceira', notes: 'Líder em anúncios de crédito no Instagram.', addedAt: isoAt(15),
        scan: {url: 'https://rivalfinanceira.exemplo.com.br', at: isoAt(15), title: 'Rival Financeira — Crédito sem enrolação', description: 'Simule seu crédito em 2 minutos, sem burocracia.', headings: ['Crédito aprovado em minutos', 'Sem taxa escondida. Sem fila.', 'Mais de 10 mil clientes atendidos'], ctas: ['Quero simular agora', 'Falar no WhatsApp'], fonts: ['Poppins'], colors: ['#0a7d5a', '#ff7a00', '#222222', '#e5e5e5', '#f6fbf9'], themeColor: '#0a7d5a', ogImage: '', textSample: ''},
-       teardown: {product: 'Crédito pessoal online', offer: 'Aprovação rápida e sem taxa escondida', hooks: ['Aprovado em minutos', 'Sem fila, sem taxa'], angles: ['Rapidez', 'Transparência'], typography: 'Poppins, títulos em negrito', layout: 'Hero verde com CTA laranja e prova social logo abaixo', colors: '#0a7d5a #ff7a00', ctas: ['Quero simular agora'], proof: ['+10 mil clientes'], opportunities: ['Ninguém explica o contrato em linguagem simples', 'Pouco conteúdo educativo sobre direitos'], source: 'ai', at: isoAt(15)}},
+       teardown: {product: 'Crédito pessoal online', offer: 'Aprovação rápida e sem taxa escondida', hooks: ['Aprovado em minutos', 'Sem fila, sem taxa'], angles: ['Rapidez', 'Transparência'], typography: 'Poppins, títulos em negrito', layout: 'Hero verde com CTA laranja e prova social logo abaixo', colors: '#0a7d5a #ff7a00', ctas: ['Quero simular agora'], proof: ['+10 mil clientes'], opportunities: ['Ninguém explica o contrato em linguagem simples', 'Pouco conteúdo educativo sobre direitos'], source: 'ai', at: isoAt(15)},
+       dossier: {gmb: {name: 'Rival Financeira Matriz', address: 'Av. Paulista, 1000 · São Paulo, SP', phone: '(11) 4000-1000', rating: 4.6, reviews: 312, categories: 'Financeira', hours: 'seg a sex 09:00–18:00', website: 'https://rivalfinanceira.exemplo.com.br', mapsUrl: '', source: 'manual'},
+         ig: {handle: '@rivalfinanceira', followers: '48 mil', freq: '5 por semana', formats: 'Reels e carrossel', bio: 'Crédito sem enrolação', notes: 'Reels com depoimento de cliente têm mais comentários.'},
+         ads: [{id: 'ad-1', platform: 'Meta (Instagram/Facebook)', format: 'Vídeo', hook: 'Crédito aprovado em minutos', offer: 'Sem taxa escondida', cta: 'Simular agora', url: '', seen: isoDay(6)}, {id: 'ad-2', platform: 'Meta (Instagram/Facebook)', format: 'Carrossel', hook: '3 erros que encarecem seu crédito', offer: 'Guia gratuito', cta: 'Baixar guia', url: '', seen: isoDay(4)}]}},
       {id: 'cp-2', name: 'Escritório Alves & Costa', url: 'https://alvescosta.exemplo.com.br', social: '@alvescosta.adv', notes: 'Direito imobiliário, comunicação formal.', addedAt: isoAt(14), scan: null,
        teardown: {product: 'Consultoria jurídica imobiliária', offer: 'Atendimento especializado', hooks: ['Seu direito, nossa causa'], angles: ['Autoridade', 'Experiência'], typography: 'Serifada, tom formal', layout: 'Fundo escuro, fotos de equipe', colors: '#1b1b2f #c9a227', ctas: ['Agende uma consulta'], proof: ['20 anos de atuação'], opportunities: ['Linguagem difícil afasta o público comum'], source: 'manual', at: isoAt(14)}}];
     mb.matrix.custom = {hooks: ['Aprovado em minutos'], angles: ['Rapidez', 'Transparência', 'Autoridade'], ctas: []};
@@ -98,11 +101,26 @@
   seedState = demoState; state = demoState();
   const mbId = () => state.projects[0].id;
   radarFetchScan = async url => ({url, at: new Date().toISOString(), title: 'Site de exemplo — ' + url.replace(/^https?:\/\//, '').split('/')[0], description: 'Leitura simulada na versão de demonstração.', headings: ['Título principal da página', 'Benefícios em destaque', 'Depoimentos de clientes'], ctas: ['Quero saber mais', 'Fale conosco'], fonts: ['Inter', 'Georgia'], colors: ['#1f6feb', '#f5a524', '#111827', '#e5e7eb'], themeColor: '', ogImage: '', textSample: ''});
+  const realApi = api; api = async (path, opts) => path.startsWith('places.php') ? {ok: true, places: [{name: 'Estabelecimento de exemplo', address: 'Rua das Flores, 120 · Campinas, SP', phone: '(19) 3000-2000', rating: 4.4, reviews: 87, categories: 'Serviços', hours: 'seg a sex 08:00–17:00', website: '', mapsUrl: ''}]} : realApi(path, opts);
+  const realRenderDesign = renderDesign;
+  renderDesign = function () {
+    const p = dzP();
+    if (p && !p.design.seeded && !p.design.sets.length && p === state.projects[0]) {
+      p.design.seeded = true;
+      (async () => {
+        const tk = makeTokens(byId(DESIGN_STYLES, 'financeiro'), byId(FONT_PAIRS, 'merriweather'), byId(PHOTO_STYLES, 'callcenter')); tk.name = 'Campanha Mutuários';
+        await ensureFonts([tk.head.family, tk.body.family]);
+        const a = buildSet('Carrossel · Parcela subiu', tk, parseCopy(DEFAULT_COPY, p), FORMATS.feed45, p.name), b = buildSet('Stories · Chamada final', tk, parseCopy('Vai assinar um contrato? | Confira antes\nSem juridiquês: a gente explica cada cláusula.\nPrimeiro contato sem compromisso: você decide depois.\nQuer conferir seu contrato? | Falar no WhatsApp', p), FORMATS.story, p.name);
+        p.design.sets.push(a, b); p.design.styles.push({id: 'st-demo', name: 'Campanha Mutuários', tk: extractStyle(a), created: new Date().toISOString()}); persist(); realRenderDesign();
+      })();
+    }
+    return realRenderDesign();
+  };
   fetchLeads = async () => [
     ['Carla Mendes', '11 98765-4410', 'Meta Ads', 'Minha parcela subiu 30% e ninguém explica. Podem revisar?', 1], ['Rogério Alves', '21 99811-2200', 'whatsapp', 'Vou assinar contrato semana que vem, queria uma opinião.', 2],
     ['Patrícia Souza', '31 98822-9080', 'site', 'Parcelas atrasadas, tenho medo de perder o imóvel.', 3], ['João Pedro', '11 97766-1234', 'Meta Ads', 'Como funciona a primeira análise?', 4], ['Mariana Lopes', '41 99900-7711', 'site', 'Quero entender meu caso.', 6]
   ].map(([name, phone, source, message, d], i) => ({id: 'l' + i, at: isoAt(d), project: mbId(), source, name, phone, email: '', message}));
-  API.available = true; API.status = {auth: {required: false, loggedIn: true}, ai: {configured: false}, sync: {enabled: false}, webhook: {configured: false}, leads: {configured: true}, meta: {configured: false}};
+  API.available = true; API.status = {auth: {required: false, loggedIn: true}, ai: {configured: false}, sync: {enabled: false}, webhook: {configured: false}, leads: {configured: true}, meta: {configured: false}, places: {configured: true}};
   loadStatus = async () => API.status; pullWorkspace = async () => {};
   renderSyncBadge = () => { const b = document.getElementById('syncBadge'); if (b) { b.textContent = '● Demo'; b.className = 'sync-badge local'; b.title = 'Versão de demonstração: dados fictícios, salvos só neste navegador.'; } };
   document.addEventListener('DOMContentLoaded', () => {

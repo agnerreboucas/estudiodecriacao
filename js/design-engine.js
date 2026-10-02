@@ -1,0 +1,288 @@
+/* Motor do Estúdio de Design: modelo de peça, layout de texto com destaque por palavra, render em canvas,
+   geração de carrossel a partir de um estilo, extração/aplicação de estilo e exportação (PNG e ZIP). */
+const FORMATS = {
+  feed45: {id: 'feed45', label: 'Feed 4:5 · 1080×1350', w: 1080, h: 1350},
+  square: {id: 'square', label: 'Quadrado 1:1 · 1080×1080', w: 1080, h: 1080},
+  story: {id: 'story', label: 'Stories 9:16 · 1080×1920', w: 1080, h: 1920}
+};
+
+/* ---- fontes (Google Fonts, carregadas sob demanda) ---- */
+const FONTS_LOADED = new Set();
+function ensureFont(family) {
+  if (!family || FONTS_LOADED.has(family) || !(family in FONT_META)) return Promise.resolve();
+  FONTS_LOADED.add(family);
+  const w = FONT_META[family], link = document.createElement('link');
+  link.rel = 'stylesheet'; link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, '+')}${w ? ':wght@' + w : ''}&display=swap`;
+  document.head.appendChild(link);
+  const ready = new Promise(res => { link.onload = res; link.onerror = res; }).then(() => Promise.all([400, 700].map(wt => document.fonts.load(`${wt} 40px "${family}"`).catch(() => 0))));
+  return Promise.race([ready, new Promise(r => setTimeout(r, 2500))]);
+}
+const ensureFonts = fams => Promise.all([...new Set(fams)].map(ensureFont));
+const fontStack = f => `"${f}", system-ui, -apple-system, "Segoe UI", sans-serif`;
+
+/* ---- cores ---- */
+const hex2rgb = h => { h = String(h || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); const n = parseInt(h.slice(0, 6), 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const lum = h => { const [r, g, b] = hex2rgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+const readable = h => lum(h) > 0.4 ? '#111111' : '#ffffff';
+const mixHex = (a, b, t) => { const x = hex2rgb(a), y = hex2rgb(b); return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
+
+/* ---- texto: **palavra** marca destaque; \n quebra de linha ---- */
+function parseText(content) {
+  let ord = 0;
+  return String(content || '').split('\n').map(par => {
+    const words = [], re = /\*\*([^*]+)\*\*|([^*]+|\*)/g; let m;
+    while ((m = re.exec(par))) { const em = m[1] !== undefined; (em ? m[1] : m[2]).split(/\s+/).filter(Boolean).forEach(t => words.push({t, em, ord: ord++})); }
+    return words;
+  });
+}
+function serializeText(paras) {
+  return paras.map(words => { const out = []; let i = 0; while (i < words.length) { if (words[i].em) { const g = []; while (i < words.length && words[i].em) g.push(words[i++].t); out.push('**' + g.join(' ') + '**'); } else out.push(words[i++].t); } return out.join(' '); }).join('\n');
+}
+function toggleWordEm(content, ord) { const paras = parseText(content); paras.forEach(p => p.forEach(w => { if (w.ord === ord) w.em = !w.em; })); return serializeText(paras); }
+
+const MEAS = document.createElement('canvas').getContext('2d');
+const LBOX = {};   // caixas calculadas na última renderização (hit-test e destaque por clique)
+const fontStr = (L, size, weight) => `${weight} ${size}px ${fontStack(L.family)}`;
+const emFont = L => L.emMode === 'bold' ? {size: L.size, weight: Math.min(900, (+L.weight || 400) + 300)} : L.emMode === 'scale' ? {size: L.size * (L.emScale || 1.25), weight: L.weight} : {size: L.size, weight: L.weight};
+function layoutText(L, ctx) {
+  ctx = ctx || MEAS;
+  const lines = [], ls = +L.ls || 0, pad = L.emMode === 'bg' ? 12 : 0;
+  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = ls + 'px';
+  const space = () => { ctx.font = fontStr(L, L.size, L.weight); return ctx.measureText(' ').width + ls; };
+  parseText(L.content).forEach(words => {
+    let cur = {words: [], w: 0, maxSize: L.size};
+    if (!words.length) { lines.push(cur); return; }
+    words.forEach(wd => {
+      const f = wd.em ? emFont(L) : {size: L.size, weight: L.weight}, txt = L.upper ? wd.t.toUpperCase() : wd.t;
+      ctx.font = fontStr(L, f.size, f.weight);
+      const p = wd.em ? pad : 0, ww = ctx.measureText(txt).width + p * 2, sp = cur.words.length ? space() : 0;
+      if (cur.words.length && cur.w + sp + ww > L.w) { lines.push(cur); cur = {words: [], w: 0, maxSize: L.size}; }
+      const x = cur.words.length ? cur.w + space() : 0;
+      cur.words.push({t: txt, em: wd.em, x, w: ww, pad: p, size: f.size, weight: f.weight, ord: wd.ord}); cur.w = x + ww; cur.maxSize = Math.max(cur.maxSize, f.size);
+    });
+    lines.push(cur);
+  });
+  let y = 0;
+  lines.forEach(l => { l.h = l.maxSize * (L.lh || 1.2); l.y = y; y += l.h; l.off = L.align === 'center' ? (L.w - l.w) / 2 : L.align === 'right' ? (L.w - l.w) : 0; });
+  return {lines, h: Math.max(y, L.size)};
+}
+function rr(ctx, x, y, w, h, r) { r = Math.max(0, Math.min(r || 0, w / 2, h / 2)); ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+function drawText(ctx, L) {
+  const lay = layoutText(L, ctx), words = [];
+  ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; ctx.textBaseline = 'alphabetic';
+  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = (+L.ls || 0) + 'px';
+  lay.lines.forEach(l => {
+    const base = L.y + l.y + (l.h - l.maxSize) / 2 + l.maxSize * 0.82;
+    l.words.forEach(w => {
+      const x = L.x + l.off + w.x; ctx.font = fontStr(L, w.size, w.weight);
+      if (w.em && L.emMode === 'bg') { ctx.fillStyle = L.emBg; rr(ctx, x, base - w.size * 0.86, w.w, w.size * 1.12, 10); ctx.fill(); ctx.fillStyle = L.emText || '#000'; ctx.fillText(w.t, x + w.pad, base); }
+      else {
+        ctx.fillStyle = w.em ? (L.emColor || L.color) : L.color; ctx.fillText(w.t, x, base);
+        if (w.em && L.emMode === 'underline') ctx.fillRect(x, base + w.size * 0.1, w.w, Math.max(4, w.size * 0.06));
+      }
+      words.push({x, y: L.y + l.y, w: w.w, h: l.h, ord: w.ord});
+    });
+  });
+  ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: lay.h, words}; return lay;
+}
+function drawRect(ctx, L) {
+  ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; rr(ctx, L.x, L.y, L.w, L.h, L.radius);
+  if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(); } if (L.stroke && L.strokeW) { ctx.lineWidth = L.strokeW; ctx.strokeStyle = L.stroke; ctx.stroke(); } ctx.restore();
+}
+const IMGS = new Map();   // imgId → ImageBitmap
+function drawImageLayer(ctx, L, slide) {
+  ctx.save(); rr(ctx, L.x, L.y, L.w, L.h, L.radius); ctx.clip(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity;
+  const img = L.imgId && IMGS.get(L.imgId);
+  if (img) {
+    const r = Math.max(L.w / img.width, L.h / img.height), dw = img.width * r, dh = img.height * r;
+    if (L.filter && 'filter' in ctx) ctx.filter = L.filter;
+    ctx.drawImage(img, L.x + (L.w - dw) * (L.fx == null ? 0.5 : L.fx), L.y + (L.h - dh) * (L.fy == null ? 0.5 : L.fy), dw, dh); ctx.filter = 'none';
+    if (L.ovColor) { ctx.globalCompositeOperation = L.ovMode || 'source-over'; ctx.fillStyle = L.ovColor; ctx.fillRect(L.x, L.y, L.w, L.h); }
+  } else {
+    const g = ctx.createLinearGradient(L.x, L.y, L.x + L.w, L.y + L.h); g.addColorStop(0, 'rgba(120,120,130,0.28)'); g.addColorStop(1, 'rgba(120,120,130,0.12)');
+    ctx.fillStyle = g; ctx.fillRect(L.x, L.y, L.w, L.h); ctx.setLineDash([14, 10]); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(120,120,130,0.55)'; ctx.strokeRect(L.x + 12, L.y + 12, L.w - 24, L.h - 24); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(90,90,100,0.9)'; ctx.textAlign = 'center'; ctx.font = `700 ${Math.max(26, Math.min(44, L.w / 18))}px ${fontStack('Inter')}`; ctx.fillText('FOTO', L.x + L.w / 2, L.y + L.h / 2 - 8);
+    ctx.font = `400 ${Math.max(20, Math.min(30, L.w / 28))}px ${fontStack('Inter')}`;
+    String(L.brief || 'Clique e envie uma foto').match(/.{1,46}(\s|$)/g).slice(0, 3).forEach((ln, i) => ctx.fillText(ln.trim(), L.x + L.w / 2, L.y + L.h / 2 + 34 + i * 32));
+  }
+  ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h};
+}
+function renderSlide(ctx, slide, W, H, scale) {
+  const k = scale || 1; ctx.setTransform(k, 0, 0, k, 0, 0); ctx.clearRect(0, 0, W, H); ctx.fillStyle = slide.bg || '#fff'; ctx.fillRect(0, 0, W, H);
+  slide.layers.forEach(L => { if (L.hidden) return; if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') { drawRect(ctx, L); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h}; } else if (L.type === 'image') drawImageLayer(ctx, L, slide); });
+}
+
+/* ---- imagens (IndexedDB 'images') ---- */
+async function imgPut(id, blob) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('images', 'readwrite'); t.objectStore('images').put(blob, id); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+async function imgGet(id) { const db = await idb(); return new Promise((res, rej) => { const q = db.transaction('images').objectStore('images').get(id); q.onsuccess = () => res(q.result || null); q.onerror = () => rej(q.error); }); }
+async function loadImage(id) { if (!id || IMGS.has(id)) return; try { const b = await imgGet(id); if (b) IMGS.set(id, await createImageBitmap(b)); } catch (e) { /* sem imagem */ } }
+async function ensureSetResources(set) {
+  const fams = [], ids = [];
+  set.slides.forEach(s => s.layers.forEach(L => { if (L.type === 'text') fams.push(L.family); if (L.type === 'image' && L.imgId) ids.push(L.imgId); }));
+  await Promise.all([ensureFonts(fams), ...ids.map(loadImage)]);
+}
+
+/* ---- construção de camadas ---- */
+let LSEQ = 0;
+const lid = () => 'L' + Date.now().toString(36) + (LSEQ++);
+const sid = () => 'S' + Date.now().toString(36) + (LSEQ++);
+const T = (role, o) => Object.assign({id: lid(), type: 'text', role, x: 0, y: 0, w: 900, content: '', family: 'Inter', size: 48, weight: 400, color: '#111111', align: 'left', lh: 1.2, ls: 0, upper: false, emMode: 'color', emColor: '#ff0000', emBg: '#ff0000', emText: '#000000', emScale: 1.25, opacity: 1}, o);
+const RC = (role, o) => Object.assign({id: lid(), type: 'rect', role, x: 0, y: 0, w: 100, h: 100, fill: '#000000', radius: 0, opacity: 1, stroke: '', strokeW: 0}, o);
+const IM = (role, o) => Object.assign({id: lid(), type: 'image', role, x: 0, y: 0, w: 100, h: 100, imgId: '', radius: 0, filter: '', ovColor: '', ovMode: '', brief: '', fx: 0.5, fy: 0.5, opacity: 1}, o);
+
+/* tokens de estilo a partir das três bibliotecas (+ ajustes de paleta) */
+function makeTokens(design, font, photo, over) {
+  const em = {chip: 'bg', underline: 'underline', bar: 'color', none: 'color'}[design.mark] || 'color';
+  return Object.assign({
+    name: design.name + ' · ' + font.name, designId: design.id, fontId: font.id, photoId: photo.id,
+    bg: design.bg, fg: design.fg, accent: design.accent, muted: design.muted,
+    head: {family: font.head, weight: font.weight}, body: {family: font.body, weight: 400}, upper: design.upper, mark: design.mark, align: design.align, photoMode: design.photo, radius: design.radius,
+    em: {mode: em}, photo: {filter: photo.filter, ovColor: photo.ovColor, ovMode: photo.ovMode, brief: photo.brief, name: photo.name}
+  }, over || {});
+}
+/* aplica o estilo (por papel) a uma camada: é o que permite trocar o estilo de toda a campanha */
+function themeLayer(L, tk) {
+  const onP = !!L.onPhoto, emT = readable(tk.accent), mode = tk.em.mode;
+  if (L.type === 'text') {
+    if (L.role === 'title') Object.assign(L, {family: tk.head.family, weight: tk.head.weight, color: onP ? '#ffffff' : tk.fg, upper: tk.upper, emMode: mode, emColor: tk.accent, emBg: tk.accent, emText: emT});
+    else if (L.role === 'body') Object.assign(L, {family: tk.body.family, weight: tk.body.weight || 400, color: onP ? '#f2f2f2' : tk.fg, upper: false});
+    else if (L.role === 'kicker') Object.assign(L, {family: tk.body.family, weight: 700, color: L.onChip ? readable(tk.accent) : (onP ? '#ffffff' : tk.accent), upper: true});
+    else if (L.role === 'muted' || L.role === 'brand') Object.assign(L, {family: tk.body.family, color: onP ? '#e5e5e5' : tk.muted});
+    else if (L.role === 'cta-text') Object.assign(L, {family: tk.head.family, weight: tk.head.weight, color: emT, upper: tk.upper});
+  } else if (L.type === 'rect') {
+    if (L.role === 'accent-fill' || L.role === 'cta-fill') L.fill = tk.accent;
+    if (L.role === 'cta-fill') L.radius = Math.max(tk.radius, 0) ? tk.radius * 2 : 0;
+    if (L.role === 'panel') L.fill = mixHex(tk.bg, tk.fg, 0.07);
+  } else if (L.type === 'image' && L.role === 'photo') Object.assign(L, {filter: tk.photo.filter, ovColor: tk.photo.ovColor, ovMode: tk.photo.ovMode, brief: tk.photo.brief});
+}
+function themeSlide(slide, tk) { slide.bg = tk.bg; slide.layers.forEach(L => themeLayer(L, tk)); }
+function applyStyleToSet(set, tk) { set.tk = tk; set.slides.forEach(s => themeSlide(s, tk)); }
+
+/* empilha itens verticalmente, medindo o texto de verdade */
+function stackPlace(items, x, w, y0, y1, valign, gap) {
+  const hs = items.map(it => { if (it.group) return it.h; if (it.type === 'text') { it.x = x; it.w = it.w || w; return layoutText(it).h; } return it.h; });
+  const total = hs.reduce((a, b) => a + b, 0) + gap * (items.length - 1);
+  let y = valign === 'bottom' ? y1 - total : valign === 'middle' ? y0 + Math.max(0, (y1 - y0 - total) / 2) : y0;
+  items.forEach((it, i) => {
+    if (it.group) it.group.forEach(g => { g.y = y + (g.dy || 0); g.x = x + (g.dx || 0); delete g.dy; delete g.dx; });
+    else { it.y = y; if (it.type !== 'text') it.x = it.x == null ? x : it.x; if (it.type === 'text') it.x = x; }
+    y += hs[i] + gap;
+  });
+}
+function chipGroup(text, tk, onP) {
+  const k = T('kicker', {content: text, size: 30, ls: 3, w: 900, onChip: true, onPhoto: onP}); themeLayer(k, tk);
+  const lay = layoutText(Object.assign({}, k, {w: 4000})), tw = Math.ceil(lay.lines[0] ? lay.lines[0].w : 100);
+  const box = RC('accent-fill', {w: tw + 56, h: Math.round(k.size * 1.9), radius: 999, fill: tk.accent}); k.w = tw + 8; k.dx = 28; k.dy = (box.h - k.size * 1.2) / 2;
+  return {group: [box, k], h: box.h};
+}
+function autoEmphasis(title) { if (/\*\*/.test(title)) return title; const ws = title.split(/\s+/); let best = -1, len = 4; ws.forEach((w, i) => { const c = w.replace(/[^\p{L}\p{N}]/gu, ''); if (c.length > len) { len = c.length; best = i; } }); if (best < 0) return title; ws[best] = '**' + ws[best] + '**'; return ws.join(' '); }
+const titleSize = (t, base) => { const n = t.replace(/\*/g, '').length; return n <= 22 ? base : n <= 40 ? Math.round(base * 0.86) : n <= 64 ? Math.round(base * 0.72) : Math.round(base * 0.6); };
+
+function slideCover(tk, copy, fmt, brand, total) {
+  const W = fmt.w, H = fmt.h, m = 90, cw = W - 2 * m, mode = tk.photoMode, onP = mode === 'full', layers = [];
+  let y0 = m, y1 = H - m - 90, valign = 'middle';
+  if (mode === 'full') { layers.push(IM('photo', {x: 0, y: 0, w: W, h: H}), RC('overlay', {x: 0, y: 0, w: W, h: H, fill: 'rgba(0,0,0,0.5)'})); valign = 'bottom'; }
+  if (mode === 'top') { const ph = Math.round(H * 0.46); layers.push(IM('photo', {x: 0, y: 0, w: W, h: ph})); y0 = ph + 60; valign = 'top'; }
+  if (mode === 'half') { const py = Math.round(H * 0.5), ph = H - m - 80 - py; layers.push(IM('photo', {x: m, y: py, w: cw, h: ph, radius: tk.radius})); y1 = py - 50; valign = 'bottom'; }
+  const items = [], al = tk.align;
+  if (copy.kicker) items.push(tk.mark === 'chip' ? chipGroup(copy.kicker, tk, onP) : T('kicker', {content: copy.kicker, size: 30, ls: 4, align: al, w: cw, onPhoto: onP}));
+  if (tk.mark === 'bar') items.push(RC('accent-fill', {w: 130, h: 14, x: al === 'center' ? (W - 130) / 2 : m}));
+  items.push(T('title', {content: autoEmphasis(copy.title), size: titleSize(copy.title, 124), lh: tk.upper ? 1.02 : 1.1, align: al, w: cw, onPhoto: onP}));
+  if (tk.mark === 'underline') items.push(RC('accent-fill', {w: al === 'center' ? 220 : 160, h: 8, x: al === 'center' ? (W - 220) / 2 : m}));
+  if (copy.sub) items.push(T('body', {content: copy.sub, size: 40, lh: 1.4, align: al, w: cw, onPhoto: onP}));
+  items.forEach(it => { if (it.type === 'text') themeLayer(it, tk); else if (it.type === 'rect') themeLayer(it, tk); });
+  if (al === 'center') items.forEach(it => { if (it.group) it.group.forEach(g => { if (g.type === 'text') { g.align = 'left'; } }); });
+  stackPlace(items, m, cw, y0, y1, valign, 34);
+  items.forEach(it => (it.group ? it.group : [it]).forEach(l => layers.push(l)));
+  if (al === 'center') items.filter(it => it.group).forEach(it => { const b = it.group[0], t = it.group[1], shift = (W - b.w) / 2 - b.x; b.x += shift; t.x += shift; });
+  layers.push(T('brand', {content: brand, size: 28, ls: 2, x: m, y: H - m - 34, w: 600, upper: true, onPhoto: onP}), T('muted', {content: total > 1 ? 'ARRASTE  →' : '', size: 28, ls: 3, x: W - m - 400, y: H - m - 34, w: 400, align: 'right', onPhoto: onP}));
+  layers.slice(-2).forEach(l => themeLayer(l, tk));
+  return {id: sid(), bg: tk.bg, layers};
+}
+function slideContent(tk, c, fmt, brand, idx, total) {
+  const W = fmt.w, H = fmt.h, m = 90, cw = W - 2 * m, mode = tk.photoMode, layers = [], al = tk.align === 'center' ? 'center' : 'left';
+  let y0 = m + 20, y1 = H - m - 90, onP = false;
+  if (mode === 'full') { onP = true; layers.push(IM('photo', {x: 0, y: 0, w: W, h: H}), RC('overlay', {x: 0, y: 0, w: W, h: H, fill: 'rgba(0,0,0,0.55)'})); }
+  else if (mode === 'top' || mode === 'half') { const ph = Math.round(H * 0.32); layers.push(IM('photo', {x: 0, y: 0, w: W, h: ph})); y0 = ph + 56; }
+  const items = [];
+  const num = String(idx).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+  items.push(tk.mark === 'chip' ? chipGroup(num, tk, onP) : T('kicker', {content: num, size: 30, ls: 4, align: al, w: cw, onPhoto: onP}));
+  if (tk.mark === 'bar') items.push(RC('accent-fill', {w: 110, h: 12, x: al === 'center' ? (W - 110) / 2 : m}));
+  items.push(T('title', {content: autoEmphasis(c.title), size: titleSize(c.title, 84), lh: tk.upper ? 1.04 : 1.12, align: al, w: cw, onPhoto: onP}));
+  if (tk.mark === 'underline') items.push(RC('accent-fill', {w: 140, h: 7, x: al === 'center' ? (W - 140) / 2 : m}));
+  if (c.body) items.push(T('body', {content: c.body, size: mode === 'none' ? 52 : 44, lh: 1.45, align: al, w: cw, onPhoto: onP}));
+  items.forEach(it => { if (it.group) { /* chip já tematizado */ } else themeLayer(it, tk); });
+  stackPlace(items, m, cw, y0, y1, mode === 'full' ? 'bottom' : mode === 'none' ? 'middle' : 'top', 38);
+  items.forEach(it => (it.group ? it.group : [it]).forEach(l => layers.push(l)));
+  if (al === 'center') items.filter(it => it.group).forEach(it => { const b = it.group[0], t = it.group[1], shift = (W - b.w) / 2 - b.x; b.x += shift; t.x += shift; });
+  const f = [T('brand', {content: brand, size: 28, ls: 2, x: m, y: H - m - 34, w: 600, upper: true, onPhoto: onP}), T('muted', {content: idx + '/' + total, size: 28, ls: 3, x: W - m - 300, y: H - m - 34, w: 300, align: 'right', onPhoto: onP})];
+  f.forEach(l => { themeLayer(l, tk); layers.push(l); });
+  return {id: sid(), bg: tk.bg, layers};
+}
+function slideCta(tk, c, fmt, brand) {
+  const W = fmt.w, H = fmt.h, m = 90, cw = W - 2 * m, layers = [], al = tk.align === 'center' ? 'center' : 'left', items = [];
+  items.push(T('title', {content: autoEmphasis(c.title), size: titleSize(c.title, 100), lh: tk.upper ? 1.02 : 1.1, align: al, w: cw}));
+  if (c.sub) items.push(T('body', {content: c.sub, size: 46, lh: 1.4, align: al, w: cw}));
+  items.forEach(it => themeLayer(it, tk));
+  const bw = Math.min(cw, 720), btn = RC('cta-fill', {w: bw, h: 128, fill: tk.accent}), bt = T('cta-text', {content: c.button || 'Fale com a gente', size: 46, align: 'center', w: bw - 40});
+  themeLayer(btn, tk); themeLayer(bt, tk); bt.dx = 20; bt.dy = (128 - bt.size * 1.2) / 2; btn.dx = 0; btn.dy = 0;
+  items.push({group: [btn, bt], h: 128});
+  stackPlace(items, m, cw, m, H - m - 90, 'middle', 44);
+  items.forEach(it => (it.group ? it.group : [it]).forEach(l => layers.push(l)));
+  if (al === 'center') { const shift = (W - bw) / 2 - btn.x; btn.x += shift; bt.x += shift; }
+  const f = [T('brand', {content: brand, size: 28, ls: 2, x: m, y: H - m - 34, w: 600, upper: true})]; f.forEach(l => { themeLayer(l, tk); layers.push(l); });
+  return {id: sid(), bg: tk.bg, layers};
+}
+/* copy: {cover:{kicker,title,sub}, slides:[{title,body}], cta:{title,sub,button}} */
+function buildSet(name, tk, copy, fmt, brand) {
+  const total = copy.slides.length + 2, slides = [slideCover(tk, copy.cover, fmt, brand, total)];
+  copy.slides.forEach((c, i) => slides.push(slideContent(tk, c, fmt, brand, i + 2, total)));
+  slides.push(slideCta(tk, copy.cta, fmt, brand));
+  return {id: uid('ds'), name, format: {id: fmt.id, w: fmt.w, h: fmt.h}, tk, slides, created: new Date().toISOString(), updated: new Date().toISOString()};
+}
+
+/* extrai o estilo do que está na tela (o que o usuário refinou à mão) para salvar e reutilizar */
+function extractStyle(set) {
+  const tk = JSON.parse(JSON.stringify(set.tk)), all = set.slides.flatMap(s => s.layers);
+  const t = all.find(L => L.type === 'text' && L.role === 'title' && !L.onPhoto) || all.find(L => L.type === 'text' && L.role === 'title');
+  const b = all.find(L => L.type === 'text' && L.role === 'body'), mu = all.find(L => L.type === 'text' && L.role === 'muted' && !L.onPhoto), ac = all.find(L => L.type === 'rect' && L.role === 'accent-fill'), im = all.find(L => L.type === 'image' && L.role === 'photo');
+  tk.bg = set.slides[0].bg || tk.bg;
+  const orig = set.tk.accent, cands = [];
+  if (t) { tk.head = {family: t.family, weight: t.weight}; tk.fg = t.onPhoto ? tk.fg : t.color; tk.upper = !!t.upper; tk.em = {mode: t.emMode}; cands.push(t.emMode === 'bg' ? t.emBg : t.emColor); }
+  if (ac) cands.push(ac.fill);
+  tk.accent = cands.find(c => c && c.toLowerCase() !== String(orig).toLowerCase()) || orig;   // vale o que o usuário realmente mudou
+  if (b) tk.body = {family: b.family, weight: b.weight}; if (mu) tk.muted = mu.color;
+  if (im) tk.photo = Object.assign({}, tk.photo, {filter: im.filter, ovColor: im.ovColor, ovMode: im.ovMode});
+  return tk;
+}
+
+/* ---- exportação ---- */
+async function slideBlob(set, slide) {
+  await ensureSetResources(set);
+  const c = document.createElement('canvas'); c.width = set.format.w; c.height = set.format.h; renderSlide(c.getContext('2d'), slide, c.width, c.height);
+  return new Promise(res => c.toBlob(res, 'image/png'));
+}
+const CRC_T = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = u8 => { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function makeZip(files) {   // armazenamento sem compressão (PNG já é comprimido)
+  const enc = new TextEncoder(), chunks = [], central = []; let off = 0;
+  files.forEach(f => {
+    const name = enc.encode(f.name), crc = crc32(f.data), h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true); h.setUint16(10, 0, true); h.setUint16(12, 0x21, true);
+    h.setUint32(14, crc, true); h.setUint32(18, f.data.length, true); h.setUint32(22, f.data.length, true); h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+    chunks.push(new Uint8Array(h.buffer), name, f.data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true); c.setUint16(12, 0, true); c.setUint16(14, 0x21, true);
+    c.setUint32(16, crc, true); c.setUint32(20, f.data.length, true); c.setUint32(24, f.data.length, true); c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+    central.push(new Uint8Array(c.buffer), name); off += 30 + name.length + f.data.length;
+  });
+  const csize = central.reduce((a, b) => a + b.length, 0), e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, csize, true); e.setUint32(16, off, true);
+  return new Blob([...chunks, ...central, new Uint8Array(e.buffer)], {type: 'application/zip'});
+}
+async function exportSetZip(set) {
+  const files = [];
+  for (let i = 0; i < set.slides.length; i++) files.push({name: `${slug(set.name)}-${String(i + 1).padStart(2, '0')}.png`, data: new Uint8Array(await (await slideBlob(set, set.slides[i])).arrayBuffer())});
+  return makeZip(files);
+}

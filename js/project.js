@@ -15,6 +15,7 @@ function projectFlow(p) {
     ['Estratégia', pre.positioningApproved && pre.icps.length > 0 && pre.okr.tr.length > 0, 'strategy', 'ICPs + OKR'],
     ['Jornada', journeyOk, 'preproject', 'Etapas descritas'],
     ['Referências', p.competitors.some(hasTeardown), 'radar', 'Concorrentes analisados'],
+    ['Estilo visual', p.design.styles.length > 0, 'page:design', 'Estilo de campanha salvo'],
     ['Comunicação', false, '', 'Matriz de Comunicação', true],
     ['Produção', cr.some(c => ['Aprovado', 'Publicado'].includes(c.status)) && p.matrix.concepts.length > 0, 'page:matrix', 'Artes e vídeos'],
     ['Publicação', p.publications.some(x => x.status === 'Publicado'), 'page:publishingHub', 'Só o que foi aprovado'],

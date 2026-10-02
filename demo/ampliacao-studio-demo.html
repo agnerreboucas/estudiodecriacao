@@ -344,6 +344,25 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .matrix-opt.add{border-style:dashed;color:#999}
 @media(max-width:900px){.radar-grid{grid-template-columns:1fr}}
 
+.dossier{border-top:1px solid #f0f0f0;margin-top:10px;padding-top:8px}.dchip{font-size:10px;border:1px solid #ddd;border-radius:999px;padding:4px 9px;color:#999}.dchip.on{border-color:#a9d6b8;color:#1d6b3a;background:#f3fbf6}
+.dossier-modal h3{margin:0 0 6px;font-size:14px}.dossier-modal .btn{text-decoration:none;display:inline-block}
+
+/* estúdio de design */
+.dz-wide{max-width:1500px!important}
+.tchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.tchip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:11.5px;cursor:pointer;color:#555}.tchip.on{background:#111;color:#fff;border-color:#111}
+.dz-styles,.dz-sets{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:10px}.dz-style,.dz-set{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff}.dz-set canvas{width:100%;height:auto;border:1px solid #eee;border-radius:8px;margin-bottom:8px;background:#fafafa}
+.dz-sw{display:flex;margin-bottom:8px}.dz-sw i{width:34px;height:34px;border:1px solid #0002;margin-right:-6px;border-radius:50%}
+.dz-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:10px}.dz-res{border:2px solid var(--line);border-radius:14px;padding:10px;cursor:pointer;background:#fff}.dz-res.on{border-color:#111}.dz-res canvas{width:100%;height:auto;border-radius:8px;border:1px solid #eee}.why{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.why span{font-size:9.5px;border:1px solid #ddd;border-radius:999px;padding:2px 7px;color:#666}
+.dz-prev{width:200px;height:auto;border:1px solid #ddd;border-radius:10px}.pal{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;color:#777}.pal input{width:44px;height:36px;border:1px solid #ddd;border-radius:8px;padding:0;background:none}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;max-height:62vh;overflow:auto}.lib-card{border:1px solid #e6e6e6;border-radius:12px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:4px}.lib-card b{font-size:26px}.lib-card strong{font-size:12px}.lib-card small{font-size:10px;opacity:.75;line-height:1.35}
+.dz-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}.dz-name{border:1px solid transparent;border-radius:8px;padding:7px 10px;font:inherit;font-weight:700;font-size:15px;min-width:200px}.dz-name:hover,.dz-name:focus{border-color:var(--line)}
+.dz-editor{display:grid;grid-template-columns:130px minmax(0,1fr) 290px;gap:12px;align-items:start}.dz-slides{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 160px);overflow:auto}
+.dz-sl{position:relative;border:2px solid var(--line);border-radius:8px;cursor:pointer;background:#fff;padding:3px}.dz-sl.on{border-color:#2f6bff}.dz-sl canvas{width:100%;height:auto;display:block;border-radius:4px}.dz-sl span{position:absolute;left:6px;top:4px;font-size:10px;font-weight:700;color:#fff;background:#0008;border-radius:6px;padding:1px 5px}
+.dz-stage{background:#ececf0;border-radius:14px;padding:18px;display:flex;justify-content:center;align-items:flex-start;min-height:400px;overflow:auto}.dz-stage canvas{box-shadow:0 8px 40px #0003;background:#fff;touch-action:none;cursor:default}
+.dz-insp{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff;max-height:calc(100vh - 160px);overflow:auto;font-size:12px}.dz-insp h3{margin:0 0 8px;font-size:14px}.dz-insp h4{margin:14px 0 4px;font-size:11px;letter-spacing:.08em;color:#888;text-transform:uppercase}
+.ins{display:flex;flex-direction:column;gap:3px;font-size:10.5px;color:#777;margin:8px 0}.ins input[type=number],.ins select,.ins input[type=text]{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:12px;width:100%}.ins input[type=color]{width:100%;height:32px;border:1px solid var(--line);border-radius:8px;padding:0}.ins input[type=range]{width:100%}.ins.inl{flex-direction:row;align-items:center;margin:0}.ins-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(max-width:1100px){.dz-editor{grid-template-columns:1fr}.dz-slides{flex-direction:row;max-height:none;overflow-x:auto}.dz-sl{flex:0 0 90px}.dz-insp{max-height:none}}
+
 </style>
 </head>
 <body>
@@ -354,6 +373,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
     <button class="active" data-page="home" title="Início">⌂</button>
     <button data-page="projects" title="Projetos">□</button>
     <button data-page="matrix" title="Matriz de Criação">✦</button>
+    <button data-page="design" title="Estúdio de Design">◧</button>
     <button data-page="videoLab" title="Video Lab">▷</button>
     <button data-page="campaigns" title="Campanhas">◉</button>
     <button data-page="approval" title="Aprovação">✓</button>
@@ -429,6 +449,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 <section id="page-brand" class="page"><div class="subpage" id="brandRoot"></div></section>
 <section id="page-settings" class="page"><div class="subpage" id="settingsRoot"></div></section>
 <section id="page-matrix" class="page"><div class="subpage" id="matrixRoot"></div></section>
+<section id="page-design" class="page"><div class="subpage dz-wide" id="designRoot"></div></section>
 <section id="page-videoLab" class="page"><div class="subpage" id="videoRoot"></div></section>
 <section id="page-campaigns" class="page"><div class="subpage" id="campaignsRoot"></div></section>
 <section id="page-approval" class="page"><div class="subpage" id="approvalRoot"></div></section>
@@ -549,7 +570,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    competitors: [], campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    competitors: [], design: {styles: [], sets: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -773,6 +794,7 @@ function integrationsHTML() {
     <div class="card"><div class="int-ico">⟲</div><h3>Sincronização</h3><p>Salva o workspace no servidor para abrir em outros dispositivos.</p>${ok(s.sync.enabled, 'Ativa', 'Desativada')}${s.sync.enabled ? `<button class="btn sm" onclick="syncNow(true)">Sincronizar agora</button>` : ''}</div>
     <div class="card"><div class="int-ico">⇢</div><h3>Webhook de saída</h3><p>Envia eventos (aprovação, publicação) para n8n, Make ou Zapier.</p>${ok(s.webhook.configured, 'Configurado', 'Falta WEBHOOK_URL')}${s.webhook.configured ? `<button class="btn sm" onclick="testWebhook()">Enviar teste</button>` : ''}</div>
     <div class="card"><div class="int-ico">⇠</div><h3>Captura de leads</h3><p>Endpoint para formulários, landing pages e webhook do WhatsApp Cloud.</p>${ok(s.leads.configured, 'Ativo', 'Falta LEADS_TOKEN')}${s.leads.configured ? `<small class="mono break">${esc(leadUrl)}&amp;token=SEU_TOKEN</small>` : ''}</div>
+    <div class="card"><div class="int-ico">⌖</div><h3>Google Meu Negócio · Places</h3><p>Radar: endereço, telefone, nota, avaliações e horário dos concorrentes.</p>${ok(s.places && s.places.configured, 'Configurado', 'Falta GOOGLE_PLACES_API_KEY')}</div>
     <div class="card"><div class="int-ico">◈</div><h3>Meta Ads · métricas</h3><p>Importa gasto, cliques e leads para a aba Performance.</p>${ok(s.meta.configured, 'Configurado', 'Falta META_ACCESS_TOKEN')}<small class="muted">Código escrito conforme a documentação da Graph API; ainda não validado com conta real.</small></div>
     <div class="card muted-card"><div class="int-ico">○</div><h3>Instagram · Google Analytics · publicação direta</h3><p>Exigem autorização OAuth por conta. Planejado para a próxima fase; hoje a publicação é preparada aqui e disparada via webhook.</p><span class="int-state">Planejado</span></div>
   </div>`;
@@ -809,7 +831,7 @@ function go(page) {
 function renderPage(page) {
   ({home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
     videoLab: renderVideoLab, campaigns: renderCampaignsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
-    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard}[page] || (() => {}))();
+    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign}[page] || (() => {}))();
 }
 function refreshCurrentView() { renderSyncBadge(); renderHome(); renderPage(ui.page); updateContextUI(); }
 function bootRender() { $('credits').textContent = state.credits; updateContextUI(); renderHome(); renderPage(ui.page); renderSyncBadge(); }
@@ -1000,7 +1022,7 @@ const newWiz = () => ({step: 1, name: '', client: '', category: 'Marketing', des
   ext: {offer: '', audience: '', problem: '', goal: '', channels: '', budget: '', deadline: '', competitors: ''}, challenges: {}, hits: {}, other: [], extracted: false, brand: {tone: '', palette: '', visual: '', rule: ''}});
 
 /* ---- áudio: IndexedDB (o original é preservado junto com a transcrição) ---- */
-const idb = () => new Promise((res, rej) => { const r = indexedDB.open('ampliacao_studio_media', 1); r.onupgradeneeded = () => r.result.createObjectStore('audio'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+const idb = () => new Promise((res, rej) => { const r = indexedDB.open('ampliacao_studio_media', 2); r.onupgradeneeded = () => { ['audio', 'images'].forEach(n => { if (!r.result.objectStoreNames.contains(n)) r.result.createObjectStore(n); }); }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
 async function audioPut(id, blob) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('audio', 'readwrite'); t.objectStore('audio').put(blob, id); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
 async function audioGet(id) { const db = await idb(); return new Promise((res, rej) => { const q = db.transaction('audio').objectStore('audio').get(id); q.onsuccess = () => res(q.result || null); q.onerror = () => rej(q.error); }); }
 
@@ -1551,7 +1573,7 @@ const hasTeardown = c => !!(c.teardown && (c.teardown.product || c.teardown.offe
 
 function radarHTML(p) {
   const list = p.competitors, all = {hooks: [], angles: []};
-  list.forEach(c => { if (c.teardown) ['hooks', 'angles'].forEach(k => (c.teardown[k] || []).forEach(x => { if (!all[k].some(y => y.toLowerCase() === x.toLowerCase())) all[k].push(x); })); });
+  list.forEach(c => { dos(c).ads.forEach(a => { const h = (a.hook || '').trim(); if (h && !all.hooks.some(y => y.toLowerCase() === h.toLowerCase())) all.hooks.push(h); }); if (c.teardown) ['hooks', 'angles'].forEach(k => (c.teardown[k] || []).forEach(x => { if (!all[k].some(y => y.toLowerCase() === x.toLowerCase())) all[k].push(x); })); });
   return `<div class="section-row"><div><h2 style="margin:0">Radar de concorrentes</h2><p class="muted" style="margin:4px 0 0;font-size:12px">Entenda o que já funciona no mercado e transforme em conceitos próprios. Use como referência, nunca para copiar textos, imagens ou marcas de terceiros.</p></div><button class="btn dark" onclick="radarModal('')">＋ Concorrente</button></div>
   ${list.length ? `<div class="radar-grid">${list.map(c => radarCard(c)).join('')}</div>` : emptyState('Nenhum concorrente ainda', 'Cadastre 2 a 5 concorrentes diretos ou referências. O Studio lê o site público de cada um e extrai produto, oferta, hooks, tipografia e cores.', '<button class="btn dark" onclick="radarModal(\'\')">＋ Adicionar o primeiro</button>')}
   ${all.hooks.length || all.angles.length ? `<div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>O que funciona no mercado ${tag('hipotese')}</h3><p class="muted" style="font-size:11px">Padrões encontrados nas análises. São hipóteses: confirme com os seus próprios testes.</p></div><button class="btn dark sm" onclick="radarToMatrix()">Enviar para a Matriz →</button></div>
@@ -1561,6 +1583,7 @@ function radarCard(c) {
   const s = c.scan, t = c.teardown;
   return `<article class="radar-card"><div class="section-row"><div><strong>${esc(c.name)}</strong><small class="muted block">${esc(c.url)}</small></div><div class="row-gap"><button class="btn sm" onclick="radarModal('${c.id}')">Editar</button><button class="btn sm" onclick="radarDelete('${c.id}')">×</button></div></div>
     <div class="row-gap" style="margin:10px 0"><button class="btn sm" onclick="radarScan('${c.id}')">${s ? '↻ Reler site' : '⌕ Ler site'}</button><button class="btn sm" onclick="radarFill('${c.id}')" ${s ? '' : 'disabled'} title="Preenche a análise com o que foi lido">Preencher da leitura</button><button class="btn sm dark" onclick="radarAI('${c.id}')">✦ Analisar com IA</button><button class="btn sm" onclick="radarEdit('${c.id}')">Editar análise</button></div>
+    ${dossierBlock(c)}
     ${s ? `<div class="scan-box"><small class="muted">Lido em ${fmtDateTime(s.at)}</small><div class="kv"><span>Título</span><strong>${esc(s.title) || '—'}</strong></div>
       ${s.colors.length ? `<div class="kv"><span>Cores</span><strong class="swatches">${s.colors.map(x => `<i style="background:${esc(x)}" title="${esc(x)}"></i>`).join('')}<small>${s.colors.map(esc).join(' ')}</small></strong></div>` : ''}
       ${s.fonts.length ? `<div class="kv"><span>Fontes</span><strong>${s.fonts.map(esc).join(', ')}</strong></div>` : ''}
@@ -1603,7 +1626,7 @@ async function radarAI(id) {
   try {
     toast('Analisando…');
     const j = await aiJSON('Você faz engenharia reversa de estratégia de marketing a partir de dados públicos de um site. Descreva PADRÕES (hooks, ângulos, estrutura), nunca copie frases literais longas. Não invente: se um dado não existe, deixe vazio. Responda só JSON: {"product","offer","hooks":["..."],"angles":["..."],"typography","layout","colors","ctas":["..."],"proof":["..."],"opportunities":["lacunas que o nosso projeto pode explorar"]}. Hooks e ângulos devem ser curtos (até 6 palavras).',
-      `Nosso projeto:\n${projectContext(p)}\n\nConcorrente: ${c.name} (${c.url}). Notas: ${c.notes}\nDados lidos do site: ${JSON.stringify(c.scan || {})}`);
+      `Nosso projeto:\n${projectContext(p)}\n\nConcorrente: ${c.name} (${c.url}). Notas: ${c.notes}\nDados lidos do site: ${JSON.stringify(c.scan || {})}\nGoogle Meu Negócio: ${JSON.stringify(dos(c).gmb)}\nInstagram (anotado por nós): ${JSON.stringify(dos(c).ig)}\nAnúncios observados: ${JSON.stringify(dos(c).ads.map(a => ({plataforma: a.platform, formato: a.format, hook: a.hook, oferta: a.offer, cta: a.cta})))}`);
     c.teardown = {product: String(j.product || ''), offer: String(j.offer || ''), hooks: lines(j.hooks).slice(0, 8), angles: lines(j.angles).slice(0, 8), typography: String(j.typography || ''), layout: String(j.layout || ''), colors: String(j.colors || ''), ctas: lines(j.ctas).slice(0, 8), proof: lines(j.proof).slice(0, 6), opportunities: lines(j.opportunities).slice(0, 6), source: 'ai', at: new Date().toISOString()};
     spendCredits(1); persist(); renderProjectTab(); toast('Análise pronta. É hipótese: revise e confirme com testes.');
   } catch (e) { toast('IA: ' + e.message); }
@@ -1620,9 +1643,764 @@ function radarEditSave(id) {
 function radarToMatrix() {
   const p = curProject(), sel = ensureSel(p); let n = 0; p.matrix.custom = p.matrix.custom || {};
   const add = (k, v) => { v = String(v).trim().slice(0, 40); if (!v) return; const has = optionsOf(p, k).some(x => x.toLowerCase() === v.toLowerCase()); if (has) return; (p.matrix.custom[k] = p.matrix.custom[k] || []).push(v); sel[k].push(v); n++; };
-  p.competitors.forEach(c => { if (c.teardown) { (c.teardown.hooks || []).forEach(x => add('hooks', x)); (c.teardown.angles || []).forEach(x => add('angles', x)); (c.teardown.ctas || []).forEach(x => add('ctas', x)); } });
+  p.competitors.forEach(c => { if (c.teardown) { (c.teardown.hooks || []).forEach(x => add('hooks', x)); (c.teardown.angles || []).forEach(x => add('angles', x)); (c.teardown.ctas || []).forEach(x => add('ctas', x)); } dos(c).ads.forEach(a => add('hooks', a.hook)); });
   persist(); toast(n ? `${n} opção(ões) do mercado adicionada(s) à Matriz.` : 'Nada novo para adicionar.'); if (n) go('matrix');
 }
+
+/* ---- dossiê: Google Meu Negócio, Instagram e anúncios observados ---- */
+const GMB_FIELDS = [['name', 'Nome no Google'], ['address', 'Endereço'], ['phone', 'Telefone'], ['rating', 'Nota (0–5)'], ['reviews', 'Nº de avaliações'], ['categories', 'Categoria'], ['hours', 'Horário'], ['website', 'Site'], ['mapsUrl', 'Link do Google Maps']];
+const AD_PLATFORMS = ['Meta (Instagram/Facebook)', 'Google (Search/YouTube)', 'TikTok', 'LinkedIn', 'Outro'], AD_FORMATS = ['Imagem', 'Carrossel', 'Vídeo', 'Stories/Reels', 'Texto'];
+function dos(c) {
+  c.dossier = c.dossier || {}; const d = c.dossier;
+  d.gmb = d.gmb || {}; d.ig = d.ig || {}; d.ads = d.ads || []; return d;
+}
+const adLibUrl = c => 'https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=BR&search_type=keyword_unordered&q=' + encodeURIComponent(c.name);
+const gAdsUrl = c => { let d = ''; try { d = new URL(/^https?:/i.test(c.url) ? c.url : 'https://' + c.url).hostname.replace(/^www\./, ''); } catch (e) { /* url inválida */ } return 'https://adstransparency.google.com/?region=BR' + (d ? '&domain=' + encodeURIComponent(d) : ''); };
+const mapsUrl = c => { const g = dos(c).gmb; return g.mapsUrl || 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((g.name || c.name) + ' ' + (g.address || '')); };
+const igUrl = c => { const h = String(dos(c).ig.handle || c.social || '').trim(); if (/^https?:/i.test(h)) return h; const m = h.match(/@?([A-Za-z0-9._]{2,30})/); return m ? 'https://www.instagram.com/' + m[1] + '/' : ''; };
+function dossierMeter(c) {
+  const d = dos(c), parts = [['Site', !!c.scan], ['Google Meu Negócio', !!(d.gmb.address || d.gmb.rating || d.gmb.phone)], ['Instagram', !!(d.ig.handle || d.ig.followers || d.ig.bio)], ['Anúncios', d.ads.length > 0]];
+  return {parts, done: parts.filter(x => x[1]).length};
+}
+function dossierBlock(c) {
+  const m = dossierMeter(c), d = dos(c), g = d.gmb;
+  return `<div class="dossier"><div class="section-row"><b>Levantamento</b><small class="muted">${m.done}/4 completo</small></div>
+    <div class="row-gap">${m.parts.map(([l, ok]) => `<span class="dchip ${ok ? 'on' : ''}">${ok ? '✓' : '○'} ${l}${l === 'Anúncios' && ok ? ' (' + d.ads.length + ')' : ''}</span>`).join('')}<button class="btn sm" onclick="dossierModal('${c.id}')">Abrir dossiê</button></div>
+    ${g.address ? `<small class="muted block" style="margin-top:6px">📍 ${esc(g.address)}${g.rating ? ' · ★ ' + esc(g.rating) + (g.reviews ? ' (' + esc(g.reviews) + ')' : '') : ''}${g.phone ? ' · ' + esc(g.phone) : ''}</small>` : ''}
+    ${d.ads.length ? `<small class="muted block" style="margin-top:4px">Anúncios observados: ${d.ads.slice(0, 3).map(a => esc(a.hook || a.offer || a.format)).join(' · ')}</small>` : ''}</div>`;
+}
+function dossierModal(id, keep) {
+  const c = comp(curProject(), id), d = dos(c), g = d.gmb, ig = d.ig, f = (k, l, v, cls) => `<div class="field ${cls || ''}"><label>${l}</label><input id="gm_${k}" value="${esc(v == null ? '' : v)}"></div>`;
+  showModal('Dossiê · ' + c.name, `<div class="dossier-modal">
+    <h3>Google Meu Negócio</h3><div class="row-gap" style="margin-bottom:8px"><button class="btn sm dark" onclick="dossierPlaces('${id}')">⌖ Buscar no Google</button><a class="btn sm" href="${esc(mapsUrl(c))}" target="_blank" rel="noopener noreferrer">Abrir no Maps</a><small class="muted">A busca usa a API oficial do Google Places (exige chave). Sem ela, preencha à mão.</small></div>
+    <div class="form-grid">${GMB_FIELDS.map(([k, l]) => f(k, l, g[k], ['address', 'hours', 'mapsUrl'].includes(k) ? 'full' : '')).join('')}</div>
+    <h3 style="margin-top:16px">Instagram</h3><div class="row-gap" style="margin-bottom:8px">${igUrl(c) ? `<a class="btn sm" href="${esc(igUrl(c))}" target="_blank" rel="noopener noreferrer">Abrir perfil</a>` : ''}<small class="muted">O Instagram não permite leitura automática de perfis de terceiros: registre o que você observa.</small></div>
+    <div class="form-grid"><div class="field"><label>@ ou link</label><input id="ig_handle" value="${esc(ig.handle || c.social || '')}"></div><div class="field"><label>Seguidores</label><input id="ig_followers" value="${esc(ig.followers || '')}"></div><div class="field"><label>Frequência de posts</label><input id="ig_freq" value="${esc(ig.freq || '')}" placeholder="Ex.: 4 por semana"></div><div class="field"><label>Formatos que mais usam</label><input id="ig_formats" value="${esc(ig.formats || '')}" placeholder="Reels, carrossel..."></div><div class="field full"><label>Bio e posicionamento</label><textarea id="ig_bio" rows="2">${esc(ig.bio || '')}</textarea></div><div class="field full"><label>O que engaja / o que repetem</label><textarea id="ig_notes" rows="2">${esc(ig.notes || '')}</textarea></div></div>
+    <h3 style="margin-top:16px">Anúncios observados</h3><div class="row-gap" style="margin-bottom:8px"><a class="btn sm" href="${esc(adLibUrl(c))}" target="_blank" rel="noopener noreferrer">Biblioteca de Anúncios da Meta</a><a class="btn sm" href="${esc(gAdsUrl(c))}" target="_blank" rel="noopener noreferrer">Central de Transparência do Google</a></div>
+    <div class="list">${d.ads.map(a => `<div class="list-item"><div><strong>${esc(a.hook || a.offer || 'Anúncio')}</strong><small>${esc(a.platform)} · ${esc(a.format)}${a.offer ? ' · ' + esc(a.offer) : ''}${a.cta ? ' · CTA: ' + esc(a.cta) : ''}</small></div><button class="btn sm" onclick="dossierAdDel('${id}','${a.id}')">×</button></div>`).join('') || '<p class="muted" style="font-size:11px">Nenhum anúncio registrado. Abra as bibliotecas acima, observe os ativos e anote os padrões.</p>'}</div>
+    <div class="form-grid" style="margin-top:8px"><div class="field"><label>Plataforma</label><select id="ad_platform">${AD_PLATFORMS.map(x => `<option>${x}</option>`).join('')}</select></div><div class="field"><label>Formato</label><select id="ad_format">${AD_FORMATS.map(x => `<option>${x}</option>`).join('')}</select></div><div class="field full"><label>Hook / título do anúncio</label><input id="ad_hook"></div><div class="field"><label>Oferta</label><input id="ad_offer"></div><div class="field"><label>CTA</label><input id="ad_cta"></div><div class="field full"><label>Link do anúncio (opcional)</label><input id="ad_url"></div></div>
+    <div class="modal-actions" style="justify-content:space-between"><button class="btn" onclick="dossierAdAdd('${id}')">＋ Registrar anúncio</button><button class="btn dark" onclick="dossierSave('${id}')">Salvar dossiê</button></div></div>`);
+}
+function dossierRead(c) {
+  const d = dos(c); GMB_FIELDS.forEach(([k]) => { const v = $('gm_' + k); if (v) d.gmb[k] = v.value.trim(); });
+  d.ig = {handle: $('ig_handle').value.trim(), followers: $('ig_followers').value.trim(), freq: $('ig_freq').value.trim(), formats: $('ig_formats').value.trim(), bio: $('ig_bio').value.trim(), notes: $('ig_notes').value.trim()};
+}
+function dossierSave(id) { const c = comp(curProject(), id); dossierRead(c); persist(); closeModal(); renderProjectTab(); toast('Dossiê salvo.'); }
+function dossierAdAdd(id) {
+  const c = comp(curProject(), id), hook = $('ad_hook').value.trim(), offer = $('ad_offer').value.trim(); if (!hook && !offer) { toast('Informe ao menos o hook ou a oferta do anúncio.'); return; }
+  dossierRead(c); dos(c).ads.push({id: uid('ad'), platform: $('ad_platform').value, format: $('ad_format').value, hook, offer, cta: $('ad_cta').value.trim(), url: $('ad_url').value.trim(), seen: today()}); persist(); dossierModal(id);
+}
+function dossierAdDel(id, adId) { const c = comp(curProject(), id); dossierRead(c); const d = dos(c); d.ads = d.ads.filter(a => a.id !== adId); persist(); dossierModal(id); }
+async function dossierPlaces(id) {
+  const c = comp(curProject(), id); dossierRead(c);
+  if (!canUseApi() || !API.status.places || !API.status.places.configured) { toast('Google Places não configurado. Preencha à mão ou veja Integrações.'); return; }
+  const q = ($('gm_name').value.trim() || c.name) + ' ' + ($('gm_address').value.trim());
+  try {
+    toast('Buscando no Google…'); const j = await api('places.php', {method: 'POST', body: {query: q.trim()}});
+    if (!j.places.length) { toast('Nada encontrado. Inclua a cidade no nome.'); return; }
+    window.__placesPick = j.places;
+    if (j.places.length === 1) return dossierApplyPlace(id, 0);
+    showModal('Qual é o estabelecimento?', `<div class="list">${j.places.map((x, i) => `<div class="list-item clickable" onclick="dossierApplyPlace('${id}',${i})"><div><strong>${esc(x.name)}</strong><small>${esc(x.address)}${x.rating ? ' · ★ ' + x.rating : ''}</small></div><span>→</span></div>`).join('')}</div>`);
+  } catch (e) { toast('Google: ' + e.message); }
+}
+function dossierApplyPlace(id, i) {
+  const c = comp(curProject(), id), x = window.__placesPick[i], g = dos(c).gmb;
+  Object.assign(g, {name: x.name, address: x.address, phone: x.phone, rating: x.rating == null ? '' : x.rating, reviews: x.reviews == null ? '' : x.reviews, categories: x.categories, hours: x.hours, website: x.website, mapsUrl: x.mapsUrl, at: new Date().toISOString(), source: 'google'});
+  persist(); dossierModal(id); toast('Dados do Google preenchidos. Confira antes de salvar.');
+}
+
+</script>
+<script>
+/* Estúdio de Design — bibliotecas (30 estilos de design, 30 pares de fontes, 30 estilos de fotografia) e cruzamento por público e tom.
+   Cada item tem "tags". O cruzamento pontua as tags do público (peso 2) e do tom (peso 3). */
+const AUDIENCE_TAGS = {
+  corporativo: 'Corporativo', popular: 'Popular', jovem: 'Jovem', feminino: 'Feminino', masculino: 'Masculino', senior: 'Sênior (50+)', familia: 'Família',
+  tecnologia: 'Tecnologia', saude: 'Saúde', financeiro: 'Financeiro', educacao: 'Educação'
+};
+const TONE_TAGS = {serio: 'Sério', acolhedor: 'Acolhedor', energetico: 'Energético', premium: 'Premium', divertido: 'Divertido', urgente: 'Urgente', confiavel: 'Confiável', moderno: 'Moderno', minimalista: 'Minimalista'};
+const AUDIENCE_PRESETS = [
+  ['escritorio', 'Trabalhadores de escritório e telemarketing', 'corporativo popular moderno acolhedor'], ['autonomos', 'Autônomos e MEI', 'popular confiavel energetico'],
+  ['pequenas', 'Donos de pequenos negócios', 'popular corporativo confiavel'], ['jovens', 'Jovens adultos (18–28)', 'jovem moderno divertido'], ['mulheres', 'Mulheres 25–45', 'feminino acolhedor moderno'],
+  ['senior', 'Público 50+', 'senior confiavel acolhedor serio'], ['familias', 'Famílias', 'familia acolhedor divertido'], ['executivos', 'Executivos e decisores', 'corporativo premium serio'],
+  ['tech', 'Tecnologia e startups', 'tecnologia moderno jovem'], ['saude', 'Saúde e bem-estar', 'saude acolhedor confiavel'], ['financeiro', 'Financeiro e crédito', 'financeiro confiavel serio popular'],
+  ['educacao', 'Educação', 'educacao acolhedor jovem'], ['varejo', 'Público popular (varejo)', 'popular urgente energetico']
+].map(([id, label, tags]) => ({id, label, tags: tags.split(' ')}));
+
+/* ---- 30 estilos de design: [id, nome, tags, bg, fg, destaque, apoio, alinhamento, foto, marcador, caixa-alta, raio] ----
+   foto: none | top | half | full · marcador: bar | underline | chip | none */
+const DESIGN_STYLES = [
+  ['brutalista', 'Brutalista', 'popular jovem energetico moderno', '#f2f0e6', '#111111', '#ff3b30', '#555555', 'left', 'none', 'chip', 1, 0],
+  ['suico', 'Minimalista suíço', 'corporativo serio minimalista moderno confiavel', '#ffffff', '#111111', '#e11d2e', '#777777', 'left', 'none', 'underline', 0, 0],
+  ['editorial', 'Editorial de revista', 'premium feminino serio moderno', '#f7f3ee', '#1c1917', '#b45309', '#78716c', 'left', 'top', 'underline', 0, 0],
+  ['pop', 'Pop colorido', 'jovem divertido popular energetico', '#ffd60a', '#111111', '#ff2d55', '#333333', 'center', 'none', 'chip', 1, 24],
+  ['corp-limpo', 'Corporativo limpo', 'corporativo confiavel serio moderno financeiro', '#0b2545', '#ffffff', '#4cc9f0', '#a9b8cf', 'left', 'half', 'bar', 0, 12],
+  ['neon-tech', 'Neon tech', 'tecnologia jovem moderno energetico', '#0b0b12', '#f5f5ff', '#00f5d4', '#8888aa', 'left', 'none', 'underline', 1, 8],
+  ['retro70', 'Retrô anos 70', 'familia acolhedor divertido popular', '#f4e4c1', '#3b2314', '#d2691e', '#7a5c3e', 'center', 'none', 'bar', 0, 20],
+  ['promo', 'Promoção de varejo', 'popular urgente energetico', '#e11d2e', '#ffffff', '#ffe500', '#ffd9d9', 'center', 'none', 'chip', 1, 12],
+  ['luxo', 'Luxo escuro dourado', 'premium serio financeiro', '#0d0d0d', '#f4efe6', '#c9a227', '#8c8472', 'center', 'none', 'underline', 0, 0],
+  ['organico', 'Orgânico terroso', 'saude acolhedor feminino familia', '#efe6d8', '#3a3226', '#7a8450', '#7d7060', 'left', 'top', 'bar', 0, 28],
+  ['memphis', 'Memphis geométrico', 'jovem divertido moderno', '#ffffff', '#111111', '#7c3aed', '#ff5ea8', 'left', 'none', 'chip', 1, 16],
+  ['cartaz', 'Cartaz tipográfico', 'popular energetico urgente jovem', '#111111', '#f5f5f5', '#ffb703', '#aaaaaa', 'left', 'none', 'none', 1, 0],
+  ['glass', 'Glassmorphism', 'tecnologia premium moderno', '#1e1b4b', '#ffffff', '#a78bfa', '#c7c2f0', 'left', 'full', 'none', 0, 28],
+  ['gradiente', 'Gradiente moderno', 'jovem tecnologia moderno', '#312e81', '#ffffff', '#f472b6', '#c7d2fe', 'left', 'none', 'chip', 0, 24],
+  ['jornal', 'Jornalístico', 'corporativo serio urgente confiavel', '#fafafa', '#111111', '#c1121f', '#666666', 'left', 'top', 'underline', 0, 0],
+  ['infantil', 'Infantil lúdico', 'familia divertido acolhedor', '#e0f2fe', '#1e3a8a', '#f97316', '#475569', 'center', 'none', 'chip', 0, 32],
+  ['mono', 'Monocromático premium', 'premium minimalista serio corporativo', '#ececec', '#111111', '#111111', '#666666', 'left', 'none', 'underline', 0, 0],
+  ['saas', 'Startup SaaS', 'tecnologia corporativo moderno confiavel', '#ffffff', '#0f172a', '#6366f1', '#64748b', 'left', 'half', 'chip', 0, 14],
+  ['street', 'Streetwear', 'jovem masculino energetico', '#151515', '#fafafa', '#d4ff00', '#888888', 'left', 'full', 'none', 1, 0],
+  ['bem-estar', 'Saúde e bem-estar', 'saude acolhedor feminino senior confiavel', '#ecfdf5', '#064e3b', '#10b981', '#4b7a68', 'left', 'top', 'bar', 0, 24],
+  ['financeiro', 'Financeiro confiável', 'financeiro corporativo senior confiavel serio popular', '#f8fafc', '#0b3b2e', '#16a34a', '#55705f', 'left', 'half', 'bar', 0, 12],
+  ['educacao', 'Educação amigável', 'educacao jovem familia acolhedor divertido', '#fff7ed', '#7c2d12', '#ea580c', '#9a6b50', 'left', 'none', 'chip', 0, 20],
+  ['urgente', 'Notícia urgente', 'urgente popular energetico', '#ffffff', '#111111', '#e11d2e', '#444444', 'left', 'top', 'chip', 1, 0],
+  ['carimbo', 'Vintage carimbo', 'popular acolhedor familia', '#f1e7d0', '#2b2118', '#b3261e', '#7a6a52', 'center', 'none', 'underline', 1, 0],
+  ['neobrutal', 'Neobrutalismo', 'jovem moderno divertido popular tecnologia', '#fef3c7', '#000000', '#8b5cf6', '#333333', 'left', 'none', 'chip', 0, 8],
+  ['aquarela', 'Aquarela suave', 'feminino acolhedor saude familia', '#fdf2f8', '#4a2040', '#db7093', '#8a6a80', 'center', 'none', 'bar', 0, 30],
+  ['industrial', 'Industrial', 'masculino corporativo serio popular', '#2a2d34', '#f1f1f1', '#f59e0b', '#a0a4ad', 'left', 'none', 'bar', 1, 0],
+  ['esportivo', 'Esportivo dinâmico', 'jovem masculino energetico popular', '#0a0a0a', '#ffffff', '#ff4d00', '#bbbbbb', 'left', 'full', 'none', 1, 0],
+  ['fitness', 'Fitness neon', 'jovem saude energetico moderno', '#0f0f1a', '#ffffff', '#39ff14', '#aaaaaa', 'left', 'full', 'chip', 1, 8],
+  ['serifado', 'Serifado elegante', 'premium feminino serio senior', '#f9f6f1', '#2a1f1a', '#8b5a3c', '#7d6e63', 'center', 'none', 'underline', 0, 0]
+].map(([id, name, tags, bg, fg, accent, muted, align, photo, mark, upper, radius]) => ({id, name, tags: tags.split(' '), bg, fg, accent, muted, align, photo, mark, upper: !!upper, radius}));
+
+/* ---- 30 pares de fontes (Google Fonts): [id, nome, títulos, texto, peso do título, tags] ---- */
+const FONT_META = { // família → pesos disponíveis (vazio = só 400)
+  'Poppins': '400;600;700;800;900', 'Inter': '400;600;700;800;900', 'Montserrat': '400;600;700;800;900', 'Open Sans': '400;600;700;800', 'Roboto': '400;500;700;900', 'Lato': '400;700;900',
+  'Nunito': '400;600;700;800;900', 'Raleway': '400;600;700;800;900', 'Oswald': '400;500;600;700', 'Bebas Neue': '', 'Anton': '', 'Playfair Display': '400;600;700;800;900', 'Merriweather': '400;700;900',
+  'Lora': '400;600;700', 'DM Serif Display': '', 'DM Sans': '400;500;700', 'Abril Fatface': '', 'Archivo Black': '', 'Rubik': '400;500;700;900', 'Work Sans': '400;600;700;900', 'Manrope': '400;600;700;800',
+  'Space Grotesk': '400;500;700', 'Sora': '400;600;700;800', 'Outfit': '400;600;700;900', 'Plus Jakarta Sans': '400;600;700;800', 'Barlow Condensed': '400;600;700;800', 'Barlow': '400;500;700',
+  'League Spartan': '400;600;700;900', 'Fredoka': '400;500;600;700', 'Baloo 2': '400;600;700;800', 'Caveat': '400;600;700', 'Bricolage Grotesque': '400;600;700;800', 'Source Serif 4': '400;600;700;900', 'Source Sans 3': '400;600;700;900'
+};
+const FONT_PAIRS = [
+  ['poppins', 'Poppins + Inter', 'Poppins', 'Inter', 800, 'moderno popular confiavel jovem'], ['montserrat', 'Montserrat + Open Sans', 'Montserrat', 'Open Sans', 800, 'corporativo confiavel moderno'],
+  ['inter', 'Inter + Inter', 'Inter', 'Inter', 800, 'minimalista corporativo moderno serio'], ['roboto', 'Roboto + Roboto', 'Roboto', 'Roboto', 900, 'corporativo popular senior confiavel'],
+  ['opensans', 'Open Sans + Lato', 'Open Sans', 'Lato', 800, 'popular senior acolhedor'], ['nunito', 'Nunito + Nunito', 'Nunito', 'Nunito', 800, 'acolhedor familia saude feminino educacao'],
+  ['raleway', 'Raleway + Lato', 'Raleway', 'Lato', 800, 'premium feminino minimalista moderno'], ['oswald', 'Oswald + Open Sans', 'Oswald', 'Open Sans', 700, 'urgente popular energetico masculino'],
+  ['bebas', 'Bebas Neue + Roboto', 'Bebas Neue', 'Roboto', 400, 'urgente energetico jovem popular masculino'], ['anton', 'Anton + Inter', 'Anton', 'Inter', 400, 'urgente energetico popular jovem'],
+  ['playfair', 'Playfair Display + Lato', 'Playfair Display', 'Lato', 800, 'premium feminino serio senior'], ['merriweather', 'Merriweather + Open Sans', 'Merriweather', 'Open Sans', 900, 'serio senior confiavel financeiro'],
+  ['lora', 'Lora + Inter', 'Lora', 'Inter', 700, 'acolhedor feminino premium serio'], ['dmserif', 'DM Serif Display + DM Sans', 'DM Serif Display', 'DM Sans', 400, 'premium moderno feminino'],
+  ['abril', 'Abril Fatface + Poppins', 'Abril Fatface', 'Poppins', 400, 'premium divertido feminino'], ['archivo', 'Archivo Black + Inter', 'Archivo Black', 'Inter', 400, 'energetico jovem masculino popular'],
+  ['rubik', 'Rubik + Rubik', 'Rubik', 'Rubik', 900, 'jovem divertido moderno popular'], ['worksans', 'Work Sans + Work Sans', 'Work Sans', 'Work Sans', 900, 'corporativo moderno minimalista'],
+  ['manrope', 'Manrope + Manrope', 'Manrope', 'Manrope', 800, 'tecnologia moderno confiavel corporativo'], ['grotesk', 'Space Grotesk + Inter', 'Space Grotesk', 'Inter', 700, 'tecnologia jovem moderno'],
+  ['sora', 'Sora + Sora', 'Sora', 'Sora', 800, 'tecnologia moderno jovem'], ['outfit', 'Outfit + Outfit', 'Outfit', 'Outfit', 900, 'moderno jovem minimalista'],
+  ['jakarta', 'Plus Jakarta Sans', 'Plus Jakarta Sans', 'Plus Jakarta Sans', 800, 'moderno corporativo tecnologia confiavel'], ['barlowc', 'Barlow Condensed + Barlow', 'Barlow Condensed', 'Barlow', 800, 'masculino urgente energetico'],
+  ['spartan', 'League Spartan + Inter', 'League Spartan', 'Inter', 900, 'jovem moderno energetico'], ['fredoka', 'Fredoka + Nunito', 'Fredoka', 'Nunito', 700, 'familia divertido educacao'],
+  ['baloo', 'Baloo 2 + Nunito', 'Baloo 2', 'Nunito', 800, 'popular divertido familia acolhedor'], ['caveat', 'Caveat + Open Sans', 'Caveat', 'Open Sans', 700, 'acolhedor familia divertido feminino'],
+  ['bricolage', 'Bricolage Grotesque + Inter', 'Bricolage Grotesque', 'Inter', 800, 'jovem moderno divertido'], ['sourceserif', 'Source Serif 4 + Source Sans 3', 'Source Serif 4', 'Source Sans 3', 900, 'serio educacao senior confiavel']
+].map(([id, name, head, body, weight, tags]) => ({id, name, head, body, weight, tags: tags.split(' ')}));
+
+/* ---- 30 estilos de fotografia: [id, nome, direção de arte, filtro, cor da sobreposição, modo, tags] ---- */
+const PHOTO_STYLES = [
+  ['documental', 'Documental popular', 'Gente real em situação do dia a dia, luz natural, nada posado.', 'saturate(1.05) contrast(1.05)', '', '', 'popular familia acolhedor'],
+  ['retrato-corp', 'Retrato corporativo luminoso', 'Profissional em escritório claro, sorriso natural, fundo desfocado.', 'brightness(1.05)', '', '', 'corporativo confiavel serio'],
+  ['pb', 'Preto e branco contrastado', 'Alto contraste, sombras profundas, expressão forte.', 'grayscale(1) contrast(1.25)', '', '', 'serio premium urgente'],
+  ['duotone', 'Duotone azul e laranja', 'Foto tratada em duas cores, fundo chapado.', 'grayscale(1) contrast(1.1)', 'rgba(30,64,175,0.55)', 'multiply', 'jovem moderno energetico'],
+  ['luz-quente', 'Luz natural quente', 'Hora dourada, tons quentes, sensação acolhedora.', 'saturate(1.2) brightness(1.03)', 'rgba(255,170,80,0.14)', 'overlay', 'acolhedor familia feminino'],
+  ['flash', 'Flash direto de celular', 'Estética de foto de celular, flash estourado, espontânea.', 'contrast(1.2) brightness(1.08) saturate(1.1)', '', '', 'popular jovem urgente'],
+  ['limpo', 'Fundo limpo minimalista', 'Sujeito isolado em fundo liso e claro, muito espaço vazio.', 'brightness(1.08) saturate(0.9)', '', '', 'minimalista corporativo premium moderno'],
+  ['cinema', 'Cinematográfico teal e laranja', 'Cena com profundidade, contraste de cor frio e quente.', 'contrast(1.1) saturate(1.15)', 'rgba(0,128,128,0.18)', 'soft-light', 'premium moderno serio'],
+  ['polaroid', 'Polaroid nostálgico', 'Tons desbotados, moldura clara, memória afetiva.', 'sepia(0.25) contrast(0.95) saturate(0.9)', '', '', 'acolhedor familia feminino'],
+  ['neon', 'Neon noturno', 'Luzes coloridas, noite, contraste alto.', 'contrast(1.3) saturate(1.4) brightness(0.9)', 'rgba(120,0,255,0.2)', 'screen', 'jovem tecnologia energetico'],
+  ['moda', 'Editorial de moda', 'Pose estudada, luz de estúdio, cores sóbrias.', 'contrast(1.1) saturate(0.85)', '', '', 'premium feminino moderno'],
+  ['lifestyle', 'Lifestyle espontâneo', 'Pessoas vivendo o produto, gestos naturais.', 'saturate(1.1) brightness(1.03)', '', '', 'jovem familia acolhedor feminino'],
+  ['produto-cor', 'Produto em fundo colorido', 'Produto centralizado em fundo chapado vibrante.', 'saturate(1.2) contrast(1.05)', '', '', 'jovem divertido popular moderno'],
+  ['macro', 'Macro e detalhe', 'Close extremo em textura ou detalhe do produto.', 'contrast(1.1) saturate(1.1)', '', '', 'premium tecnologia saude'],
+  ['aerea', 'Aérea e ampla', 'Vista de cima, escala, paisagem ou cidade.', 'saturate(1.1) contrast(1.05)', '', '', 'corporativo financeiro'],
+  ['trabalho', 'Mão na massa', 'Pessoa trabalhando, mãos em primeiro plano, esforço real.', 'contrast(1.08) saturate(1.05)', '', '', 'popular masculino corporativo'],
+  ['grao35', 'Grão de filme 35 mm', 'Grão visível, cores levemente desbotadas.', 'contrast(1.1) saturate(0.9) sepia(0.1)', '', '', 'premium acolhedor jovem'],
+  ['pastel', 'Pastel suave', 'Cores claras e dessaturadas, luz difusa.', 'brightness(1.1) saturate(0.75) contrast(0.9)', '', '', 'feminino acolhedor saude minimalista'],
+  ['urbano-noite', 'Urbano noturno', 'Rua à noite, reflexos, atitude.', 'contrast(1.25) saturate(1.2) brightness(0.85)', 'rgba(20,20,60,0.25)', 'multiply', 'jovem masculino energetico'],
+  ['flat-lay', 'Flat lay de estúdio', 'Objetos organizados vistos de cima, fundo liso.', 'brightness(1.06) saturate(1.05)', '', '', 'minimalista feminino premium moderno'],
+  ['callcenter', 'Atendimento com headset', 'Pessoa sorrindo de headset em escritório, estilo popular e próximo.', 'brightness(1.04) saturate(1.05)', '', '', 'popular corporativo acolhedor'],
+  ['equipe', 'Equipe em escritório moderno', 'Time diverso conversando em ambiente claro e aberto.', 'brightness(1.04) contrast(1.02)', '', '', 'corporativo moderno confiavel tecnologia'],
+  ['emocao', 'Close de emoção', 'Rosto em primeiro plano, expressão marcante, fundo escuro.', 'contrast(1.15) saturate(1.05)', '', '', 'urgente serio acolhedor'],
+  ['antes-depois', 'Antes e depois', 'Duas situações lado a lado, contraste claro de resultado.', 'contrast(1.1) saturate(1.1)', '', '', 'popular saude financeiro urgente'],
+  ['grafico', 'Foto com elementos gráficos', 'Pessoa recortada com formas e setas desenhadas por cima.', 'saturate(1.2) contrast(1.1)', '', '', 'jovem divertido popular'],
+  ['sticker', 'Recorte estilo sticker', 'Pessoa recortada com contorno branco grosso.', 'saturate(1.15) contrast(1.05)', '', '', 'jovem divertido popular moderno'],
+  ['preto-ouro', 'Preto e dourado', 'Fundo preto, luz dourada, sensação de luxo.', 'contrast(1.2) saturate(1.1)', 'rgba(201,162,39,0.12)', 'overlay', 'premium financeiro serio'],
+  ['natureza', 'Verde e natureza', 'Folhagem, luz suave, respiro.', 'saturate(1.1) brightness(1.03)', 'rgba(60,140,80,0.1)', 'overlay', 'saude acolhedor feminino familia'],
+  ['movimento', 'Esporte em movimento', 'Ação congelada ou borrão de movimento, energia.', 'contrast(1.2) saturate(1.2)', '', '', 'jovem masculino energetico saude'],
+  ['familia-casa', 'Família em casa', 'Cena doméstica, luz de janela, proximidade.', 'saturate(1.05) brightness(1.04)', 'rgba(255,200,140,0.1)', 'overlay', 'familia acolhedor senior popular']
+].map(([id, name, brief, filter, ovColor, ovMode, tags]) => ({id, name, brief, filter, ovColor, ovMode, tags: tags.split(' ')}));
+
+const byId = (list, id) => list.find(x => x.id === id);
+
+/* ---- cruzamento ---- */
+function scoreItem(item, aud, tone) {
+  const a = item.tags.filter(t => aud.includes(t)), o = item.tags.filter(t => tone.includes(t));
+  return {score: a.length * 2 + o.length * 3, why: a.concat(o)};
+}
+function recommendLibrary(list, aud, tone, n = 3) {
+  return list.map(it => Object.assign({item: it}, scoreItem(it, aud, tone))).sort((x, y) => y.score - x.score || x.item.name.localeCompare(y.item.name)).slice(0, n);
+}
+/* combina os melhores de cada biblioteca; limita repetição do mesmo design */
+function crossCompositions(aud, tone, max = 6) {
+  const D = recommendLibrary(DESIGN_STYLES, aud, tone, 4), F = recommendLibrary(FONT_PAIRS, aud, tone, 4), P = recommendLibrary(PHOTO_STYLES, aud, tone, 4), out = [];
+  D.forEach(d => F.forEach(f => P.forEach(p => out.push({design: d.item, font: f.item, photo: p.item, score: d.score * 1.4 + f.score + p.score, why: [...new Set(d.why.concat(f.why, p.why))]}))));
+  out.sort((a, b) => b.score - a.score);
+  const pick = [], used = {};
+  out.forEach(c => { if (pick.length < max && (used[c.design.id] || 0) < 2 && !pick.some(x => x.design.id === c.design.id && x.font.id === c.font.id)) { pick.push(c); used[c.design.id] = (used[c.design.id] || 0) + 1; } });
+  return pick;
+}
+
+</script>
+<script>
+/* Motor do Estúdio de Design: modelo de peça, layout de texto com destaque por palavra, render em canvas,
+   geração de carrossel a partir de um estilo, extração/aplicação de estilo e exportação (PNG e ZIP). */
+const FORMATS = {
+  feed45: {id: 'feed45', label: 'Feed 4:5 · 1080×1350', w: 1080, h: 1350},
+  square: {id: 'square', label: 'Quadrado 1:1 · 1080×1080', w: 1080, h: 1080},
+  story: {id: 'story', label: 'Stories 9:16 · 1080×1920', w: 1080, h: 1920}
+};
+
+/* ---- fontes (Google Fonts, carregadas sob demanda) ---- */
+const FONTS_LOADED = new Set();
+function ensureFont(family) {
+  if (!family || FONTS_LOADED.has(family) || !(family in FONT_META)) return Promise.resolve();
+  FONTS_LOADED.add(family);
+  const w = FONT_META[family], link = document.createElement('link');
+  link.rel = 'stylesheet'; link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, '+')}${w ? ':wght@' + w : ''}&display=swap`;
+  document.head.appendChild(link);
+  const ready = new Promise(res => { link.onload = res; link.onerror = res; }).then(() => Promise.all([400, 700].map(wt => document.fonts.load(`${wt} 40px "${family}"`).catch(() => 0))));
+  return Promise.race([ready, new Promise(r => setTimeout(r, 2500))]);
+}
+const ensureFonts = fams => Promise.all([...new Set(fams)].map(ensureFont));
+const fontStack = f => `"${f}", system-ui, -apple-system, "Segoe UI", sans-serif`;
+
+/* ---- cores ---- */
+const hex2rgb = h => { h = String(h || '#000000').replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); const n = parseInt(h.slice(0, 6), 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const lum = h => { const [r, g, b] = hex2rgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+const readable = h => lum(h) > 0.4 ? '#111111' : '#ffffff';
+const mixHex = (a, b, t) => { const x = hex2rgb(a), y = hex2rgb(b); return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
+
+/* ---- texto: **palavra** marca destaque; \n quebra de linha ---- */
+function parseText(content) {
+  let ord = 0;
+  return String(content || '').split('\n').map(par => {
+    const words = [], re = /\*\*([^*]+)\*\*|([^*]+|\*)/g; let m;
+    while ((m = re.exec(par))) { const em = m[1] !== undefined; (em ? m[1] : m[2]).split(/\s+/).filter(Boolean).forEach(t => words.push({t, em, ord: ord++})); }
+    return words;
+  });
+}
+function serializeText(paras) {
+  return paras.map(words => { const out = []; let i = 0; while (i < words.length) { if (words[i].em) { const g = []; while (i < words.length && words[i].em) g.push(words[i++].t); out.push('**' + g.join(' ') + '**'); } else out.push(words[i++].t); } return out.join(' '); }).join('\n');
+}
+function toggleWordEm(content, ord) { const paras = parseText(content); paras.forEach(p => p.forEach(w => { if (w.ord === ord) w.em = !w.em; })); return serializeText(paras); }
+
+const MEAS = document.createElement('canvas').getContext('2d');
+const LBOX = {};   // caixas calculadas na última renderização (hit-test e destaque por clique)
+const fontStr = (L, size, weight) => `${weight} ${size}px ${fontStack(L.family)}`;
+const emFont = L => L.emMode === 'bold' ? {size: L.size, weight: Math.min(900, (+L.weight || 400) + 300)} : L.emMode === 'scale' ? {size: L.size * (L.emScale || 1.25), weight: L.weight} : {size: L.size, weight: L.weight};
+function layoutText(L, ctx) {
+  ctx = ctx || MEAS;
+  const lines = [], ls = +L.ls || 0, pad = L.emMode === 'bg' ? 12 : 0;
+  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = ls + 'px';
+  const space = () => { ctx.font = fontStr(L, L.size, L.weight); return ctx.measureText(' ').width + ls; };
+  parseText(L.content).forEach(words => {
+    let cur = {words: [], w: 0, maxSize: L.size};
+    if (!words.length) { lines.push(cur); return; }
+    words.forEach(wd => {
+      const f = wd.em ? emFont(L) : {size: L.size, weight: L.weight}, txt = L.upper ? wd.t.toUpperCase() : wd.t;
+      ctx.font = fontStr(L, f.size, f.weight);
+      const p = wd.em ? pad : 0, ww = ctx.measureText(txt).width + p * 2, sp = cur.words.length ? space() : 0;
+      if (cur.words.length && cur.w + sp + ww > L.w) { lines.push(cur); cur = {words: [], w: 0, maxSize: L.size}; }
+      const x = cur.words.length ? cur.w + space() : 0;
+      cur.words.push({t: txt, em: wd.em, x, w: ww, pad: p, size: f.size, weight: f.weight, ord: wd.ord}); cur.w = x + ww; cur.maxSize = Math.max(cur.maxSize, f.size);
+    });
+    lines.push(cur);
+  });
+  let y = 0;
+  lines.forEach(l => { l.h = l.maxSize * (L.lh || 1.2); l.y = y; y += l.h; l.off = L.align === 'center' ? (L.w - l.w) / 2 : L.align === 'right' ? (L.w - l.w) : 0; });
+  return {lines, h: Math.max(y, L.size)};
+}
+function rr(ctx, x, y, w, h, r) { r = Math.max(0, Math.min(r || 0, w / 2, h / 2)); ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+function drawText(ctx, L) {
+  const lay = layoutText(L, ctx), words = [];
+  ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; ctx.textBaseline = 'alphabetic';
+  if (ctx.letterSpacing !== undefined) ctx.letterSpacing = (+L.ls || 0) + 'px';
+  lay.lines.forEach(l => {
+    const base = L.y + l.y + (l.h - l.maxSize) / 2 + l.maxSize * 0.82;
+    l.words.forEach(w => {
+      const x = L.x + l.off + w.x; ctx.font = fontStr(L, w.size, w.weight);
+      if (w.em && L.emMode === 'bg') { ctx.fillStyle = L.emBg; rr(ctx, x, base - w.size * 0.86, w.w, w.size * 1.12, 10); ctx.fill(); ctx.fillStyle = L.emText || '#000'; ctx.fillText(w.t, x + w.pad, base); }
+      else {
+        ctx.fillStyle = w.em ? (L.emColor || L.color) : L.color; ctx.fillText(w.t, x, base);
+        if (w.em && L.emMode === 'underline') ctx.fillRect(x, base + w.size * 0.1, w.w, Math.max(4, w.size * 0.06));
+      }
+      words.push({x, y: L.y + l.y, w: w.w, h: l.h, ord: w.ord});
+    });
+  });
+  ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: lay.h, words}; return lay;
+}
+function drawRect(ctx, L) {
+  ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; rr(ctx, L.x, L.y, L.w, L.h, L.radius);
+  if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(); } if (L.stroke && L.strokeW) { ctx.lineWidth = L.strokeW; ctx.strokeStyle = L.stroke; ctx.stroke(); } ctx.restore();
+}
+const IMGS = new Map();   // imgId → ImageBitmap
+function drawImageLayer(ctx, L, slide) {
+  ctx.save(); rr(ctx, L.x, L.y, L.w, L.h, L.radius); ctx.clip(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity;
+  const img = L.imgId && IMGS.get(L.imgId);
+  if (img) {
+    const r = Math.max(L.w / img.width, L.h / img.height), dw = img.width * r, dh = img.height * r;
+    if (L.filter && 'filter' in ctx) ctx.filter = L.filter;
+    ctx.drawImage(img, L.x + (L.w - dw) * (L.fx == null ? 0.5 : L.fx), L.y + (L.h - dh) * (L.fy == null ? 0.5 : L.fy), dw, dh); ctx.filter = 'none';
+    if (L.ovColor) { ctx.globalCompositeOperation = L.ovMode || 'source-over'; ctx.fillStyle = L.ovColor; ctx.fillRect(L.x, L.y, L.w, L.h); }
+  } else {
+    const g = ctx.createLinearGradient(L.x, L.y, L.x + L.w, L.y + L.h); g.addColorStop(0, 'rgba(120,120,130,0.28)'); g.addColorStop(1, 'rgba(120,120,130,0.12)');
+    ctx.fillStyle = g; ctx.fillRect(L.x, L.y, L.w, L.h); ctx.setLineDash([14, 10]); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(120,120,130,0.55)'; ctx.strokeRect(L.x + 12, L.y + 12, L.w - 24, L.h - 24); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(90,90,100,0.9)'; ctx.textAlign = 'center'; ctx.font = `700 ${Math.max(26, Math.min(44, L.w / 18))}px ${fontStack('Inter')}`; ctx.fillText('FOTO', L.x + L.w / 2, L.y + L.h / 2 - 8);
+    ctx.font = `400 ${Math.max(20, Math.min(30, L.w / 28))}px ${fontStack('Inter')}`;
+    String(L.brief || 'Clique e envie uma foto').match(/.{1,46}(\s|$)/g).slice(0, 3).forEach((ln, i) => ctx.fillText(ln.trim(), L.x + L.w / 2, L.y + L.h / 2 + 34 + i * 32));
+  }
+  ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h};
+}
+function renderSlide(ctx, slide, W, H, scale) {
+  const k = scale || 1; ctx.setTransform(k, 0, 0, k, 0, 0); ctx.clearRect(0, 0, W, H); ctx.fillStyle = slide.bg || '#fff'; ctx.fillRect(0, 0, W, H);
+  slide.layers.forEach(L => { if (L.hidden) return; if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') { drawRect(ctx, L); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h}; } else if (L.type === 'image') drawImageLayer(ctx, L, slide); });
+}
+
+/* ---- imagens (IndexedDB 'images') ---- */
+async function imgPut(id, blob) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('images', 'readwrite'); t.objectStore('images').put(blob, id); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+async function imgGet(id) { const db = await idb(); return new Promise((res, rej) => { const q = db.transaction('images').objectStore('images').get(id); q.onsuccess = () => res(q.result || null); q.onerror = () => rej(q.error); }); }
+async function loadImage(id) { if (!id || IMGS.has(id)) return; try { const b = await imgGet(id); if (b) IMGS.set(id, await createImageBitmap(b)); } catch (e) { /* sem imagem */ } }
+async function ensureSetResources(set) {
+  const fams = [], ids = [];
+  set.slides.forEach(s => s.layers.forEach(L => { if (L.type === 'text') fams.push(L.family); if (L.type === 'image' && L.imgId) ids.push(L.imgId); }));
+  await Promise.all([ensureFonts(fams), ...ids.map(loadImage)]);
+}
+
+/* ---- construção de camadas ---- */
+let LSEQ = 0;
+const lid = () => 'L' + Date.now().toString(36) + (LSEQ++);
+const sid = () => 'S' + Date.now().toString(36) + (LSEQ++);
+const T = (role, o) => Object.assign({id: lid(), type: 'text', role, x: 0, y: 0, w: 900, content: '', family: 'Inter', size: 48, weight: 400, color: '#111111', align: 'left', lh: 1.2, ls: 0, upper: false, emMode: 'color', emColor: '#ff0000', emBg: '#ff0000', emText: '#000000', emScale: 1.25, opacity: 1}, o);
+const RC = (role, o) => Object.assign({id: lid(), type: 'rect', role, x: 0, y: 0, w: 100, h: 100, fill: '#000000', radius: 0, opacity: 1, stroke: '', strokeW: 0}, o);
+const IM = (role, o) => Object.assign({id: lid(), type: 'image', role, x: 0, y: 0, w: 100, h: 100, imgId: '', radius: 0, filter: '', ovColor: '', ovMode: '', brief: '', fx: 0.5, fy: 0.5, opacity: 1}, o);
+
+/* tokens de estilo a partir das três bibliotecas (+ ajustes de paleta) */
+function makeTokens(design, font, photo, over) {
+  const em = {chip: 'bg', underline: 'underline', bar: 'color', none: 'color'}[design.mark] || 'color';
+  return Object.assign({
+    name: design.name + ' · ' + font.name, designId: design.id, fontId: font.id, photoId: photo.id,
+    bg: design.bg, fg: design.fg, accent: design.accent, muted: design.muted,
+    head: {family: font.head, weight: font.weight}, body: {family: font.body, weight: 400}, upper: design.upper, mark: design.mark, align: design.align, photoMode: design.photo, radius: design.radius,
+    em: {mode: em}, photo: {filter: photo.filter, ovColor: photo.ovColor, ovMode: photo.ovMode, brief: photo.brief, name: photo.name}
+  }, over || {});
+}
+/* aplica o estilo (por papel) a uma camada: é o que permite trocar o estilo de toda a campanha */
+function themeLayer(L, tk) {
+  const onP = !!L.onPhoto, emT = readable(tk.accent), mode = tk.em.mode;
+  if (L.type === 'text') {
+    if (L.role === 'title') Object.assign(L, {family: tk.head.family, weight: tk.head.weight, color: onP ? '#ffffff' : tk.fg, upper: tk.upper, emMode: mode, emColor: tk.accent, emBg: tk.accent, emText: emT});
+    else if (L.role === 'body') Object.assign(L, {family: tk.body.family, weight: tk.body.weight || 400, color: onP ? '#f2f2f2' : tk.fg, upper: false});
+    else if (L.role === 'kicker') Object.assign(L, {family: tk.body.family, weight: 700, color: L.onChip ? readable(tk.accent) : (onP ? '#ffffff' : tk.accent), upper: true});
+    else if (L.role === 'muted' || L.role === 'brand') Object.assign(L, {family: tk.body.family, color: onP ? '#e5e5e5' : tk.muted});
+    else if (L.role === 'cta-text') Object.assign(L, {family: tk.head.family, weight: tk.head.weight, color: emT, upper: tk.upper});
+  } else if (L.type === 'rect') {
+    if (L.role === 'accent-fill' || L.role === 'cta-fill') L.fill = tk.accent;
+    if (L.role === 'cta-fill') L.radius = Math.max(tk.radius, 0) ? tk.radius * 2 : 0;
+    if (L.role === 'panel') L.fill = mixHex(tk.bg, tk.fg, 0.07);
+  } else if (L.type === 'image' && L.role === 'photo') Object.assign(L, {filter: tk.photo.filter, ovColor: tk.photo.ovColor, ovMode: tk.photo.ovMode, brief: tk.photo.brief});
+}
+function themeSlide(slide, tk) { slide.bg = tk.bg; slide.layers.forEach(L => themeLayer(L, tk)); }
+function applyStyleToSet(set, tk) { set.tk = tk; set.slides.forEach(s => themeSlide(s, tk)); }
+
+/* empilha itens verticalmente, medindo o texto de verdade */
+function stackPlace(items, x, w, y0, y1, valign, gap) {
+  const hs = items.map(it => { if (it.group) return it.h; if (it.type === 'text') { it.x = x; it.w = it.w || w; return layoutText(it).h; } return it.h; });
+  const total = hs.reduce((a, b) => a + b, 0) + gap * (items.length - 1);
+  let y = valign === 'bottom' ? y1 - total : valign === 'middle' ? y0 + Math.max(0, (y1 - y0 - total) / 2) : y0;
+  items.forEach((it, i) => {
+    if (it.group) it.group.forEach(g => { g.y = y + (g.dy || 0); g.x = x + (g.dx || 0); delete g.dy; delete g.dx; });
+    else { it.y = y; if (it.type !== 'text') it.x = it.x == null ? x : it.x; if (it.type === 'text') it.x = x; }
+    y += hs[i] + gap;
+  });
+}
+function chipGroup(text, tk, onP) {
+  const k = T('kicker', {content: text, size: 30, ls: 3, w: 900, onChip: true, onPhoto: onP}); themeLayer(k, tk);
+  const lay = layoutText(Object.assign({}, k, {w: 4000})), tw = Math.ceil(lay.lines[0] ? lay.lines[0].w : 100);
+  const box = RC('accent-fill', {w: tw + 56, h: Math.round(k.size * 1.9), radius: 999, fill: tk.accent}); k.w = tw + 8; k.dx = 28; k.dy = (box.h - k.size * 1.2) / 2;
+  return {group: [box, k], h: box.h};
+}
+function autoEmphasis(title) { if (/\*\*/.test(title)) return title; const ws = title.split(/\s+/); let best = -1, len = 4; ws.forEach((w, i) => { const c = w.replace(/[^\p{L}\p{N}]/gu, ''); if (c.length > len) { len = c.length; best = i; } }); if (best < 0) return title; ws[best] = '**' + ws[best] + '**'; return ws.join(' '); }
+const titleSize = (t, base) => { const n = t.replace(/\*/g, '').length; return n <= 22 ? base : n <= 40 ? Math.round(base * 0.86) : n <= 64 ? Math.round(base * 0.72) : Math.round(base * 0.6); };
+
+function slideCover(tk, copy, fmt, brand, total) {
+  const W = fmt.w, H = fmt.h, m = 90, cw = W - 2 * m, mode = tk.photoMode, onP = mode === 'full', layers = [];
+  let y0 = m, y1 = H - m - 90, valign = 'middle';
+  if (mode === 'full') { layers.push(IM('photo', {x: 0, y: 0, w: W, h: H}), RC('overlay', {x: 0, y: 0, w: W, h: H, fill: 'rgba(0,0,0,0.5)'})); valign = 'bottom'; }
+  if (mode === 'top') { const ph = Math.round(H * 0.46); layers.push(IM('photo', {x: 0, y: 0, w: W, h: ph})); y0 = ph + 60; valign = 'top'; }
+  if (mode === 'half') { const py = Math.round(H * 0.5), ph = H - m - 80 - py; layers.push(IM('photo', {x: m, y: py, w: cw, h: ph, radius: tk.radius})); y1 = py - 50; valign = 'bottom'; }
+  const items = [], al = tk.align;
+  if (copy.kicker) items.push(tk.mark === 'chip' ? chipGroup(copy.kicker, tk, onP) : T('kicker', {content: copy.kicker, size: 30, ls: 4, align: al, w: cw, onPhoto: onP}));
+  if (tk.mark === 'bar') items.push(RC('accent-fill', {w: 130, h: 14, x: al === 'center' ? (W - 130) / 2 : m}));
+  items.push(T('title', {content: autoEmphasis(copy.title), size: titleSize(copy.title, 124), lh: tk.upper ? 1.02 : 1.1, align: al, w: cw, onPhoto: onP}));
+  if (tk.mark === 'underline') items.push(RC('accent-fill', {w: al === 'center' ? 220 : 160, h: 8, x: al === 'center' ? (W - 220) / 2 : m}));
+  if (copy.sub) items.push(T('body', {content: copy.sub, size: 40, lh: 1.4, align: al, w: cw, onPhoto: onP}));
+  items.forEach(it => { if (it.type === 'text') themeLayer(it, tk); else if (it.type === 'rect') themeLayer(it, tk); });
+  if (al === 'center') items.forEach(it => { if (it.group) it.group.forEach(g => { if (g.type === 'text') { g.align = 'left'; } }); });
+  stackPlace(items, m, cw, y0, y1, valign, 34);
+  items.forEach(it => (it.group ? it.group : [it]).forEach(l => layers.push(l)));
+  if (al === 'center') items.filter(it => it.group).forEach(it => { const b = it.group[0], t = it.group[1], shift = (W - b.w) / 2 - b.x; b.x += shift; t.x += shift; });
+  layers.push(T('brand', {content: brand, size: 28, ls: 2, x: m, y: H - m - 34, w: 600, upper: true, onPhoto: onP}), T('muted', {content: total > 1 ? 'ARRASTE  →' : '', size: 28, ls: 3, x: W - m - 400, y: H - m - 34, w: 400, align: 'right', onPhoto: onP}));
+  layers.slice(-2).forEach(l => themeLayer(l, tk));
+  return {id: sid(), bg: tk.bg, layers};
+}
+function slideContent(tk, c, fmt, brand, idx, total) {
+  const W = fmt.w, H = fmt.h, m = 90, cw = W - 2 * m, mode = tk.photoMode, layers = [], al = tk.align === 'center' ? 'center' : 'left';
+  let y0 = m + 20, y1 = H - m - 90, onP = false;
+  if (mode === 'full') { onP = true; layers.push(IM('photo', {x: 0, y: 0, w: W, h: H}), RC('overlay', {x: 0, y: 0, w: W, h: H, fill: 'rgba(0,0,0,0.55)'})); }
+  else if (mode === 'top' || mode === 'half') { const ph = Math.round(H * 0.32); layers.push(IM('photo', {x: 0, y: 0, w: W, h: ph})); y0 = ph + 56; }
+  const items = [];
+  const num = String(idx).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+  items.push(tk.mark === 'chip' ? chipGroup(num, tk, onP) : T('kicker', {content: num, size: 30, ls: 4, align: al, w: cw, onPhoto: onP}));
+  if (tk.mark === 'bar') items.push(RC('accent-fill', {w: 110, h: 12, x: al === 'center' ? (W - 110) / 2 : m}));
+  items.push(T('title', {content: autoEmphasis(c.title), size: titleSize(c.title, 84), lh: tk.upper ? 1.04 : 1.12, align: al, w: cw, onPhoto: onP}));
+  if (tk.mark === 'underline') items.push(RC('accent-fill', {w: 140, h: 7, x: al === 'center' ? (W - 140) / 2 : m}));
+  if (c.body) items.push(T('body', {content: c.body, size: mode === 'none' ? 52 : 44, lh: 1.45, align: al, w: cw, onPhoto: onP}));
+  items.forEach(it => { if (it.group) { /* chip já tematizado */ } else themeLayer(it, tk); });
+  stackPlace(items, m, cw, y0, y1, mode === 'full' ? 'bottom' : mode === 'none' ? 'middle' : 'top', 38);
+  items.forEach(it => (it.group ? it.group : [it]).forEach(l => layers.push(l)));
+  if (al === 'center') items.filter(it => it.group).forEach(it => { const b = it.group[0], t = it.group[1], shift = (W - b.w) / 2 - b.x; b.x += shift; t.x += shift; });
+  const f = [T('brand', {content: brand, size: 28, ls: 2, x: m, y: H - m - 34, w: 600, upper: true, onPhoto: onP}), T('muted', {content: idx + '/' + total, size: 28, ls: 3, x: W - m - 300, y: H - m - 34, w: 300, align: 'right', onPhoto: onP})];
+  f.forEach(l => { themeLayer(l, tk); layers.push(l); });
+  return {id: sid(), bg: tk.bg, layers};
+}
+function slideCta(tk, c, fmt, brand) {
+  const W = fmt.w, H = fmt.h, m = 90, cw = W - 2 * m, layers = [], al = tk.align === 'center' ? 'center' : 'left', items = [];
+  items.push(T('title', {content: autoEmphasis(c.title), size: titleSize(c.title, 100), lh: tk.upper ? 1.02 : 1.1, align: al, w: cw}));
+  if (c.sub) items.push(T('body', {content: c.sub, size: 46, lh: 1.4, align: al, w: cw}));
+  items.forEach(it => themeLayer(it, tk));
+  const bw = Math.min(cw, 720), btn = RC('cta-fill', {w: bw, h: 128, fill: tk.accent}), bt = T('cta-text', {content: c.button || 'Fale com a gente', size: 46, align: 'center', w: bw - 40});
+  themeLayer(btn, tk); themeLayer(bt, tk); bt.dx = 20; bt.dy = (128 - bt.size * 1.2) / 2; btn.dx = 0; btn.dy = 0;
+  items.push({group: [btn, bt], h: 128});
+  stackPlace(items, m, cw, m, H - m - 90, 'middle', 44);
+  items.forEach(it => (it.group ? it.group : [it]).forEach(l => layers.push(l)));
+  if (al === 'center') { const shift = (W - bw) / 2 - btn.x; btn.x += shift; bt.x += shift; }
+  const f = [T('brand', {content: brand, size: 28, ls: 2, x: m, y: H - m - 34, w: 600, upper: true})]; f.forEach(l => { themeLayer(l, tk); layers.push(l); });
+  return {id: sid(), bg: tk.bg, layers};
+}
+/* copy: {cover:{kicker,title,sub}, slides:[{title,body}], cta:{title,sub,button}} */
+function buildSet(name, tk, copy, fmt, brand) {
+  const total = copy.slides.length + 2, slides = [slideCover(tk, copy.cover, fmt, brand, total)];
+  copy.slides.forEach((c, i) => slides.push(slideContent(tk, c, fmt, brand, i + 2, total)));
+  slides.push(slideCta(tk, copy.cta, fmt, brand));
+  return {id: uid('ds'), name, format: {id: fmt.id, w: fmt.w, h: fmt.h}, tk, slides, created: new Date().toISOString(), updated: new Date().toISOString()};
+}
+
+/* extrai o estilo do que está na tela (o que o usuário refinou à mão) para salvar e reutilizar */
+function extractStyle(set) {
+  const tk = JSON.parse(JSON.stringify(set.tk)), all = set.slides.flatMap(s => s.layers);
+  const t = all.find(L => L.type === 'text' && L.role === 'title' && !L.onPhoto) || all.find(L => L.type === 'text' && L.role === 'title');
+  const b = all.find(L => L.type === 'text' && L.role === 'body'), mu = all.find(L => L.type === 'text' && L.role === 'muted' && !L.onPhoto), ac = all.find(L => L.type === 'rect' && L.role === 'accent-fill'), im = all.find(L => L.type === 'image' && L.role === 'photo');
+  tk.bg = set.slides[0].bg || tk.bg;
+  const orig = set.tk.accent, cands = [];
+  if (t) { tk.head = {family: t.family, weight: t.weight}; tk.fg = t.onPhoto ? tk.fg : t.color; tk.upper = !!t.upper; tk.em = {mode: t.emMode}; cands.push(t.emMode === 'bg' ? t.emBg : t.emColor); }
+  if (ac) cands.push(ac.fill);
+  tk.accent = cands.find(c => c && c.toLowerCase() !== String(orig).toLowerCase()) || orig;   // vale o que o usuário realmente mudou
+  if (b) tk.body = {family: b.family, weight: b.weight}; if (mu) tk.muted = mu.color;
+  if (im) tk.photo = Object.assign({}, tk.photo, {filter: im.filter, ovColor: im.ovColor, ovMode: im.ovMode});
+  return tk;
+}
+
+/* ---- exportação ---- */
+async function slideBlob(set, slide) {
+  await ensureSetResources(set);
+  const c = document.createElement('canvas'); c.width = set.format.w; c.height = set.format.h; renderSlide(c.getContext('2d'), slide, c.width, c.height);
+  return new Promise(res => c.toBlob(res, 'image/png'));
+}
+const CRC_T = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = u8 => { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function makeZip(files) {   // armazenamento sem compressão (PNG já é comprimido)
+  const enc = new TextEncoder(), chunks = [], central = []; let off = 0;
+  files.forEach(f => {
+    const name = enc.encode(f.name), crc = crc32(f.data), h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true); h.setUint16(10, 0, true); h.setUint16(12, 0x21, true);
+    h.setUint32(14, crc, true); h.setUint32(18, f.data.length, true); h.setUint32(22, f.data.length, true); h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+    chunks.push(new Uint8Array(h.buffer), name, f.data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true); c.setUint16(12, 0, true); c.setUint16(14, 0x21, true);
+    c.setUint32(16, crc, true); c.setUint32(20, f.data.length, true); c.setUint32(24, f.data.length, true); c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+    central.push(new Uint8Array(c.buffer), name); off += 30 + name.length + f.data.length;
+  });
+  const csize = central.reduce((a, b) => a + b.length, 0), e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, csize, true); e.setUint32(16, off, true);
+  return new Blob([...chunks, ...central, new Uint8Array(e.buffer)], {type: 'application/zip'});
+}
+async function exportSetZip(set) {
+  const files = [];
+  for (let i = 0; i < set.slides.length; i++) files.push({name: `${slug(set.name)}-${String(i + 1).padStart(2, '0')}.png`, data: new Uint8Array(await (await slideBlob(set, set.slides[i])).arrayBuffer())});
+  return makeZip(files);
+}
+
+</script>
+<script>
+/* Estúdio de Design — telas: início (estilos e peças), composição (cruzamento 30×30×30) e editor */
+const dz = {view: 'home', cmp: null, setId: '', slide: 0, sel: '', hist: [], hi: -1, scale: 0.3, mode: 'select', drag: null, saveT: 0};
+const FONT_LIST = Object.keys(FONT_META).sort();
+const dzP = () => curProject();
+const dzSet = () => { const p = dzP(); return p && p.design.sets.find(s => s.id === dz.setId); };
+const dzSlide = () => { const s = dzSet(); return s && s.slides[Math.min(dz.slide, s.slides.length - 1)]; };
+const dzLayer = () => { const s = dzSlide(); return s && s.layers.find(l => l.id === dz.sel); };
+
+function renderDesign() {
+  const p = dzP(), r = $('designRoot'); if (!p) { r.innerHTML = noProject('Estúdio de Design'); return; }
+  if (dz.view === 'editor' && !dzSet()) dz.view = 'home';
+  if (dz.view === 'home') return dzHome(p, r);
+  if (dz.view === 'compose') return dzCompose(p, r);
+  dzEditorShell(p, r);
+}
+
+/* ================= INÍCIO ================= */
+function dzHome(p, r) {
+  const {styles, sets} = p.design;
+  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
+  <div class="panel"><div class="section-row"><h3>Estilos de campanha salvos</h3><small class="muted">${styles.length} salvo(s)</small></div>
+    ${styles.length ? `<div class="dz-styles">${styles.map(s => `<article class="dz-style"><div class="dz-sw">${[s.tk.bg, s.tk.fg, s.tk.accent, s.tk.muted].map(c => `<i style="background:${esc(c)}"></i>`).join('')}</div><strong>${esc(s.name)}</strong><small class="muted block">${esc(s.tk.head.family)} + ${esc(s.tk.body.family)} · ${esc((s.tk.photo || {}).name || 'foto')}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dzNew('${s.id}')">Usar em nova peça</button><button class="btn sm" onclick="dzStyleDel('${s.id}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhum estilo salvo', 'Crie uma peça, refine no editor e use “Salvar como estilo” para reaproveitar em toda a campanha.')}</div>
+  <div class="panel" style="margin-top:14px"><div class="section-row"><h3>Peças do projeto</h3><small class="muted">${sets.length} peça(s)</small></div>
+    ${sets.length ? `<div class="dz-sets">${sets.map(s => `<article class="dz-set"><canvas class="dz-thumb" data-set="${s.id}" width="216" height="${Math.round(216 * s.format.h / s.format.w)}"></canvas><strong>${esc(s.name)}</strong><small class="muted block">${s.slides.length} slide(s) · ${esc(s.format.w + '×' + s.format.h)} · ${esc(s.tk.name || '')}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dzOpen('${s.id}')">Abrir editor</button><button class="btn sm" onclick="dzDup('${s.id}')">Duplicar</button><button class="btn sm" onclick="dzSetDel('${s.id}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhuma peça ainda', 'Comece uma nova composição: o Studio cruza as bibliotecas com o seu público e gera o carrossel.', '<button class="btn dark" onclick="dzNew()">＋ Nova composição</button>')}</div>`;
+  r.querySelectorAll('.dz-thumb').forEach(async cv => { const s = p.design.sets.find(x => x.id === cv.dataset.set); await ensureSetResources(s); renderSlide(cv.getContext('2d'), s.slides[0], s.format.w, s.format.h, cv.width / s.format.w); });
+}
+function dzNew(styleId) {
+  const p = dzP(); dz.view = 'compose';
+  const st = styleId && p.design.styles.find(x => x.id === styleId);
+  dz.cmp = {name: '', text: '', aud: [], audTags: [], tone: [], fmt: 'feed45', results: [], pick: {design: 'neobrutal', font: 'poppins', photo: 'documental'}, tk: st ? JSON.parse(JSON.stringify(st.tk)) : null, styleName: st ? st.name : ''};
+  if (st) { dz.cmp.pick = {design: st.tk.designId, font: st.tk.fontId, photo: st.tk.photoId}; }
+  go('design');
+}
+function dzOpen(id) { dz.setId = id; dz.slide = 0; dz.sel = ''; dz.view = 'editor'; dz.hist = []; dz.hi = -1; dz.mode = 'select'; renderDesign(); }
+function dzBack() { dz.view = 'home'; renderDesign(); }
+function dzDup(id) { const p = dzP(), s = JSON.parse(JSON.stringify(p.design.sets.find(x => x.id === id))); s.id = uid('ds'); s.name += ' (cópia)'; p.design.sets.push(s); persist(); renderDesign(); }
+function dzSetDel(id) { if (!confirm('Excluir esta peça?')) return; const p = dzP(); p.design.sets = p.design.sets.filter(s => s.id !== id); persist(); renderDesign(); }
+function dzStyleDel(id) { if (!confirm('Excluir este estilo salvo?')) return; const p = dzP(); p.design.styles = p.design.styles.filter(s => s.id !== id); persist(); renderDesign(); }
+
+/* ================= BIBLIOTECA ================= */
+function dzLibrary(kind) {
+  const lists = {design: ['Estilos de design', DESIGN_STYLES], font: ['Fontes', FONT_PAIRS], photo: ['Fotografia', PHOTO_STYLES]};
+  const [title, list] = lists[kind];
+  if (kind === 'font') ensureFonts(FONT_PAIRS.flatMap(f => [f.head, f.body]));
+  const card = it => kind === 'design' ? `<div class="lib-card" style="background:${it.bg};color:${it.fg}"><b style="color:${it.accent}">Aa</b><strong>${esc(it.name)}</strong><small>${it.tags.map(t => AUDIENCE_TAGS[t] || TONE_TAGS[t] || t).join(' · ')}</small></div>`
+    : kind === 'font' ? `<div class="lib-card"><b style="font-family:'${it.head}';font-weight:${it.weight}">Aa Bb</b><strong>${esc(it.name)}</strong><small style="font-family:'${it.body}'">Texto de apoio da peça</small></div>`
+    : `<div class="lib-card"><b style="filter:${it.filter}">◩</b><strong>${esc(it.name)}</strong><small>${esc(it.brief)}</small></div>`;
+  showModal('Biblioteca · ' + title + ` (${list.length})`, `<div class="matrix-tabs" style="margin-bottom:10px">${[['design', 'Design'], ['font', 'Fontes'], ['photo', 'Fotografia']].map(([k, l]) => `<button class="${k === kind ? 'active' : ''}" onclick="dzLibrary('${k}')">${l}</button>`).join('')}</div><div class="lib-grid">${list.map(card).join('')}</div>`);
+}
+
+/* ================= COMPOSIÇÃO (cruzamento) ================= */
+const DEFAULT_COPY = 'Seu financiamento subiu e ninguém explicou? | Entenda antes de pagar\nPor que a parcela muda: a correção segue um índice que você pode conferir.\nO que você pode revisar: juros, seguros e taxas do contrato.\nPrimeiro passo: junte o contrato e a última cobrança.\nQuer entender seu caso? | Falar no WhatsApp';
+function dzCompose(p, r) {
+  const c = dz.cmp, aud = c.aud.flatMap(id => AUDIENCE_PRESETS.find(a => a.id === id).tags).concat(c.audTags), tone = c.tone;
+  const chips = (obj, sel, fn) => Object.entries(obj).map(([k, l]) => `<button class="tchip ${sel.includes(k) ? 'on' : ''}" onclick="${fn}('${k}')">${l}</button>`).join('');
+  const D = byId(DESIGN_STYLES, c.pick.design), F = byId(FONT_PAIRS, c.pick.font), P = byId(PHOTO_STYLES, c.pick.photo);
+  r.innerHTML = `<div class="page-head"><div><h1>Nova composição</h1><p>Conte o que a peça precisa dizer e para quem. O Studio cruza 30 estilos de design, 30 fontes e 30 estilos de fotografia.</p></div><div class="actions"><button class="btn" onclick="dzBack()">Cancelar</button></div></div>
+  <div class="two dz-compose"><div class="panel"><h3>1. A peça</h3>
+    <div class="field"><label>Nome da peça</label><input value="${esc(c.name)}" oninput="dz.cmp.name=this.value" placeholder="Ex.: Carrossel · Parcela subiu"></div>
+    <div class="field" style="margin-top:8px"><label>Formato</label><select onchange="dz.cmp.fmt=this.value">${Object.values(FORMATS).map(f => `<option value="${f.id}" ${f.id === c.fmt ? 'selected' : ''}>${f.label}</option>`).join('')}</select></div>
+    <div class="field" style="margin-top:8px"><label>O que dizer <small class="muted">primeira linha = capa (“Título | subtítulo”) · do meio = slides (“Título: texto”) · última = chamada (“Título | botão”)</small></label><textarea id="dzText" class="jp-ta" rows="9" oninput="dz.cmp.text=this.value" placeholder="${esc(DEFAULT_COPY)}">${esc(c.text)}</textarea></div>
+    <div class="row-gap" style="margin-top:8px"><button class="btn sm" onclick="dzUseConcept()">Usar conceito da Matriz</button><button class="btn sm" onclick="dzAICopy()">✦ Escrever com IA</button><button class="btn sm" onclick="dz.cmp.text=DEFAULT_COPY;renderDesign()">Texto de exemplo</button></div></div>
+  <div class="panel"><h3>2. Para quem</h3><div class="okr-label">PÚBLICO</div><div class="tchips">${AUDIENCE_PRESETS.map(a => `<button class="tchip ${c.aud.includes(a.id) ? 'on' : ''}" onclick="dzTogAud('${a.id}')">${esc(a.label)}</button>`).join('')}</div>
+    <div class="okr-label" style="margin-top:10px">AJUSTE FINO DO PÚBLICO</div><div class="tchips">${chips(AUDIENCE_TAGS, c.audTags, 'dzTogAudTag')}</div>
+    <div class="okr-label" style="margin-top:10px">TOM</div><div class="tchips">${chips(TONE_TAGS, tone, 'dzTogTone')}</div>
+    <div class="modal-actions" style="justify-content:flex-start"><button class="btn dark" onclick="dzCross()">⚡ Cruzar bibliotecas</button><small class="muted">${aud.length + tone.length ? '' : 'Escolha público e tom para o cruzamento.'}</small></div></div></div>
+  ${c.results.length ? `<div class="panel" style="margin-top:14px"><h3>Composições recomendadas ${tag('recomendacao')}</h3><p class="muted" style="font-size:11px;margin-top:0">Pontuação por tags em comum com o público e o tom escolhidos. Escolha uma; você pode ajustar cada parte abaixo.</p><div class="dz-results">${c.results.map((x, i) => `<article class="dz-res ${x.design.id === c.pick.design && x.font.id === c.pick.font && x.photo.id === c.pick.photo ? 'on' : ''}" onclick="dzPick(${i})"><canvas data-i="${i}" width="200" height="250"></canvas><strong>${esc(x.design.name)}</strong><small class="muted block">${esc(x.font.name)}</small><small class="muted block">${esc(x.photo.name)}</small><div class="why">${x.why.slice(0, 5).map(t => `<span>${esc(AUDIENCE_TAGS[t] || TONE_TAGS[t] || t)}</span>`).join('')}</div></article>`).join('')}</div></div>` : ''}
+  <div class="panel" style="margin-top:14px"><h3>3. Composição escolhida ${c.styleName ? `<small class="muted">· estilo salvo “${esc(c.styleName)}”</small>` : ''}</h3>
+    <div class="form-grid"><div class="field"><label>Estilo de design (${DESIGN_STYLES.length})</label><select onchange="dzSelPick('design',this.value)">${DESIGN_STYLES.map(x => `<option value="${x.id}" ${x.id === c.pick.design ? 'selected' : ''}>${x.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Fonte (${FONT_PAIRS.length})</label><select onchange="dzSelPick('font',this.value)">${FONT_PAIRS.map(x => `<option value="${x.id}" ${x.id === c.pick.font ? 'selected' : ''}>${x.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Fotografia (${PHOTO_STYLES.length})</label><select onchange="dzSelPick('photo',this.value)">${PHOTO_STYLES.map(x => `<option value="${x.id}" ${x.id === c.pick.photo ? 'selected' : ''}>${x.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Direção de foto</label><input value="${esc(P.brief)}" readonly></div></div>
+    <div class="row-gap" style="margin-top:10px"><canvas id="dzPrev" width="240" height="300" class="dz-prev"></canvas><div><div class="okr-label">PALETA (ajustável)</div><div class="row-gap">${[['bg', 'Fundo'], ['fg', 'Texto'], ['accent', 'Destaque'], ['muted', 'Apoio']].map(([k, l]) => `<label class="pal"><input type="color" value="${esc((c.tk || D)[k])}" onchange="dzPal('${k}',this.value)"><span>${l}</span></label>`).join('')}</div></div></div>
+    <div class="modal-actions"><button class="btn orange" onclick="dzGenerate()">Gerar peças e abrir o editor</button></div></div>`;
+  dzDrawPrev(); r.querySelectorAll('.dz-res canvas').forEach(cv => dzDrawComp(cv, c.results[+cv.dataset.i]));
+}
+const tog = (arr, k) => { const i = arr.indexOf(k); if (i < 0) arr.push(k); else arr.splice(i, 1); };
+function dzTogAud(id) { tog(dz.cmp.aud, id); renderDesign(); } function dzTogAudTag(k) { tog(dz.cmp.audTags, k); renderDesign(); } function dzTogTone(k) { tog(dz.cmp.tone, k); renderDesign(); }
+function dzCross() {
+  const c = dz.cmp, aud = c.aud.flatMap(id => AUDIENCE_PRESETS.find(a => a.id === id).tags).concat(c.audTags);
+  if (!aud.length && !c.tone.length) { toast('Escolha ao menos um público ou um tom.'); return; }
+  c.results = crossCompositions([...new Set(aud)], c.tone, 6); if (c.results[0]) { c.pick = {design: c.results[0].design.id, font: c.results[0].font.id, photo: c.results[0].photo.id}; c.tk = null; }
+  renderDesign(); toast(c.results.length + ' composições recomendadas.');
+}
+function dzPick(i) { const x = dz.cmp.results[i]; dz.cmp.pick = {design: x.design.id, font: x.font.id, photo: x.photo.id}; dz.cmp.tk = null; dz.cmp.styleName = ''; renderDesign(); }
+function dzSelPick(k, v) { dz.cmp.pick[k] = v; dz.cmp.tk = null; dz.cmp.styleName = ''; renderDesign(); }
+function dzPal(k, v) { const c = dz.cmp; c.tk = c.tk || makeTokens(byId(DESIGN_STYLES, c.pick.design), byId(FONT_PAIRS, c.pick.font), byId(PHOTO_STYLES, c.pick.photo)); c.tk[k] = v; dzDrawPrev(); }
+function dzTokens() { const c = dz.cmp; return c.tk || makeTokens(byId(DESIGN_STYLES, c.pick.design), byId(FONT_PAIRS, c.pick.font), byId(PHOTO_STYLES, c.pick.photo)); }
+async function dzDrawComp(cv, x) {
+  const tk = makeTokens(x.design, x.font, x.photo), set = buildSet('prev', tk, parseCopy(dz.cmp.text || DEFAULT_COPY, dzP()), FORMATS.feed45, dzP().name);
+  await ensureFonts([x.font.head, x.font.body]); const t2 = buildSet('prev', tk, parseCopy(dz.cmp.text || DEFAULT_COPY, dzP()), FORMATS.feed45, dzP().name);
+  if (cv.isConnected) renderSlide(cv.getContext('2d'), t2.slides[0], 1080, 1350, cv.width / 1080);
+}
+async function dzDrawPrev() {
+  const cv = $('dzPrev'); if (!cv) return; const tk = dzTokens(); await ensureFonts([tk.head.family, tk.body.family]);
+  const set = buildSet('prev', tk, parseCopy(dz.cmp.text || DEFAULT_COPY, dzP()), FORMATS.feed45, dzP().name); if (cv.isConnected) renderSlide(cv.getContext('2d'), set.slides[0], 1080, 1350, cv.width / 1080);
+}
+/* "Título | subtítulo" · "Título: texto" · "Título | botão" */
+function parseCopy(text, p) {
+  const lines = String(text || '').split('\n').map(s => s.trim()).filter(Boolean);
+  const two = (s, sep) => { const i = s.indexOf(sep); return i < 0 ? [s, ''] : [s.slice(0, i).trim(), s.slice(i + sep.length).trim()]; };
+  if (lines.length < 3) {
+    const base = lines[0] ? two(lines[0], '|') : ['Título da peça', ''];
+    return {cover: {kicker: p.name, title: base[0], sub: base[1]}, slides: [{title: 'O problema', body: p.brief.problem || 'Descreva o problema do público.'}, {title: 'O que muda', body: p.brief.offer || 'Explique a solução em uma frase.'}, {title: 'Como funciona', body: 'Mostre o caminho em passos simples.'}], cta: {title: 'Vamos conversar?', sub: '', button: 'Fale com a gente'}};
+  }
+  const [ct, cs] = two(lines[0], '|'), [at, ab] = two(lines[lines.length - 1], '|');
+  return {cover: {kicker: p.name, title: ct, sub: cs}, slides: lines.slice(1, -1).map(l => { const [t, b] = two(l, ':'); return {title: t, body: b}; }), cta: {title: at, sub: '', button: ab || 'Fale com a gente'}};
+}
+function dzUseConcept() {
+  const p = dzP(), list = shownConcepts(p).slice(0, 12); if (!list.length) { toast('Gere conceitos na Matriz primeiro.'); return; }
+  showModal('Escolher conceito da Matriz', `<div class="list">${list.map(c => `<div class="list-item clickable" onclick="dzApplyConcept('${c.id}')"><div><strong>${esc(c.hook)} × ${esc(c.angle)}</strong><small>${esc(hookLine(p, c))}</small></div><span>→</span></div>`).join('')}</div>`);
+}
+function dzApplyConcept(id) {
+  const p = dzP(), c = p.matrix.concepts.find(x => x.id === id), j = p.pre.journey;
+  dz.cmp.text = `${hookLine(p, c)} | ${p.brand.positioning || p.desc || ''}\n${j[1].dor ? 'O problema: ' + j[1].dor : 'O problema: descreva a dor do público'}\n${j[3].desejo ? 'O que você quer: ' + j[3].desejo : 'O que você quer: descreva o desejo'}\n${j[2].confianca ? 'Por que confiar: ' + j[2].confianca : 'Por que confiar: mostre uma prova'}\n${c.cta} | ${(p.pre.icps[0] || {}).intent || 'Falar com a gente'}`;
+  if (!dz.cmp.name) dz.cmp.name = `Carrossel · ${c.hook} × ${c.angle}`; closeModal(); renderDesign();
+}
+async function dzAICopy() {
+  if (!aiReady()) { toast('IA não configurada. Veja Integrações. Dá para escrever os textos à mão.'); return; }
+  const p = dzP();
+  try {
+    toast('Escrevendo…');
+    const j = await aiJSON('Escreva os textos de um carrossel de Instagram em PT-BR, curtos e diretos, seguindo o Voice Brain. Sem promessas absolutas, sem inventar dados. Responda só JSON: {"cover":{"title","sub"},"slides":[{"title","body"}],"cta":{"title","button"}} com 3 a 5 slides.', projectContext(p) + '\nTema/ideia: ' + (dz.cmp.text || p.pre.objective || p.desc));
+    dz.cmp.text = `${j.cover.title} | ${j.cover.sub || ''}\n` + (j.slides || []).map(s => `${s.title}: ${s.body}`).join('\n') + `\n${j.cta.title} | ${j.cta.button || 'Fale com a gente'}`; spendCredits(1); renderDesign(); toast('Textos sugeridos. Edite à vontade.');
+  } catch (e) { toast('IA: ' + e.message); }
+}
+async function dzGenerate() {
+  const p = dzP(), c = dz.cmp, tk = dzTokens(), fmt = FORMATS[c.fmt]; toast('Gerando peças…');
+  await ensureFonts([tk.head.family, tk.body.family]);
+  const set = buildSet(c.name.trim() || 'Carrossel ' + (p.design.sets.length + 1), tk, parseCopy(c.text || DEFAULT_COPY, p), fmt, p.name);
+  p.design.sets.push(set); persist(); dzOpen(set.id);
+}
+
+/* ================= EDITOR ================= */
+function dzEditorShell(p, r) {
+  const s = dzSet();
+  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">← Estúdio</button><input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>
+    <button class="btn sm ${dz.mode === 'emphasis' ? 'dark' : ''}" onclick="dzModeEm()" title="Clique em palavras do texto para destacar">✦ Destacar por clique</button>
+    <button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddPhoto()">＋ Foto</button>
+    <button class="btn sm" onclick="dzSaveStyle()">Salvar como estilo</button><button class="btn sm" onclick="dzApplyStyleModal()">Aplicar estilo…</button><button class="btn sm" onclick="dzExportOne()">PNG</button><button class="btn sm dark" onclick="dzExportAll()">Baixar todos (ZIP)</button></div></div>
+  <div class="dz-editor"><div class="dz-slides" id="dzSlides"></div><div class="dz-stage" id="dzStage"><canvas id="dzCanvas"></canvas></div><div class="dz-insp" id="dzInsp"></div></div><input type="file" id="dzFile" accept="image/*" hidden>`;
+  dzBindCanvas(); dzSlidesPanel(); dzInspector(); dzFit(); ensureSetResources(s).then(() => { dzDraw(); dzSlidesPanel(); });
+  if (dz.hist.length === 0) dzSnap();
+}
+function dzFit() {
+  const s = dzSet(), st = $('dzStage'), cv = $('dzCanvas'); if (!s || !cv) return;
+  const aw = Math.max(280, st.clientWidth - 40), ah = Math.max(300, window.innerHeight - 190);
+  dz.scale = Math.min(aw / s.format.w, ah / s.format.h, 1);
+  cv.width = s.format.w; cv.height = s.format.h; cv.style.width = Math.round(s.format.w * dz.scale) + 'px'; cv.style.height = Math.round(s.format.h * dz.scale) + 'px';
+}
+function dzDraw() {
+  const s = dzSet(), sl = dzSlide(), cv = $('dzCanvas'); if (!s || !sl || !cv) return;
+  const ctx = cv.getContext('2d'); renderSlide(ctx, sl, s.format.w, s.format.h, 1);
+  const L = dzLayer(), b = L && LBOX[L.id];
+  if (b) {
+    ctx.save(); ctx.strokeStyle = '#2f6bff'; ctx.lineWidth = 3 / dz.scale; ctx.setLineDash([10 / dz.scale, 6 / dz.scale]); ctx.strokeRect(b.x, b.y, b.w, b.h); ctx.setLineDash([]);
+    const hs = 22 / dz.scale; ctx.fillStyle = '#2f6bff'; ctx.fillRect(b.x + b.w - hs / 2, b.y + b.h - hs / 2, hs, hs); ctx.restore();
+  }
+  if (dz.mode === 'emphasis') sl.layers.filter(l => l.type === 'text').forEach(l => (LBOX[l.id].words || []).forEach(w => { ctx.save(); ctx.strokeStyle = 'rgba(47,107,255,.35)'; ctx.lineWidth = 2 / dz.scale; ctx.strokeRect(w.x, w.y, w.w, w.h); ctx.restore(); }));
+}
+function dzSlidesPanel() {
+  const s = dzSet(), el = $('dzSlides'); if (!s || !el) return;
+  el.innerHTML = s.slides.map((sl, i) => `<div class="dz-sl ${i === dz.slide ? 'on' : ''}" onclick="dzGoSlide(${i})"><canvas width="108" height="${Math.round(108 * s.format.h / s.format.w)}" data-i="${i}"></canvas><span>${i + 1}</span></div>`).join('') +
+    `<div class="row-gap" style="margin-top:8px"><button class="btn sm" onclick="dzSlideAdd()" title="Duplicar slide">＋</button><button class="btn sm" onclick="dzSlideMove(-1)">◀</button><button class="btn sm" onclick="dzSlideMove(1)">▶</button><button class="btn sm" onclick="dzSlideDel()">×</button></div>`;
+  el.querySelectorAll('canvas').forEach(cv => renderSlide(cv.getContext('2d'), s.slides[+cv.dataset.i], s.format.w, s.format.h, cv.width / s.format.w));
+}
+function dzGoSlide(i) { dz.slide = i; dz.sel = ''; dzSlidesPanel(); dzInspector(); dzDraw(); }
+function dzSlideAdd() { const s = dzSet(), c = JSON.parse(JSON.stringify(dzSlide())); c.id = sid(); c.layers.forEach(l => l.id = lid()); s.slides.splice(dz.slide + 1, 0, c); dz.slide++; dz.sel = ''; dzCommit(); dzSlidesPanel(); dzInspector(); dzDraw(); }
+function dzSlideDel() { const s = dzSet(); if (s.slides.length < 2) { toast('A peça precisa de ao menos um slide.'); return; } if (!confirm('Excluir este slide?')) return; s.slides.splice(dz.slide, 1); dz.slide = Math.max(0, dz.slide - 1); dz.sel = ''; dzCommit(); dzSlidesPanel(); dzInspector(); dzDraw(); }
+function dzSlideMove(d) { const s = dzSet(), j = dz.slide + d; if (j < 0 || j >= s.slides.length) return; [s.slides[dz.slide], s.slides[j]] = [s.slides[j], s.slides[dz.slide]]; dz.slide = j; dzCommit(); dzSlidesPanel(); dzDraw(); }
+
+/* histórico e persistência */
+function dzSnap() { const s = dzSet(); dz.hist = dz.hist.slice(0, dz.hi + 1); dz.hist.push(JSON.stringify(s.slides)); if (dz.hist.length > 60) dz.hist.shift(); dz.hi = dz.hist.length - 1; }
+function dzCommit() { const s = dzSet(); s.updated = new Date().toISOString(); dzSnap(); persist(); }
+function dzCommitSoon() { clearTimeout(dz.saveT); dz.saveT = setTimeout(() => { dzCommit(); dzSlidesPanel(); }, 400); }
+function dzUndo() { if (dz.hi <= 0) return; dz.hi--; dzRestore(); } function dzRedo() { if (dz.hi >= dz.hist.length - 1) return; dz.hi++; dzRestore(); }
+function dzRestore() { const s = dzSet(); s.slides = JSON.parse(dz.hist[dz.hi]); dz.slide = Math.min(dz.slide, s.slides.length - 1); if (!dzLayer()) dz.sel = ''; persist(); ensureSetResources(s).then(() => { dzSlidesPanel(); dzInspector(); dzDraw(); }); }
+
+/* interação no canvas */
+function dzBindCanvas() {
+  const cv = $('dzCanvas'); if (!cv) return;
+  const pt = e => { const r = cv.getBoundingClientRect(); return {x: (e.clientX - r.left) / r.width * cv.width, y: (e.clientY - r.top) / r.height * cv.height}; };
+  cv.addEventListener('pointerdown', e => {
+    const s = dzSlide(), p = pt(e); cv.setPointerCapture(e.pointerId);
+    if (dz.mode === 'emphasis') {
+      const L = [...s.layers].reverse().find(l => l.type === 'text' && LBOX[l.id] && p.x >= LBOX[l.id].x && p.x <= LBOX[l.id].x + LBOX[l.id].w && p.y >= LBOX[l.id].y && p.y <= LBOX[l.id].y + LBOX[l.id].h);
+      const w = L && LBOX[L.id].words.find(w => p.x >= w.x && p.x <= w.x + w.w && p.y >= w.y && p.y <= w.y + w.h);
+      if (w) { L.content = toggleWordEm(L.content, w.ord); dz.sel = L.id; dzDraw(); dzCommit(); dzInspector(); dzSlidesPanel(); } return;
+    }
+    const cur = dzLayer(), cb = cur && LBOX[cur.id], hs = 34 / dz.scale;
+    if (cb && Math.abs(p.x - (cb.x + cb.w)) < hs && Math.abs(p.y - (cb.y + cb.h)) < hs) { dz.drag = {t: 'resize', sx: p.x, sy: p.y, w: cur.w, h: cur.h, ch: false}; return; }
+    const hit = [...s.layers].reverse().find(l => !l.hidden && LBOX[l.id] && p.x >= LBOX[l.id].x && p.x <= LBOX[l.id].x + LBOX[l.id].w && p.y >= LBOX[l.id].y && p.y <= LBOX[l.id].y + LBOX[l.id].h && !(l.role === 'overlay'));
+    if (hit) { dz.sel = hit.id; dz.drag = {t: 'move', sx: p.x, sy: p.y, x: hit.x, y: hit.y, ch: false}; } else dz.sel = '';
+    dzInspector(); dzDraw();
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!dz.drag) return; const L = dzLayer(), p = pt(e), d = dz.drag; if (!L) return; d.ch = true;
+    if (d.t === 'move') { L.x = Math.round(d.x + p.x - d.sx); L.y = Math.round(d.y + p.y - d.sy); } else { L.w = Math.max(40, Math.round(d.w + p.x - d.sx)); if (L.type !== 'text') L.h = Math.max(20, Math.round(d.h + p.y - d.sy)); }
+    dzDraw();
+  });
+  const end = () => { if (dz.drag && dz.drag.ch) { dzCommit(); dzInspector(); dzSlidesPanel(); } dz.drag = null; };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+  cv.addEventListener('dblclick', () => { const t = $('dzTxt'); if (t) { t.focus(); t.select(); } });
+}
+document.addEventListener('keydown', e => {
+  if (ui.page !== 'design' || dz.view !== 'editor') return; const tg = e.target.tagName; if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tg)) return;
+  const L = dzLayer(), mod = e.ctrlKey || e.metaKey;
+  if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? dzRedo() : dzUndo(); return; } if (mod && e.key.toLowerCase() === 'y') { e.preventDefault(); dzRedo(); return; }
+  if (!L) return; const st = e.shiftKey ? 10 : 1;
+  if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); dzLayerDel(); } else if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); dzLayerDup(); }
+  else if (e.key.startsWith('Arrow')) { e.preventDefault(); if (e.key === 'ArrowLeft') L.x -= st; if (e.key === 'ArrowRight') L.x += st; if (e.key === 'ArrowUp') L.y -= st; if (e.key === 'ArrowDown') L.y += st; dzDraw(); dzCommitSoon(); dzInspector(); }
+});
+window.addEventListener('resize', () => { if (ui.page === 'design' && dz.view === 'editor') { dzFit(); dzDraw(); } });
+
+/* camadas */
+function dzAddText() { const s = dzSlide(), tk = dzSet().tk, L = T('body', {x: 90, y: 400, w: 900, content: 'Novo **texto**', size: 64}); themeLayer(L, tk); L.role = 'body'; s.layers.push(L); dz.sel = L.id; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel(); }
+function dzAddRect() { const s = dzSlide(), L = RC('accent-fill', {x: 90, y: 300, w: 400, h: 200, fill: dzSet().tk.accent, radius: 16}); s.layers.push(L); dz.sel = L.id; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel(); }
+function dzAddPhoto() { const s = dzSlide(), tk = dzSet().tk, f = dzSet().format, L = IM('photo', {x: 90, y: 200, w: f.w - 180, h: Math.round(f.h * 0.4), radius: tk.radius}); themeLayer(L, tk); s.layers.push(L); dz.sel = L.id; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel(); }
+function dzLayerDel() { const s = dzSlide(); s.layers = s.layers.filter(l => l.id !== dz.sel); dz.sel = ''; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel(); }
+function dzLayerDup() { const s = dzSlide(), L = JSON.parse(JSON.stringify(dzLayer())); L.id = lid(); L.x += 30; L.y += 30; s.layers.push(L); dz.sel = L.id; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel(); }
+function dzLayerMove(d) { const s = dzSlide(), i = s.layers.findIndex(l => l.id === dz.sel), j = i + d; if (j < 0 || j >= s.layers.length) return; [s.layers[i], s.layers[j]] = [s.layers[j], s.layers[i]]; dzCommit(); dzDraw(); dzSlidesPanel(); }
+function dzModeEm() { dz.mode = dz.mode === 'emphasis' ? 'select' : 'emphasis'; renderDesign(); toast(dz.mode === 'emphasis' ? 'Clique em uma palavra para destacar ou remover o destaque.' : 'Modo seleção.'); }
+
+/* inspetor */
+function dzProp(k, v, num) { const L = dzLayer(); if (!L) return; L[k] = num ? +v : v; dzDraw(); dzCommitSoon(); }
+function dzSlideBg(v) { dzSlide().bg = v; dzDraw(); dzCommitSoon(); }
+function dzInspector() {
+  const el = $('dzInsp'); if (!el) return; const L = dzLayer(), sl = dzSlide();
+  if (!L) { el.innerHTML = `<h3>Slide ${dz.slide + 1}</h3><label class="ins">Cor de fundo<input type="color" value="${esc(sl.bg)}" oninput="dzSlideBg(this.value)"></label><p class="muted" style="font-size:11px">Clique em um elemento da peça para editar. Arraste para mover, use o quadrado azul para redimensionar, setas para ajustar e Delete para remover.</p><small class="muted">Estilo: ${esc(dzSet().tk.name || '')}</small>`; return; }
+  const n = (k, l, min, max, step) => `<label class="ins">${l}<input type="number" min="${min}" max="${max}" step="${step || 1}" value="${Math.round(L[k] * 100) / 100}" onchange="dzProp('${k}',this.value,1);dzInspector()"></label>`;
+  const rg = (k, l, min, max, step) => `<label class="ins">${l} <b>${L[k]}</b><input type="range" min="${min}" max="${max}" step="${step}" value="${L[k]}" oninput="dzProp('${k}',this.value,1);this.previousElementSibling.textContent=this.value"></label>`;
+  const col = (k, l) => `<label class="ins">${l}<input type="color" value="${esc(String(L[k] || '#000000').startsWith('#') ? L[k] : '#000000')}" oninput="dzProp('${k}',this.value)"></label>`;
+  const geo = `<div class="ins-row">${n('x', 'X', -2000, 4000)}${n('y', 'Y', -2000, 4000)}${n('w', 'Largura', 20, 4000)}${L.type !== 'text' ? n('h', 'Altura', 20, 4000) : ''}</div>`;
+  const acts = `<div class="row-gap" style="margin-top:10px"><button class="btn sm" onclick="dzLayerMove(1)">▲ Frente</button><button class="btn sm" onclick="dzLayerMove(-1)">▼ Trás</button><button class="btn sm" onclick="dzLayerDup()">Duplicar</button><button class="btn sm" onclick="dzLayerDel()">Excluir</button></div>`;
+  if (L.type === 'text') el.innerHTML = `<h3>Texto <small class="muted">${esc(L.role)}</small></h3>
+    <textarea id="dzTxt" class="jp-ta" rows="4" oninput="dzProp('content',this.value)">${esc(L.content)}</textarea>
+    <div class="row-gap" style="margin:6px 0"><button class="btn sm" onclick="dzEmSel()" title="Selecione palavras no texto acima">Destacar seleção</button><button class="btn sm" onclick="dzEmClear()">Limpar destaques</button></div><small class="muted">Use **palavra** para destacar. Ou ative “Destacar por clique” no topo.</small>
+    <label class="ins">Fonte<select onchange="dzFont(this.value)">${FONT_LIST.map(f => `<option ${f === L.family ? 'selected' : ''}>${f}</option>`).join('')}</select></label>
+    <div class="ins-row"><label class="ins">Peso<select onchange="dzProp('weight',this.value,1)">${[300, 400, 500, 600, 700, 800, 900].map(w => `<option ${w == L.weight ? 'selected' : ''}>${w}</option>`).join('')}</select></label>${col('color', 'Cor')}</div>
+    ${rg('size', 'Tamanho', 16, 320, 1)}${rg('lh', 'Entrelinha', 0.8, 2, 0.05)}${rg('ls', 'Espaçamento', -4, 24, 0.5)}
+    <div class="row-gap"><button class="btn sm ${L.align === 'left' ? 'dark' : ''}" onclick="dzProp('align','left');dzInspector()">⟸</button><button class="btn sm ${L.align === 'center' ? 'dark' : ''}" onclick="dzProp('align','center');dzInspector()">☰</button><button class="btn sm ${L.align === 'right' ? 'dark' : ''}" onclick="dzProp('align','right');dzInspector()">⟹</button><label class="ins inl"><input type="checkbox" ${L.upper ? 'checked' : ''} onchange="dzProp('upper',this.checked);dzInspector()"> CAIXA ALTA</label></div>
+    <h4>Destaque das palavras</h4><label class="ins">Estilo<select onchange="dzProp('emMode',this.value)">${[['color', 'Cor'], ['bg', 'Marca-texto'], ['bold', 'Negrito'], ['scale', 'Maior'], ['underline', 'Sublinhado']].map(([v, l]) => `<option value="${v}" ${v === L.emMode ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <div class="ins-row">${col('emColor', 'Cor')}${col('emBg', 'Fundo')}${col('emText', 'Texto')}</div>${rg('emScale', 'Escala (modo maior)', 1, 2, 0.05)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
+  else if (L.type === 'rect') el.innerHTML = `<h3>Forma <small class="muted">${esc(L.role)}</small></h3><div class="ins-row">${col('fill', 'Cor')}${col('stroke', 'Borda')}</div>${rg('radius', 'Cantos', 0, 400, 1)}${rg('strokeW', 'Espessura da borda', 0, 30, 1)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
+  else el.innerHTML = `<h3>Foto</h3><button class="btn sm dark" onclick="dzPickPhoto()">${L.imgId ? 'Trocar foto' : 'Enviar foto'}</button> ${L.imgId ? '<button class="btn sm" onclick="dzProp(\'imgId\',\'\')">Remover</button>' : ''}
+    <label class="ins">Tratamento (${PHOTO_STYLES.length} estilos)<select onchange="dzPhotoStyle(this.value)"><option value="">Sem tratamento</option>${PHOTO_STYLES.map(x => `<option value="${x.id}" ${L.filter === x.filter && L.ovColor === x.ovColor ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>
+    <small class="muted block">${esc(L.brief || '')}</small>${rg('radius', 'Cantos', 0, 400, 1)}${rg('fx', 'Enquadrar na horizontal', 0, 1, 0.01)}${rg('fy', 'Enquadrar na vertical', 0, 1, 0.01)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
+}
+async function dzFont(f) { await ensureFont(f); dzProp('family', f); }
+function dzEmSel() { const t = $('dzTxt'), L = dzLayer(); if (!t || t.selectionStart === t.selectionEnd) { toast('Selecione palavras no texto.'); return; } const a = t.value.slice(0, t.selectionStart), m = t.value.slice(t.selectionStart, t.selectionEnd), z = t.value.slice(t.selectionEnd); L.content = a + '**' + m.replace(/\*\*/g, '') + '**' + z; t.value = L.content; dzDraw(); dzCommitSoon(); }
+function dzEmClear() { const L = dzLayer(); L.content = L.content.replace(/\*\*/g, ''); dzInspector(); dzDraw(); dzCommitSoon(); }
+function dzPhotoStyle(id) { const L = dzLayer(), x = byId(PHOTO_STYLES, id); Object.assign(L, x ? {filter: x.filter, ovColor: x.ovColor, ovMode: x.ovMode, brief: x.brief} : {filter: '', ovColor: '', ovMode: ''}); dzDraw(); dzCommitSoon(); }
+function dzPickPhoto() { const f = $('dzFile'); f.onchange = async () => { const file = f.files[0]; f.value = ''; if (!file) return; let bmp; try { bmp = await createImageBitmap(file); } catch (e) { toast('Não consegui ler essa imagem. Use PNG, JPG ou WebP válidos.'); return; } const id = uid('img'); await imgPut(id, file); IMGS.set(id, bmp); const L = dzLayer(); L.imgId = id; dzDraw(); dzCommit(); dzInspector(); dzSlidesPanel(); }; f.click(); }
+
+/* estilos e exportação */
+function dzSaveStyle() { askText('Salvar como estilo', 'Nome do estilo (ex.: Campanha trabalhador de escritório)', name => { const p = dzP(), tk = extractStyle(dzSet()); tk.name = name; p.design.styles.push({id: uid('st'), name, tk, created: new Date().toISOString()}); persist(); toast('Estilo salvo. Use em toda a campanha.'); }); }
+function dzApplyStyleModal() {
+  const p = dzP(), list = p.design.styles; if (!list.length) { toast('Salve um estilo primeiro.'); return; }
+  showModal('Aplicar estilo', `<p class="muted" style="margin-top:0;font-size:12px">O estilo troca cores, fontes, destaque e tratamento de foto por papel (título, texto, destaque). Posições e textos não mudam.</p><div class="list">${list.map(s => `<div class="list-item"><div><strong>${esc(s.name)}</strong><small>${esc(s.tk.head.family)} + ${esc(s.tk.body.family)}</small></div><div class="row-gap"><button class="btn sm dark" onclick="dzApplyStyle('${s.id}',false)">Esta peça</button><button class="btn sm" onclick="dzApplyStyle('${s.id}',true)">Todas as peças</button></div></div>`).join('')}</div>`);
+}
+async function dzApplyStyle(id, all) {
+  const p = dzP(), st = p.design.styles.find(s => s.id === id), sets = all ? p.design.sets : [dzSet()];
+  await ensureFonts([st.tk.head.family, st.tk.body.family]);
+  sets.forEach(s => applyStyleToSet(s, JSON.parse(JSON.stringify(st.tk)))); persist(); closeModal(); dzSnap(); dzSlidesPanel(); dzInspector(); dzDraw(); toast(all ? `Estilo aplicado a ${sets.length} peça(s).` : 'Estilo aplicado.');
+}
+async function dzExportOne() { const s = dzSet(), b = await slideBlob(s, dzSlide()); download(`${slug(s.name)}-${String(dz.slide + 1).padStart(2, '0')}.png`, b, 'image/png'); }
+async function dzExportAll() { toast('Gerando ZIP…'); const s = dzSet(); download(`${slug(s.name)}.zip`, await exportSetZip(s), 'application/zip'); }
 
 </script>
 <script>
@@ -1643,6 +2421,7 @@ function projectFlow(p) {
     ['Estratégia', pre.positioningApproved && pre.icps.length > 0 && pre.okr.tr.length > 0, 'strategy', 'ICPs + OKR'],
     ['Jornada', journeyOk, 'preproject', 'Etapas descritas'],
     ['Referências', p.competitors.some(hasTeardown), 'radar', 'Concorrentes analisados'],
+    ['Estilo visual', p.design.styles.length > 0, 'page:design', 'Estilo de campanha salvo'],
     ['Comunicação', false, '', 'Matriz de Comunicação', true],
     ['Produção', cr.some(c => ['Aprovado', 'Publicado'].includes(c.status)) && p.matrix.concepts.length > 0, 'page:matrix', 'Artes e vídeos'],
     ['Publicação', p.publications.some(x => x.status === 'Publicado'), 'page:publishingHub', 'Só o que foi aprovado'],
@@ -2155,7 +2934,10 @@ function renderAnalyticsPage() {
     mb.competitors = [
       {id: 'cp-1', name: 'Rival Financeira', url: 'https://rivalfinanceira.exemplo.com.br', social: '@rivalfinanceira', notes: 'Líder em anúncios de crédito no Instagram.', addedAt: isoAt(15),
        scan: {url: 'https://rivalfinanceira.exemplo.com.br', at: isoAt(15), title: 'Rival Financeira — Crédito sem enrolação', description: 'Simule seu crédito em 2 minutos, sem burocracia.', headings: ['Crédito aprovado em minutos', 'Sem taxa escondida. Sem fila.', 'Mais de 10 mil clientes atendidos'], ctas: ['Quero simular agora', 'Falar no WhatsApp'], fonts: ['Poppins'], colors: ['#0a7d5a', '#ff7a00', '#222222', '#e5e5e5', '#f6fbf9'], themeColor: '#0a7d5a', ogImage: '', textSample: ''},
-       teardown: {product: 'Crédito pessoal online', offer: 'Aprovação rápida e sem taxa escondida', hooks: ['Aprovado em minutos', 'Sem fila, sem taxa'], angles: ['Rapidez', 'Transparência'], typography: 'Poppins, títulos em negrito', layout: 'Hero verde com CTA laranja e prova social logo abaixo', colors: '#0a7d5a #ff7a00', ctas: ['Quero simular agora'], proof: ['+10 mil clientes'], opportunities: ['Ninguém explica o contrato em linguagem simples', 'Pouco conteúdo educativo sobre direitos'], source: 'ai', at: isoAt(15)}},
+       teardown: {product: 'Crédito pessoal online', offer: 'Aprovação rápida e sem taxa escondida', hooks: ['Aprovado em minutos', 'Sem fila, sem taxa'], angles: ['Rapidez', 'Transparência'], typography: 'Poppins, títulos em negrito', layout: 'Hero verde com CTA laranja e prova social logo abaixo', colors: '#0a7d5a #ff7a00', ctas: ['Quero simular agora'], proof: ['+10 mil clientes'], opportunities: ['Ninguém explica o contrato em linguagem simples', 'Pouco conteúdo educativo sobre direitos'], source: 'ai', at: isoAt(15)},
+       dossier: {gmb: {name: 'Rival Financeira Matriz', address: 'Av. Paulista, 1000 · São Paulo, SP', phone: '(11) 4000-1000', rating: 4.6, reviews: 312, categories: 'Financeira', hours: 'seg a sex 09:00–18:00', website: 'https://rivalfinanceira.exemplo.com.br', mapsUrl: '', source: 'manual'},
+         ig: {handle: '@rivalfinanceira', followers: '48 mil', freq: '5 por semana', formats: 'Reels e carrossel', bio: 'Crédito sem enrolação', notes: 'Reels com depoimento de cliente têm mais comentários.'},
+         ads: [{id: 'ad-1', platform: 'Meta (Instagram/Facebook)', format: 'Vídeo', hook: 'Crédito aprovado em minutos', offer: 'Sem taxa escondida', cta: 'Simular agora', url: '', seen: isoDay(6)}, {id: 'ad-2', platform: 'Meta (Instagram/Facebook)', format: 'Carrossel', hook: '3 erros que encarecem seu crédito', offer: 'Guia gratuito', cta: 'Baixar guia', url: '', seen: isoDay(4)}]}},
       {id: 'cp-2', name: 'Escritório Alves & Costa', url: 'https://alvescosta.exemplo.com.br', social: '@alvescosta.adv', notes: 'Direito imobiliário, comunicação formal.', addedAt: isoAt(14), scan: null,
        teardown: {product: 'Consultoria jurídica imobiliária', offer: 'Atendimento especializado', hooks: ['Seu direito, nossa causa'], angles: ['Autoridade', 'Experiência'], typography: 'Serifada, tom formal', layout: 'Fundo escuro, fotos de equipe', colors: '#1b1b2f #c9a227', ctas: ['Agende uma consulta'], proof: ['20 anos de atuação'], opportunities: ['Linguagem difícil afasta o público comum'], source: 'manual', at: isoAt(14)}}];
     mb.matrix.custom = {hooks: ['Aprovado em minutos'], angles: ['Rapidez', 'Transparência', 'Autoridade'], ctas: []};
@@ -2180,11 +2962,26 @@ function renderAnalyticsPage() {
   seedState = demoState; state = demoState();
   const mbId = () => state.projects[0].id;
   radarFetchScan = async url => ({url, at: new Date().toISOString(), title: 'Site de exemplo — ' + url.replace(/^https?:\/\//, '').split('/')[0], description: 'Leitura simulada na versão de demonstração.', headings: ['Título principal da página', 'Benefícios em destaque', 'Depoimentos de clientes'], ctas: ['Quero saber mais', 'Fale conosco'], fonts: ['Inter', 'Georgia'], colors: ['#1f6feb', '#f5a524', '#111827', '#e5e7eb'], themeColor: '', ogImage: '', textSample: ''});
+  const realApi = api; api = async (path, opts) => path.startsWith('places.php') ? {ok: true, places: [{name: 'Estabelecimento de exemplo', address: 'Rua das Flores, 120 · Campinas, SP', phone: '(19) 3000-2000', rating: 4.4, reviews: 87, categories: 'Serviços', hours: 'seg a sex 08:00–17:00', website: '', mapsUrl: ''}]} : realApi(path, opts);
+  const realRenderDesign = renderDesign;
+  renderDesign = function () {
+    const p = dzP();
+    if (p && !p.design.seeded && !p.design.sets.length && p === state.projects[0]) {
+      p.design.seeded = true;
+      (async () => {
+        const tk = makeTokens(byId(DESIGN_STYLES, 'financeiro'), byId(FONT_PAIRS, 'merriweather'), byId(PHOTO_STYLES, 'callcenter')); tk.name = 'Campanha Mutuários';
+        await ensureFonts([tk.head.family, tk.body.family]);
+        const a = buildSet('Carrossel · Parcela subiu', tk, parseCopy(DEFAULT_COPY, p), FORMATS.feed45, p.name), b = buildSet('Stories · Chamada final', tk, parseCopy('Vai assinar um contrato? | Confira antes\nSem juridiquês: a gente explica cada cláusula.\nPrimeiro contato sem compromisso: você decide depois.\nQuer conferir seu contrato? | Falar no WhatsApp', p), FORMATS.story, p.name);
+        p.design.sets.push(a, b); p.design.styles.push({id: 'st-demo', name: 'Campanha Mutuários', tk: extractStyle(a), created: new Date().toISOString()}); persist(); realRenderDesign();
+      })();
+    }
+    return realRenderDesign();
+  };
   fetchLeads = async () => [
     ['Carla Mendes', '11 98765-4410', 'Meta Ads', 'Minha parcela subiu 30% e ninguém explica. Podem revisar?', 1], ['Rogério Alves', '21 99811-2200', 'whatsapp', 'Vou assinar contrato semana que vem, queria uma opinião.', 2],
     ['Patrícia Souza', '31 98822-9080', 'site', 'Parcelas atrasadas, tenho medo de perder o imóvel.', 3], ['João Pedro', '11 97766-1234', 'Meta Ads', 'Como funciona a primeira análise?', 4], ['Mariana Lopes', '41 99900-7711', 'site', 'Quero entender meu caso.', 6]
   ].map(([name, phone, source, message, d], i) => ({id: 'l' + i, at: isoAt(d), project: mbId(), source, name, phone, email: '', message}));
-  API.available = true; API.status = {auth: {required: false, loggedIn: true}, ai: {configured: false}, sync: {enabled: false}, webhook: {configured: false}, leads: {configured: true}, meta: {configured: false}};
+  API.available = true; API.status = {auth: {required: false, loggedIn: true}, ai: {configured: false}, sync: {enabled: false}, webhook: {configured: false}, leads: {configured: true}, meta: {configured: false}, places: {configured: true}};
   loadStatus = async () => API.status; pullWorkspace = async () => {};
   renderSyncBadge = () => { const b = document.getElementById('syncBadge'); if (b) { b.textContent = '● Demo'; b.className = 'sync-badge local'; b.title = 'Versão de demonstração: dados fictícios, salvos só neste navegador.'; } };
   document.addEventListener('DOMContentLoaded', () => {

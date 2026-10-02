@@ -24,6 +24,9 @@ return [
     'META_ACCESS_TOKEN'   => '',
     'META_AD_ACCOUNT_ID'  => '',     // somente números, sem "act_"
 
+    /* Google Meu Negócio (Places API New): chave em console.cloud.google.com, com a API ativada */
+    'GOOGLE_PLACES_API_KEY' => '',
+
     /* Radar de concorrentes: a leitura de sites bloqueia endereços internos. Só ligue em testes locais. */
     // 'ANALYZE_ALLOW_PRIVATE' => false,
 

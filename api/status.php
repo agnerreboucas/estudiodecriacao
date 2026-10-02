@@ -7,5 +7,6 @@ json_out(['ok' => true,
   'sync' => ['enabled' => $in],
   'webhook' => ['configured' => $in && cfg('WEBHOOK_URL') !== null],
   'leads' => ['configured' => $in && cfg('LEADS_TOKEN') !== null],
+  'places' => ['configured' => $in && cfg('GOOGLE_PLACES_API_KEY') !== null],
   'meta' => ['configured' => $in && cfg('META_ACCESS_TOKEN') !== null && cfg('META_AD_ACCOUNT_ID') !== null],
 ]);

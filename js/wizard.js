@@ -30,7 +30,7 @@ const newWiz = () => ({step: 1, name: '', client: '', category: 'Marketing', des
   ext: {offer: '', audience: '', problem: '', goal: '', channels: '', budget: '', deadline: '', competitors: ''}, challenges: {}, hits: {}, other: [], extracted: false, brand: {tone: '', palette: '', visual: '', rule: ''}});
 
 /* ---- áudio: IndexedDB (o original é preservado junto com a transcrição) ---- */
-const idb = () => new Promise((res, rej) => { const r = indexedDB.open('ampliacao_studio_media', 1); r.onupgradeneeded = () => r.result.createObjectStore('audio'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+const idb = () => new Promise((res, rej) => { const r = indexedDB.open('ampliacao_studio_media', 2); r.onupgradeneeded = () => { ['audio', 'images'].forEach(n => { if (!r.result.objectStoreNames.contains(n)) r.result.createObjectStore(n); }); }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
 async function audioPut(id, blob) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('audio', 'readwrite'); t.objectStore('audio').put(blob, id); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
 async function audioGet(id) { const db = await idb(); return new Promise((res, rej) => { const q = db.transaction('audio').objectStore('audio').get(id); q.onsuccess = () => res(q.result || null); q.onerror = () => rej(q.error); }); }
 
