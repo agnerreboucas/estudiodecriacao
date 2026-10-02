@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ampliação Studio — Creative Workspace</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/journey.css">
+<link rel="stylesheet" href="css/architecture.css">
+</head>
+<body>
+<div class="app">
+<aside class="rail">
+  <div class="logo">A</div>
+  <nav class="rail-nav">
+    <button class="active" data-page="home" title="Início">⌂</button>
+    <button data-page="projects" title="Projetos">□</button>
+    <button data-page="matrix" title="Matriz de Criação">✦</button>
+    <button data-page="videoLab" title="Video Lab">▷</button>
+    <button data-page="campaigns" title="Campanhas">◉</button>
+    <button data-page="approval" title="Aprovação">✓</button>
+    <button data-page="publishingHub" title="Publicação">↗</button>
+    <button data-page="analyticsHub" title="Performance">⌁</button>
+    <button data-page="library" title="Biblioteca">◈</button>
+    <button data-page="brand" title="Brand Brain">◇</button>
+  </nav>
+  <div class="rail-bottom">
+    <button data-page="settings" title="Configurações">⚙</button>
+    <button onclick="toast('Central de ajuda aberta')" title="Ajuda">?</button>
+  </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <button class="top-btn" onclick="openCreate()">＋ Criar</button>
+  <button class="top-btn credit">⚡ <span id="credits">30</span></button>
+  <div class="avatar">AS</div>
+</header>
+
+<section id="page-home" class="page active">
+  <div class="home-hero">
+    <h1>Design que entende o trabalho.</h1>
+    <p>Seu espaço criativo para pensar, criar e evoluir campanhas com IA.</p>
+    <div class="composer">
+      <textarea id="prompt" placeholder="Peça ao Ampliação Studio para criar uma campanha, pesquisar referências ou desenvolver uma peça..."></textarea>
+      <div class="composer-bottom">
+        <div class="composer-tools">
+          <button class="icon" onclick="toast('Referência adicionada')" title="Adicionar referência">＋</button>
+          <button class="icon" onclick="go('brand')" title="Usar Brand Brain">▣</button>
+          <button class="icon" onclick="toast('Briefing estruturado')" title="Estruturar briefing">☷</button>
+        </div>
+        <button class="send" onclick="generate()">↑</button>
+      </div>
+    </div>
+    <div class="chips">
+      <button class="chip chip-primary" onclick="openCreation('project')">＋ Criar projeto</button>
+      <button class="chip" onclick="openCreation('ad')">◉ Criar anúncio</button>
+      <button class="chip" onclick="openCreation('video')">▷ Criar vídeo</button>
+      <button class="chip" onclick="openCreation('post')">▣ Post</button>
+      <button class="chip" onclick="openCreation('carousel')">▤ Carrossel</button>
+      <button class="chip" onclick="openCreation('story')">▯ Stories</button>
+      <button class="chip" onclick="openCreation('stories')">▥ Sequência de Stories</button>
+    </div>
+    <div class="composer-context">
+      <span>Contexto de criação</span>
+      <button id="contextButton" onclick="openCreation('context')">＋ Escolher projeto</button>
+      <small id="contextHint">As novas peças podem usar estratégia, Brand Brain e referências do projeto.</small>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="section-row"><h2>Projetos recentes</h2><button class="btn" onclick="go('projects')">Ver todos</button></div>
+    <div class="masonry" id="homeGallery"></div>
+  </div>
+</section>
+
+<section id="page-projects" class="page">
+  <div class="subpage">
+    <div class="page-head"><div><h1>Projetos</h1><p>Todos os trabalhos do seu workspace.</p></div><div class="actions"><button class="btn" onclick="openCreate()">＋ Novo projeto</button></div></div>
+    <div class="project-grid" id="projectsGrid"></div>
+  </div>
+</section>
+
+<section id="page-library" class="page">
+  <div class="subpage">
+    <div class="page-head"><div><h1>Biblioteca</h1><p>Referências, criativos, assets e materiais do workspace.</p></div><button class="btn" onclick="openModal('asset')">＋ Adicionar asset</button></div>
+    <div class="filterbar"><button class="active">Todos</button><button>Branding</button><button>Cartazes e anúncios</button><button>Ilustração</button><button>UI</button><button>Vídeos</button><button>Produto</button></div>
+    <div class="masonry" id="libraryGrid"></div>
+  </div>
+</section>
+
+<section id="page-brand" class="page">
+  <div class="subpage">
+    <div class="page-head"><div><h1>Brand Brain</h1><p>O contexto que orienta todas as criações.</p></div><button class="btn dark" onclick="openModal('brandEdit')">Editar Brand Brain</button></div>
+    <div class="two">
+      <div class="panel">
+        <h3>Mutuários Brasil</h3>
+        <div class="kv"><span>Posicionamento</span><strong>Orientação antes da decisão</strong></div>
+        <div class="kv"><span>Tom</span><strong>Claro, seguro, humano</strong></div>
+        <div class="kv"><span>Paleta</span><strong>Verde profundo · areia · laranja</strong></div>
+        <div class="kv"><span>Direção visual</span><strong>Editorial + performance</strong></div>
+        <div class="kv"><span>Regra</span><strong>Educar antes de converter</strong></div>
+      </div>
+      <div class="panel">
+        <h3>Instruções para IA</h3>
+        <p>Priorizar clareza, contexto e prova. Evitar promessas absolutas. Construir peças com hierarquia visual forte, pouco ruído e uma ação principal por criativo.</p>
+        <div class="list">
+          <div class="list-item"><span>Logo principal</span><strong>✓</strong></div>
+          <div class="list-item"><span>Kit de cores</span><strong>✓</strong></div>
+          <div class="list-item"><span>Banco de referências</span><strong>✓</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="page-settings" class="page">
+  <div class="subpage">
+    <div class="page-head"><div><h1>Configurações</h1><p>Preferências do workspace e integrações.</p></div></div>
+    <div class="panel">
+      <div class="form-grid">
+        <div class="field"><label>Nome do workspace</label><input id="workspaceName" value="Ampliação Marketing"></div>
+        <div class="field"><label>Projeto principal</label><select><option>Mutuários Brasil</option><option>Ampliação Studio</option></select></div>
+        <div class="field full"><label>Instrução global</label><textarea id="globalInstruction">Criar com clareza estratégica, consistência de marca e foco na jornada de compra.</textarea></div>
+      </div>
+      <div style="margin-top:15px"><button class="btn dark" onclick="saveSettings()">Salvar configurações</button></div>
+    </div>
+  </div>
+</section>
+
+
+<section id="page-matrix" class="page">
+ <div class="subpage">
+  <div class="page-head"><div><h1>Matriz de Criação</h1><p>Combine contexto, hooks, ângulos, formatos e direção antes de gastar créditos.</p></div><button class="btn dark" onclick="generateConcepts()">Gerar conceitos</button></div>
+  <div class="matrix-toolbar">
+   <div class="matrix-tabs"><button class="active">15s</button><button>6s</button><button>10s</button><button>20s</button><button>30s</button><button>60s</button></div>
+   <span class="badge hot" id="matrixProject">Mutuários Brasil</span><span class="badge">Contexto herdado do projeto</span>
+  </div>
+  <div class="matrix-grid">
+   <div class="matrix-card"><h3>01 · Hooks</h3><div class="matrix-options" id="hooks"></div></div>
+   <div class="matrix-card"><h3>02 · Ângulos</h3><div class="matrix-options" id="angles"></div></div>
+   <div class="matrix-card"><h3>03 · Formatos</h3><div class="matrix-options" id="formats"></div></div>
+   <div class="matrix-card"><h3>04 · CTAs</h3><div class="matrix-options" id="ctas"></div></div>
+   <div class="matrix-card"><h3>05 · Direção</h3><div class="matrix-options" id="direction"></div></div>
+   <div class="matrix-card"><h3>Potencial combinatório</h3><div class="matrix-count" id="matrixCount">0</div><div class="matrix-muted">combinações possíveis antes do filtro de conceito.</div><div style="margin-top:12px"><button class="btn" onclick="selectAllMatrix()">Selecionar núcleo</button></div></div>
+  </div>
+  <div class="panel" style="margin-top:12px"><div class="section-row"><h2>Pipeline de conceitos</h2><span class="muted">100 → 30 → 12 → 6 → produção</span></div><div class="concept-list" id="concepts"></div></div>
+ </div>
+</section>
+
+<section id="page-videoLab" class="page">
+ <div class="subpage">
+  <div class="video-lab-head"><div><h1>Video Lab</h1><p>Roteiro → aprovação → storyboard → direção → geração por cena → edição.</p></div><div class="actions"><button class="btn" onclick="toast('Estimativa recalculada')">⚡ Estimar créditos</button><button class="btn dark" onclick="toast('Produção iniciada em modo simulação')">Gerar vídeo</button></div></div>
+  <div class="two">
+   <div class="panel"><h3>Vídeo de 15 segundos · conceito ativo</h3><div class="kv"><span>Hook</span><strong>Você sabe o que está pagando?</strong></div><div class="kv"><span>Estrutura</span><strong>0–2 Hook · 2–5 Problema · 5–10 Solução · 10–13 Prova · 13–15 CTA</strong></div><div class="kv"><span>Formato</span><strong>UGC especialista</strong></div><div class="kv"><span>Status</span><strong>● Roteiro aprovado</strong></div></div>
+   <div class="credit-box"><div class="label" style="color:#aaa">Produção estimada</div><div class="metric">42 créditos</div><div style="font-size:10px;color:#aaa">6 cenas · geração + voz + edição</div><button class="btn" style="margin-top:12px" onclick="toast('Alternativa econômica: 27 créditos')">Otimizar custo</button></div>
+  </div>
+  <div class="panel" style="margin-top:12px"><h3>Storyboard e direção por cena</h3><div class="scene-grid" id="sceneGrid"></div></div>
+  <div class="panel" style="margin-top:12px"><h3>Skills ativas</h3><div class="skill-list"><div class="skill"><b>Script Writer</b><small>Hook + roteiro de performance</small></div><div class="skill"><b>Art Director</b><small>Identidade + composição</small></div><div class="skill"><b>DoP</b><small>Câmera, luz, lente e movimento</small></div><div class="skill"><b>Model Router</b><small>Escolha por cena e custo</small></div><div class="skill"><b>Copywriter</b><small>Texto e CTA</small></div><div class="skill"><b>Compliance</b><small>Regras do projeto</small></div><div class="skill"><b>Editor</b><small>Ritmo, cortes e montagem</small></div><div class="skill"><b>Learning</b><small>Performance alimenta a matriz</small></div></div></div>
+ </div>
+</section>
+
+<section id="page-campaigns" class="page">
+ <div class="subpage"><div class="page-head"><div><h1>Campanhas</h1><p>Campanhas construídas a partir do projeto e da matriz criativa.</p></div><button class="btn dark" onclick="openModal('campaign')">＋ Nova campanha</button></div>
+ <div class="cards"><div class="card"><div class="label">Conceitos</div><div class="metric">100</div></div><div class="card"><div class="label">Selecionados</div><div class="metric">12</div></div><div class="card"><div class="label">Em produção</div><div class="metric">6</div></div><div class="card"><div class="label">Ativos</div><div class="metric">24</div></div></div>
+ <div class="panel" style="margin-top:15px"><div class="list">${['Educação — Dor','Diagnóstico — Intenção','Conversão — WhatsApp','Remarketing — Prova'].map((x,i)=>`<div class="list-item"><div><strong>${x}</strong><small>${i+3} conjuntos · matriz aplicada</small></div><span>${i===2?'● Ativa':'○ Rascunho'}</span></div>`).join('')}</div></div>
+ </div>
+</section>
+
+<section id="page-approval" class="page">
+ <div class="subpage"><div class="page-head"><div><h1>Aprovação</h1><p>Gate de revisão antes de publicação ou gasto de créditos.</p></div><button class="btn dark" onclick="toast('Lote aprovado')">Aprovar lote</button></div>
+ <div class="panel"><div class="list">${['Roteiro · Vídeo 15s · Hook 03','Storyboard · Vídeo 15s · Cenas 01–06','Criativo · Meta Ads · Variação A','Carrossel · Jornada · Variação B'].map(x=>`<div class="list-item"><div><strong>${x}</strong><small>Contexto: Mutuários Brasil · aguardando revisão</small></div><div><button class="btn" onclick="toast('Item aprovado')">Aprovar</button></div></div>`).join('')}</div></div>
+ </div>
+</section>
+
+<section id="page-publishingHub" class="page">
+ <div class="subpage"><div class="page-head"><div><h1>Publicação</h1><p>Agendamento e distribuição por canal.</p></div><button class="btn dark" onclick="toast('Publicação preparada')">Preparar publicação</button></div>
+ <div class="two"><div class="panel"><h3>Próximas publicações</h3><div class="list">${['Instagram · Reels · 03/10','Instagram · Carrossel · 05/10','Meta Ads · Vídeo · 07/10','Stories · Sequência · 09/10'].map(x=>`<div class="list-item"><strong>${x}</strong><span>Agendar</span></div>`).join('')}</div></div><div class="panel"><h3>Canais</h3><div class="kv"><span>Instagram</span><strong>Conectado</strong></div><div class="kv"><span>Facebook</span><strong>Conectado</strong></div><div class="kv"><span>Meta Ads</span><strong>Conectado</strong></div></div></div>
+ </div>
+</section>
+
+<section id="page-analyticsHub" class="page">
+ <div class="subpage"><div class="page-head"><div><h1>Performance & Learning</h1><p>O resultado volta para o projeto e recalibra a matriz.</p></div><button class="btn" onclick="toast('Aprendizado atualizado')">Atualizar aprendizado</button></div>
+ <div class="cards"><div class="card"><div class="label">CTR</div><div class="metric">2,84%</div></div><div class="card"><div class="label">CPL</div><div class="metric">R$ 25,76</div></div><div class="card"><div class="label">Hook líder</div><div class="metric">18%</div><div class="trend">peso relativo</div></div><div class="card"><div class="label">Ângulo líder</div><div class="metric">16%</div><div class="trend">peso relativo</div></div></div>
+ <div class="two"><div class="panel"><h3>Peso aprendido por variável</h3>${[['Hook · Problema',82],['Hook · Curiosidade',68],['Ângulo · Erro',74],['Ângulo · Educação',88],['Formato · UGC',79]].map(x=>`<div style="margin:11px 0"><div style="display:flex;justify-content:space-between;font-size:10px"><span>${x[0]}</span><b>${x[1]}</b></div><div class="learning-bar"><i style="width:${x[1]}%"></i></div></div>`).join('')}</div><div class="panel"><h3>Regra de aprendizado</h3><p>Combinações com sinais fortes recebem mais peso nos próximos lotes. Combinações fracas permanecem disponíveis para exploração, evitando que o sistema fique preso em uma única fórmula.</p></div></div>
+ </div>
+</section>
+<section id="page-project" class="page">
+  <div class="subpage">
+    <div class="project-hero">
+      <div class="project-hero-content">
+        <div class="eyebrow">Projeto demonstrativo</div>
+        <h2>Mutuários Brasil</h2>
+        <p>Ecossistema de aquisição, conteúdo e conversão para pessoas que precisam entender seus direitos e próximos passos.</p>
+        <span class="pill-status">● Em desenvolvimento</span>
+      </div>
+    </div>
+    <nav class="project-nav" id="projectNav">
+      <button class="active" data-tab="overview">Visão geral</button>
+      <button data-tab="preproject">Pré-Projeto</button>
+      <button data-tab="strategy">Estratégia & ICP</button>
+      <button data-tab="creative">Feed criativo</button>
+      <button data-tab="landing">Landing Pages</button>
+      <button data-tab="ads">Anúncios</button>
+      <button data-tab="publishing">Publicação</button>
+      <button data-tab="performance">Performance</button>
+      <button data-tab="integrations">Integrações</button>
+      <button data-tab="projectSettings">Configurações</button>
+    </nav>
+    <div id="projectContent"></div><div class="architecture-overview"><div class="section-row"><div><div class="eyebrow">Motor do Projeto</div><h2>Arquitetura do Pré-Projeto</h2></div><span class="pill-status">Tração → Estruturação → Previsibilidade</span></div><div class="architecture-flow"><div>BRIEFING</div><b>→</b><div>DESAFIOS</div><b>→</b><div>HIPÓTESES</div><b>→</b><div>DIAGNÓSTICO</div><b>→</b><div>JUSTIFICATIVA</div><b>→</b><div>OBJETIVO</div><b>→</b><div>OKR</div></div><div class="architecture-split"><article><span>01 · TRAÇÃO</span><strong>Gerar leads</strong><p>Fazer a demanda aparecer e criar o mínimo necessário para capturar, registrar e acompanhar oportunidades.</p></article><article><span>02 · ESTRUTURAÇÃO</span><strong>Organizar conversão</strong><p>Qualificar, acompanhar e estruturar progressivamente o fluxo comercial com base nos leads reais.</p></article><article><span>03 · PREVISIBILIDADE</span><strong>Otimizar</strong><p>Conectar aquisição, conversão, receita e aprendizado para melhorar continuamente o projeto.</p></article></div></div>
+  </div>
+</section>
+</main>
+</div>
+
+<div class="modal-back" id="modalBack" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalBox"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="js/core.js"></script>
+<script src="js/journey.js"></script>
+<script src="js/project.js"></script>
+<script src="js/matrix.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
