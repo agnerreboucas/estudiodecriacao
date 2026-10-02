@@ -246,12 +246,12 @@ function renderPublishingPage() {
 function metricModal() {
   const p = curProject();
   showModal('Registrar métricas', `<div class="form-grid"><div class="field"><label>Data</label><input id="mDate" type="date" value="${today()}"></div><div class="field"><label>Investimento (R$)</label><input id="mSpend" type="number" min="0" step="0.01"></div><div class="field"><label>Impressões</label><input id="mImp" type="number" min="0"></div><div class="field"><label>Cliques</label><input id="mClk" type="number" min="0"></div><div class="field"><label>Leads</label><input id="mLeads" type="number" min="0"></div><div class="field"><label>Vendas / conversões</label><input id="mConv" type="number" min="0"></div>
-    <div class="field full"><label>Conceito da matriz (opcional, alimenta o aprendizado)</label><select id="mConcept"><option value="">— nenhum —</option>${p.matrix.concepts.filter(c => c.creativeId || c.pinned).map(c => `<option value="${c.id}">${esc(c.hook)} × ${esc(c.angle)} · ${esc(c.format)}</option>`).join('')}</select></div><div class="field full"><label>Observação</label><input id="mNote"></div></div>
+    <div class="field full"><label>Conceito da matriz (opcional, alimenta o aprendizado)</label><select id="mConcept"><option value="">— nenhum —</option>${p.matrix.concepts.filter(c => c.creativeId || c.pinned).map(c => `<option value="${c.id}">${esc(c.hook)} × ${esc(c.angle)} · ${esc(c.format)}</option>`).join('')}</select></div><div class="field full"><label>Variação de anúncio enviada (opcional, alimenta o aprendizado de estilo, fonte, foto e CTA)</label><select id="mCreative"><option value="">— nenhuma —</option>${state.creatives.filter(c => c.projectId === p.id && c.dims).map(c => `<option value="${c.id}">${esc(c.title)} · ${esc(c.brief)}</option>`).join('')}</select></div><div class="field full"><label>Observação</label><input id="mNote"></div></div>
     <p class="muted" style="font-size:11px">Só conceitos fixados ou enviados para produção aparecem na lista.</p><div class="modal-actions"><button class="btn dark" onclick="metricSave()">Salvar</button></div>`);
 }
 function metricSave() {
   const p = curProject(), n = id => +$(id).value || 0;
-  const m = {id: uid('m'), date: $('mDate').value || today(), spend: n('mSpend'), impressions: n('mImp'), clicks: n('mClk'), leads: n('mLeads'), conversions: n('mConv'), conceptId: $('mConcept').value, note: $('mNote').value.trim(), source: 'manual'};
+  const m = {id: uid('m'), date: $('mDate').value || today(), spend: n('mSpend'), impressions: n('mImp'), clicks: n('mClk'), leads: n('mLeads'), conversions: n('mConv'), conceptId: $('mConcept').value, creativeId: $('mCreative') ? $('mCreative').value : '', note: $('mNote').value.trim(), source: 'manual'};
   if (!m.spend && !m.impressions && !m.clicks && !m.leads && !m.conversions) { toast('Preencha ao menos um número.'); return; }
   p.metrics.push(m); persist(); closeModal(); ui.page === 'project' ? renderProjectTab() : renderAnalyticsPage(); toast('Métricas registradas.');
 }
@@ -273,7 +273,7 @@ async function loadLeadsInbox(pid) {
   } catch (e) { box.innerHTML = `<p class="muted">Leads indisponíveis: ${esc(e.message)}</p>`; }
 }
 function performanceHTML(p) {
-  const t = metricTotals(p), lw = learnWeights(p), metaOk = canUseApi() && API.status.meta.configured;
+  const t = metricTotals(p), lw0 = learnWeights(p), ld = learnDesign(p), lw = {rows: lw0.rows.concat(ld.rows).sort((a, b) => b.w - a.w)}, metaOk = canUseApi() && API.status.meta.configured;
   const inbox = canUseApi() && API.status.leads.configured;
   if (inbox) setTimeout(() => loadLeadsInbox(p.id), 0);
   return `<div class="section-row"><div class="actions">${metaOk ? '<button class="btn" onclick="importMeta()">⇣ Importar Meta Ads</button>' : ''}<button class="btn dark" onclick="metricModal()">＋ Registrar métricas</button></div></div>

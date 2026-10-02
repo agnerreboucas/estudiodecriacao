@@ -9,6 +9,8 @@ Documentos de referência em `docs/` (PRD, Guia de Estilo e o protótipo origina
 - **Radar de concorrentes:** lê uma página pública (título, textos, CTAs, fontes e cores), monta a análise (por IA ou preenchida da leitura) e envia hooks e ângulos do mercado para a Matriz. Serve de referência: as peças geradas devem ser originais. A leitura roda no servidor com proteção contra acesso a endereços internos.
 - **Dossiê do concorrente:** Google Meu Negócio (busca pela API oficial do Google Places ou manual: endereço, telefone, nota, avaliações, horário), Instagram (registro manual + atalho do perfil) e anúncios observados, com atalhos para a Biblioteca de Anúncios da Meta e a Central de Transparência do Google. Os hooks dos anúncios observados vão para a Matriz.
 - **Estúdio de Design:** 30 estilos de design × 30 pares de fontes × 30 estilos de fotografia, cruzados por público e tom. Gera o carrossel e abre num editor de canvas (arrastar, redimensionar, destaque por palavra, foto com tratamento, desfazer). Salva o **estilo de campanha** e aplica a todas as peças. Exporta PNG e ZIP. Fontes via Google Fonts (precisa de internet).
+- **Fábrica de variações (lógica do Icon):** pega um anúncio (uma peça do Estúdio ou do zero) e gera até 100 variações combinando textos soltos (headlines, apoios, CTAs) × estilos × layouts, com diversidade garantida. Cada variação vira peça editável, PNG, PSD ou ZIP, ou vai para a Aprovação. O desempenho real (CPL por estilo, fonte, foto e CTA) volta como peso e reordena as próximas levas.
+- **Exportação em camadas:** PSD (uma camada raster por elemento, RLE, validado com `psd-tools`) e ZIP de PNGs por camada com manifesto. O texto vai como camada raster (não editável como texto no Photoshop).
 - **Fluxo do projeto** do briefing ao aprendizado, com os gates, na visão geral.
 - **Projetos** com Context ID, marca (Brand Brain), Voice Brain, assets e tudo ligado ao projeto.
 - **Pré-Projeto (Journey Architect):** desafios → hipóteses editáveis (DADO/HIPÓTESE) → cruzamento → diagnóstico → justificativa → objetivo → OKR (tração e estruturação) → até 3 ICPs → jornada de 5 etapas → checklist de validação → estados Rascunho / Em revisão / Ajustes / Aprovado. Editar um pré-projeto aprovado o reabre (nenhum gate passa em silêncio). Rastreabilidade DESAFIO-00N → HIP-00N. Apresentação editorial e PDF gerados do projeto.
@@ -25,7 +27,7 @@ Sem números inventados: o que não tem dado aparece como "—".
 ## Estrutura
     index.html        casca da aplicação
     css/              base, journey, architecture, studio
-    js/               util, store, integrations, core, wizard, preproject, present, radar, design-data, design-engine, design-ui, project, hubs, app
+    js/               util, store, integrations, core, wizard, preproject, present, radar, design-data, design-engine, design-psd, design-ui, design-var, project, hubs, app
     api/              PHP (login, workspace, ai, webhook, leads, meta, status)
     docs/             PRD, guia de estilo, protótipo original
 

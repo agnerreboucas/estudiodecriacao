@@ -111,7 +111,9 @@
         const tk = makeTokens(byId(DESIGN_STYLES, 'financeiro'), byId(FONT_PAIRS, 'merriweather'), byId(PHOTO_STYLES, 'callcenter')); tk.name = 'Campanha Mutuários';
         await ensureFonts([tk.head.family, tk.body.family]);
         const a = buildSet('Carrossel · Parcela subiu', tk, parseCopy(DEFAULT_COPY, p), FORMATS.feed45, p.name), b = buildSet('Stories · Chamada final', tk, parseCopy('Vai assinar um contrato? | Confira antes\nSem juridiquês: a gente explica cada cláusula.\nPrimeiro contato sem compromisso: você decide depois.\nQuer conferir seu contrato? | Falar no WhatsApp', p), FORMATS.story, p.name);
-        p.design.sets.push(a, b); p.design.styles.push({id: 'st-demo', name: 'Campanha Mutuários', tk: extractStyle(a), created: new Date().toISOString()}); persist(); realRenderDesign();
+        p.design.sets.push(a, b); p.design.styles.push({id: 'st-demo', name: 'Campanha Mutuários', tk: extractStyle(a), created: new Date().toISOString()});
+        dz.vf = Object.assign(VF_DEFAULT(), {mode: 'slide', setId: a.id, slideIdx: a.slides.length - 1, h: 'Quer entender seu caso?\nA parcela mudou. Você sabe por quê?\nAntes de pagar mais, confira isto\n3 sinais de que você paga a mais', s: '', c: 'Falar no WhatsApp\nQuero conferir meu contrato\nSaiba mais', aud: ['escritorio'], tone: ['moderno', 'acolhedor'], crossN: 3, randomN: 3, n: 24});
+        await vfGenerate(); dz.vf.batchId = ''; dz.view = 'home'; persist(); realRenderDesign();
       })();
     }
     return realRenderDesign();

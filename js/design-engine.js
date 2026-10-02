@@ -176,7 +176,11 @@ function chipGroup(text, tk, onP) {
   const box = RC('accent-fill', {w: tw + 56, h: Math.round(k.size * 1.9), radius: 999, fill: tk.accent}); k.w = tw + 8; k.dx = 28; k.dy = (box.h - k.size * 1.2) / 2;
   return {group: [box, k], h: box.h};
 }
-function autoEmphasis(title) { if (/\*\*/.test(title)) return title; const ws = title.split(/\s+/); let best = -1, len = 4; ws.forEach((w, i) => { const c = w.replace(/[^\p{L}\p{N}]/gu, ''); if (c.length > len) { len = c.length; best = i; } }); if (best < 0) return title; ws[best] = '**' + ws[best] + '**'; return ws.join(' '); }
+function autoEmphasis(title, strat) {
+  if (/\*\*/.test(title) || strat === 'none') return title.replace(/\*\*/g, strat === 'none' ? '' : '**');
+  const ws = title.split(/\s+/), cand = ws.map((w, i) => [w.replace(/[^\p{L}\p{N}]/gu, '').length, i]).filter(x => x[0] > 4).sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+  const pick = cand[strat === 'alt' && cand.length > 1 ? 1 : 0]; if (!pick) return title; ws[pick[1]] = '**' + ws[pick[1]] + '**'; return ws.join(' ');
+}
 const titleSize = (t, base) => { const n = t.replace(/\*/g, '').length; return n <= 22 ? base : n <= 40 ? Math.round(base * 0.86) : n <= 64 ? Math.round(base * 0.72) : Math.round(base * 0.6); };
 
 function slideCover(tk, copy, fmt, brand, total) {
@@ -285,4 +289,60 @@ async function exportSetZip(set) {
   const files = [];
   for (let i = 0; i < set.slides.length; i++) files.push({name: `${slug(set.name)}-${String(i + 1).padStart(2, '0')}.png`, data: new Uint8Array(await (await slideBlob(set, set.slides[i])).arrayBuffer())});
   return makeZip(files);
+}
+
+/* ================= ANÚNCIO DE IMAGEM ÚNICA E VARIAÇÕES ================= */
+const AD_LAYOUTS = {top: 'Foto no topo', bottom: 'Foto embaixo', full: 'Foto cheia', none: 'Só tipografia'};
+/* anúncio: headline + apoio + botão, com a foto conforme o layout */
+function slideAd(tk, copy, fmt, brand, layout) {
+  const W = fmt.w, H = fmt.h, m = 90, cw = W - 2 * m, al = tk.align === 'center' ? 'center' : 'left', layers = [];
+  const mode = layout && layout !== 'auto' ? layout : ({half: 'bottom'}[tk.photoMode] || tk.photoMode), onP = mode === 'full';
+  let y0 = m, y1 = H - m - 70;
+  if (mode === 'full') layers.push(IM('photo', {x: 0, y: 0, w: W, h: H}), RC('overlay', {x: 0, y: 0, w: W, h: H, fill: 'rgba(0,0,0,0.5)'}));
+  if (mode === 'top') { const ph = Math.round(H * 0.42); layers.push(IM('photo', {x: 0, y: 0, w: W, h: ph})); y0 = ph + 50; }
+  if (mode === 'bottom') { const ph = Math.round(H * 0.36), py = H - m - 70 - ph; layers.push(IM('photo', {x: m, y: py, w: cw, h: ph, radius: tk.radius})); y1 = py - 50; }
+  const items = [];
+  if (copy.kicker) items.push(tk.mark === 'chip' ? chipGroup(copy.kicker, tk, onP) : T('kicker', {content: copy.kicker, size: 28, ls: 4, align: al, w: cw, onPhoto: onP}));
+  if (tk.mark === 'bar') items.push(RC('accent-fill', {w: 120, h: 12, x: al === 'center' ? (W - 120) / 2 : m}));
+  items.push(T('title', {content: autoEmphasis(copy.title), size: titleSize(copy.title, mode === 'none' ? 118 : 96), lh: tk.upper ? 1.02 : 1.1, align: al, w: cw, onPhoto: onP}));
+  if (tk.mark === 'underline') items.push(RC('accent-fill', {w: 150, h: 7, x: al === 'center' ? (W - 150) / 2 : m}));
+  if (copy.sub) items.push(T('body', {content: copy.sub, size: 42, lh: 1.4, align: al, w: cw, onPhoto: onP}));
+  items.forEach(it => { if (!it.group) themeLayer(it, tk); });
+  let bw = 0, btn, bt;
+  if (copy.button) {
+    bw = Math.min(cw, 640); btn = RC('cta-fill', {w: bw, h: 112, fill: tk.accent}); bt = T('cta-text', {content: copy.button, size: 42, align: 'center', w: bw - 40});
+    themeLayer(btn, tk); themeLayer(bt, tk); bt.dx = 20; bt.dy = (112 - bt.size * 1.2) / 2; btn.dx = 0; btn.dy = 0; items.push({group: [btn, bt], h: 112});
+  }
+  stackPlace(items, m, cw, y0, y1, mode === 'full' ? 'bottom' : 'middle', 36);
+  items.forEach(it => (it.group ? it.group : [it]).forEach(l => layers.push(l)));
+  if (al === 'center') items.filter(it => it.group).forEach(it => { const b = it.group[0], t = it.group[1], shift = (W - b.w) / 2 - b.x; b.x += shift; t.x += shift; });
+  const br = T('brand', {content: brand, size: 26, ls: 2, x: m, y: H - m - 30, w: 700, upper: true, onPhoto: onP}); themeLayer(br, tk); layers.push(br);
+  return {id: sid(), bg: tk.bg, layers};
+}
+function cloneSlide(slide) { const c = JSON.parse(JSON.stringify(slide)); c.id = sid(); c.layers.forEach(l => { l.id = lid(); }); return c; }
+const FIXED_ROLES = ['photo', 'overlay', 'brand', 'muted'];
+/* troca textos por papel e re-estiliza; reorganiza o que fica abaixo e, se o texto novo não couber, reduz o título até caber */
+function variantFromBase(base, tk, texts, emMode, fmt) {
+  const s = cloneSlide(base), H = fmt.h, m = 90, limit = H - m - 70, topMin = 60;
+  const first = role => s.layers.find(l => l.type === 'text' && l.role === role && l.content);
+  const targets = [['title', texts.h && autoEmphasis(texts.h, emMode)], ['body', texts.s], ['cta-text', texts.c]].map(([r, v]) => [first(r), v]).filter(([L, v]) => L && v);
+  const orig = new Map(s.layers.map(l => [l.id, l.y]));
+  const olds = targets.map(([L]) => ({L, y: L.y, h: layoutText(L).h, size: L.size}));
+  targets.forEach(([L, v]) => { L.content = v; });
+  themeSlide(s, tk);
+  const movable = l => !FIXED_ROLES.includes(l.role) && l.type !== 'image' && !(l.type === 'rect' && l.w >= fmt.w - 2);
+  const tOld = olds.find(o => o.L.role === 'title');
+  const pass = k => {
+    if (tOld) tOld.L.size = Math.max(24, Math.round(tOld.size * k));
+    olds.forEach(o => { o.d = layoutText(o.L).h - o.h; });
+    let top = 1e9, bot = 0;
+    s.layers.forEach(l => {
+      if (!movable(l)) return; let sh = 0; olds.forEach(o => { if (o.L !== l && orig.get(l.id) >= o.y + o.h - 2) sh += o.d; });
+      l.y = orig.get(l.id) + sh; top = Math.min(top, l.y); bot = Math.max(bot, l.y + (l.type === 'text' ? layoutText(l).h : l.h));
+    });
+    return {top, bot};
+  };
+  let fit; for (const k of [1, 0.92, 0.85, 0.78, 0.7, 0.62, 0.55, 0.48, 0.4]) { fit = pass(k); if (fit.bot - fit.top <= limit - topMin) break; }
+  if (fit.bot > limit) { const up = Math.min(fit.bot - limit, Math.max(0, fit.top - topMin)); s.layers.forEach(l => { if (movable(l)) l.y -= up; }); }
+  return s;
 }

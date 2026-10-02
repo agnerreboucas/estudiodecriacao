@@ -363,6 +363,11 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .ins{display:flex;flex-direction:column;gap:3px;font-size:10.5px;color:#777;margin:8px 0}.ins input[type=number],.ins select,.ins input[type=text]{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:12px;width:100%}.ins input[type=color]{width:100%;height:32px;border:1px solid var(--line);border-radius:8px;padding:0}.ins input[type=range]{width:100%}.ins.inl{flex-direction:row;align-items:center;margin:0}.ins-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 @media(max-width:1100px){.dz-editor{grid-template-columns:1fr}.dz-slides{flex-direction:row;max-height:none;overflow-x:auto}.dz-sl{flex:0 0 90px}.dz-insp{max-height:none}}
 
+/* fábrica de variações */
+.vf-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 12px}
+.vf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.vf-card{border:2px solid var(--line);border-radius:14px;padding:10px;background:#fff}.vf-card.sel{border-color:#2f6bff}.vf-card canvas{width:100%;height:auto;border-radius:8px;border:1px solid #eee;background:#fafafa;display:block}
+.vf-meta{margin:8px 0}.vf-meta b{display:block;font-size:12px;line-height:1.3}.vf-meta small{color:#888;font-size:10.5px}.vf-sel{display:flex;align-items:center}.chk-line{display:flex;gap:8px;align-items:center;font-size:12px}
+
 </style>
 </head>
 <body>
@@ -570,7 +575,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    competitors: [], design: {styles: [], sets: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -2021,7 +2026,11 @@ function chipGroup(text, tk, onP) {
   const box = RC('accent-fill', {w: tw + 56, h: Math.round(k.size * 1.9), radius: 999, fill: tk.accent}); k.w = tw + 8; k.dx = 28; k.dy = (box.h - k.size * 1.2) / 2;
   return {group: [box, k], h: box.h};
 }
-function autoEmphasis(title) { if (/\*\*/.test(title)) return title; const ws = title.split(/\s+/); let best = -1, len = 4; ws.forEach((w, i) => { const c = w.replace(/[^\p{L}\p{N}]/gu, ''); if (c.length > len) { len = c.length; best = i; } }); if (best < 0) return title; ws[best] = '**' + ws[best] + '**'; return ws.join(' '); }
+function autoEmphasis(title, strat) {
+  if (/\*\*/.test(title) || strat === 'none') return title.replace(/\*\*/g, strat === 'none' ? '' : '**');
+  const ws = title.split(/\s+/), cand = ws.map((w, i) => [w.replace(/[^\p{L}\p{N}]/gu, '').length, i]).filter(x => x[0] > 4).sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+  const pick = cand[strat === 'alt' && cand.length > 1 ? 1 : 0]; if (!pick) return title; ws[pick[1]] = '**' + ws[pick[1]] + '**'; return ws.join(' ');
+}
 const titleSize = (t, base) => { const n = t.replace(/\*/g, '').length; return n <= 22 ? base : n <= 40 ? Math.round(base * 0.86) : n <= 64 ? Math.round(base * 0.72) : Math.round(base * 0.6); };
 
 function slideCover(tk, copy, fmt, brand, total) {
@@ -2132,6 +2141,151 @@ async function exportSetZip(set) {
   return makeZip(files);
 }
 
+/* ================= ANÚNCIO DE IMAGEM ÚNICA E VARIAÇÕES ================= */
+const AD_LAYOUTS = {top: 'Foto no topo', bottom: 'Foto embaixo', full: 'Foto cheia', none: 'Só tipografia'};
+/* anúncio: headline + apoio + botão, com a foto conforme o layout */
+function slideAd(tk, copy, fmt, brand, layout) {
+  const W = fmt.w, H = fmt.h, m = 90, cw = W - 2 * m, al = tk.align === 'center' ? 'center' : 'left', layers = [];
+  const mode = layout && layout !== 'auto' ? layout : ({half: 'bottom'}[tk.photoMode] || tk.photoMode), onP = mode === 'full';
+  let y0 = m, y1 = H - m - 70;
+  if (mode === 'full') layers.push(IM('photo', {x: 0, y: 0, w: W, h: H}), RC('overlay', {x: 0, y: 0, w: W, h: H, fill: 'rgba(0,0,0,0.5)'}));
+  if (mode === 'top') { const ph = Math.round(H * 0.42); layers.push(IM('photo', {x: 0, y: 0, w: W, h: ph})); y0 = ph + 50; }
+  if (mode === 'bottom') { const ph = Math.round(H * 0.36), py = H - m - 70 - ph; layers.push(IM('photo', {x: m, y: py, w: cw, h: ph, radius: tk.radius})); y1 = py - 50; }
+  const items = [];
+  if (copy.kicker) items.push(tk.mark === 'chip' ? chipGroup(copy.kicker, tk, onP) : T('kicker', {content: copy.kicker, size: 28, ls: 4, align: al, w: cw, onPhoto: onP}));
+  if (tk.mark === 'bar') items.push(RC('accent-fill', {w: 120, h: 12, x: al === 'center' ? (W - 120) / 2 : m}));
+  items.push(T('title', {content: autoEmphasis(copy.title), size: titleSize(copy.title, mode === 'none' ? 118 : 96), lh: tk.upper ? 1.02 : 1.1, align: al, w: cw, onPhoto: onP}));
+  if (tk.mark === 'underline') items.push(RC('accent-fill', {w: 150, h: 7, x: al === 'center' ? (W - 150) / 2 : m}));
+  if (copy.sub) items.push(T('body', {content: copy.sub, size: 42, lh: 1.4, align: al, w: cw, onPhoto: onP}));
+  items.forEach(it => { if (!it.group) themeLayer(it, tk); });
+  let bw = 0, btn, bt;
+  if (copy.button) {
+    bw = Math.min(cw, 640); btn = RC('cta-fill', {w: bw, h: 112, fill: tk.accent}); bt = T('cta-text', {content: copy.button, size: 42, align: 'center', w: bw - 40});
+    themeLayer(btn, tk); themeLayer(bt, tk); bt.dx = 20; bt.dy = (112 - bt.size * 1.2) / 2; btn.dx = 0; btn.dy = 0; items.push({group: [btn, bt], h: 112});
+  }
+  stackPlace(items, m, cw, y0, y1, mode === 'full' ? 'bottom' : 'middle', 36);
+  items.forEach(it => (it.group ? it.group : [it]).forEach(l => layers.push(l)));
+  if (al === 'center') items.filter(it => it.group).forEach(it => { const b = it.group[0], t = it.group[1], shift = (W - b.w) / 2 - b.x; b.x += shift; t.x += shift; });
+  const br = T('brand', {content: brand, size: 26, ls: 2, x: m, y: H - m - 30, w: 700, upper: true, onPhoto: onP}); themeLayer(br, tk); layers.push(br);
+  return {id: sid(), bg: tk.bg, layers};
+}
+function cloneSlide(slide) { const c = JSON.parse(JSON.stringify(slide)); c.id = sid(); c.layers.forEach(l => { l.id = lid(); }); return c; }
+const FIXED_ROLES = ['photo', 'overlay', 'brand', 'muted'];
+/* troca textos por papel e re-estiliza; reorganiza o que fica abaixo e, se o texto novo não couber, reduz o título até caber */
+function variantFromBase(base, tk, texts, emMode, fmt) {
+  const s = cloneSlide(base), H = fmt.h, m = 90, limit = H - m - 70, topMin = 60;
+  const first = role => s.layers.find(l => l.type === 'text' && l.role === role && l.content);
+  const targets = [['title', texts.h && autoEmphasis(texts.h, emMode)], ['body', texts.s], ['cta-text', texts.c]].map(([r, v]) => [first(r), v]).filter(([L, v]) => L && v);
+  const orig = new Map(s.layers.map(l => [l.id, l.y]));
+  const olds = targets.map(([L]) => ({L, y: L.y, h: layoutText(L).h, size: L.size}));
+  targets.forEach(([L, v]) => { L.content = v; });
+  themeSlide(s, tk);
+  const movable = l => !FIXED_ROLES.includes(l.role) && l.type !== 'image' && !(l.type === 'rect' && l.w >= fmt.w - 2);
+  const tOld = olds.find(o => o.L.role === 'title');
+  const pass = k => {
+    if (tOld) tOld.L.size = Math.max(24, Math.round(tOld.size * k));
+    olds.forEach(o => { o.d = layoutText(o.L).h - o.h; });
+    let top = 1e9, bot = 0;
+    s.layers.forEach(l => {
+      if (!movable(l)) return; let sh = 0; olds.forEach(o => { if (o.L !== l && orig.get(l.id) >= o.y + o.h - 2) sh += o.d; });
+      l.y = orig.get(l.id) + sh; top = Math.min(top, l.y); bot = Math.max(bot, l.y + (l.type === 'text' ? layoutText(l).h : l.h));
+    });
+    return {top, bot};
+  };
+  let fit; for (const k of [1, 0.92, 0.85, 0.78, 0.7, 0.62, 0.55, 0.48, 0.4]) { fit = pass(k); if (fit.bot - fit.top <= limit - topMin) break; }
+  if (fit.bot > limit) { const up = Math.min(fit.bot - limit, Math.max(0, fit.top - topMin)); s.layers.forEach(l => { if (movable(l)) l.y -= up; }); }
+  return s;
+}
+
+</script>
+<script>
+/* Exportação em camadas: PSD (uma camada raster por elemento, empilhadas como no editor) e ZIP de PNGs com manifesto.
+   Limites: o texto vai como camada raster (não editável como texto no Photoshop) e as fontes não são embutidas. */
+class BW {
+  constructor() { this.p = []; this.n = 0; }
+  b(u8) { this.p.push(u8); this.n += u8.length; return this; }
+  num(size, fn, v) { const d = new DataView(new ArrayBuffer(size)); fn.call(d, 0, v); return this.b(new Uint8Array(d.buffer)); }
+  u8(v) { return this.b(Uint8Array.of(v & 255)); }
+  u16(v) { return this.num(2, DataView.prototype.setUint16, v); }
+  i16(v) { return this.num(2, DataView.prototype.setInt16, v); }
+  u32(v) { return this.num(4, DataView.prototype.setUint32, v); }
+  i32(v) { return this.num(4, DataView.prototype.setInt32, v); }
+  str(s) { return this.b(Uint8Array.from(s, c => c.charCodeAt(0) & 255)); }
+  pad(m) { while (this.n % m) this.u8(0); return this; }
+  bytes() { const o = new Uint8Array(this.n); let k = 0; this.p.forEach(x => { o.set(x, k); k += x.length; }); return o; }
+}
+/* compressão RLE (PackBits) usada pelo formato PSD, linha a linha */
+function packBits(src) {
+  const out = new Uint8Array(src.length * 2 + 2); let o = 0, i = 0; const n = src.length;
+  while (i < n) {
+    let j = i + 1; while (j < n && j - i < 128 && src[j] === src[i]) j++;
+    if (j - i >= 2) { out[o++] = 257 - (j - i); out[o++] = src[i]; i = j; }
+    else { let k = i + 1; while (k < n && k - i < 128 && !(k + 1 < n && src[k] === src[k + 1])) k++; out[o++] = k - i - 1; out.set(src.subarray(i, k), o); o += k - i; i = k; }
+  }
+  return out.subarray(0, o);
+}
+function packPlane(plane, w, h) { const rows = []; let total = 0; for (let y = 0; y < h; y++) { const r = packBits(plane.subarray(y * w, (y + 1) * w)); rows.push(r); total += r.length; } return {rows, total}; }
+const ROLE_NAME = {title: 'Título', body: 'Texto', kicker: 'Chamada', 'cta-text': 'Texto do botão', 'cta-fill': 'Botão', 'accent-fill': 'Destaque', photo: 'Foto', overlay: 'Película', brand: 'Marca', muted: 'Apoio', panel: 'Painel'};
+function layerName(L) {
+  const base = ROLE_NAME[L.role] || (L.type === 'text' ? 'Texto' : L.type === 'image' ? 'Foto' : 'Forma');
+  return L.type === 'text' ? `${base}: ${String(L.content).replace(/\*\*/g, '').replace(/\s+/g, ' ').slice(0, 24)}` : base;
+}
+function renderLayerData(L, box) {
+  const c = document.createElement('canvas'); c.width = box.w; c.height = box.h; const ctx = c.getContext('2d'); ctx.translate(-box.x, -box.y);
+  if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') drawRect(ctx, L); else drawImageLayer(ctx, L);
+  return {canvas: c, data: ctx.getImageData(0, 0, box.w, box.h).data};
+}
+/* camadas de baixo para cima, cada uma recortada na sua caixa */
+async function collectLayerItems(set, slide) {
+  await ensureSetResources(set);
+  const W = set.format.w, H = set.format.h, comp = document.createElement('canvas'); comp.width = W; comp.height = H;
+  const cctx = comp.getContext('2d'); renderSlide(cctx, slide, W, H, 1);
+  const bg = document.createElement('canvas'); bg.width = W; bg.height = H; const bx = bg.getContext('2d'); bx.fillStyle = slide.bg || '#ffffff'; bx.fillRect(0, 0, W, H);
+  const items = [{name: 'Fundo', role: 'bg', type: 'rect', box: {x: 0, y: 0, w: W, h: H}, canvas: bg, data: bx.getImageData(0, 0, W, H).data}];
+  for (const L of slide.layers) {
+    if (L.hidden || !LBOX[L.id]) continue; const b = LBOX[L.id], pad = L.type === 'text' ? Math.ceil(L.size * 0.3) + 10 : 0;
+    const x = Math.max(0, Math.floor(b.x - pad)), y = Math.max(0, Math.floor(b.y - pad)), x2 = Math.min(W, Math.ceil(b.x + b.w + pad)), y2 = Math.min(H, Math.ceil(b.y + b.h + pad));
+    const box = {x, y, w: x2 - x, h: y2 - y}; if (box.w < 1 || box.h < 1) continue;
+    const r = renderLayerData(L, box); items.push({name: layerName(L), role: L.role, type: L.type, text: L.type === 'text' ? L.content.replace(/\*\*/g, '') : '', box, canvas: r.canvas, data: r.data});
+  }
+  return {items, comp: cctx.getImageData(0, 0, W, H).data, W, H};
+}
+const pascal = name => { const s = Array.from(name.normalize('NFC').slice(0, 31)).map(ch => ch.charCodeAt(0) < 256 ? ch.charCodeAt(0) : 63); const w = new BW(); w.u8(s.length).b(Uint8Array.from(s)).pad(4); return w.bytes(); };
+const uniBlock = name => { const w = new BW(), u = name.slice(0, 63); w.u32(u.length); for (let i = 0; i < u.length; i++) w.u16(u.charCodeAt(i)); const d = w.bytes(), o = new BW(); o.str('8BIM').str('luni').u32(d.length).b(d); o.pad(2); return o.bytes(); };
+
+async function buildPSD(set, slide) {
+  const {items, comp, W, H} = await collectLayerItems(set, slide), rec = new BW(), chan = new BW(), ids = [0, 1, 2, -1];
+  items.forEach(it => {
+    const {x, y, w, h} = it.box;
+    const packed = ids.map(id => { const plane = new Uint8Array(w * h), off = id === -1 ? 3 : id; for (let i = 0, j = off; i < w * h; i++, j += 4) plane[i] = it.data[j]; return packPlane(plane, w, h); });
+    rec.i32(y).i32(x).i32(y + h).i32(x + w).u16(4); ids.forEach((id, k) => rec.i16(id).u32(2 + 2 * h + packed[k].total));
+    rec.str('8BIM').str('norm').u8(255).u8(0).u8(0).u8(0);
+    const extra = new BW(); extra.u32(0).u32(0).b(pascal(it.name)).b(uniBlock(it.name)); rec.u32(extra.n).b(extra.bytes());
+    packed.forEach(pk => { chan.u16(1); pk.rows.forEach(r => chan.u16(r.length)); pk.rows.forEach(r => chan.b(r)); });
+  });
+  const info = new BW(); info.i16(items.length).b(rec.bytes()).b(chan.bytes()).pad(2);
+  const lm = new BW(); lm.u32(info.n).b(info.bytes()).u32(0);
+  const f = new BW();
+  f.str('8BPS').u16(1).b(new Uint8Array(6)).u16(3).u32(H).u32(W).u16(8).u16(3);   // cabeçalho: RGB, 8 bits
+  f.u32(0).u32(0);                                                                  // dados de cor e recursos de imagem (vazios)
+  f.u32(lm.n).b(lm.bytes());                                                        // camadas
+  const mp = [0, 1, 2].map(c => { const plane = new Uint8Array(W * H); for (let i = 0, j = c; i < W * H; i++, j += 4) plane[i] = comp[j]; return packPlane(plane, W, H); });
+  f.u16(1); mp.forEach(pk => pk.rows.forEach(r => f.u16(r.length))); mp.forEach(pk => pk.rows.forEach(r => f.b(r)));   // imagem composta (RLE)
+  return new Blob([f.bytes()], {type: 'image/vnd.adobe.photoshop'});
+}
+async function buildLayersZip(set, slide) {
+  const {items, comp, W, H} = await collectLayerItems(set, slide), files = [], manifest = [];
+  const full = document.createElement('canvas'); full.width = W; full.height = H; full.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(comp), W, H), 0, 0);
+  files.push({name: 'composicao.png', data: new Uint8Array(await (await new Promise(r => full.toBlob(r, 'image/png'))).arrayBuffer())});
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i], fn = `camadas/${String(i).padStart(2, '0')}-${slug(it.name) || 'camada'}.png`;
+    files.push({name: fn, data: new Uint8Array(await (await new Promise(r => it.canvas.toBlob(r, 'image/png'))).arrayBuffer())});
+    manifest.push({ordem: i, nome: it.name, tipo: it.type, papel: it.role, x: it.box.x, y: it.box.y, largura: it.box.w, altura: it.box.h, texto: it.text || undefined, arquivo: fn});
+  }
+  files.push({name: 'manifesto.json', data: new TextEncoder().encode(JSON.stringify({largura: W, altura: H, camadas: manifest}, null, 2))});
+  return makeZip(files);
+}
+
 </script>
 <script>
 /* Estúdio de Design — telas: início (estilos e peças), composição (cruzamento 30×30×30) e editor */
@@ -2147,13 +2301,14 @@ function renderDesign() {
   if (dz.view === 'editor' && !dzSet()) dz.view = 'home';
   if (dz.view === 'home') return dzHome(p, r);
   if (dz.view === 'compose') return dzCompose(p, r);
+  if (dz.view === 'variations') return renderVariations(p, r);
   dzEditorShell(p, r);
 }
 
 /* ================= INÍCIO ================= */
 function dzHome(p, r) {
   const {styles, sets} = p.design;
-  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn" onclick="dzVarOpen()">⚡ Fábrica de variações</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
   <div class="panel"><div class="section-row"><h3>Estilos de campanha salvos</h3><small class="muted">${styles.length} salvo(s)</small></div>
     ${styles.length ? `<div class="dz-styles">${styles.map(s => `<article class="dz-style"><div class="dz-sw">${[s.tk.bg, s.tk.fg, s.tk.accent, s.tk.muted].map(c => `<i style="background:${esc(c)}"></i>`).join('')}</div><strong>${esc(s.name)}</strong><small class="muted block">${esc(s.tk.head.family)} + ${esc(s.tk.body.family)} · ${esc((s.tk.photo || {}).name || 'foto')}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dzNew('${s.id}')">Usar em nova peça</button><button class="btn sm" onclick="dzStyleDel('${s.id}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhum estilo salvo', 'Crie uma peça, refine no editor e use “Salvar como estilo” para reaproveitar em toda a campanha.')}</div>
   <div class="panel" style="margin-top:14px"><div class="section-row"><h3>Peças do projeto</h3><small class="muted">${sets.length} peça(s)</small></div>
@@ -2272,8 +2427,8 @@ function dzEditorShell(p, r) {
   const s = dzSet();
   r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">← Estúdio</button><input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>
     <button class="btn sm ${dz.mode === 'emphasis' ? 'dark' : ''}" onclick="dzModeEm()" title="Clique em palavras do texto para destacar">✦ Destacar por clique</button>
-    <button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddPhoto()">＋ Foto</button>
-    <button class="btn sm" onclick="dzSaveStyle()">Salvar como estilo</button><button class="btn sm" onclick="dzApplyStyleModal()">Aplicar estilo…</button><button class="btn sm" onclick="dzExportOne()">PNG</button><button class="btn sm dark" onclick="dzExportAll()">Baixar todos (ZIP)</button></div></div>
+    <button class="btn sm" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta peça">⚡ Variações</button><button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddPhoto()">＋ Foto</button>
+    <button class="btn sm" onclick="dzSaveStyle()">Salvar como estilo</button><button class="btn sm" onclick="dzApplyStyleModal()">Aplicar estilo…</button><button class="btn sm" onclick="dzExportOne()">PNG</button><button class="btn sm" onclick="dzExportPSD()" title="Photoshop em camadas">PSD</button><button class="btn sm" onclick="dzExportLayers()" title="PNG por camada + manifesto">Camadas</button><button class="btn sm dark" onclick="dzExportAll()">Baixar todos (ZIP)</button></div></div>
   <div class="dz-editor"><div class="dz-slides" id="dzSlides"></div><div class="dz-stage" id="dzStage"><canvas id="dzCanvas"></canvas></div><div class="dz-insp" id="dzInsp"></div></div><input type="file" id="dzFile" accept="image/*" hidden>`;
   dzBindCanvas(); dzSlidesPanel(); dzInspector(); dzFit(); ensureSetResources(s).then(() => { dzDraw(); dzSlidesPanel(); });
   if (dz.hist.length === 0) dzSnap();
@@ -2402,6 +2557,163 @@ async function dzApplyStyle(id, all) {
 async function dzExportOne() { const s = dzSet(), b = await slideBlob(s, dzSlide()); download(`${slug(s.name)}-${String(dz.slide + 1).padStart(2, '0')}.png`, b, 'image/png'); }
 async function dzExportAll() { toast('Gerando ZIP…'); const s = dzSet(); download(`${slug(s.name)}.zip`, await exportSetZip(s), 'application/zip'); }
 
+async function dzExportPSD() { const s = dzSet(); toast('Gerando PSD…'); download(`${slug(s.name)}-${String(dz.slide + 1).padStart(2, '0')}.psd`, await buildPSD(s, dzSlide()), 'image/vnd.adobe.photoshop'); toast('PSD gerado. O texto vai como camada raster (não editável como texto).'); }
+async function dzExportLayers() { const s = dzSet(); toast('Gerando camadas…'); download(`${slug(s.name)}-${String(dz.slide + 1).padStart(2, '0')}-camadas.zip`, await buildLayersZip(s, dzSlide()), 'application/zip'); }
+
+</script>
+<script>
+/* Fábrica de variações: a partir de UM anúncio (ou do zero) gera dezenas de variações combinando
+   textos soltos (headlines, apoios, CTAs) × estilos × layouts. O desempenho real volta e reordena as próximas levas. */
+dz.vf = null;
+const VF_DEFAULT = () => ({mode: 'slide', setId: '', slideIdx: 0, fmt: 'square', layouts: ['auto'], h: '', s: '', c: '', keepBase: true, saved: [], aud: [], tone: [], crossN: 3, randomN: 3, n: 30, batchId: '', filter: 'all', imgId: ''});
+const lineList = t => [...new Set(String(t || '').split('\n').map(x => x.trim()).filter(Boolean))];
+
+function dzVarOpen(setId) {
+  const p = dzP(), bank = p.design.bank || (p.design.bank = {h: [], s: [], c: []});
+  dz.vf = Object.assign(VF_DEFAULT(), {h: bank.h.join('\n'), s: bank.s.join('\n'), c: bank.c.join('\n')});
+  const set = setId ? p.design.sets.find(s => s.id === setId) : p.design.sets[0];
+  if (set) { dz.vf.setId = set.id; dz.vf.slideIdx = setId && setId === dz.setId ? dz.slide : 0; dz.vf.fmt = set.format.id; } else dz.vf.mode = 'build';
+  dz.view = 'variations'; go('design');
+}
+/* em "a partir de uma peça", só varia o que a base tem: sem botão, CTA não muda nada; sem texto de apoio, idem */
+function vfUses(p) { const b = dz.vf.mode === 'slide' && vfBaseSlide(p); if (!b) return {s: true, c: true}; const has = r => b.slide.layers.some(l => l.type === 'text' && l.role === r && l.content); return {s: has('body'), c: has('cta-text')}; }
+function vfBaseSlide(p) { const s = p.design.sets.find(x => x.id === dz.vf.setId); return s && {set: s, slide: s.slides[Math.min(dz.vf.slideIdx, s.slides.length - 1)]}; }
+
+/* ---------- configuração ---------- */
+function renderVariations(p, r) {
+  const v = dz.vf; if (!v) return dzBack();
+  const batch = v.batchId && p.design.batches.find(b => b.id === v.batchId); if (batch) return vfResults(p, r, batch);
+  const base = vfBaseSlide(p), aud = v.aud.flatMap(id => AUDIENCE_PRESETS.find(a => a.id === id).tags), H = lineList(v.h).length, us = vfUses(p), S = us.s ? lineList(v.s).length : 0, C = us.c ? lineList(v.c).length : 0;
+  const nStyles = vfTokens(p, true).length, nLay = v.mode === 'build' ? v.layouts.length : 1, combos = Math.max(1, H) * Math.max(1, S) * Math.max(1, C) * Math.max(1, nStyles) * nLay * 2;
+  const chip = (obj, sel, fn) => Object.entries(obj).map(([k, l]) => `<button class="tchip ${sel.includes(k) ? 'on' : ''}" onclick="${fn}('${k}')">${l}</button>`).join('');
+  r.innerHTML = `<div class="page-head"><div><h1>Fábrica de variações</h1><p>Pegue um anúncio e gere dezenas de versões: textos soltos × estilos × layouts. O desempenho real reordena as próximas levas.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzBack()">Voltar</button></div></div>
+  <div class="two dz-compose"><div class="panel"><h3>1. Anúncio base</h3>
+    <div class="matrix-tabs" style="margin:8px 0"><button class="${v.mode === 'slide' ? 'active' : ''}" onclick="dz.vf.mode='slide';renderDesign()">A partir de uma peça</button><button class="${v.mode === 'build' ? 'active' : ''}" onclick="dz.vf.mode='build';renderDesign()">Do zero</button></div>
+    ${v.mode === 'slide' ? (p.design.sets.length ? `<div class="form-grid"><div class="field"><label>Peça</label><select onchange="dz.vf.setId=this.value;dz.vf.slideIdx=0;renderDesign()">${p.design.sets.map(s => `<option value="${s.id}" ${s.id === v.setId ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div><div class="field"><label>Slide</label><select onchange="dz.vf.slideIdx=+this.value;renderDesign()">${(base ? base.set.slides : []).map((_, i) => `<option value="${i}" ${i === v.slideIdx ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></div></div><canvas id="vfBase" width="200" height="${base ? Math.round(200 * base.set.format.h / base.set.format.w) : 250}" class="dz-prev" style="margin-top:8px"></canvas><p class="muted" style="font-size:11px">Os elementos ficam onde estão; troca-se o texto e o estilo por papel (título, apoio, botão, destaque, foto).${!us.c ? ' <b>Esta peça não tem botão: os CTAs serão ignorados.</b> Escolha um slide com botão (o último) ou use “Do zero”.' : ''}${!us.s ? ' <b>Sem texto de apoio nesta peça: os apoios serão ignorados.</b>' : ''}</p>` : emptyState('Nenhuma peça ainda', 'Crie uma peça no Estúdio ou use “Do zero”.'))
+      : `<div class="field"><label>Formato</label><select onchange="dz.vf.fmt=this.value">${Object.values(FORMATS).map(f => `<option value="${f.id}" ${f.id === v.fmt ? 'selected' : ''}>${f.label}</option>`).join('')}</select></div><div class="okr-label" style="margin-top:10px">LAYOUTS</div><div class="tchips">${Object.entries(Object.assign({auto: 'Do estilo'}, AD_LAYOUTS)).map(([k, l]) => `<button class="tchip ${v.layouts.includes(k) ? 'on' : ''}" onclick="vfTogLayout('${k}')">${l}</button>`).join('')}</div>`}
+    <div class="row-gap" style="margin-top:10px"><button class="btn sm" onclick="vfPhotoPick()">${v.imgId ? 'Trocar foto' : 'Foto para todas (opcional)'}</button>${v.imgId ? '<small class="muted">foto aplicada às áreas de foto</small>' : ''}</div></div>
+  <div class="panel"><h3>2. Textos soltos <small class="muted">um por linha</small></h3>
+    <div class="field"><label>Headlines (${H})</label><textarea class="jp-ta" rows="5" oninput="dz.vf.h=this.value;vfCount()" placeholder="Seu financiamento subiu e ninguém explicou?&#10;A parcela mudou. Você sabe por quê?&#10;Antes de pagar mais, confira isto">${esc(v.h)}</textarea></div>
+    <div class="field" style="margin-top:6px"><label>Textos de apoio (${S})</label><textarea class="jp-ta" rows="3" oninput="dz.vf.s=this.value;vfCount()" placeholder="Entenda antes de pagar&#10;Análise sem compromisso">${esc(v.s)}</textarea></div>
+    <div class="field" style="margin-top:6px"><label>CTAs (${C})</label><textarea class="jp-ta" rows="3" oninput="dz.vf.c=this.value;vfCount()" placeholder="Falar no WhatsApp&#10;Quero conferir meu contrato">${esc(v.c)}</textarea></div>
+    <div class="row-gap" style="margin-top:8px"><button class="btn sm" onclick="vfFromBase()">Usar texto da peça base</button><button class="btn sm" onclick="vfFromMatrix()">Importar hooks da Matriz</button><button class="btn sm" onclick="vfAI()">✦ Variar com IA</button></div></div></div>
+  <div class="panel" style="margin-top:14px"><h3>3. Estilos</h3><div class="two"><div>
+    ${v.mode === 'slide' ? `<label class="chk-line"><input type="checkbox" ${v.keepBase ? 'checked' : ''} onchange="dz.vf.keepBase=this.checked;renderDesign()"> Manter o estilo da peça base</label>` : ''}
+    <div class="okr-label" style="margin-top:8px">ESTILOS SALVOS</div>${p.design.styles.length ? `<div class="tchips">${p.design.styles.map(s => `<button class="tchip ${v.saved.includes(s.id) ? 'on' : ''}" onclick="vfTogSaved('${s.id}')">${esc(s.name)}</button>`).join('')}</div>` : '<small class="muted">Nenhum estilo salvo.</small>'}
+    <div class="okr-label" style="margin-top:10px">ALEATÓRIOS DA BIBLIOTECA (30×30×30)</div><label class="ins">Quantidade <b>${v.randomN}</b><input type="range" min="0" max="12" value="${v.randomN}" oninput="dz.vf.randomN=+this.value;this.previousElementSibling.textContent=this.value;vfCount()"></label></div>
+    <div><div class="okr-label">CRUZAR POR PÚBLICO E TOM</div><div class="tchips">${AUDIENCE_PRESETS.map(a => `<button class="tchip ${v.aud.includes(a.id) ? 'on' : ''}" onclick="vfTogAud('${a.id}')">${esc(a.label)}</button>`).join('')}</div><div class="tchips" style="margin-top:8px">${chip(TONE_TAGS, v.tone, 'vfTogTone')}</div>
+      <label class="ins">Composições do cruzamento <b>${v.crossN}</b><input type="range" min="0" max="6" value="${v.crossN}" oninput="dz.vf.crossN=+this.value;this.previousElementSibling.textContent=this.value;vfCount()"></label></div></div></div>
+  <div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>4. Gerar</h3><p class="muted" id="vfInfo" style="font-size:11px;margin:0">${H || '1'} headline(s) × ${S || '1'} apoio(s) × ${C || '1'} CTA(s) × ${nStyles} estilo(s)${v.mode === 'build' ? ' × ' + nLay + ' layout(s)' : ''} × 2 destaques = ${fmtNum(combos)} combinações possíveis</p></div>
+    <div class="row-gap"><label class="ins inl">Quantas <b>${v.n}</b><input type="range" min="6" max="100" value="${v.n}" oninput="dz.vf.n=+this.value;this.previousElementSibling.textContent=this.value"></label><button class="btn orange" onclick="vfGenerate()">⚡ Gerar variações</button></div></div></div><input type="file" id="vfFile" accept="image/*" hidden>`;
+  vfDrawBase(base);
+}
+async function vfDrawBase(base) { const cv = $('vfBase'); if (!cv || !base) return; await ensureSetResources(base.set); if (cv.isConnected) renderSlide(cv.getContext('2d'), base.slide, base.set.format.w, base.set.format.h, cv.width / base.set.format.w); }
+function vfCount() { const el = $('vfInfo'); if (!el) return; const p = dzP(), v = dz.vf, us = vfUses(p), H = lineList(v.h).length, S = us.s ? lineList(v.s).length : 0, C = us.c ? lineList(v.c).length : 0, ns = vfTokens(p, true).length, nl = v.mode === 'build' ? v.layouts.length : 1; el.textContent = `${H || 1} headline(s) × ${S || 1} apoio(s) × ${C || 1} CTA(s) × ${ns} estilo(s)${v.mode === 'build' ? ' × ' + nl + ' layout(s)' : ''} × 2 destaques = ${fmtNum(Math.max(1, H) * Math.max(1, S) * Math.max(1, C) * Math.max(1, ns) * nl * 2)} combinações possíveis`; }
+function vfTogLayout(k) { tog(dz.vf.layouts, k); if (!dz.vf.layouts.length) dz.vf.layouts = ['auto']; renderDesign(); }
+function vfTogSaved(id) { tog(dz.vf.saved, id); renderDesign(); } function vfTogAud(id) { tog(dz.vf.aud, id); renderDesign(); } function vfTogTone(k) { tog(dz.vf.tone, k); renderDesign(); }
+function vfPhotoPick() { const f = $('vfFile'); f.onchange = async () => { const file = f.files[0]; f.value = ''; if (!file) return; let bmp; try { bmp = await createImageBitmap(file); } catch (e) { toast('Não consegui ler essa imagem.'); return; } const id = uid('img'); await imgPut(id, file); IMGS.set(id, bmp); dz.vf.imgId = id; renderDesign(); }; f.click(); }
+function vfFromBase() {
+  const b = vfBaseSlide(dzP()); if (!b) { toast('Escolha uma peça base.'); return; } const g = role => { const L = b.slide.layers.find(l => l.type === 'text' && l.role === role && l.content); return L ? L.content.replace(/\*\*/g, '') : ''; };
+  const add = (k, t) => { if (t) dz.vf[k] = lineList(dz.vf[k] + '\n' + t).join('\n'); }; add('h', g('title')); add('s', g('body')); add('c', g('cta-text')); renderDesign();
+}
+function vfFromMatrix() { const p = dzP(), list = shownConcepts(p).slice(0, 12); if (!list.length) { toast('Gere conceitos na Matriz primeiro.'); return; } dz.vf.h = lineList(dz.vf.h + '\n' + list.map(c => hookLine(p, c)).join('\n')).join('\n'); renderDesign(); toast(list.length + ' hooks importados.'); }
+async function vfAI() {
+  if (!aiReady()) { toast('IA não configurada. Veja Integrações. Você pode escrever as variações à mão.'); return; }
+  const p = dzP(), seed = lineList(dz.vf.h)[0] || (vfBaseSlide(p) ? (vfBaseSlide(p).slide.layers.find(l => l.role === 'title') || {content: ''}).content.replace(/\*\*/g, '') : '') || p.pre.objective;
+  try {
+    toast('Criando variações…');
+    const j = await aiJSON('Crie variações de um anúncio em PT-BR seguindo o Voice Brain. Varie o ângulo (pergunta, alerta, número, prova, benefício, urgência) sem inventar dados nem fazer promessas absolutas. Headlines até 12 palavras. Responda só JSON: {"headlines":["..."],"subs":["..."],"ctas":["..."]} com 10 headlines, 4 subs e 4 ctas.', projectContext(p) + '\nAnúncio base (headline): ' + seed);
+    const add = (k, arr) => { dz.vf[k] = lineList(dz.vf[k] + '\n' + (arr || []).map(String).join('\n')).join('\n'); }; add('h', j.headlines); add('s', j.subs); add('c', j.ctas); spendCredits(1); renderDesign(); toast('Variações de texto adicionadas. Revise.');
+  } catch (e) { toast('IA: ' + e.message); }
+}
+
+/* ---------- estilos do lote ---------- */
+function vfTokens(p, countOnly) {
+  const v = dz.vf, list = [], seen = new Set(), add = (tk, label) => { const k = tk.designId + '|' + tk.fontId + '|' + tk.photoId + '|' + tk.accent + '|' + tk.bg; if (seen.has(k)) return; seen.add(k); list.push(Object.assign(JSON.parse(JSON.stringify(tk)), {name: tk.name || label})); };
+  const base = v.mode === 'slide' && vfBaseSlide(p); if (base && v.keepBase) add(base.set.tk, 'Estilo da peça');
+  v.saved.forEach(id => { const s = p.design.styles.find(x => x.id === id); if (s) add(s.tk, s.name); });
+  const aud = v.aud.flatMap(id => AUDIENCE_PRESETS.find(a => a.id === id).tags);
+  if (v.crossN && (aud.length || v.tone.length)) crossCompositions([...new Set(aud)], v.tone, v.crossN).forEach(c => add(makeTokens(c.design, c.font, c.photo), c.design.name));
+  for (let i = 0; i < v.randomN; i++) { const d = DESIGN_STYLES[(i * 7 + 3 + (v.n || 0)) % 30], f = FONT_PAIRS[(i * 11 + 5) % 30], ph = PHOTO_STYLES[(i * 13 + 2) % 30]; add(makeTokens(d, f, ph), d.name); }
+  if (!list.length && !countOnly) add(base ? base.set.tk : makeTokens(byId(DESIGN_STYLES, 'pop'), byId(FONT_PAIRS, 'poppins'), byId(PHOTO_STYLES, 'documental')), 'Estilo padrão');
+  return list;
+}
+
+/* ---------- geração ---------- */
+async function vfGenerate() {
+  const p = dzP(), v = dz.vf, us = vfUses(p), bank = {h: lineList(v.h), s: us.s ? lineList(v.s) : [], c: us.c ? lineList(v.c) : []}, base = v.mode === 'slide' && vfBaseSlide(p);
+  if (v.mode === 'slide' && !base) { toast('Escolha uma peça base ou use “Do zero”.'); return; }
+  if (v.mode === 'build' && !bank.h.length) { toast('Escreva ao menos uma headline.'); return; }
+  const toks = vfTokens(p), W = learnDesign(p).map, fmt = v.mode === 'slide' ? base.set.format : FORMATS[v.fmt];
+  const H = bank.h.length || 1, S = bank.s.length || 1, C = bank.c.length || 1, T = toks.length, L = v.mode === 'build' ? v.layouts.length : 1, total = H * S * C * T * L * 2, pool = [], seen = new Set();
+  const w = (k, val) => (W[k + '|' + val] == null ? 50 : W[k + '|' + val]);
+  const mk = (h, s, c, t, l, e) => { const tk = toks[t], dims = {design: tk.designId, font: tk.fontId, photo: tk.photoId, cta: bank.c[c] || '', layout: v.mode === 'build' ? v.layouts[l] : ''}; return {id: uid('v'), h, s, c, t, l, em: e ? 'alt' : 'auto', fav: false, sent: '', dims, score: (w('design', dims.design) + w('font', dims.font) + w('photo', dims.photo) + w('cta', dims.cta)) / 4 + Math.random() * 10}; };
+  if (total <= 6000) { for (let h = 0; h < H; h++) for (let s = 0; s < S; s++) for (let c = 0; c < C; c++) for (let t = 0; t < T; t++) for (let l = 0; l < L; l++) for (let e = 0; e < 2; e++) pool.push(mk(h, s, c, t, l, e)); }
+  else for (let g = 0; g < 6000 && pool.length < 3000; g++) { const a = [Math.floor(Math.random() * H), Math.floor(Math.random() * S), Math.floor(Math.random() * C), Math.floor(Math.random() * T), Math.floor(Math.random() * L), Math.random() < 0.5 ? 0 : 1], k = a.join(); if (!seen.has(k)) { seen.add(k); pool.push(mk(...a)); } }
+  /* diversidade: nenhuma headline nem estilo domina o lote */
+  pool.sort((a, b) => b.score - a.score);
+  const picked = [], cnt = {h: {}, t: {}}, capH = Math.ceil(v.n / H) + 1, capT = Math.ceil(v.n / T) + 1;
+  for (const it of pool) { if (picked.length >= v.n) break; if ((cnt.h[it.h] || 0) >= capH || (cnt.t[it.t] || 0) >= capT) continue; picked.push(it); cnt.h[it.h] = (cnt.h[it.h] || 0) + 1; cnt.t[it.t] = (cnt.t[it.t] || 0) + 1; }
+  for (const it of pool) { if (picked.length >= v.n) break; if (!picked.includes(it)) picked.push(it); }
+  const batch = {id: uid('vb'), name: 'Lote ' + (p.design.batches.length + 1) + ' · ' + new Date().toLocaleDateString('pt-BR'), created: new Date().toISOString(), mode: v.mode, fmt: {id: fmt.id, w: fmt.w, h: fmt.h}, brand: p.name, base: base ? cloneSlide(base.slide) : null, bank, tokens: toks, layouts: v.layouts.slice(), imgId: v.imgId, learned: Object.keys(W).length > 0, items: picked};
+  p.design.bank = {h: lineList(v.h), s: lineList(v.s), c: lineList(v.c)}; p.design.batches.push(batch); v.batchId = batch.id; persist(); renderDesign(); toast(`${picked.length} variações geradas${batch.learned ? ' (ordenadas pelos pesos aprendidos)' : ''}.`);
+}
+async function vfSlide(batch, item) {
+  await ensureFonts(batch.tokens.flatMap(t => [t.head.family, t.body.family]));
+  const tk = batch.tokens[item.t], texts = {h: batch.bank.h[item.h], s: batch.bank.s[item.s], c: batch.bank.c[item.c]}, fmt = batch.fmt; let sl;
+  if (batch.mode === 'slide') sl = variantFromBase(batch.base, tk, texts, item.em, fmt);
+  else sl = slideAd(tk, {kicker: '', title: autoEmphasis(texts.h || 'Título', item.em), sub: texts.s || '', button: texts.c || ''}, fmt, batch.brand, batch.layouts[item.l]);
+  if (batch.imgId) sl.layers.forEach(l => { if (l.type === 'image' && l.role === 'photo') l.imgId = batch.imgId; });
+  return sl;
+}
+
+/* ---------- resultados ---------- */
+function vfResults(p, r, b) {
+  const v = dz.vf, view = b.items.filter(i => v.filter === 'fav' ? i.fav : v.filter === 'sel' ? i.sel : true), nSel = b.items.filter(i => i.sel).length, nFav = b.items.filter(i => i.fav).length;
+  r.innerHTML = `<div class="page-head"><div><h1>${esc(b.name)}</h1><p>${b.items.length} variações · ${b.tokens.length} estilo(s) · ${b.bank.h.length || 1} headline(s). ${b.learned ? 'Ordenadas pelos pesos aprendidos do seu desempenho real.' : 'Ainda sem dados de desempenho: a ordem usa só diversidade.'}</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dz.vf.batchId='';renderDesign()">Ajustar e gerar de novo</button><button class="btn" onclick="dzBack()">Estúdio</button></div></div>
+  <div class="vf-bar"><div class="matrix-tabs">${[['all', 'Todas (' + b.items.length + ')'], ['fav', '★ Favoritas (' + nFav + ')'], ['sel', 'Selecionadas (' + nSel + ')']].map(([k, l]) => `<button class="${v.filter === k ? 'active' : ''}" onclick="dz.vf.filter='${k}';renderDesign()">${l}</button>`).join('')}</div>
+    <div class="row-gap"><button class="btn sm" onclick="vfSelAll('${b.id}')">Selecionar visíveis</button><button class="btn sm" onclick="vfExportZip('${b.id}')">PNG (ZIP)</button><button class="btn sm dark" onclick="vfSend('${b.id}')">Enviar ${nSel || ''} para aprovação</button></div></div>
+  <div class="vf-grid">${view.map(it => { const tk = b.tokens[it.t]; return `<article class="vf-card ${it.sel ? 'sel' : ''}"><canvas data-id="${it.id}" width="220" height="${Math.round(220 * b.fmt.h / b.fmt.w)}"></canvas><div class="vf-meta"><b>${esc((b.bank.h[it.h] || '').replace(/\*\*/g, '').slice(0, 54))}</b><small>${esc(tk.name)}${it.dims.cta ? ' · ' + esc(it.dims.cta) : ''}</small></div><div class="row-gap"><label class="vf-sel"><input type="checkbox" ${it.sel ? 'checked' : ''} onchange="vfSel('${b.id}','${it.id}',this.checked)"></label><button class="btn sm ${it.fav ? 'dark' : ''}" onclick="vfFav('${b.id}','${it.id}')" title="Favoritar">★</button><button class="btn sm" onclick="vfEdit('${b.id}','${it.id}')">Editar</button><button class="btn sm" onclick="vfPsd('${b.id}','${it.id}')">PSD</button>${it.sent ? '<span class="itag itag-decisao">ENVIADA</span>' : ''}</div></article>`; }).join('') || emptyState('Nada neste filtro', 'Favorite ou selecione variações para vê-las aqui.')}</div>`;
+  vfPaint(b, view);
+}
+async function vfPaint(b, view) {
+  const cvs = [...document.querySelectorAll('.vf-card canvas')]; let n = 0;
+  for (const cv of cvs) { const it = b.items.find(i => i.id === cv.dataset.id); if (!it || !cv.isConnected) continue; try { const sl = await vfSlide(b, it); await Promise.all(sl.layers.filter(l => l.imgId).map(l => loadImage(l.imgId))); if (cv.isConnected) renderSlide(cv.getContext('2d'), sl, b.fmt.w, b.fmt.h, cv.width / b.fmt.w); } catch (e) { /* mantém vazio */ } if (++n % 6 === 0) await new Promise(r => setTimeout(r, 0)); }
+}
+const vfBatch = id => dzP().design.batches.find(b => b.id === id), vfItem = (bid, id) => vfBatch(bid).items.find(i => i.id === id);
+function vfFav(bid, id) { const i = vfItem(bid, id); i.fav = !i.fav; persist(); renderDesign(); }
+function vfSel(bid, id, on) { vfItem(bid, id).sel = on; persist(); const b = vfBatch(bid); const el = document.querySelector(`.vf-card canvas[data-id="${id}"]`); if (el) el.closest('.vf-card').classList.toggle('sel', on); document.querySelectorAll('.vf-bar .matrix-tabs button')[2].textContent = `Selecionadas (${b.items.filter(i => i.sel).length})`; }
+function vfSelAll(bid) { const b = vfBatch(bid); [...document.querySelectorAll('.vf-card canvas')].forEach(cv => { vfItem(bid, cv.dataset.id).sel = true; }); persist(); renderDesign(); }
+function vfTargets(b) { const s = b.items.filter(i => i.sel); return s.length ? s : (b.items.filter(i => i.fav).length ? b.items.filter(i => i.fav) : b.items); }
+async function vfToSet(b, it, name) { const sl = await vfSlide(b, it), tk = JSON.parse(JSON.stringify(b.tokens[it.t])); return {id: uid('ds'), name, format: b.fmt, tk, slides: [sl], created: new Date().toISOString(), updated: new Date().toISOString()}; }
+async function vfEdit(bid, id) { const p = dzP(), b = vfBatch(bid), it = vfItem(bid, id), set = await vfToSet(b, it, 'Variação · ' + (b.bank.h[it.h] || '').replace(/\*\*/g, '').slice(0, 30)); p.design.sets.push(set); persist(); dzOpen(set.id); }
+async function vfPsd(bid, id) { const b = vfBatch(bid), it = vfItem(bid, id), set = await vfToSet(b, it, 'variacao'); toast('Gerando PSD…'); download(`variacao-${slug((b.bank.h[it.h] || 'anuncio').replace(/\*\*/g, '')).slice(0, 40)}.psd`, await buildPSD(set, set.slides[0]), 'image/vnd.adobe.photoshop'); }
+async function vfExportZip(bid) {
+  const b = vfBatch(bid), list = vfTargets(b), files = []; toast(`Gerando ${list.length} PNG…`);
+  for (let i = 0; i < list.length; i++) { const set = await vfToSet(b, list[i], 'v'); files.push({name: `variacao-${String(i + 1).padStart(3, '0')}.png`, data: new Uint8Array(await (await slideBlob(set, set.slides[0])).arrayBuffer())}); }
+  download(`${slug(b.name)}.zip`, makeZip(files), 'application/zip');
+}
+function vfSend(bid) {
+  const p = dzP(), b = vfBatch(bid), list = b.items.filter(i => i.sel && !i.sent); if (!list.length) { toast('Selecione variações (ainda não enviadas) para a aprovação.'); return; }
+  list.forEach(it => {
+    const tk = b.tokens[it.t], title = (b.bank.h[it.h] || b.name).replace(/\*\*/g, ''), cr = {id: uid('c'), projectId: p.id, title: title.slice(0, 60), type: 'Anúncio (variação)', cls: 'a4', status: 'Para aprovação', brief: `${tk.name}${it.dims.cta ? ' · CTA: ' + it.dims.cta : ''}`, dims: it.dims, varRef: {batch: b.id, item: it.id}, created: new Date().toISOString()};
+    state.creatives.unshift(cr); addApproval(p, cr.title, 'Criativo', 'creative', cr.id); it.sent = cr.id;
+  });
+  persist(); renderDesign(); toast(`${list.length} variação(ões) na fila de Aprovação.`);
+}
+
+/* ---------- aprendizado: o desempenho real de cada variação volta como peso ---------- */
+function learnDesign(p) {
+  const agg = {}, nm = {design: id => (byId(DESIGN_STYLES, id) || {}).name, font: id => (byId(FONT_PAIRS, id) || {}).name, photo: id => (byId(PHOTO_STYLES, id) || {}).name};
+  p.metrics.forEach(m => {
+    const cr = m.creativeId && state.creatives.find(c => c.id === m.creativeId); if (!cr || !cr.dims || !(+m.leads > 0) || !(+m.spend > 0)) return;
+    [['design', cr.dims.design], ['font', cr.dims.font], ['photo', cr.dims.photo], ['cta', cr.dims.cta]].forEach(([k, val]) => { if (!val) return; const a = agg[k + '|' + val] = agg[k + '|' + val] || {k, v: (nm[k] ? nm[k](val) : val) || val, key: val, spend: 0, leads: 0, n: 0}; a.spend += +m.spend; a.leads += +m.leads; a.n++; });
+  });
+  const rows = Object.values(agg).map(a => Object.assign(a, {cpl: a.spend / a.leads})); if (!rows.length) return {rows: [], map: {}};
+  const best = Math.min(...rows.map(r => r.cpl)), map = {}; rows.forEach(r => { r.w = Math.max(1, Math.round(100 * best / r.cpl)); map[r.k + '|' + r.key] = r.w; });
+  return {rows: rows.sort((a, b) => b.w - a.w), map};
+}
+
 </script>
 <script>
 /* Abas do projeto: visão geral, estratégia, feed, landing pages, anúncios, publicação, performance, integrações, configurações */
@@ -2426,7 +2738,7 @@ function projectFlow(p) {
     ['Produção', cr.some(c => ['Aprovado', 'Publicado'].includes(c.status)) && p.matrix.concepts.length > 0, 'page:matrix', 'Artes e vídeos'],
     ['Publicação', p.publications.some(x => x.status === 'Publicado'), 'page:publishingHub', 'Só o que foi aprovado'],
     ['Resultados', p.metrics.length > 0, 'performance', 'Métricas reais'],
-    ['Aprendizado', learnWeights(p).rows.length > 0, 'performance', 'Pesos da matriz']
+    ['Aprendizado', (learnWeights(p).rows.length + learnDesign(p).rows.length) > 0, 'performance', 'Pesos da matriz']
   ];
   let cur = false;
   return st.map(([label, done, to, hint, soon]) => { let s = soon ? 'soon' : done ? 'done' : !cur ? (cur = true, 'current') : 'todo'; return {label, state: s, to, hint}; });
@@ -2814,12 +3126,12 @@ function renderPublishingPage() {
 function metricModal() {
   const p = curProject();
   showModal('Registrar métricas', `<div class="form-grid"><div class="field"><label>Data</label><input id="mDate" type="date" value="${today()}"></div><div class="field"><label>Investimento (R$)</label><input id="mSpend" type="number" min="0" step="0.01"></div><div class="field"><label>Impressões</label><input id="mImp" type="number" min="0"></div><div class="field"><label>Cliques</label><input id="mClk" type="number" min="0"></div><div class="field"><label>Leads</label><input id="mLeads" type="number" min="0"></div><div class="field"><label>Vendas / conversões</label><input id="mConv" type="number" min="0"></div>
-    <div class="field full"><label>Conceito da matriz (opcional, alimenta o aprendizado)</label><select id="mConcept"><option value="">— nenhum —</option>${p.matrix.concepts.filter(c => c.creativeId || c.pinned).map(c => `<option value="${c.id}">${esc(c.hook)} × ${esc(c.angle)} · ${esc(c.format)}</option>`).join('')}</select></div><div class="field full"><label>Observação</label><input id="mNote"></div></div>
+    <div class="field full"><label>Conceito da matriz (opcional, alimenta o aprendizado)</label><select id="mConcept"><option value="">— nenhum —</option>${p.matrix.concepts.filter(c => c.creativeId || c.pinned).map(c => `<option value="${c.id}">${esc(c.hook)} × ${esc(c.angle)} · ${esc(c.format)}</option>`).join('')}</select></div><div class="field full"><label>Variação de anúncio enviada (opcional, alimenta o aprendizado de estilo, fonte, foto e CTA)</label><select id="mCreative"><option value="">— nenhuma —</option>${state.creatives.filter(c => c.projectId === p.id && c.dims).map(c => `<option value="${c.id}">${esc(c.title)} · ${esc(c.brief)}</option>`).join('')}</select></div><div class="field full"><label>Observação</label><input id="mNote"></div></div>
     <p class="muted" style="font-size:11px">Só conceitos fixados ou enviados para produção aparecem na lista.</p><div class="modal-actions"><button class="btn dark" onclick="metricSave()">Salvar</button></div>`);
 }
 function metricSave() {
   const p = curProject(), n = id => +$(id).value || 0;
-  const m = {id: uid('m'), date: $('mDate').value || today(), spend: n('mSpend'), impressions: n('mImp'), clicks: n('mClk'), leads: n('mLeads'), conversions: n('mConv'), conceptId: $('mConcept').value, note: $('mNote').value.trim(), source: 'manual'};
+  const m = {id: uid('m'), date: $('mDate').value || today(), spend: n('mSpend'), impressions: n('mImp'), clicks: n('mClk'), leads: n('mLeads'), conversions: n('mConv'), conceptId: $('mConcept').value, creativeId: $('mCreative') ? $('mCreative').value : '', note: $('mNote').value.trim(), source: 'manual'};
   if (!m.spend && !m.impressions && !m.clicks && !m.leads && !m.conversions) { toast('Preencha ao menos um número.'); return; }
   p.metrics.push(m); persist(); closeModal(); ui.page === 'project' ? renderProjectTab() : renderAnalyticsPage(); toast('Métricas registradas.');
 }
@@ -2841,7 +3153,7 @@ async function loadLeadsInbox(pid) {
   } catch (e) { box.innerHTML = `<p class="muted">Leads indisponíveis: ${esc(e.message)}</p>`; }
 }
 function performanceHTML(p) {
-  const t = metricTotals(p), lw = learnWeights(p), metaOk = canUseApi() && API.status.meta.configured;
+  const t = metricTotals(p), lw0 = learnWeights(p), ld = learnDesign(p), lw = {rows: lw0.rows.concat(ld.rows).sort((a, b) => b.w - a.w)}, metaOk = canUseApi() && API.status.meta.configured;
   const inbox = canUseApi() && API.status.leads.configured;
   if (inbox) setTimeout(() => loadLeadsInbox(p.id), 0);
   return `<div class="section-row"><div class="actions">${metaOk ? '<button class="btn" onclick="importMeta()">⇣ Importar Meta Ads</button>' : ''}<button class="btn dark" onclick="metricModal()">＋ Registrar métricas</button></div></div>
@@ -2972,7 +3284,9 @@ function renderAnalyticsPage() {
         const tk = makeTokens(byId(DESIGN_STYLES, 'financeiro'), byId(FONT_PAIRS, 'merriweather'), byId(PHOTO_STYLES, 'callcenter')); tk.name = 'Campanha Mutuários';
         await ensureFonts([tk.head.family, tk.body.family]);
         const a = buildSet('Carrossel · Parcela subiu', tk, parseCopy(DEFAULT_COPY, p), FORMATS.feed45, p.name), b = buildSet('Stories · Chamada final', tk, parseCopy('Vai assinar um contrato? | Confira antes\nSem juridiquês: a gente explica cada cláusula.\nPrimeiro contato sem compromisso: você decide depois.\nQuer conferir seu contrato? | Falar no WhatsApp', p), FORMATS.story, p.name);
-        p.design.sets.push(a, b); p.design.styles.push({id: 'st-demo', name: 'Campanha Mutuários', tk: extractStyle(a), created: new Date().toISOString()}); persist(); realRenderDesign();
+        p.design.sets.push(a, b); p.design.styles.push({id: 'st-demo', name: 'Campanha Mutuários', tk: extractStyle(a), created: new Date().toISOString()});
+        dz.vf = Object.assign(VF_DEFAULT(), {mode: 'slide', setId: a.id, slideIdx: a.slides.length - 1, h: 'Quer entender seu caso?\nA parcela mudou. Você sabe por quê?\nAntes de pagar mais, confira isto\n3 sinais de que você paga a mais', s: '', c: 'Falar no WhatsApp\nQuero conferir meu contrato\nSaiba mais', aud: ['escritorio'], tone: ['moderno', 'acolhedor'], crossN: 3, randomN: 3, n: 24});
+        await vfGenerate(); dz.vf.batchId = ''; dz.view = 'home'; persist(); realRenderDesign();
       })();
     }
     return realRenderDesign();

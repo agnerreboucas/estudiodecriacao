@@ -20,7 +20,7 @@ function projectFlow(p) {
     ['Produção', cr.some(c => ['Aprovado', 'Publicado'].includes(c.status)) && p.matrix.concepts.length > 0, 'page:matrix', 'Artes e vídeos'],
     ['Publicação', p.publications.some(x => x.status === 'Publicado'), 'page:publishingHub', 'Só o que foi aprovado'],
     ['Resultados', p.metrics.length > 0, 'performance', 'Métricas reais'],
-    ['Aprendizado', learnWeights(p).rows.length > 0, 'performance', 'Pesos da matriz']
+    ['Aprendizado', (learnWeights(p).rows.length + learnDesign(p).rows.length) > 0, 'performance', 'Pesos da matriz']
   ];
   let cur = false;
   return st.map(([label, done, to, hint, soon]) => { let s = soon ? 'soon' : done ? 'done' : !cur ? (cur = true, 'current') : 'todo'; return {label, state: s, to, hint}; });

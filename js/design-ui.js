@@ -11,13 +11,14 @@ function renderDesign() {
   if (dz.view === 'editor' && !dzSet()) dz.view = 'home';
   if (dz.view === 'home') return dzHome(p, r);
   if (dz.view === 'compose') return dzCompose(p, r);
+  if (dz.view === 'variations') return renderVariations(p, r);
   dzEditorShell(p, r);
 }
 
 /* ================= INÍCIO ================= */
 function dzHome(p, r) {
   const {styles, sets} = p.design;
-  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn" onclick="dzVarOpen()">⚡ Fábrica de variações</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
   <div class="panel"><div class="section-row"><h3>Estilos de campanha salvos</h3><small class="muted">${styles.length} salvo(s)</small></div>
     ${styles.length ? `<div class="dz-styles">${styles.map(s => `<article class="dz-style"><div class="dz-sw">${[s.tk.bg, s.tk.fg, s.tk.accent, s.tk.muted].map(c => `<i style="background:${esc(c)}"></i>`).join('')}</div><strong>${esc(s.name)}</strong><small class="muted block">${esc(s.tk.head.family)} + ${esc(s.tk.body.family)} · ${esc((s.tk.photo || {}).name || 'foto')}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dzNew('${s.id}')">Usar em nova peça</button><button class="btn sm" onclick="dzStyleDel('${s.id}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhum estilo salvo', 'Crie uma peça, refine no editor e use “Salvar como estilo” para reaproveitar em toda a campanha.')}</div>
   <div class="panel" style="margin-top:14px"><div class="section-row"><h3>Peças do projeto</h3><small class="muted">${sets.length} peça(s)</small></div>
@@ -136,8 +137,8 @@ function dzEditorShell(p, r) {
   const s = dzSet();
   r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">← Estúdio</button><input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>
     <button class="btn sm ${dz.mode === 'emphasis' ? 'dark' : ''}" onclick="dzModeEm()" title="Clique em palavras do texto para destacar">✦ Destacar por clique</button>
-    <button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddPhoto()">＋ Foto</button>
-    <button class="btn sm" onclick="dzSaveStyle()">Salvar como estilo</button><button class="btn sm" onclick="dzApplyStyleModal()">Aplicar estilo…</button><button class="btn sm" onclick="dzExportOne()">PNG</button><button class="btn sm dark" onclick="dzExportAll()">Baixar todos (ZIP)</button></div></div>
+    <button class="btn sm" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta peça">⚡ Variações</button><button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddPhoto()">＋ Foto</button>
+    <button class="btn sm" onclick="dzSaveStyle()">Salvar como estilo</button><button class="btn sm" onclick="dzApplyStyleModal()">Aplicar estilo…</button><button class="btn sm" onclick="dzExportOne()">PNG</button><button class="btn sm" onclick="dzExportPSD()" title="Photoshop em camadas">PSD</button><button class="btn sm" onclick="dzExportLayers()" title="PNG por camada + manifesto">Camadas</button><button class="btn sm dark" onclick="dzExportAll()">Baixar todos (ZIP)</button></div></div>
   <div class="dz-editor"><div class="dz-slides" id="dzSlides"></div><div class="dz-stage" id="dzStage"><canvas id="dzCanvas"></canvas></div><div class="dz-insp" id="dzInsp"></div></div><input type="file" id="dzFile" accept="image/*" hidden>`;
   dzBindCanvas(); dzSlidesPanel(); dzInspector(); dzFit(); ensureSetResources(s).then(() => { dzDraw(); dzSlidesPanel(); });
   if (dz.hist.length === 0) dzSnap();
@@ -265,3 +266,6 @@ async function dzApplyStyle(id, all) {
 }
 async function dzExportOne() { const s = dzSet(), b = await slideBlob(s, dzSlide()); download(`${slug(s.name)}-${String(dz.slide + 1).padStart(2, '0')}.png`, b, 'image/png'); }
 async function dzExportAll() { toast('Gerando ZIP…'); const s = dzSet(); download(`${slug(s.name)}.zip`, await exportSetZip(s), 'application/zip'); }
+
+async function dzExportPSD() { const s = dzSet(); toast('Gerando PSD…'); download(`${slug(s.name)}-${String(dz.slide + 1).padStart(2, '0')}.psd`, await buildPSD(s, dzSlide()), 'image/vnd.adobe.photoshop'); toast('PSD gerado. O texto vai como camada raster (não editável como texto).'); }
+async function dzExportLayers() { const s = dzSet(); toast('Gerando camadas…'); download(`${slug(s.name)}-${String(dz.slide + 1).padStart(2, '0')}-camadas.zip`, await buildLayersZip(s, dzSlide()), 'application/zip'); }
