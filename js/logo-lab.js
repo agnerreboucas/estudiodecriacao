@@ -178,7 +178,7 @@ function lgUndo() { lgCommit(); if (lgH.i > 0) lgRestore(lgH.i - 1); else toast(
 function lgRedo() { if (lgH.i < lgH.stack.length - 1) lgRestore(lgH.i + 1); else toast('Nada para refazer.'); }
 function lgBack() { if (lgNav.i <= 0) { toast('Esta é a primeira página.'); return; } lgGoNav(lgNav.i - 1); }
 function lgForward() { if (lgNav.i >= lgNav.stack.length - 1) { toast('Não há página para avançar.'); return; } lgGoNav(lgNav.i + 1); }
-function lgGoNav(i) { const e = lgNav.stack[i]; lgNav.i = i; lgNav.restoring = true; lg.view = e.view; lg.step = e.step; if ((lg.view === 'edit' || lg.view === 'mock' || lg.view === 'board') && !lg.cur) lg.view = lg.items.length ? 'grid' : 'brief'; if (lg.view === 'grid' && !lg.items.length) lg.view = 'brief'; renderDesign(); }
+function lgGoNav(i) { const e = lgNav.stack[i]; lgNav.i = i; lgNav.restoring = true; lg.view = e.view; lg.step = e.step; if ((lg.view === 'edit' || lg.view === 'mock' || lg.view === 'board' || lg.view === 'pres') && !lg.cur) lg.view = lg.items.length ? 'grid' : 'brief'; if (lg.view === 'grid' && !lg.items.length) lg.view = 'brief'; renderDesign(); }
 function lgClearSel() {
   const b = lg.brief; if (lg.view === 'grid') lg.fav = {}; else if (lg.view === 'brief') { b.styles = []; b.mood = []; b.palIds = []; b.iconCats = []; b.useBrand = false; } else { toast('Nada selecionado aqui.'); return; }
   renderDesign(); toast('Seleção limpa. Use Desfazer para voltar atrás.');
@@ -195,11 +195,11 @@ document.addEventListener('keydown', e => {
 function renderLogoLab(p, r) {
   if (!lg.brief) lg.brief = lgBriefDefault(p);
   lgCommit();
-  let v = lg.view; if ((v === 'grid' && !lg.items.length) || ((v === 'edit' || v === 'mock' || v === 'board') && !lg.cur) || (v === 'fonts' && lgF.mode === 'edit' && !lg.cur)) { v = 'brief'; lg.view = 'brief'; }
+  let v = lg.view; if ((v === 'grid' && !lg.items.length) || ((v === 'edit' || v === 'mock' || v === 'board' || v === 'pres') && !lg.cur) || (v === 'fonts' && lgF.mode === 'edit' && !lg.cur)) { v = 'brief'; lg.view = 'brief'; }
   const key = v + '|' + (v === 'brief' ? lg.step || 0 : 0);
   if (!lgNav.restoring && key !== lgNav.last) { lgNav.stack = lgNav.stack.slice(0, lgNav.i + 1); lgNav.stack.push({view: v, step: lg.step || 0}); lgNav.i = lgNav.stack.length - 1; }
   lgNav.last = key; lgNav.restoring = false;
-  if (v === 'grid') lgGridPage(p, r); else if (v === 'edit') lgEditPage(p, r); else if (v === 'mock') lgMockPage(p, r); else if (v === 'board') lgBoardPage(p, r); else if (v === 'fonts') lgFontsPage(p, r); else lgBriefPage(p, r);
+  if (v === 'grid') lgGridPage(p, r); else if (v === 'edit') lgEditPage(p, r); else if (v === 'mock') lgMockPage(p, r); else if (v === 'board') lgBoardPage(p, r); else if (v === 'pres') lgPresPage(p, r); else if (v === 'fonts') lgFontsPage(p, r); else lgBriefPage(p, r);
   const ac = r.querySelector('.page-head .actions'); if (ac) ac.insertAdjacentHTML('afterbegin', lgBarHTML());
 }
 const lgChip = (on, fn, label) => `<button class="tchip ${on ? 'on' : ''}" onclick="${fn}">${esc(label)}</button>`;
@@ -272,7 +272,7 @@ function lgEditPage(p, r) {
   r.innerHTML = `<div class="page-head"><div><h1>Editar logo</h1><p>Mexa em qualquer parte; a prévia atualiza na hora.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="lg.view=lg.items.length?'grid':'brief';renderDesign()">← Voltar</button></div></div>
   <div class="two dz-compose lg-edit"><div class="panel lg-prev"><canvas id="lgBig" width="720" height="480" style="width:100%;max-width:720px;border:1px solid #e6e6e6;border-radius:12px"></canvas>
     <div class="row-gap" style="margin-top:12px">${['light', 'dark', 'color'].map(m => `<button class="btn sm ${s.mode === m ? 'dark' : ''}" onclick="lgSet('mode','${m}')">${{light: 'Fundo claro', dark: 'Fundo escuro', color: 'Fundo colorido'}[m]}</button>`).join('')}</div>
-    <div class="row-gap" style="margin-top:12px"><button class="btn dark" onclick="lgSaveKit()">Salvar no Brand Kit</button><button class="btn" onclick="lgDownload('png')">PNG transparente</button><button class="btn" onclick="lgDownload('svg')">SVG</button><button class="btn" onclick="lgToEditor()">Abrir no Editor</button><button class="btn" onclick="lgMockOpen()">Ver em mockups</button><button class="btn" onclick="lgBoardOpen()">Prancha de marca</button><button class="btn" onclick="lgPackageDown()">Pacote ZIP</button><button class="btn" onclick="lgSaveLab()">Guardar em Meus logos</button></div>
+    <div class="row-gap" style="margin-top:12px"><button class="btn dark" onclick="lgSaveKit()">Salvar no Brand Kit</button><button class="btn" onclick="lgDownload('png')">PNG transparente</button><button class="btn" onclick="lgDownload('svg')">SVG</button><button class="btn" onclick="lgToEditor()">Abrir no Editor</button><button class="btn dark" onclick="lgPresOpen()">Vitrine (logo aplicado)</button><button class="btn" onclick="lgMockOpen()">Ver em mockups</button><button class="btn" onclick="lgBoardOpen()">Prancha de marca</button><button class="btn" onclick="lgPackageDown()">Pacote ZIP</button><button class="btn" onclick="lgSaveLab()">Guardar em Meus logos</button></div>
     <small class="muted block" style="margin-top:6px">No SVG o texto sai como texto (a fonte precisa estar instalada onde for aberto). O PNG sai com a fonte já aplicada.</small></div>
   <div class="panel lg-opts"><div class="row-gap" style="margin-bottom:8px;justify-content:flex-end"><button class="btn sm" onclick="lgAccAll(true)">Expandir tudo</button><button class="btn sm" onclick="lgAccAll(false)">Recolher tudo</button></div>
   ${lgAcc('nome', 'Nome e slogan', esc(s.name), `<div class="field"><label>Nome</label><input value="${esc(s.name)}" oninput="lgSet('name',this.value,1)"></div><div class="field"><label>Slogan</label><input value="${esc(s.tag)}" oninput="lgSet('tag',this.value,1)"></div>`)}
