@@ -7,6 +7,7 @@ const BX_W = {heading: ['Título', 'H'], text: ['Texto', '¶'], image: ['Imagem'
 const BX_LAYOUTS = {'1': [12], '2': [6, 6], '3': [4, 4, 4], '4': [3, 3, 3, 3], '1-2': [4, 8], '2-1': [8, 4]};
 const BX_LAYOUT_NAME = {'1': '1 coluna', '2': '2 colunas', '3': '3 colunas', '4': '4 colunas', '1-2': '⅓ + ⅔', '2-1': '⅔ + ⅓'};
 const bxId = () => uid('bx');
+const bxFontCss = w => (w.fw ? `font-weight:${+w.fw};` : '') + (w.ff ? `font-family:'${String(w.ff).replace(/[^\w \-]/g, '')}',sans-serif;` : '');
 function bxW(t, o) { return Object.assign({id: bxId(), t, hide: {t: false, l: false, m: false}, al: {}, size: {}, wpct: {}, h: {}, text: '', title: '', tag: 'h2', color: '', muted: false, imgId: '', src: '', alt: '', rad: 12, ratio: '16:9', link: 'checkout', href: '', style: 'solid', full: false, icon: 'check', emoji: '', date: '', items: []}, ({heading: {text: 'Seu título aqui'}, text: {text: 'Escreva o texto aqui.'}, button: {text: 'Quero agora'}, feature: {title: 'Título', text: 'Descrição'}, list: {items: [{t: 'Primeiro item', d: ''}]}, spacer: {h: {d: 32}}, faq: {items: [{t: 'Pergunta?', d: 'Resposta.'}]}, quote: {items: [{t: '[CONFIRMAR: depoimento real]', d: '[CONFIRMAR: nome]'}]}, form: {title: 'Receba contato', text: '', text2: ''}, video: {src: ''}, image: {}, divider: {}, countdown: {}})[t] || {}, o || {}); }
 const bxCol = (span, widgets, o) => Object.assign({id: bxId(), span: {d: span, t: span <= 4 ? 6 : 12, m: 12}, v: 'top', widgets: widgets || []}, o || {});
 function bxSec(layout, o) { return Object.assign({id: bxId(), name: '', w: 'box', bg: '', alt: false, bgImg: '', pad: {}, padB: {}, hide: {t: false, l: false, m: false}, gap: {}, cols: (BX_LAYOUTS[layout] || [12]).map(n => bxCol(n))}, o || {}); }
@@ -56,7 +57,7 @@ async function bxRender(l, opts) {
   const attr = (id) => P ? ` data-bx="${bxSafe(id)}"` : '';
   const wHTML = async w => {
     const id = bxSafe(w.id), a = attr(id); let h = '';
-    bpEach(id, w.al, v => `text-align:${v}`); bpEach(id, w.size, v => `font-size:${v}px`);
+    bpEach(id, w.al, v => `text-align:${v}`); { const wf = bxFontCss(w); if (wf) rule('d', '#' + id, wf); } bpEach(id, w.size, v => `font-size:${v}px`);
     ['t', 'l', 'm'].forEach(bp => { if (w.hide[bp]) rule(bp, '#' + id, 'display:none'); });
     switch (w.t) {
       case 'heading': h = `<${w.tag} id="${id}"${a}${w.color ? ` style="color:${w.color}"` : ''}>${R(w.text)}</${w.tag}>`; break;

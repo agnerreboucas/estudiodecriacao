@@ -106,7 +106,7 @@ function lpOpen(id) {
   lpUI.id = id; lpUI.tab = 'blocos'; if (!lpUI.back) lpUI.back = ''; persist(); renderLandings();
 }
 function lpDelete(id) { if (!confirm('Excluir esta landing page?')) return; const p = curProject(); p.landings = p.landings.filter(x => x.id !== id); persist(); renderLandings(); }
-async function lpExport(id) { const p = curProject(), l = p.landings.find(x => x.id === id); if (!l.blocks.length) { lpOpen(id); return; } if (!state.workspace.leadsUrl && l.blocks.some(b => b.t === 'form' && b.on)) toast('Dica: defina a URL de captura de leads em Configurações antes de publicar.'); if (lpPending(l)) toast(`Atenção: ${lpPending(l)} item(ns) ainda marcado(s) como [CONFIRMAR].`); download(slug(l.name) + '.html', await lpHTML(l, p), 'text/html'); l.status = 'Exportada'; persist(); renderLandings(); }
+async function lpExport(id) { const p = curProject(), l = p.landings.find(x => x.id === id); if (!l.blocks.length) { lpOpen(id); return; } if (!state.workspace.leadsUrl && l.blocks.some(b => b.t === 'form' && b.on)) toast('Dica: defina a URL de captura de leads em Configurações antes de publicar.'); if (lpPending(l)) toast(`Atenção: ${lpPending(l)} item(ns) ainda marcado(s) como [CONFIRMAR].`); const html = await lpHTML(l, p), as = await lpAssets(l, p); if (as.length) { const enc = new TextEncoder(); download(slug(l.name) + '.zip', makeZip([{name: 'index.html', data: enc.encode(html)}].concat(as)), 'application/zip'); toast('ZIP com index.html e a imagem de compartilhamento. Suba os dois na mesma pasta.'); } else download(slug(l.name) + '.html', html, 'text/html'); l.status = 'Exportada'; persist(); renderLandings(); }
 
 /* ---------- editor ---------- */
 function lpEditor(r, p, l) {
@@ -208,9 +208,48 @@ function lpBrandTheme() { const l = lpCur(); Object.assign(l.theme, lpTheme(curP
 function lpTabPublicar(b, l) {
   const checks = [[!!l.blocks.find(x => x.t === 'hero' && x.on && x.title), 'Título (promessa) preenchido'], [!!(l.product.checkout || l.whatsapp || l.blocks.some(x => x.t === 'form' && x.on)), 'A página tem para onde levar o clique (checkout, WhatsApp ou formulário)'], [lpPending(l) === 0, lpPending(l) ? `${lpPending(l)} item(ns) ainda como [CONFIRMAR]` : 'Nenhum item pendente de confirmação'], [!l.blocks.some(x => x.t === 'form' && x.on) || !!state.workspace.leadsUrl, 'Formulário com destino de leads configurado (Configurações)'], [!l.blocks.some(x => x.t === 'form' && x.on) || !!l.privacyUrl, 'Link da política de privacidade (LGPD) no formulário'], [!l.blocks.some(x => x.t === 'prova' && x.on) || !/\[CONFIRMAR/.test(JSON.stringify(l.blocks.filter(x => x.t === 'prova')) ), 'Depoimentos reais e autorizados']];
   b.innerHTML = `<div class="panel"><h3>Antes de publicar</h3>${checks.map(([ok, t]) => `<div class="so-issue ${ok ? '' : 'aviso'}" style="${ok ? 'background:#e9f7ee;color:#176b30' : ''}">${ok ? '✓' : '⚠'} ${lpA(t)}</div>`).join('')}</div>
+  ${lpSeoPanel(l, curProject())}
   ${lpIn('Política de privacidade (URL)', l.privacyUrl, `lpSet('privacyUrl',this.value)`, 0, 'https://…')}${lpIn('ID do Pixel da Meta (só números)', l.tracking.metaPixel, `lpSet('tracking.metaPixel',this.value.trim())`)}${lpIn('ID do Google Analytics 4 (G-XXXXXXX)', l.tracking.ga4, `lpSet('tracking.ga4',this.value.trim())`)}
   <div class="field"><label>Status</label><select onchange="lpCur().status=this.value;persist()">${['Rascunho', 'Em revisão', 'Aprovada', 'Exportada', 'Publicada'].map(s => `<option ${l.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
   <div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" onclick="lpExport('${l.id}')">⬇ Exportar HTML</button><button class="btn" onclick="lpCopyHTML()">Copiar HTML</button></div><small class="muted block" style="margin-top:8px">O arquivo é uma página única, responsiva, sem dependência além das fontes. Suba na Hostinger (public_html) ou em qualquer hospedagem. O formulário envia para <span class="mono">${lpA(state.workspace.leadsUrl || 'a URL de leads (não configurada)')}</span>. O Pixel e o GA4 só entram no arquivo exportado, não na prévia.</small>`;
+}
+/* ---------- SEO + compartilhamento ---------- */
+const lpHasImg = id => id ? '✓ definida' : 'não definida';
+function lpSeoPanel(l, p) {
+  const o = lpSeoOf(l, p), q = l.seo, s = o.site;
+  setTimeout(lpSeoLive, 30);
+  return `<div class="panel" style="margin-top:10px"><h3>SEO e compartilhamento</h3>
+  <small class="muted block" style="margin-bottom:6px">O que aparece no Google e no cartão que se abre ao colar o link no WhatsApp, Facebook, LinkedIn ou X. Campos vazios usam o texto da própria página${s ? ' e os dados do site' : ''}.</small>
+  <div class="field"><label>Título da página <span id="seoTc" class="muted"></span></label><input id="seoT" value="${lpA(q.title)}" oninput="lpSeoSet('title',this.value)" placeholder="automático a partir do título principal"></div>
+  <div class="field"><label>Descrição <span id="seoDc" class="muted"></span></label><textarea id="seoD" rows="3" oninput="lpSeoSet('desc',this.value)" placeholder="${lpA(s && s.desc ? 'usa a descrição do site' : 'automático a partir do subtítulo')}">${lpA(q.desc)}</textarea></div>
+  <div class="field"><label>Palavra-chave principal</label><input value="${lpA(q.keyword)}" oninput="lpSeoSet('keyword',this.value)" placeholder="ex.: renegociar dívida consignado"></div>
+  ${s && l.slug !== 'index' ? `<div class="field"><label>Endereço da página (slug)</label><input value="${lpA(l.slug)}" onchange="lpSlugSet(this.value)" placeholder="servicos"><small class="muted">arquivo: ${lpA(o.file)} (os links do menu acompanham)</small></div>` : ''}
+  ${s ? `<small class="muted block">Imagem, favicon e endereço do site são definidos em <b>Sites → Cabeçalho, menu e rodapé</b>; aqui você pode trocar só para esta página.</small>` : ''}
+  <div class="field"><label>Endereço do site publicado (começa com https://)</label><input value="${lpA(q.baseUrl)}" onchange="lpSeoSet('baseUrl',this.value,true)" placeholder="${lpA(s && s.baseUrl ? s.baseUrl : 'https://www.seudominio.com.br')}"></div>
+  <div class="row-gap" style="flex-wrap:wrap;margin-bottom:6px"><button class="btn sm" onclick="lpSeoImg('ogImgId')">📚 Imagem de compartilhamento (${lpHasImg(q.ogImgId)})</button>${q.ogImgId ? `<button class="btn sm" onclick="lpSeoImgClear('ogImgId')">×</button>` : ''}<button class="btn sm" onclick="lpSeoImg('faviconImgId')">📚 Favicon (${lpHasImg(q.faviconImgId)})</button>${q.faviconImgId ? `<button class="btn sm" onclick="lpSeoImgClear('faviconImgId')">×</button>` : ''}</div>
+  <div id="seoLive"></div></div>`;
+}
+let lpSeoTimer = 0;
+function lpSeoSet(k, v, re) { const l = lpCur(); l.seo[k] = k === 'baseUrl' ? seoBase(v) : v; persist(); lpPaintSoon(); if (re) renderLandings(); else { clearTimeout(lpSeoTimer); lpSeoTimer = setTimeout(lpSeoLive, 350); } }
+function lpSlugSet(v) { const l = lpCur(), p = curProject(), sl = slug(v).slice(0, 40); if (!sl || p.landings.some(x => x.id !== l.id && x.siteId === l.siteId && x.slug === sl)) { toast('Endereço vazio ou já usado por outra página.'); renderLandings(); return; } l.slug = sl; persist(); renderLandings(); }
+function lpSeoImg(k) { libPick(r => { lpCur().seo[k] = r.id; persist(); renderLandings(); }); }
+function lpSeoImgClear(k) { lpCur().seo[k] = ''; persist(); renderLandings(); }
+async function lpSeoLive() {
+  const box = $('seoLive'); if (!box) return; const l = lpCur(), p = curProject(); if (!l) return;
+  const h = await lpHTML(l, p, {preview: true}), o = lpSeoOf(l, p), g = re => { const m = h.match(re); return m ? m[1] : ''; };
+  const un = s => String(s).replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  const title = un(g(/<title>([\s\S]*?)<\/title>/)), desc = un(g(/<meta name="description" content="([^"]*)"/));
+  const body = h.slice(h.indexOf('<body')), hs = [...body.matchAll(/<h([1-6])[\s>][\s\S]*?<\/h\1>/g)].map(m => ({n: +m[1], t: m[0].replace(/<[^>]+>/g, '').trim()}));
+  const h1 = hs.filter(x => x.n === 1), jump = hs.some((x, i) => i && x.n - hs[i - 1].n > 1) || (hs[0] && hs[0].n > 1), noAlt = (body.match(/<img(?![^>]*\balt="[^"]+")[^>]*>/g) || []).length, kw = o.keyword.toLowerCase(), has = t => !kw || t.toLowerCase().includes(kw);
+  $('seoTc') && ($('seoTc').textContent = title.length + ' caracteres (ideal 30–60)'); $('seoDc') && ($('seoDc').textContent = desc.length + ' caracteres (ideal 70–160)');
+  const C = [[title.length >= 30 && title.length <= 60, `Título com ${title.length} caracteres (ideal 30–60)`], [desc.length >= 70 && desc.length <= 160, `Descrição com ${desc.length} caracteres (ideal 70–160)`], [h1.length === 1, h1.length === 1 ? 'Um único H1 na página' : `${h1.length} títulos H1 (o ideal é exatamente 1)`], [!jump, jump ? 'A hierarquia pula níveis (ex.: H1 → H3); use H2 entre eles' : 'Hierarquia H1 → H2 → H3 sem pulos'], [noAlt === 0, noAlt ? `${noAlt} imagem(ns) sem texto alternativo` : 'Imagens com texto alternativo']];
+  if (kw) C.push([has(title), 'Palavra-chave no título'], [has(desc), 'Palavra-chave na descrição'], [h1[0] ? h1[0].t.toLowerCase().includes(kw) : false, 'Palavra-chave no H1']);
+  C.push([!!o.ogId, o.ogId ? 'Imagem de compartilhamento definida' + (l.seo.ogImgId || (o.site && o.site.ogImgId) ? '' : ' (pegou a primeira imagem da página)') : 'Sem imagem de compartilhamento: o link sai sem imagem nas redes'], [!!o.base, o.base ? 'Endereço do site informado (necessário para a imagem aparecer nas redes)' : 'Informe o endereço do site publicado: sem ele a imagem do cartão não é incluída'], [!!o.fav, o.fav ? 'Favicon definido' : 'Sem favicon (o ícone da aba fica genérico)']);
+  const img = await lpOgData(o.ogId), host = (o.base || '').replace(/^https?:\/\//, '').split('/')[0] || 'seudominio.com.br';
+  box.innerHTML = `<div class="okr-label">COMO O LINK APARECE AO COMPARTILHAR</div><div class="seo-card">${img ? `<img src="${img}" alt="">` : '<div class="seo-noimg">sem imagem</div>'}<div class="seo-t"><small>${lpA(host.toUpperCase())}</small><b>${lpA(title.slice(0, 70))}</b><span>${lpA(desc.slice(0, 120))}</span></div></div>
+  <div class="okr-label" style="margin-top:10px">VERIFICAÇÃO</div>${C.map(([ok, t]) => `<div class="so-issue ${ok ? '' : 'aviso'}" style="${ok ? 'background:#e9f7ee;color:#176b30' : ''}">${ok ? '✓' : '⚠'} ${lpA(t)}</div>`).join('')}
+  <details style="margin-top:6px"><summary class="muted" style="cursor:pointer">Estrutura de títulos (${hs.length})</summary>${hs.map(x => `<div style="margin-left:${(x.n - 1) * 14}px;font-size:12.5px"><b class="mono">H${x.n}</b> ${lpA(x.t.slice(0, 70))}</div>`).join('') || '<small class="muted">nenhum título</small>'}</details>
+  <small class="muted block" style="margin-top:6px">As redes só mostram a imagem se ela estiver hospedada em um endereço público: o arquivo <span class="mono">${lpA(o.ogFile)}</span> vai junto na exportação (ZIP); suba na mesma pasta da página. Depois de publicar, use o Depurador de Compartilhamento do Facebook para atualizar o cache.</small>`;
 }
 async function lpCopyHTML() { const l = lpCur(); try { await navigator.clipboard.writeText(await lpHTML(l, curProject())); toast('HTML copiado.'); } catch (e) { toast('Não consegui copiar; use Exportar.'); } }
 
