@@ -281,3 +281,9 @@
 .lib-pv img{width:100%;border-radius:8px;display:block;max-height:340px;object-fit:contain;background:#f1f1f1}.lib-sw{width:22px;height:22px;border-radius:5px;border:1px solid #ddd;display:inline-block}
 .lib-res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 @media(max-width:1050px){.lib-wrap.has-sel{grid-template-columns:1fr}.lib-bench{position:static;max-height:none}}
+
+.ent-ta{position:relative;margin:3px 0}.ent-ta textarea{width:100%;font-size:12.5px}.ent-ta small{position:absolute;right:8px;bottom:5px;font-size:10px}
+.ent-opt{display:flex;gap:8px;align-items:flex-start;border:1px solid #eee;border-radius:8px;padding:4px 8px;margin:4px 0;cursor:pointer}.ent-opt.on{border-color:#111;background:#fafafa}.ent-opt .ent-ta{flex:1}
+.ent-grp{margin-bottom:12px}.ent-part{border-left:3px solid #e5e5e5;padding:2px 0 2px 10px;margin:8px 0}
+
+.int-key{margin:8px 0}.int-key label{display:block;font-size:11px;color:#555;margin-bottom:3px}.int-key label em{font-style:normal;margin-left:6px;color:#999}.int-key label em.on{color:#1d6b3a}.int-key input,.int-key select{flex:1;min-width:0;font-size:12px}

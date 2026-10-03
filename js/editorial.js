@@ -1,7 +1,7 @@
 /* ===== Agente Editorial (Furacão Editorial Engine + BrandsDecoded Content Agent) =====
    insumo → extração → triagem → ângulos (curadoria) → escolha → briefing + headlines → formato → auditoria → entrega */
 const edi = {tab: 'agente', busy: '', skillFile: 'skill.md', openDisc: false};
-const ED_STAGES = [['insumo', '1 · Insumo'], ['triagem', '2 · Triagem'], ['angulos', '3 · Ângulos'], ['narrativa', '4 · Briefing e formato'], ['auditoria', '5 · Auditoria e entrega']];
+const ED_STAGES = [['insumo', '1 · Insumo'], ['triagem', '2 · Triagem'], ['angulos', '3 · Ângulos'], ['narrativa', '4 · Briefing e formato'], ['auditoria', '5 · Auditoria e entrega'], ['entregas', '6 · Entregas']];
 const ED_FORMATS = [['carrossel', 'Carrossel (18 textos)'], ['post', 'Post'], ['video', 'Vídeo'], ['reel', 'Reel / Short'], ['thread', 'Thread'], ['newsletter', 'Newsletter'], ['artigo', 'Artigo'], ['campanha', 'Campanha']];
 const ED_CATS = ['contraste', 'investigação', 'comportamento', 'geracional', 'crise', 'novidade', 'mudança cultural', 'disputa de status', 'identidade', 'referência pop', 'Brasil', 'nome próprio'];
 const ED_LENSES = ['cultural', 'negócios', 'comportamental', 'estratégica', 'tecnológica', 'contradição', 'consequência', 'futuro'];
@@ -39,9 +39,9 @@ function renderEditorial() {
 }
 function eAgent(s) {
   const idx = ED_STAGES.findIndex(x => x[0] === s.stage);
-  return `<div class="mot-steps">${ED_STAGES.map(([k, l], i) => `<button class="tchip ${s.stage === k ? 'on' : ''}" ${i > idx && !eReady(k) ? 'disabled' : ''} onclick="eStage('${k}')">${l}</button>`).join('')}<span style="flex:1"></span><button class="btn sm" onclick="eReset()">Reiniciar</button></div>${({insumo: eInsumo, triagem: eTriagemUI, angulos: eAngulosUI, narrativa: eNarrativaUI, auditoria: eAuditoriaUI})[s.stage](s)}`;
+  return `<div class="mot-steps">${ED_STAGES.map(([k, l], i) => `<button class="tchip ${s.stage === k ? 'on' : ''}" ${i > idx && !eReady(k) ? 'disabled' : ''} onclick="eStage('${k}')">${l}</button>`).join('')}<span style="flex:1"></span><button class="btn sm" onclick="eReset()">Reiniciar</button></div>${({insumo: eInsumo, triagem: eTriagemUI, angulos: eAngulosUI, narrativa: eNarrativaUI, auditoria: eAuditoriaUI, entregas: eEntregasUI})[s.stage](s)}`;
 }
-function eReady(k) { const s = EDS(); return k === 'insumo' || (k === 'triagem' && s.analysis) || (k === 'angulos' && s.ideas && s.ideas.length) || (k === 'narrativa' && s.brief) || (k === 'auditoria' && s.content); }
+function eReady(k) { const s = EDS(); return k === 'insumo' || (k === 'triagem' && s.analysis) || (k === 'angulos' && s.ideas && s.ideas.length) || (k === 'narrativa' && s.brief) || (k === 'auditoria' && s.content) || (k === 'entregas' && s.brief); }
 function eStage(k) { if (!eReady(k)) return; EDS().stage = k; eSave(); renderEditorial(); }
 function eReset() { if (!confirm('Reiniciar a sessão? O histórico e a memória são mantidos.')) return; EDX().session = normalizeEditorial({}).session; eSave(); renderEditorial(); }
 const eIn = (id, lab, val, ph, rows, path) => `<div class="field"><label>${lab}</label>${rows ? `<textarea rows="${rows}" placeholder="${esc(ph || '')}" oninput="${path}">${esc(val)}</textarea>` : `<input value="${esc(val)}" placeholder="${esc(ph || '')}" oninput="${path}">`}</div>`;
@@ -53,6 +53,7 @@ function eInsumo(s) {
   <div class="tchips" style="margin-bottom:8px"><button class="tchip ${s.mode === 'A' ? 'on' : ''}" onclick="EDS().mode='A';eSave();renderEditorial()">A · Transformação (tenho um conteúdo)</button><button class="tchip ${s.mode === 'B' ? 'on' : ''}" onclick="EDS().mode='B';eSave();renderEditorial()">B · Investigação (tenho uma hipótese)</button></div>
   ${eIn('in', s.mode === 'B' ? 'Hipótese, insight ou observação' : 'Texto, notícia, transcrição, briefing, ideia ou tema', s.input, s.mode === 'B' ? 'Ex.: acho que as pessoas estão trocando o café por ritual…' : 'Cole aqui o material. Links: cole o texto da página (a plataforma não abre links sozinha).', 12, "EDS().input=this.value;eSave()")}
   <div class="row-gap" style="margin-bottom:8px"><input type="file" accept=".txt,.md,text/plain" onchange="eFile(this)"><small class="muted">${EDS().input.length.toLocaleString('pt-BR')} caracteres</small></div>
+  ${typeof eInsumoSources === 'function' ? eInsumoSources(s) : ''}
   ${accSec('edi', 'src', 'Fontes e evidências que você tem', 'dados, links, trechos de estudos', eIn('src', 'Cole fontes, dados e trechos (com a origem de cada um)', s.sources, 'Ex.: IBGE 2024: …; reportagem X (data): …', 6, "EDS().sources=this.value;eSave()") + '<small class="muted">O agente só trata como dado o que estiver aqui ou no insumo. O resto vira “a confirmar”.</small>', false)}
   <div class="row-gap" style="margin-top:10px;flex-wrap:wrap"><button class="btn dark" onclick="eTriage()" ${edi.busy ? 'disabled' : ''}>${edi.busy === 'tri' ? 'Lendo…' : '✦ Ler e fazer a triagem'}</button><small class="muted">Não exige briefing completo: o agente infere o contexto e pergunta só o que falta.</small></div></div>
   <div><div class="okr-label">CONTEXTO DE PRODUÇÃO</div>${[['plataforma', 'Plataforma'], ['objetivo', 'Objetivo'], ['funil', 'Funil'], ['frequencia', 'Frequência'], ['campanha', 'Campanha'], ['cta', 'CTA']].map(([k, l]) => eIn('p' + k, l, pr[k], '', 0, `EDX().prod.${k}=this.value;eSave()`)).join('')}<small class="muted block">O DNA da marca e a memória ficam na aba <b>Memória e DNA</b> e entram em todas as etapas.</small></div></div>`;
@@ -152,7 +153,7 @@ function eNarrativaUI(s) {
   <div><div class="okr-label">HEADLINES (clique para fixar como hook)</div>${s.headlines.map((h, k) => `<button class="ed-hl ${h.pick ? 'on' : ''}" onclick="eHlPick(${k})"><small>${esc(h.estilo)}</small><b>${esc(h.headline)}</b><em>${esc(h.porque)}</em></button>`).join('')}
   <div class="row-gap" style="margin:6px 0"><button class="btn sm" onclick="eHeadlines()" ${edi.busy ? 'disabled' : ''}>${edi.busy === 'hl' ? 'Gerando…' : '↻ Refazer headlines'}</button></div>
   <div class="okr-label" style="margin-top:12px">FORMATO</div><div class="tchips">${ED_FORMATS.map(([k, l]) => `<button class="tchip ${s.format === k ? 'on' : ''}" onclick="EDS().format='${k}';eSave();renderEditorial()">${l}</button>`).join('')}</div>
-  <div class="row-gap" style="margin-top:10px"><button class="btn dark" onclick="eProduce()" ${!s.format || edi.busy ? 'disabled' : ''}>${edi.busy === 'prod' ? 'Escrevendo…' : '✦ Produzir no formato'}</button></div><small class="muted block" style="margin-top:6px">A ideia só é adaptada ao formato agora, depois da escolha.</small></div></div>`;
+  <div class="row-gap" style="margin-top:10px"><button class="btn dark" onclick="eProduce()" ${!s.format || edi.busy ? 'disabled' : ''}>${edi.busy === 'prod' ? 'Escrevendo…' : '✦ Produzir no formato'}</button></div><small class="muted block" style="margin-top:6px">A ideia só é adaptada ao formato agora, depois da escolha.</small><div class="row-gap" style="margin-top:10px"><button class="btn" onclick="eStage('entregas')">Ver todas as entregas (anúncios, landing, roteiros, posts, stories) →</button></div></div></div>`;
 }
 function eHlPick(k) { const s = EDS(); s.headlines.forEach((h, i) => { h.pick = i === k ? !h.pick : false; }); eSave(); renderEditorial(); }
 

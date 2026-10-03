@@ -18,6 +18,7 @@ return [
     /* Narração (ElevenLabs). Chave em https://elevenlabs.io → Developers → API Keys */
     'ELEVENLABS_API_KEY'  => '',
     'ELEVENLABS_MODEL'    => 'eleven_multilingual_v2',
+    'STT_CALLS_PER_HOUR'  => 20,          // transcrição de áudio (usa a chave ElevenLabs ou, se não houver, a OpenAI)
     'TTS_CHARS_PER_DAY'   => 60000,       // trava de custo (caracteres por dia)
 
     /* Magnific (antigo Freepik API): banco de imagens e upscale. Chave em https://www.magnific.com/api (ou painel de desenvolvedor Freepik) */

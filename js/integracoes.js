@@ -1,31 +1,33 @@
 /* Modo Integração: página única para ver o que está ligado (IA texto/imagem, narração, banco de imagens, upscale, vídeo),
    testar cada conexão, e os recursos que dependem delas: banco de imagens (Magnific) e narração do e-book (ElevenLabs).
    As chaves ficam só no servidor (api/config.php); aqui o navegador só vê "configurado / não configurado". */
-const INT = {voices: null, voicesErr: '', testing: '', out: {}, stock: {q: '', page: 1, res: [], busy: false, cb: null, or: ''}};
+const INT = {keys: null, keysLoading: false, voices: null, voicesErr: '', testing: '', out: {}, stock: {q: '', page: 1, res: [], busy: false, cb: null, or: ''}};
 const intSt = () => (API.status || {});
 const intOn = k => canUseApi() && !!(intSt()[k] && intSt()[k].configured);
 const ttsReady = () => intOn('tts');
 const stockReady = () => intOn('magnific');
 
 const INT_CARDS = [
-  {k: 'ai', ico: 'sparkles', t: 'IA de texto · Claude ou GPT', d: 'Motor de conteúdo, diagnóstico, copy, leitura de layout. Escolha o provedor com AI_PROVIDER.', keys: ['AI_PROVIDER = anthropic | openai', 'ANTHROPIC_API_KEY ou OPENAI_API_KEY', 'OPENAI_TEXT_MODEL (se usar GPT)'], test: 'text'},
-  {k: 'image', ico: 'image', t: 'Imagens com IA · OpenAI', d: 'Gera fotos e ilustrações no Editor de Design, capas e variações. Aceita foto de referência.', keys: ['OPENAI_API_KEY', 'OPENAI_IMAGE_MODEL (gpt-image-1)'], test: ''},
-  {k: 'magnific', ico: 'pin', t: 'Magnific · banco de imagens e upscale', d: 'Busca imagens de banco para capa, design e miolo, e amplia a resolução para impressão.', keys: ['MAGNIFIC_API_KEY'], test: 'stock'},
-  {k: 'tts', ico: 'video', t: 'ElevenLabs · narração', d: 'Lê o e-book em voz alta, capítulo por capítulo, e baixa em MP3 (aba Áudio do e-book).', keys: ['ELEVENLABS_API_KEY', 'ELEVENLABS_MODEL (eleven_multilingual_v2)'], test: 'voices'},
-  {k: 'higgsfield', ico: 'video', t: 'Higgsfield · vídeo e imagem', d: 'Espaço reservado. Depois de contratar, envie a documentação da API e eu escrevo a integração (anúncios em vídeo).', keys: ['HIGGSFIELD_API_KEY'], test: '', soon: true}
+  {k: 'ai', ico: 'sparkles', t: 'IA de texto · Claude ou GPT', d: 'Motor de conteúdo, diagnóstico, copy, leitura de layout e de imagens. Escolha o provedor e cole a chave dele.', fields: [['AI_PROVIDER', 'Provedor'], ['ANTHROPIC_API_KEY', 'Chave Claude (Anthropic)'], ['OPENAI_API_KEY', 'Chave GPT (OpenAI)']], test: 'text'},
+  {k: 'image', ico: 'image', t: 'Imagens com IA · OpenAI', d: 'Gera fotos e ilustrações (Biblioteca de imagens, Editor de Design, capas). Usa a mesma chave OpenAI do GPT.', fields: [['OPENAI_API_KEY', 'Chave OpenAI']], test: ''},
+  {k: 'magnific', ico: 'pin', t: 'Magnific · banco de imagens e upscale', d: 'Busca imagens de banco para capa, design e miolo, e amplia a resolução para impressão.', fields: [['MAGNIFIC_API_KEY', 'Chave Magnific']], test: 'stock'},
+  {k: 'tts', ico: 'video', t: 'ElevenLabs · narração e transcrição', d: 'Lê o e-book em voz alta (aba Áudio) e transcreve áudios de insumo.', fields: [['ELEVENLABS_API_KEY', 'Chave ElevenLabs']], test: 'voices'},
+  {k: 'higgsfield', ico: 'video', t: 'Higgsfield · vídeo e imagem', d: 'Espaço reservado. Depois de contratar, envie a documentação da API e eu escrevo a integração (anúncios em vídeo).', fields: [['HIGGSFIELD_API_KEY', 'Chave Higgsfield']], test: '', soon: true}
 ];
 function renderIntegracoes() {
   const r = $('integracoesRoot'); if (!r) return;
   const s = intSt(), ok = k => !!(s[k] && s[k].configured);
-  if (!API.available) { r.innerHTML = `<h2 style="margin:0 0 10px;font-size:18px">Integrações</h2>${integrationsHTML()}`; return; }
+  if (!API.available) { r.innerHTML = `<h2 style="margin:0 0 10px;font-size:18px">Integrações (APIs)</h2><div class="panel"><h3>Aqui você cola as chaves das APIs, mas isso só funciona no servidor</h3><p style="font-size:13px">Este arquivo está aberto direto no computador (modo demonstração, sem PHP), por isso o Studio não consegue guardar chaves. Para ligar GPT, ElevenLabs, Magnific e as outras APIs:</p><ol style="font-size:13px;line-height:1.7"><li>Envie a pasta inteira do projeto para a Hostinger (pasta <span class="mono">public_html</span>).</li><li>Copie <span class="mono">api/config.sample.php</span> para <span class="mono">api/config.php</span> e defina a senha do Studio (<span class="mono">ADMIN_PASSWORD_HASH</span>).</li><li>Abra o Studio no endereço do site, entre com a senha e volte a <b>Configurações → Integrações</b>: cada cartão terá o campo para colar a chave e o botão <b>Salvar</b>.</li></ol></div>${integrationsHTML()}`; return; }
+  if (canUseApi() && !INT.keys && !INT.keysLoading) { INT.keysLoading = true; api('keys.php').then(j => { INT.keys = j; }, () => { INT.keys = {keys: {}, editable: false}; }).then(() => { INT.keysLoading = false; renderIntegracoes(); }); }
   const aiProv = s.ai && s.ai.provider === 'openai' ? 'GPT (OpenAI)' : 'Claude (Anthropic)';
-  r.innerHTML = `<div class="section-row" style="margin-bottom:10px"><div><h2 style="margin:0;font-size:18px">Integrações (APIs)</h2><p class="muted" style="margin:2px 0 0">Onde você liga as APIs. Cada chave fica só no servidor, no arquivo <span class="mono">api/config.php</span>; aqui você vê o que está ligado e testa a conexão.</p></div><button class="btn" onclick="loadStatus().then(renderIntegracoes)">↻ Atualizar status</button></div>
+  r.innerHTML = `<div class="section-row" style="margin-bottom:10px"><div><h2 style="margin:0;font-size:18px">Integrações (APIs)</h2><p class="muted" style="margin:2px 0 0">Onde você liga as APIs. Cada chave fica só no servidor, no arquivo <span class="mono">api/config.php</span>; aqui você vê o que está ligado e testa a conexão.</p></div><button class="btn" onclick="INT.keys=null;loadStatus().then(renderIntegracoes)">↻ Atualizar status</button></div>
+  ${INT.keys && !INT.keys.editable ? `<div class="panel" style="margin-bottom:12px"><b>Para colar as chaves aqui no app</b>, defina primeiro a senha do Studio (<span class="mono">ADMIN_PASSWORD_HASH</span> em <span class="mono">api/config.php</span>). Sem senha, qualquer pessoa com o link poderia trocar as chaves. Enquanto isso, as chaves vão direto no <span class="mono">config.php</span>.</div>` : ''}
   ${needsLogin() ? `<div class="panel" style="margin-bottom:12px"><div class="section-row"><div><h3>Entre no Studio</h3><p class="muted">Sem login o servidor não mostra o status das chaves.</p></div><button class="btn dark" onclick="showLogin()">Entrar</button></div></div>` : ''}
   <div class="integration-grid int-big">${INT_CARDS.map(c => {
     const on = ok(c.k), extra = c.k === 'ai' && on ? ` · ${aiProv}${s.ai.model ? ' · ' + esc(s.ai.model) : ''}` : '';
     return `<div class="card"><div class="int-ico">${ico(c.ico, 24)}</div><h3>${esc(c.t)}</h3><p>${esc(c.d)}</p>
       ${c.soon ? '<span class="int-state">Aguardando documentação</span>' : `<span class="int-state ${on ? 'on' : ''}">${on ? 'Configurado' + extra : 'Não configurado'}</span>`}
-      <div class="int-keys">${c.keys.map(k => `<code>${esc(k)}</code>`).join('')}</div>
+      ${(c.fields || []).map(([n, l]) => intKeyRow(n, l)).join('')}
       ${c.test && on ? `<button class="btn sm" onclick="intTest('${c.test}')" ${INT.testing ? 'disabled' : ''}>${INT.testing === c.test ? 'Testando…' : 'Testar conexão'}</button>` : ''}
       ${INT.out[c.test] && c.test ? `<small class="int-out ${INT.out[c.test].ok ? 'ok' : 'bad'}">${esc(INT.out[c.test].msg)}</small>` : ''}</div>`;
   }).join('')}</div>
@@ -39,6 +41,18 @@ function renderIntegracoes() {
   <small class="muted block" style="margin-top:8px">Os endereços da Magnific e os campos de upscale seguem a API pública como eu a conheço e ainda não foram validados com chave real: use “Testar conexão” e me mande o erro, se aparecer. A conta do GPT e a de imagens usam a mesma chave OpenAI.</small></div>
   <h2 style="margin:22px 0 10px;font-size:18px">Outras conexões</h2>${integrationsHTML()}`;
 }
+/* campo de chave: salva no servidor (keys.php), nunca volta para o navegador */
+function intKeyRow(name, label) {
+  const K = INT.keys, info = K && K.keys && K.keys[name] || {}, edit = !!(K && K.editable);
+  if (name === 'AI_PROVIDER') { const cur = K && K.provider || 'anthropic'; return `<div class="int-key"><label>${esc(label)}</label><select ${edit ? '' : 'disabled'} onchange="intKeySave('AI_PROVIDER',this.value)"><option value="anthropic" ${cur === 'anthropic' ? 'selected' : ''}>Claude (Anthropic)</option><option value="openai" ${cur === 'openai' ? 'selected' : ''}>GPT (OpenAI)</option></select></div>`; }
+  const st = info.configured ? (info.source === 'app' ? '● salva no app' : '● em config.php') : '○ não definida';
+  return `<div class="int-key"><label>${esc(label)} <em class="${info.configured ? 'on' : ''}">${st}</em></label>${edit ? `<div class="row-gap"><input type="password" id="ik_${name}" autocomplete="off" placeholder="${info.configured ? 'cole para trocar' : 'cole a chave aqui'}"><button class="btn sm dark" onclick="intKeySave('${name}')">Salvar</button>${info.source === 'app' ? `<button class="btn sm" onclick="intKeyClear('${name}')">Remover</button>` : ''}</div>` : ''}</div>`;
+}
+async function intKeySave(name, val) {
+  const v = val != null ? val : ($('ik_' + name) || {}).value || ''; if (!String(v).trim()) { toast('Cole a chave primeiro.'); return; }
+  try { await api('keys.php', {method: 'POST', body: {name, value: String(v).trim()}}); INT.keys = null; await loadStatus(); toast('Salvo no servidor.'); renderIntegracoes(); } catch (e) { toast(e.message); }
+}
+async function intKeyClear(name) { if (!confirm('Remover esta chave do servidor?')) return; try { await api('keys.php', {method: 'POST', body: {name, clear: true}}); INT.keys = null; await loadStatus(); renderIntegracoes(); } catch (e) { toast(e.message); } }
 function intCopyCfg() {
   const t = `'AI_PROVIDER' => 'openai',          // ou 'anthropic'\n'OPENAI_API_KEY' => '',\n'OPENAI_TEXT_MODEL' => 'gpt-4o',\n'ELEVENLABS_API_KEY' => '',\n'MAGNIFIC_API_KEY' => '',\n'HIGGSFIELD_API_KEY' => '',`;
   (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Trecho copiado.'), () => { showModal('Trecho do config.php', `<textarea rows="8" style="width:100%" class="mono">${esc(t)}</textarea><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`); });

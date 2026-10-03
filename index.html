@@ -38,6 +38,7 @@
 <main class="main">
 <header class="topbar">
   <div class="nav-btns"><button class="top-btn" id="navBack" onclick="navBack()" title="Voltar (Alt+←)" disabled>‹ Voltar</button><button class="top-btn" id="navFwd" onclick="navFwd()" title="Avançar (Alt+→)" disabled>Avançar ›</button></div>
+  <button class="top-btn" onclick="go('settings');setTimeout(()=>{const e=$('integracoesRoot');if(e)e.scrollIntoView()},80)" title="Chaves das APIs (GPT, ElevenLabs, Magnific…)">🔌 APIs</button>
   <button class="top-btn" onclick="openCreate()">＋ Criar</button>
   <button class="top-btn sync-badge local" id="syncBadge" onclick="syncBadgeClick()">● Local</button>
   <button class="top-btn credit" title="Créditos de produção (estimativa)">⚡ <span id="credits">30</span></button>
@@ -197,6 +198,7 @@
 <script src="js/imglib.js"></script>
 <script src="js/editorial-skill.js"></script>
 <script src="js/editorial.js"></script>
+<script src="js/editorial-ent.js"></script>
 <script src="js/app.js"></script>
 <script src="js/ebook-kdp.js"></script>
 <script src="js/ebook-cover.js"></script>
