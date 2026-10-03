@@ -319,3 +319,4 @@
 .lp-it{display:grid;grid-template-columns:1fr;gap:4px;border:1px solid #eee;border-radius:8px;padding:6px;margin:4px 0;position:relative}.lp-it button{position:absolute;right:6px;top:6px}.lp-it input{padding-right:34px}
 @media(max-width:1100px){.lp-wrap{grid-template-columns:1fr}.lp-side{max-height:none}.lp-prev{position:static}.lp-types{grid-template-columns:1fr}}
 .page-head .actions .so-badge{align-self:center;padding:5px 12px;font-size:11px;line-height:1.2;white-space:nowrap}
+.lp-ref{gap:12px;align-items:flex-start}.lp-ref a{color:inherit}

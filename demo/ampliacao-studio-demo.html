@@ -588,6 +588,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .lp-it{display:grid;grid-template-columns:1fr;gap:4px;border:1px solid #eee;border-radius:8px;padding:6px;margin:4px 0;position:relative}.lp-it button{position:absolute;right:6px;top:6px}.lp-it input{padding-right:34px}
 @media(max-width:1100px){.lp-wrap{grid-template-columns:1fr}.lp-side{max-height:none}.lp-prev{position:static}.lp-types{grid-template-columns:1fr}}
 .page-head .actions .so-badge{align-self:center;padding:5px 12px;font-size:11px;line-height:1.2;white-space:nowrap}
+.lp-ref{gap:12px;align-items:flex-start}.lp-ref a{color:inherit}
 
 </style>
 <style>
@@ -945,7 +946,7 @@ function seedState() {
   const cd = newProject('Cartório Descomplicado', 'Conteúdo + geração de demanda', {cover: 'a6', icon: 'CD'});
   const se = newProject('Saber Ensinar', 'Educação criativa', {cover: 'a8', icon: 'SE'});
   return {
-    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], imglib: {items: []}, inspo: {items: [], boards: [], cats: []}, myFonts: [],
+    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], imglib: {items: []}, lpRefs: {items: [], seeded: false}, inspo: {items: [], boards: [], cats: []}, myFonts: [],
     workspace: {name: 'Ampliação Marketing', instruction: 'Criar com clareza estratégica, consistência de marca e foco na jornada de compra.'},
     credits: 30, activeProjectId: mb.id, projects: [mb, cd, se], creatives
   };
@@ -964,6 +965,13 @@ function normalizeInspo(x) {
     imgId: safeId(i.imgId) ? i.imgId : '', url: url(i.url), imgUrl: url(i.imgUrl), w: Math.min(20000, Math.max(0, +i.w || 0)), h: Math.min(20000, Math.max(0, +i.h || 0)), colors: (Array.isArray(i.colors) ? i.colors : []).filter(hex).slice(0, 8), hues: (Array.isArray(i.hues) ? i.hues : []).map(h => str(h, 10)).slice(0, 4),
     fav: !!i.fav, boards: (Array.isArray(i.boards) ? i.boards : []).filter(b => bids.has(b)), created: str(i.created, 40)}));
   return out;
+}
+/* Referências de landing pages (URLs de outras páginas, com tipo, nota e leitura opcional da estrutura) */
+function normalizeLpRefs(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), arr = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(t => str(t, n)), TY = ['cadastro', 'curso', 'ebook', 'servico', 'evento', 'produto', 'institucional', 'outro'];
+  x = x && typeof x === 'object' ? x : {};
+  return {seeded: !!x.seeded, items: (Array.isArray(x.items) ? x.items : []).filter(r => r && /^[\w-]{1,60}$/.test(r.id || '') && /^https?:\/\/[^\s"'<>]{1,600}$/i.test(r.url || '')).slice(0, 300).map(r => ({id: r.id, url: r.url, title: str(r.title, 200), type: TY.includes(r.type) ? r.type : 'outro', note: str(r.note, 600), use: r.use !== false,
+    scan: r.scan && typeof r.scan === 'object' ? {title: str(r.scan.title, 200), description: str(r.scan.description, 400), headings: arr(r.scan.headings, 160, 20), ctas: arr(r.scan.ctas, 60, 15), fonts: arr(r.scan.fonts, 60, 6), colors: arr(r.scan.colors, 9, 8), at: str(r.scan.at, 40)} : null}))};
 }
 function normalizeImglib(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), items = x && Array.isArray(x.items) ? x.items : [];
@@ -1073,7 +1081,7 @@ function normalizeSocial(x) {
 /* Landing pages: dados do produto, insumos, blocos (tipos fixos, textos limitados), visual e rastreio. Mantém os campos antigos (headline, sub, bullets, cta, whatsapp). */
 const LP_BLOCK_TYPES = ['hero', 'numeros', 'dor', 'solucao', 'beneficios', 'passos', 'conteudo', 'para_quem', 'autoridade', 'prova', 'oferta', 'bonus', 'garantia', 'faq', 'programa', 'palestrantes', 'local', 'ingressos', 'texto', 'cta_final', 'form'];
 function normalizeLandings(x) {
-  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TY = ['curso', 'ebook', 'servico', 'evento', 'generico'];
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TY = ['curso', 'ebook', 'servico', 'evento', 'cadastro', 'generico'];
   return (Array.isArray(x) ? x : []).filter(l => l && typeof l === 'object').slice(0, 200).map(l => {
     const pr = l.product || {}, th = l.theme || {}, tr = l.tracking || {};
     return {id: sid(l.id) ? l.id : uid('lp'), name: str(l.name, 120) || 'Landing page', goal: str(l.goal, 30) || 'Gerar lead', headline: str(l.headline, 300), sub: str(l.sub, 500), bullets: str(l.bullets, 3000), cta: str(l.cta, 80) || 'Enviar', whatsapp: str(l.whatsapp, 20).replace(/\D/g, ''), status: str(l.status, 30) || 'Rascunho',
@@ -1115,7 +1123,7 @@ function normalize(s) {
   s.workspace = mergeDefaults(s.workspace, base.workspace);
   s.credits = Number.isFinite(+s.credits) ? +s.credits : 30;
   s.inspo = normalizeInspo(s.inspo);
-  s.imglib = normalizeImglib(s.imglib); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills);
+  s.imglib = normalizeImglib(s.imglib); s.lpRefs = normalizeLpRefs(s.lpRefs); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills);
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
@@ -16854,6 +16862,8 @@ const LP_TYPE_INFO = {
     why: 'Serviço se vende por confiança: problema → como resolvemos → etapas → resultado → provas reais → equipe → perguntas → contato (formulário/WhatsApp).'},
   evento: {label: 'Evento', blocks: ['hero', 'numeros', 'texto', 'programa', 'palestrantes', 'local', 'ingressos', 'prova', 'faq', 'cta_final'], goal: 'checkout', cta: 'Garantir meu ingresso',
     why: 'Evento precisa de data, local e programa visíveis logo no começo, contagem regressiva, quem vai estar lá, lotes e urgência honesta.'},
+  cadastro: {label: 'Cadastro / solicitação gratuita', blocks: ['hero', 'passos', 'beneficios', 'prova', 'faq', 'form'], goal: 'lead', cta: 'Quero me cadastrar',
+    why: 'Página de uma ação só: pedir algo gratuito (visita, exemplar, aula, avaliação). Promessa clara no topo, o que acontece depois do cadastro (etapas), por que vale, prova e perguntas, e o formulário curto (nome, contato e consentimento).'},
   generico: {label: 'Captação simples', blocks: ['hero', 'beneficios', 'prova', 'form'], goal: 'lead', cta: 'Quero receber', why: 'Página curta de captação de lead: promessa, benefícios, prova e formulário.'}
 };
 /* campos de cada bloco (editor e IA): [campo, rótulo, tipo] — tipos: line, area, items(rótulo do t / rótulo do d), list, img */
@@ -16976,7 +16986,7 @@ function renderLandings() {
   if (lpUI.id) return lpEditor(r, p, lpCur());
   eSrc.sink = null; eSrc.render = null;
   r.innerHTML = `<div class="page-head"><div><h1>Landing pages</h1><p>Escolha o tipo de produto, passe os insumos do projeto (descrição, site, imagem, áudio, atributos) e a página é montada em blocos editáveis, com HTML responsivo pronto para publicar.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="lpNewModal()">＋ Nova landing page</button></div></div>
-  ${p.landings.length ? `<div class="lp-list">${p.landings.map(l => { const t = LP_TYPE_INFO[l.type]; return `<div class="panel lp-card"><div><span class="so-badge" style="margin:0 6px 0 0">${lpA(t ? t.label : 'Simples')}</span><small class="muted">${lpA(l.status)}</small><h3 style="margin:6px 0 2px">${lpA(l.name)}</h3><small class="muted block">${(l.blocks || []).filter(b => b.on).length ? (l.blocks.filter(b => b.on).length + ' blocos') : 'formato simples (será convertido ao abrir)'}${lpPending(l) ? ` · <span class="so-warn">${lpPending(l)} item(ns) a confirmar</span>` : ''}</small></div><div class="row-gap"><button class="btn sm dark" onclick="lpOpen('${l.id}')">Abrir</button><button class="btn sm" onclick="lpExport('${l.id}')">⬇ HTML</button><button class="btn sm" onclick="lpDelete('${l.id}')">Excluir</button></div></div>`; }).join('')}</div>` : `<div class="panel"><h3>Nenhuma landing page ainda</h3><p class="muted">Comece pelo tipo de produto: cada um já vem com a estrutura de blocos que mais costuma converter.</p><button class="btn dark" onclick="lpNewModal()">＋ Nova landing page</button></div>`}`;
+  ${p.landings.length ? `<div class="lp-list">${p.landings.map(l => { const t = LP_TYPE_INFO[l.type]; return `<div class="panel lp-card"><div><span class="so-badge" style="margin:0 6px 0 0">${lpA(t ? t.label : 'Simples')}</span><small class="muted">${lpA(l.status)}</small><h3 style="margin:6px 0 2px">${lpA(l.name)}</h3><small class="muted block">${(l.blocks || []).filter(b => b.on).length ? (l.blocks.filter(b => b.on).length + ' blocos') : 'formato simples (será convertido ao abrir)'}${lpPending(l) ? ` · <span class="so-warn">${lpPending(l)} item(ns) a confirmar</span>` : ''}</small></div><div class="row-gap"><button class="btn sm dark" onclick="lpOpen('${l.id}')">Abrir</button><button class="btn sm" onclick="lpExport('${l.id}')">⬇ HTML</button><button class="btn sm" onclick="lpDelete('${l.id}')">Excluir</button></div></div>`; }).join('')}</div>` : `<div class="panel"><h3>Nenhuma landing page ainda</h3><p class="muted">Comece pelo tipo de produto: cada um já vem com a estrutura de blocos que mais costuma converter.</p><button class="btn dark" onclick="lpNewModal()">＋ Nova landing page</button></div>`}${lpRefsHTML()}`;
 }
 function lpNewModal() {
   showModal('Nova landing page', `<div class="field"><label>Nome interno</label><input id="lpnName" placeholder="Ex.: Curso Finanças sem medo — lançamento"></div><div class="okr-label">TIPO DE PRODUTO</div><div class="lp-types">${Object.entries(LP_TYPE_INFO).map(([k, t], i) => `<label class="lp-type"><input type="radio" name="lpnT" value="${k}" ${i === 0 ? 'checked' : ''}><b>${lpA(t.label)}</b><small class="muted">${lpA(t.why)}</small><small class="mono muted">${t.blocks.map(b => LP_BLOCK[b].label).join(' → ')}</small></label>`).join('')}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="lpCreate()">Criar e abrir</button></div>`);
@@ -17029,7 +17039,7 @@ function lpChangeType(t) {
 }
 function lpPrompt(l) {
   const t = LP_TYPE_INFO[l.type], P = l.product, blocks = l.blocks.filter(b => b.on);
-  return `PRODUTO: ${t.label}\nNome: ${P.nome || '(não informado)'}\nPreço/condição: ${P.preco || '(não informado)'}\nPúblico: ${P.publico || '(não informado)'}\nLink de compra: ${P.checkout ? 'informado' : 'não informado'}${l.type === 'evento' ? `\nData/hora: ${P.data || '(não informada)'}\nLocal: ${P.local || '(não informado)'}` : ''}\nWhatsApp de contato: ${l.whatsapp ? 'sim' : 'não'}\n\nINSUMOS (única fonte de fatos):\n${l.input || '(vazio)'}\n\n${lpUI.useAgent && EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief ? 'IDEIA E BRIEFING DO AGENTE EDITORIAL:\n' + eCtx() + '\n' : ''}ESTRUTURA DA PÁGINA (na ordem; devolva um objeto por bloco):\n${blocks.map((b, i) => `${i + 1}. t="${b.t}" — ${LP_BLOCK[b.t].ai}`).join('\n')}\n\nFormato: JSON {"blocks":[{"t":"hero","kicker":"","title":"","text":"","cta":"","note":"","name":"","price":"","items":[{"t":"","d":""}],"yes":[],"no":[]}]} usando só os campos pedidos em cada bloco.\nRegras: português do Brasil, frases curtas e específicas; use **negrito** para 1 ou 2 palavras-chave do título; NUNCA invente números, depoimentos, nomes, prazos, garantias, preços, credenciais ou resultados: onde o insumo não trouxer o dado, escreva [CONFIRMAR: o que falta]; não prometa resultado garantido; conteúdo de saúde, finanças ou jurídico sem promessa de cura, ganho ou aprovação.`;
+  return `${lpRefPrompt(l)}PRODUTO: ${t.label}\nNome: ${P.nome || '(não informado)'}\nPreço/condição: ${P.preco || '(não informado)'}\nPúblico: ${P.publico || '(não informado)'}\nLink de compra: ${P.checkout ? 'informado' : 'não informado'}${l.type === 'evento' ? `\nData/hora: ${P.data || '(não informada)'}\nLocal: ${P.local || '(não informado)'}` : ''}\nWhatsApp de contato: ${l.whatsapp ? 'sim' : 'não'}\n\nINSUMOS (única fonte de fatos):\n${l.input || '(vazio)'}\n\n${lpUI.useAgent && EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief ? 'IDEIA E BRIEFING DO AGENTE EDITORIAL:\n' + eCtx() + '\n' : ''}ESTRUTURA DA PÁGINA (na ordem; devolva um objeto por bloco):\n${blocks.map((b, i) => `${i + 1}. t="${b.t}" — ${LP_BLOCK[b.t].ai}`).join('\n')}\n\nFormato: JSON {"blocks":[{"t":"hero","kicker":"","title":"","text":"","cta":"","note":"","name":"","price":"","items":[{"t":"","d":""}],"yes":[],"no":[]}]} usando só os campos pedidos em cada bloco.\nRegras: português do Brasil, frases curtas e específicas; use **negrito** para 1 ou 2 palavras-chave do título; NUNCA invente números, depoimentos, nomes, prazos, garantias, preços, credenciais ou resultados: onde o insumo não trouxer o dado, escreva [CONFIRMAR: o que falta]; não prometa resultado garantido; conteúdo de saúde, finanças ou jurídico sem promessa de cura, ganho ou aprovação.`;
 }
 async function lpGenerate() {
   const l = lpCur(); if (lpUI.busy) return; if (!l.input.trim() && !l.product.nome) { toast('Escreva os insumos ou ao menos o nome do produto.'); return; }
@@ -17088,6 +17098,44 @@ function lpTabPublicar(b, l) {
   <div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" onclick="lpExport('${l.id}')">⬇ Exportar HTML</button><button class="btn" onclick="lpCopyHTML()">Copiar HTML</button></div><small class="muted block" style="margin-top:8px">O arquivo é uma página única, responsiva, sem dependência além das fontes. Suba na Hostinger (public_html) ou em qualquer hospedagem. O formulário envia para <span class="mono">${lpA(state.workspace.leadsUrl || 'a URL de leads (não configurada)')}</span>. O Pixel e o GA4 só entram no arquivo exportado, não na prévia.</small>`;
 }
 async function lpCopyHTML() { const l = lpCur(); try { await navigator.clipboard.writeText(await lpHTML(l, curProject())); toast('HTML copiado.'); } catch (e) { toast('Não consegui copiar; use Exportar.'); } }
+
+/* ---------- referências de landing pages (URLs) ---------- */
+const LP_REF_TYPES = {cadastro: 'Cadastro', curso: 'Curso', ebook: 'E-book', servico: 'Serviço', evento: 'Evento', produto: 'Produto', institucional: 'Institucional', outro: 'Outro'};
+const LP_REF_SEED = [
+  ['https://www.vindeacristo.org/ps/licao-sobre-o-livro-de-mormon', 'Aprenda com os missionários e receba uma cópia gratuita do Livro de Mórmon', 'cadastro', 'Enviada por você (página de cadastro).'],
+  ['https://www.vindeacristo.org/ps/reunir-com-missionarios', 'Aproxime-se de Deus. Converse com os missionários.', 'cadastro', 'Mesma família de páginas de cadastro (/ps/).'],
+  ['https://www.vindeacristo.org/ps/licao-sobre-jesus-cristo', 'Torne-se a melhor versão de si mesmo por meio de Jesus Cristo', 'cadastro', 'Mesma família (/ps/).'],
+  ['https://www.vindeacristo.org/all/licao-de-pascoa', 'Descubra o que é possível com Jesus Cristo. Converse com os missionários.', 'cadastro', 'Versão sazonal (Páscoa).'],
+  ['https://www.vindeacristo.org/formulario/descubra-a-biblia-sagrada', 'Receba um exemplar gratuito da Bíblia', 'cadastro', 'Formulário direto (/formulario/).'],
+  ['https://www.vindeacristo.org/formulario/visita-dos-missionarios', 'Converse com os missionários on-line ou pessoalmente', 'cadastro', 'Formulário direto (/formulario/).'],
+  ['https://enwp.com.br/treinamento/robo-monitoramento-processual', 'Robô de monitoramento processual (treinamento)', 'curso', 'Enviada por você.'],
+  ['https://enwp.com.br/treinamento/governanca-de-ia', 'Governança de IA (treinamento)', 'curso', 'Enviada por você.'],
+  ['https://akimobmoveis.com.br/landpage-produtos/', 'Landing de produtos (móveis)', 'produto', 'Enviada por você.'],
+  ['https://anuncie.eletromidia.com.br/', 'Anuncie na Eletromidia', 'servico', 'Enviada por você (campanha de captação B2B).'],
+  ['https://imidiaoutdoor.com.br/', 'Imidia Outdoor', 'servico', 'Enviada por você.']
+];
+function lpRefs() { if (!state.lpRefs) state.lpRefs = normalizeLpRefs(null); const R = state.lpRefs; if (!R.seeded) { R.seeded = true; LP_REF_SEED.forEach(([url, title, type, note]) => R.items.push({id: uid('rf'), url, title, type, note, use: true, scan: null})); persist(); } return R; }
+function lpRefsHTML() {
+  const R = lpRefs();
+  return `<div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>Referências de landing pages</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">URLs de páginas que servem de modelo. “Ler estrutura” lê a página pelo seu servidor (blocos, títulos, botões, fontes e cores) e a IA usa só a estrutura como inspiração ao gerar, sem copiar texto.</p></div></div>
+  <div class="row-gap" style="margin:8px 0;flex-wrap:wrap"><input id="lrU" placeholder="https://…" style="flex:1;min-width:220px"><select id="lrT">${Object.entries(LP_REF_TYPES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select><input id="lrN" placeholder="Nota (opcional)" style="flex:1;min-width:140px"><button class="btn sm dark" onclick="lpRefAdd()">＋ Adicionar</button></div>
+  ${R.items.map(r => `<div class="list-item lp-ref"><div style="min-width:0"><strong><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title || r.url)}</a></strong><small class="block muted" style="white-space:normal">${esc(LP_REF_TYPES[r.type])} · ${esc(r.url.replace(/^https?:\/\//, '').slice(0, 70))}${r.note ? ' · ' + esc(r.note) : ''}</small>${r.scan ? `<small class="block" style="white-space:normal;color:#176b30">✓ Lida: ${r.scan.headings.length} título(s), ${r.scan.ctas.length} botão(ões)${r.scan.fonts.length ? ' · fontes ' + esc(r.scan.fonts.slice(0, 2).join(', ')) : ''}${r.scan.colors.length ? ' · ' + r.scan.colors.slice(0, 4).map(c => `<i class="so-net" style="background:${esc(c)};width:11px;height:11px;border:1px solid #ddd"></i>`).join('') : ''}</small>` : ''}</div><div class="row-gap"><label class="ins inl" title="Usar como inspiração ao gerar"><input type="checkbox" ${r.use ? 'checked' : ''} onchange="lpRefUse('${r.id}',this.checked)"> usar</label><button class="btn sm" onclick="lpRefScan('${r.id}')" ${lpUI.refBusy ? 'disabled' : ''}>${lpUI.refBusy === r.id ? 'Lendo…' : r.scan ? 'Reler' : 'Ler estrutura'}</button><button class="btn sm" onclick="lpRefDel('${r.id}')">×</button></div></div>`).join('')}</div>`;
+}
+const lpCleanUrl = u => { try { const x = new URL(u); [...x.searchParams.keys()].forEach(k => { if (/^(gclid|gbraid|wbraid|fbclid|msclkid|gad_.*|utm_.*|hsa_.*|cid|cq_cmp|adlang|source|network|ef_id|s_kwcid)$/i.test(k)) x.searchParams.delete(k); }); return x.toString(); } catch (e) { return u; } };
+function lpRefAdd() { const u = $('lrU').value.trim(); if (!/^https?:\/\/\S+$/i.test(u)) { toast('Cole um endereço completo, começando com https://'); return; } lpRefs().items.unshift({id: uid('rf'), url: lpCleanUrl(u), title: '', type: $('lrT').value, note: $('lrN').value.trim(), use: true, scan: null}); persist(); renderLandings(); }
+function lpRefUse(id, v) { lpRefs().items.find(r => r.id === id).use = v; persist(); }
+function lpRefDel(id) { const R = lpRefs(); R.items = R.items.filter(r => r.id !== id); persist(); renderLandings(); }
+async function lpRefScan(id) {
+  const r = lpRefs().items.find(x => x.id === id); if (!r || lpUI.refBusy) return; if (!canUseApi()) { toast(needsLogin() ? 'Entre no Studio para ler sites.' : 'A leitura de sites exige o servidor PHP (Hostinger).'); return; }
+  lpUI.refBusy = id; renderLandings();
+  try { const x = await radarFetchScan(r.url); r.scan = {title: x.title || '', description: x.description || '', headings: x.headings || [], ctas: x.ctas || [], fonts: x.fonts || [], colors: x.colors || [], at: new Date().toISOString()}; if (!r.title) r.title = x.title || r.title; persist(); toast('Estrutura lida.'); } catch (e) { toast(e.message); }
+  lpUI.refBusy = ''; renderLandings();
+}
+/* trecho para o prompt: só estrutura, de referências marcadas e lidas */
+function lpRefPrompt(l) {
+  const R = lpRefs().items.filter(r => r.use && r.scan && (r.type === l.type || r.type === 'cadastro' && l.type === 'cadastro')).slice(0, 3);
+  return R.length ? 'REFERÊNCIAS DE ESTRUTURA (use só como inspiração de ordem, tom e tamanho dos blocos; NÃO copie frases nem marcas):\n' + R.map(r => `- ${r.title}: títulos [${r.scan.headings.slice(0, 10).join(' | ')}]; botões [${r.scan.ctas.slice(0, 6).join(' | ')}]`).join('\n') + '\n\n' : '';
+}
 
 </script>
 <script>

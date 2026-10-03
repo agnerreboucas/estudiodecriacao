@@ -9,6 +9,8 @@ const LP_TYPE_INFO = {
     why: 'Serviço se vende por confiança: problema → como resolvemos → etapas → resultado → provas reais → equipe → perguntas → contato (formulário/WhatsApp).'},
   evento: {label: 'Evento', blocks: ['hero', 'numeros', 'texto', 'programa', 'palestrantes', 'local', 'ingressos', 'prova', 'faq', 'cta_final'], goal: 'checkout', cta: 'Garantir meu ingresso',
     why: 'Evento precisa de data, local e programa visíveis logo no começo, contagem regressiva, quem vai estar lá, lotes e urgência honesta.'},
+  cadastro: {label: 'Cadastro / solicitação gratuita', blocks: ['hero', 'passos', 'beneficios', 'prova', 'faq', 'form'], goal: 'lead', cta: 'Quero me cadastrar',
+    why: 'Página de uma ação só: pedir algo gratuito (visita, exemplar, aula, avaliação). Promessa clara no topo, o que acontece depois do cadastro (etapas), por que vale, prova e perguntas, e o formulário curto (nome, contato e consentimento).'},
   generico: {label: 'Captação simples', blocks: ['hero', 'beneficios', 'prova', 'form'], goal: 'lead', cta: 'Quero receber', why: 'Página curta de captação de lead: promessa, benefícios, prova e formulário.'}
 };
 /* campos de cada bloco (editor e IA): [campo, rótulo, tipo] — tipos: line, area, items(rótulo do t / rótulo do d), list, img */
