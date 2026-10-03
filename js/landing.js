@@ -3,8 +3,8 @@
 const LP_TYPE_INFO = {
   curso: {label: 'Curso online', blocks: ['hero', 'dor', 'solucao', 'conteudo', 'para_quem', 'autoridade', 'prova', 'bonus', 'oferta', 'garantia', 'faq', 'cta_final'], goal: 'checkout', cta: 'Quero me inscrever',
     why: 'Quem compra curso precisa acreditar que o método funciona e que vai conseguir: promessa → dor → método → o que vai aprender → para quem é → professor → prova → oferta e garantia.'},
-  ebook: {label: 'E-book', blocks: ['hero', 'dor', 'conteudo', 'autoridade', 'prova', 'oferta', 'faq', 'cta_final'], goal: 'checkout', cta: 'Quero o e-book',
-    why: 'Produto de decisão rápida: página curta. Capa e promessa no topo, o que tem dentro (capítulos), quem escreveu, prova e oferta.'},
+  ebook: {label: 'E-book', blocks: ['hero', 'dor', 'conteudo', 'amostra', 'autoridade', 'prova', 'oferta', 'faq', 'cta_final'], goal: 'checkout', cta: 'Quero o e-book',
+    why: 'Produto de decisão rápida: página curta. Capa e promessa no topo, o que tem dentro (capítulos), amostra grátis para reduzir o risco, quem escreveu, prova e oferta. Padrão visto nos exemplos de landing de e-book (capa em destaque, amostra, depoimentos e preço claros).'},
   servico: {label: 'Serviço', blocks: ['hero', 'dor', 'solucao', 'passos', 'beneficios', 'prova', 'autoridade', 'faq', 'form'], goal: 'lead', cta: 'Falar com a equipe',
     why: 'Serviço se vende por confiança: problema → como resolvemos → etapas → resultado → provas reais → equipe → perguntas → contato (formulário/WhatsApp).'},
   evento: {label: 'Evento', blocks: ['hero', 'numeros', 'texto', 'programa', 'palestrantes', 'local', 'ingressos', 'prova', 'faq', 'cta_final'], goal: 'checkout', cta: 'Garantir meu ingresso',
@@ -17,6 +17,7 @@ const LP_TYPE_INFO = {
 const LP_BLOCK = {
   hero: {label: 'Topo (promessa)', fields: [['kicker', 'Etiqueta (acima do título)', 'line'], ['title', 'Título', 'area'], ['text', 'Subtítulo', 'area'], ['cta', 'Botão', 'line'], ['note', 'Nota abaixo do botão', 'line'], ['imgId', 'Imagem', 'img']], ai: 'title: promessa específica (até 80 caracteres); text: subtítulo que explica para quem e como (até 180); cta: texto do botão; note: microtexto de segurança/condição (opcional); kicker: etiqueta curta'},
   numeros: {label: 'Números / destaques', fields: [['items', 'Itens', 'items:Valor/Legenda']], ai: 'items: 3 a 4 números ou fatos verificáveis do insumo (t = valor, d = legenda). Sem número no insumo, use [CONFIRMAR: …]'},
+  amostra: {label: 'Amostra grátis / prévia', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area'], ['imgId', 'Imagem da prévia', 'img'], ['cta', 'Botão', 'line']], ai: 'title; text: o que a pessoa vê na amostra (capítulo, páginas, trecho), só do insumo; cta: ex. "Ler uma amostra grátis"'},
   dor: {label: 'Problema / dor', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area'], ['items', 'Sinais da dor', 'items:Situação/Detalhe']], ai: 'title; text: 1 parágrafo; items: 3 a 5 situações reconhecíveis (t) com detalhe opcional (d)'},
   solucao: {label: 'Solução / método', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area'], ['items', 'Pilares', 'items:Pilar/Explicação']], ai: 'title; text: como funciona em um parágrafo; items: 3 pilares (t, d)'},
   beneficios: {label: 'Benefícios', fields: [['title', 'Título', 'line'], ['items', 'Benefícios', 'items:Benefício/Explicação']], ai: 'title; items: 3 a 6 benefícios concretos (t, d), sem promessa absoluta'},
@@ -85,6 +86,7 @@ function lpBlockHTML(l, b, ctx) {
   switch (b.t) {
     case 'hero': return `<header class="hero ${ctx.img ? '' : 'noimg'}"><div class="w"><div class="g"><div>${b.kicker ? `<span class="k">${E(b.kicker)}</span>` : ''}<h1>${R(b.title)}</h1>${b.text ? `<p class="sub">${R(b.text)}</p>` : ''}${ctx.countdown}${btn(b.cta, 'cta1')}${b.note ? `<div class="note">${E(b.note)}</div>` : ''}</div>${ctx.img ? `<div><img src="${ctx.img}" alt="${E(b.title)}"></div>` : ''}</div></div></header>`;
     case 'numeros': return `<section class="alt"><div class="w center"><div class="grid">${b.items.filter(i => i.t).map(i => `<div><div class="num">${E(i.t)}</div><div class="mut">${E(i.d)}</div></div>`).join('')}</div></div></section>`;
+    case 'amostra': return `<section class="alt"><div class="w"><div class="hero ${ctx.img ? '' : 'noimg'}" style="padding:0"><div class="g">${ctx.img ? `<div><img src="${ctx.img}" alt="${E(b.title)}"></div>` : ''}<div>${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${btn(b.cta || 'Ler uma amostra grátis')}</div></div></div></div></section>`;
     case 'dor': return `<section><div class="w">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${b.items.length ? `<ul class="ck no">${b.items.filter(i => i.t).map(i => `<li><strong>${R(i.t)}</strong>${i.d ? ' ' + R(i.d) : ''}</li>`).join('')}</ul>` : ''}</div></section>`;
     case 'solucao': return `<section class="alt"><div class="w">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${items('', card)}</div></section>`;
     case 'beneficios': return `<section><div class="w">${head()}${items('', card)}</div></section>`;

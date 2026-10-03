@@ -946,7 +946,7 @@ function seedState() {
   const cd = newProject('Cartório Descomplicado', 'Conteúdo + geração de demanda', {cover: 'a6', icon: 'CD'});
   const se = newProject('Saber Ensinar', 'Educação criativa', {cover: 'a8', icon: 'SE'});
   return {
-    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], imglib: {items: []}, lpRefs: {items: [], seeded: false}, inspo: {items: [], boards: [], cats: []}, myFonts: [],
+    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], imglib: {items: []}, lpRefs: {items: [], seeded: false, seen: []}, inspo: {items: [], boards: [], cats: []}, myFonts: [],
     workspace: {name: 'Ampliação Marketing', instruction: 'Criar com clareza estratégica, consistência de marca e foco na jornada de compra.'},
     credits: 30, activeProjectId: mb.id, projects: [mb, cd, se], creatives
   };
@@ -970,7 +970,7 @@ function normalizeInspo(x) {
 function normalizeLpRefs(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), arr = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(t => str(t, n)), TY = ['cadastro', 'curso', 'ebook', 'servico', 'evento', 'produto', 'institucional', 'outro'];
   x = x && typeof x === 'object' ? x : {};
-  return {seeded: !!x.seeded, items: (Array.isArray(x.items) ? x.items : []).filter(r => r && /^[\w-]{1,60}$/.test(r.id || '') && /^https?:\/\/[^\s"'<>]{1,600}$/i.test(r.url || '')).slice(0, 300).map(r => ({id: r.id, url: r.url, title: str(r.title, 200), type: TY.includes(r.type) ? r.type : 'outro', note: str(r.note, 600), use: r.use !== false,
+  return {seeded: !!x.seeded, seen: (Array.isArray(x.seen) ? x.seen : []).slice(0, 400).map(u => str(u, 600)), items: (Array.isArray(x.items) ? x.items : []).filter(r => r && /^[\w-]{1,60}$/.test(r.id || '') && /^https?:\/\/[^\s"'<>]{1,600}$/i.test(r.url || '')).slice(0, 300).map(r => ({id: r.id, url: r.url, title: str(r.title, 200), type: TY.includes(r.type) ? r.type : 'outro', note: str(r.note, 600), use: r.use !== false,
     scan: r.scan && typeof r.scan === 'object' ? {title: str(r.scan.title, 200), description: str(r.scan.description, 400), headings: arr(r.scan.headings, 160, 20), ctas: arr(r.scan.ctas, 60, 15), fonts: arr(r.scan.fonts, 60, 6), colors: arr(r.scan.colors, 9, 8), at: str(r.scan.at, 40)} : null}))};
 }
 function normalizeImglib(x) {
@@ -1079,7 +1079,7 @@ function normalizeSocial(x) {
   return {accounts, posts, boosts, inbox, events, metrics, migrated: !!x.migrated, example: !!x.example};
 }
 /* Landing pages: dados do produto, insumos, blocos (tipos fixos, textos limitados), visual e rastreio. Mantém os campos antigos (headline, sub, bullets, cta, whatsapp). */
-const LP_BLOCK_TYPES = ['hero', 'numeros', 'dor', 'solucao', 'beneficios', 'passos', 'conteudo', 'para_quem', 'autoridade', 'prova', 'oferta', 'bonus', 'garantia', 'faq', 'programa', 'palestrantes', 'local', 'ingressos', 'texto', 'cta_final', 'form'];
+const LP_BLOCK_TYPES = ['hero', 'numeros', 'dor', 'solucao', 'beneficios', 'passos', 'conteudo', 'amostra', 'para_quem', 'autoridade', 'prova', 'oferta', 'bonus', 'garantia', 'faq', 'programa', 'palestrantes', 'local', 'ingressos', 'texto', 'cta_final', 'form'];
 function normalizeLandings(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TY = ['curso', 'ebook', 'servico', 'evento', 'cadastro', 'generico'];
   return (Array.isArray(x) ? x : []).filter(l => l && typeof l === 'object').slice(0, 200).map(l => {
@@ -16856,8 +16856,8 @@ function anManual() {
 const LP_TYPE_INFO = {
   curso: {label: 'Curso online', blocks: ['hero', 'dor', 'solucao', 'conteudo', 'para_quem', 'autoridade', 'prova', 'bonus', 'oferta', 'garantia', 'faq', 'cta_final'], goal: 'checkout', cta: 'Quero me inscrever',
     why: 'Quem compra curso precisa acreditar que o método funciona e que vai conseguir: promessa → dor → método → o que vai aprender → para quem é → professor → prova → oferta e garantia.'},
-  ebook: {label: 'E-book', blocks: ['hero', 'dor', 'conteudo', 'autoridade', 'prova', 'oferta', 'faq', 'cta_final'], goal: 'checkout', cta: 'Quero o e-book',
-    why: 'Produto de decisão rápida: página curta. Capa e promessa no topo, o que tem dentro (capítulos), quem escreveu, prova e oferta.'},
+  ebook: {label: 'E-book', blocks: ['hero', 'dor', 'conteudo', 'amostra', 'autoridade', 'prova', 'oferta', 'faq', 'cta_final'], goal: 'checkout', cta: 'Quero o e-book',
+    why: 'Produto de decisão rápida: página curta. Capa e promessa no topo, o que tem dentro (capítulos), amostra grátis para reduzir o risco, quem escreveu, prova e oferta. Padrão visto nos exemplos de landing de e-book (capa em destaque, amostra, depoimentos e preço claros).'},
   servico: {label: 'Serviço', blocks: ['hero', 'dor', 'solucao', 'passos', 'beneficios', 'prova', 'autoridade', 'faq', 'form'], goal: 'lead', cta: 'Falar com a equipe',
     why: 'Serviço se vende por confiança: problema → como resolvemos → etapas → resultado → provas reais → equipe → perguntas → contato (formulário/WhatsApp).'},
   evento: {label: 'Evento', blocks: ['hero', 'numeros', 'texto', 'programa', 'palestrantes', 'local', 'ingressos', 'prova', 'faq', 'cta_final'], goal: 'checkout', cta: 'Garantir meu ingresso',
@@ -16870,6 +16870,7 @@ const LP_TYPE_INFO = {
 const LP_BLOCK = {
   hero: {label: 'Topo (promessa)', fields: [['kicker', 'Etiqueta (acima do título)', 'line'], ['title', 'Título', 'area'], ['text', 'Subtítulo', 'area'], ['cta', 'Botão', 'line'], ['note', 'Nota abaixo do botão', 'line'], ['imgId', 'Imagem', 'img']], ai: 'title: promessa específica (até 80 caracteres); text: subtítulo que explica para quem e como (até 180); cta: texto do botão; note: microtexto de segurança/condição (opcional); kicker: etiqueta curta'},
   numeros: {label: 'Números / destaques', fields: [['items', 'Itens', 'items:Valor/Legenda']], ai: 'items: 3 a 4 números ou fatos verificáveis do insumo (t = valor, d = legenda). Sem número no insumo, use [CONFIRMAR: …]'},
+  amostra: {label: 'Amostra grátis / prévia', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area'], ['imgId', 'Imagem da prévia', 'img'], ['cta', 'Botão', 'line']], ai: 'title; text: o que a pessoa vê na amostra (capítulo, páginas, trecho), só do insumo; cta: ex. "Ler uma amostra grátis"'},
   dor: {label: 'Problema / dor', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area'], ['items', 'Sinais da dor', 'items:Situação/Detalhe']], ai: 'title; text: 1 parágrafo; items: 3 a 5 situações reconhecíveis (t) com detalhe opcional (d)'},
   solucao: {label: 'Solução / método', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area'], ['items', 'Pilares', 'items:Pilar/Explicação']], ai: 'title; text: como funciona em um parágrafo; items: 3 pilares (t, d)'},
   beneficios: {label: 'Benefícios', fields: [['title', 'Título', 'line'], ['items', 'Benefícios', 'items:Benefício/Explicação']], ai: 'title; items: 3 a 6 benefícios concretos (t, d), sem promessa absoluta'},
@@ -16938,6 +16939,7 @@ function lpBlockHTML(l, b, ctx) {
   switch (b.t) {
     case 'hero': return `<header class="hero ${ctx.img ? '' : 'noimg'}"><div class="w"><div class="g"><div>${b.kicker ? `<span class="k">${E(b.kicker)}</span>` : ''}<h1>${R(b.title)}</h1>${b.text ? `<p class="sub">${R(b.text)}</p>` : ''}${ctx.countdown}${btn(b.cta, 'cta1')}${b.note ? `<div class="note">${E(b.note)}</div>` : ''}</div>${ctx.img ? `<div><img src="${ctx.img}" alt="${E(b.title)}"></div>` : ''}</div></div></header>`;
     case 'numeros': return `<section class="alt"><div class="w center"><div class="grid">${b.items.filter(i => i.t).map(i => `<div><div class="num">${E(i.t)}</div><div class="mut">${E(i.d)}</div></div>`).join('')}</div></div></section>`;
+    case 'amostra': return `<section class="alt"><div class="w"><div class="hero ${ctx.img ? '' : 'noimg'}" style="padding:0"><div class="g">${ctx.img ? `<div><img src="${ctx.img}" alt="${E(b.title)}"></div>` : ''}<div>${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${btn(b.cta || 'Ler uma amostra grátis')}</div></div></div></div></section>`;
     case 'dor': return `<section><div class="w">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${b.items.length ? `<ul class="ck no">${b.items.filter(i => i.t).map(i => `<li><strong>${R(i.t)}</strong>${i.d ? ' ' + R(i.d) : ''}</li>`).join('')}</ul>` : ''}</div></section>`;
     case 'solucao': return `<section class="alt"><div class="w">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${items('', card)}</div></section>`;
     case 'beneficios': return `<section><div class="w">${head()}${items('', card)}</div></section>`;
@@ -17112,9 +17114,17 @@ const LP_REF_SEED = [
   ['https://enwp.com.br/treinamento/governanca-de-ia', 'Governança de IA (treinamento)', 'curso', 'Enviada por você.'],
   ['https://akimobmoveis.com.br/landpage-produtos/', 'Landing de produtos (móveis)', 'produto', 'Enviada por você.'],
   ['https://anuncie.eletromidia.com.br/', 'Anuncie na Eletromidia', 'servico', 'Enviada por você (campanha de captação B2B).'],
-  ['https://imidiaoutdoor.com.br/', 'Imidia Outdoor', 'servico', 'Enviada por você.']
+  ['https://imidiaoutdoor.com.br/', 'Imidia Outdoor', 'servico', 'Enviada por você.'],
+  ['https://landingi.com/pt-br/landing-page/ebook-exemplos/', 'Landingi · exemplos de landing page de e-book', 'ebook', 'Enviada por você (inclui o exemplo Emily Kimelman: gráficos, amostra grátis, escolha de formato, vídeo do autor, avaliações e preço claro).'],
+  ['https://landingi.com/landing-page/ebook-examples/', 'Landingi · 20 best ebook landing page examples', 'ebook', 'Versão em inglês da galeria.'],
+  ['https://blog.greatpages.com.br/post/landing-page-ebook-exemplos-passo-a-passo-converter', 'GreatPages · landing page de e-book: 10 exemplos e passo a passo', 'ebook', 'Achada por busca (português).'],
+  ['https://blog.greatpages.com.br/post/landing-page-ebook-exemplos-como-criar', 'GreatPages · 10 exemplos reais e como criar a sua', 'ebook', 'Achada por busca (português).'],
+  ['https://www.rdstation.com/blog/materiais-educativos/ebooks/exemplos-de-landing-pages/', 'RD Station · 34 exemplos de landing pages que convertem', 'ebook', 'Achada por busca (português).'],
+  ['https://www.zoho.com/blog/pt-br/marketing/landing-page-para-ebook.html', 'Zoho · landing page para e-book: 3 exemplos que funcionam', 'ebook', 'Achada por busca (português).'],
+  ['https://studioartemis.co/conteudos/negocios/landing-page-para-ebook-estrutura-ideal-para-vender-mais/', 'Studio Artemis · estrutura ideal de landing page para e-book', 'ebook', 'Achada por busca (estrutura).'],
+  ['https://www.mailerlite.com/landing-page-examples/ebook', 'MailerLite · galeria de landing pages de e-book', 'ebook', 'Achada por busca.']
 ];
-function lpRefs() { if (!state.lpRefs) state.lpRefs = normalizeLpRefs(null); const R = state.lpRefs; if (!R.seeded) { R.seeded = true; LP_REF_SEED.forEach(([url, title, type, note]) => R.items.push({id: uid('rf'), url, title, type, note, use: true, scan: null})); persist(); } return R; }
+function lpRefs() { if (!state.lpRefs) state.lpRefs = normalizeLpRefs(null); const R = state.lpRefs; if (!Array.isArray(R.seen)) R.seen = []; let ch = false; LP_REF_SEED.forEach(([url, title, type, note]) => { if (R.seen.includes(url) || R.items.some(r => r.url === url)) { if (!R.seen.includes(url)) { R.seen.push(url); ch = true; } return; } R.seen.push(url); R.items.push({id: uid('rf'), url, title, type, note, use: true, scan: null}); ch = true; }); R.seeded = true; if (ch) persist(); return R; }
 function lpRefsHTML() {
   const R = lpRefs();
   return `<div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>Referências de landing pages</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">URLs de páginas que servem de modelo. “Ler estrutura” lê a página pelo seu servidor (blocos, títulos, botões, fontes e cores) e a IA usa só a estrutura como inspiração ao gerar, sem copiar texto.</p></div></div>

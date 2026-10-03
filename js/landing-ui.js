@@ -135,9 +135,17 @@ const LP_REF_SEED = [
   ['https://enwp.com.br/treinamento/governanca-de-ia', 'Governança de IA (treinamento)', 'curso', 'Enviada por você.'],
   ['https://akimobmoveis.com.br/landpage-produtos/', 'Landing de produtos (móveis)', 'produto', 'Enviada por você.'],
   ['https://anuncie.eletromidia.com.br/', 'Anuncie na Eletromidia', 'servico', 'Enviada por você (campanha de captação B2B).'],
-  ['https://imidiaoutdoor.com.br/', 'Imidia Outdoor', 'servico', 'Enviada por você.']
+  ['https://imidiaoutdoor.com.br/', 'Imidia Outdoor', 'servico', 'Enviada por você.'],
+  ['https://landingi.com/pt-br/landing-page/ebook-exemplos/', 'Landingi · exemplos de landing page de e-book', 'ebook', 'Enviada por você (inclui o exemplo Emily Kimelman: gráficos, amostra grátis, escolha de formato, vídeo do autor, avaliações e preço claro).'],
+  ['https://landingi.com/landing-page/ebook-examples/', 'Landingi · 20 best ebook landing page examples', 'ebook', 'Versão em inglês da galeria.'],
+  ['https://blog.greatpages.com.br/post/landing-page-ebook-exemplos-passo-a-passo-converter', 'GreatPages · landing page de e-book: 10 exemplos e passo a passo', 'ebook', 'Achada por busca (português).'],
+  ['https://blog.greatpages.com.br/post/landing-page-ebook-exemplos-como-criar', 'GreatPages · 10 exemplos reais e como criar a sua', 'ebook', 'Achada por busca (português).'],
+  ['https://www.rdstation.com/blog/materiais-educativos/ebooks/exemplos-de-landing-pages/', 'RD Station · 34 exemplos de landing pages que convertem', 'ebook', 'Achada por busca (português).'],
+  ['https://www.zoho.com/blog/pt-br/marketing/landing-page-para-ebook.html', 'Zoho · landing page para e-book: 3 exemplos que funcionam', 'ebook', 'Achada por busca (português).'],
+  ['https://studioartemis.co/conteudos/negocios/landing-page-para-ebook-estrutura-ideal-para-vender-mais/', 'Studio Artemis · estrutura ideal de landing page para e-book', 'ebook', 'Achada por busca (estrutura).'],
+  ['https://www.mailerlite.com/landing-page-examples/ebook', 'MailerLite · galeria de landing pages de e-book', 'ebook', 'Achada por busca.']
 ];
-function lpRefs() { if (!state.lpRefs) state.lpRefs = normalizeLpRefs(null); const R = state.lpRefs; if (!R.seeded) { R.seeded = true; LP_REF_SEED.forEach(([url, title, type, note]) => R.items.push({id: uid('rf'), url, title, type, note, use: true, scan: null})); persist(); } return R; }
+function lpRefs() { if (!state.lpRefs) state.lpRefs = normalizeLpRefs(null); const R = state.lpRefs; if (!Array.isArray(R.seen)) R.seen = []; let ch = false; LP_REF_SEED.forEach(([url, title, type, note]) => { if (R.seen.includes(url) || R.items.some(r => r.url === url)) { if (!R.seen.includes(url)) { R.seen.push(url); ch = true; } return; } R.seen.push(url); R.items.push({id: uid('rf'), url, title, type, note, use: true, scan: null}); ch = true; }); R.seeded = true; if (ch) persist(); return R; }
 function lpRefsHTML() {
   const R = lpRefs();
   return `<div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>Referências de landing pages</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">URLs de páginas que servem de modelo. “Ler estrutura” lê a página pelo seu servidor (blocos, títulos, botões, fontes e cores) e a IA usa só a estrutura como inspiração ao gerar, sem copiar texto.</p></div></div>
