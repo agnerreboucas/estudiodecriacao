@@ -20,7 +20,7 @@ function accAuto(root, sel, key, opt) {
 (function () {
   const wrap = (name, after) => { const f = window[name]; if (typeof f !== 'function') return; window[name] = function () { const r = f.apply(this, arguments); try { after(); } catch (e) { console.warn(name, e); } return r; }; };
   wrap('dzInspector', () => { const L = typeof dzLayer === 'function' ? dzLayer() : null; accAuto($('dzInsp'), 'h4', 'dz-' + (L ? L.type + (L.role === 'logo' ? 'L' : '') : 'none')); });
-  wrap('dtpPanel', () => { const it = dui.tab === 'objeto' && typeof dtpSelItem === 'function' ? dtpSelItem() : null; accAuto($('dtpPanel'), '.okr-label', 'dtp-' + dui.tab + (it ? it.k : '')); });
+  wrap('dtpPanel', () => { const it = dui.tab === 'objeto' && typeof dtpSelItem === 'function' ? dtpSelItem() : null; accAuto($('dtpPanel'), '.okr-label', 'dtp-' + dui.tab + (it ? it.k : ''), dui.tab === 'modelos' ? {open: [0, 1]} : undefined); });
   wrap('covRender', () => accAuto(document.querySelector('.cov-form'), '.okr-label', 'cov', {open: [0, 1, 2, 4]}));
 })();
 

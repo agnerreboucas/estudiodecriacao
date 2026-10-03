@@ -49,10 +49,10 @@ function dtpEditor(p, r) {
     <div class="row-gap"><select class="sm" onchange="dtpDoc().unit=this.value;dtpTouch();dtpPanel();dtpDraw()" title="Unidade de medida">${Object.keys(DTP_U).map(k => `<option value="${k}" ${k === u ? 'selected' : ''}>${DTP_UL[k]}</option>`).join('')}</select><button class="btn sm" onclick="dtpZoom(0.8)">−</button><span id="dtpZ" class="muted" style="min-width:44px;text-align:center;font-size:12px"></span><button class="btn sm" onclick="dtpZoom(1.25)">＋</button><button class="btn sm" onclick="dtpFit()">Ajustar</button>
     <button class="tchip ${dui.view === 'story' ? 'on' : ''}" onclick="dtpView(dui.view==='story'?'layout':'story')" title="Edição só do texto, com a marca do estouro">Editar texto (matéria)</button></div></div>
   <div class="dtp-wrap"><div class="dtp-left" id="dtpLeft"></div><div class="dtp-mid"><div class="dtp-stage" id="dtpStage"><canvas id="dtpCv"></canvas></div><div id="dtpStory" class="dtp-story" style="display:none"></div><div class="dtp-foot"><span id="dtpInfo"></span><span id="dtpAuto" class="muted"></span></div></div>
-  <div class="dtp-right"><div class="matrix-tabs">${[['texto', 'Texto'], ['estilos', 'Estilos'], ['pagina', 'Página'], ['objeto', 'Objeto'], ['ref', 'Referência'], ['exportar', 'Exportar']].map(([k, l]) => `<button class="${dui.tab === k ? 'active' : ''}" onclick="dtpTabSet('${k}')">${l}</button>`).join('')}</div><div id="dtpPanel"></div></div></div>`;
+  <div class="dtp-right"><div class="matrix-tabs">${[['texto', 'Texto'], ['estilos', 'Estilos'], ['modelos', 'Modelos'], ['pagina', 'Página'], ['objeto', 'Objeto'], ['ref', 'Referência'], ['exportar', 'Exportar']].map(([k, l]) => `<button class="${dui.tab === k ? 'active' : ''}" onclick="dtpTabSet('${k}')">${l}</button>`).join('')}</div><div id="dtpPanel"></div></div></div>`;
   dtpBindStage(); dtpStatus(); dtpRefresh(true); setTimeout(dtpFit, 50);
 }
-function dtpTabSet(t) { dui.tab = t; document.querySelectorAll('.dtp-right .matrix-tabs button').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().startsWith(({texto: 'texto', estilos: 'estilos', pagina: 'página', objeto: 'objeto', ref: 'referência', exportar: 'exportar'})[t]))); dtpPanel(); }
+function dtpTabSet(t) { dui.tab = t; document.querySelectorAll('.dtp-right .matrix-tabs button').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().startsWith(({texto: 'texto', estilos: 'estilos', modelos: 'modelos', pagina: 'página', objeto: 'objeto', ref: 'referência', exportar: 'exportar'})[t]))); dtpPanel(); }
 function dtpTool(k) { dui.tool = k; document.querySelectorAll('.dtp-bar [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === k)); const c = $('dtpCv'); if (c) c.style.cursor = k === 'v' ? 'default' : 'crosshair'; }
 function dtpView(v) { dui.view = v; const s = $('dtpStage'), st = $('dtpStory'); if (!s) return; s.style.display = v === 'layout' ? '' : 'none'; st.style.display = v === 'story' ? '' : 'none'; document.querySelectorAll('.dtp-bar .tchip').forEach(b => { if (/matéria/.test(b.textContent)) b.classList.toggle('on', v === 'story'); }); if (v === 'story') dtpStoryRender(); else { dtpFit(); } }
 
@@ -212,6 +212,7 @@ function dtpPanel() {
   const N = (label, path, extra) => { const v = path.split('.').reduce((o, k) => o[k], d); return `<div class="field"><label>${label}</label><input type="number" step="any" value="${dtpFmt(v, u)}" onchange="dtpSetPt('${path}',this.value)" ${extra || ''}></div>`; };
   if (dui.tab === 'texto') { P.innerHTML = dtpTextoHTML(d); return; }
   if (dui.tab === 'estilos') { P.innerHTML = dtpEstilosHTML(d); return; }
+  if (dui.tab === 'modelos') { P.innerHTML = dtpModelosHTML(d); return; }
   if (dui.tab === 'objeto') { P.innerHTML = dtpObjetoHTML(d, N); return; }
   if (dui.tab === 'ref') { P.innerHTML = dtpRefHTML(d); return; }
   if (dui.tab === 'exportar') { P.innerHTML = dtpExportHTML(d); return; }

@@ -81,7 +81,8 @@ function normalizeLayouts(x) {
     const sd = d.styles && typeof d.styles === 'object' ? d.styles : {};
     Object.keys(sd).filter(k => /^[a-z0-9_-]{1,24}$/i.test(k)).slice(0, 40).forEach(k => { styles[k] = style(sd[k], D); });
     ['body', 'h1', 'h2', 'h3', 'quote', 'caption'].forEach(k => { if (!styles[k]) styles[k] = style({}, D); });
-    const items = a => (Array.isArray(a) ? a : []).filter(i => i && ['img', 'rect', 'text'].includes(i.k)).slice(0, 80).map(i => ({id: safeId(i.id) ? i.id : uid('fr'), k: i.k, x: num(i.x, 0, -5000, 9000), y: num(i.y, 0, -5000, 9000), w: num(i.w, 50, 2, 9000), h: num(i.h, 50, 2, 9000), wrap: WRAP.includes(i.wrap) ? i.wrap : 'none', off: num(i.off, 6, 0, 200), imgId: safeId(i.imgId) ? i.imgId : '', fill: i.fill ? hex(i.fill, '#CCCCCC') : '', stroke: i.stroke ? hex(i.stroke, '#000000') : '', sw: num(i.sw, 1, 0, 40), op: num(i.op, 1, 0, 1), zoom: num(i.zoom, 1, 0.2, 8), px: num(i.px, 0, -5000, 5000), py: num(i.py, 0, -5000, 5000), text: str(i.text, 6000), st: styles[i.st] ? i.st : 'body', pad: num(i.pad, 4, 0, 100), ar: num(i.ar, 0, 0, 100)}));
+    const ov = o => { if (!o || typeof o !== 'object') return undefined; const r = {}; ['size', 'lead', 'indent', 'after', 'before'].forEach(k => { if (o[k] != null && isFinite(+o[k])) r[k] = num(o[k], 0, 0, 600); }); ['b', 'i', 'caps'].forEach(k => { if (o[k] != null) r[k] = o[k] ? 1 : 0; }); if (/^#[0-9a-f]{6}$/i.test(String(o.color))) r.color = o.color; if (ALIGN.includes(o.align)) r.align = o.align; return Object.keys(r).length ? r : undefined; };
+    const items = a => (Array.isArray(a) ? a : []).filter(i => i && ['img', 'rect', 'text'].includes(i.k)).slice(0, 80).map(i => ({id: safeId(i.id) ? i.id : uid('fr'), k: i.k, x: num(i.x, 0, -5000, 9000), y: num(i.y, 0, -5000, 9000), w: num(i.w, 50, 2, 9000), h: num(i.h, 50, 2, 9000), wrap: WRAP.includes(i.wrap) ? i.wrap : 'none', off: num(i.off, 6, 0, 200), imgId: safeId(i.imgId) ? i.imgId : '', fill: i.fill ? hex(i.fill, '#CCCCCC') : '', stroke: i.stroke ? hex(i.stroke, '#000000') : '', sw: num(i.sw, 1, 0, 40), op: num(i.op, 1, 0, 1), zoom: num(i.zoom, 1, 0.2, 8), px: num(i.px, 0, -5000, 5000), py: num(i.py, 0, -5000, 5000), text: str(i.text, 6000), st: styles[i.st] ? i.st : 'body', pad: num(i.pad, 4, 0, 100), ar: num(i.ar, 0, 0, 100), ov: ov(i.ov)}));
     const story = (Array.isArray(d.story) ? d.story : []).slice(0, 4000).map(s => {
       if (!s) return null;
       if (s.k === 'break' || s.k === 'colbreak') return {k: s.k};
@@ -90,7 +91,7 @@ function normalizeLayouts(x) {
     }).filter(Boolean);
     const rn = d.run || {};
     return {
-      id: d.id, name: str(d.name, 120) || 'Documento', created: str(d.created, 40), unit: UNITS.includes(d.unit) ? d.unit : 'mm',
+      id: d.id, styleId: /^[a-z0-9_-]{1,24}$/i.test(d.styleId || '') ? d.styleId : '', name: str(d.name, 120) || 'Documento', created: str(d.created, 40), unit: UNITS.includes(d.unit) ? d.unit : 'mm',
       page: {w: num(pg.w, 420, 36, 6000), h: num(pg.h, 595, 36, 6000)}, facing: !!d.facing, bleed: num(d.bleed, 8.5, 0, 72),
       margins: {t: num(m.t, 40, 0, 2000), b: num(m.b, 40, 0, 2000), i: num(m.i, 40, 0, 2000), o: num(m.o, 40, 0, 2000)},
       cols: Math.round(num(d.cols, 1, 1, 8)), colw: (Array.isArray(d.colw) ? d.colw : []).slice(0, 8).map(v => num(v, 1, 0.1, 20)), mod: {cols: Math.round(num(d.mod && d.mod.cols, 6, 0, 24)), rows: Math.round(num(d.mod && d.mod.rows, 8, 0, 24))}, front: Math.round(num(d.front, 0, 0, 20)), gutter: num(d.gutter, 14, 0, 200), baseline: num(d.baseline, 0, 0, 100), nPages: Math.round(num(d.nPages, 1, 1, 400)), autoflow: d.autoflow !== false, paper: hex(d.paper, '#FFFFFF'),
