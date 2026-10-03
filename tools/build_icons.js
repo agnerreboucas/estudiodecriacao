@@ -48,13 +48,26 @@ Object.keys(nodes).forEach(name => {
   bucket[ci].push({name, d, k: (tags[name] || []).slice(0, 5).join(' ')});
 });
 const out = []; const per = 56;
-bucket.forEach((arr, ci) => { arr.sort((a, b) => a.name.split('-').length - b.name.split('-').length || a.d.length - b.d.length); arr.slice(0, per).forEach(it => out.push([it.name, ptLabel(it.name), ci, it.d, it.k])); });
-const cats = CATS.map(c => [c[0], c[1]]);
+bucket.forEach((arr, ci) => { arr.sort((a, b) => a.name.split('-').length - b.name.split('-').length || a.d.length - b.d.length); arr.slice(0, per).forEach(it => out.push([it.name, ptLabel(it.name), ci + 3, it.d, it.k])); });
+const cats = [['justica', 'Justiça e direito'], ['vendas', 'Vendas e comércio'], ['atendimento', 'Atendimento e suporte']].concat(CATS.map(c => [c[0], c[1]]));
+/* Phosphor (MIT): seleção curada para justiça, vendas, negócios e atendimento; versões regular e cheia (viewBox 256, caminhos preenchidos) */
+const phDir = process.argv[3] && path.resolve(process.argv[3]);
+if (phDir) {
+  const cur = require('./ph_curated.js'), AREA = {J: 0, V: 1, A: 2, N: cats.findIndex(c => c[0] === 'negocios')};
+  const pathOf = f => { const t = fs.readFileSync(f, 'utf8'); return [...t.matchAll(/<path[^>]* d="([^"]+)"/g)].map(m => m[1]).join(''); };
+  Object.keys(cur).forEach(name => {
+    const [label, kw, areas] = cur[name]; if (!label) return; const cs = [...areas].map(ch => AREA[ch]), prim = cs[0], extra = cs.slice(1);
+    [['regular', 'ph-', ''], ['fill', 'phf-', ' · cheio']].forEach(([w, pre, suf]) => {
+      const f = path.join(phDir, 'assets', w, name + (w === 'regular' ? '' : '-fill') + '.svg'); if (!fs.existsSync(f)) return; const d = pathOf(f); if (!d) return;
+      out.push([pre + name, label + suf, prim, d, kw + ' ' + name.replace(/-/g, ' '), 256, w === 'fill' ? 'f' : 'r', extra]);
+    });
+  });
+}
 const js = `/* Biblioteca de ícones para o Laboratório do Logo: ${out.length} ícones em ${cats.length} categorias.
-   Origem: Lucide (https://lucide.dev), licença ISC; ver THIRD_PARTY.md. Gerado por tools/build_icons.js. Viewbox 24, traço. */
+   Origem: Lucide (ISC, linha, viewBox 24) e Phosphor (MIT, caminhos preenchidos, viewBox 256); ver THIRD_PARTY.md. Gerado por tools/build_icons.js. */
 const LG_ICON_CATS = ${JSON.stringify(cats)};
-/* [id, rótulo PT, categoria, caminho, palavras-chave em inglês] */
+/* [id, rótulo PT, categoria, caminho, palavras-chave, viewBox (24 se ausente), estilo ('f' cheio, 'r' regular; ausente = linha), categorias extras] */
 const LG_ICONS = ${JSON.stringify(out)};
 `;
 fs.writeFileSync(path.resolve(__dirname, '../js/logo-icons.js'), js);
-console.log(out.length, 'ícones;', bucket.map((b, i) => cats[i][0] + ':' + Math.min(per, b.length) + '/' + b.length).join(' '), (js.length / 1024).toFixed(0) + ' KB');
+console.log(out.length, 'ícones;', cats.map((c, i) => c[0] + ':' + out.filter(o => o[2] === i || (o[7] || []).includes(i)).length).join(' '), (js.length / 1024).toFixed(0) + ' KB');
