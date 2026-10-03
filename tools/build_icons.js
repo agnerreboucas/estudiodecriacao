@@ -48,12 +48,12 @@ Object.keys(nodes).forEach(name => {
   bucket[ci].push({name, d, k: (tags[name] || []).slice(0, 5).join(' ')});
 });
 const out = []; const per = 56;
-bucket.forEach((arr, ci) => { arr.sort((a, b) => a.name.split('-').length - b.name.split('-').length || a.d.length - b.d.length); arr.slice(0, per).forEach(it => out.push([it.name, ptLabel(it.name), ci + 3, it.d, it.k])); });
-const cats = [['justica', 'Justiça e direito'], ['vendas', 'Vendas e comércio'], ['atendimento', 'Atendimento e suporte']].concat(CATS.map(c => [c[0], c[1]]));
+bucket.forEach((arr, ci) => { arr.sort((a, b) => a.name.split('-').length - b.name.split('-').length || a.d.length - b.d.length); arr.slice(0, per).forEach(it => out.push([it.name, ptLabel(it.name), ci + 4, it.d, it.k])); });
+const cats = [['justica', 'Justiça e direito'], ['vendas', 'Vendas e comércio'], ['atendimento', 'Atendimento e suporte'], ['redes', 'Redes sociais e apps']].concat(CATS.map(c => [c[0], c[1]]));
 /* Phosphor (MIT): seleção curada para justiça, vendas, negócios e atendimento; versões regular e cheia (viewBox 256, caminhos preenchidos) */
 const phDir = process.argv[3] && path.resolve(process.argv[3]);
 if (phDir) {
-  const cur = require('./ph_curated.js'), AREA = {J: 0, V: 1, A: 2, N: cats.findIndex(c => c[0] === 'negocios')};
+  const cur = require('./ph_curated.js'), AREA = {J: 0, V: 1, A: 2, R: 3, N: cats.findIndex(c => c[0] === 'negocios')};
   const pathOf = f => { const t = fs.readFileSync(f, 'utf8'); return [...t.matchAll(/<path[^>]* d="([^"]+)"/g)].map(m => m[1]).join(''); };
   Object.keys(cur).forEach(name => {
     const [label, kw, areas] = cur[name]; if (!label) return; const cs = [...areas].map(ch => AREA[ch]), prim = cs[0], extra = cs.slice(1);
@@ -63,8 +63,19 @@ if (phDir) {
     });
   });
 }
+/* Simple Icons (CC0): logotipos de redes sociais e apps; caminho único, viewBox 24, preenchido */
+const siDir = process.argv[4] && path.resolve(process.argv[4]);
+if (siDir) {
+  const sc = require('./si_curated.js'), ri = cats.findIndex(c => c[0] === 'redes'), phLogo = phDir && (n => path.join(phDir, 'assets', 'fill', n + '-logo-fill.svg')), phReg = phDir && (n => path.join(phDir, 'assets', 'regular', n + '-logo.svg'));
+  const pathOf2 = f => { const t = fs.readFileSync(f, 'utf8'); return [...t.matchAll(/<path[^>]* d="([^"]+)"/g)].map(m => m[1]).join(''); };
+  Object.keys(sc).forEach(k => {
+    const [label, kw] = sc[k];
+    if (k.startsWith('ph:')) { const n = k.slice(3); if (!phLogo) return; [[phReg(n), 'ph-', ''], [phLogo(n), 'phf-', ' · cheio']].forEach(([f, pre, suf]) => { if (fs.existsSync(f)) { const d = pathOf2(f); if (d) out.push([pre + n + '-logo', label + suf, ri, d, kw + ' logo marca ' + n, 256, pre === 'phf-' ? 'f' : 'r', []]); } }); return; }
+    const f = path.join(siDir, 'icons', k + '.svg'); if (!fs.existsSync(f)) return; const d = pathOf2(f); if (d) out.push(['si-' + k, label, ri, d, kw + ' logo marca ' + k, 24, 'f', []]);
+  });
+}
 const js = `/* Biblioteca de ícones para o Laboratório do Logo: ${out.length} ícones em ${cats.length} categorias.
-   Origem: Lucide (ISC, linha, viewBox 24) e Phosphor (MIT, caminhos preenchidos, viewBox 256); ver THIRD_PARTY.md. Gerado por tools/build_icons.js. */
+   Origem: Lucide (ISC, linha, viewBox 24), Phosphor (MIT, preenchidos, viewBox 256) e Simple Icons (CC0, logotipos de redes e apps, viewBox 24); ver THIRD_PARTY.md. Logotipos de terceiros são marcas registradas dos seus donos. Gerado por tools/build_icons.js. */
 const LG_ICON_CATS = ${JSON.stringify(cats)};
 /* [id, rótulo PT, categoria, caminho, palavras-chave, viewBox (24 se ausente), estilo ('f' cheio, 'r' regular; ausente = linha), categorias extras] */
 const LG_ICONS = ${JSON.stringify(out)};
