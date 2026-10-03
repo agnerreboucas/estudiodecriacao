@@ -49,39 +49,96 @@ const lum = h => { const [r, g, b] = hex2rgb(h).map(v => { v /= 255; return v <=
 const readable = h => lum(h) > 0.4 ? '#111111' : '#ffffff';
 const mixHex = (a, b, t) => { const x = hex2rgb(a), y = hex2rgb(b); return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
 
-/* ---- texto: **palavra** marca destaque; \n quebra de linha ---- */
+/* ---- texto: **palavra** marca destaque; \n quebra de linha; L.spans formata trechos (letras ou palavras) ----
+   Posições (s,e) dos trechos são índices no texto "limpo" (sem os ** dos destaques). */
 function parseText(content) {
-  let ord = 0;
+  let ord = 0, pos = 0;
   return String(content || '').split('\n').map(par => {
     const words = [], re = /\*\*([^*]+)\*\*|([^*]+|\*)/g; let m;
-    while ((m = re.exec(par))) { const em = m[1] !== undefined; (em ? m[1] : m[2]).split(/\s+/).filter(Boolean).forEach(t => words.push({t, em, ord: ord++})); }
-    return words;
+    while ((m = re.exec(par))) {
+      const em = m[1] !== undefined, seg = em ? m[1] : m[2], tk = /\S+|\s+/g; let t;
+      while ((t = tk.exec(seg))) { if (/^\s/.test(t[0])) pos += t[0].length; else { words.push({t: t[0], em, ord: ord++, s: pos, e: pos + t[0].length}); pos += t[0].length; } }
+    }
+    pos += 1; return words;
   });
+}
+const plainOf = c => String(c || '').split('\n').map(par => par.replace(/\*\*([^*]+)\*\*/g, '$1')).join('\n');
+/* índice no texto do <textarea> (com **) → índice no texto limpo */
+function rawToPlain(content, idx) {
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v)); let removed = 0, off = 0;
+  for (const par of String(content || '').split('\n')) {
+    const re = /\*\*([^*]+)\*\*/g; let m;
+    while ((m = re.exec(par))) { const a = off + m.index, b = a + m[0].length; removed += clamp(idx - a, 0, 2) + clamp(idx - (b - 2), 0, 2); }
+    off += par.length + 1;
+  }
+  return Math.max(0, idx - removed);
 }
 function serializeText(paras) {
   return paras.map(words => { const out = []; let i = 0; while (i < words.length) { if (words[i].em) { const g = []; while (i < words.length && words[i].em) g.push(words[i++].t); out.push('**' + g.join(' ') + '**'); } else out.push(words[i++].t); } return out.join(' '); }).join('\n');
 }
 function toggleWordEm(content, ord) { const paras = parseText(content); paras.forEach(p => p.forEach(w => { if (w.ord === ord) w.em = !w.em; })); return serializeText(paras); }
 
+/* estilo por caractere: junta os trechos (o último sobrepõe) */
+const SPAN_KEYS = ['size', 'color', 'family', 'weight', 'tr', 'italic'];
+function spanStyles(L, n) {
+  if (!L.spans || !L.spans.length) return null; const arr = new Array(n).fill(null);
+  L.spans.forEach(sp => { for (let i = Math.max(0, sp.s); i < Math.min(n, sp.e); i++) arr[i] = Object.assign({}, arr[i] || {}, sp.st); });
+  return arr;
+}
+/* grava estilos por caractere de volta como trechos compactos */
+function spansFromStyles(arr) {
+  const out = []; let cur = null;
+  const same = (a, b) => (!a && !b) || (a && b && SPAN_KEYS.every(k => a[k] === b[k]));
+  arr.forEach((st, i) => { if (st && !Object.keys(st).length) st = null; if (cur && same(cur.st, st)) cur.e = i + 1; else { cur = st ? {s: i, e: i + 1, st: Object.assign({}, st)} : null; if (cur) out.push(cur); } });
+  return out;
+}
+/* aplica props (valor undefined/'' remove a propriedade) ao trecho [s,e) */
+function applySpanProps(L, s, e, props) {
+  const n = plainOf(L.content).length, arr = spanStyles(L, n) || new Array(n).fill(null);
+  s = Math.max(0, Math.min(n, s)); e = Math.max(s, Math.min(n, e));
+  for (let i = s; i < e; i++) { const st = Object.assign({}, arr[i] || {}); Object.keys(props).forEach(k => { if (props[k] === undefined || props[k] === '' || props[k] === null) delete st[k]; else st[k] = props[k]; }); arr[i] = Object.keys(st).length ? st : null; }
+  L.spans = spansFromStyles(arr); if (!L.spans.length) delete L.spans;
+}
+/* texto mudou: desloca os trechos conforme a parte alterada */
+function remapSpans(oldPlain, newPlain, spans) {
+  if (!spans || !spans.length) return spans; let p = 0; const mx = Math.min(oldPlain.length, newPlain.length);
+  while (p < mx && oldPlain[p] === newPlain[p]) p++;
+  let q = 0; while (q < mx - p && oldPlain[oldPlain.length - 1 - q] === newPlain[newPlain.length - 1 - q]) q++;
+  const oe = oldPlain.length - q, d = newPlain.length - oldPlain.length, out = [];
+  spans.forEach(sp => { let s = sp.s, e = sp.e; if (e <= p) { out.push({...sp}); return; } if (s >= oe) { out.push({...sp, s: s + d, e: e + d}); return; } s = Math.min(s, p); e = Math.max(s, e + d); e = Math.min(e, newPlain.length); if (e > s) out.push({...sp, s, e}); });
+  return out;
+}
+
 const MEAS = document.createElement('canvas').getContext('2d');
 const LBOX = {};   // caixas calculadas na última renderização (hit-test e destaque por clique)
-const fontStr = (L, size, weight) => `${weight} ${size}px ${fontStack(L.family)}`;
+const fontOf = (family, size, weight, italic) => `${italic ? 'italic ' : ''}${weight} ${size}px ${fontStack(family)}`;
+const fontStr = (L, size, weight) => fontOf(L.family, size, weight);
 const emFont = L => L.emMode === 'bold' ? {size: L.size, weight: Math.min(900, (+L.weight || 400) + 300)} : L.emMode === 'scale' ? {size: L.size * (L.emScale || 1.25), weight: L.weight} : {size: L.size, weight: L.weight};
+const trText = (txt, tr, upper, atWordStart) => { const t = tr || (upper ? 'upper' : ''); return t === 'upper' ? txt.toUpperCase() : t === 'lower' ? txt.toLowerCase() : t === 'title' ? (atWordStart ? txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase() : txt.toLowerCase()) : txt; };
 function layoutText(L, ctx) {
   ctx = ctx || MEAS;
-  const lines = [], ls = +L.ls || 0, pad = L.emMode === 'bg' ? 12 : 0;
+  const lines = [], ls = +L.ls || 0, pad = L.emMode === 'bg' ? 12 : 0, paras = parseText(L.content), plainLen = plainOf(L.content).length, sty = spanStyles(L, plainLen);
   if (ctx.letterSpacing !== undefined) ctx.letterSpacing = ls + 'px';
   const space = () => { ctx.font = fontStr(L, L.size, L.weight); return ctx.measureText(' ').width + ls; };
-  parseText(L.content).forEach(words => {
+  /* uma palavra vira trechos (runs) com o mesmo estilo; sem formatação é um trecho só */
+  const buildRuns = (wd) => {
+    const runs = [], text = wd.t, key = i => { const st = sty && sty[wd.s + i]; return st ? JSON.stringify(st) : ''; };
+    let a = 0; for (let i = 1; i <= text.length; i++) if (i === text.length || key(i) !== key(a)) { runs.push({a, b: i, st: sty && sty[wd.s + a] || null}); a = i; }
+    return runs.map(r => {
+      const st = r.st || {}, base = wd.em ? emFont(L) : {size: L.size, weight: L.weight};
+      const size = (st.size || L.size) * (wd.em && L.emMode === 'scale' ? (L.emScale || 1.25) : 1), weight = st.weight || (wd.em && L.emMode === 'bold' ? base.weight : L.weight), family = st.family || L.family, italic = !!st.italic;
+      const txt = trText(text.slice(r.a, r.b), st.tr, L.upper, r.a === 0); ctx.font = fontOf(family, size, weight, italic);
+      return {t: txt, w: ctx.measureText(txt).width, size, weight, family, italic, color: st.color || '', font: ctx.font, s: wd.s + r.a, e: wd.s + r.b};
+    });
+  };
+  paras.forEach(words => {
     let cur = {words: [], w: 0, maxSize: L.size};
     if (!words.length) { lines.push(cur); return; }
     words.forEach(wd => {
-      const f = wd.em ? emFont(L) : {size: L.size, weight: L.weight}, txt = L.upper ? wd.t.toUpperCase() : wd.t;
-      ctx.font = fontStr(L, f.size, f.weight);
-      const p = wd.em ? pad : 0, ww = ctx.measureText(txt).width + p * 2, sp = cur.words.length ? space() : 0;
+      const runs = buildRuns(wd), p = wd.em ? pad : 0, ww = runs.reduce((a, r) => a + r.w, 0) + p * 2, sp = cur.words.length ? space() : 0, msz = Math.max(...runs.map(r => r.size));
       if (cur.words.length && cur.w + sp + ww > L.w) { lines.push(cur); cur = {words: [], w: 0, maxSize: L.size}; }
       const x = cur.words.length ? cur.w + space() : 0;
-      cur.words.push({t: txt, em: wd.em, x, w: ww, pad: p, size: f.size, weight: f.weight, ord: wd.ord}); cur.w = x + ww; cur.maxSize = Math.max(cur.maxSize, f.size);
+      cur.words.push({t: runs.map(r => r.t).join(''), em: wd.em, x, w: ww, pad: p, size: msz, weight: runs[0].weight, ord: wd.ord, s: wd.s, e: wd.e, runs}); cur.w = x + ww; cur.maxSize = Math.max(cur.maxSize, msz);
     });
     lines.push(cur);
   });
@@ -99,13 +156,15 @@ function drawText(ctx, L) {
   lay.lines.forEach(l => {
     const base = L.y + l.y + (l.h - l.maxSize) / 2 + l.maxSize * 0.82;
     l.words.forEach(w => {
-      const x = L.x + l.off + w.x; ctx.font = fontStr(L, w.size, w.weight);
-      if (w.em && L.emMode === 'bg') { ctx.fillStyle = L.emBg; rr(ctx, x, base - w.size * 0.86, w.w, w.size * 1.12, 10); ctx.fill(); ctx.fillStyle = L.emText || '#000'; ctx.fillText(w.t, x + w.pad, base); }
-      else {
-        ctx.fillStyle = w.em ? (L.emColor || L.color) : L.color; ctx.fillText(w.t, x, base);
-        if (w.em && L.emMode === 'underline') ctx.fillRect(x, base + w.size * 0.1, w.w, Math.max(4, w.size * 0.06));
-      }
-      words.push({x, y: L.y + l.y, w: w.w, h: l.h, ord: w.ord});
+      const x = L.x + l.off + w.x;
+      if (w.em && L.emMode === 'bg') { ctx.fillStyle = L.emBg; rr(ctx, x, base - w.size * 0.86, w.w, w.size * 1.12, 10); ctx.fill(); }
+      let cx = x + w.pad; const rb = [];
+      w.runs.forEach(r => {
+        ctx.font = r.font; ctx.fillStyle = r.color || (w.em ? (L.emMode === 'bg' ? (L.emText || '#000') : (L.emColor || L.color)) : L.color); ctx.fillText(r.t, cx, base);
+        rb.push({x: cx, w: r.w, s: r.s, e: r.e, font: r.font, t: r.t}); cx += r.w;
+      });
+      if (w.em && L.emMode === 'underline') ctx.fillRect(x, base + w.size * 0.1, w.w, Math.max(4, w.size * 0.06));
+      words.push({x, y: L.y + l.y, w: w.w, h: l.h, ord: w.ord, s: w.s, e: w.e, runs: rb});
     });
   });
   ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: lay.h, words}; return lay;
@@ -402,7 +461,7 @@ function variantFromBase(base, tk, texts, emMode, fmt) {
   const targets = [['title', texts.h && autoEmphasis(texts.h, emMode)], ['body', texts.s], ['cta-text', texts.c]].map(([r, v]) => [first(r), v]).filter(([L, v]) => L && v);
   const orig = new Map(s.layers.map(l => [l.id, l.y]));
   const olds = targets.map(([L]) => ({L, y: L.y, h: layoutText(L).h, size: L.size}));
-  targets.forEach(([L, v]) => { L.content = v; });
+  targets.forEach(([L, v]) => { L.content = v; delete L.spans; });
   themeSlide(s, tk);
   const movable = l => !FIXED_ROLES.includes(l.role) && l.type !== 'image' && !(l.type === 'rect' && l.w >= fmt.w - 2);
   const tOld = olds.find(o => o.L.role === 'title');

@@ -138,9 +138,9 @@ async function dzGenerate() {
 function dzEditorShell(p, r) {
   const s = dzSet();
   r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">← Estúdio</button><input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>
-    <button class="btn sm ${dz.mode === 'emphasis' ? 'dark' : ''}" onclick="dzModeEm()" title="Clique em palavras do texto para destacar">✦ Destacar por clique</button>
+    <button class="btn sm ${dz.mode === 'emphasis' ? 'dark' : ''}" onclick="dzModeEm()" title="Clique em palavras do texto para destacar">✦ Destacar por clique</button><button class="btn sm ${dz.mode === 'fmt' ? 'dark' : ''}" onclick="dzModeFmt()" title="Clique numa palavra do slide para formatar só ela (Shift estende)">✎ Formatar palavra</button>
     ${dzSet().deck ? '<button class="btn sm dark" onclick="dzPresentDeck()" title="Apresentar e baixar em HTML">▶ Apresentar</button>' : ''}<button class="btn sm" onclick="dzResizeOpen(dz.setId)" title="Adaptar esta arte para outras medidas">⤢ Tamanhos</button>
-    <button class="btn sm" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta peça">⚡ Variações</button><button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddLogo()">＋ Logo</button><button class="btn sm" onclick="dzAddPhoto()">＋ Foto</button>
+    <button class="btn sm" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta peça">⚡ Variações</button><button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddLogo()">＋ Logo</button><button class="btn sm" onclick="dzAddPhoto()">＋ Foto</button><button class="btn sm" onclick="dzLayerDup()" title="Duplicar o elemento selecionado: texto, imagem, forma ou logo (Ctrl+D)">⧉ Duplicar</button>
     <button class="btn sm dark" id="dzSaveBtn" onclick="dzSaveNow()" title="Salvar agora (o editor também salva sozinho)">Salvar</button><button class="btn sm" onclick="dzSaveTemplate()" title="Guardar esta peça ou apresentação como modelo">★ Modelo</button><button class="btn sm" onclick="dzSaveStyle()">Salvar como estilo</button><button class="btn sm" onclick="dzApplyStyleModal()">Aplicar estilo…</button><button class="btn sm" onclick="dzExportOne()">PNG</button><button class="btn sm" onclick="dzExportPDF()" title="PDF com uma página por slide">⬇ PDF</button><button class="btn sm" onclick="dzExportPSD()" title="Photoshop em camadas">PSD</button><button class="btn sm" onclick="dzExportLayers()" title="PNG por camada + manifesto">Camadas</button><button class="btn sm dark" onclick="dzExportAll()">Baixar todos (ZIP)</button></div></div>
   <div class="dz-editor"><div class="dz-slides" id="dzSlides"></div><div class="dz-stage" id="dzStage"><canvas id="dzCanvas"></canvas></div><div class="dz-insp" id="dzInsp"></div></div><input type="file" id="dzFile" accept="image/*" hidden>`;
   dzBindCanvas(); dzSlidesPanel(); dzInspector(); dzFit(); ensureSetResources(s).then(() => { dzDraw(); dzSlidesPanel(); });
@@ -160,7 +160,8 @@ function dzDraw() {
     ctx.save(); ctx.strokeStyle = '#2f6bff'; ctx.lineWidth = 3 / dz.scale; ctx.setLineDash([10 / dz.scale, 6 / dz.scale]); ctx.strokeRect(b.x, b.y, b.w, b.h); ctx.setLineDash([]);
     const hs = 22 / dz.scale; ctx.fillStyle = '#2f6bff'; ctx.fillRect(b.x + b.w - hs / 2, b.y + b.h - hs / 2, hs, hs); ctx.restore();
   }
-  if (dz.mode === 'emphasis') sl.layers.filter(l => l.type === 'text').forEach(l => (LBOX[l.id].words || []).forEach(w => { ctx.save(); ctx.strokeStyle = 'rgba(47,107,255,.35)'; ctx.lineWidth = 2 / dz.scale; ctx.strokeRect(w.x, w.y, w.w, w.h); ctx.restore(); }));
+  if (dz.range && L && L.type === 'text' && dz.range.id === L.id && b && b.words) dzDrawRange(ctx, b);
+  if (dz.mode === 'emphasis' || dz.mode === 'fmt') sl.layers.filter(l => l.type === 'text').forEach(l => (LBOX[l.id].words || []).forEach(w => { ctx.save(); ctx.strokeStyle = 'rgba(47,107,255,.35)'; ctx.lineWidth = 2 / dz.scale; ctx.strokeRect(w.x, w.y, w.w, w.h); ctx.restore(); }));
 }
 function dzSlidesPanel() {
   const s = dzSet(), el = $('dzSlides'); if (!s || !el) return;
@@ -186,10 +187,15 @@ function dzBindCanvas() {
   const pt = e => { const r = cv.getBoundingClientRect(); return {x: (e.clientX - r.left) / r.width * cv.width, y: (e.clientY - r.top) / r.height * cv.height}; };
   cv.addEventListener('pointerdown', e => {
     const s = dzSlide(), p = pt(e); cv.setPointerCapture(e.pointerId);
+    if (dz.mode === 'fmt') {
+      const L = [...s.layers].reverse().find(l => l.type === 'text' && !l.hidden && LBOX[l.id] && p.x >= LBOX[l.id].x && p.x <= LBOX[l.id].x + LBOX[l.id].w && p.y >= LBOX[l.id].y && p.y <= LBOX[l.id].y + LBOX[l.id].h);
+      const w = L && LBOX[L.id].words.find(w => p.x >= w.x && p.x <= w.x + w.w && p.y >= w.y && p.y <= w.y + w.h);
+      if (w) { dz.range = (e.shiftKey && dz.range && dz.range.id === L.id) ? {id: L.id, s: Math.min(dz.range.s, w.s), e: Math.max(dz.range.e, w.e)} : {id: L.id, s: w.s, e: w.e}; dz.sel = L.id; dzInspector(); dzDraw(); } return;
+    }
     if (dz.mode === 'emphasis') {
       const L = [...s.layers].reverse().find(l => l.type === 'text' && LBOX[l.id] && p.x >= LBOX[l.id].x && p.x <= LBOX[l.id].x + LBOX[l.id].w && p.y >= LBOX[l.id].y && p.y <= LBOX[l.id].y + LBOX[l.id].h);
       const w = L && LBOX[L.id].words.find(w => p.x >= w.x && p.x <= w.x + w.w && p.y >= w.y && p.y <= w.y + w.h);
-      if (w) { L.content = toggleWordEm(L.content, w.ord); dz.sel = L.id; dzDraw(); dzCommit(); dzInspector(); dzSlidesPanel(); } return;
+      if (w) { const old = plainOf(L.content); L.content = toggleWordEm(L.content, w.ord); if (L.spans) L.spans = remapSpans(old, plainOf(L.content), L.spans); dz.sel = L.id; dzDraw(); dzCommit(); dzInspector(); dzSlidesPanel(); } return;
     }
     const cur = dzLayer(), cb = cur && LBOX[cur.id], hs = 34 / dz.scale;
     if (cb && Math.abs(p.x - (cb.x + cb.w)) < hs && Math.abs(p.y - (cb.y + cb.h)) < hs) { dz.drag = {t: 'resize', sx: p.x, sy: p.y, w: cur.w, h: cur.h, ch: false}; return; }
@@ -204,12 +210,18 @@ function dzBindCanvas() {
   });
   const end = () => { if (dz.drag && dz.drag.ch) { dzCommit(); dzInspector(); dzSlidesPanel(); } dz.drag = null; };
   cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
-  cv.addEventListener('dblclick', () => { const t = $('dzTxt'); if (t) { t.focus(); t.select(); } });
+  cv.addEventListener('dblclick', e => {
+    const p = pt(e), L = dzLayer(), b = L && L.type === 'text' && LBOX[L.id], w = b && b.words.find(w => p.x >= w.x && p.x <= w.x + w.w && p.y >= w.y && p.y <= w.y + w.h);
+    if (w) { dz.range = {id: L.id, s: w.s, e: w.e}; dzInspector(); dzDraw(); return; }   // duplo clique numa palavra: seleciona para formatar
+    const t = $('dzTxt'); if (t) { t.focus(); t.select(); }
+  });
 }
 document.addEventListener('keydown', e => {
   if (ui.page !== 'design' || dz.view !== 'editor') return; const tg = e.target.tagName; if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tg)) return;
   const L = dzLayer(), mod = e.ctrlKey || e.metaKey;
   if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? dzRedo() : dzUndo(); return; } if (mod && e.key.toLowerCase() === 'y') { e.preventDefault(); dzRedo(); return; }
+  if (mod && e.key.toLowerCase() === 'c' && L) { dz.clip = JSON.parse(JSON.stringify(L)); toast('Elemento copiado. Use Ctrl+V em qualquer slide.'); return; }
+  if (mod && e.key.toLowerCase() === 'v' && dz.clip) { e.preventDefault(); dzPaste(); return; }
   if (!L) return; const st = e.shiftKey ? 10 : 1;
   if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); dzLayerDel(); } else if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); dzLayerDup(); }
   else if (e.key.startsWith('Arrow')) { e.preventDefault(); if (e.key === 'ArrowLeft') L.x -= st; if (e.key === 'ArrowRight') L.x += st; if (e.key === 'ArrowUp') L.y -= st; if (e.key === 'ArrowDown') L.y += st; dzDraw(); dzCommitSoon(); dzInspector(); }
@@ -221,6 +233,7 @@ function dzAddText() { const s = dzSlide(), tk = dzSet().tk, L = T('body', {x: 9
 function dzAddRect() { const s = dzSlide(), L = RC('accent-fill', {x: 90, y: 300, w: 400, h: 200, fill: dzSet().tk.accent, radius: 16}); s.layers.push(L); dz.sel = L.id; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel(); }
 function dzAddPhoto() { const s = dzSlide(), tk = dzSet().tk, f = dzSet().format, L = IM('photo', {x: 90, y: 200, w: f.w - 180, h: Math.round(f.h * 0.4), radius: tk.radius}); themeLayer(L, tk); s.layers.push(L); dz.sel = L.id; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel(); }
 function dzLayerDel() { const s = dzSlide(); s.layers = s.layers.filter(l => l.id !== dz.sel); dz.sel = ''; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel(); }
+function dzPaste() { const s = dzSlide(); if (!s || !dz.clip) return; const L = JSON.parse(JSON.stringify(dz.clip)); L.id = lid(); L.x += 24; L.y += 24; dz.clip.x += 24; dz.clip.y += 24; s.layers.push(L); dz.sel = L.id; dz.range = null; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel(); }
 function dzLayerDup() { const s = dzSlide(), L = JSON.parse(JSON.stringify(dzLayer())); L.id = lid(); L.x += 30; L.y += 30; s.layers.push(L); dz.sel = L.id; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel(); }
 function dzLayerMove(d) { const s = dzSlide(), i = s.layers.findIndex(l => l.id === dz.sel), j = i + d; if (j < 0 || j >= s.layers.length) return; [s.layers[i], s.layers[j]] = [s.layers[j], s.layers[i]]; dzCommit(); dzDraw(); dzSlidesPanel(); }
 function dzModeEm() { dz.mode = dz.mode === 'emphasis' ? 'select' : 'emphasis'; renderDesign(); toast(dz.mode === 'emphasis' ? 'Clique em uma palavra para destacar ou remover o destaque.' : 'Modo seleção.'); }
@@ -237,9 +250,10 @@ function dzInspector() {
   const geo = `<div class="ins-row">${n('x', 'X', -2000, 4000)}${n('y', 'Y', -2000, 4000)}${n('w', 'Largura', 20, 4000)}${L.type !== 'text' ? n('h', 'Altura', 20, 4000) : ''}</div>`;
   const acts = brandSwatches(L) + `<div class="row-gap" style="margin-top:10px"><button class="btn sm" onclick="dzLayerMove(1)">▲ Frente</button><button class="btn sm" onclick="dzLayerMove(-1)">▼ Trás</button><button class="btn sm" onclick="dzLayerDup()">Duplicar</button><button class="btn sm" onclick="dzLayerDel()">Excluir</button></div>`;
   if (L.type === 'text') el.innerHTML = `<h3>Texto <small class="muted">${esc(L.role)}</small></h3>
-    <textarea id="dzTxt" class="jp-ta" rows="4" oninput="dzProp('content',this.value)">${esc(L.content)}</textarea>
+    <textarea id="dzTxt" class="jp-ta" rows="4" oninput="dzTxtInput(this.value)" onselect="dzTxtSel()" onkeyup="dzTxtSel()" onmouseup="dzTxtSel()">${esc(L.content)}</textarea>
+    <div id="dzRng">${dzRangeHTML(L)}</div>
     <div class="row-gap" style="margin:6px 0"><button class="btn sm" onclick="dzEmSel()" title="Selecione palavras no texto acima">Destacar seleção</button><button class="btn sm" onclick="dzEmClear()">Limpar destaques</button></div><small class="muted">Use **palavra** para destacar. Ou ative “Destacar por clique” no topo.</small>
-    <label class="ins">Fonte<select onchange="dzFont(this.value)">${fontChoices().map(f => `<option ${f === L.family ? 'selected' : ''}>${esc(f)}</option>`).join('')}</select></label>
+    <h4>Texto inteiro</h4><label class="ins">Fonte<select onchange="dzFont(this.value)">${fontChoices().map(f => `<option ${f === L.family ? 'selected' : ''}>${esc(f)}</option>`).join('')}</select></label>
     <div class="ins-row"><label class="ins">Peso<select onchange="dzProp('weight',this.value,1)">${[300, 400, 500, 600, 700, 800, 900].map(w => `<option ${w == L.weight ? 'selected' : ''}>${w}</option>`).join('')}</select></label>${col('color', 'Cor')}</div>
     ${rg('size', 'Tamanho', 16, 320, 1)}${rg('lh', 'Entrelinha', 0.8, 2, 0.05)}${rg('ls', 'Espaçamento', -4, 24, 0.5)}
     <div class="row-gap"><button class="btn sm ${L.align === 'left' ? 'dark' : ''}" onclick="dzProp('align','left');dzInspector()">⟸</button><button class="btn sm ${L.align === 'center' ? 'dark' : ''}" onclick="dzProp('align','center');dzInspector()">☰</button><button class="btn sm ${L.align === 'right' ? 'dark' : ''}" onclick="dzProp('align','right');dzInspector()">⟹</button><label class="ins inl"><input type="checkbox" ${L.upper ? 'checked' : ''} onchange="dzProp('upper',this.checked);dzInspector()"> CAIXA ALTA</label></div>
@@ -251,6 +265,49 @@ function dzInspector() {
   else el.innerHTML = `<h3>Foto</h3><button class="btn sm dark" onclick="dzPickPhoto()">${L.imgId ? 'Trocar foto' : 'Enviar foto'}</button> <button class="btn sm" onclick="dzGenPhoto()" title="${imageReady() ? 'Gerar com IA' : 'Configure OPENAI_API_KEY no servidor'}">✦ Gerar com IA</button> ${L.imgId ? '<button class="btn sm" onclick="dzProp(\'imgId\',\'\')">Remover</button>' : ''}
     <label class="ins">Tratamento (${PHOTO_STYLES.length} estilos)<select onchange="dzPhotoStyle(this.value)"><option value="">Sem tratamento</option>${PHOTO_STYLES.map(x => `<option value="${x.id}" ${L.filter === x.filter && L.ovColor === x.ovColor ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>
     <small class="muted block">${esc(L.brief || '')}</small>${rg('radius', 'Cantos', 0, 400, 1)}${rg('fx', 'Enquadrar na horizontal', 0, 1, 0.01)}${rg('fy', 'Enquadrar na vertical', 0, 1, 0.01)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
+}
+function dzModeFmt() { dz.mode = dz.mode === 'fmt' ? 'select' : 'fmt'; renderDesign(); toast(dz.mode === 'fmt' ? 'Clique numa palavra para formatar só ela. Shift+clique estende. Para letras, selecione no campo de texto.' : 'Modo de seleção.'); }
+const hexOr = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v || '')) ? v : d;
+/* ---- formatação de trecho (letras ou palavras) ---- */
+function dzTxtInput(v) {
+  const L = dzLayer(); if (!L) return; const old = plainOf(L.content); L.content = v;
+  if (L.spans) { L.spans = remapSpans(old, plainOf(v), L.spans); if (!L.spans.length) delete L.spans; }
+  dz.range = null; dzDraw(); dzCommitSoon(); const r = $('dzRng'); if (r) r.innerHTML = dzRangeHTML(L);
+}
+function dzTxtSel() {
+  const t = $('dzTxt'), L = dzLayer(); if (!t || !L) return; const a = t.selectionStart, b = t.selectionEnd;
+  const nr = a === b ? null : {id: L.id, s: rawToPlain(t.value, a), e: rawToPlain(t.value, b)};
+  if (JSON.stringify(nr) === JSON.stringify(dz.range)) return; dz.range = nr; dzRangeRefresh();
+}
+function dzRangeRefresh() { const L = dzLayer(), r = $('dzRng'); if (r) r.innerHTML = dzRangeHTML(L); dzDraw(); }
+function dzRangeValid(L) { const rg = dz.range; if (!L || L.type !== 'text' || !rg || rg.id !== L.id) return null; const n = plainOf(L.content).length, s = Math.max(0, rg.s), e = Math.min(n, rg.e); return e > s ? {s, e} : null; }
+function dzRangeHTML(L) {
+  const hint = '<small class="muted block" style="margin:8px 0">Selecione letras ou palavras no campo acima (ou use “✎ Formatar palavra” e clique no slide; duplo clique também seleciona uma palavra) para mudar tamanho, cor, fonte, peso e maiúsculas só nelas.</small>';
+  const rg = dzRangeValid(L); if (!rg) return hint;
+  const plain = plainOf(L.content), sty = (spanStyles(L, plain.length) || []).slice(rg.s, rg.e), seg = sty.length ? sty : [], uni = k => { const v0 = seg[0] && seg[0][k]; return seg.every(x => (x && x[k]) === v0) ? v0 : undefined; };
+  const size = uni('size'), color = uni('color'), fam = uni('family'), wt = uni('weight'), tr = uni('tr'), it = uni('italic'), sel = plain.slice(rg.s, rg.e).replace(/\n/g, ' ');
+  return `<div class="rng"><h4>Seleção: “${esc(sel.length > 34 ? sel.slice(0, 34) + '…' : sel)}” <small class="muted">${rg.e - rg.s} caractere(s)</small></h4>
+    <div class="ins-row"><label class="ins">Tamanho<input type="number" min="8" max="600" step="2" value="${size || ''}" placeholder="${Math.round(L.size)}" onchange="dzRangeProp('size',this.value===''?'':+this.value)"></label>
+    <label class="ins">Cor<span class="rng-col"><input type="color" value="${hexOr(color, hexOr(L.color, '#000000'))}" oninput="dzRangeProp('color',this.value,true)" onchange="dzRangeProp('color',this.value)"><button class="btn sm" onclick="dzRangeProp('color','')" title="Voltar à cor do texto">↺</button></span></label></div>
+    <label class="ins">Fonte<select onchange="dzRangeProp('family',this.value)"><option value="">(a do texto)</option>${fontChoices().map(f => `<option ${f === fam ? 'selected' : ''}>${esc(f)}</option>`).join('')}</select></label>
+    <div class="ins-row"><label class="ins">Peso<select onchange="dzRangeProp('weight',this.value===''?'':+this.value)"><option value="">(o do texto)</option>${[300, 400, 500, 600, 700, 800, 900].map(w => `<option ${w === wt ? 'selected' : ''}>${w}</option>`).join('')}</select></label>
+    <label class="ins">Caixa<select onchange="dzRangeProp('tr',this.value)">${[['', 'Como está'], ['upper', 'MAIÚSCULAS'], ['lower', 'minúsculas'], ['title', 'Primeira Maiúscula']].map(([v, l]) => `<option value="${v}" ${(tr || '') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
+    <label class="ins inl"><input type="checkbox" ${it ? 'checked' : ''} onchange="dzRangeProp('italic',this.checked?true:'')"> Itálico</label>
+    <div class="row-gap"><button class="btn sm" onclick="dzRangeClear()">Limpar formatação da seleção</button><button class="btn sm" onclick="dz.range=null;dzRangeRefresh()">Desmarcar</button></div></div>`;
+}
+async function dzRangeProp(k, v, quiet) {
+  const L = dzLayer(), rg = dzRangeValid(L); if (!rg) return;
+  if (k === 'family' && v) await ensureFont(v);
+  applySpanProps(L, rg.s, rg.e, {[k]: v}); dzDraw(); dzCommitSoon(); if (!quiet) dzRangeRefresh();
+}
+function dzRangeClear() { const L = dzLayer(), rg = dzRangeValid(L); if (!rg) return; applySpanProps(L, rg.s, rg.e, {size: '', color: '', family: '', weight: '', tr: '', italic: ''}); dzDraw(); dzCommitSoon(); dzRangeRefresh(); }
+function dzDrawRange(ctx, b) {
+  const L = dzLayer(), rg = dzRangeValid(L); if (!rg) return; ctx.save(); ctx.fillStyle = 'rgba(47,107,255,.22)'; ctx.strokeStyle = 'rgba(47,107,255,.8)'; ctx.lineWidth = 2 / dz.scale;
+  b.words.forEach(w => { if (w.e <= rg.s || w.s >= rg.e) return; (w.runs || []).forEach(r => {
+    const a = Math.max(r.s, rg.s), z = Math.min(r.e, rg.e); if (z <= a) return; let x0 = r.x, x1 = r.x + r.w;
+    if (r.t !== undefined && (a > r.s || z < r.e)) { MEAS.font = r.font; if (MEAS.letterSpacing !== undefined) MEAS.letterSpacing = (+L.ls || 0) + 'px'; x0 = r.x + MEAS.measureText(r.t.slice(0, a - r.s)).width; x1 = r.x + MEAS.measureText(r.t.slice(0, z - r.s)).width; }
+    ctx.fillRect(x0, w.y, Math.max(2, x1 - x0), w.h); ctx.strokeRect(x0, w.y, Math.max(2, x1 - x0), w.h); }); });
+  ctx.restore();
 }
 async function dzFont(f) { await ensureFont(f); dzProp('family', f); }
 function dzEmSel() { const t = $('dzTxt'), L = dzLayer(); if (!t || t.selectionStart === t.selectionEnd) { toast('Selecione palavras no texto.'); return; } const a = t.value.slice(0, t.selectionStart), m = t.value.slice(t.selectionStart, t.selectionEnd), z = t.value.slice(t.selectionEnd); L.content = a + '**' + m.replace(/\*\*/g, '') + '**' + z; t.value = L.content; dzDraw(); dzCommitSoon(); }

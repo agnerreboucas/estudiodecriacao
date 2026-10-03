@@ -33,7 +33,7 @@ function tplFillDeck(t, p) {
     if (!slotted) { out.push(sl); return; }                    // slide só do usuário: mantém
     const src = byName[ts.name]; if (!src) return;             // sem dado equivalente neste projeto: omite
     const map = {}; src.layers.forEach(l => { if (l.type === 'text' && l.slot) map[l.slot] = l.content; });
-    sl.layers.forEach(l => { if (l.type === 'text' && l.slot) l.content = l.slot in map ? map[l.slot] : ''; });
+    sl.layers.forEach(l => { if (l.type === 'text' && l.slot) { const nc = l.slot in map ? map[l.slot] : ''; if (nc !== l.content) delete l.spans; l.content = nc; } });
     out.push(sl);
   });
   return out;

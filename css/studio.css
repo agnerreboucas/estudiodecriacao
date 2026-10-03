@@ -125,3 +125,4 @@
 .rel-head .btn{margin-left:auto;padding:4px 7px}.rel-head{display:flex;gap:8px;align-items:center}
 .jp-pitchbox{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fafafa}.jp-pitchbox .type{font-size:10px;letter-spacing:.12em;font-weight:800;color:#777;margin-bottom:6px}
 .tpl-list{display:grid;gap:8px;margin:10px 0}.tpl-row{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.rng{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0;background:#f7f9ff}.rng h4{margin:0 0 8px;font-size:12px}.rng-col{display:flex;gap:6px;align-items:center}.rng-col input[type=color]{flex:1}

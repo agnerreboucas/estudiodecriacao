@@ -8,7 +8,7 @@ function scaleSlide(s, kx, ky) {
     if (l.type === 'path') { l.x = Math.round(l.x * kx); l.y = Math.round(l.y * ky); l.w = Math.round(l.w * kx); l.h = Math.round(l.h * ky); return; }
     if (l.role === 'logo') { const cx = (l.x + l.w / 2) * kx, cy = (l.y + l.h / 2) * ky; l.w = Math.round(l.w * k); l.h = Math.round(l.h * k); l.x = Math.round(Math.max(0, cx - l.w / 2)); l.y = Math.round(Math.max(0, cy - l.h / 2)); return; }
     l.x = Math.round(l.x * kx); l.y = Math.round(l.y * ky); l.w = Math.round(l.w * kx); if (l.blur) l.blur = Math.round(l.blur * k * 10) / 10; if (l.strokeW) l.strokeW = Math.max(1, Math.round(l.strokeW * k));
-    if (l.type === 'text') { l.size = Math.max(8, Math.round(l.size * k * 10) / 10); if (l.ls) l.ls = Math.round(l.ls * k * 10) / 10; }
+    if (l.type === 'text') { l.size = Math.max(8, Math.round(l.size * k * 10) / 10); if (l.ls) l.ls = Math.round(l.ls * k * 10) / 10; if (l.spans) l.spans.forEach(sp => { if (sp.st.size) sp.st.size = Math.round(sp.st.size * k * 10) / 10; }); }
     else { l.h = Math.round(l.h * ky); if (l.radius) l.radius = Math.round(l.radius * k); if (l.strokeW) l.strokeW = Math.max(1, Math.round(l.strokeW * k)); }
   });
   return s;
@@ -70,7 +70,7 @@ function resizeSlide(sl, from, to, tk) {
   const copy = {kicker: cp.kicker, title: cp.title || 'Título', sub: cp.sub, button: cp.button};
   const out = slideAd(tk, copy, to, cp.brand, layout);
   // devolve exatamente o texto original (inclui destaques feitos à mão)
-  const set = (role, v) => { const L = out.layers.find(l => l.type === 'text' && l.role === role); if (L && v) L.content = v; };
+  const set = (role, v) => { const L = out.layers.find(l => l.type === 'text' && l.role === role); if (L && v) { L.content = v; const src = sl.layers.find(l => l.type === 'text' && l.role === role && l.content); if (src && src.spans && plainOf(src.content) === plainOf(v)) { const r = L.size / (src.size || L.size); L.spans = JSON.parse(JSON.stringify(src.spans)); L.spans.forEach(sp => { if (sp.st.size) sp.st.size = Math.round(sp.st.size * r * 10) / 10; }); } } };
   set('title', cp.title); set('body', cp.sub); set('cta-text', cp.button); set('kicker', cp.kicker);
   if (cp.photo) { const P = out.layers.find(l => l.type === 'image' && l.role === 'photo'); if (P) Object.assign(P, {imgId: cp.photo.imgId, filter: cp.photo.filter, ovColor: cp.photo.ovColor, ovMode: cp.photo.ovMode, brief: cp.photo.brief, fx: cp.photo.fx, fy: cp.photo.fy}); }
   const lg = sl.layers.find(l => l.type === 'image' && l.role === 'logo');
@@ -125,7 +125,7 @@ function fitLogoSlide(sl, from, to) {
   s.layers.forEach(l => {
     const h = l.type === 'text' ? layoutText(l).h : l.h;
     l.x = Math.round(l.x * k + ox); l.y = Math.round(l.y * k + oy); l.w = Math.round(l.w * k);
-    if (l.type === 'text') { l.size = Math.max(6, Math.round(l.size * k * 10) / 10); if (l.ls) l.ls = Math.round(l.ls * k * 10) / 10; if (l.blur) l.blur *= k; }
+    if (l.type === 'text') { if (l.spans) l.spans.forEach(sp => { if (sp.st.size) sp.st.size = Math.round(sp.st.size * k * 10) / 10; }); l.size = Math.max(6, Math.round(l.size * k * 10) / 10); if (l.ls) l.ls = Math.round(l.ls * k * 10) / 10; if (l.blur) l.blur *= k; }
     else { l.h = Math.round(h * k); if (l.radius) l.radius = Math.round(l.radius * k); if (l.strokeW && l.type !== 'path') l.strokeW = Math.max(1, Math.round(l.strokeW * k)); }
   });
   return s;
