@@ -12,26 +12,70 @@ main{margin-left:220px}section{min-height:100vh;background:#fff;padding:70px 7vw
 .chain{display:grid;gap:10px;max-width:900px}.chain div{border:1px solid #e6e6e6;border-radius:12px;padding:16px;background:#fff}.chain small{font-size:10px;letter-spacing:.12em;color:#999;font-weight:800;display:block;margin-bottom:6px}.chain p{margin:0;font-size:14px;line-height:1.6;color:#333}
 .jr{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.jr .card{padding:14px}
 @media(max-width:900px){aside{display:none}main{margin:0}section{padding:44px 24px}.cards,.cards.three,.jr{grid-template-columns:1fr}}`;
-const PRES_JS = `(function(){var s=[].slice.call(document.querySelectorAll('section')),a=[].slice.call(document.querySelectorAll('aside a'));
-document.addEventListener('keydown',function(e){var i=s.findIndex(function(x){return x.getBoundingClientRect().bottom>window.innerHeight*.4});
-if(e.key==='ArrowDown'||e.key==='PageDown'){e.preventDefault();(s[i+1]||s[i]).scrollIntoView()}if(e.key==='ArrowUp'||e.key==='PageUp'){e.preventDefault();(s[i-1]||s[0]).scrollIntoView()}});
-window.addEventListener('scroll',function(){var i=s.findIndex(function(x){return x.getBoundingClientRect().bottom>window.innerHeight*.4});a.forEach(function(l,j){l.classList.toggle('on',j===i)})});})();`;
+const PRES_JS = `(function(){
+function secs(){return [].slice.call(document.querySelectorAll('main > section'))}
+function cur(){var s=secs(),k=-1;for(var i=0;i<s.length;i++){if(s[i].getBoundingClientRect().bottom>window.innerHeight*.4){k=i;break}}return k<0?s.length-1:k}
+function mark(){var s=secs(),c=s[cur()];[].slice.call(document.querySelectorAll('aside a')).forEach(function(l){l.classList.toggle('on',!!c&&l.getAttribute('href')==='#'+c.id)})}
+function go(id){var t=document.getElementById(id);if(t){t.scrollIntoView({behavior:'smooth',block:'start'})}}
+/* o menu navega por clique (não depende de hash: funciona em iframe, arquivo local e depois de apagar seções) */
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('aside a');if(!a)return;var h=a.getAttribute('href')||'';if(h.charAt(0)!=='#')return;e.preventDefault();go(h.slice(1))});
+document.addEventListener('keydown',function(e){var ae=document.activeElement;if(ae&&(ae.isContentEditable||/INPUT|TEXTAREA|SELECT/.test(ae.tagName)))return;var s=secs(),i=cur();
+if(e.key==='ArrowDown'||e.key==='PageDown'){e.preventDefault();(s[i+1]||s[i]).scrollIntoView({behavior:'smooth'})}if(e.key==='ArrowUp'||e.key==='PageUp'){e.preventDefault();(s[i-1]||s[0]).scrollIntoView({behavior:'smooth'})}});
+window.addEventListener('scroll',mark);window.addEventListener('load',mark);mark();})();`;
+/* edição do documento: apagar, desfazer, editar texto e salvar o HTML já limpo */
+const PE_CSS = `#pe-bar{position:fixed;right:16px;bottom:16px;z-index:9999;display:flex;gap:6px;align-items:center;background:#111;color:#fff;padding:8px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);font:12px Inter,system-ui,Arial,sans-serif;flex-wrap:wrap;max-width:calc(100vw - 32px)}
+#pe-bar button{background:#2a2a2a;color:#fff;border:0;border-radius:9px;padding:8px 11px;font:inherit;font-weight:600;cursor:pointer}#pe-bar button:hover{background:#3a3a3a}#pe-bar button:disabled{opacity:.4;cursor:default}#pe-bar button.on{background:#fff;color:#111}#pe-bar .pe-hint{color:#aaa;font-size:11px;padding:0 6px;max-width:260px}
+.pe-hover{outline:2px dashed #3b82f6!important;outline-offset:2px;cursor:pointer}.pe-sel{outline:3px solid #ef4444!important;outline-offset:2px;cursor:pointer}[contenteditable=true]{outline:2px solid #16a34a!important;outline-offset:2px;cursor:text}
+@media print{#pe-bar{display:none!important}aside{display:none!important}main{margin:0!important}section{min-height:auto!important;page-break-inside:avoid}.pe-hover,.pe-sel{outline:0!important}}`;
+const PE_JS = `(function(){
+var SEL='section,.card,.chain > div,.list p,.flow span,.obj,.lead,.box,li,h1,h2,.k,.muted,.tag,p,small,.id,.jr > div';
+var on=false,sel=null,hist=[],bar,main=document.querySelector('main')||document.body,aside=document.querySelector('aside'),first={m:main.innerHTML,a:aside?aside.innerHTML:''};
+function snap(){return {m:main.innerHTML,a:aside?aside.innerHTML:'',y:window.scrollY}}
+function push(){hist.push(snap());if(hist.length>60)hist.shift();upd()}
+function restore(o){main.innerHTML=o.m;if(aside)aside.innerHTML=o.a;sel=null;upd()}
+function pick(t){if(!t||!t.closest)return null;if(bar&&bar.contains(t))return null;if(aside&&aside.contains(t))return null;return t.closest(SEL)}
+function clear(c){[].slice.call(document.querySelectorAll('.'+c)).forEach(function(n){n.classList.remove(c)})}
+function select(n){clear('pe-sel');sel=n;if(n)n.classList.add('pe-sel');upd()}
+function del(){if(!sel)return;push();var n=sel;if(n.tagName==='SECTION'&&n.id&&aside){var l=aside.querySelector('a[href="#'+n.id+'"]');if(l)l.remove()}n.remove();sel=null;upd();if(window.scrollY>0)window.dispatchEvent(new Event('scroll'))}
+function undo(){var o=hist.pop();if(o){restore(o);window.scrollTo(0,o.y)}}
+function reset(){if(hist.length||main.innerHTML!==first.m){if(!confirm('Restaurar o documento original? As exclusões e edições serão desfeitas.'))return;hist=[];restore(first)}}
+function upd(){if(!bar)return;var q=function(a){return bar.querySelector('[data-a="'+a+'"]')};q('edit').classList.toggle('on',on);q('edit').textContent=on?'Sair da edição':'Editar';q('del').disabled=!sel;q('parent').disabled=!sel;q('undo').disabled=!hist.length;q('reset').disabled=!hist.length;var h=bar.querySelector('.pe-hint');h.textContent=on?(sel?'Selecionado. Apague, suba um nível ou clique em outro.':'Clique no que quiser apagar. Duplo clique edita o texto.'):''}
+function serialize(){var c=document.documentElement.cloneNode(true);var b=c.querySelector('#pe-bar');if(b)b.remove();[].slice.call(c.querySelectorAll('.pe-hover,.pe-sel')).forEach(function(n){n.classList.remove('pe-hover');n.classList.remove('pe-sel')});[].slice.call(c.querySelectorAll('[contenteditable]')).forEach(function(n){n.removeAttribute('contenteditable')});if(c.querySelector('body'))c.querySelector('body').classList.remove('pe-on');return '<!doctype html>'+c.outerHTML}
+window.__presSerialize=serialize;
+function save(){var t=(document.title||'documento').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'documento',bl=new Blob([serialize()],{type:'text/html'}),a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=t+'.html';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
+function toggle(){on=!on;document.body.classList.toggle('pe-on',on);if(!on){select(null);clear('pe-hover');[].slice.call(document.querySelectorAll('[contenteditable]')).forEach(function(n){n.removeAttribute('contenteditable')})}upd()}
+function act(a){if(a==='edit')toggle();else if(a==='del')del();else if(a==='undo')undo();else if(a==='reset')reset();else if(a==='save')save();else if(a==='parent'&&sel){var p=sel.parentElement&&sel.parentElement.closest(SEL);if(p&&!(aside&&aside.contains(p))&&p!==document.body)select(p)}}
+bar=document.createElement('div');bar.id='pe-bar';bar.setAttribute('role','toolbar');bar.innerHTML='<button data-a="edit">Editar</button><button data-a="parent" title="Selecionar o bloco maior">⬆ Bloco maior</button><button data-a="del" title="Apagar (Delete)">Apagar</button><button data-a="undo" title="Desfazer (Ctrl+Z)">Desfazer</button><button data-a="reset">Restaurar tudo</button><button data-a="save">Salvar HTML</button><span class="pe-hint"></span>';document.body.appendChild(bar);
+bar.addEventListener('click',function(e){var b=e.target.closest('button');if(b&&!b.disabled)act(b.dataset.a)});
+document.addEventListener('mouseover',function(e){if(!on)return;clear('pe-hover');var n=pick(e.target);if(n&&n!==sel)n.classList.add('pe-hover')});
+document.addEventListener('mouseout',function(e){if(on&&!e.relatedTarget)clear('pe-hover')});
+document.addEventListener('click',function(e){if(!on)return;if(bar.contains(e.target)||(aside&&aside.contains(e.target)))return;if(e.target.isContentEditable)return;e.preventDefault();e.stopPropagation();clear('pe-hover');select(pick(e.target))},true);
+document.addEventListener('dblclick',function(e){if(!on)return;var n=pick(e.target);if(!n||n.tagName==='SECTION')return;push();n.setAttribute('contenteditable','true');n.focus();n.addEventListener('blur',function f(){n.removeAttribute('contenteditable');n.removeEventListener('blur',f)})});
+document.addEventListener('keydown',function(e){var ae=document.activeElement,typing=ae&&(ae.isContentEditable||/INPUT|TEXTAREA|SELECT/.test(ae.tagName));
+if(e.key==='Escape'&&on){if(typing)ae.blur();else select(null)}
+if(!on||typing)return;if((e.key==='Delete'||e.key==='Backspace')&&sel){e.preventDefault();del()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}});
+upd();})();`;
 
 const E = esc;
 function presData(p) {
-  const pre = p.pre; refreshDrafts(pre);
+  const pre = p.pre; refreshDrafts(pre); refreshExtras(p);
   const items = preItems(pre);
-  return {p, pre, items, rels: relationsFor(items), apr: pre.status === 'APROVADO'};
+  return {p, pre, items, rels: relationsFor(items).filter(r => !pre.hiddenRels.includes(refHip(r.a) + refHip(r.b))), apr: pre.status === 'APROVADO'};
 }
+const KIND_LABEL = {dado: 'DADO', hipotese: 'HIPÓTESE', recomendacao: 'RECOMENDAÇÃO'};
+const paras = t => String(t || '').split('\n').filter(x => x.trim()).map(x => `<p>${E(x)}</p>`).join('');
+const sumBlocks = pre => pre.summary.blocks.map(b => `<div class="card"><span class="id">${E(b.label)}</span><span class="tag">${KIND_LABEL[b.kind] || 'RECOMENDAÇÃO'}</span>${paras(b.text)}</div>`).join('') || '<p class="muted">Sem blocos no resumo.</p>';
 const kvTag = apr => `<span class="tag">${apr ? 'DECISÃO' : 'RECOMENDAÇÃO'}</span>`;
 
 function presentationHTML(p) {
   const {pre, items, apr} = presData(p), d = pre.diag;
-  const menu = [['capa', 'Capa'], ['diagnostico', 'Diagnóstico'], ['hipoteses', 'Hipóteses'], ['objetivo', 'Objetivo'], ['okr', 'OKR'], ['tracao', 'Tração'], ['estruturacao', 'Estruturação'], ['icp', 'ICP'], ['jornada', 'Jornada'], ['posicionamento', 'Posicionamento'], ['validacao', 'Validação']];
+  const menu = [['capa', 'Capa'], ['resumo', 'Resumo executivo'], ['pitch', 'Elevator pitch'], ['diagnostico', 'Diagnóstico'], ['hipoteses', 'Hipóteses'], ['objetivo', 'Objetivo'], ['okr', 'OKR'], ['tracao', 'Tração'], ['estruturacao', 'Estruturação'], ['icp', 'ICP'], ['jornada', 'Jornada'], ['posicionamento', 'Posicionamento'], ['validacao', 'Validação']];
   const list = arr => arr.filter(x => x.trim()).map(x => `<p>${E(x)}</p>`).join('') || '<p class="muted" style="margin-left:0">Ainda não definido.</p>';
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pré-Projeto — ${E(p.name)}</title><style>${PRES_CSS}</style></head><body>
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pré-Projeto — ${E(p.name)}</title><style>${PRES_CSS}${PE_CSS}</style></head><body>
 <aside><b>AMPLIAÇÃO STUDIO</b>${menu.map(m => `<a href="#${m[0]}">${m[1]}</a>`).join('')}</aside><main>
 <section id="capa" class="dark"><div class="k">PRÉ-PROJETO · ${E(p.name.toUpperCase())}</div><h1>Jornada de Crescimento</h1><p class="lead">${E(p.desc || 'Do diagnóstico à definição do objetivo, com prioridade em gerar tração enquanto se constrói a estrutura.')}</p><p class="muted">${E(p.ctx)} · Status: ${E(pre.status)}</p></section>
+<section id="resumo"><div class="k">RESUMO EXECUTIVO</div><h2>Para abrir o projeto</h2><div class="cards">${sumBlocks(pre)}</div></section>
+<section id="pitch" class="dark"><div class="k">ELEVATOR PITCH · ~${pitchSeconds(pre.pitch.text)} SEGUNDOS ${kvTag(apr)}</div><h2>Em uma frase</h2><div class="obj">${E(pre.pitch.short || '')}</div><p class="lead">${E(pre.pitch.text || 'Ainda não definido.')}</p></section>
 <section id="diagnostico"><div class="k">01 · DIAGNÓSTICO</div><h2>O que está acontecendo</h2><div class="cards">${items.map(i => `<div class="card"><span class="id">${refDes(i)}</span><br><b>${E(i.title)}</b><p>${E(i.note)}</p></div>`).join('') || '<p class="muted">Nenhum desafio selecionado.</p>'}</div>
   <div class="chain" style="margin-top:22px">${[['CENÁRIO', d.scenario], ['HIPÓTESE CAUSAL', d.causal], ['CONSEQUÊNCIA', d.consequence], ['NECESSIDADE DE TRANSFORMAÇÃO', d.need]].map(x => `<div><small>${x[0]}</small><p>${E(x[1])}</p></div>`).join('')}</div></section>
 <section id="hipoteses"><div class="k">02 · HIPÓTESES</div><h2>Cada desafio gera uma hipótese</h2><div class="cards">${items.map(i => { const h = pre.hyp[i.id] || {}; return `<div class="card"><span class="id">${refHip(i)}</span><span class="tag">${h.validated ? 'DADO · VALIDADA' : 'HIPÓTESE'}</span><p>${E(hypText(pre, i))}</p><p><b>Impacto:</b> ${E(i.impact)}</p></div>`; }).join('')}</div><p class="muted">Hipóteses precisam ser validadas; não são conclusões definitivas.</p></section>
@@ -43,15 +87,17 @@ function presentationHTML(p) {
 <section id="jornada"><div class="k">08 · JORNADA INICIAL <span class="tag">HIPÓTESE</span></div><h2>Da situação à decisão</h2><div class="jr">${pre.journey.map((s, i) => `<div class="card"><b>${pad(i + 1, 2)} ${E(s.name)}</b>${JOURNEY_FIELDS.map(([k, l]) => s[k] ? `<p><b>${l}:</b> ${E(s[k])}</p>` : '').join('') || '<p class="muted">—</p>'}</div>`).join('')}</div></section>
 <section id="posicionamento"><div class="k">09 · POSICIONAMENTO</div><h2>Próximo gate</h2><p class="lead">O pré-projeto não define o posicionamento definitivo. Depois da aprovação, o posicionamento responde como a empresa quer ocupar espaço na mente do mercado.</p>${pre.positioning ? `<div class="obj">${E(pre.positioning)}</div>` : ''}<div class="flow"><span>Pré-Projeto</span><span>→ Posicionamento</span><span>→ Estratégia</span><span>→ Jornada aprofundada</span><span>→ Comunicação</span><span>→ Produção</span></div></section>
 <section id="validacao" class="dark"><div class="k">10 · VALIDAÇÃO</div><h2>${apr ? 'Pré-projeto aprovado' : 'Aguardando validação'}</h2><p class="lead">Status: ${E(pre.status)}${pre.approvedAt ? ' · aprovado em ' + fmtDate(pre.approvedAt) : ''}. Nenhum gate estratégico é ultrapassado sem validação humana.</p></section>
-</main><script>${PRES_JS}</script></body></html>`;
+</main><script>${PRES_JS}</script><script>${PE_JS}</script></body></html>`;
 }
 
 function pdfHTML(p) {
   const {pre, items, rels} = presData(p), d = pre.diag;
   const box = (h, body) => `<h2>${h}</h2>${body}`;
   const b = t => `<div class="box">${t}</div>`;
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Pré-Projeto — ${E(p.name)}</title><style>body{font-family:Arial,sans-serif;padding:34px;color:#111;max-width:860px;margin:auto}h1{font-size:28px;margin:0 0 4px}h2{font-size:18px;margin:26px 0 8px;border-bottom:1px solid #ddd;padding-bottom:6px}.box{border:1px solid #ddd;padding:12px 14px;margin:8px 0;border-radius:8px;break-inside:avoid}.label{font-size:10px;letter-spacing:.12em;color:#888;font-weight:bold}p{line-height:1.55;color:#444;margin:6px 0;font-size:13px}.id{font-size:10px;color:#999;font-family:monospace}ul{padding-left:18px}li{font-size:13px;line-height:1.55;color:#444}@media print{body{padding:0}}</style></head><body>
-<h1>Pré-Projeto — ${E(p.name)}</h1><p>${E(p.ctx)} · Status: ${E(pre.status)} · Gerado em ${fmtDate(new Date().toISOString())} · Ampliação Studio</p>
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Pré-Projeto — ${E(p.name)}</title><style>${PE_CSS}body{font-family:Arial,sans-serif;padding:34px;color:#111;max-width:860px;margin:auto}h1{font-size:28px;margin:0 0 4px}h2{font-size:18px;margin:26px 0 8px;border-bottom:1px solid #ddd;padding-bottom:6px}.box{border:1px solid #ddd;padding:12px 14px;margin:8px 0;border-radius:8px;break-inside:avoid}.label{font-size:10px;letter-spacing:.12em;color:#888;font-weight:bold}p{line-height:1.55;color:#444;margin:6px 0;font-size:13px}.id{font-size:10px;color:#999;font-family:monospace}ul{padding-left:18px}li{font-size:13px;line-height:1.55;color:#444}@media print{body{padding:0}}</style></head><body>
+<main><h1>Pré-Projeto — ${E(p.name)}</h1><p>${E(p.ctx)} · Status: ${E(pre.status)} · Gerado em ${fmtDate(new Date().toISOString())} · Ampliação Studio</p>
+${box('Resumo executivo', pre.summary.blocks.map(x => b(`<div class="label">${E(x.label.toUpperCase())} · ${KIND_LABEL[x.kind] || ''}</div>${paras(x.text)}`)).join('') || '<p>Sem blocos.</p>')}
+${box('Elevator pitch (~' + pitchSeconds(pre.pitch.text) + ' s)', b(`<p><b>${E(pre.pitch.short)}</b></p><p>${E(pre.pitch.text)}</p>`))}
 ${box('Briefing', b(`<p>${E(pre.briefing) || 'Não informado.'}</p>`))}
 ${box('Desafios e hipóteses', items.map(i => b(`<span class="id">${refDes(i)} → ${refHip(i)}</span><p><b>${E(i.title)}</b></p><p>${E(hypText(pre, i))}</p><p><b>Impacto hipotético:</b> ${E(i.impact)}</p>`)).join('') || '<p>Nenhum desafio selecionado.</p>')}
 ${box('Cruzamento das hipóteses', rels.map(r => b(`<span class="id">${refHip(r.a)} ↔ ${refHip(r.b)} · ${r.type}</span><p>${E(r.text)}</p>`)).join('') || '<p>Sem relações identificadas.</p>')}
@@ -62,7 +108,7 @@ ${box('OKR · ' + E(pre.okr.objective), b(`<div class="label">TRAÇÃO</div><ul>
 ${box('ICPs prioritários', pre.icps.map((x, i) => b(`<div class="label">ICP ${i + 1}</div><p><b>${E(x.name)}</b></p>${ICP_FIELDS.slice(1).map(([k, l]) => x[k] ? `<p>${l}: ${E(x[k])}</p>` : '').join('')}`)).join('') || '<p>Nenhum ICP definido.</p>')}
 ${box('Jornada inicial (hipótese)', pre.journey.map((s, i) => b(`<div class="label">${pad(i + 1, 2)} ${E(s.name.toUpperCase())}</div>${JOURNEY_FIELDS.map(([k, l]) => s[k] ? `<p>${l}: ${E(s[k])}</p>` : '').join('') || '<p>—</p>'}`)).join(''))}
 ${box('Gates', `<p>Pré-Projeto (${E(pre.status)}) → Posicionamento → Estratégia → Jornada aprofundada → Plano de Comunicação → Produção.</p>${pre.positioning ? b(`<div class="label">POSICIONAMENTO</div><p>${E(pre.positioning)}</p>`) : ''}`)}
-</body></html>`;
+</main><script>${PE_JS}</script></body></html>`;
 }
 
 /* Overlay em tela cheia (sem depender de pop-ups) */
@@ -73,9 +119,15 @@ function showOverlay(title, html, filename) {
   $('overlay').classList.add('open');
 }
 function closeOverlay() { $('overlay').classList.remove('open'); $('overlayFrame').srcdoc = ''; }
-function overlayDownload() { if (ui.overlay) download(ui.overlay.filename, ui.overlay.html, 'text/html'); }
+/* baixa o documento como está na tela (com o que você apagou ou editou) */
+function overlayDownload() {
+  if (!ui.overlay) return;
+  let html = ui.overlay.html;
+  try { const w = $('overlayFrame').contentWindow; if (w && typeof w.__presSerialize === 'function') html = w.__presSerialize(); } catch (e) { /* usa o original */ }
+  download(ui.overlay.filename, html, 'text/html');
+}
 function overlayPrint() { const f = $('overlayFrame'); try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { toast('Use "Baixar HTML" e imprima pelo navegador.'); } }
 
 const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 function prePresent() { const p = preP(); showOverlay('Apresentação · ' + p.name, presentationHTML(p), `pre-projeto-${slug(p.name)}.html`); }
-function prePDF() { const p = preP(); showOverlay('PDF · ' + p.name, pdfHTML(p), `pre-projeto-${slug(p.name)}.html`); setTimeout(overlayPrint, 600); toast('Na janela de impressão, escolha "Salvar como PDF".'); }
+function prePDF() { const p = preP(); showOverlay('PDF · ' + p.name, pdfHTML(p), `pre-projeto-${slug(p.name)}.html`); toast('Apague ou edite o que quiser (botão Editar) e clique em Imprimir / PDF.'); }

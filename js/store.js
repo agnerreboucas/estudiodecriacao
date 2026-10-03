@@ -11,6 +11,7 @@ function newPre() {
     okr: {objective: '', tr: [], st: [], edited: false},
     icps: [],
     journey: ['Descoberta', 'Atenção', 'Consideração', 'Decisão', 'Pós-compra'].map(name => ({name, situacao: '', duvida: '', dor: '', desejo: '', gatilho: '', objecao: '', confianca: ''})),
+    summary: {blocks: [], edited: false}, pitch: {text: '', short: '', edited: false}, hiddenRels: [],
     positioning: '', positioningApproved: false,
     status: 'RASCUNHO', history: [], approvedAt: null
   };

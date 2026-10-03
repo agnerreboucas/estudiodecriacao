@@ -119,3 +119,8 @@
 .rail button.active{background:#efefef}.rail button.active .ico{stroke-width:2.1}
 .int-ico{color:#111;display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:#f3f3f3}.int-ico .ico{stroke:#111}
 .composer-tools .icon .ico{stroke:#111}
+
+/* resumo executivo e pitch (pré-projeto) */
+.jp-sum{display:grid;gap:10px;margin:10px 0}.jp-sumblk{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}.sb-head{display:flex;gap:8px;align-items:center;margin-bottom:8px}.sb-label{flex:1;font-weight:700;border:1px solid transparent;border-radius:8px;padding:6px 8px;font:inherit;font-weight:700;background:#fafafa}.sb-label:focus{border-color:#111;background:#fff;outline:none}.sb-kind{font-size:11px;padding:6px;border:1px solid var(--line);border-radius:8px;background:#fff}.sb-tools{display:flex;gap:4px}.sb-tools .btn{padding:6px 8px;display:inline-grid;place-items:center}
+.rel-head .btn{margin-left:auto;padding:4px 7px}.rel-head{display:flex;gap:8px;align-items:center}
+.jp-pitchbox{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fafafa}.jp-pitchbox .type{font-size:10px;letter-spacing:.12em;font-weight:800;color:#777;margin-bottom:6px}

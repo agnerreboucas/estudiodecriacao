@@ -100,6 +100,48 @@ function buildDrafts(pre) {
   ];
   return {diag, justification, objective, okr: {objective: n ? 'Transformar aquisição em crescimento mais previsível' : '', tr, st}};
 }
+/* ---- resumo executivo (abertura do projeto) e elevator pitch: rascunho a partir do que já foi definido ---- */
+const SUM_KINDS = ['dado', 'hipotese', 'recomendacao'];
+const lowFirst = s => s ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+const clip = (s, n) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n).replace(/\s\S*$/, '') + '…' : s; };
+function buildSummary(p) {
+  const pre = p.pre, items = preItems(pre), n = items.length, d = pre.diag, ok = items.filter(i => pre.hyp[i.id] && pre.hyp[i.id].validated).length;
+  if (!n) return [];
+  const B = (id, label, kind, text) => ({id, label, kind, text});
+  const out = [
+    B('ctx', 'Contexto', 'dado', clip(pre.briefing, 360) || `${p.name}${p.desc ? ': ' + p.desc : ''}.`),
+    B('challenge', 'Desafio central', 'hipotese', [d.scenario, d.need].filter(Boolean).join(' ')),
+    B('objective', 'Objetivo', 'recomendacao', pre.objective),
+    B('kr', 'Como vamos medir', 'recomendacao', [pre.okr.objective && `Objetivo do OKR: ${pre.okr.objective}.`, pre.okr.tr[0] && `Tração: ${pre.okr.tr[0]}`, pre.okr.st[0] && `Estruturação: ${pre.okr.st[0]}`].filter(Boolean).join(' ')),
+    B('who', 'Para quem', 'hipotese', pre.icps.length ? `Perfis prioritários: ${joinList(pre.icps.map(x => x.name).filter(Boolean))}. São hipóteses até a validação com o cliente.` : 'Perfis prioritários ainda não definidos.'),
+    B('phases', 'Como vamos começar', 'recomendacao', 'Fase 1, tração: fazer a demanda aparecer enquanto se constrói o mínimo de estrutura. Fase 2, estruturação: organizar registro, acompanhamento e conversão. Depois da aprovação, o gate de Posicionamento define como a empresa ocupa espaço no mercado.'),
+    B('validation', 'O que ainda precisa ser validado', 'hipotese', `${ok} de ${n} hipótese(s) validada(s); as demais seguem como hipótese até a conversa com o cliente. Metas numéricas dependem dessa validação.`),
+    B('next', 'Próximos passos para abrir o projeto', 'recomendacao', '1. Validar as hipóteses com o cliente.\n2. Aprovar o pré-projeto.\n3. Definir o posicionamento.\n4. Montar a estratégia e o plano de comunicação.')
+  ];
+  return out.filter(b => b.text && b.text.trim());
+}
+function buildPitch(p) {
+  const pre = p.pre, items = preItems(pre); if (!items.length) return {text: '', short: ''};
+  const who = (pre.icps[0] && pre.icps[0].name) || (p.brief && p.brief.audience) || 'empresas como a sua', co = p.name || 'Nossa equipe';
+  const obj = String(pre.objective || '').replace(/\.$/, ''), prob = joinList(items.slice(0, 2).map(i => lowFirst(i.title)));
+  const text = [
+    `${co} ajuda ${who} a ${lowFirst(obj) || 'crescer de forma mais previsível'}.`,
+    prob ? `Hoje, ${prob}.` : '',
+    'Por isso começamos pela tração, fazendo a demanda aparecer, e em paralelo organizamos o mínimo de estrutura para acompanhar cada oportunidade até a decisão.',
+    pre.positioning ? `Nosso posicionamento: ${pre.positioning}` : '',
+    'O primeiro passo é validar esse diagnóstico com você.'
+  ].filter(Boolean).join(' ');
+  return {text, short: `${co}: ${lowFirst(obj) || 'crescimento mais previsível'}.`};
+}
+function refreshExtras(p) {
+  const pre = p.pre;
+  if (!pre.summary || !Array.isArray(pre.summary.blocks)) pre.summary = {blocks: [], edited: false};
+  if (!pre.pitch || typeof pre.pitch !== 'object') pre.pitch = {text: '', short: '', edited: false};
+  if (!Array.isArray(pre.hiddenRels)) pre.hiddenRels = [];
+  if (!pre.summary.edited) pre.summary.blocks = buildSummary(p);
+  if (!pre.pitch.edited) { const b = buildPitch(p); pre.pitch.text = b.text; pre.pitch.short = b.short; }
+}
+const pitchSeconds = t => Math.max(1, Math.round(String(t || '').trim().split(/\s+/).filter(Boolean).length / 2.5));
 function refreshDrafts(pre) {
   const d = buildDrafts(pre);
   if (!pre.diagEdited) pre.diag = d.diag;
@@ -116,7 +158,9 @@ function preValidation(pre) {
     [!!pre.justification.trim(), 'Justificativa preenchida'],
     [!!pre.objective.trim(), 'Objetivo estratégico definido'],
     [pre.okr.tr.some(x => x.trim()) && pre.okr.st.some(x => x.trim()), 'KRs de tração e de estruturação definidos'],
-    [pre.icps.length >= 1 && pre.icps.length <= 3, 'De 1 a 3 ICPs prioritários']
+    [pre.icps.length >= 1 && pre.icps.length <= 3, 'De 1 a 3 ICPs prioritários'],
+    [!!(pre.summary && pre.summary.blocks.some(b => String(b.text).trim())), 'Resumo executivo com ao menos um bloco'],
+    [!!(pre.pitch && String(pre.pitch.text).trim()), 'Elevator pitch preenchido']
   ];
 }
 function preLog(action, note) { preOf().history.unshift({at: new Date().toISOString(), action, note: note || ''}); }
@@ -156,9 +200,20 @@ function preRegen(what) {
     if (what === 'just') pre.justEdited = false;
     if (what === 'obj') pre.objEdited = false;
     if (what === 'okr') pre.okr.edited = false;
+    if (what === 'summary') pre.summary.edited = false;
+    if (what === 'pitch') pre.pitch.edited = false;
+    if (what === 'rels') pre.hiddenRels = [];
   });
   toast('Texto regenerado a partir dos desafios.');
 }
+/* resumo executivo: editar, apagar, mover e acrescentar blocos; pitch editável */
+const sumB = () => preOf().summary.blocks;
+function preSumSet(i, k, v) { const pre = preOf(); pre.summary.blocks[i][k] = v; pre.summary.edited = true; preTouch(); }
+function preSumDel(i) { preRedo(pre => { pre.summary.blocks.splice(i, 1); pre.summary.edited = true; }); }
+function preSumMove(i, d) { preRedo(pre => { const b = pre.summary.blocks, j = i + d; if (j < 0 || j >= b.length) return; [b[i], b[j]] = [b[j], b[i]]; pre.summary.edited = true; }); }
+function preSumAdd() { preRedo(pre => { pre.summary.blocks.push({id: uid('sb'), label: 'Novo bloco', kind: 'recomendacao', text: ''}); pre.summary.edited = true; }); }
+function prePitchSet(k, v) { const pre = preOf(); pre.pitch[k] = v; pre.pitch.edited = true; preTouch(); const el = $('pitchSecs'); if (el) el.textContent = pitchSeconds(pre.pitch.text); }
+function preRelDel(key) { preRedo(pre => { if (!pre.hiddenRels.includes(key)) pre.hiddenRels.push(key); }); }
 function preKR(kind, i, v) { preOf().okr[kind][i] = v; preOf().okr.edited = true; preTouch(); }
 function preAddKR(kind) { preRedo(pre => { pre.okr[kind].push(''); pre.okr.edited = true; }); }
 function preDelKR(kind, i) { preRedo(pre => { pre.okr[kind].splice(i, 1); pre.okr.edited = true; }); }
@@ -212,8 +267,8 @@ function syncPreStatusUI() {
 const taPre = (v, path, rows = 3, ph = '') => `<textarea class="jp-ta" rows="${rows}" placeholder="${esc(ph)}" onchange="preSet('${path}',this.value)">${esc(v)}</textarea>`;
 function renderPre() {
   const c = $('projectContent'), p = preP(); if (!c || !p) return;
-  const pre = p.pre; refreshDrafts(pre);
-  const items = preItems(pre), rels = relationsFor(items), apr = pre.status === 'APROVADO';
+  const pre = p.pre; refreshDrafts(pre); refreshExtras(p);
+  const items = preItems(pre), rels = relationsFor(items).filter(r => !pre.hiddenRels.includes(refHip(r.a) + refHip(r.b))), apr = pre.status === 'APROVADO';
   const rec = apr ? 'decisao' : 'recomendacao';
   const checks = preValidation(pre), allOk = checks.every(x => x[0]);
   const done = [items.length > 0, items.length > 0, !!pre.justification, !!pre.objective && pre.okr.tr.length > 0, ['EM REVISÃO', 'APROVADO'].includes(pre.status), !!pre.positioning, false];
@@ -250,7 +305,7 @@ function renderPre() {
     </div>
 
     <div class="jp-panel"><h3>3. Cruzamento das hipóteses</h3><p class="sub">Hipóteses relacionadas não são somadas: são conectadas por causa, consequência ou dependência.</p>
-      <div class="jp-rel-list">${rels.map(r => `<div class="jp-rel"><div class="rel-head"><span class="mono">${refHip(r.a)} ↔ ${refHip(r.b)}</span><span class="jp-mini-badge">${r.type}</span></div><p>${esc(r.text)}</p></div>`).join('') || `<p class="muted">${items.length > 1 ? 'Os desafios escolhidos ainda não têm relação conhecida. Valide com o cliente.' : 'Selecione ao menos dois desafios para procurar relações.'}</p>`}</div>
+      <div class="jp-rel-list">${rels.map(r => `<div class="jp-rel"><div class="rel-head"><span class="mono">${refHip(r.a)} ↔ ${refHip(r.b)}</span><span class="jp-mini-badge">${r.type}</span><button class="btn sm" onclick="preRelDel('${refHip(r.a)}${refHip(r.b)}')" title="Apagar esta relação">${ico('trash', 14)}</button></div><p>${esc(r.text)}</p></div>`).join('') || `<p class="muted">${items.length > 1 ? 'Os desafios escolhidos ainda não têm relação conhecida. Valide com o cliente.' : 'Selecione ao menos dois desafios para procurar relações.'}</p>`}${pre.hiddenRels.length ? `<button class="btn sm" onclick="preRegen('rels')">↺ Restaurar ${pre.hiddenRels.length} relação(ões) apagada(s)</button>` : ''}</div>
     </div>
 
     <div class="jp-panel"><div class="section-row"><div><h3>4. Diagnóstico consolidado</h3><p class="sub">Cenário → hipótese causal → consequência → necessidade de transformação.</p></div><div class="row-gap"><button class="btn sm" onclick="preRegen('diag')">↻ Regenerar</button><button class="btn sm" onclick="preAI('diag')">✦ IA</button></div></div>
@@ -282,7 +337,15 @@ function renderPre() {
       <div class="jp-journey-edit">${pre.journey.map((s, i) => { const n = JOURNEY_FIELDS.filter(([k]) => s[k]).length; return `<button class="jn-card" onclick="preJourneyModal(${i})"><b>${pad(i + 1, 2)} ${esc(s.name)}</b><small>${JOURNEY_HINT[i]}</small><span class="jp-mini-badge">${n}/7 campos</span>${s.situacao ? `<p>${esc(s.situacao)}</p>` : ''}</button>`; }).join('')}</div>
     </div>
 
-    <div class="jp-panel"><h3>10. Validação e gates</h3><p class="sub">O pré-projeto organiza a hipótese estratégica. O posicionamento continua sendo o gate antes da estratégia definitiva.</p>
+    <div class="jp-panel"><div class="section-row"><div><h3>10. Resumo executivo</h3><p class="sub">Uma página para abrir o projeto com o cliente e o time. Edite, reordene, apague qualquer bloco ou acrescente os seus.</p></div><div class="row-gap"><button class="btn sm" onclick="preAI('summary')">✦ Refinar com IA</button><button class="btn sm" onclick="preRegen('summary')">↻ Regenerar</button></div></div>
+      <div class="jp-sum">${pre.summary.blocks.map((b, i) => `<article class="jp-sumblk"><div class="sb-head"><input class="sb-label" value="${esc(b.label)}" onchange="preSumSet(${i},'label',this.value)" aria-label="Título do bloco"><select class="sb-kind" onchange="preSumSet(${i},'kind',this.value);keepScroll(renderPre)" aria-label="Tipo">${SUM_KINDS.map(k => `<option value="${k}" ${k === b.kind ? 'selected' : ''}>${{dado: 'Dado', hipotese: 'Hipótese', recomendacao: 'Recomendação'}[k]}</option>`).join('')}</select><span class="sb-tools"><button class="btn sm" onclick="preSumMove(${i},-1)" title="Subir" ${i === 0 ? 'disabled' : ''}>${ico('up', 14)}</button><button class="btn sm" onclick="preSumMove(${i},1)" title="Descer" ${i === pre.summary.blocks.length - 1 ? 'disabled' : ''}>${ico('down', 14)}</button><button class="btn sm" onclick="preSumDel(${i})" title="Apagar este bloco">${ico('trash', 14)}</button></span></div><textarea class="jp-ta" rows="3" onchange="preSumSet(${i},'text',this.value)">${esc(b.text)}</textarea></article>`).join('') || '<p class="muted">Nenhum bloco. Selecione desafios para gerar um rascunho ou adicione um bloco.</p>'}</div>
+      <button class="btn sm" onclick="preSumAdd()">${ico('plus', 14)} Adicionar bloco</button></div>
+
+    <div class="jp-panel"><div class="section-row"><div><h3>11. Elevator pitch</h3><p class="sub">Para explicar o projeto em cerca de <b id="pitchSecs">${pitchSeconds(pre.pitch.text)}</b> segundos, sem inventar números. Edite à vontade.</p></div><div class="row-gap"><button class="btn sm" onclick="preAI('pitch')">✦ Refinar com IA</button><button class="btn sm" onclick="preRegen('pitch')">↻ Regenerar</button></div></div>
+      <div class="jp-pitchbox"><div class="type">PITCH ${tag(rec)}</div><textarea class="jp-ta" rows="5" placeholder="Será gerado a partir do diagnóstico e do objetivo." onchange="prePitchSet('text',this.value)">${esc(pre.pitch.text)}</textarea></div>
+      <div class="jp-pitchbox" style="margin-top:10px"><div class="type">EM UMA FRASE</div><textarea class="jp-ta" rows="2" onchange="prePitchSet('short',this.value)">${esc(pre.pitch.short)}</textarea></div></div>
+
+    <div class="jp-panel"><h3>12. Validação e gates</h3><p class="sub">O pré-projeto organiza a hipótese estratégica. O posicionamento continua sendo o gate antes da estratégia definitiva.</p>
       <div class="jp-checklist">${checks.map(c => `<div class="chk ${c[0] ? 'ok' : ''}"><span>${c[0] ? '✓' : '○'}</span>${esc(c[1])}</div>`).join('')}</div>
       <div class="jp-gate-flow"><span>BRIEFING</span><b>→</b><span>DIAGNÓSTICO</span><b>→</b><span>HIPÓTESES</span><b>→</b><span>JUSTIFICATIVA</span><b>→</b><span>OBJETIVO + OKR</span><b>→</b><span>VALIDAÇÃO</span><b>→</b><span>POSICIONAMENTO</span><b>→</b><span>ESTRATÉGIA</span></div>
       <div class="jp-gate"><div><strong id="jpGateLabel">${apr ? 'PRÉ-PROJETO APROVADO' : 'AGUARDANDO VALIDAÇÃO'}</strong><p>${apr ? 'Próximo gate: <b>POSICIONAMENTO</b>. Defina como a empresa quer ocupar espaço na mente do mercado antes de fechar a estratégia.' : (allOk ? 'Checklist completo: envie para revisão e depois aprove.' : 'Complete o checklist para enviar para revisão.')}</p></div>${apr ? `<button class="btn dark" onclick="state.activeProjectId='${p.id}';ui.tab='strategy';renderProjectTab()">Abrir Posicionamento →</button>` : ''}</div>
@@ -310,6 +373,19 @@ async function preAI(kind) {
       if (j.justification) { pre.justification = j.justification; pre.justEdited = true; }
       if (j.objective) { pre.objective = j.objective; pre.objEdited = true; }
       toast('Diagnóstico sugerido pela IA. Revise e edite.');
+    } else if (kind === 'summary') {
+      if (pre.summary.edited && !confirm('Substituir os blocos que você editou?')) return;
+      const j = await aiJSON('Escreva o resumo executivo para abrir o projeto, em PT-BR, claro e cauteloso. Não invente dados nem números; use "pode" e "sugere" quando for hipótese. Responda só JSON: [{"label","kind","text"}] com kind em dado|hipotese|recomendacao, 6 a 8 blocos curtos (contexto, desafio central, objetivo, como medir, para quem, como começar, o que validar, próximos passos).', ctx + '\nDiagnóstico: ' + JSON.stringify(pre.diag) + '\nObjetivo: ' + pre.objective + '\nKRs tração: ' + pre.okr.tr.join(' | ') + '\nKRs estruturação: ' + pre.okr.st.join(' | ') + '\nICPs: ' + pre.icps.map(x => x.name).join(', '));
+      const arr = (Array.isArray(j) ? j : []).filter(x => x && x.text).slice(0, 10);
+      if (!arr.length) { toast('A IA não devolveu blocos. Mantive o rascunho.'); return; }
+      pre.summary = {edited: true, blocks: arr.map(x => ({id: uid('sb'), label: String(x.label || 'Bloco').slice(0, 80), kind: SUM_KINDS.includes(x.kind) ? x.kind : 'recomendacao', text: String(x.text)}))};
+      toast('Resumo sugerido pela IA. Revise e apague o que não servir.');
+    } else if (kind === 'pitch') {
+      if (pre.pitch.edited && !confirm('Substituir o pitch que você editou?')) return;
+      const j = await aiJSON('Escreva um elevator pitch de cerca de 30 segundos (70 a 90 palavras) em PT-BR, natural para falar em voz alta, e uma versão de uma frase. Não invente números nem resultados. Responda só JSON: {"text","short"}.', ctx + '\nDiagnóstico: ' + JSON.stringify(pre.diag) + '\nObjetivo: ' + pre.objective + '\nPosicionamento: ' + (pre.positioning || '(não definido)'));
+      if (!j.text) { toast('A IA não devolveu o pitch. Mantive o rascunho.'); return; }
+      pre.pitch = {text: String(j.text), short: String(j.short || ''), edited: true};
+      toast('Pitch sugerido pela IA. Leia em voz alta e ajuste.');
     } else if (kind === 'icp') {
       if (pre.icps.length && !confirm('Substituir os ICPs atuais?')) return;
       const j = await aiJSON('Proponha até 3 ICPs prioritários, com base só no briefing. Responda só JSON: [{"name","profile","situation","need","behavior","intent"}]', ctx);

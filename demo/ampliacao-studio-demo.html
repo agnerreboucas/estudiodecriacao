@@ -388,6 +388,11 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .int-ico{color:#111;display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:#f3f3f3}.int-ico .ico{stroke:#111}
 .composer-tools .icon .ico{stroke:#111}
 
+/* resumo executivo e pitch (pré-projeto) */
+.jp-sum{display:grid;gap:10px;margin:10px 0}.jp-sumblk{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}.sb-head{display:flex;gap:8px;align-items:center;margin-bottom:8px}.sb-label{flex:1;font-weight:700;border:1px solid transparent;border-radius:8px;padding:6px 8px;font:inherit;font-weight:700;background:#fafafa}.sb-label:focus{border-color:#111;background:#fff;outline:none}.sb-kind{font-size:11px;padding:6px;border:1px solid var(--line);border-radius:8px;background:#fff}.sb-tools{display:flex;gap:4px}.sb-tools .btn{padding:6px 8px;display:inline-grid;place-items:center}
+.rel-head .btn{margin-left:auto;padding:4px 7px}.rel-head{display:flex;gap:8px;align-items:center}
+.jp-pitchbox{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fafafa}.jp-pitchbox .type{font-size:10px;letter-spacing:.12em;font-weight:800;color:#777;margin-bottom:6px}
+
 </style>
 </head>
 <body>
@@ -585,6 +590,8 @@ const ICONS = {
   image: '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>',
   pin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
   target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+  up: '<path d="m18 15-6-6-6 6"/>', down: '<path d="m6 9 6 6 6-6"/>', plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
   plug: '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>'
 };
 /* ico('home') → SVG preto no tamanho do texto; use ico('home', 22) para outro tamanho */
@@ -608,6 +615,7 @@ function newPre() {
     okr: {objective: '', tr: [], st: [], edited: false},
     icps: [],
     journey: ['Descoberta', 'Atenção', 'Consideração', 'Decisão', 'Pós-compra'].map(name => ({name, situacao: '', duvida: '', dor: '', desejo: '', gatilho: '', objecao: '', confianca: ''})),
+    summary: {blocks: [], edited: false}, pitch: {text: '', short: '', edited: false}, hiddenRels: [],
     positioning: '', positioningApproved: false,
     status: 'RASCUNHO', history: [], approvedAt: null
   };
@@ -1315,6 +1323,48 @@ function buildDrafts(pre) {
   ];
   return {diag, justification, objective, okr: {objective: n ? 'Transformar aquisição em crescimento mais previsível' : '', tr, st}};
 }
+/* ---- resumo executivo (abertura do projeto) e elevator pitch: rascunho a partir do que já foi definido ---- */
+const SUM_KINDS = ['dado', 'hipotese', 'recomendacao'];
+const lowFirst = s => s ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+const clip = (s, n) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n).replace(/\s\S*$/, '') + '…' : s; };
+function buildSummary(p) {
+  const pre = p.pre, items = preItems(pre), n = items.length, d = pre.diag, ok = items.filter(i => pre.hyp[i.id] && pre.hyp[i.id].validated).length;
+  if (!n) return [];
+  const B = (id, label, kind, text) => ({id, label, kind, text});
+  const out = [
+    B('ctx', 'Contexto', 'dado', clip(pre.briefing, 360) || `${p.name}${p.desc ? ': ' + p.desc : ''}.`),
+    B('challenge', 'Desafio central', 'hipotese', [d.scenario, d.need].filter(Boolean).join(' ')),
+    B('objective', 'Objetivo', 'recomendacao', pre.objective),
+    B('kr', 'Como vamos medir', 'recomendacao', [pre.okr.objective && `Objetivo do OKR: ${pre.okr.objective}.`, pre.okr.tr[0] && `Tração: ${pre.okr.tr[0]}`, pre.okr.st[0] && `Estruturação: ${pre.okr.st[0]}`].filter(Boolean).join(' ')),
+    B('who', 'Para quem', 'hipotese', pre.icps.length ? `Perfis prioritários: ${joinList(pre.icps.map(x => x.name).filter(Boolean))}. São hipóteses até a validação com o cliente.` : 'Perfis prioritários ainda não definidos.'),
+    B('phases', 'Como vamos começar', 'recomendacao', 'Fase 1, tração: fazer a demanda aparecer enquanto se constrói o mínimo de estrutura. Fase 2, estruturação: organizar registro, acompanhamento e conversão. Depois da aprovação, o gate de Posicionamento define como a empresa ocupa espaço no mercado.'),
+    B('validation', 'O que ainda precisa ser validado', 'hipotese', `${ok} de ${n} hipótese(s) validada(s); as demais seguem como hipótese até a conversa com o cliente. Metas numéricas dependem dessa validação.`),
+    B('next', 'Próximos passos para abrir o projeto', 'recomendacao', '1. Validar as hipóteses com o cliente.\n2. Aprovar o pré-projeto.\n3. Definir o posicionamento.\n4. Montar a estratégia e o plano de comunicação.')
+  ];
+  return out.filter(b => b.text && b.text.trim());
+}
+function buildPitch(p) {
+  const pre = p.pre, items = preItems(pre); if (!items.length) return {text: '', short: ''};
+  const who = (pre.icps[0] && pre.icps[0].name) || (p.brief && p.brief.audience) || 'empresas como a sua', co = p.name || 'Nossa equipe';
+  const obj = String(pre.objective || '').replace(/\.$/, ''), prob = joinList(items.slice(0, 2).map(i => lowFirst(i.title)));
+  const text = [
+    `${co} ajuda ${who} a ${lowFirst(obj) || 'crescer de forma mais previsível'}.`,
+    prob ? `Hoje, ${prob}.` : '',
+    'Por isso começamos pela tração, fazendo a demanda aparecer, e em paralelo organizamos o mínimo de estrutura para acompanhar cada oportunidade até a decisão.',
+    pre.positioning ? `Nosso posicionamento: ${pre.positioning}` : '',
+    'O primeiro passo é validar esse diagnóstico com você.'
+  ].filter(Boolean).join(' ');
+  return {text, short: `${co}: ${lowFirst(obj) || 'crescimento mais previsível'}.`};
+}
+function refreshExtras(p) {
+  const pre = p.pre;
+  if (!pre.summary || !Array.isArray(pre.summary.blocks)) pre.summary = {blocks: [], edited: false};
+  if (!pre.pitch || typeof pre.pitch !== 'object') pre.pitch = {text: '', short: '', edited: false};
+  if (!Array.isArray(pre.hiddenRels)) pre.hiddenRels = [];
+  if (!pre.summary.edited) pre.summary.blocks = buildSummary(p);
+  if (!pre.pitch.edited) { const b = buildPitch(p); pre.pitch.text = b.text; pre.pitch.short = b.short; }
+}
+const pitchSeconds = t => Math.max(1, Math.round(String(t || '').trim().split(/\s+/).filter(Boolean).length / 2.5));
 function refreshDrafts(pre) {
   const d = buildDrafts(pre);
   if (!pre.diagEdited) pre.diag = d.diag;
@@ -1331,7 +1381,9 @@ function preValidation(pre) {
     [!!pre.justification.trim(), 'Justificativa preenchida'],
     [!!pre.objective.trim(), 'Objetivo estratégico definido'],
     [pre.okr.tr.some(x => x.trim()) && pre.okr.st.some(x => x.trim()), 'KRs de tração e de estruturação definidos'],
-    [pre.icps.length >= 1 && pre.icps.length <= 3, 'De 1 a 3 ICPs prioritários']
+    [pre.icps.length >= 1 && pre.icps.length <= 3, 'De 1 a 3 ICPs prioritários'],
+    [!!(pre.summary && pre.summary.blocks.some(b => String(b.text).trim())), 'Resumo executivo com ao menos um bloco'],
+    [!!(pre.pitch && String(pre.pitch.text).trim()), 'Elevator pitch preenchido']
   ];
 }
 function preLog(action, note) { preOf().history.unshift({at: new Date().toISOString(), action, note: note || ''}); }
@@ -1371,9 +1423,20 @@ function preRegen(what) {
     if (what === 'just') pre.justEdited = false;
     if (what === 'obj') pre.objEdited = false;
     if (what === 'okr') pre.okr.edited = false;
+    if (what === 'summary') pre.summary.edited = false;
+    if (what === 'pitch') pre.pitch.edited = false;
+    if (what === 'rels') pre.hiddenRels = [];
   });
   toast('Texto regenerado a partir dos desafios.');
 }
+/* resumo executivo: editar, apagar, mover e acrescentar blocos; pitch editável */
+const sumB = () => preOf().summary.blocks;
+function preSumSet(i, k, v) { const pre = preOf(); pre.summary.blocks[i][k] = v; pre.summary.edited = true; preTouch(); }
+function preSumDel(i) { preRedo(pre => { pre.summary.blocks.splice(i, 1); pre.summary.edited = true; }); }
+function preSumMove(i, d) { preRedo(pre => { const b = pre.summary.blocks, j = i + d; if (j < 0 || j >= b.length) return; [b[i], b[j]] = [b[j], b[i]]; pre.summary.edited = true; }); }
+function preSumAdd() { preRedo(pre => { pre.summary.blocks.push({id: uid('sb'), label: 'Novo bloco', kind: 'recomendacao', text: ''}); pre.summary.edited = true; }); }
+function prePitchSet(k, v) { const pre = preOf(); pre.pitch[k] = v; pre.pitch.edited = true; preTouch(); const el = $('pitchSecs'); if (el) el.textContent = pitchSeconds(pre.pitch.text); }
+function preRelDel(key) { preRedo(pre => { if (!pre.hiddenRels.includes(key)) pre.hiddenRels.push(key); }); }
 function preKR(kind, i, v) { preOf().okr[kind][i] = v; preOf().okr.edited = true; preTouch(); }
 function preAddKR(kind) { preRedo(pre => { pre.okr[kind].push(''); pre.okr.edited = true; }); }
 function preDelKR(kind, i) { preRedo(pre => { pre.okr[kind].splice(i, 1); pre.okr.edited = true; }); }
@@ -1427,8 +1490,8 @@ function syncPreStatusUI() {
 const taPre = (v, path, rows = 3, ph = '') => `<textarea class="jp-ta" rows="${rows}" placeholder="${esc(ph)}" onchange="preSet('${path}',this.value)">${esc(v)}</textarea>`;
 function renderPre() {
   const c = $('projectContent'), p = preP(); if (!c || !p) return;
-  const pre = p.pre; refreshDrafts(pre);
-  const items = preItems(pre), rels = relationsFor(items), apr = pre.status === 'APROVADO';
+  const pre = p.pre; refreshDrafts(pre); refreshExtras(p);
+  const items = preItems(pre), rels = relationsFor(items).filter(r => !pre.hiddenRels.includes(refHip(r.a) + refHip(r.b))), apr = pre.status === 'APROVADO';
   const rec = apr ? 'decisao' : 'recomendacao';
   const checks = preValidation(pre), allOk = checks.every(x => x[0]);
   const done = [items.length > 0, items.length > 0, !!pre.justification, !!pre.objective && pre.okr.tr.length > 0, ['EM REVISÃO', 'APROVADO'].includes(pre.status), !!pre.positioning, false];
@@ -1465,7 +1528,7 @@ function renderPre() {
     </div>
 
     <div class="jp-panel"><h3>3. Cruzamento das hipóteses</h3><p class="sub">Hipóteses relacionadas não são somadas: são conectadas por causa, consequência ou dependência.</p>
-      <div class="jp-rel-list">${rels.map(r => `<div class="jp-rel"><div class="rel-head"><span class="mono">${refHip(r.a)} ↔ ${refHip(r.b)}</span><span class="jp-mini-badge">${r.type}</span></div><p>${esc(r.text)}</p></div>`).join('') || `<p class="muted">${items.length > 1 ? 'Os desafios escolhidos ainda não têm relação conhecida. Valide com o cliente.' : 'Selecione ao menos dois desafios para procurar relações.'}</p>`}</div>
+      <div class="jp-rel-list">${rels.map(r => `<div class="jp-rel"><div class="rel-head"><span class="mono">${refHip(r.a)} ↔ ${refHip(r.b)}</span><span class="jp-mini-badge">${r.type}</span><button class="btn sm" onclick="preRelDel('${refHip(r.a)}${refHip(r.b)}')" title="Apagar esta relação">${ico('trash', 14)}</button></div><p>${esc(r.text)}</p></div>`).join('') || `<p class="muted">${items.length > 1 ? 'Os desafios escolhidos ainda não têm relação conhecida. Valide com o cliente.' : 'Selecione ao menos dois desafios para procurar relações.'}</p>`}${pre.hiddenRels.length ? `<button class="btn sm" onclick="preRegen('rels')">↺ Restaurar ${pre.hiddenRels.length} relação(ões) apagada(s)</button>` : ''}</div>
     </div>
 
     <div class="jp-panel"><div class="section-row"><div><h3>4. Diagnóstico consolidado</h3><p class="sub">Cenário → hipótese causal → consequência → necessidade de transformação.</p></div><div class="row-gap"><button class="btn sm" onclick="preRegen('diag')">↻ Regenerar</button><button class="btn sm" onclick="preAI('diag')">✦ IA</button></div></div>
@@ -1497,7 +1560,15 @@ function renderPre() {
       <div class="jp-journey-edit">${pre.journey.map((s, i) => { const n = JOURNEY_FIELDS.filter(([k]) => s[k]).length; return `<button class="jn-card" onclick="preJourneyModal(${i})"><b>${pad(i + 1, 2)} ${esc(s.name)}</b><small>${JOURNEY_HINT[i]}</small><span class="jp-mini-badge">${n}/7 campos</span>${s.situacao ? `<p>${esc(s.situacao)}</p>` : ''}</button>`; }).join('')}</div>
     </div>
 
-    <div class="jp-panel"><h3>10. Validação e gates</h3><p class="sub">O pré-projeto organiza a hipótese estratégica. O posicionamento continua sendo o gate antes da estratégia definitiva.</p>
+    <div class="jp-panel"><div class="section-row"><div><h3>10. Resumo executivo</h3><p class="sub">Uma página para abrir o projeto com o cliente e o time. Edite, reordene, apague qualquer bloco ou acrescente os seus.</p></div><div class="row-gap"><button class="btn sm" onclick="preAI('summary')">✦ Refinar com IA</button><button class="btn sm" onclick="preRegen('summary')">↻ Regenerar</button></div></div>
+      <div class="jp-sum">${pre.summary.blocks.map((b, i) => `<article class="jp-sumblk"><div class="sb-head"><input class="sb-label" value="${esc(b.label)}" onchange="preSumSet(${i},'label',this.value)" aria-label="Título do bloco"><select class="sb-kind" onchange="preSumSet(${i},'kind',this.value);keepScroll(renderPre)" aria-label="Tipo">${SUM_KINDS.map(k => `<option value="${k}" ${k === b.kind ? 'selected' : ''}>${{dado: 'Dado', hipotese: 'Hipótese', recomendacao: 'Recomendação'}[k]}</option>`).join('')}</select><span class="sb-tools"><button class="btn sm" onclick="preSumMove(${i},-1)" title="Subir" ${i === 0 ? 'disabled' : ''}>${ico('up', 14)}</button><button class="btn sm" onclick="preSumMove(${i},1)" title="Descer" ${i === pre.summary.blocks.length - 1 ? 'disabled' : ''}>${ico('down', 14)}</button><button class="btn sm" onclick="preSumDel(${i})" title="Apagar este bloco">${ico('trash', 14)}</button></span></div><textarea class="jp-ta" rows="3" onchange="preSumSet(${i},'text',this.value)">${esc(b.text)}</textarea></article>`).join('') || '<p class="muted">Nenhum bloco. Selecione desafios para gerar um rascunho ou adicione um bloco.</p>'}</div>
+      <button class="btn sm" onclick="preSumAdd()">${ico('plus', 14)} Adicionar bloco</button></div>
+
+    <div class="jp-panel"><div class="section-row"><div><h3>11. Elevator pitch</h3><p class="sub">Para explicar o projeto em cerca de <b id="pitchSecs">${pitchSeconds(pre.pitch.text)}</b> segundos, sem inventar números. Edite à vontade.</p></div><div class="row-gap"><button class="btn sm" onclick="preAI('pitch')">✦ Refinar com IA</button><button class="btn sm" onclick="preRegen('pitch')">↻ Regenerar</button></div></div>
+      <div class="jp-pitchbox"><div class="type">PITCH ${tag(rec)}</div><textarea class="jp-ta" rows="5" placeholder="Será gerado a partir do diagnóstico e do objetivo." onchange="prePitchSet('text',this.value)">${esc(pre.pitch.text)}</textarea></div>
+      <div class="jp-pitchbox" style="margin-top:10px"><div class="type">EM UMA FRASE</div><textarea class="jp-ta" rows="2" onchange="prePitchSet('short',this.value)">${esc(pre.pitch.short)}</textarea></div></div>
+
+    <div class="jp-panel"><h3>12. Validação e gates</h3><p class="sub">O pré-projeto organiza a hipótese estratégica. O posicionamento continua sendo o gate antes da estratégia definitiva.</p>
       <div class="jp-checklist">${checks.map(c => `<div class="chk ${c[0] ? 'ok' : ''}"><span>${c[0] ? '✓' : '○'}</span>${esc(c[1])}</div>`).join('')}</div>
       <div class="jp-gate-flow"><span>BRIEFING</span><b>→</b><span>DIAGNÓSTICO</span><b>→</b><span>HIPÓTESES</span><b>→</b><span>JUSTIFICATIVA</span><b>→</b><span>OBJETIVO + OKR</span><b>→</b><span>VALIDAÇÃO</span><b>→</b><span>POSICIONAMENTO</span><b>→</b><span>ESTRATÉGIA</span></div>
       <div class="jp-gate"><div><strong id="jpGateLabel">${apr ? 'PRÉ-PROJETO APROVADO' : 'AGUARDANDO VALIDAÇÃO'}</strong><p>${apr ? 'Próximo gate: <b>POSICIONAMENTO</b>. Defina como a empresa quer ocupar espaço na mente do mercado antes de fechar a estratégia.' : (allOk ? 'Checklist completo: envie para revisão e depois aprove.' : 'Complete o checklist para enviar para revisão.')}</p></div>${apr ? `<button class="btn dark" onclick="state.activeProjectId='${p.id}';ui.tab='strategy';renderProjectTab()">Abrir Posicionamento →</button>` : ''}</div>
@@ -1525,6 +1596,19 @@ async function preAI(kind) {
       if (j.justification) { pre.justification = j.justification; pre.justEdited = true; }
       if (j.objective) { pre.objective = j.objective; pre.objEdited = true; }
       toast('Diagnóstico sugerido pela IA. Revise e edite.');
+    } else if (kind === 'summary') {
+      if (pre.summary.edited && !confirm('Substituir os blocos que você editou?')) return;
+      const j = await aiJSON('Escreva o resumo executivo para abrir o projeto, em PT-BR, claro e cauteloso. Não invente dados nem números; use "pode" e "sugere" quando for hipótese. Responda só JSON: [{"label","kind","text"}] com kind em dado|hipotese|recomendacao, 6 a 8 blocos curtos (contexto, desafio central, objetivo, como medir, para quem, como começar, o que validar, próximos passos).', ctx + '\nDiagnóstico: ' + JSON.stringify(pre.diag) + '\nObjetivo: ' + pre.objective + '\nKRs tração: ' + pre.okr.tr.join(' | ') + '\nKRs estruturação: ' + pre.okr.st.join(' | ') + '\nICPs: ' + pre.icps.map(x => x.name).join(', '));
+      const arr = (Array.isArray(j) ? j : []).filter(x => x && x.text).slice(0, 10);
+      if (!arr.length) { toast('A IA não devolveu blocos. Mantive o rascunho.'); return; }
+      pre.summary = {edited: true, blocks: arr.map(x => ({id: uid('sb'), label: String(x.label || 'Bloco').slice(0, 80), kind: SUM_KINDS.includes(x.kind) ? x.kind : 'recomendacao', text: String(x.text)}))};
+      toast('Resumo sugerido pela IA. Revise e apague o que não servir.');
+    } else if (kind === 'pitch') {
+      if (pre.pitch.edited && !confirm('Substituir o pitch que você editou?')) return;
+      const j = await aiJSON('Escreva um elevator pitch de cerca de 30 segundos (70 a 90 palavras) em PT-BR, natural para falar em voz alta, e uma versão de uma frase. Não invente números nem resultados. Responda só JSON: {"text","short"}.', ctx + '\nDiagnóstico: ' + JSON.stringify(pre.diag) + '\nObjetivo: ' + pre.objective + '\nPosicionamento: ' + (pre.positioning || '(não definido)'));
+      if (!j.text) { toast('A IA não devolveu o pitch. Mantive o rascunho.'); return; }
+      pre.pitch = {text: String(j.text), short: String(j.short || ''), edited: true};
+      toast('Pitch sugerido pela IA. Leia em voz alta e ajuste.');
     } else if (kind === 'icp') {
       if (pre.icps.length && !confirm('Substituir os ICPs atuais?')) return;
       const j = await aiJSON('Proponha até 3 ICPs prioritários, com base só no briefing. Responda só JSON: [{"name","profile","situation","need","behavior","intent"}]', ctx);
@@ -1555,26 +1639,70 @@ main{margin-left:220px}section{min-height:100vh;background:#fff;padding:70px 7vw
 .chain{display:grid;gap:10px;max-width:900px}.chain div{border:1px solid #e6e6e6;border-radius:12px;padding:16px;background:#fff}.chain small{font-size:10px;letter-spacing:.12em;color:#999;font-weight:800;display:block;margin-bottom:6px}.chain p{margin:0;font-size:14px;line-height:1.6;color:#333}
 .jr{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.jr .card{padding:14px}
 @media(max-width:900px){aside{display:none}main{margin:0}section{padding:44px 24px}.cards,.cards.three,.jr{grid-template-columns:1fr}}`;
-const PRES_JS = `(function(){var s=[].slice.call(document.querySelectorAll('section')),a=[].slice.call(document.querySelectorAll('aside a'));
-document.addEventListener('keydown',function(e){var i=s.findIndex(function(x){return x.getBoundingClientRect().bottom>window.innerHeight*.4});
-if(e.key==='ArrowDown'||e.key==='PageDown'){e.preventDefault();(s[i+1]||s[i]).scrollIntoView()}if(e.key==='ArrowUp'||e.key==='PageUp'){e.preventDefault();(s[i-1]||s[0]).scrollIntoView()}});
-window.addEventListener('scroll',function(){var i=s.findIndex(function(x){return x.getBoundingClientRect().bottom>window.innerHeight*.4});a.forEach(function(l,j){l.classList.toggle('on',j===i)})});})();`;
+const PRES_JS = `(function(){
+function secs(){return [].slice.call(document.querySelectorAll('main > section'))}
+function cur(){var s=secs(),k=-1;for(var i=0;i<s.length;i++){if(s[i].getBoundingClientRect().bottom>window.innerHeight*.4){k=i;break}}return k<0?s.length-1:k}
+function mark(){var s=secs(),c=s[cur()];[].slice.call(document.querySelectorAll('aside a')).forEach(function(l){l.classList.toggle('on',!!c&&l.getAttribute('href')==='#'+c.id)})}
+function go(id){var t=document.getElementById(id);if(t){t.scrollIntoView({behavior:'smooth',block:'start'})}}
+/* o menu navega por clique (não depende de hash: funciona em iframe, arquivo local e depois de apagar seções) */
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('aside a');if(!a)return;var h=a.getAttribute('href')||'';if(h.charAt(0)!=='#')return;e.preventDefault();go(h.slice(1))});
+document.addEventListener('keydown',function(e){var ae=document.activeElement;if(ae&&(ae.isContentEditable||/INPUT|TEXTAREA|SELECT/.test(ae.tagName)))return;var s=secs(),i=cur();
+if(e.key==='ArrowDown'||e.key==='PageDown'){e.preventDefault();(s[i+1]||s[i]).scrollIntoView({behavior:'smooth'})}if(e.key==='ArrowUp'||e.key==='PageUp'){e.preventDefault();(s[i-1]||s[0]).scrollIntoView({behavior:'smooth'})}});
+window.addEventListener('scroll',mark);window.addEventListener('load',mark);mark();})();`;
+/* edição do documento: apagar, desfazer, editar texto e salvar o HTML já limpo */
+const PE_CSS = `#pe-bar{position:fixed;right:16px;bottom:16px;z-index:9999;display:flex;gap:6px;align-items:center;background:#111;color:#fff;padding:8px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);font:12px Inter,system-ui,Arial,sans-serif;flex-wrap:wrap;max-width:calc(100vw - 32px)}
+#pe-bar button{background:#2a2a2a;color:#fff;border:0;border-radius:9px;padding:8px 11px;font:inherit;font-weight:600;cursor:pointer}#pe-bar button:hover{background:#3a3a3a}#pe-bar button:disabled{opacity:.4;cursor:default}#pe-bar button.on{background:#fff;color:#111}#pe-bar .pe-hint{color:#aaa;font-size:11px;padding:0 6px;max-width:260px}
+.pe-hover{outline:2px dashed #3b82f6!important;outline-offset:2px;cursor:pointer}.pe-sel{outline:3px solid #ef4444!important;outline-offset:2px;cursor:pointer}[contenteditable=true]{outline:2px solid #16a34a!important;outline-offset:2px;cursor:text}
+@media print{#pe-bar{display:none!important}aside{display:none!important}main{margin:0!important}section{min-height:auto!important;page-break-inside:avoid}.pe-hover,.pe-sel{outline:0!important}}`;
+const PE_JS = `(function(){
+var SEL='section,.card,.chain > div,.list p,.flow span,.obj,.lead,.box,li,h1,h2,.k,.muted,.tag,p,small,.id,.jr > div';
+var on=false,sel=null,hist=[],bar,main=document.querySelector('main')||document.body,aside=document.querySelector('aside'),first={m:main.innerHTML,a:aside?aside.innerHTML:''};
+function snap(){return {m:main.innerHTML,a:aside?aside.innerHTML:'',y:window.scrollY}}
+function push(){hist.push(snap());if(hist.length>60)hist.shift();upd()}
+function restore(o){main.innerHTML=o.m;if(aside)aside.innerHTML=o.a;sel=null;upd()}
+function pick(t){if(!t||!t.closest)return null;if(bar&&bar.contains(t))return null;if(aside&&aside.contains(t))return null;return t.closest(SEL)}
+function clear(c){[].slice.call(document.querySelectorAll('.'+c)).forEach(function(n){n.classList.remove(c)})}
+function select(n){clear('pe-sel');sel=n;if(n)n.classList.add('pe-sel');upd()}
+function del(){if(!sel)return;push();var n=sel;if(n.tagName==='SECTION'&&n.id&&aside){var l=aside.querySelector('a[href="#'+n.id+'"]');if(l)l.remove()}n.remove();sel=null;upd();if(window.scrollY>0)window.dispatchEvent(new Event('scroll'))}
+function undo(){var o=hist.pop();if(o){restore(o);window.scrollTo(0,o.y)}}
+function reset(){if(hist.length||main.innerHTML!==first.m){if(!confirm('Restaurar o documento original? As exclusões e edições serão desfeitas.'))return;hist=[];restore(first)}}
+function upd(){if(!bar)return;var q=function(a){return bar.querySelector('[data-a="'+a+'"]')};q('edit').classList.toggle('on',on);q('edit').textContent=on?'Sair da edição':'Editar';q('del').disabled=!sel;q('parent').disabled=!sel;q('undo').disabled=!hist.length;q('reset').disabled=!hist.length;var h=bar.querySelector('.pe-hint');h.textContent=on?(sel?'Selecionado. Apague, suba um nível ou clique em outro.':'Clique no que quiser apagar. Duplo clique edita o texto.'):''}
+function serialize(){var c=document.documentElement.cloneNode(true);var b=c.querySelector('#pe-bar');if(b)b.remove();[].slice.call(c.querySelectorAll('.pe-hover,.pe-sel')).forEach(function(n){n.classList.remove('pe-hover');n.classList.remove('pe-sel')});[].slice.call(c.querySelectorAll('[contenteditable]')).forEach(function(n){n.removeAttribute('contenteditable')});if(c.querySelector('body'))c.querySelector('body').classList.remove('pe-on');return '<!doctype html>'+c.outerHTML}
+window.__presSerialize=serialize;
+function save(){var t=(document.title||'documento').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'documento',bl=new Blob([serialize()],{type:'text/html'}),a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=t+'.html';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
+function toggle(){on=!on;document.body.classList.toggle('pe-on',on);if(!on){select(null);clear('pe-hover');[].slice.call(document.querySelectorAll('[contenteditable]')).forEach(function(n){n.removeAttribute('contenteditable')})}upd()}
+function act(a){if(a==='edit')toggle();else if(a==='del')del();else if(a==='undo')undo();else if(a==='reset')reset();else if(a==='save')save();else if(a==='parent'&&sel){var p=sel.parentElement&&sel.parentElement.closest(SEL);if(p&&!(aside&&aside.contains(p))&&p!==document.body)select(p)}}
+bar=document.createElement('div');bar.id='pe-bar';bar.setAttribute('role','toolbar');bar.innerHTML='<button data-a="edit">Editar</button><button data-a="parent" title="Selecionar o bloco maior">⬆ Bloco maior</button><button data-a="del" title="Apagar (Delete)">Apagar</button><button data-a="undo" title="Desfazer (Ctrl+Z)">Desfazer</button><button data-a="reset">Restaurar tudo</button><button data-a="save">Salvar HTML</button><span class="pe-hint"></span>';document.body.appendChild(bar);
+bar.addEventListener('click',function(e){var b=e.target.closest('button');if(b&&!b.disabled)act(b.dataset.a)});
+document.addEventListener('mouseover',function(e){if(!on)return;clear('pe-hover');var n=pick(e.target);if(n&&n!==sel)n.classList.add('pe-hover')});
+document.addEventListener('mouseout',function(e){if(on&&!e.relatedTarget)clear('pe-hover')});
+document.addEventListener('click',function(e){if(!on)return;if(bar.contains(e.target)||(aside&&aside.contains(e.target)))return;if(e.target.isContentEditable)return;e.preventDefault();e.stopPropagation();clear('pe-hover');select(pick(e.target))},true);
+document.addEventListener('dblclick',function(e){if(!on)return;var n=pick(e.target);if(!n||n.tagName==='SECTION')return;push();n.setAttribute('contenteditable','true');n.focus();n.addEventListener('blur',function f(){n.removeAttribute('contenteditable');n.removeEventListener('blur',f)})});
+document.addEventListener('keydown',function(e){var ae=document.activeElement,typing=ae&&(ae.isContentEditable||/INPUT|TEXTAREA|SELECT/.test(ae.tagName));
+if(e.key==='Escape'&&on){if(typing)ae.blur();else select(null)}
+if(!on||typing)return;if((e.key==='Delete'||e.key==='Backspace')&&sel){e.preventDefault();del()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}});
+upd();})();`;
 
 const E = esc;
 function presData(p) {
-  const pre = p.pre; refreshDrafts(pre);
+  const pre = p.pre; refreshDrafts(pre); refreshExtras(p);
   const items = preItems(pre);
-  return {p, pre, items, rels: relationsFor(items), apr: pre.status === 'APROVADO'};
+  return {p, pre, items, rels: relationsFor(items).filter(r => !pre.hiddenRels.includes(refHip(r.a) + refHip(r.b))), apr: pre.status === 'APROVADO'};
 }
+const KIND_LABEL = {dado: 'DADO', hipotese: 'HIPÓTESE', recomendacao: 'RECOMENDAÇÃO'};
+const paras = t => String(t || '').split('\n').filter(x => x.trim()).map(x => `<p>${E(x)}</p>`).join('');
+const sumBlocks = pre => pre.summary.blocks.map(b => `<div class="card"><span class="id">${E(b.label)}</span><span class="tag">${KIND_LABEL[b.kind] || 'RECOMENDAÇÃO'}</span>${paras(b.text)}</div>`).join('') || '<p class="muted">Sem blocos no resumo.</p>';
 const kvTag = apr => `<span class="tag">${apr ? 'DECISÃO' : 'RECOMENDAÇÃO'}</span>`;
 
 function presentationHTML(p) {
   const {pre, items, apr} = presData(p), d = pre.diag;
-  const menu = [['capa', 'Capa'], ['diagnostico', 'Diagnóstico'], ['hipoteses', 'Hipóteses'], ['objetivo', 'Objetivo'], ['okr', 'OKR'], ['tracao', 'Tração'], ['estruturacao', 'Estruturação'], ['icp', 'ICP'], ['jornada', 'Jornada'], ['posicionamento', 'Posicionamento'], ['validacao', 'Validação']];
+  const menu = [['capa', 'Capa'], ['resumo', 'Resumo executivo'], ['pitch', 'Elevator pitch'], ['diagnostico', 'Diagnóstico'], ['hipoteses', 'Hipóteses'], ['objetivo', 'Objetivo'], ['okr', 'OKR'], ['tracao', 'Tração'], ['estruturacao', 'Estruturação'], ['icp', 'ICP'], ['jornada', 'Jornada'], ['posicionamento', 'Posicionamento'], ['validacao', 'Validação']];
   const list = arr => arr.filter(x => x.trim()).map(x => `<p>${E(x)}</p>`).join('') || '<p class="muted" style="margin-left:0">Ainda não definido.</p>';
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pré-Projeto — ${E(p.name)}</title><style>${PRES_CSS}</style></head><body>
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pré-Projeto — ${E(p.name)}</title><style>${PRES_CSS}${PE_CSS}</style></head><body>
 <aside><b>AMPLIAÇÃO STUDIO</b>${menu.map(m => `<a href="#${m[0]}">${m[1]}</a>`).join('')}</aside><main>
 <section id="capa" class="dark"><div class="k">PRÉ-PROJETO · ${E(p.name.toUpperCase())}</div><h1>Jornada de Crescimento</h1><p class="lead">${E(p.desc || 'Do diagnóstico à definição do objetivo, com prioridade em gerar tração enquanto se constrói a estrutura.')}</p><p class="muted">${E(p.ctx)} · Status: ${E(pre.status)}</p></section>
+<section id="resumo"><div class="k">RESUMO EXECUTIVO</div><h2>Para abrir o projeto</h2><div class="cards">${sumBlocks(pre)}</div></section>
+<section id="pitch" class="dark"><div class="k">ELEVATOR PITCH · ~${pitchSeconds(pre.pitch.text)} SEGUNDOS ${kvTag(apr)}</div><h2>Em uma frase</h2><div class="obj">${E(pre.pitch.short || '')}</div><p class="lead">${E(pre.pitch.text || 'Ainda não definido.')}</p></section>
 <section id="diagnostico"><div class="k">01 · DIAGNÓSTICO</div><h2>O que está acontecendo</h2><div class="cards">${items.map(i => `<div class="card"><span class="id">${refDes(i)}</span><br><b>${E(i.title)}</b><p>${E(i.note)}</p></div>`).join('') || '<p class="muted">Nenhum desafio selecionado.</p>'}</div>
   <div class="chain" style="margin-top:22px">${[['CENÁRIO', d.scenario], ['HIPÓTESE CAUSAL', d.causal], ['CONSEQUÊNCIA', d.consequence], ['NECESSIDADE DE TRANSFORMAÇÃO', d.need]].map(x => `<div><small>${x[0]}</small><p>${E(x[1])}</p></div>`).join('')}</div></section>
 <section id="hipoteses"><div class="k">02 · HIPÓTESES</div><h2>Cada desafio gera uma hipótese</h2><div class="cards">${items.map(i => { const h = pre.hyp[i.id] || {}; return `<div class="card"><span class="id">${refHip(i)}</span><span class="tag">${h.validated ? 'DADO · VALIDADA' : 'HIPÓTESE'}</span><p>${E(hypText(pre, i))}</p><p><b>Impacto:</b> ${E(i.impact)}</p></div>`; }).join('')}</div><p class="muted">Hipóteses precisam ser validadas; não são conclusões definitivas.</p></section>
@@ -1586,15 +1714,17 @@ function presentationHTML(p) {
 <section id="jornada"><div class="k">08 · JORNADA INICIAL <span class="tag">HIPÓTESE</span></div><h2>Da situação à decisão</h2><div class="jr">${pre.journey.map((s, i) => `<div class="card"><b>${pad(i + 1, 2)} ${E(s.name)}</b>${JOURNEY_FIELDS.map(([k, l]) => s[k] ? `<p><b>${l}:</b> ${E(s[k])}</p>` : '').join('') || '<p class="muted">—</p>'}</div>`).join('')}</div></section>
 <section id="posicionamento"><div class="k">09 · POSICIONAMENTO</div><h2>Próximo gate</h2><p class="lead">O pré-projeto não define o posicionamento definitivo. Depois da aprovação, o posicionamento responde como a empresa quer ocupar espaço na mente do mercado.</p>${pre.positioning ? `<div class="obj">${E(pre.positioning)}</div>` : ''}<div class="flow"><span>Pré-Projeto</span><span>→ Posicionamento</span><span>→ Estratégia</span><span>→ Jornada aprofundada</span><span>→ Comunicação</span><span>→ Produção</span></div></section>
 <section id="validacao" class="dark"><div class="k">10 · VALIDAÇÃO</div><h2>${apr ? 'Pré-projeto aprovado' : 'Aguardando validação'}</h2><p class="lead">Status: ${E(pre.status)}${pre.approvedAt ? ' · aprovado em ' + fmtDate(pre.approvedAt) : ''}. Nenhum gate estratégico é ultrapassado sem validação humana.</p></section>
-</main><script>${PRES_JS}<\/script></body></html>`;
+</main><script>${PRES_JS}<\/script><script>${PE_JS}<\/script></body></html>`;
 }
 
 function pdfHTML(p) {
   const {pre, items, rels} = presData(p), d = pre.diag;
   const box = (h, body) => `<h2>${h}</h2>${body}`;
   const b = t => `<div class="box">${t}</div>`;
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Pré-Projeto — ${E(p.name)}</title><style>body{font-family:Arial,sans-serif;padding:34px;color:#111;max-width:860px;margin:auto}h1{font-size:28px;margin:0 0 4px}h2{font-size:18px;margin:26px 0 8px;border-bottom:1px solid #ddd;padding-bottom:6px}.box{border:1px solid #ddd;padding:12px 14px;margin:8px 0;border-radius:8px;break-inside:avoid}.label{font-size:10px;letter-spacing:.12em;color:#888;font-weight:bold}p{line-height:1.55;color:#444;margin:6px 0;font-size:13px}.id{font-size:10px;color:#999;font-family:monospace}ul{padding-left:18px}li{font-size:13px;line-height:1.55;color:#444}@media print{body{padding:0}}</style></head><body>
-<h1>Pré-Projeto — ${E(p.name)}</h1><p>${E(p.ctx)} · Status: ${E(pre.status)} · Gerado em ${fmtDate(new Date().toISOString())} · Ampliação Studio</p>
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Pré-Projeto — ${E(p.name)}</title><style>${PE_CSS}body{font-family:Arial,sans-serif;padding:34px;color:#111;max-width:860px;margin:auto}h1{font-size:28px;margin:0 0 4px}h2{font-size:18px;margin:26px 0 8px;border-bottom:1px solid #ddd;padding-bottom:6px}.box{border:1px solid #ddd;padding:12px 14px;margin:8px 0;border-radius:8px;break-inside:avoid}.label{font-size:10px;letter-spacing:.12em;color:#888;font-weight:bold}p{line-height:1.55;color:#444;margin:6px 0;font-size:13px}.id{font-size:10px;color:#999;font-family:monospace}ul{padding-left:18px}li{font-size:13px;line-height:1.55;color:#444}@media print{body{padding:0}}</style></head><body>
+<main><h1>Pré-Projeto — ${E(p.name)}</h1><p>${E(p.ctx)} · Status: ${E(pre.status)} · Gerado em ${fmtDate(new Date().toISOString())} · Ampliação Studio</p>
+${box('Resumo executivo', pre.summary.blocks.map(x => b(`<div class="label">${E(x.label.toUpperCase())} · ${KIND_LABEL[x.kind] || ''}</div>${paras(x.text)}`)).join('') || '<p>Sem blocos.</p>')}
+${box('Elevator pitch (~' + pitchSeconds(pre.pitch.text) + ' s)', b(`<p><b>${E(pre.pitch.short)}</b></p><p>${E(pre.pitch.text)}</p>`))}
 ${box('Briefing', b(`<p>${E(pre.briefing) || 'Não informado.'}</p>`))}
 ${box('Desafios e hipóteses', items.map(i => b(`<span class="id">${refDes(i)} → ${refHip(i)}</span><p><b>${E(i.title)}</b></p><p>${E(hypText(pre, i))}</p><p><b>Impacto hipotético:</b> ${E(i.impact)}</p>`)).join('') || '<p>Nenhum desafio selecionado.</p>')}
 ${box('Cruzamento das hipóteses', rels.map(r => b(`<span class="id">${refHip(r.a)} ↔ ${refHip(r.b)} · ${r.type}</span><p>${E(r.text)}</p>`)).join('') || '<p>Sem relações identificadas.</p>')}
@@ -1605,7 +1735,7 @@ ${box('OKR · ' + E(pre.okr.objective), b(`<div class="label">TRAÇÃO</div><ul>
 ${box('ICPs prioritários', pre.icps.map((x, i) => b(`<div class="label">ICP ${i + 1}</div><p><b>${E(x.name)}</b></p>${ICP_FIELDS.slice(1).map(([k, l]) => x[k] ? `<p>${l}: ${E(x[k])}</p>` : '').join('')}`)).join('') || '<p>Nenhum ICP definido.</p>')}
 ${box('Jornada inicial (hipótese)', pre.journey.map((s, i) => b(`<div class="label">${pad(i + 1, 2)} ${E(s.name.toUpperCase())}</div>${JOURNEY_FIELDS.map(([k, l]) => s[k] ? `<p>${l}: ${E(s[k])}</p>` : '').join('') || '<p>—</p>'}`)).join(''))}
 ${box('Gates', `<p>Pré-Projeto (${E(pre.status)}) → Posicionamento → Estratégia → Jornada aprofundada → Plano de Comunicação → Produção.</p>${pre.positioning ? b(`<div class="label">POSICIONAMENTO</div><p>${E(pre.positioning)}</p>`) : ''}`)}
-</body></html>`;
+</main><script>${PE_JS}<\/script></body></html>`;
 }
 
 /* Overlay em tela cheia (sem depender de pop-ups) */
@@ -1616,12 +1746,18 @@ function showOverlay(title, html, filename) {
   $('overlay').classList.add('open');
 }
 function closeOverlay() { $('overlay').classList.remove('open'); $('overlayFrame').srcdoc = ''; }
-function overlayDownload() { if (ui.overlay) download(ui.overlay.filename, ui.overlay.html, 'text/html'); }
+/* baixa o documento como está na tela (com o que você apagou ou editou) */
+function overlayDownload() {
+  if (!ui.overlay) return;
+  let html = ui.overlay.html;
+  try { const w = $('overlayFrame').contentWindow; if (w && typeof w.__presSerialize === 'function') html = w.__presSerialize(); } catch (e) { /* usa o original */ }
+  download(ui.overlay.filename, html, 'text/html');
+}
 function overlayPrint() { const f = $('overlayFrame'); try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { toast('Use "Baixar HTML" e imprima pelo navegador.'); } }
 
 const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 function prePresent() { const p = preP(); showOverlay('Apresentação · ' + p.name, presentationHTML(p), `pre-projeto-${slug(p.name)}.html`); }
-function prePDF() { const p = preP(); showOverlay('PDF · ' + p.name, pdfHTML(p), `pre-projeto-${slug(p.name)}.html`); setTimeout(overlayPrint, 600); toast('Na janela de impressão, escolha "Salvar como PDF".'); }
+function prePDF() { const p = preP(); showOverlay('PDF · ' + p.name, pdfHTML(p), `pre-projeto-${slug(p.name)}.html`); toast('Apague ou edite o que quiser (botão Editar) e clique em Imprimir / PDF.'); }
 
 </script>
 <script>
