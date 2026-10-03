@@ -52,7 +52,7 @@ function lpSeedBlocks(l) {
 /* ---------- renderização do HTML ---------- */
 const lpE = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]);
 const lpRich = s => lpE(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-const lpPending = l => (l.blocks || []).filter(b => b.on).reduce((n, b) => n + (JSON.stringify([b.title, b.text, b.note, b.price, b.items, b.yes, b.no]).match(/\[CONFIRMAR/g) || []).length, 0);
+const lpPending = l => (l.vis ? (JSON.stringify(l.vis).match(/\[CONFIRMAR/g) || []).length : 0) + (l.blocks || []).filter(b => b.on && !l.vis).reduce((n, b) => n + (JSON.stringify([b.title, b.text, b.note, b.price, b.items, b.yes, b.no]).match(/\[CONFIRMAR/g) || []).length, 0);
 function lpCta(l, b) {
   const P = l.product, hasForm = (l.blocks || []).some(x => x.t === 'form' && x.on);
   if (P.checkout && l.type !== 'servico') return {href: P.checkout, ext: true};
