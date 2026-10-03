@@ -368,6 +368,17 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .vf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.vf-card{border:2px solid var(--line);border-radius:14px;padding:10px;background:#fff}.vf-card.sel{border-color:#2f6bff}.vf-card canvas{width:100%;height:auto;border-radius:8px;border:1px solid #eee;background:#fafafa;display:block}
 .vf-meta{margin:8px 0}.vf-meta b{display:block;font-size:12px;line-height:1.3}.vf-meta small{color:#888;font-size:10.5px}.vf-sel{display:flex;align-items:center}.chk-line{display:flex;gap:8px;align-items:center;font-size:12px}
 
+.rsz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.rsz-g h4{margin:8px 0 4px;font-size:12px;color:var(--muted)}.rsz-i{display:flex;gap:6px;align-items:center;font-size:12.5px;padding:3px 0}.rsz-i.cur span{font-weight:700}
+
+.bk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}.bk-logo{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.bk-logo canvas{background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0 0/14px 14px;border:1px solid var(--line);border-radius:8px}.bk-logo canvas.bk-on-dark{background:#1b1b1f}
+.bk-font{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)}
+.bk-extr{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.bk-chip{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}.bk-chip.on{box-shadow:0 0 0 2px #111}.bk-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.bk-bar{display:flex;height:64px;border-radius:12px;overflow:hidden;margin:12px 0;border:1px solid var(--line)}.bk-bar i{display:block}
+.bk-sws{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}.bk-sw{display:flex;flex-direction:column;gap:4px;font-size:12px}.bk-sw i{display:block;height:44px;border-radius:10px;border:1px solid var(--line)}.bk-sw input{width:100%;height:26px;padding:0;border:0;background:none}.bk-sw span{font-family:monospace;font-size:11px;color:var(--muted)}
+.bk-cts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.bk-ct{font-size:11.5px;padding:4px 9px;border-radius:999px;background:#eef6ee}.bk-ct.mid{background:#fff4dc}.bk-ct.bad{background:#fde7e7}
+.bk-prev{display:flex;gap:14px;flex-wrap:wrap}.bk-prev canvas{max-width:100%;height:auto;border:1px solid var(--line);border-radius:10px}
+.bk-sw i{display:none}.bk-sw input{height:44px;border-radius:10px;cursor:pointer;border:1px solid var(--line);padding:2px}
+
 </style>
 </head>
 <body>
@@ -575,7 +586,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -1859,11 +1870,33 @@ function crossCompositions(aud, tone, max = 6) {
 <script>
 /* Motor do Estúdio de Design: modelo de peça, layout de texto com destaque por palavra, render em canvas,
    geração de carrossel a partir de um estilo, extração/aplicação de estilo e exportação (PNG e ZIP). */
-const FORMATS = {
-  feed45: {id: 'feed45', label: 'Feed 4:5 · 1080×1350', w: 1080, h: 1350},
-  square: {id: 'square', label: 'Quadrado 1:1 · 1080×1080', w: 1080, h: 1080},
-  story: {id: 'story', label: 'Stories 9:16 · 1080×1920', w: 1080, h: 1920}
-};
+/* Catálogo de formatos. Medidas conforme as plataformas publicam hoje; elas mudam, então confira antes de produzir em escala. */
+const FORMAT_GROUPS = [
+  ['Instagram', [
+    ['feed45', 'Feed 4:5', 1080, 1350], ['square', 'Feed quadrado 1:1', 1080, 1080], ['ig34', 'Feed 3:4 (grade nova)', 1080, 1440],
+    ['iglandscape', 'Feed paisagem 1.91:1', 1080, 566], ['story', 'Stories / Reels 9:16', 1080, 1920], ['igprofile', 'Foto de perfil', 320, 320]]],
+  ['Anúncios Meta (Facebook + Instagram)', [
+    ['adsquare', 'Feed 1:1', 1080, 1080], ['ad45', 'Feed 4:5', 1080, 1350], ['adstory', 'Stories / Reels 9:16', 1080, 1920],
+    ['adlink', 'Link / paisagem 1.91:1', 1200, 628], ['adcarousel', 'Carrossel 1:1', 1080, 1080], ['admarket', 'Marketplace 1:1', 1080, 1080]]],
+  ['Capas e banners de redes', [
+    ['fbcover', 'Facebook · capa da página', 851, 315, 'No celular a capa é cortada nas laterais: mantenha o texto no centro.'], ['fbevent', 'Facebook · capa de evento', 1920, 1005],
+    ['fbpost', 'Facebook · post com link', 1200, 630], ['ytbanner', 'YouTube · banner do canal', 2560, 1440, 'Só a faixa central (1546×423) aparece em todos os aparelhos: o texto fica nela.', {w: 1546, h: 423}],
+    ['ytthumb', 'YouTube · miniatura', 1280, 720], ['lipersonal', 'LinkedIn · capa pessoal', 1584, 396], ['licompany', 'LinkedIn · capa da empresa', 1128, 191],
+    ['xheader', 'X · capa do perfil', 1500, 500], ['xpost', 'X · post com imagem 16:9', 1600, 900], ['pin', 'Pinterest · pin 2:3', 1000, 1500]]]
+];
+const FORMATS = {};
+FORMAT_GROUPS.forEach(([g, list]) => list.forEach(([id, name, w, h, note, safe]) => { FORMATS[id] = {id, group: g, label: name + ' · ' + w + '×' + h, name, w, h, note: note || '', safe: safe || null}; }));
+const customFormat = (w, h) => { w = Math.max(64, Math.min(4096, Math.round(+w) || 1080)); h = Math.max(64, Math.min(4096, Math.round(+h) || 1080)); return {id: 'custom', group: 'Personalizado', label: 'Personalizado · ' + w + '×' + h, name: 'Personalizado', w, h, note: '', safe: null}; };
+/* o: {fmt, cw, ch} → objeto de formato */
+const resolveFmt = o => o.fmt === 'custom' ? customFormat(o.cw, o.ch) : (FORMATS[o.fmt] || FORMATS.feed45);
+const fmtOptions = sel => FORMAT_GROUPS.map(([g, list]) => `<optgroup label="${g}">${list.map(([id, name, w, h]) => `<option value="${id}" ${id === sel ? 'selected' : ''}>${name} · ${w}×${h}</option>`).join('')}</optgroup>`).join('') + `<optgroup label="Livre"><option value="custom" ${sel === 'custom' ? 'selected' : ''}>Personalizado… (digite as medidas)</option></optgroup>`;
+/* seletor completo (lista + medidas livres). who = 'cmp' ou 'vf' (estado em dz) */
+function fmtPicker(who, o) {
+  const f = resolveFmt(o);
+  return `<select onchange="dzFmtPick('${who}','fmt',this.value)">${fmtOptions(o.fmt)}</select>` +
+    (o.fmt === 'custom' ? `<div class="ins-row" style="margin-top:6px"><label class="ins">Largura (px)<input type="number" min="64" max="4096" value="${f.w}" onchange="dzFmtPick('${who}','cw',this.value)"></label><label class="ins">Altura (px)<input type="number" min="64" max="4096" value="${f.h}" onchange="dzFmtPick('${who}','ch',this.value)"></label></div>` : '') +
+    (f.note ? `<small class="muted block">${f.note}</small>` : '');
+}
 
 /* ---- fontes (Google Fonts, carregadas sob demanda) ---- */
 const FONTS_LOADED = new Set();
@@ -1979,7 +2012,7 @@ async function loadImage(id) { if (!id || IMGS.has(id)) return; try { const b = 
 async function ensureSetResources(set) {
   const fams = [], ids = [];
   set.slides.forEach(s => s.layers.forEach(L => { if (L.type === 'text') fams.push(L.family); if (L.type === 'image' && L.imgId) ids.push(L.imgId); }));
-  await Promise.all([ensureFonts(fams), ...ids.map(loadImage)]);
+  await Promise.all([ensureFonts(fams), ...ids.map(loadImage), typeof brandFontsLoad === 'function' ? brandFontsLoad(curProject()) : 0]);
 }
 
 /* ---- construção de camadas ---- */
@@ -2012,7 +2045,7 @@ function themeLayer(L, tk) {
   } else if (L.type === 'rect') {
     if (L.role === 'accent-fill' || L.role === 'cta-fill') L.fill = tk.accent;
     if (L.role === 'cta-fill') L.radius = Math.max(tk.radius, 0) ? tk.radius * 2 : 0;
-    if (L.role === 'panel') L.fill = mixHex(tk.bg, tk.fg, 0.07);
+    if (L.role === 'panel') L.fill = tk.second ? mixHex(tk.bg, tk.second, 0.16) : mixHex(tk.bg, tk.fg, 0.07);
   } else if (L.type === 'image' && L.role === 'photo') Object.assign(L, {filter: tk.photo.filter, ovColor: tk.photo.ovColor, ovMode: tk.photo.ovMode, brief: tk.photo.brief});
 }
 function themeSlide(slide, tk) { slide.bg = tk.bg; slide.layers.forEach(L => themeLayer(L, tk)); }
@@ -2153,7 +2186,15 @@ async function exportSetZip(set) {
 /* ================= ANÚNCIO DE IMAGEM ÚNICA E VARIAÇÕES ================= */
 const AD_LAYOUTS = {top: 'Foto no topo', bottom: 'Foto embaixo', full: 'Foto cheia', none: 'Só tipografia'};
 /* anúncio: headline + apoio + botão, com a foto conforme o layout */
+/* anúncio em qualquer medida: formatos largos usam o layout lateral; os demais são montados em 1080 de largura e escalados */
+const isWide = f => f.w / f.h >= 1.5;
 function slideAd(tk, copy, fmt, brand, layout) {
+  if (isWide(fmt)) return slideWide(tk, copy, fmt, brand, {photo: layout !== 'none'});
+  if (fmt.w === 1080) return slideAdBase(tk, copy, fmt, brand, layout);
+  const k = fmt.w / 1080, s = slideAdBase(tk, copy, {w: 1080, h: Math.round(fmt.h / k)}, brand, layout);
+  return scaleSlide(s, k, k);
+}
+function slideAdBase(tk, copy, fmt, brand, layout) {
   const W = fmt.w, H = fmt.h, m = 90, cw = W - 2 * m, al = tk.align === 'center' ? 'center' : 'left', layers = [];
   const mode = layout && layout !== 'auto' ? layout : ({half: 'bottom'}[tk.photoMode] || tk.photoMode), onP = mode === 'full';
   let y0 = m, y1 = H - m - 70;
@@ -2204,6 +2245,311 @@ function variantFromBase(base, tk, texts, emMode, fmt) {
   let fit; for (const k of [1, 0.92, 0.85, 0.78, 0.7, 0.62, 0.55, 0.48, 0.4]) { fit = pass(k); if (fit.bot - fit.top <= limit - topMin) break; }
   if (fit.bot > limit) { const up = Math.min(fit.bot - limit, Math.max(0, fit.top - topMin)); s.layers.forEach(l => { if (movable(l)) l.y -= up; }); }
   return s;
+}
+
+</script>
+<script>
+/* Formatos e redimensionamento: uma arte pronta vira várias medidas (feed, stories, anúncios, capas, tamanho livre).
+   Formatos parecidos escalam a peça (preserva sua edição); muito diferentes reconstroem por papel (título, texto, botão, foto). */
+
+/* escala uniforme de posição/tamanho; texto acompanha o menor fator */
+function scaleSlide(s, kx, ky) {
+  const k = Math.min(kx, ky);
+  s.layers.forEach(l => {
+    if (l.role === 'logo') { const cx = (l.x + l.w / 2) * kx, cy = (l.y + l.h / 2) * ky; l.w = Math.round(l.w * k); l.h = Math.round(l.h * k); l.x = Math.round(Math.max(0, cx - l.w / 2)); l.y = Math.round(Math.max(0, cy - l.h / 2)); return; }
+    l.x = Math.round(l.x * kx); l.y = Math.round(l.y * ky); l.w = Math.round(l.w * kx);
+    if (l.type === 'text') { l.size = Math.max(8, Math.round(l.size * k * 10) / 10); if (l.ls) l.ls = Math.round(l.ls * k * 10) / 10; }
+    else { l.h = Math.round(l.h * ky); if (l.radius) l.radius = Math.round(l.radius * k); if (l.strokeW) l.strokeW = Math.max(1, Math.round(l.strokeW * k)); }
+  });
+  return s;
+}
+
+/* layout lateral para formatos largos (capas, banners, 1.91:1, 16:9): texto à esquerda, foto à direita */
+function slideWide(tk, copy, fmt, brand, o) {
+  o = o || {};
+  const W = fmt.w, H = fmt.h, box = fmt.safe ? {x: Math.round((W - fmt.safe.w) / 2), y: Math.round((H - fmt.safe.h) / 2), w: fmt.safe.w, h: fmt.safe.h} : {x: 0, y: 0, w: W, h: H};
+  const m = Math.max(10, Math.round(box.h * 0.09)), ratio = box.w / box.h, layers = [];
+  const withPhoto = o.photo !== false && ratio <= 4.5;
+  const pw = withPhoto ? Math.round(box.w * (ratio > 3 ? 0.3 : 0.38)) : 0;
+  if (withPhoto) { const ph = IM('photo', {x: box.x + box.w - pw, y: box.y, w: pw, h: box.h}); themeLayer(ph, tk); layers.push(ph); }
+  const x0 = box.x + m, tw = Math.min(box.w - pw - 2 * m - (withPhoto ? m : 0), Math.round(box.h * 6.5)), al = 'left';
+  const mk = drop => {
+    const items = [];
+    if (copy.kicker && drop < 2) items.push(T('kicker', {content: copy.kicker, size: Math.max(10, Math.round(box.h * 0.045)), ls: 2, align: al, w: tw}));
+    items.push(T('title', {content: autoEmphasis(copy.title), size: 100, lh: tk.upper ? 1.02 : 1.1, align: al, w: tw}));
+    if (copy.sub && drop < 3) items.push(T('body', {content: copy.sub, size: Math.max(11, Math.round(box.h * 0.07)), lh: 1.35, align: al, w: tw}));
+    items.forEach(it => themeLayer(it, tk));
+    if (copy.button && drop < 1) {
+      const bh = Math.max(24, Math.round(box.h * 0.17)), bw = Math.min(tw, Math.round(box.h * 0.9)), btn = RC('cta-fill', {w: bw, h: bh, fill: tk.accent}), bt = T('cta-text', {content: copy.button, size: Math.max(10, Math.round(bh * 0.38)), align: 'center', w: bw - 16});
+      themeLayer(btn, tk); themeLayer(bt, tk); bt.dx = 8; bt.dy = (bh - bt.size * 1.2) / 2; btn.dx = 0; btn.dy = 0; items.push({group: [btn, bt], h: bh});
+    }
+    return items;
+  };
+  const avail = box.h - 2 * m, gap = Math.max(6, Math.round(box.h * 0.04));
+  let items = null;
+  for (const drop of [0, 1, 2, 3]) {
+    const its = mk(drop), t = its.find(i => i.role === 'title'), base = Math.round(box.h * 0.2);
+    for (const k of [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.42]) {
+      t.size = Math.max(10, Math.round(titleSize(copy.title, base) * k));
+      const total = its.reduce((a, it) => a + (it.group ? it.h : it.type === 'text' ? layoutText(it).h : it.h), 0) + gap * (its.length - 1);
+      if (total <= avail) { items = its; break; }
+    }
+    if (items) break; if (drop === 3) items = its;
+  }
+  stackPlace(items, x0, tw, box.y + m, box.y + box.h - m, 'middle', gap);
+  items.forEach(it => (it.group ? it.group : [it]).forEach(l => layers.push(l)));
+  if (brand && box.h >= 300) { const br = T('brand', {content: brand, size: Math.max(10, Math.round(box.h * 0.04)), ls: 2, x: x0, y: box.y + box.h - m - 14, w: tw, upper: true}); themeLayer(br, tk); layers.push(br); }
+  return {id: sid(), bg: tk.bg, layers};
+}
+
+/* lê o conteúdo de uma peça por papel */
+function slideCopy(sl) {
+  const t = r => sl.layers.find(l => l.type === 'text' && l.role === r && l.content);
+  const k = t('kicker'), ti = t('title'), b = t('body'), c = t('cta-text'), br = t('brand'), ph = sl.layers.find(l => l.type === 'image' && l.role === 'photo');
+  return {kicker: k ? k.content : '', title: ti ? ti.content : '', sub: b ? b.content : '', button: c ? c.content : '', brand: br ? br.content : '', photo: ph || null};
+}
+
+/* adapta UMA peça de um formato para outro */
+function resizeSlide(sl, from, to, tk) {
+  const rf = from.w / from.h, rt = to.w / to.h, rel = rt / rf, wf = isWide(from), wt = isWide(to);
+  if ((wf === wt) && rel >= (wt ? 0.8 : 0.7) && rel <= (wt ? 1.25 : 1.45)) return scaleSlide(cloneSlide(sl), to.w / from.w, to.h / from.h);
+  const cp = slideCopy(sl), photoFull = cp.photo && cp.photo.w >= from.w * 0.95 && cp.photo.h >= from.h * 0.95;
+  const layout = !cp.photo ? 'none' : photoFull ? 'full' : 'auto';
+  const copy = {kicker: cp.kicker, title: cp.title || 'Título', sub: cp.sub, button: cp.button};
+  const out = slideAd(tk, copy, to, cp.brand, layout);
+  // devolve exatamente o texto original (inclui destaques feitos à mão)
+  const set = (role, v) => { const L = out.layers.find(l => l.type === 'text' && l.role === role); if (L && v) L.content = v; };
+  set('title', cp.title); set('body', cp.sub); set('cta-text', cp.button); set('kicker', cp.kicker);
+  if (cp.photo) { const P = out.layers.find(l => l.type === 'image' && l.role === 'photo'); if (P) Object.assign(P, {imgId: cp.photo.imgId, filter: cp.photo.filter, ovColor: cp.photo.ovColor, ovMode: cp.photo.ovMode, brief: cp.photo.brief, fx: cp.photo.fx, fy: cp.photo.fy}); }
+  const lg = sl.layers.find(l => l.type === 'image' && l.role === 'logo');
+  if (lg) { const k = Math.min(to.w / from.w, to.h / from.h), w = Math.round(lg.w * k), h = Math.round(lg.h * k), cx = (lg.x + lg.w / 2) / from.w, cy = (lg.y + lg.h / 2) / from.h; out.layers.push(Object.assign(cloneSlide({layers: [lg]}).layers[0], {w, h, x: Math.round(Math.min(Math.max(0, cx * to.w - w / 2), to.w - w)), y: Math.round(Math.min(Math.max(0, cy * to.h - h / 2), to.h - h))})); }
+  out.bg = sl.bg || tk.bg;
+  return out;
+}
+/* fontes já precisam estar carregadas (use ensureSetResources antes) */
+function resizeSetSync(set, to, name) {
+  const from = set.format, ns = {id: uid('ds'), name: name || set.name + ' · ' + (to.name || to.label), format: {id: to.id, w: to.w, h: to.h}, tk: JSON.parse(JSON.stringify(set.tk)), slides: [], created: new Date().toISOString(), updated: new Date().toISOString()};
+  if (to.safe) ns.format.safe = to.safe;
+  ns.slides = set.slides.map(s => resizeSlide(s, from, ns.format, ns.tk));
+  return ns;
+}
+/* carrossel já no formato pedido: nativo (1080 de largura, não largo) usa o gerador próprio; os outros nascem em 4:5 e são adaptados */
+function buildSetAny(name, tk, copy, fmt, brand) {
+  if (fmt.w === 1080 && !isWide(fmt)) return buildSet(name, tk, copy, fmt, brand);
+  const base = buildSet(name, tk, copy, FORMATS.feed45, brand);
+  const r = resizeSetSync(base, fmt, name); r.name = name; return r;
+}
+
+/* ---- interface ---- */
+function dzFmtPick(who, field, v) { const o = who === 'vf' ? dz.vf : dz.cmp; o[field] = field === 'fmt' ? v : +v; renderDesign(); }
+
+let rsz = {setId: '', sel: {}, cw: 1080, ch: 1080, useCustom: false};
+function dzResizeOpen(setId) {
+  const p = dzP(), set = p.design.sets.find(x => x.id === setId); if (!set) return;
+  rsz = {setId, sel: {}, cw: 1080, ch: 1080, useCustom: false};
+  const grp = FORMAT_GROUPS.map(([g, list]) => `<div class="rsz-g"><h4>${g}</h4>${list.map(([id, name, w, h]) => `<label class="rsz-i ${id === set.format.id ? 'cur' : ''}"><input type="checkbox" value="${id}" onchange="rsz.sel[this.value]=this.checked;dzResizeCount()"> <span>${name}</span> <small class="muted">${w}×${h}</small></label>`).join('')}</div>`).join('');
+  showModal('⤢ Adaptar para outros tamanhos', `<p class="muted" style="margin-top:0;font-size:12px">Peça atual: <b>${esc(set.name)}</b> (${set.format.w}×${set.format.h}). Cada medida marcada vira uma peça nova na biblioteca; a original não muda. Formatos parecidos mantêm sua edição; muito diferentes (ex.: capa larga) reorganizam título, texto, botão e foto.</p>
+    <div class="rsz-grid">${grp}</div>
+    <div class="rsz-g"><h4>Medida livre</h4><div class="ins-row"><label class="ins inl"><input type="checkbox" onchange="rsz.useCustom=this.checked;dzResizeCount()"> Incluir</label><label class="ins">Largura<input type="number" min="64" max="4096" value="1080" onchange="rsz.cw=+this.value"></label><label class="ins">Altura<input type="number" min="64" max="4096" value="1080" onchange="rsz.ch=+this.value"></label></div></div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" id="rszGo" onclick="dzResizeRun()" disabled>Gerar (0)</button></div>`);
+}
+function dzResizeCount() { const n = Object.values(rsz.sel).filter(Boolean).length + (rsz.useCustom ? 1 : 0), b = $('rszGo'); if (b) { b.textContent = 'Gerar (' + n + ')'; b.disabled = !n; } }
+async function dzResizeRun() {
+  const p = dzP(), src = p.design.sets.find(x => x.id === rsz.setId); if (!src) return;
+  const targets = Object.keys(rsz.sel).filter(k => rsz.sel[k] && FORMATS[k]).map(k => FORMATS[k]); if (rsz.useCustom) targets.push(customFormat(rsz.cw, rsz.ch));
+  if (!targets.length) return; const b = $('rszGo'); b.disabled = true; b.textContent = 'Gerando…';
+  try {
+    await ensureSetResources(src);
+    const made = targets.map(t => resizeSetSync(src, t));
+    for (const s of made) await ensureSetResources(s);
+    p.design.sets.push(...made); persist(); closeModal(); renderDesign(); toast(made.length + ' peça(s) criada(s) na biblioteca.');
+  } catch (e) { b.disabled = false; b.textContent = 'Gerar'; toast('Não consegui adaptar: ' + e.message); }
+}
+
+</script>
+<script>
+/* Brand Kit: logo, fontes próprias e paleta 60/30/10 + 3 cinzas, extraídos do logo. Vira estilo de campanha. */
+const BRAND_DEFAULT = () => ({logos: [], fonts: [], extracted: [], primary: '', bgMode: 'light', accMode: 'logo', pal: {c60: '', c30: '', c10: ''}, grays: ['', '', ''], headFont: '', bodyFont: ''});
+const isHex = v => /^#[0-9a-f]{6}$/i.test(String(v || ''));
+const brandOf = p => { p.design.brand = mergeDefaults(p.design.brand, BRAND_DEFAULT()); return p.design.brand; };
+
+/* ---- cor ---- */
+function rgb2hsl(r, g, b) { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2; let h = 0, s = 0; if (mx !== mn) { const d = mx - mn; s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn); h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; } return [h, s, l]; }
+function hsl2hex(h, s, l) { h = ((h % 360) + 360) % 360; s = Math.max(0, Math.min(1, s)); l = Math.max(0, Math.min(1, l)); const f = n => { const k = (n + h / 30) % 12, a = s * Math.min(l, 1 - l); return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))); }; return '#' + [f(0), f(8), f(4)].map(v => v.toString(16).padStart(2, '0')).join(''); }
+const hexHsl = h => rgb2hsl(...hex2rgb(h));
+const contrast = (a, b) => { const x = lum(a) + 0.05, y = lum(b) + 0.05; return Math.max(x, y) / Math.min(x, y); };
+
+/* cores dominantes de uma imagem (ignora transparência e quase-branco; cinzas ficam de fora) */
+function extractColors(bmp) {
+  const k = 96 / Math.max(bmp.width, bmp.height), w = Math.max(1, Math.round(bmp.width * k)), h = Math.max(1, Math.round(bmp.height * k));
+  const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d', {willReadFrequently: true}); x.drawImage(bmp, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h).data, bins = new Map();
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] < 140) continue; const [hh, ss, ll] = rgb2hsl(d[i], d[i + 1], d[i + 2]);
+    if (ll > 0.93 || ll < 0.07 || ss < 0.16) continue;
+    const key = (d[i] >> 4) << 8 | (d[i + 1] >> 4) << 4 | (d[i + 2] >> 4), b = bins.get(key) || {n: 0, r: 0, g: 0, b: 0}; b.n++; b.r += d[i]; b.g += d[i + 1]; b.b += d[i + 2]; bins.set(key, b);
+  }
+  const list = [...bins.values()].sort((a, b) => b.n - a.n).map(b => ({n: b.n, hex: '#' + [b.r, b.g, b.b].map(v => Math.round(v / b.n).toString(16).padStart(2, '0')).join('')}));
+  const out = [];
+  for (const it of list) {
+    const [h1] = hexHsl(it.hex);
+    if (out.every(o => { const [h2] = hexHsl(o.hex); const dh = Math.min(Math.abs(h1 - h2), 360 - Math.abs(h1 - h2)); return dh > 22 || Math.abs(lum(o.hex) - lum(it.hex)) > 0.25; })) out.push(it);
+    if (out.length >= 6) break;
+  }
+  return out.map(o => o.hex);
+}
+
+/* monta 60/30/10 + 3 cinzas a partir da cor principal. 60 = área dominante (fundo), 30 = cor da marca/painéis, 10 = destaque (botão, ênfase) */
+function buildPalette(b) {
+  const prim = isHex(b.primary) ? b.primary : (b.extracted[0] || '#2a5bd7'), [h, s, l] = hexHsl(prim), sat = Math.max(s, 0.5);
+  const second = b.extracted.find(c => { const [h2] = hexHsl(c); const dh = Math.min(Math.abs(h - h2), 360 - Math.abs(h - h2)); return dh > 40; });
+  const accH = {logo: second ? hexHsl(second)[0] : h + 180, comp: h + 180, ana: h + 30, tri: h + 120}[b.accMode] ?? h + 180;
+  const accent = b.accMode === 'logo' && second ? second : hsl2hex(accH, Math.max(sat, 0.7), 0.52);
+  const tint = hsl2hex(h, Math.min(0.5, Math.max(0.12, s * 0.4)), 0.95), deep = hsl2hex(h, Math.min(0.6, Math.max(0.2, s * 0.6)), 0.11);
+  const brand = b.bgMode === 'dark' && l < 0.45 ? hsl2hex(h, s, 0.58) : prim;
+  const pal = b.bgMode === 'dark' ? {c60: deep, c30: brand, c10: accent} : b.bgMode === 'brand' ? {c60: prim, c30: tint, c10: accent} : {c60: tint, c30: prim, c10: accent};
+  const gs = Math.min(0.1, s * 0.15 + 0.03);
+  return {pal, grays: [hsl2hex(h, gs, 0.92), hsl2hex(h, gs, 0.55), hsl2hex(h, gs, 0.2)]};
+}
+function brandRecalc(p) { const b = brandOf(p), r = buildPalette(b); b.pal = r.pal; b.grays = r.grays; }
+
+/* ---- fontes próprias ---- */
+const BRAND_FONTS_LOADED = new Set();
+async function brandFontsLoad(p) {
+  if (!p) return; const b = brandOf(p);
+  for (const f of b.fonts) {
+    if (BRAND_FONTS_LOADED.has(f.id)) continue; BRAND_FONTS_LOADED.add(f.id);
+    try { const blob = await imgGet(f.fileId); if (!blob) { BRAND_FONTS_LOADED.delete(f.id); continue; } const ff = new FontFace(f.family, await blob.arrayBuffer(), {weight: String(f.weight || 400)}); await ff.load(); document.fonts.add(ff); }
+    catch (e) { BRAND_FONTS_LOADED.delete(f.id); console.warn('fonte da marca', f.name, e); }
+  }
+}
+const brandFontNames = p => brandOf(p).fonts.map(f => f.family);
+const fontChoices = () => { const p = dzP(); return p ? [...new Set([...brandFontNames(p), ...FONT_LIST])] : FONT_LIST; };
+
+/* ---- logos ---- */
+async function bitmapFromFile(file) {
+  try { return await createImageBitmap(file); } catch (e) { /* SVG e afins */ }
+  const url = URL.createObjectURL(file);
+  try { const img = new Image(); img.src = url; await img.decode(); const c = document.createElement('canvas'); c.width = img.naturalWidth || 512; c.height = img.naturalHeight || 512; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); return await createImageBitmap(c); }
+  finally { URL.revokeObjectURL(url); }
+}
+function brandLogoPick() {
+  const f = $('bkLogo'); f.onchange = async () => {
+    const file = f.files[0]; f.value = ''; if (!file) return;
+    if (file.size > 8_000_000) { toast('Arquivo grande demais (máx. 8 MB).'); return; }
+    let bmp; try { bmp = await bitmapFromFile(file); } catch (e) { toast('Não consegui ler esse logo. Use PNG, JPG, WebP ou SVG.'); return; }
+    const p = dzP(), b = brandOf(p), id = uid('img'); await imgPut(id, file); IMGS.set(id, bmp);
+    b.logos.push({id: uid('lg'), name: file.name.replace(/\.[^.]+$/, '').slice(0, 40), imgId: id, tone: 'any', w: bmp.width, h: bmp.height});
+    if (!b.extracted.length) { b.extracted = extractColors(bmp); if (b.extracted[0]) { b.primary = b.extracted[0]; brandRecalc(p); } }
+    persist(); renderDesign(); toast(b.extracted.length ? 'Logo enviado. Paleta gerada a partir dele.' : 'Logo enviado. Não achei cores marcantes; escolha a cor principal manualmente.');
+  }; f.click();
+}
+async function brandReextract(i) { const p = dzP(), b = brandOf(p), lg = b.logos[i]; if (!lg) return; await loadImage(lg.imgId); const bmp = IMGS.get(lg.imgId); if (!bmp) return; b.extracted = extractColors(bmp); b.primary = b.extracted[0] || b.primary; brandRecalc(p); persist(); renderDesign(); }
+function brandLogoSet(i, k, v) { const b = brandOf(dzP()); b.logos[i][k] = v; persist(); }
+function brandLogoDel(i) { if (!confirm('Remover este logo do kit?')) return; brandOf(dzP()).logos.splice(i, 1); persist(); renderDesign(); }
+
+/* ---- fontes: envio ---- */
+function brandFontPick() {
+  const f = $('bkFont'); f.onchange = async () => {
+    const file = f.files[0]; f.value = ''; if (!file) return;
+    if (!/\.(woff2?|ttf|otf)$/i.test(file.name) || file.size > 6_000_000) { toast('Use arquivo .woff2, .woff, .ttf ou .otf de até 6 MB.'); return; }
+    const p = dzP(), b = brandOf(p), name = file.name.replace(/\.[^.]+$/, '').replace(/[^\p{L}\p{N} _-]/gu, '').trim().slice(0, 40) || 'Fonte da marca', id = uid('bf'), fileId = uid('img');
+    const weight = /bold|black|heavy/i.test(file.name) ? 700 : 400, family = 'Marca ' + name;
+    try { const ff = new FontFace(family, await file.arrayBuffer(), {weight: String(weight)}); await ff.load(); document.fonts.add(ff); } catch (e) { toast('Esse arquivo de fonte não abriu. Tente outro formato (.woff2 ou .ttf).'); return; }
+    await imgPut(fileId, file); BRAND_FONTS_LOADED.add(id);
+    b.fonts.push({id, name, family, fileId, weight}); if (!b.headFont) b.headFont = family; if (!b.bodyFont) b.bodyFont = family;
+    persist(); renderDesign(); toast('Fonte adicionada: ' + name);
+  }; f.click();
+}
+function brandFontDel(i) { if (!confirm('Remover esta fonte? Peças que a usam voltarão para uma fonte padrão do navegador.')) return; const b = brandOf(dzP()), f = b.fonts[i]; b.fonts.splice(i, 1); if (b.headFont === f.family) b.headFont = ''; if (b.bodyFont === f.family) b.bodyFont = ''; persist(); renderDesign(); }
+
+/* ---- edição da paleta ---- */
+function brandSet(k, v) { const p = dzP(), b = brandOf(p); b[k] = v; if (['primary', 'bgMode', 'accMode'].includes(k)) brandRecalc(p); persist(); renderDesign(); }
+function brandCol(group, i, v) { if (!isHex(v)) return; const b = brandOf(dzP()); if (group === 'pal') b.pal[i] = v; else b.grays[+i] = v; persist(); brandRefreshPrev(); const sw = document.querySelectorAll('[data-bk="' + group + i + '"]'); sw.forEach(e => { e.style.background = v; if (e.tagName === 'SPAN') e.textContent = v; }); }
+
+/* ---- estilo de campanha a partir do kit ---- */
+function brandTokens(p) {
+  const b = brandOf(p); if (!isHex(b.pal.c60)) brandRecalc(p);
+  const dark = lum(b.pal.c60) < 0.35, fg = dark ? '#ffffff' : b.grays[2], head = b.headFont || 'Poppins', body = b.bodyFont || 'Inter';
+  const tk = makeTokens(DESIGN_STYLES[0], FONT_PAIRS[0], PHOTO_STYLES[0], {
+    name: 'Kit de marca', designId: DESIGN_STYLES[0].id, bg: b.pal.c60, fg, accent: b.pal.c10, muted: dark ? b.grays[0] : b.grays[1], second: b.pal.c30,
+    head: {family: head, weight: b.fonts.some(f => f.family === head) ? (b.fonts.find(f => f.family === head).weight || 400) : 700}, body: {family: body, weight: 400}
+  });
+  return tk;
+}
+function brandSaveStyle() {
+  const p = dzP(), b = brandOf(p), tk = brandTokens(p), list = p.design.styles, ex = list.find(s => s.kit);
+  if (ex) { ex.tk = tk; ex.name = 'Kit de marca · ' + p.name; } else list.push({id: uid('st'), name: 'Kit de marca · ' + p.name, kit: true, tk, created: new Date().toISOString()});
+  p.brand.palette = `60% ${b.pal.c60} · 30% ${b.pal.c30} · 10% ${b.pal.c10} · cinzas ${b.grays.join(' ')}`;
+  persist(); toast('Estilo "Kit de marca" salvo. Use-o em Nova composição, nas variações ou aplique às peças.'); renderDesign();
+}
+function brandExportCSS() {
+  const b = brandOf(dzP()), n = (k, v) => `  --${k}: ${v};`;
+  download('brand-kit.css', ':root {\n' + [n('cor-60-base', b.pal.c60), n('cor-30-marca', b.pal.c30), n('cor-10-destaque', b.pal.c10), n('cinza-claro', b.grays[0]), n('cinza-medio', b.grays[1]), n('cinza-escuro', b.grays[2])].join('\n') + '\n}\n', 'text/css');
+}
+
+/* ---- tela ---- */
+function renderBrandKit(p, r) {
+  const b = brandOf(p); if (!isHex(b.pal.c60)) brandRecalc(p);
+  const sw = (grp, k, c, label) => `<label class="bk-sw"><i data-bk="${grp}${k}" style="background:${esc(c)}"></i><input type="color" value="${esc(c)}" oninput="brandCol('${grp}','${k}',this.value)"><b>${label}</b><span data-bk="${grp}${k}" style="background:none">${esc(c)}</span></label>`;
+  const radio = (key, opts) => `<div class="tchips">${opts.map(([v, l]) => `<button class="tchip ${b[key] === v ? 'on' : ''}" onclick="brandSet('${key}','${v}')">${l}</button>`).join('')}</div>`;
+  const fontSel = (key, l) => `<label class="ins">${l}<select onchange="brandSet('${key}',this.value)"><option value="">Padrão do estilo</option>${b.fonts.map(f => `<option value="${esc(f.family)}" ${b[key] === f.family ? 'selected' : ''}>${esc(f.name)} (enviada)</option>`).join('')}${FONT_LIST.map(f => `<option ${b[key] === f ? 'selected' : ''}>${f}</option>`).join('')}</select></label>`;
+  r.innerHTML = `<div class="page-head"><div><h1>Brand Kit</h1><p>Suba o logo e as fontes da marca. O Studio extrai as cores do logo e monta a paleta 60/30/10 com 3 cinzas, que viram o estilo de toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzBack()">← Estúdio</button></div></div>
+  <input type="file" id="bkLogo" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden><input type="file" id="bkFont" accept=".woff2,.woff,.ttf,.otf" hidden>
+  <div class="bk-grid">
+  <div class="panel"><div class="section-row"><h3>Logos</h3><button class="btn sm dark" onclick="brandLogoPick()">＋ Enviar logo</button></div>
+    ${b.logos.length ? b.logos.map((l, i) => `<div class="bk-logo"><canvas data-logo="${esc(l.imgId)}" width="120" height="70" class="${l.tone === 'dark' ? 'bk-on-dark' : ''}"></canvas><div><strong>${esc(l.name)}</strong><label class="ins">Usar sobre<select onchange="brandLogoSet(${i},'tone',this.value);renderDesign()"><option value="any" ${l.tone === 'any' ? 'selected' : ''}>qualquer fundo</option><option value="light" ${l.tone === 'light' ? 'selected' : ''}>fundo claro</option><option value="dark" ${l.tone === 'dark' ? 'selected' : ''}>fundo escuro</option></select></label><div class="row-gap"><button class="btn sm" onclick="brandReextract(${i})">Extrair cores</button><button class="btn sm" onclick="brandLogoDel(${i})">×</button></div></div></div>`).join('') : '<p class="muted" style="font-size:12.5px">Envie o logo em PNG com fundo transparente (ideal), JPG, WebP ou SVG. Se tiver versão para fundo escuro, envie também.</p>'}</div>
+  <div class="panel"><div class="section-row"><h3>Fontes da marca</h3><button class="btn sm dark" onclick="brandFontPick()">＋ Enviar fonte</button></div>
+    ${b.fonts.length ? b.fonts.map((f, i) => `<div class="bk-font"><span style="font-family:'${esc(f.family)}';font-size:22px">Aa Bb Cc 123</span><small class="muted">${esc(f.name)}</small><button class="btn sm" onclick="brandFontDel(${i})">×</button></div>`).join('') : '<p class="muted" style="font-size:12.5px">Envie .woff2, .woff, .ttf ou .otf. Use só fontes que você tem licença para usar. Sem fonte própria, escolha uma das 30 pares da biblioteca.</p>'}
+    <div class="ins-row" style="margin-top:8px">${fontSel('headFont', 'Títulos')}${fontSel('bodyFont', 'Textos')}</div></div>
+  </div>
+  <div class="panel" style="margin-top:14px"><div class="section-row"><h3>Paleta 60 · 30 · 10</h3><small class="muted">${b.extracted.length ? 'cores achadas no logo' : 'sem logo: escolha a cor principal'}</small></div>
+    <div class="bk-extr">${b.extracted.map(c => `<button class="bk-chip ${c === b.primary ? 'on' : ''}" style="background:${esc(c)}" title="Usar como cor principal ${esc(c)}" onclick="brandSet('primary','${esc(c)}')"></button>`).join('')}<label class="ins inl">Cor principal <input type="color" value="${esc(isHex(b.primary) ? b.primary : b.pal.c30)}" onchange="brandSet('primary',this.value)"></label></div>
+    <div class="ins-row" style="align-items:flex-start;margin-top:8px"><div><div class="okr-label">FUNDO DOMINANTE (60%)</div>${radio('bgMode', [['light', 'Claro'], ['dark', 'Escuro'], ['brand', 'Cor da marca']])}</div><div><div class="okr-label">DESTAQUE (10%)</div>${radio('accMode', [['logo', 'Do logo'], ['comp', 'Complementar'], ['ana', 'Análoga'], ['tri', 'Tríade']])}</div></div>
+    <div class="bk-bar"><i data-bk="palc60" style="flex:60;background:${esc(b.pal.c60)}"></i><i data-bk="palc30" style="flex:30;background:${esc(b.pal.c30)}"></i><i data-bk="palc10" style="flex:10;background:${esc(b.pal.c10)}"></i></div>
+    <div class="bk-sws">${sw('pal', 'c60', b.pal.c60, '60% · base')}${sw('pal', 'c30', b.pal.c30, '30% · marca')}${sw('pal', 'c10', b.pal.c10, '10% · destaque')}</div>
+    <div class="okr-label" style="margin-top:12px">3 CINZAS (puxados para o tom da marca)</div><div class="bk-sws">${sw('g', '0', b.grays[0], 'Cinza claro')}${sw('g', '1', b.grays[1], 'Cinza médio')}${sw('g', '2', b.grays[2], 'Cinza escuro')}</div>
+    <div class="bk-cts" id="bkCts"></div></div>
+  <div class="panel" style="margin-top:14px"><div class="section-row"><h3>Prévia</h3><div class="row-gap"><button class="btn sm" onclick="brandExportCSS()">Baixar .css</button><button class="btn sm dark" onclick="brandSaveStyle()">Salvar como estilo de campanha</button></div></div><div class="bk-prev"><canvas id="bkPrev" width="360" height="450"></canvas><canvas id="bkPrev2" width="360" height="450"></canvas></div></div>`;
+  r.querySelectorAll('canvas[data-logo]').forEach(async cv => { await loadImage(cv.dataset.logo); const bm = IMGS.get(cv.dataset.logo); if (!bm) return; const k = Math.min(cv.width / bm.width, cv.height / bm.height), w = bm.width * k, h = bm.height * k; cv.getContext('2d').drawImage(bm, (cv.width - w) / 2, (cv.height - h) / 2, w, h); });
+  brandRefreshPrev();
+}
+function brandCts() {
+  const b = brandOf(dzP()), el = $('bkCts'); if (!el) return;
+  const dark = lum(b.pal.c60) < 0.35, fg = dark ? '#ffffff' : b.grays[2], ck = (a, bg, lab) => { const v = contrast(a, bg); return `<span class="bk-ct ${v >= 4.5 ? 'ok' : v >= 3 ? 'mid' : 'bad'}">${lab} ${v.toFixed(1)}:1 ${v >= 4.5 ? '✓ AA' : v >= 3 ? '· só texto grande' : '✗ baixo'}</span>`; };
+  el.innerHTML = ck(fg, b.pal.c60, 'Texto sobre a base') + ck(readable(b.pal.c10) === '#111111' ? '#111111' : '#ffffff', b.pal.c10, 'Texto no botão') + ck(b.pal.c10, b.pal.c60, 'Destaque sobre a base');
+}
+let bkTimer = 0;
+function brandRefreshPrev() {
+  brandCts(); clearTimeout(bkTimer);
+  bkTimer = setTimeout(async () => {
+    const p = dzP(), a = $('bkPrev'), a2 = $('bkPrev2'); if (!p || !a) return;
+    const tk = brandTokens(p); await ensureFonts([tk.head.family, tk.body.family]);
+    const copy = {kicker: p.name, title: 'Seu **projeto** pronto para crescer', sub: 'Entenda antes de decidir.', button: 'Fale com a gente'};
+    const s1 = slideAd(tk, copy, {w: 1080, h: 1350}, p.name, 'none'), lg = brandOf(p).logos[0];
+    if (lg) { await loadImage(lg.imgId); const bm = IMGS.get(lg.imgId); if (bm) { const h = 90, w = Math.min(420, Math.round(h * bm.width / bm.height)); s1.layers.push(IM('logo', {imgId: lg.imgId, x: 90, y: 1350 - 90 - h - 40, w, h: Math.round(w * bm.height / bm.width)})); } }
+    renderSlide(a.getContext('2d'), s1, 1080, 1350, a.width / 1080);
+    const tk2 = JSON.parse(JSON.stringify(tk)); tk2.bg = tk.accent; tk2.fg = readable(tk.accent); tk2.accent = tk.second || tk.fg; tk2.muted = tk2.fg;
+    renderSlide(a2.getContext('2d'), slideAd(tk2, {kicker: '', title: 'Uma **peça** com destaque total', sub: '', button: ''}, {w: 1080, h: 1350}, p.name, 'none'), 1080, 1350, a2.width / 1080);
+  }, 120);
+}
+function dzBrandOpen() { dz.view = 'brand'; go('design'); renderDesign(); }
+
+/* paleta no inspetor do editor: um clique aplica a cor na camada */
+function brandSwatches(L) {
+  const p = dzP(); if (!p || !L || L.type === 'image') return '';
+  const b = brandOf(p); if (!isHex(b.pal.c60)) return '';
+  const key = L.type === 'text' ? 'color' : 'fill', cs = [b.pal.c60, b.pal.c30, b.pal.c10, ...b.grays];
+  return `<div class="okr-label" style="margin-top:10px">CORES DA MARCA</div><div class="bk-chips">${cs.map(c => `<button class="bk-chip" style="background:${esc(c)}" title="${esc(c)}" onclick="dzProp('${key}','${esc(c)}');dzInspector()"></button>`).join('')}</div>`;
+}
+/* logo na peça: escolhe a versão certa para o fundo */
+async function dzAddLogo() {
+  const p = dzP(), b = brandOf(p); if (!b.logos.length) { toast('Envie um logo no Brand Kit primeiro.'); dzBrandOpen(); return; }
+  const s = dzSlide(), f = dzSet().format, dark = lum(s.bg || '#ffffff') < 0.35;
+  const lg = b.logos.find(l => l.tone === (dark ? 'dark' : 'light')) || b.logos.find(l => l.tone === 'any') || b.logos[0];
+  await loadImage(lg.imgId); const bm = IMGS.get(lg.imgId); if (!bm) { toast('Logo indisponível.'); return; }
+  const m = Math.round(Math.min(f.w, f.h) * 0.06), hh = Math.round(f.h * 0.07), ww = Math.min(Math.round(hh * bm.width / bm.height), Math.round(f.w * 0.4)), h2 = Math.round(ww * bm.height / bm.width);
+  const L = IM('logo', {imgId: lg.imgId, x: m, y: f.h - m - h2, w: ww, h: h2}); s.layers.push(L); dz.sel = L.id; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel();
 }
 
 </script>
@@ -2311,17 +2657,18 @@ function renderDesign() {
   if (dz.view === 'home') return dzHome(p, r);
   if (dz.view === 'compose') return dzCompose(p, r);
   if (dz.view === 'variations') return renderVariations(p, r);
+  if (dz.view === 'brand') return renderBrandKit(p, r);
   dzEditorShell(p, r);
 }
 
 /* ================= INÍCIO ================= */
 function dzHome(p, r) {
   const {styles, sets} = p.design;
-  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn" onclick="dzVarOpen()">⚡ Fábrica de variações</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzBrandOpen()">◈ Brand Kit</button><button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn" onclick="dzVarOpen()">⚡ Fábrica de variações</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
   <div class="panel"><div class="section-row"><h3>Estilos de campanha salvos</h3><small class="muted">${styles.length} salvo(s)</small></div>
     ${styles.length ? `<div class="dz-styles">${styles.map(s => `<article class="dz-style"><div class="dz-sw">${[s.tk.bg, s.tk.fg, s.tk.accent, s.tk.muted].map(c => `<i style="background:${esc(c)}"></i>`).join('')}</div><strong>${esc(s.name)}</strong><small class="muted block">${esc(s.tk.head.family)} + ${esc(s.tk.body.family)} · ${esc((s.tk.photo || {}).name || 'foto')}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dzNew('${s.id}')">Usar em nova peça</button><button class="btn sm" onclick="dzStyleDel('${s.id}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhum estilo salvo', 'Crie uma peça, refine no editor e use “Salvar como estilo” para reaproveitar em toda a campanha.')}</div>
   <div class="panel" style="margin-top:14px"><div class="section-row"><h3>Peças do projeto</h3><small class="muted">${sets.length} peça(s)</small></div>
-    ${sets.length ? `<div class="dz-sets">${sets.map(s => `<article class="dz-set"><canvas class="dz-thumb" data-set="${s.id}" width="216" height="${Math.round(216 * s.format.h / s.format.w)}"></canvas><strong>${esc(s.name)}</strong><small class="muted block">${s.slides.length} slide(s) · ${esc(s.format.w + '×' + s.format.h)} · ${esc(s.tk.name || '')}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dzOpen('${s.id}')">Abrir editor</button><button class="btn sm" onclick="dzDup('${s.id}')">Duplicar</button><button class="btn sm" onclick="dzSetDel('${s.id}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhuma peça ainda', 'Comece uma nova composição: o Studio cruza as bibliotecas com o seu público e gera o carrossel.', '<button class="btn dark" onclick="dzNew()">＋ Nova composição</button>')}</div>`;
+    ${sets.length ? `<div class="dz-sets">${sets.map(s => `<article class="dz-set"><canvas class="dz-thumb" data-set="${s.id}" width="216" height="${Math.round(216 * s.format.h / s.format.w)}"></canvas><strong>${esc(s.name)}</strong><small class="muted block">${s.slides.length} slide(s) · ${esc(s.format.w + '×' + s.format.h)} · ${esc(s.tk.name || '')}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dzOpen('${s.id}')">Abrir editor</button><button class="btn sm" onclick="dzDup('${s.id}')">Duplicar</button><button class="btn sm" onclick="dzResizeOpen('${s.id}')" title="Adaptar para outros tamanhos">⤢</button><button class="btn sm" onclick="dzSetDel('${s.id}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhuma peça ainda', 'Comece uma nova composição: o Studio cruza as bibliotecas com o seu público e gera o carrossel.', '<button class="btn dark" onclick="dzNew()">＋ Nova composição</button>')}</div>`;
   r.querySelectorAll('.dz-thumb').forEach(async cv => { const s = p.design.sets.find(x => x.id === cv.dataset.set); await ensureSetResources(s); renderSlide(cv.getContext('2d'), s.slides[0], s.format.w, s.format.h, cv.width / s.format.w); });
 }
 function dzNew(styleId) {
@@ -2357,7 +2704,7 @@ function dzCompose(p, r) {
   r.innerHTML = `<div class="page-head"><div><h1>Nova composição</h1><p>Conte o que a peça precisa dizer e para quem. O Studio cruza 30 estilos de design, 30 fontes e 30 estilos de fotografia.</p></div><div class="actions"><button class="btn" onclick="dzBack()">Cancelar</button></div></div>
   <div class="two dz-compose"><div class="panel"><h3>1. A peça</h3>
     <div class="field"><label>Nome da peça</label><input value="${esc(c.name)}" oninput="dz.cmp.name=this.value" placeholder="Ex.: Carrossel · Parcela subiu"></div>
-    <div class="field" style="margin-top:8px"><label>Formato</label><select onchange="dz.cmp.fmt=this.value">${Object.values(FORMATS).map(f => `<option value="${f.id}" ${f.id === c.fmt ? 'selected' : ''}>${f.label}</option>`).join('')}</select></div>
+    <div class="field" style="margin-top:8px"><label>Formato</label>${fmtPicker('cmp', c)}</div>
     <div class="field" style="margin-top:8px"><label>O que dizer <small class="muted">primeira linha = capa (“Título | subtítulo”) · do meio = slides (“Título: texto”) · última = chamada (“Título | botão”)</small></label><textarea id="dzText" class="jp-ta" rows="9" oninput="dz.cmp.text=this.value" placeholder="${esc(DEFAULT_COPY)}">${esc(c.text)}</textarea></div>
     <div class="row-gap" style="margin-top:8px"><button class="btn sm" onclick="dzUseConcept()">Usar conceito da Matriz</button><button class="btn sm" onclick="dzAICopy()">✦ Escrever com IA</button><button class="btn sm" onclick="dz.cmp.text=DEFAULT_COPY;renderDesign()">Texto de exemplo</button></div></div>
   <div class="panel"><h3>2. Para quem</h3><div class="okr-label">PÚBLICO</div><div class="tchips">${AUDIENCE_PRESETS.map(a => `<button class="tchip ${c.aud.includes(a.id) ? 'on' : ''}" onclick="dzTogAud('${a.id}')">${esc(a.label)}</button>`).join('')}</div>
@@ -2425,9 +2772,9 @@ async function dzAICopy() {
   } catch (e) { toast('IA: ' + e.message); }
 }
 async function dzGenerate() {
-  const p = dzP(), c = dz.cmp, tk = dzTokens(), fmt = FORMATS[c.fmt]; toast('Gerando peças…');
+  const p = dzP(), c = dz.cmp, tk = dzTokens(), fmt = resolveFmt(c); toast('Gerando peças…');
   await ensureFonts([tk.head.family, tk.body.family]);
-  const set = buildSet(c.name.trim() || 'Carrossel ' + (p.design.sets.length + 1), tk, parseCopy(c.text || DEFAULT_COPY, p), fmt, p.name);
+  const set = buildSetAny(c.name.trim() || 'Carrossel ' + (p.design.sets.length + 1), tk, parseCopy(c.text || DEFAULT_COPY, p), fmt, p.name);
   p.design.sets.push(set); persist(); dzOpen(set.id);
 }
 
@@ -2436,7 +2783,8 @@ function dzEditorShell(p, r) {
   const s = dzSet();
   r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">← Estúdio</button><input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>
     <button class="btn sm ${dz.mode === 'emphasis' ? 'dark' : ''}" onclick="dzModeEm()" title="Clique em palavras do texto para destacar">✦ Destacar por clique</button>
-    <button class="btn sm" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta peça">⚡ Variações</button><button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddPhoto()">＋ Foto</button>
+    <button class="btn sm" onclick="dzResizeOpen(dz.setId)" title="Adaptar esta arte para outras medidas">⤢ Tamanhos</button>
+    <button class="btn sm" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta peça">⚡ Variações</button><button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddLogo()">＋ Logo</button><button class="btn sm" onclick="dzAddPhoto()">＋ Foto</button>
     <button class="btn sm" onclick="dzSaveStyle()">Salvar como estilo</button><button class="btn sm" onclick="dzApplyStyleModal()">Aplicar estilo…</button><button class="btn sm" onclick="dzExportOne()">PNG</button><button class="btn sm" onclick="dzExportPSD()" title="Photoshop em camadas">PSD</button><button class="btn sm" onclick="dzExportLayers()" title="PNG por camada + manifesto">Camadas</button><button class="btn sm dark" onclick="dzExportAll()">Baixar todos (ZIP)</button></div></div>
   <div class="dz-editor"><div class="dz-slides" id="dzSlides"></div><div class="dz-stage" id="dzStage"><canvas id="dzCanvas"></canvas></div><div class="dz-insp" id="dzInsp"></div></div><input type="file" id="dzFile" accept="image/*" hidden>`;
   dzBindCanvas(); dzSlidesPanel(); dzInspector(); dzFit(); ensureSetResources(s).then(() => { dzDraw(); dzSlidesPanel(); });
@@ -2531,17 +2879,18 @@ function dzInspector() {
   const rg = (k, l, min, max, step) => `<label class="ins">${l} <b>${L[k]}</b><input type="range" min="${min}" max="${max}" step="${step}" value="${L[k]}" oninput="dzProp('${k}',this.value,1);this.previousElementSibling.textContent=this.value"></label>`;
   const col = (k, l) => `<label class="ins">${l}<input type="color" value="${esc(String(L[k] || '#000000').startsWith('#') ? L[k] : '#000000')}" oninput="dzProp('${k}',this.value)"></label>`;
   const geo = `<div class="ins-row">${n('x', 'X', -2000, 4000)}${n('y', 'Y', -2000, 4000)}${n('w', 'Largura', 20, 4000)}${L.type !== 'text' ? n('h', 'Altura', 20, 4000) : ''}</div>`;
-  const acts = `<div class="row-gap" style="margin-top:10px"><button class="btn sm" onclick="dzLayerMove(1)">▲ Frente</button><button class="btn sm" onclick="dzLayerMove(-1)">▼ Trás</button><button class="btn sm" onclick="dzLayerDup()">Duplicar</button><button class="btn sm" onclick="dzLayerDel()">Excluir</button></div>`;
+  const acts = brandSwatches(L) + `<div class="row-gap" style="margin-top:10px"><button class="btn sm" onclick="dzLayerMove(1)">▲ Frente</button><button class="btn sm" onclick="dzLayerMove(-1)">▼ Trás</button><button class="btn sm" onclick="dzLayerDup()">Duplicar</button><button class="btn sm" onclick="dzLayerDel()">Excluir</button></div>`;
   if (L.type === 'text') el.innerHTML = `<h3>Texto <small class="muted">${esc(L.role)}</small></h3>
     <textarea id="dzTxt" class="jp-ta" rows="4" oninput="dzProp('content',this.value)">${esc(L.content)}</textarea>
     <div class="row-gap" style="margin:6px 0"><button class="btn sm" onclick="dzEmSel()" title="Selecione palavras no texto acima">Destacar seleção</button><button class="btn sm" onclick="dzEmClear()">Limpar destaques</button></div><small class="muted">Use **palavra** para destacar. Ou ative “Destacar por clique” no topo.</small>
-    <label class="ins">Fonte<select onchange="dzFont(this.value)">${FONT_LIST.map(f => `<option ${f === L.family ? 'selected' : ''}>${f}</option>`).join('')}</select></label>
+    <label class="ins">Fonte<select onchange="dzFont(this.value)">${fontChoices().map(f => `<option ${f === L.family ? 'selected' : ''}>${esc(f)}</option>`).join('')}</select></label>
     <div class="ins-row"><label class="ins">Peso<select onchange="dzProp('weight',this.value,1)">${[300, 400, 500, 600, 700, 800, 900].map(w => `<option ${w == L.weight ? 'selected' : ''}>${w}</option>`).join('')}</select></label>${col('color', 'Cor')}</div>
     ${rg('size', 'Tamanho', 16, 320, 1)}${rg('lh', 'Entrelinha', 0.8, 2, 0.05)}${rg('ls', 'Espaçamento', -4, 24, 0.5)}
     <div class="row-gap"><button class="btn sm ${L.align === 'left' ? 'dark' : ''}" onclick="dzProp('align','left');dzInspector()">⟸</button><button class="btn sm ${L.align === 'center' ? 'dark' : ''}" onclick="dzProp('align','center');dzInspector()">☰</button><button class="btn sm ${L.align === 'right' ? 'dark' : ''}" onclick="dzProp('align','right');dzInspector()">⟹</button><label class="ins inl"><input type="checkbox" ${L.upper ? 'checked' : ''} onchange="dzProp('upper',this.checked);dzInspector()"> CAIXA ALTA</label></div>
     <h4>Destaque das palavras</h4><label class="ins">Estilo<select onchange="dzProp('emMode',this.value)">${[['color', 'Cor'], ['bg', 'Marca-texto'], ['bold', 'Negrito'], ['scale', 'Maior'], ['underline', 'Sublinhado']].map(([v, l]) => `<option value="${v}" ${v === L.emMode ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     <div class="ins-row">${col('emColor', 'Cor')}${col('emBg', 'Fundo')}${col('emText', 'Texto')}</div>${rg('emScale', 'Escala (modo maior)', 1, 2, 0.05)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
   else if (L.type === 'rect') el.innerHTML = `<h3>Forma <small class="muted">${esc(L.role)}</small></h3><div class="ins-row">${col('fill', 'Cor')}${col('stroke', 'Borda')}</div>${rg('radius', 'Cantos', 0, 400, 1)}${rg('strokeW', 'Espessura da borda', 0, 30, 1)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
+  else if (L.role === 'logo') el.innerHTML = `<h3>Logo</h3><small class="muted block">Arraste e use as alças para redimensionar. Mantenha a proporção.</small>${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
   else el.innerHTML = `<h3>Foto</h3><button class="btn sm dark" onclick="dzPickPhoto()">${L.imgId ? 'Trocar foto' : 'Enviar foto'}</button> <button class="btn sm" onclick="dzGenPhoto()" title="${imageReady() ? 'Gerar com IA' : 'Configure OPENAI_API_KEY no servidor'}">✦ Gerar com IA</button> ${L.imgId ? '<button class="btn sm" onclick="dzProp(\'imgId\',\'\')">Remover</button>' : ''}
     <label class="ins">Tratamento (${PHOTO_STYLES.length} estilos)<select onchange="dzPhotoStyle(this.value)"><option value="">Sem tratamento</option>${PHOTO_STYLES.map(x => `<option value="${x.id}" ${L.filter === x.filter && L.ovColor === x.ovColor ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>
     <small class="muted block">${esc(L.brief || '')}</small>${rg('radius', 'Cantos', 0, 400, 1)}${rg('fx', 'Enquadrar na horizontal', 0, 1, 0.01)}${rg('fy', 'Enquadrar na vertical', 0, 1, 0.01)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
@@ -2604,7 +2953,7 @@ function dzVarOpen(setId) {
   const p = dzP(), bank = p.design.bank || (p.design.bank = {h: [], s: [], c: []});
   dz.vf = Object.assign(VF_DEFAULT(), {h: bank.h.join('\n'), s: bank.s.join('\n'), c: bank.c.join('\n')});
   const set = setId ? p.design.sets.find(s => s.id === setId) : p.design.sets[0];
-  if (set) { dz.vf.setId = set.id; dz.vf.slideIdx = setId && setId === dz.setId ? dz.slide : 0; dz.vf.fmt = set.format.id; } else dz.vf.mode = 'build';
+  if (set) { dz.vf.setId = set.id; dz.vf.slideIdx = setId && setId === dz.setId ? dz.slide : 0; dz.vf.fmt = set.format.id; dz.vf.cw = set.format.w; dz.vf.ch = set.format.h; } else dz.vf.mode = 'build';
   dz.view = 'variations'; go('design');
 }
 /* em "a partir de uma peça", só varia o que a base tem: sem botão, CTA não muda nada; sem texto de apoio, idem */
@@ -2622,7 +2971,7 @@ function renderVariations(p, r) {
   <div class="two dz-compose"><div class="panel"><h3>1. Anúncio base</h3>
     <div class="matrix-tabs" style="margin:8px 0"><button class="${v.mode === 'slide' ? 'active' : ''}" onclick="dz.vf.mode='slide';renderDesign()">A partir de uma peça</button><button class="${v.mode === 'build' ? 'active' : ''}" onclick="dz.vf.mode='build';renderDesign()">Do zero</button></div>
     ${v.mode === 'slide' ? (p.design.sets.length ? `<div class="form-grid"><div class="field"><label>Peça</label><select onchange="dz.vf.setId=this.value;dz.vf.slideIdx=0;renderDesign()">${p.design.sets.map(s => `<option value="${s.id}" ${s.id === v.setId ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div><div class="field"><label>Slide</label><select onchange="dz.vf.slideIdx=+this.value;renderDesign()">${(base ? base.set.slides : []).map((_, i) => `<option value="${i}" ${i === v.slideIdx ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></div></div><canvas id="vfBase" width="200" height="${base ? Math.round(200 * base.set.format.h / base.set.format.w) : 250}" class="dz-prev" style="margin-top:8px"></canvas><p class="muted" style="font-size:11px">Os elementos ficam onde estão; troca-se o texto e o estilo por papel (título, apoio, botão, destaque, foto).${!us.c ? ' <b>Esta peça não tem botão: os CTAs serão ignorados.</b> Escolha um slide com botão (o último) ou use “Do zero”.' : ''}${!us.s ? ' <b>Sem texto de apoio nesta peça: os apoios serão ignorados.</b>' : ''}</p>` : emptyState('Nenhuma peça ainda', 'Crie uma peça no Estúdio ou use “Do zero”.'))
-      : `<div class="field"><label>Formato</label><select onchange="dz.vf.fmt=this.value">${Object.values(FORMATS).map(f => `<option value="${f.id}" ${f.id === v.fmt ? 'selected' : ''}>${f.label}</option>`).join('')}</select></div><div class="okr-label" style="margin-top:10px">LAYOUTS</div><div class="tchips">${Object.entries(Object.assign({auto: 'Do estilo'}, AD_LAYOUTS)).map(([k, l]) => `<button class="tchip ${v.layouts.includes(k) ? 'on' : ''}" onclick="vfTogLayout('${k}')">${l}</button>`).join('')}</div>`}
+      : `<div class="field"><label>Formato</label>${fmtPicker('vf', v)}</div><div class="okr-label" style="margin-top:10px">LAYOUTS</div><div class="tchips">${Object.entries(Object.assign({auto: 'Do estilo'}, AD_LAYOUTS)).map(([k, l]) => `<button class="tchip ${v.layouts.includes(k) ? 'on' : ''}" onclick="vfTogLayout('${k}')">${l}</button>`).join('')}</div>`}
     <div class="row-gap" style="margin-top:10px"><button class="btn sm" onclick="vfPhotoPick()">${v.imgId ? 'Trocar foto' : 'Foto para todas (opcional)'}</button>${v.imgId ? '<small class="muted">foto aplicada às áreas de foto</small>' : ''}</div></div>
   <div class="panel"><h3>2. Textos soltos <small class="muted">um por linha</small></h3>
     <div class="field"><label>Headlines (${H})</label><textarea class="jp-ta" rows="5" oninput="dz.vf.h=this.value;vfCount()" placeholder="Seu financiamento subiu e ninguém explicou?&#10;A parcela mudou. Você sabe por quê?&#10;Antes de pagar mais, confira isto">${esc(v.h)}</textarea></div>
@@ -2676,7 +3025,7 @@ async function vfGenerate() {
   const p = dzP(), v = dz.vf, us = vfUses(p), bank = {h: lineList(v.h), s: us.s ? lineList(v.s) : [], c: us.c ? lineList(v.c) : []}, base = v.mode === 'slide' && vfBaseSlide(p);
   if (v.mode === 'slide' && !base) { toast('Escolha uma peça base ou use “Do zero”.'); return; }
   if (v.mode === 'build' && !bank.h.length) { toast('Escreva ao menos uma headline.'); return; }
-  const toks = vfTokens(p), W = learnDesign(p).map, fmt = v.mode === 'slide' ? base.set.format : FORMATS[v.fmt];
+  const toks = vfTokens(p), W = learnDesign(p).map, fmt = v.mode === 'slide' ? base.set.format : resolveFmt(v);
   const H = bank.h.length || 1, S = bank.s.length || 1, C = bank.c.length || 1, T = toks.length, L = v.mode === 'build' ? v.layouts.length : 1, total = H * S * C * T * L * 2, pool = [], seen = new Set();
   const w = (k, val) => (W[k + '|' + val] == null ? 50 : W[k + '|' + val]);
   const mk = (h, s, c, t, l, e) => { const tk = toks[t], dims = {design: tk.designId, font: tk.fontId, photo: tk.photoId, cta: bank.c[c] || '', layout: v.mode === 'build' ? v.layouts[l] : ''}; return {id: uid('v'), h, s, c, t, l, em: e ? 'alt' : 'auto', fav: false, sent: '', dims, score: (w('design', dims.design) + w('font', dims.font) + w('photo', dims.photo) + w('cta', dims.cta)) / 4 + Math.random() * 10}; };

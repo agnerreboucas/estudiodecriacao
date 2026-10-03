@@ -1,10 +1,32 @@
 /* Motor do Estúdio de Design: modelo de peça, layout de texto com destaque por palavra, render em canvas,
    geração de carrossel a partir de um estilo, extração/aplicação de estilo e exportação (PNG e ZIP). */
-const FORMATS = {
-  feed45: {id: 'feed45', label: 'Feed 4:5 · 1080×1350', w: 1080, h: 1350},
-  square: {id: 'square', label: 'Quadrado 1:1 · 1080×1080', w: 1080, h: 1080},
-  story: {id: 'story', label: 'Stories 9:16 · 1080×1920', w: 1080, h: 1920}
-};
+/* Catálogo de formatos. Medidas conforme as plataformas publicam hoje; elas mudam, então confira antes de produzir em escala. */
+const FORMAT_GROUPS = [
+  ['Instagram', [
+    ['feed45', 'Feed 4:5', 1080, 1350], ['square', 'Feed quadrado 1:1', 1080, 1080], ['ig34', 'Feed 3:4 (grade nova)', 1080, 1440],
+    ['iglandscape', 'Feed paisagem 1.91:1', 1080, 566], ['story', 'Stories / Reels 9:16', 1080, 1920], ['igprofile', 'Foto de perfil', 320, 320]]],
+  ['Anúncios Meta (Facebook + Instagram)', [
+    ['adsquare', 'Feed 1:1', 1080, 1080], ['ad45', 'Feed 4:5', 1080, 1350], ['adstory', 'Stories / Reels 9:16', 1080, 1920],
+    ['adlink', 'Link / paisagem 1.91:1', 1200, 628], ['adcarousel', 'Carrossel 1:1', 1080, 1080], ['admarket', 'Marketplace 1:1', 1080, 1080]]],
+  ['Capas e banners de redes', [
+    ['fbcover', 'Facebook · capa da página', 851, 315, 'No celular a capa é cortada nas laterais: mantenha o texto no centro.'], ['fbevent', 'Facebook · capa de evento', 1920, 1005],
+    ['fbpost', 'Facebook · post com link', 1200, 630], ['ytbanner', 'YouTube · banner do canal', 2560, 1440, 'Só a faixa central (1546×423) aparece em todos os aparelhos: o texto fica nela.', {w: 1546, h: 423}],
+    ['ytthumb', 'YouTube · miniatura', 1280, 720], ['lipersonal', 'LinkedIn · capa pessoal', 1584, 396], ['licompany', 'LinkedIn · capa da empresa', 1128, 191],
+    ['xheader', 'X · capa do perfil', 1500, 500], ['xpost', 'X · post com imagem 16:9', 1600, 900], ['pin', 'Pinterest · pin 2:3', 1000, 1500]]]
+];
+const FORMATS = {};
+FORMAT_GROUPS.forEach(([g, list]) => list.forEach(([id, name, w, h, note, safe]) => { FORMATS[id] = {id, group: g, label: name + ' · ' + w + '×' + h, name, w, h, note: note || '', safe: safe || null}; }));
+const customFormat = (w, h) => { w = Math.max(64, Math.min(4096, Math.round(+w) || 1080)); h = Math.max(64, Math.min(4096, Math.round(+h) || 1080)); return {id: 'custom', group: 'Personalizado', label: 'Personalizado · ' + w + '×' + h, name: 'Personalizado', w, h, note: '', safe: null}; };
+/* o: {fmt, cw, ch} → objeto de formato */
+const resolveFmt = o => o.fmt === 'custom' ? customFormat(o.cw, o.ch) : (FORMATS[o.fmt] || FORMATS.feed45);
+const fmtOptions = sel => FORMAT_GROUPS.map(([g, list]) => `<optgroup label="${g}">${list.map(([id, name, w, h]) => `<option value="${id}" ${id === sel ? 'selected' : ''}>${name} · ${w}×${h}</option>`).join('')}</optgroup>`).join('') + `<optgroup label="Livre"><option value="custom" ${sel === 'custom' ? 'selected' : ''}>Personalizado… (digite as medidas)</option></optgroup>`;
+/* seletor completo (lista + medidas livres). who = 'cmp' ou 'vf' (estado em dz) */
+function fmtPicker(who, o) {
+  const f = resolveFmt(o);
+  return `<select onchange="dzFmtPick('${who}','fmt',this.value)">${fmtOptions(o.fmt)}</select>` +
+    (o.fmt === 'custom' ? `<div class="ins-row" style="margin-top:6px"><label class="ins">Largura (px)<input type="number" min="64" max="4096" value="${f.w}" onchange="dzFmtPick('${who}','cw',this.value)"></label><label class="ins">Altura (px)<input type="number" min="64" max="4096" value="${f.h}" onchange="dzFmtPick('${who}','ch',this.value)"></label></div>` : '') +
+    (f.note ? `<small class="muted block">${f.note}</small>` : '');
+}
 
 /* ---- fontes (Google Fonts, carregadas sob demanda) ---- */
 const FONTS_LOADED = new Set();
@@ -120,7 +142,7 @@ async function loadImage(id) { if (!id || IMGS.has(id)) return; try { const b = 
 async function ensureSetResources(set) {
   const fams = [], ids = [];
   set.slides.forEach(s => s.layers.forEach(L => { if (L.type === 'text') fams.push(L.family); if (L.type === 'image' && L.imgId) ids.push(L.imgId); }));
-  await Promise.all([ensureFonts(fams), ...ids.map(loadImage)]);
+  await Promise.all([ensureFonts(fams), ...ids.map(loadImage), typeof brandFontsLoad === 'function' ? brandFontsLoad(curProject()) : 0]);
 }
 
 /* ---- construção de camadas ---- */
@@ -153,7 +175,7 @@ function themeLayer(L, tk) {
   } else if (L.type === 'rect') {
     if (L.role === 'accent-fill' || L.role === 'cta-fill') L.fill = tk.accent;
     if (L.role === 'cta-fill') L.radius = Math.max(tk.radius, 0) ? tk.radius * 2 : 0;
-    if (L.role === 'panel') L.fill = mixHex(tk.bg, tk.fg, 0.07);
+    if (L.role === 'panel') L.fill = tk.second ? mixHex(tk.bg, tk.second, 0.16) : mixHex(tk.bg, tk.fg, 0.07);
   } else if (L.type === 'image' && L.role === 'photo') Object.assign(L, {filter: tk.photo.filter, ovColor: tk.photo.ovColor, ovMode: tk.photo.ovMode, brief: tk.photo.brief});
 }
 function themeSlide(slide, tk) { slide.bg = tk.bg; slide.layers.forEach(L => themeLayer(L, tk)); }
@@ -294,7 +316,15 @@ async function exportSetZip(set) {
 /* ================= ANÚNCIO DE IMAGEM ÚNICA E VARIAÇÕES ================= */
 const AD_LAYOUTS = {top: 'Foto no topo', bottom: 'Foto embaixo', full: 'Foto cheia', none: 'Só tipografia'};
 /* anúncio: headline + apoio + botão, com a foto conforme o layout */
+/* anúncio em qualquer medida: formatos largos usam o layout lateral; os demais são montados em 1080 de largura e escalados */
+const isWide = f => f.w / f.h >= 1.5;
 function slideAd(tk, copy, fmt, brand, layout) {
+  if (isWide(fmt)) return slideWide(tk, copy, fmt, brand, {photo: layout !== 'none'});
+  if (fmt.w === 1080) return slideAdBase(tk, copy, fmt, brand, layout);
+  const k = fmt.w / 1080, s = slideAdBase(tk, copy, {w: 1080, h: Math.round(fmt.h / k)}, brand, layout);
+  return scaleSlide(s, k, k);
+}
+function slideAdBase(tk, copy, fmt, brand, layout) {
   const W = fmt.w, H = fmt.h, m = 90, cw = W - 2 * m, al = tk.align === 'center' ? 'center' : 'left', layers = [];
   const mode = layout && layout !== 'auto' ? layout : ({half: 'bottom'}[tk.photoMode] || tk.photoMode), onP = mode === 'full';
   let y0 = m, y1 = H - m - 70;

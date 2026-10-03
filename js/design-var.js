@@ -8,7 +8,7 @@ function dzVarOpen(setId) {
   const p = dzP(), bank = p.design.bank || (p.design.bank = {h: [], s: [], c: []});
   dz.vf = Object.assign(VF_DEFAULT(), {h: bank.h.join('\n'), s: bank.s.join('\n'), c: bank.c.join('\n')});
   const set = setId ? p.design.sets.find(s => s.id === setId) : p.design.sets[0];
-  if (set) { dz.vf.setId = set.id; dz.vf.slideIdx = setId && setId === dz.setId ? dz.slide : 0; dz.vf.fmt = set.format.id; } else dz.vf.mode = 'build';
+  if (set) { dz.vf.setId = set.id; dz.vf.slideIdx = setId && setId === dz.setId ? dz.slide : 0; dz.vf.fmt = set.format.id; dz.vf.cw = set.format.w; dz.vf.ch = set.format.h; } else dz.vf.mode = 'build';
   dz.view = 'variations'; go('design');
 }
 /* em "a partir de uma peça", só varia o que a base tem: sem botão, CTA não muda nada; sem texto de apoio, idem */
@@ -26,7 +26,7 @@ function renderVariations(p, r) {
   <div class="two dz-compose"><div class="panel"><h3>1. Anúncio base</h3>
     <div class="matrix-tabs" style="margin:8px 0"><button class="${v.mode === 'slide' ? 'active' : ''}" onclick="dz.vf.mode='slide';renderDesign()">A partir de uma peça</button><button class="${v.mode === 'build' ? 'active' : ''}" onclick="dz.vf.mode='build';renderDesign()">Do zero</button></div>
     ${v.mode === 'slide' ? (p.design.sets.length ? `<div class="form-grid"><div class="field"><label>Peça</label><select onchange="dz.vf.setId=this.value;dz.vf.slideIdx=0;renderDesign()">${p.design.sets.map(s => `<option value="${s.id}" ${s.id === v.setId ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div><div class="field"><label>Slide</label><select onchange="dz.vf.slideIdx=+this.value;renderDesign()">${(base ? base.set.slides : []).map((_, i) => `<option value="${i}" ${i === v.slideIdx ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></div></div><canvas id="vfBase" width="200" height="${base ? Math.round(200 * base.set.format.h / base.set.format.w) : 250}" class="dz-prev" style="margin-top:8px"></canvas><p class="muted" style="font-size:11px">Os elementos ficam onde estão; troca-se o texto e o estilo por papel (título, apoio, botão, destaque, foto).${!us.c ? ' <b>Esta peça não tem botão: os CTAs serão ignorados.</b> Escolha um slide com botão (o último) ou use “Do zero”.' : ''}${!us.s ? ' <b>Sem texto de apoio nesta peça: os apoios serão ignorados.</b>' : ''}</p>` : emptyState('Nenhuma peça ainda', 'Crie uma peça no Estúdio ou use “Do zero”.'))
-      : `<div class="field"><label>Formato</label><select onchange="dz.vf.fmt=this.value">${Object.values(FORMATS).map(f => `<option value="${f.id}" ${f.id === v.fmt ? 'selected' : ''}>${f.label}</option>`).join('')}</select></div><div class="okr-label" style="margin-top:10px">LAYOUTS</div><div class="tchips">${Object.entries(Object.assign({auto: 'Do estilo'}, AD_LAYOUTS)).map(([k, l]) => `<button class="tchip ${v.layouts.includes(k) ? 'on' : ''}" onclick="vfTogLayout('${k}')">${l}</button>`).join('')}</div>`}
+      : `<div class="field"><label>Formato</label>${fmtPicker('vf', v)}</div><div class="okr-label" style="margin-top:10px">LAYOUTS</div><div class="tchips">${Object.entries(Object.assign({auto: 'Do estilo'}, AD_LAYOUTS)).map(([k, l]) => `<button class="tchip ${v.layouts.includes(k) ? 'on' : ''}" onclick="vfTogLayout('${k}')">${l}</button>`).join('')}</div>`}
     <div class="row-gap" style="margin-top:10px"><button class="btn sm" onclick="vfPhotoPick()">${v.imgId ? 'Trocar foto' : 'Foto para todas (opcional)'}</button>${v.imgId ? '<small class="muted">foto aplicada às áreas de foto</small>' : ''}</div></div>
   <div class="panel"><h3>2. Textos soltos <small class="muted">um por linha</small></h3>
     <div class="field"><label>Headlines (${H})</label><textarea class="jp-ta" rows="5" oninput="dz.vf.h=this.value;vfCount()" placeholder="Seu financiamento subiu e ninguém explicou?&#10;A parcela mudou. Você sabe por quê?&#10;Antes de pagar mais, confira isto">${esc(v.h)}</textarea></div>
@@ -80,7 +80,7 @@ async function vfGenerate() {
   const p = dzP(), v = dz.vf, us = vfUses(p), bank = {h: lineList(v.h), s: us.s ? lineList(v.s) : [], c: us.c ? lineList(v.c) : []}, base = v.mode === 'slide' && vfBaseSlide(p);
   if (v.mode === 'slide' && !base) { toast('Escolha uma peça base ou use “Do zero”.'); return; }
   if (v.mode === 'build' && !bank.h.length) { toast('Escreva ao menos uma headline.'); return; }
-  const toks = vfTokens(p), W = learnDesign(p).map, fmt = v.mode === 'slide' ? base.set.format : FORMATS[v.fmt];
+  const toks = vfTokens(p), W = learnDesign(p).map, fmt = v.mode === 'slide' ? base.set.format : resolveFmt(v);
   const H = bank.h.length || 1, S = bank.s.length || 1, C = bank.c.length || 1, T = toks.length, L = v.mode === 'build' ? v.layouts.length : 1, total = H * S * C * T * L * 2, pool = [], seen = new Set();
   const w = (k, val) => (W[k + '|' + val] == null ? 50 : W[k + '|' + val]);
   const mk = (h, s, c, t, l, e) => { const tk = toks[t], dims = {design: tk.designId, font: tk.fontId, photo: tk.photoId, cta: bank.c[c] || '', layout: v.mode === 'build' ? v.layouts[l] : ''}; return {id: uid('v'), h, s, c, t, l, em: e ? 'alt' : 'auto', fav: false, sent: '', dims, score: (w('design', dims.design) + w('font', dims.font) + w('photo', dims.photo) + w('cta', dims.cta)) / 4 + Math.random() * 10}; };
