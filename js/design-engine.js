@@ -225,9 +225,17 @@ function drawPathLayer(ctx, L) {
   if (L.stroke && L.strokeW) { ctx.lineWidth = L.strokeW; ctx.strokeStyle = L.stroke; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(p); }
   ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h};
 }
+function drawVideoLayer(ctx, L) {
+  const {x, y, w, h} = L, s = Math.min(w, h); ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity;
+  const g = ctx.createLinearGradient(x, y, x + w, y + h); g.addColorStop(0, '#20242c'); g.addColorStop(1, '#0c0e12'); ctx.fillStyle = g; rr(ctx, x, y, w, h, Math.min(24, s * 0.06)); ctx.fill();
+  const cx = x + w / 2, cy = y + h / 2, r = s * 0.17; ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill();
+  ctx.fillStyle = '#111'; ctx.beginPath(); ctx.moveTo(cx - r * 0.3, cy - r * 0.46); ctx.lineTo(cx - r * 0.3, cy + r * 0.46); ctx.lineTo(cx + r * 0.52, cy); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = `600 ${Math.max(14, Math.round(s * 0.05))}px Inter, system-ui, sans-serif`; ctx.textBaseline = 'alphabetic'; ctx.fillText(String(L.name || 'Vídeo').slice(0, 60), x + s * 0.05, y + h - s * 0.05);
+  ctx.restore(); LBOX[L.id] = {x, y, w, h};
+}
 function drawLayer(ctx, L) {
   if (L.hidden) return;
-  const draw = () => { if (L.type === 'path') drawPathLayer(ctx, L); else if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') { drawRect(ctx, L); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h}; } else if (L.type === 'image') drawImageLayer(ctx, L); };
+  const draw = () => { if (L.type === 'path') drawPathLayer(ctx, L); else if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') { drawRect(ctx, L); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h}; } else if (L.type === 'image') drawImageLayer(ctx, L); else if (L.type === 'video') drawVideoLayer(ctx, L); };
   if (!L.rot) return draw();
   const h = L.type === 'text' ? layoutText(L).h : L.h, cx = L.x + L.w / 2, cy = L.y + h / 2;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(L.rot * Math.PI / 180); ctx.translate(-cx, -cy); draw(); ctx.restore();

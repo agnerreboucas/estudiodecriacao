@@ -212,34 +212,47 @@ async function deckRenderImages(set, w) {
   for (const sl of set.slides) { const c = document.createElement('canvas'); c.width = w; c.height = h; renderSlide(c.getContext('2d'), sl, f.w, f.h, w / f.w); out.push(c.toDataURL('image/jpeg', 0.9)); }
   return out;
 }
-function deckHTML(title, imgs, names, ratio) {
-  const E2 = esc;
+function deckHTML(title, imgs, names, ratio, hot) {
+  const E2 = esc; hot = hot || [];
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${E2(title)}</title><style>
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:#0b0b0b;color:#fff;font-family:Inter,system-ui,Arial,sans-serif;overflow:hidden}
 aside{position:fixed;left:0;top:0;bottom:0;width:190px;background:#111;overflow:auto;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;scrollbar-width:none}aside::-webkit-scrollbar{display:none}aside a:first-child{margin-top:auto}aside a:last-child{margin-bottom:auto}
 aside a{display:block;width:100%;border-radius:8px;cursor:pointer;padding:4px;transition:background .2s}aside a img{display:block;margin:0 auto;border-radius:4px;opacity:.6;transition:opacity .2s;aspect-ratio:${ratio};height:auto;width:min(100%,calc(max(34px,(100vh - 32px - (var(--n) - 1)*10px)/var(--n) - 8px)*${ratio}))}aside a.on,aside a:hover{background:#1d1d1d}aside a.on img,aside a:hover img{opacity:1}aside a.on img{outline:2px solid #fff}
 main{margin-left:190px;height:100%;display:grid;place-items:center;padding:18px}.stage{width:min(100%,calc((100vh - 36px)*${ratio}));aspect-ratio:${ratio};position:relative}.stage img{width:100%;height:100%;display:block;border-radius:6px;object-fit:contain;cursor:pointer}
 .fade{animation:fd .7s ease both}@keyframes fd{from{opacity:0}to{opacity:1}}
+.vid{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:50;display:none;align-items:center;justify-content:center}.vid.on{display:flex}.vid iframe,.vid video{width:min(96vw,calc(92vh*16/9));height:min(54vw,92vh);border:0;background:#000;display:block}.vid .x{position:absolute;top:14px;right:16px;background:#fff;color:#111;border:0;border-radius:999px;width:42px;height:42px;font-size:20px;cursor:pointer}.vid .o{position:absolute;left:16px;bottom:14px;color:#bbb;font-size:12px}.vid .o a{color:#fff}
+.hot{position:absolute;inset:0;pointer-events:none}.hot button{position:absolute;pointer-events:auto;background:transparent;border:0;cursor:pointer;border-radius:10px}.hot button:hover{background:rgba(255,255,255,.08);outline:2px solid rgba(255,255,255,.55)}
 .fs aside{display:none}.fs main{margin:0;padding:0}.fs .stage{width:min(100vw,calc(100vh*${ratio}))}.fs .stage img{border-radius:0}
 #fs{position:fixed;right:16px;bottom:16px;background:rgba(34,34,34,.85);color:#fff;border:0;border-radius:9px;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer;opacity:.75;transition:opacity .2s}#fs:hover{opacity:1}.fs #fs{opacity:0}.fs #fs:hover{opacity:.9}
 .all{display:none}@media(max-width:800px){aside{display:none}main{margin:0}}
 @media print{aside,#fs,.stage{display:none!important}html,body{overflow:visible;height:auto}main{display:block;margin:0;padding:0}.all{display:block}.all img{display:block;width:100%;page-break-after:always}body{background:#fff}@page{size:landscape;margin:0}}
 </style></head><body><aside style="--n:${imgs.length}">${imgs.map((im, i) => `<a data-i="${i}" title="${E2(names[i] || 'Slide ' + (i + 1))}"><img src="${im}" alt="${E2(names[i] || 'Slide ' + (i + 1))}"></a>`).join('')}</aside>
-<main><div class="stage"><img id="cur" alt=""></div><div class="all">${imgs.map(im => `<img src="${im}" alt="">`).join('')}</div></main>
-<button id="fs" title="Tela cheia (F)">Tela cheia</button>
-<script>var IM=${JSON.stringify(imgs)},i=-1,cur=document.getElementById('cur'),links=[].slice.call(document.querySelectorAll('aside a'));
-function show(k){k=Math.max(0,Math.min(IM.length-1,k));if(k===i)return;i=k;cur.classList.remove('fade');void cur.offsetWidth;cur.src=IM[i];cur.classList.add('fade');links.forEach(function(l,j){l.classList.toggle('on',j===i)});var a=links[i];if(a&&a.scrollIntoView)a.scrollIntoView({block:'nearest'});document.title=document.title.split(' · ')[0]+' · '+(i+1)+'/'+IM.length}
+<main><div class="stage"><img id="cur" alt=""><div class="hot" id="hot"></div></div><div class="all">${imgs.map(im => `<img src="${im}" alt="">`).join('')}</div></main>
+<button id="fs" title="Tela cheia (F)">Tela cheia</button><div class="vid" id="vid"><button class="x" id="vx" title="Fechar (Esc)">✕</button><div id="vbox"></div><div class="o" id="vo"></div></div>
+<script>var IM=${JSON.stringify(imgs)},HOT=${JSON.stringify(hot).replace(/</g, '\\u003c')},i=-1,cur=document.getElementById('cur'),links=[].slice.call(document.querySelectorAll('aside a'));
+function show(k){k=Math.max(0,Math.min(IM.length-1,k));if(k===i)return;i=k;cur.classList.remove('fade');void cur.offsetWidth;cur.src=IM[i];cur.classList.add('fade');links.forEach(function(l,j){l.classList.toggle('on',j===i)});var a=links[i];if(a&&a.scrollIntoView)a.scrollIntoView({block:'nearest'});document.title=document.title.split(' · ')[0]+' · '+(i+1)+'/'+IM.length;drawHot()}
 links.forEach(function(l){l.addEventListener('click',function(){show(+l.getAttribute('data-i'))})});
 function fsEl(){return document.fullscreenElement||document.webkitFullscreenElement}
-function toggleFs(){var d=document.documentElement;if(fsEl()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}else{(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d)}}
-function syncFs(){document.body.classList.toggle('fs',!!fsEl())}
-document.addEventListener('fullscreenchange',syncFs);document.addEventListener('webkitfullscreenchange',syncFs);
+function exitNative(){var x=document.exitFullscreen||document.webkitExitFullscreen;if(fsEl()&&x){try{var pr=x.call(document);if(pr&&pr.catch)pr.catch(function(){})}catch(e){}}}
+function reqNative(el){var r=el.requestFullscreen||el.webkitRequestFullscreen;if(!r)return false;try{var pr=r.call(el);if(pr&&pr.catch)pr.catch(function(){});return true}catch(e){return false}}
+function setFs(on){document.body.classList.toggle('fs',on)}
+var vidFs=false;
+function toggleFs(){if(document.body.classList.contains('fs')){setFs(false);exitNative()}else{setFs(true);reqNative(document.documentElement)}}
+function onFsChange(){if(vidFs)return;setFs(!!fsEl())}
+document.addEventListener('fullscreenchange',onFsChange);document.addEventListener('webkitfullscreenchange',onFsChange);
+var hotEl=document.getElementById('hot'),vid=document.getElementById('vid'),vbox=document.getElementById('vbox'),vo=document.getElementById('vo');
+function drawHot(){hotEl.innerHTML='';(HOT[i]||[]).forEach(function(h,k){var b=document.createElement('button');b.title='Reproduzir: '+h.title;b.style.cssText='left:'+h.x*100+'%;top:'+h.y*100+'%;width:'+h.w*100+'%;height:'+h.h*100+'%';b.onclick=function(e){e.stopPropagation();openVid(h)};hotEl.appendChild(b)})}
+function openVid(h){vbox.innerHTML='';var el;if(h.kind==='file'){el=document.createElement('video');el.src=h.src;el.controls=true;el.autoplay=true;el.playsInline=true}else{el=document.createElement('iframe');el.src=h.src;el.allow='autoplay; fullscreen; picture-in-picture; encrypted-media';el.setAttribute('allowfullscreen','');el.referrerPolicy='strict-origin-when-cross-origin'}vbox.appendChild(el);vo.innerHTML=h.open?'Não carregou? <a href="'+h.open.replace(/"/g,'')+'" target="_blank" rel="noopener">Abrir no site</a>':'';vid.classList.add('on');if(!fsEl()){vidFs=true;if(!reqNative(vid))vidFs=false}}
+function closeVid(){if(!vid.classList.contains('on'))return;vbox.innerHTML='';vid.classList.remove('on');if(vidFs){vidFs=false;exitNative()}}
+document.getElementById('vx').onclick=closeVid;vid.addEventListener('click',function(e){if(e.target===vid)closeVid()});
+document.addEventListener('fullscreenchange',function(){if(vidFs&&!fsEl()){vidFs=false;vbox.innerHTML='';vid.classList.remove('on')}});
 document.getElementById('fs').onclick=toggleFs;
-document.addEventListener('keydown',function(e){if(['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key)>-1){e.preventDefault();show(i+1)}if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>-1){e.preventDefault();show(i-1)}if(e.key==='Home')show(0);if(e.key==='End')show(IM.length-1);if(e.key==='f'||e.key==='F')toggleFs()});
+document.addEventListener('keydown',function(e){if(vid.classList.contains('on')){if(e.key==='Escape')closeVid();return}if(e.key==='Escape'&&document.body.classList.contains('fs')&&!fsEl()){setFs(false);return}if(['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key)>-1){e.preventDefault();show(i+1)}if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>-1){e.preventDefault();show(i-1)}if(e.key==='Home')show(0);if(e.key==='End')show(IM.length-1);if(e.key==='f'||e.key==='F')toggleFs()});
 cur.addEventListener('click',function(){show(i+1)});show(0);<\/script></body></html>`;
 }
 async function dzPresentDeck() {
   const set = dzSet(); if (!set) return; toast('Montando a apresentação…');
-  const imgs = await deckRenderImages(set, 1280), p = dzP();
-  showOverlay('Apresentação · ' + (p ? p.name : set.name), deckHTML(set.name, imgs, set.slides.map(s => s.name), set.format.w / set.format.h), `apresentacao-${slug(set.name)}.html`);
+  const imgs = await deckRenderImages(set, 1280), p = dzP(), hs = await deckHotspots(set);
+  if (hs.warn.length) toast('Vídeo não embutido: ' + hs.warn.join('; '));
+  showOverlay('Apresentação · ' + (p ? p.name : set.name), deckHTML(set.name, imgs, set.slides.map(s => s.name), set.format.w / set.format.h, hs.hot), `apresentacao-${slug(set.name)}.html`);
 }
