@@ -261,27 +261,40 @@ async function lgPaintGrid() {
     if (++n % 6 === 0) await new Promise(r => setTimeout(r, 0)); }
 }
 function lgEdit(id) { lg.cur = JSON.parse(JSON.stringify(lg.items.find(i => i.id === id) || lgLab(dzP()).saved.find(i => i.id === id))); lg.view = 'edit'; renderDesign(); }
+/* blocos recolhíveis do editor: o estado (aberto/fechado) fica em lg.acc e sobrevive aos redesenhos */
+lg.acc = {nome: true, tipo: true, simbolo: false, comp: false, tons: false, regra: false, paleta: false};
+function lgAcc(id, title, sum, body) { return `<section class="lg-acc ${lg.acc[id] ? 'open' : ''}" id="acc-${id}"><button class="lg-acc-h" onclick="lgAccToggle('${id}')"><span>${title}</span><small>${sum || ''}</small><i>▸</i></button><div class="lg-acc-b">${body}</div></section>`; }
+function lgAccToggle(id) { lg.acc[id] = !lg.acc[id]; const el = $('acc-' + id); if (el) el.classList.toggle('open', lg.acc[id]); if (lg.acc[id]) { if (id === 'tons') lgTonePaint(); else if (id === 'regra') lgMeterSoon(); else if (id === 'simbolo') lgSymCanvases(); } }
+function lgAccAll(on) { Object.keys(lg.acc).forEach(k => { lg.acc[k] = on; }); renderDesign(); }
 function lgEditPage(p, r) {
   const s = lg.cur, pal = LG_PALETTES.concat(lgBrandPalette(p) || []);
   const pickS = lgSymPicker();
   r.innerHTML = `<div class="page-head"><div><h1>Editar logo</h1><p>Mexa em qualquer parte; a prévia atualiza na hora.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="lg.view=lg.items.length?'grid':'brief';renderDesign()">← Voltar</button></div></div>
-  <div class="two dz-compose"><div class="panel"><canvas id="lgBig" width="720" height="480" style="width:100%;max-width:720px;border:1px solid #e6e6e6;border-radius:12px"></canvas>
+  <div class="two dz-compose lg-edit"><div class="panel lg-prev"><canvas id="lgBig" width="720" height="480" style="width:100%;max-width:720px;border:1px solid #e6e6e6;border-radius:12px"></canvas>
     <div class="row-gap" style="margin-top:12px">${['light', 'dark', 'color'].map(m => `<button class="btn sm ${s.mode === m ? 'dark' : ''}" onclick="lgSet('mode','${m}')">${{light: 'Fundo claro', dark: 'Fundo escuro', color: 'Fundo colorido'}[m]}</button>`).join('')}</div>
     <div class="row-gap" style="margin-top:12px"><button class="btn dark" onclick="lgSaveKit()">Salvar no Brand Kit</button><button class="btn" onclick="lgDownload('png')">PNG transparente</button><button class="btn" onclick="lgDownload('svg')">SVG</button><button class="btn" onclick="lgToEditor()">Abrir no Editor</button><button class="btn" onclick="lgMockOpen()">Ver em mockups</button><button class="btn" onclick="lgBoardOpen()">Prancha de marca</button><button class="btn" onclick="lgPackageDown()">Pacote ZIP</button><button class="btn" onclick="lgSaveLab()">Guardar em Meus logos</button></div>
     <small class="muted block" style="margin-top:6px">No SVG o texto sai como texto (a fonte precisa estar instalada onde for aberto). O PNG sai com a fonte já aplicada.</small></div>
-  <div class="panel"><div class="field"><label>Nome</label><input value="${esc(s.name)}" oninput="lgSet('name',this.value,1)"></div><div class="field"><label>Slogan</label><input value="${esc(s.tag)}" oninput="lgSet('tag',this.value,1)"></div>
+  <div class="panel lg-opts"><div class="row-gap" style="margin-bottom:8px;justify-content:flex-end"><button class="btn sm" onclick="lgAccAll(true)">Expandir tudo</button><button class="btn sm" onclick="lgAccAll(false)">Recolher tudo</button></div>
+  ${lgAcc('nome', 'Nome e slogan', esc(s.name), `<div class="field"><label>Nome</label><input value="${esc(s.name)}" oninput="lgSet('name',this.value,1)"></div><div class="field"><label>Slogan</label><input value="${esc(s.tag)}" oninput="lgSet('tag',this.value,1)"></div>`)}
+  ${lgAcc('tipo', 'Tipo de logo e fonte', esc(lgFontOf(s).head) + ' · ' + lgFontOf(s).hw, `
     <div class="okr-label">TIPO DE LOGO</div><div class="row-gap" style="margin:4px 0 10px"><button class="btn sm ${lgIsType(s) ? '' : 'dark'}" onclick="lgSetKind('symbol')">Símbolo + nome</button><button class="btn sm ${lgIsType(s) ? 'dark' : ''}" onclick="lgSetKind('type')">Só tipografia</button></div>
     <div class="lg-fontbox"><div><b style="font-size:15px;font-family:'${esc(lgFontOf(s).head)}',system-ui">${esc(lgFontOf(s).head)}</b> <small class="muted">${esc(LG_WEIGHT_NAMES[lgFontOf(s).hw] || lgFontOf(s).hw)} ${lgFontOf(s).hw} · apoio: ${esc(lgFontOf(s).tag)}</small></div><button class="btn sm dark" onclick="lgFontsOpen('edit')">Escolher fonte (prévia das famílias)</button></div>
-    ${lgIsType(s) ? lgTypeOpts(s) : '<div class="okr-label">SÍMBOLO</div>' + pickS}
+  `)}
+  ${lgAcc('simbolo', lgIsType(s) ? 'Tipografia' : 'Símbolo', lgIsType(s) ? 'só letras' : esc(lgSymDef(s.sym, s).label || ''), `${lgIsType(s) ? lgTypeOpts(s) : '<div class="okr-label">SÍMBOLO</div>' + pickS}`)}
+  ${lgAcc('comp', 'Composição e tamanhos', esc(((lgIsType(s) ? LG_TP_COMPS : LG_COMPS).find(c => c[0] === s.comp) || [0, s.comp])[1]), `
     <div class="ins-row"><label class="ins">Conjunto de fontes<select onchange="lgSetRole(this.value)">${Object.entries(LG_FONTS).map(([k, f]) => `<option value="${k}" ${s.font === k ? 'selected' : ''}>${esc(f.label)} · ${esc(f.head)}</option>`).join('')}</select></label>
     <label class="ins">Composição<select onchange="lgSet('comp',this.value)">${(lgIsType(s) ? LG_TP_COMPS : LG_COMPS).map(([k, l]) => `<option value="${k}" ${s.comp === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
     <div class="ins-row"><label class="ins">Símbolo <b>${Math.round(s.symScale * 100)}%</b><input type="range" min="50" max="180" value="${Math.round(s.symScale * 100)}" oninput="lgSet('symScale',this.value/100,1);this.previousElementSibling.textContent=this.value+'%'"></label>${String(s.sym).startsWith('ic:') && !lgIsFillIcon(lgIcon(s.sym.slice(3)) || []) ? `<label class="ins">Traço do ícone <b>${s.icw || 2}</b><input type="range" min="1" max="3.5" step="0.1" value="${s.icw || 2}" oninput="lgSet('icw',+this.value,1);this.previousElementSibling.textContent=this.value"></label>` : ''}<label class="ins">Nome <b>${Math.round(s.nameScale * 100)}%</b><input type="range" min="60" max="160" value="${Math.round(s.nameScale * 100)}" oninput="lgSet('nameScale',this.value/100,1);this.previousElementSibling.textContent=this.value+'%'"></label></div>
     <label class="check" style="margin:4px 0 10px"><input type="checkbox" ${s.grad ? 'checked' : ''} onchange="lgSet('grad',this.checked)"> Degradê no símbolo</label>
-    ${lgToneHTML(s)}
-    ${lgRuleHTML(s)}
+  `)}
+  ${lgAcc('tons', 'Variações de fundo e logo', s.tone ? 'fundo ' + LG_TONES.find(t => t[0] === s.tone.bg)[1] + ' · logo ' + LG_TONES.find(t => t[0] === s.tone.logo)[1] : '6 combinações', lgToneHTML(s))}
+  ${lgAcc('regra', 'Estrutura de cores 60-30-10', s.rule ? 'ativa' : 'desligada', lgRuleHTML(s))}
+  ${lgAcc('paleta', 'Paleta e cores', esc((pal.find(x => x.c.join() === s.pal.join()) || {name: 'personalizada'}).name), `
     <div class="okr-label">PALETA</div><div class="lg-pals">${pal.map(x => `<button class="lg-pal ${s.pal.join() === x.c.join() ? 'on' : ''}" title="${esc(x.name)}" onclick="lgSetPal('${x.id}')">${x.c.map(c => `<i style="background:${c}"></i>`).join('')}<span>${esc(x.name)}</span></button>`).join('')}</div>
-    <div class="okr-label" style="margin-top:8px">AJUSTE FINO DAS 5 CORES <small class="muted">escura · principal · apoio · destaque · clara</small></div><div class="bk-chips">${s.pal.map((c, i) => `<input type="color" value="${c}" oninput="lgSetColor(${i},this.value)" style="width:42px;height:34px;padding:0;border:1px solid #ddd;border-radius:8px">`).join('')}</div></div></div>`;
-  lgDrawBig(); lgSymCanvases(); lgMeterSoon(); lgTonePaint();
+    <div class="okr-label" style="margin-top:8px">AJUSTE FINO DAS 5 CORES <small class="muted">escura · principal · apoio · destaque · clara</small></div><div class="bk-chips">${s.pal.map((c, i) => `<input type="color" value="${c}" oninput="lgSetColor(${i},this.value)" style="width:42px;height:34px;padding:0;border:1px solid #ddd;border-radius:8px">`).join('')}</div>
+  `)}
+  </div></div>`;
+  lgDrawBig(); if (lg.acc.simbolo) lgSymCanvases(); if (lg.acc.regra) lgMeterSoon(); if (lg.acc.tons) lgTonePaint();
 }
 /* seletor de símbolo: próprios + biblioteca de ícones (busca e categorias) */
 const lgIc = {tab: 'own', q: '', cat: '', sty: ''};

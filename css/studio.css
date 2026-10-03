@@ -195,3 +195,9 @@
 .in-view img{width:100%;max-height:68vh;object-fit:contain;background:#f4f4f4;border-radius:12px;display:block}
 .in-sw.big{height:auto;gap:6px;border-radius:0;overflow:visible;flex-wrap:wrap}.in-sw.big button{flex:none;width:64px;height:44px;border:1px solid #ddd;border-radius:8px;cursor:pointer;display:flex;align-items:flex-end;padding:2px}.in-sw.big small{font-size:9px;background:#fffc;border-radius:3px;padding:0 3px}
 .in-bar select{flex:none;width:170px}
+
+/* editor do logo: blocos recolhíveis e painéis fixos */
+.lg-edit{align-items:start}.lg-prev{position:sticky;top:12px}.lg-opts{max-height:calc(100vh - 28px);overflow:auto;position:sticky;top:12px;padding:12px}
+.lg-acc{border:1.5px solid #e6e6e6;border-radius:12px;margin-bottom:8px;background:#fff;overflow:hidden}.lg-acc-h{display:flex;align-items:center;gap:10px;width:100%;border:0;background:#fafafa;padding:11px 14px;font:inherit;cursor:pointer;text-align:left}.lg-acc-h span{font-weight:700;font-size:13px}.lg-acc-h small{flex:1;color:#777;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lg-acc-h i{font-style:normal;transition:transform .15s;color:#666}
+.lg-acc.open .lg-acc-h i{transform:rotate(90deg)}.lg-acc.open .lg-acc-h{background:#f1f1f1}.lg-acc-b{display:none;padding:12px 14px}.lg-acc.open .lg-acc-b{display:block}
+.lg-acc .lg-rule{border:0;padding:0;background:none;margin:0}.lg-acc .lg-rule>.okr-label:first-child{display:none}
