@@ -94,7 +94,7 @@ async function siteGenOne(id) { const p = curProject(), s = siteCur(), l = p.lan
 async function siteExport(id) {
   const p = curProject(), s = p.sites.find(x => x.id === id), pages = p.landings.filter(l => l.siteId === id); if (!pages.length) { toast('O site não tem páginas.'); return; }
   const pend = pages.reduce((n, l) => n + lpPending(l), 0); if (pend) toast(`Atenção: ${pend} item(ns) ainda como [CONFIRMAR].`); toast('Montando o ZIP…');
-  const enc = new TextEncoder(), files = []; for (const l of pages) files.push({name: lpFile(l), data: enc.encode(await lpHTML(l, p))});
+  const enc = new TextEncoder(), files = []; const imgSeen = new Set(); for (const l of pages) { const ex = lpExtractImgs(await lpHTML(l, p)); files.push({name: lpFile(l), data: enc.encode(ex.html)}); ex.files.forEach(f => { if (!imgSeen.has(f.name)) { imgSeen.add(f.name); files.push(f); } }); }
   const seen = new Set(); for (const l of pages) for (const a of await lpAssets(l, p)) if (!seen.has(a.name)) { seen.add(a.name); files.push(a); }
   if (!files.some(f => f.name === 'index.html')) files[0] = {name: 'index.html', data: files[0].data};
   download(slug(s.name) + '-site.zip', makeZip(files), 'application/zip'); pages.forEach(l => { l.status = 'Exportada'; }); persist();

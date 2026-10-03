@@ -1,5 +1,6 @@
 <?php
 require __DIR__ . '/_lib.php';
+require __DIR__ . '/_dispatch.php';
 $store = data_dir() . '/leads.jsonl';
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -71,4 +72,10 @@ $fh = fopen($store, 'a'); if (!$fh) fail('Não foi possível gravar', 500);
 flock($fh, LOCK_EX);
 foreach ($leads as $l) fwrite($fh, json_encode(['id' => bin2hex(random_bytes(6)), 'at' => date('c'), 'project' => $project] + $l, JSON_UNESCAPED_UNICODE) . "\n");
 flock($fh, LOCK_UN); fclose($fh);
-json_out(['ok' => true, 'received' => count($leads)]);
+/* responde ao visitante já e distribui em seguida (e-mail, planilha, CRM, WhatsApp); falha em um destino não afeta os outros */
+header('Content-Type: application/json; charset=utf-8'); header('Cache-Control: no-store'); header('Connection: close');
+$out = json_encode(['ok' => true, 'received' => count($leads)]); header('Content-Length: ' . strlen($out)); echo $out;
+if (function_exists('fastcgi_finish_request')) fastcgi_finish_request(); else { @ob_end_flush(); @flush(); }
+ignore_user_abort(true); @set_time_limit(60);
+foreach ($leads as $l) { try { dispatch_lead(['project' => $project, 'at' => date('c')] + $l); } catch (Throwable $e) { dispatch_log('erro: ' . $e->getMessage()); } }
+exit;
