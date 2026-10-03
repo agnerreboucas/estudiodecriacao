@@ -157,15 +157,23 @@ function placeholderArt(ctx, L) {
   const g = ctx.createLinearGradient(x, y, x + w * 0.4, y + h); g.addColorStop(0, 'rgba(150,160,175,0.95)'); g.addColorStop(1, 'rgba(70,78,95,0.95)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
   ctx.fillStyle = 'rgba(255,255,255,0.16)'; ctx.beginPath(); ctx.arc(x + w * 0.62, y + h * 0.38, Math.min(w, h) * 0.2, 0, 7); ctx.fill(); rr(ctx, x + w * 0.42, y + h * 0.58, w * 0.4, h * 0.6, w * 0.15); ctx.fill();
 }
+/* camada vetorial (símbolos de logo): d em viewBox 100×100, escalada para a caixa x,y,w,h */
+function drawPathLayer(ctx, L) {
+  ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; ctx.translate(L.x, L.y); ctx.scale(L.w / 100, L.h / 100);
+  const p = new Path2D(L.d);
+  if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(p, L.rule || 'nonzero'); }
+  if (L.stroke && L.strokeW) { ctx.lineWidth = L.strokeW; ctx.strokeStyle = L.stroke; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(p); }
+  ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h};
+}
 function drawLayer(ctx, L) {
   if (L.hidden) return;
-  const draw = () => { if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') { drawRect(ctx, L); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h}; } else if (L.type === 'image') drawImageLayer(ctx, L); };
+  const draw = () => { if (L.type === 'path') drawPathLayer(ctx, L); else if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') { drawRect(ctx, L); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h}; } else if (L.type === 'image') drawImageLayer(ctx, L); };
   if (!L.rot) return draw();
   const h = L.type === 'text' ? layoutText(L).h : L.h, cx = L.x + L.w / 2, cy = L.y + h / 2;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(L.rot * Math.PI / 180); ctx.translate(-cx, -cy); draw(); ctx.restore();
 }
 function renderSlide(ctx, slide, W, H, scale) {
-  const k = scale || 1; ctx.setTransform(k, 0, 0, k, 0, 0); ctx.clearRect(0, 0, W, H); ctx.fillStyle = slide.bg || '#fff'; ctx.fillRect(0, 0, W, H);
+  const k = scale || 1; ctx.setTransform(k, 0, 0, k, 0, 0); ctx.clearRect(0, 0, W, H); if (!slide.noBg) { ctx.fillStyle = slide.bg || '#fff'; ctx.fillRect(0, 0, W, H); }
   slide.layers.forEach(L => drawLayer(ctx, L));
 }
 

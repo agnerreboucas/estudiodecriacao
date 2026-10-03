@@ -5,6 +5,7 @@
 function scaleSlide(s, kx, ky) {
   const k = Math.min(kx, ky);
   s.layers.forEach(l => {
+    if (l.type === 'path') { l.x = Math.round(l.x * kx); l.y = Math.round(l.y * ky); l.w = Math.round(l.w * kx); l.h = Math.round(l.h * ky); return; }
     if (l.role === 'logo') { const cx = (l.x + l.w / 2) * kx, cy = (l.y + l.h / 2) * ky; l.w = Math.round(l.w * k); l.h = Math.round(l.h * k); l.x = Math.round(Math.max(0, cx - l.w / 2)); l.y = Math.round(Math.max(0, cy - l.h / 2)); return; }
     l.x = Math.round(l.x * kx); l.y = Math.round(l.y * ky); l.w = Math.round(l.w * kx); if (l.blur) l.blur = Math.round(l.blur * k * 10) / 10; if (l.strokeW) l.strokeW = Math.max(1, Math.round(l.strokeW * k));
     if (l.type === 'text') { l.size = Math.max(8, Math.round(l.size * k * 10) / 10); if (l.ls) l.ls = Math.round(l.ls * k * 10) / 10; }
@@ -60,6 +61,7 @@ function slideCopy(sl) {
 
 /* adapta UMA peça de um formato para outro */
 function resizeSlide(sl, from, to, tk) {
+  if (sl.isLogo) return fitLogoSlide(sl, from, to);
   const rf = from.w / from.h, rt = to.w / to.h, rel = rt / rf, wf = isWide(from), wt = isWide(to);
   if ((wf === wt) && rel >= (wt ? 0.8 : 0.7) && rel <= (wt ? 1.25 : 1.45)) return scaleSlide(cloneSlide(sl), to.w / from.w, to.h / from.h);
   if (sl.pm && typeof palette === 'function') { const pl = palette(tk, sl.pm); tk = Object.assign({}, tk, {bg: pl.bg, fg: pl.fg, accent: pl.acc, muted: pl.mut}); }
@@ -114,4 +116,17 @@ async function dzResizeRun() {
     for (const s of made) await ensureSetResources(s);
     p.design.sets.push(...made); persist(); closeModal(); renderDesign(); toast(made.length + ' peça(s) criada(s) na biblioteca.');
   } catch (e) { b.disabled = false; b.textContent = 'Gerar'; toast('Não consegui adaptar: ' + e.message); }
+}
+
+/* peça que é um logo: nunca reconstruir por papéis; escala uniforme e centraliza no novo formato */
+function fitLogoSlide(sl, from, to) {
+  const s = cloneSlide(sl); s.isLogo = true; s.noBg = sl.noBg; s.bg = sl.bg;
+  const k = Math.min(to.w / from.w, to.h / from.h), ox = (to.w - from.w * k) / 2, oy = (to.h - from.h * k) / 2;
+  s.layers.forEach(l => {
+    const h = l.type === 'text' ? layoutText(l).h : l.h;
+    l.x = Math.round(l.x * k + ox); l.y = Math.round(l.y * k + oy); l.w = Math.round(l.w * k);
+    if (l.type === 'text') { l.size = Math.max(6, Math.round(l.size * k * 10) / 10); if (l.ls) l.ls = Math.round(l.ls * k * 10) / 10; if (l.blur) l.blur *= k; }
+    else { l.h = Math.round(h * k); if (l.radius) l.radius = Math.round(l.radius * k); if (l.strokeW && l.type !== 'path') l.strokeW = Math.max(1, Math.round(l.strokeW * k)); }
+  });
+  return s;
 }
