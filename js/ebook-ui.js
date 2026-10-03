@@ -143,7 +143,8 @@ async function ebCoverMake() {
   const t = T('title', {x: 160, y: 660, w: W - 320, content: eb.title, family: eb.brand.h, size: 190, weight: 700, color: '#ffffff', lh: 1.08, align: 'center'}), th = layoutText(t).h; L.push(t);
   L.push(RC('rule', {x: W / 2 - 90, y: 660 + th + 60, w: 180, h: 8, fill: c.gold, radius: 4}));
   const st = T('subtitle', {x: 160, y: 660 + th + 130, w: W - 320, content: eb.subtitle, family: eb.brand.b, size: 66, weight: 400, color: '#e8efe8', lh: 1.4, align: 'center'}); const n = plainOf(st.content).length; if (n) st.spans = [{s: 0, e: n, st: {italic: true}}]; L.push(st);
-  L.push(T('author', {x: 160, y: H - 420, w: W - 320, content: eb.author, family: eb.brand.h, size: 62, weight: 600, color: '#ffffff', align: 'center'})); if (eb.collection) L.push(T('collection', {x: 160, y: H - 330, w: W - 320, content: eb.collection, family: eb.brand.b, size: 40, weight: 600, color: c.gold, ls: 7, upper: true, align: 'center'}));
+  const au = T('author', {x: 160, y: H - 420, w: W - 320, content: eb.author, family: eb.brand.h, size: 62, weight: 600, color: '#ffffff', align: 'center'}), ah = layoutText(au).h; au.y = H - 150 - (eb.collection ? 120 : 0) - ah; L.push(au);
+  if (eb.collection) L.push(T('collection', {x: 160, y: H - 190, w: W - 320, content: eb.collection, family: eb.brand.b, size: 40, weight: 600, color: c.gold, ls: 7, upper: true, align: 'center'}));
   const set = {id: uid('ds'), name: 'Capa · ' + eb.name, format: {id: 'custom', w: W, h: H}, tk, slides: [{id: sid(), name: 'Capa', bg: c.primary, layers: L}], created: new Date().toISOString(), updated: new Date().toISOString()};
   p.design.sets.push(set); eb.coverSetId = set.id; persist(); eui.cache = {}; toast('Capa criada. Refine no Editor de Design e volte à Editora: ela já entra nas versões.'); go('design'); dzOpen(set.id);
 }

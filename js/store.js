@@ -29,7 +29,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -111,6 +111,23 @@ function normalizeKdp(k) {
   k = k && typeof k === 'object' ? k : {}; const n = (v, d, lo, hi) => { v = +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
   return {trim: /^kdp[a-z0-9]{1,8}$/.test(k.trim || '') ? k.trim : 'kdp6x9', pages: Math.round(n(k.pages, 0, 0, 900)), paper: ['bw-white', 'bw-cream', 'color-std', 'color-premium'].includes(k.paper) ? k.paper : 'bw-white', docId: safeId(k.docId) ? k.docId : '', bleed: k.bleed !== false};
 }
+/* Agente editorial: DNA da marca, memória, histórico e sessão (JSON validado: profundidade, tamanho e tipos limitados) */
+function ediClean(v, d) {
+  d = d || 0; if (v == null) return v === null ? null : ''; if (typeof v === 'string') return v.slice(0, 6000); if (typeof v === 'number') return isFinite(v) ? v : 0; if (typeof v === 'boolean') return v; if (d > 6) return '';
+  if (Array.isArray(v)) return v.slice(0, 80).map(x => ediClean(x, d + 1)); if (typeof v === 'object') { const o = {}; Object.keys(v).slice(0, 40).forEach(k => { if (/^[\w-]{1,40}$/.test(k)) o[k] = ediClean(v[k], d + 1); }); return o; } return '';
+}
+function normalizeEditorial(e) {
+  e = e && typeof e === 'object' ? e : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), obj = (o, keys, n) => Object.fromEntries(keys.map(k => [k, str(o && o[k], n)])), arr = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(x => str(x, n)).filter(Boolean), s = e.session && typeof e.session === 'object' ? e.session : {};
+  const SZ = {capa1: [40, 90], capa2: [60, 140], titulo: [25, 60], par: [220, 420], curto: [80, 180], fechamento: [120, 260], assinatura: [15, 60]}, sz = {};
+  Object.keys(SZ).forEach(k => { const a = e.sizes && e.sizes[k]; sz[k] = Array.isArray(a) && a.length === 2 && a.every(n => isFinite(+n)) ? [Math.max(0, Math.min(3000, +a[0])), Math.max(0, Math.min(3000, +a[1]))] : SZ[k]; });
+  return {
+    brand: obj(e.brand, ['publico', 'posicionamento', 'tom', 'categorias', 'produtos', 'diferenciais', 'prioritarios', 'proibidos', 'aprovados', 'rejeitados'], 1500), prod: obj(e.prod, ['plataforma', 'objetivo', 'funil', 'frequencia', 'campanha', 'cta'], 300),
+    mem: Object.assign(obj(e.mem, ['vocab', 'referencias', 'marcas', 'temas', 'formatos', 'padroes', 'proibidas', 'estruturas'], 1500), {negatives: arr(e.mem && e.mem.negatives, 240, 40)}), sizes: sz,
+    liked: arr(e.liked, 400, 60), rejected: (Array.isArray(e.rejected) ? e.rejected : []).slice(0, 80).map(r => ({tese: str(r && r.tese, 400), why: str(r && r.why, 40)})).filter(r => r.tese),
+    history: (Array.isArray(e.history) ? e.history : []).slice(0, 150).filter(h => h && /^[\w-]{1,40}$/.test(h.id || '')).map(h => ({id: h.id, t: str(h.t, 40), input: str(h.input, 300), ideas: ediClean(h.ideas), chosen: Math.round(+h.chosen) || -1, brief: !!h.brief, formats: arr(h.formats, 30, 12), headlines: arr(h.headlines, 300, 24)})),
+    session: {stage: ['insumo', 'triagem', 'angulos', 'narrativa', 'auditoria'].includes(s.stage) ? s.stage : 'insumo', mode: s.mode === 'B' ? 'B' : 'A', input: str(s.input, 60000), analysis: ediClean(s.analysis), ideas: ediClean(s.ideas), chosen: Math.round(+s.chosen) >= 0 ? Math.round(+s.chosen) : -1, brief: ediClean(s.brief), headlines: ediClean(s.headlines), format: str(s.format, 30), content: ediClean(s.content), audit: ediClean(s.audit), histId: /^[\w-]{1,40}$/.test(s.histId || '') ? s.histId : '', sources: str(s.sources, 20000)}
+  };
+}
 /* Motor de e-book: skills (workspace) e rascunho de produção (projeto) */
 function normalizeSkills(x) {
   return (Array.isArray(x) ? x : []).filter(k => k && safeId(k.id) && typeof k.text === 'string').slice(0, 30).map(k => ({id: k.id, name: String(k.name || 'Skill').slice(0, 80), text: k.text.slice(0, 30000)}));
@@ -145,7 +162,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
