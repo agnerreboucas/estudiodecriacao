@@ -86,7 +86,7 @@ function eEntBody(kind) {
     return `<small class="muted block">${R.format === 'reel' ? 'Reel / Short (30–45 s)' : 'Vídeo (60–90 s)'}</small>${parts('roteiro')}<div class="row-gap" style="margin-top:8px;flex-wrap:wrap">${gen}<button class="btn sm" onclick="eEntAudit('roteiro')">Auditar</button><button class="btn sm" onclick="eEntDown('roteiro')">⬇ .md</button></div>`;
   }
   if (!E[kind]) return `<p class="muted">${esc(ENT_LIST.find(x => x[0] === kind)[2])}.</p><div class="row-gap">${eEntGen(kind, 'Gerar ' + ENT_LIST.find(x => x[0] === kind)[1].toLowerCase())}</div>`;
-  return `${parts(kind)}<div class="row-gap" style="margin-top:8px;flex-wrap:wrap">${eEntGen(kind, 'Refazer')}<button class="btn sm dark" onclick="eEntDesign('${kind}')">Abrir no Editor de Design</button><button class="btn sm" onclick="eEntAudit('${kind}')">Auditar</button><button class="btn sm" onclick="eEntDown('${kind}')">⬇ .md</button></div>`;
+  return `${parts(kind)}<div class="row-gap" style="margin-top:8px;flex-wrap:wrap">${eEntGen(kind, 'Refazer')}<button class="btn sm dark" onclick="eEntDesign('${kind}')">Abrir no Editor de Design</button>${kind === 'carrossel' ? '<button class="btn sm" onclick="eEntToCarousel()">Levar para Carrosséis</button>' : ''}<button class="btn sm" onclick="eEntAudit('${kind}')">Auditar</button><button class="btn sm" onclick="eEntDown('${kind}')">⬇ .md</button></div>`;
 }
 function eEntregasUI(s) {
   const it = s.ideas[s.chosen]; if (!it || !s.brief) return '<p class="muted">Escolha uma ideia e gere o briefing primeiro.</p>';

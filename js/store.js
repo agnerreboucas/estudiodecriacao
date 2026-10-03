@@ -29,7 +29,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -146,6 +146,11 @@ function normalizeMotor(m) {
   return {skillId: safeId(m.skillId) ? m.skillId : '', idea: str(m.idea, 4000), source: str(m.source, 60000), audience: str(m.audience, 300), tone: str(m.tone, 300), nch: Math.max(3, Math.min(14, Math.round(+m.nch || 7))), title: str(m.title, 200), subtitle: str(m.subtitle, 300), author: str(m.author, 200), outline: out, chapters, full: str(m.full, 200000), stage: ['material', 'estrutura', 'texto', 'enviar'].includes(m.stage) ? m.stage : 'material', approved: !!m.approved};
 }
 /* Editora: valida cada e-book (ids, textos, tipos de bloco, cores) antes de entrar no estado */
+function normalizeCarousel(c) {
+  c = c && typeof c === 'object' ? c : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), T = (Array.isArray(c.texts) ? c.texts : []).slice(0, 18).map(t => str(t, 1200)); while (T.length < 18) T.push('');
+  return {base: /^[\w-]{1,30}$/.test(c.base || '') ? c.base : 'brandsdecoded', cover: /^[\w-]{1,30}$/.test(c.cover || '') ? c.cover : 'tese', style: /^[\w-]{0,40}$/.test(c.style || '') ? (c.style || '') : '', dark: !!c.dark, idea: str(c.idea, 4000), useAgent: c.useAgent !== false, texts: T,
+    covers: (Array.isArray(c.covers) ? c.covers : []).slice(0, 8).map(o => ({titulo: str(o && o.titulo, 300), subtitulo: str(o && o.subtitulo, 500)})).filter(o => o.titulo)};
+}
 function normalizeAudio(a) {
   const o = {voiceId: '', voiceName: '', items: {}}; if (!a || typeof a !== 'object') return o;
   o.voiceId = /^[A-Za-z0-9]{0,40}$/.test(String(a.voiceId)) ? String(a.voiceId || '') : ''; o.voiceName = String(a.voiceName || '').slice(0, 80);
@@ -175,7 +180,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
