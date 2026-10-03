@@ -31,7 +31,7 @@ function layerName(L) {
 }
 function renderLayerData(L, box) {
   const c = document.createElement('canvas'); c.width = box.w; c.height = box.h; const ctx = c.getContext('2d'); ctx.translate(-box.x, -box.y);
-  if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') drawRect(ctx, L); else drawImageLayer(ctx, L);
+  drawLayer(ctx, L);
   return {canvas: c, data: ctx.getImageData(0, 0, box.w, box.h).data};
 }
 /* camadas de baixo para cima, cada uma recortada na sua caixa */
@@ -44,7 +44,7 @@ async function collectLayerItems(set, slide) {
   for (const L of slide.layers) {
     if (L.hidden || !LBOX[L.id]) continue; const b = LBOX[L.id], pad = L.type === 'text' ? Math.ceil(L.size * 0.3) + 10 : 0;
     const x = Math.max(0, Math.floor(b.x - pad)), y = Math.max(0, Math.floor(b.y - pad)), x2 = Math.min(W, Math.ceil(b.x + b.w + pad)), y2 = Math.min(H, Math.ceil(b.y + b.h + pad));
-    const box = {x, y, w: x2 - x, h: y2 - y}; if (box.w < 1 || box.h < 1) continue;
+    const box = L.rot || L.blur ? {x: 0, y: 0, w: W, h: H} : {x, y, w: x2 - x, h: y2 - y}; if (box.w < 1 || box.h < 1) continue;
     const r = renderLayerData(L, box); items.push({name: layerName(L), role: L.role, type: L.type, text: L.type === 'text' ? L.content.replace(/\*\*/g, '') : '', box, canvas: r.canvas, data: r.data});
   }
   return {items, comp: cctx.getImageData(0, 0, W, H).data, W, H};

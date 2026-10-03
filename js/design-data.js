@@ -54,7 +54,7 @@ const FONT_META = { // família → pesos disponíveis (vazio = só 400)
   'Nunito': '400;600;700;800;900', 'Raleway': '400;600;700;800;900', 'Oswald': '400;500;600;700', 'Bebas Neue': '', 'Anton': '', 'Playfair Display': '400;600;700;800;900', 'Merriweather': '400;700;900',
   'Lora': '400;600;700', 'DM Serif Display': '', 'DM Sans': '400;500;700', 'Abril Fatface': '', 'Archivo Black': '', 'Rubik': '400;500;700;900', 'Work Sans': '400;600;700;900', 'Manrope': '400;600;700;800',
   'Space Grotesk': '400;500;700', 'Sora': '400;600;700;800', 'Outfit': '400;600;700;900', 'Plus Jakarta Sans': '400;600;700;800', 'Barlow Condensed': '400;600;700;800', 'Barlow': '400;500;700',
-  'League Spartan': '400;600;700;900', 'Fredoka': '400;500;600;700', 'Baloo 2': '400;600;700;800', 'Caveat': '400;600;700', 'Bricolage Grotesque': '400;600;700;800', 'Source Serif 4': '400;600;700;900', 'Source Sans 3': '400;600;700;900'
+  'League Spartan': '400;600;700;900', 'Fredoka': '400;500;600;700', 'Baloo 2': '400;600;700;800', 'Caveat': '400;600;700', 'Bricolage Grotesque': '400;600;700;800', 'Source Serif 4': '400;600;700;900', 'Source Sans 3': '400;600;700;900', 'Instrument Serif': '', 'Cormorant Garamond': '400;600;700', 'Fjalla One': '', 'Archivo Narrow': '400;700', 'Kalam': '400;700', 'Permanent Marker': '', 'Big Shoulders Display': '400;700;900'
 };
 const FONT_PAIRS = [
   ['poppins', 'Poppins + Inter', 'Poppins', 'Inter', 800, 'moderno popular confiavel jovem'], ['montserrat', 'Montserrat + Open Sans', 'Montserrat', 'Open Sans', 800, 'corporativo confiavel moderno'],

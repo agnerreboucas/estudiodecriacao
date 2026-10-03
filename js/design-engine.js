@@ -93,6 +93,7 @@ function rr(ctx, x, y, w, h, r) { r = Math.max(0, Math.min(r || 0, w / 2, h / 2)
 function drawText(ctx, L) {
   const lay = layoutText(L, ctx), words = [];
   ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; ctx.textBaseline = 'alphabetic';
+  if (L.blur && 'filter' in ctx) ctx.filter = `blur(${L.blur}px)`;
   if (ctx.letterSpacing !== undefined) ctx.letterSpacing = (+L.ls || 0) + 'px';
   lay.lines.forEach(l => {
     const base = L.y + l.y + (l.h - l.maxSize) / 2 + l.maxSize * 0.82;
@@ -108,31 +109,64 @@ function drawText(ctx, L) {
   });
   ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: lay.h, words}; return lay;
 }
+/* formas: retângulo (com cantos), elipse e arco (janela com topo redondo) */
+function shapePath(ctx, L) {
+  if (L.shape === 'ellipse') { ctx.beginPath(); ctx.ellipse(L.x + L.w / 2, L.y + L.h / 2, L.w / 2, L.h / 2, 0, 0, Math.PI * 2); }
+  else if (L.shape === 'arch') { const r = L.w / 2; ctx.beginPath(); ctx.moveTo(L.x, L.y + L.h); ctx.lineTo(L.x, L.y + r); ctx.arc(L.x + r, L.y + r, r, Math.PI, 0); ctx.lineTo(L.x + L.w, L.y + L.h); ctx.closePath(); }
+  else rr(ctx, L.x, L.y, L.w, L.h, L.radius);
+}
+let GRAIN_PAT = null;
+function grainFill(ctx) {
+  if (!GRAIN_PAT) { const c = document.createElement('canvas'); c.width = c.height = 160; const x = c.getContext('2d'), d = x.createImageData(160, 160); let s = 7; for (let i = 0; i < d.data.length; i += 4) { s = (s * 16807) % 2147483647; const v = s % 256; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } x.putImageData(d, 0, 0); GRAIN_PAT = ctx.createPattern(c, 'repeat'); }
+  return GRAIN_PAT;
+}
 function drawRect(ctx, L) {
-  ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; rr(ctx, L.x, L.y, L.w, L.h, L.radius);
-  if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(); } if (L.stroke && L.strokeW) { ctx.lineWidth = L.strokeW; ctx.strokeStyle = L.stroke; ctx.stroke(); } ctx.restore();
+  ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; shapePath(ctx, L);
+  if (L.grad) { const a = (L.grad.a || 0) * Math.PI / 180, cx = L.x + L.w / 2, cy = L.y + L.h / 2, d = Math.abs(L.w * Math.sin(a)) / 2 + Math.abs(L.h * Math.cos(a)) / 2, g = ctx.createLinearGradient(cx - Math.sin(a) * d, cy + Math.cos(a) * d, cx + Math.sin(a) * d, cy - Math.cos(a) * d); g.addColorStop(0, L.grad.c1); g.addColorStop(1, L.grad.c2); ctx.fillStyle = g; ctx.fill(); }
+  else if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(); }
+  if (L.grain) { ctx.save(); ctx.clip(); ctx.globalAlpha = (L.opacity == null ? 1 : L.opacity) * L.grain; ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = grainFill(ctx); ctx.fillRect(L.x, L.y, L.w, L.h); ctx.restore(); }
+  if (L.stroke && L.strokeW) { ctx.lineWidth = L.strokeW; ctx.strokeStyle = L.stroke; ctx.stroke(); } ctx.restore();
 }
 const IMGS = new Map();   // imgId → ImageBitmap
 function drawImageLayer(ctx, L, slide) {
-  ctx.save(); rr(ctx, L.x, L.y, L.w, L.h, L.radius); ctx.clip(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity;
+  ctx.save(); shapePath(ctx, L); ctx.clip(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity;
   const img = L.imgId && IMGS.get(L.imgId);
   if (img) {
-    const r = Math.max(L.w / img.width, L.h / img.height), dw = img.width * r, dh = img.height * r;
+    const r = (L.fit === 'contain' ? Math.min : Math.max)(L.w / img.width, L.h / img.height), dw = img.width * r, dh = img.height * r;
     if (L.filter && 'filter' in ctx) ctx.filter = L.filter;
     ctx.drawImage(img, L.x + (L.w - dw) * (L.fx == null ? 0.5 : L.fx), L.y + (L.h - dh) * (L.fy == null ? 0.5 : L.fy), dw, dh); ctx.filter = 'none';
     if (L.ovColor) { ctx.globalCompositeOperation = L.ovMode || 'source-over'; ctx.fillStyle = L.ovColor; ctx.fillRect(L.x, L.y, L.w, L.h); }
-  } else {
+  } else if (LAYOUT_PREVIEW) placeholderArt(ctx, L);
+  else {
     const g = ctx.createLinearGradient(L.x, L.y, L.x + L.w, L.y + L.h); g.addColorStop(0, 'rgba(120,120,130,0.28)'); g.addColorStop(1, 'rgba(120,120,130,0.12)');
     ctx.fillStyle = g; ctx.fillRect(L.x, L.y, L.w, L.h); ctx.setLineDash([14, 10]); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(120,120,130,0.55)'; ctx.strokeRect(L.x + 12, L.y + 12, L.w - 24, L.h - 24); ctx.setLineDash([]);
-    ctx.fillStyle = 'rgba(90,90,100,0.9)'; ctx.textAlign = 'center'; ctx.font = `700 ${Math.max(26, Math.min(44, L.w / 18))}px ${fontStack('Inter')}`; ctx.fillText('FOTO', L.x + L.w / 2, L.y + L.h / 2 - 8);
+    ctx.fillStyle = 'rgba(90,90,100,0.9)'; ctx.textAlign = 'center'; ctx.font = `700 ${Math.max(26, Math.min(44, L.w / 18))}px ${fontStack('Inter')}`; ctx.fillText(L.role === 'cutout' ? 'SUJEITO' : 'FOTO', L.x + L.w / 2, L.y + L.h / 2 - 8);
     ctx.font = `400 ${Math.max(20, Math.min(30, L.w / 28))}px ${fontStack('Inter')}`;
     String(L.brief || 'Clique e envie uma foto').match(/.{1,46}(\s|$)/g).slice(0, 3).forEach((ln, i) => ctx.fillText(ln.trim(), L.x + L.w / 2, L.y + L.h / 2 + 34 + i * 32));
   }
   ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h};
 }
+/* prévia da galeria: no lugar do cinza tracejado, uma silhueta para dar para julgar a composição */
+let LAYOUT_PREVIEW = false;
+function placeholderArt(ctx, L) {
+  const x = L.x, y = L.y, w = L.w, h = L.h;
+  if (L.role === 'cutout') {
+    ctx.fillStyle = 'rgba(30,30,40,0.82)'; const hr = Math.min(w, h) * 0.17; ctx.beginPath(); ctx.arc(x + w / 2, y + h * 0.3, hr, 0, 7); ctx.fill();
+    rr(ctx, x + w * 0.16, y + h * 0.3 + hr * 1.15, w * 0.68, h * 0.7, w * 0.22); ctx.fill(); return;
+  }
+  const g = ctx.createLinearGradient(x, y, x + w * 0.4, y + h); g.addColorStop(0, 'rgba(150,160,175,0.95)'); g.addColorStop(1, 'rgba(70,78,95,0.95)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = 'rgba(255,255,255,0.16)'; ctx.beginPath(); ctx.arc(x + w * 0.62, y + h * 0.38, Math.min(w, h) * 0.2, 0, 7); ctx.fill(); rr(ctx, x + w * 0.42, y + h * 0.58, w * 0.4, h * 0.6, w * 0.15); ctx.fill();
+}
+function drawLayer(ctx, L) {
+  if (L.hidden) return;
+  const draw = () => { if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') { drawRect(ctx, L); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h}; } else if (L.type === 'image') drawImageLayer(ctx, L); };
+  if (!L.rot) return draw();
+  const h = L.type === 'text' ? layoutText(L).h : L.h, cx = L.x + L.w / 2, cy = L.y + h / 2;
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(L.rot * Math.PI / 180); ctx.translate(-cx, -cy); draw(); ctx.restore();
+}
 function renderSlide(ctx, slide, W, H, scale) {
   const k = scale || 1; ctx.setTransform(k, 0, 0, k, 0, 0); ctx.clearRect(0, 0, W, H); ctx.fillStyle = slide.bg || '#fff'; ctx.fillRect(0, 0, W, H);
-  slide.layers.forEach(L => { if (L.hidden) return; if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') { drawRect(ctx, L); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h}; } else if (L.type === 'image') drawImageLayer(ctx, L, slide); });
+  slide.layers.forEach(L => drawLayer(ctx, L));
 }
 
 /* ---- imagens (IndexedDB 'images') ---- */
@@ -164,7 +198,8 @@ function makeTokens(design, font, photo, over) {
   }, over || {});
 }
 /* aplica o estilo (por papel) a uma camada: é o que permite trocar o estilo de toda a campanha */
-function themeLayer(L, tk) {
+function themeLayer(L, tk, pal) {
+  if (pal && L.pk && L.type !== 'image') return themePal(L, tk, pal);   // camadas de modelo de layout: cor por papel da paleta
   const onP = !!L.onPhoto, emT = readable(tk.accent), mode = tk.em.mode;
   if (L.type === 'text') {
     if (L.role === 'title') Object.assign(L, {family: tk.head.family, weight: tk.head.weight, color: onP ? '#ffffff' : tk.fg, upper: tk.upper, emMode: mode, emColor: tk.accent, emBg: tk.accent, emText: emT});
@@ -178,7 +213,7 @@ function themeLayer(L, tk) {
     if (L.role === 'panel') L.fill = tk.second ? mixHex(tk.bg, tk.second, 0.16) : mixHex(tk.bg, tk.fg, 0.07);
   } else if (L.type === 'image' && L.role === 'photo') Object.assign(L, {filter: tk.photo.filter, ovColor: tk.photo.ovColor, ovMode: tk.photo.ovMode, brief: tk.photo.brief});
 }
-function themeSlide(slide, tk) { slide.bg = tk.bg; slide.layers.forEach(L => themeLayer(L, tk)); }
+function themeSlide(slide, tk) { const pal = slide.pm && typeof palette === 'function' ? palette(tk, slide.pm) : null; slide.bg = pal ? pal.bg : tk.bg; slide.layers.forEach(L => themeLayer(L, tk, pal)); }
 function applyStyleToSet(set, tk) { set.tk = tk; set.slides.forEach(s => themeSlide(s, tk)); }
 
 /* empilha itens verticalmente, medindo o texto de verdade */

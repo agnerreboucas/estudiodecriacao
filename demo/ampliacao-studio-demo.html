@@ -379,6 +379,9 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .bk-prev{display:flex;gap:14px;flex-wrap:wrap}.bk-prev canvas{max-width:100%;height:auto;border:1px solid var(--line);border-radius:10px}
 .bk-sw i{display:none}.bk-sw input{height:44px;border-radius:10px;cursor:pointer;border:1px solid var(--line);padding:2px}
 
+.ly-bar{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:12px}.ly-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.ly-search{padding:8px 12px;border:1px solid var(--line);border-radius:10px;min-width:320px;font:inherit}
+.ly-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}.ly-card{border:1px solid var(--line);border-radius:14px;padding:10px;background:#fff;cursor:pointer;transition:box-shadow .15s,transform .15s}.ly-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.1);transform:translateY(-2px)}.ly-card canvas{width:100%;height:auto;border-radius:8px;border:1px solid #eee;margin-bottom:8px;background:#fafafa}.ly-card strong{font-size:13px}
+
 </style>
 </head>
 <body>
@@ -1792,7 +1795,7 @@ const FONT_META = { // família → pesos disponíveis (vazio = só 400)
   'Nunito': '400;600;700;800;900', 'Raleway': '400;600;700;800;900', 'Oswald': '400;500;600;700', 'Bebas Neue': '', 'Anton': '', 'Playfair Display': '400;600;700;800;900', 'Merriweather': '400;700;900',
   'Lora': '400;600;700', 'DM Serif Display': '', 'DM Sans': '400;500;700', 'Abril Fatface': '', 'Archivo Black': '', 'Rubik': '400;500;700;900', 'Work Sans': '400;600;700;900', 'Manrope': '400;600;700;800',
   'Space Grotesk': '400;500;700', 'Sora': '400;600;700;800', 'Outfit': '400;600;700;900', 'Plus Jakarta Sans': '400;600;700;800', 'Barlow Condensed': '400;600;700;800', 'Barlow': '400;500;700',
-  'League Spartan': '400;600;700;900', 'Fredoka': '400;500;600;700', 'Baloo 2': '400;600;700;800', 'Caveat': '400;600;700', 'Bricolage Grotesque': '400;600;700;800', 'Source Serif 4': '400;600;700;900', 'Source Sans 3': '400;600;700;900'
+  'League Spartan': '400;600;700;900', 'Fredoka': '400;500;600;700', 'Baloo 2': '400;600;700;800', 'Caveat': '400;600;700', 'Bricolage Grotesque': '400;600;700;800', 'Source Serif 4': '400;600;700;900', 'Source Sans 3': '400;600;700;900', 'Instrument Serif': '', 'Cormorant Garamond': '400;600;700', 'Fjalla One': '', 'Archivo Narrow': '400;700', 'Kalam': '400;700', 'Permanent Marker': '', 'Big Shoulders Display': '400;700;900'
 };
 const FONT_PAIRS = [
   ['poppins', 'Poppins + Inter', 'Poppins', 'Inter', 800, 'moderno popular confiavel jovem'], ['montserrat', 'Montserrat + Open Sans', 'Montserrat', 'Open Sans', 800, 'corporativo confiavel moderno'],
@@ -1963,6 +1966,7 @@ function rr(ctx, x, y, w, h, r) { r = Math.max(0, Math.min(r || 0, w / 2, h / 2)
 function drawText(ctx, L) {
   const lay = layoutText(L, ctx), words = [];
   ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; ctx.textBaseline = 'alphabetic';
+  if (L.blur && 'filter' in ctx) ctx.filter = `blur(${L.blur}px)`;
   if (ctx.letterSpacing !== undefined) ctx.letterSpacing = (+L.ls || 0) + 'px';
   lay.lines.forEach(l => {
     const base = L.y + l.y + (l.h - l.maxSize) / 2 + l.maxSize * 0.82;
@@ -1978,31 +1982,64 @@ function drawText(ctx, L) {
   });
   ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: lay.h, words}; return lay;
 }
+/* formas: retângulo (com cantos), elipse e arco (janela com topo redondo) */
+function shapePath(ctx, L) {
+  if (L.shape === 'ellipse') { ctx.beginPath(); ctx.ellipse(L.x + L.w / 2, L.y + L.h / 2, L.w / 2, L.h / 2, 0, 0, Math.PI * 2); }
+  else if (L.shape === 'arch') { const r = L.w / 2; ctx.beginPath(); ctx.moveTo(L.x, L.y + L.h); ctx.lineTo(L.x, L.y + r); ctx.arc(L.x + r, L.y + r, r, Math.PI, 0); ctx.lineTo(L.x + L.w, L.y + L.h); ctx.closePath(); }
+  else rr(ctx, L.x, L.y, L.w, L.h, L.radius);
+}
+let GRAIN_PAT = null;
+function grainFill(ctx) {
+  if (!GRAIN_PAT) { const c = document.createElement('canvas'); c.width = c.height = 160; const x = c.getContext('2d'), d = x.createImageData(160, 160); let s = 7; for (let i = 0; i < d.data.length; i += 4) { s = (s * 16807) % 2147483647; const v = s % 256; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } x.putImageData(d, 0, 0); GRAIN_PAT = ctx.createPattern(c, 'repeat'); }
+  return GRAIN_PAT;
+}
 function drawRect(ctx, L) {
-  ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; rr(ctx, L.x, L.y, L.w, L.h, L.radius);
-  if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(); } if (L.stroke && L.strokeW) { ctx.lineWidth = L.strokeW; ctx.strokeStyle = L.stroke; ctx.stroke(); } ctx.restore();
+  ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; shapePath(ctx, L);
+  if (L.grad) { const a = (L.grad.a || 0) * Math.PI / 180, cx = L.x + L.w / 2, cy = L.y + L.h / 2, d = Math.abs(L.w * Math.sin(a)) / 2 + Math.abs(L.h * Math.cos(a)) / 2, g = ctx.createLinearGradient(cx - Math.sin(a) * d, cy + Math.cos(a) * d, cx + Math.sin(a) * d, cy - Math.cos(a) * d); g.addColorStop(0, L.grad.c1); g.addColorStop(1, L.grad.c2); ctx.fillStyle = g; ctx.fill(); }
+  else if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(); }
+  if (L.grain) { ctx.save(); ctx.clip(); ctx.globalAlpha = (L.opacity == null ? 1 : L.opacity) * L.grain; ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = grainFill(ctx); ctx.fillRect(L.x, L.y, L.w, L.h); ctx.restore(); }
+  if (L.stroke && L.strokeW) { ctx.lineWidth = L.strokeW; ctx.strokeStyle = L.stroke; ctx.stroke(); } ctx.restore();
 }
 const IMGS = new Map();   // imgId → ImageBitmap
 function drawImageLayer(ctx, L, slide) {
-  ctx.save(); rr(ctx, L.x, L.y, L.w, L.h, L.radius); ctx.clip(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity;
+  ctx.save(); shapePath(ctx, L); ctx.clip(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity;
   const img = L.imgId && IMGS.get(L.imgId);
   if (img) {
-    const r = Math.max(L.w / img.width, L.h / img.height), dw = img.width * r, dh = img.height * r;
+    const r = (L.fit === 'contain' ? Math.min : Math.max)(L.w / img.width, L.h / img.height), dw = img.width * r, dh = img.height * r;
     if (L.filter && 'filter' in ctx) ctx.filter = L.filter;
     ctx.drawImage(img, L.x + (L.w - dw) * (L.fx == null ? 0.5 : L.fx), L.y + (L.h - dh) * (L.fy == null ? 0.5 : L.fy), dw, dh); ctx.filter = 'none';
     if (L.ovColor) { ctx.globalCompositeOperation = L.ovMode || 'source-over'; ctx.fillStyle = L.ovColor; ctx.fillRect(L.x, L.y, L.w, L.h); }
-  } else {
+  } else if (LAYOUT_PREVIEW) placeholderArt(ctx, L);
+  else {
     const g = ctx.createLinearGradient(L.x, L.y, L.x + L.w, L.y + L.h); g.addColorStop(0, 'rgba(120,120,130,0.28)'); g.addColorStop(1, 'rgba(120,120,130,0.12)');
     ctx.fillStyle = g; ctx.fillRect(L.x, L.y, L.w, L.h); ctx.setLineDash([14, 10]); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(120,120,130,0.55)'; ctx.strokeRect(L.x + 12, L.y + 12, L.w - 24, L.h - 24); ctx.setLineDash([]);
-    ctx.fillStyle = 'rgba(90,90,100,0.9)'; ctx.textAlign = 'center'; ctx.font = `700 ${Math.max(26, Math.min(44, L.w / 18))}px ${fontStack('Inter')}`; ctx.fillText('FOTO', L.x + L.w / 2, L.y + L.h / 2 - 8);
+    ctx.fillStyle = 'rgba(90,90,100,0.9)'; ctx.textAlign = 'center'; ctx.font = `700 ${Math.max(26, Math.min(44, L.w / 18))}px ${fontStack('Inter')}`; ctx.fillText(L.role === 'cutout' ? 'SUJEITO' : 'FOTO', L.x + L.w / 2, L.y + L.h / 2 - 8);
     ctx.font = `400 ${Math.max(20, Math.min(30, L.w / 28))}px ${fontStack('Inter')}`;
     String(L.brief || 'Clique e envie uma foto').match(/.{1,46}(\s|$)/g).slice(0, 3).forEach((ln, i) => ctx.fillText(ln.trim(), L.x + L.w / 2, L.y + L.h / 2 + 34 + i * 32));
   }
   ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h};
 }
+/* prévia da galeria: no lugar do cinza tracejado, uma silhueta para dar para julgar a composição */
+let LAYOUT_PREVIEW = false;
+function placeholderArt(ctx, L) {
+  const x = L.x, y = L.y, w = L.w, h = L.h;
+  if (L.role === 'cutout') {
+    ctx.fillStyle = 'rgba(30,30,40,0.82)'; const hr = Math.min(w, h) * 0.17; ctx.beginPath(); ctx.arc(x + w / 2, y + h * 0.3, hr, 0, 7); ctx.fill();
+    rr(ctx, x + w * 0.16, y + h * 0.3 + hr * 1.15, w * 0.68, h * 0.7, w * 0.22); ctx.fill(); return;
+  }
+  const g = ctx.createLinearGradient(x, y, x + w * 0.4, y + h); g.addColorStop(0, 'rgba(150,160,175,0.95)'); g.addColorStop(1, 'rgba(70,78,95,0.95)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = 'rgba(255,255,255,0.16)'; ctx.beginPath(); ctx.arc(x + w * 0.62, y + h * 0.38, Math.min(w, h) * 0.2, 0, 7); ctx.fill(); rr(ctx, x + w * 0.42, y + h * 0.58, w * 0.4, h * 0.6, w * 0.15); ctx.fill();
+}
+function drawLayer(ctx, L) {
+  if (L.hidden) return;
+  const draw = () => { if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') { drawRect(ctx, L); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h}; } else if (L.type === 'image') drawImageLayer(ctx, L); };
+  if (!L.rot) return draw();
+  const h = L.type === 'text' ? layoutText(L).h : L.h, cx = L.x + L.w / 2, cy = L.y + h / 2;
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(L.rot * Math.PI / 180); ctx.translate(-cx, -cy); draw(); ctx.restore();
+}
 function renderSlide(ctx, slide, W, H, scale) {
   const k = scale || 1; ctx.setTransform(k, 0, 0, k, 0, 0); ctx.clearRect(0, 0, W, H); ctx.fillStyle = slide.bg || '#fff'; ctx.fillRect(0, 0, W, H);
-  slide.layers.forEach(L => { if (L.hidden) return; if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') { drawRect(ctx, L); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h}; } else if (L.type === 'image') drawImageLayer(ctx, L, slide); });
+  slide.layers.forEach(L => drawLayer(ctx, L));
 }
 
 /* ---- imagens (IndexedDB 'images') ---- */
@@ -2034,7 +2071,8 @@ function makeTokens(design, font, photo, over) {
   }, over || {});
 }
 /* aplica o estilo (por papel) a uma camada: é o que permite trocar o estilo de toda a campanha */
-function themeLayer(L, tk) {
+function themeLayer(L, tk, pal) {
+  if (pal && L.pk && L.type !== 'image') return themePal(L, tk, pal);   // camadas de modelo de layout: cor por papel da paleta
   const onP = !!L.onPhoto, emT = readable(tk.accent), mode = tk.em.mode;
   if (L.type === 'text') {
     if (L.role === 'title') Object.assign(L, {family: tk.head.family, weight: tk.head.weight, color: onP ? '#ffffff' : tk.fg, upper: tk.upper, emMode: mode, emColor: tk.accent, emBg: tk.accent, emText: emT});
@@ -2048,7 +2086,7 @@ function themeLayer(L, tk) {
     if (L.role === 'panel') L.fill = tk.second ? mixHex(tk.bg, tk.second, 0.16) : mixHex(tk.bg, tk.fg, 0.07);
   } else if (L.type === 'image' && L.role === 'photo') Object.assign(L, {filter: tk.photo.filter, ovColor: tk.photo.ovColor, ovMode: tk.photo.ovMode, brief: tk.photo.brief});
 }
-function themeSlide(slide, tk) { slide.bg = tk.bg; slide.layers.forEach(L => themeLayer(L, tk)); }
+function themeSlide(slide, tk) { const pal = slide.pm && typeof palette === 'function' ? palette(tk, slide.pm) : null; slide.bg = pal ? pal.bg : tk.bg; slide.layers.forEach(L => themeLayer(L, tk, pal)); }
 function applyStyleToSet(set, tk) { set.tk = tk; set.slides.forEach(s => themeSlide(s, tk)); }
 
 /* empilha itens verticalmente, medindo o texto de verdade */
@@ -2257,7 +2295,7 @@ function scaleSlide(s, kx, ky) {
   const k = Math.min(kx, ky);
   s.layers.forEach(l => {
     if (l.role === 'logo') { const cx = (l.x + l.w / 2) * kx, cy = (l.y + l.h / 2) * ky; l.w = Math.round(l.w * k); l.h = Math.round(l.h * k); l.x = Math.round(Math.max(0, cx - l.w / 2)); l.y = Math.round(Math.max(0, cy - l.h / 2)); return; }
-    l.x = Math.round(l.x * kx); l.y = Math.round(l.y * ky); l.w = Math.round(l.w * kx);
+    l.x = Math.round(l.x * kx); l.y = Math.round(l.y * ky); l.w = Math.round(l.w * kx); if (l.blur) l.blur = Math.round(l.blur * k * 10) / 10; if (l.strokeW) l.strokeW = Math.max(1, Math.round(l.strokeW * k));
     if (l.type === 'text') { l.size = Math.max(8, Math.round(l.size * k * 10) / 10); if (l.ls) l.ls = Math.round(l.ls * k * 10) / 10; }
     else { l.h = Math.round(l.h * ky); if (l.radius) l.radius = Math.round(l.radius * k); if (l.strokeW) l.strokeW = Math.max(1, Math.round(l.strokeW * k)); }
   });
@@ -2313,6 +2351,7 @@ function slideCopy(sl) {
 function resizeSlide(sl, from, to, tk) {
   const rf = from.w / from.h, rt = to.w / to.h, rel = rt / rf, wf = isWide(from), wt = isWide(to);
   if ((wf === wt) && rel >= (wt ? 0.8 : 0.7) && rel <= (wt ? 1.25 : 1.45)) return scaleSlide(cloneSlide(sl), to.w / from.w, to.h / from.h);
+  if (sl.pm && typeof palette === 'function') { const pl = palette(tk, sl.pm); tk = Object.assign({}, tk, {bg: pl.bg, fg: pl.fg, accent: pl.acc, muted: pl.mut}); }
   const cp = slideCopy(sl), photoFull = cp.photo && cp.photo.w >= from.w * 0.95 && cp.photo.h >= from.h * 0.95;
   const layout = !cp.photo ? 'none' : photoFull ? 'full' : 'auto';
   const copy = {kicker: cp.kicker, title: cp.title || 'Título', sub: cp.sub, button: cp.button};
@@ -2554,6 +2593,678 @@ async function dzAddLogo() {
 
 </script>
 <script>
+/* Modelos de layout: composições prontas (tipografia, foto + texto, camadas, promoção, estrutura, capas de vídeo).
+   Cada modelo monta a peça numa tela de 1080 de largura e escala para qualquer formato; cores e fontes vêm do estilo ativo (ou do Brand Kit).
+   Só a estrutura é recriada: textos, marcas e imagens dos posts de referência não entram. */
+const LAYOUTS = [];
+const LAYOUT_GROUPS = ['Tipografia', 'Foto + texto', 'Camadas', 'Promoção e evento', 'Estrutura', 'Capas de vídeo'];
+
+/* ---- fontes por tipo: o modelo pede "condensada", "serifada", "manuscrita"; o estilo/Brand Kit decide a família ---- */
+const COND = ['Anton', 'Bebas Neue', 'Oswald', 'Barlow Condensed', 'Fjalla One', 'Archivo Narrow', 'Big Shoulders Display'];
+const SERIF = ['DM Serif Display', 'Playfair Display', 'Abril Fatface', 'Lora', 'Merriweather', 'Source Serif 4', 'Instrument Serif', 'Cormorant Garamond'];
+function kindFamily(tk, kind) {
+  const h = tk.head.family;
+  if (/^Marca /.test(h) && !['script', 'body', 'mono'].includes(kind)) return h;     // fonte própria da marca manda
+  switch (kind) {
+    case 'cond': return COND.includes(h) ? h : 'Anton';
+    case 'serif': return SERIF.includes(h) ? h : 'DM Serif Display';
+    case 'script': return 'Caveat';
+    case 'marker': return 'Permanent Marker';
+    case 'body': return tk.body.family;
+    case 'black': return 'Archivo Black';
+    default: return h;
+  }
+}
+function fw(family, want) {
+  const m = FONT_META[family]; if (m === undefined) return want; if (m === '') return 400;
+  const ws = m.split(';').map(Number); return ws.reduce((a, b) => Math.abs(b - want) < Math.abs(a - want) ? b : a);
+}
+
+/* ---- paleta por modo: o mesmo modelo vira claro, escuro ou na cor da marca ---- */
+function palette(tk, mode) {
+  const acc = tk.accent, sec = tk.second || mixHex(acc, tk.fg, 0.45);
+  let bg, fg, mut, ac = acc;
+  if (mode === 'dark') { bg = lum(tk.bg) < 0.1 ? tk.bg : lum(tk.fg) < 0.14 ? tk.fg : mixHex('#0b0b10', acc, 0.12); fg = '#ffffff'; mut = mixHex(bg, '#ffffff', 0.62); }
+  else if (mode === 'accent') { bg = acc; fg = readable(acc); mut = mixHex(bg, fg, 0.7); ac = contrast(sec, bg) >= 2.2 ? sec : fg; }
+  else { bg = lum(tk.bg) > 0.55 ? tk.bg : '#f6f3ec'; fg = lum(tk.fg) < 0.35 ? tk.fg : '#141414'; mut = mixHex(bg, fg, 0.55); }
+  return {bg, fg, mut, acc: ac, sec, on: readable(ac), inv: readable(bg), rev: readable(fg), alt: mixHex(bg, fg, 0.08), line: mixHex(bg, fg, 0.18), grad2: mixHex(acc, sec, 0.5)};
+}
+/* aplica a paleta/fonte do papel à camada (também usado ao trocar o estilo da peça) */
+function themePal(L, tk, pal) {
+  const col = pal[L.pk] || pal.fg;
+  if (L.type === 'text') {
+    L.color = col;
+    if (L.fk) { L.family = kindFamily(tk, L.fk); L.weight = fw(L.family, L.fw || (L.fk === 'body' ? 400 : 800)); }
+    if (L.fixUp !== undefined) L.upper = L.fixUp;
+    L.emMode = L.em0 || tk.em.mode; L.emColor = pal.acc; L.emBg = pal.acc; L.emText = readable(pal.acc);
+  } else if (L.type === 'rect') {
+    if (!L.grad) L.fill = L.pk === 'none' ? '' : col;
+    if (L.pks) L.stroke = pal[L.pks];
+    if (L.grad && L.gk) L.grad = Object.assign({}, L.grad, {c1: pal[L.gk[0]] || pal.acc, c2: pal[L.gk[1]] || pal.sec});
+  }
+}
+
+/* ---- construção ---- */
+function layoutCtx(lay, tk, fmt, copy, brand) {
+  const W = 1080, k = fmt.w / 1080, V = Math.round(fmt.h / k), pal = palette(tk, lay.mode), m = 90;
+  const c = {W, H: V, tk, pal, m, cw: W - 2 * m, copy, brand, layers: []};
+  const push = L => { c.layers.push(L); return L; };
+  c.t = (role, content, o) => { const L = T(role, Object.assign({pk: 'fg', fk: 'body', x: m, w: c.cw, lh: 1.15}, o, {content: content == null ? '' : String(content)})); themeLayer(L, tk, pal); return push(L); };
+  c.r = (role, o) => { const L = RC(role, Object.assign({pk: 'fg'}, o)); themeLayer(L, tk, pal); return push(L); };
+  c.i = (role, o) => { const L = IM(role, Object.assign({}, o)); if (role === 'photo') themeLayer(L, tk, pal); if (role === 'cutout') L.fit = 'contain'; return push(L); };
+  c.h = L => layoutText(L).h;
+  /* gira um grupo de camadas em torno de um ponto (cada camada gira no próprio centro, então reposiciona) */
+  c.rotGroup = (layers, cx, cy, deg) => { const a = deg * Math.PI / 180, co = Math.cos(a), si = Math.sin(a);
+    layers.forEach(L => { const h = L.type === 'text' ? layoutText(L).h : L.h, mx = L.x + L.w / 2 - cx, my = L.y + h / 2 - cy; L.x = Math.round(cx + mx * co - my * si - L.w / 2); L.y = Math.round(cy + mx * si + my * co - h / 2); L.rot = deg; }); };
+  /* reduz o tamanho até caber na altura e na largura (qualquer fonte, qualquer tamanho de texto) */
+  c.fit = (L, maxH, minS, maxLines) => {
+    for (let n = 0; n < 40; n++) { const lay2 = layoutText(L), wide = lay2.lines.some(l => l.w > L.w + 1); if (lay2.h <= maxH && !wide && (!maxLines || lay2.lines.length <= maxLines)) break; if (L.size <= (minS || 16)) break; L.size = Math.max(minS || 16, Math.round(L.size * 0.94 * 10) / 10); }
+    return L;
+  };
+  c.stack = (items, y0, y1, valign, gap, x, w) => { stackPlace(items, x == null ? m : x, w || c.cw, y0, y1, valign || 'middle', gap == null ? 24 : gap); return items; };
+  c.bgRect = (o) => c.r('bgfill', Object.assign({x: 0, y: 0, w: W, h: V}, o));
+  return c;
+}
+/* texto padrão do modelo + o que o usuário preencheu */
+function layoutCopy(lay, copy) {
+  const s = JSON.parse(JSON.stringify(lay.sample || {})), out = Object.assign(s, Object.fromEntries(Object.entries(copy || {}).filter(([, v]) => v !== '' && v != null)));
+  if (!Array.isArray(out.items)) out.items = String(out.items || '').split('\n').filter(Boolean);
+  return out;
+}
+function buildLayoutSlide(lay, tk, copy, fmt, brand) {
+  if (isWide(fmt)) {   // formatos largos: monta em 4:5 e reorganiza por papel
+    const base = buildLayoutSlide(lay, tk, copy, FORMATS.feed45, brand);
+    return resizeSlide(base, FORMATS.feed45, fmt, tk);
+  }
+  const k = fmt.w / 1080, c = layoutCtx(lay, tk, fmt, layoutCopy(lay, copy), brand || '');
+  lay.build(c);
+  const s = {id: sid(), bg: c.pal.bg, pm: lay.mode, lay: lay.id, layers: c.layers};
+  if (k !== 1) scaleSlide(s, k, k);
+  return s;
+}
+function layoutSetFrom(lay, tk, copy, fmt, brand, name) {
+  const s = buildLayoutSlide(lay, tk, copy, fmt, brand);
+  return {id: uid('ds'), name: name || lay.name, format: {id: fmt.id, w: fmt.w, h: fmt.h}, tk: JSON.parse(JSON.stringify(tk)), slides: [s], created: new Date().toISOString(), updated: new Date().toISOString()};
+}
+const layoutById = id => LAYOUTS.find(l => l.id === id);
+
+</script>
+<script>
+/* Modelos · Tipografia */
+LAYOUTS.push(
+{id: 'cartaz-tipografico', name: 'Cartaz tipográfico', group: 'Tipografia', mode: 'light', tags: 'serviço autoridade frase impacto condensado', fields: ['title', 'sub', 'handle'],
+  sample: {title: 'Seu sonho precisa ser **VISTO.**', sub: 'Leve seu negócio a sério. Mostre o que você faz todos os dias.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    const t = c.t('title', copy.title, {fk: 'cond', fixUp: true, size: 190, lh: 0.94, em0: 'scale', emScale: 1.2, fw: 400}); c.fit(t, c.H * 0.5, 60);
+    const s = c.t('body', copy.sub, {fk: 'cond', fixUp: true, size: 46, lh: 1.12, w: c.cw * 0.86}); c.fit(s, 220, 24);
+    c.stack([t, s], c.H * 0.1, c.H - c.m - 80, 'middle', 36);
+    c.t('brand', copy.handle, {size: 24, pk: 'mut', y: c.H - c.m - 26, ls: 1}); }},
+{id: 'carrossel-texto', name: 'Carrossel de texto', group: 'Tipografia', mode: 'light', tags: 'educativo carrossel texto marca-texto autoridade', fields: ['title', 'sub', 'handle', 'kicker'],
+  sample: {title: 'Aprenda a ler as **métricas** dos seus anúncios', sub: '', kicker: 'Seu Nome', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.r('avatar', {shape: 'ellipse', x: c.m, y: c.m - 10, w: 84, h: 84, pk: 'acc'});
+    c.t('kicker', copy.kicker, {x: c.m + 104, y: c.m + 6, w: 600, size: 30, fk: 'body', fw: 700, pk: 'fg'});
+    c.t('muted', copy.handle, {x: c.m + 104, y: c.m + 44, w: 600, size: 24, pk: 'mut'});
+    const t = c.t('title', copy.title, {fk: 'head', size: 96, lh: 1.14, em0: 'bg', fw: 800, fixUp: false}); c.fit(t, c.H * 0.55, 44);
+    const items = [t]; if (copy.sub) items.push(c.t('body', copy.sub, {size: 42, pk: 'mut', lh: 1.35}));
+    c.stack(items, c.m + 120, c.H - c.m, 'middle', 36); }},
+{id: 'numero-gigante', name: 'Número gigante + título', group: 'Tipografia', mode: 'light', tags: 'lista dicas numero carrossel educativo', fields: ['num', 'title', 'sub', 'kicker', 'button'],
+  sample: {num: '13', title: 'DICAS PARA VENDER MAIS', sub: 'Todo empreendedor deveria conhecer', kicker: '01 / 15', button: 'Arraste →'},
+  build(c) { const {copy} = c, d = String(copy.num).split(''), first = d[0] || '1', rest = d.slice(1).join('');
+    c.t('muted', copy.kicker, {y: c.m - 30, w: 400, size: 28, pk: 'mut', ls: 2});
+    const a = c.t('display', first, {fk: 'head', fw: 900, size: 700, lh: 0.8, w: 1200, x: c.m - 30, y: c.m + 10, pk: 'acc', fixUp: false});
+    const aw = layoutText(Object.assign({}, a, {w: 4000})).lines[0].w;
+    if (rest) { c.t('display', rest, {fk: 'head', fw: 900, size: 700, lh: 0.8, w: 1200, x: c.m - 30 + aw * 0.86, y: c.m + 10, pk: 'sec', fixUp: false}); }
+    const t = c.t('title', copy.title, {fk: 'head', fw: 900, size: 104, lh: 1.02, y: c.H * 0.46, fixUp: true, em0: 'color'}); c.fit(t, c.H * 0.25, 40);
+    const s = c.t('body', copy.sub, {size: 46, y: t.y + c.h(t) + 20, fixUp: false, fk: 'body', fw: 700});
+    c.t('brand', copy.button, {x: c.m, y: c.H - c.m - 30, w: c.cw, size: 34, align: 'right', pk: 'fg', fw: 700}); }},
+{id: 'palavra-cortada', name: 'Palavra gigante cortada', group: 'Tipografia', mode: 'dark', tags: 'impacto foto título gigante', fields: ['title', 'sub', 'handle'],
+  sample: {title: 'VENDER,', sub: 'eu faria seu perfil assim, se fosse seu social media.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H});
+    c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: {c1: 'rgba(0,0,0,0.55)', c2: 'rgba(0,0,0,0.2)', a: 180}});
+    c.t('title', copy.title, {fk: 'cond', fixUp: true, size: 470, lh: 0.9, w: 4000, x: -40, y: c.H * 0.06, fw: 400, pk: 'fg'});
+    c.t('body', copy.sub, {w: 520, x: c.m, y: c.H * 0.5, size: 44, fw: 700, lh: 1.2});
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 24, pk: 'mut'}); }},
+{id: 'manifesto-linhas', name: 'Manifesto em linhas', group: 'Tipografia', mode: 'light', tags: 'poema valores manifesto texto', fields: ['title', 'items', 'sub', 'handle'],
+  sample: {title: 'Nunca foi sorte, sempre foi trabalho.', items: 'Se alguém bateu o olho e entendeu rápido…\nSe alguém lembrou depois que viu…\nSe alguém leu e mandou uma mensagem…\nSe alguém confiou até sem conhecer…', sub: 'o trabalho cumpriu seu dever.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    const t = c.t('title', copy.title, {fk: 'script', size: 96, align: 'center', pk: 'acc', lh: 1.05, fw: 700, fixUp: false}); c.fit(t, 330, 40);
+    const body = c.t('body', copy.items.join('\n'), {size: 34, align: 'center', pk: 'mut', lh: 1.9, fk: 'body'}); c.fit(body, c.H * 0.4, 20);
+    const end = c.t('body', copy.sub, {fk: 'script', size: 84, align: 'center', pk: 'acc', lh: 1.1, fw: 700}); c.fit(end, 260, 36);
+    c.stack([t, body, end], c.m * 0.9, c.H - c.m - 40, 'middle', 56);
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'texto-repetido', name: 'Texto repetido em degradê', group: 'Tipografia', mode: 'dark', tags: 'minimalista tipografia foco', fields: ['title', 'handle'],
+  sample: {title: 'VISUALMENTE.', handle: '@seunegocio'},
+  build(c) { const {copy} = c, n = 9, step = (c.H - 2 * c.m - 80) / n;
+    for (let i = 0; i < n; i++) { const d = Math.abs(i - 4) / 4, mid = i === 4;
+      c.t('title', copy.title, {fk: 'body', size: 70, ls: 10, fixUp: true, align: 'center', y: c.m + 20 + i * step, pk: mid ? 'fg' : 'mut', opacity: mid ? 1 : 0.28 + 0.55 * (1 - d), fw: mid ? 800 : 400, w: c.cw}); }
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'texto-espalhado', name: 'Palavras soltas na grade', group: 'Tipografia', mode: 'dark', tags: 'textura tipografia ritmo minimalista', fields: ['title', 'sub', 'handle'],
+  sample: {title: 'Todo design parece fácil depois que fica pronto', sub: 'Tem detalhes que ninguém nunca vai notar. ', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.t('body', Array.from({length: 40}, () => copy.sub).join(''), {size: 15, lh: 1.25, pk: 'mut', opacity: 0.5, x: 20, w: c.W - 40, y: 20, ls: 0});
+    String(copy.title).split(/\s+/).forEach((w, i, a) => { c.t('title', w, {fk: 'body', fw: 700, size: 30, ls: 2, fixUp: true, w: 360, x: c.W * 0.1 + (i % 3) * 270, y: c.H * 0.16 + i * (c.H * 0.64 / Math.max(1, a.length)), pk: i % 4 === 2 ? 'acc' : 'fg'}); });
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'caderno-manuscrito', name: 'Caderno manuscrito', group: 'Tipografia', mode: 'light', tags: 'manuscrito humano descontraído educativo', fields: ['title', 'handle'],
+  sample: {title: 'Palavras proibidas no **ChatGPT**', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.bgRect({pk: 'alt'});
+    for (let y = 150; y < c.H - 40; y += 74) c.r('line', {x: 0, y, w: c.W, h: 3, pk: 'line'});
+    c.r('margin', {x: 150, y: 0, w: 3, h: c.H, pk: 'acc', opacity: 0.55});
+    const t = c.t('title', copy.title, {fk: 'script', size: 150, lh: 1.05, x: 190, w: 840, fw: 700, em0: 'underline', pk: 'fg', fixUp: false}); c.fit(t, c.H * 0.62, 50);
+    c.stack([t], c.H * 0.12, c.H * 0.85, 'middle', 0, 190, 840);
+    c.t('brand', copy.handle, {x: 190, y: c.H - c.m - 14, size: 24, pk: 'mut'}); }},
+{id: 'degrade-titulo', name: 'Degradê com título no canto', group: 'Tipografia', mode: 'accent', tags: 'degradê simples titulo moderno grão', fields: ['title', 'handle'],
+  sample: {title: 'Lindos degradês', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.bgRect({pk: 'none', grad: {c1: c.pal.bg, c2: c.pal.grad2, a: 160}, gk: ['bg', 'grad2']});
+    c.bgRect({pk: 'none', grain: 0.1});
+    const t = c.t('title', copy.title, {fk: 'head', size: 170, lh: 1.02, fw: 800, w: 760, fixUp: false}); c.fit(t, c.H * 0.4, 60);
+    t.y = c.H - c.m - 110 - c.h(t);
+    c.t('brand', copy.handle, {y: c.H - c.m - 40, size: 28, pk: 'fg', fw: 600}); }},
+{id: 'pergunta-centralizada', name: 'Pergunta centralizada', group: 'Tipografia', mode: 'light', tags: 'pergunta engajamento simples carrossel', fields: ['title', 'handle'],
+  sample: {title: 'Demora tanto assim pra fazer um logo?', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.bgRect({pk: 'alt'});
+    const t = c.t('title', copy.title, {fk: 'head', size: 88, lh: 1.12, align: 'center', fw: 800, fixUp: false, em0: 'bold'}); c.fit(t, c.H * 0.5, 40);
+    c.stack([t], c.m, c.H - c.m, 'middle', 0);
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 24, pk: 'mut', align: 'center'}); }},
+{id: 'pergunta-imagem-resposta', name: 'Pergunta, imagem e resposta', group: 'Tipografia', mode: 'dark', tags: 'meme comparação humor print', fields: ['title', 'sub', 'kicker', 'handle'],
+  sample: {title: 'Há quanto tempo você trabalha com isso?', kicker: 'eu:', sub: 'há muuuito tempo…', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    const q = c.t('title', copy.title, {fk: 'head', size: 72, lh: 1.1, align: 'center', fw: 700, fixUp: false}); c.fit(q, 260, 36); q.y = c.m + 10;
+    const k = c.t('kicker', copy.kicker, {size: 46, align: 'center', pk: 'mut', fixUp: false, fw: 700, y: q.y + c.h(q) + 40});
+    const iy = k.y + 90; c.i('thumb', {x: c.m + 50, y: iy, w: c.cw - 100, h: Math.round(c.H * 0.32), radius: 14, brief: 'Print ou imagem de apoio'});
+    c.t('body', copy.sub, {size: 54, align: 'center', pk: 'mut', y: iy + Math.round(c.H * 0.32) + 40, fw: 600});
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'serif-minimal', name: 'Frase serifada minimalista', group: 'Tipografia', mode: 'accent', tags: 'elegante frase minimalista reflexão', fields: ['title', 'sub'],
+  sample: {title: 'Você gostava do que criou.', sub: 'Até olhar as curtidas.'},
+  build(c) { const {copy} = c;
+    const t = c.t('title', copy.title, {fk: 'serif', size: 62, lh: 1.3, fw: 400, w: 780, fixUp: false}), s = c.t('body', copy.sub, {fk: 'serif', size: 62, lh: 1.3, fw: 400, w: 780, fixUp: false});
+    c.stack([t, s], c.m, c.H - c.m, 'middle', 0); }},
+{id: 'bloco-vertical', name: 'Palavra vertical entre bordas', group: 'Tipografia', mode: 'dark', tags: 'impacto motivacional vertical condensado', fields: ['title', 'kicker', 'items', 'handle'],
+  sample: {title: 'IDEIAS', kicker: 'Faça suas', items: 'Confie em você\nExperimente\nMude se precisar\nLeve até o fim', handle: '@seunegocio'},
+  build(c) { const {copy} = c, word = String(copy.title).replace(/\s+/g, '').split('').join('\n');
+    c.t('kicker', copy.kicker, {size: 34, ls: 8, align: 'center', fixUp: true, pk: 'fg', fw: 700, y: c.m - 20});
+    const w = c.t('title', word, {fk: 'cond', size: 300, lh: 0.86, align: 'center', pk: 'acc', fixUp: true, fw: 400, x: 240, w: 600}); c.fit(w, c.H - 2 * c.m - 80, 60); w.y = c.m + 40;
+    const edge = (txt, cx, rot) => c.t('muted', txt, {size: 30, ls: 7, fixUp: true, align: 'center', pk: 'fg', fw: 700, w: 760, x: cx - 380, y: c.H / 2 - 20, rot});
+    copy.items.slice(0, 4).forEach((it, i) => edge(it, i % 2 ? 1015 - (i > 1 ? 70 : 0) : 65 + (i > 1 ? 70 : 0), i % 2 ? 90 : -90));
+    c.t('brand', copy.handle, {y: c.H - c.m + 6, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'palavra-grao', name: 'Palavra desfocada com grão', group: 'Tipografia', mode: 'dark', tags: 'urgência impacto desfoque grão', fields: ['title', 'kicker', 'sub'],
+  sample: {title: 'UR\nGEN\nTE', kicker: 'O urgente não deveria…', sub: '…ser maior que a gente.'},
+  build(c) { const {copy} = c;
+    c.t('title', copy.title, {fk: 'cond', size: 400, lh: 0.84, align: 'left', pk: 'acc', fixUp: true, fw: 400, w: 1000, x: 40, y: c.H * 0.16, blur: 5, opacity: 0.95}); c.fit(c.layers[c.layers.length - 1], c.H * 0.7, 120);
+    c.bgRect({pk: 'none', grain: 0.55});
+    c.t('kicker', copy.kicker, {size: 38, y: c.m, fw: 600, pk: 'fg', fixUp: false});
+    c.t('body', copy.sub, {size: 38, y: c.H - c.m - 60, align: 'right', fw: 600, pk: 'fg'}); }},
+{id: 'serif-balao', name: 'Número serifado com balão', group: 'Tipografia', mode: 'accent', tags: 'lista dicas número serifado balão', fields: ['num', 'title', 'sub'],
+  sample: {num: '30', title: 'códigos para usar melhor a ferramenta', sub: 'guia rápido'},
+  build(c) { const {copy} = c;
+    c.t('title', copy.num, {fk: 'serif', size: 640, lh: 0.8, fw: 400, w: 1000, x: c.m - 30, y: c.m - 10, fixUp: false, pk: 'fg'});
+    c.r('bubble', {shape: 'ellipse', x: 260, y: c.H * 0.46, w: 760, h: 520, pk: 'fg'});
+    c.r('bubble', {x: 800, y: c.H * 0.46 + 430, w: 70, h: 110, pk: 'fg', rot: 25, radius: 8});
+    const t = c.t('body', copy.title, {fk: 'head', size: 66, fw: 700, pk: 'rev', align: 'center', x: 340, w: 600, lh: 1.15, fixUp: false}); c.fit(t, 330, 30); t.y = c.H * 0.46 + (520 - c.h(t)) / 2;
+    c.t('brand', copy.sub, {x: c.m, y: c.H - c.m - 30, size: 30, pk: 'fg', fw: 600}); }},
+{id: 'preto-branco-manuscrita', name: 'Título forte com palavra manuscrita', group: 'Tipografia', mode: 'light', tags: 'contraste manuscrita destaque cor', fields: ['title', 'kicker', 'handle'],
+  sample: {title: 'Preto e Branco', kicker: '+ Cor de Destaque', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    const t = c.t('title', copy.title, {fk: 'black', size: 160, lh: 1, fw: 400, fixUp: false, align: 'left', y: c.m - 20}); c.fit(t, 330, 50);
+    const k = c.t('kicker', copy.kicker, {fk: 'script', size: 120, pk: 'acc', fw: 700, fixUp: false, rot: -3, y: t.y + c.h(t) + 6}); c.fit(k, 160, 40);
+    const ph = c.i('photo', {x: 0, y: k.y + c.h(k) + 30, w: c.W, h: c.H - (k.y + c.h(k) + 30)}); ph.filter = 'grayscale(1)';
+    c.t('brand', copy.handle, {y: c.H - c.m, size: 22, pk: 'on', x: c.m + 400, w: 500, align: 'right'}); }}
+);
+
+</script>
+<script>
+/* Modelos · Foto + texto e Camadas (texto atrás do sujeito) */
+const SHADE = (a, b) => ({c1: 'rgba(0,0,0,' + a + ')', c2: 'rgba(0,0,0,' + b + ')', a: 180});
+LAYOUTS.push(
+{id: 'poster-campanha', name: 'Pôster de campanha com produto', group: 'Foto + texto', mode: 'accent', tags: 'produto campanha cartaz título topo', fields: ['title', 'sub', 'handle'],
+  sample: {title: 'Precisamos conversar sobre isso!', sub: '', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    const t = c.t('title', copy.title, {fk: 'cond', size: 170, lh: 0.95, align: 'center', fixUp: true, fw: 400}); c.fit(t, c.H * 0.3, 50); t.y = c.m - 10;
+    c.i('cutout', {x: 120, y: t.y + c.h(t) + 10, w: c.W - 240, h: c.H - (t.y + c.h(t)) - c.m - 90, brief: 'Produto recortado (PNG sem fundo)'});
+    if (copy.sub) c.t('body', copy.sub, {size: 40, align: 'center', y: c.H - c.m - 90, pk: 'fg', fw: 700});
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 24, align: 'center', pk: 'fg'}); }},
+{id: 'titulo-pequeno-palavra-enorme', name: 'Título pequeno + palavra enorme', group: 'Foto + texto', mode: 'dark', tags: 'nicho profissão chamada foto', fields: ['kicker', 'title', 'sub', 'handle'],
+  sample: {kicker: 'Se você é', title: 'DJ,', sub: 'esta publicação foi feita para você.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: SHADE(0.55, 0.05)});
+    const k = c.t('kicker', copy.kicker, {size: 64, fk: 'head', fw: 700, fixUp: false, pk: 'fg'}), t = c.t('title', copy.title, {fk: 'head', size: 360, fw: 900, pk: 'acc', lh: 0.9, fixUp: true}); c.fit(t, 380, 90);
+    const s = c.t('body', copy.sub, {size: 46, w: 640, fw: 600, lh: 1.2});
+    c.stack([k, t, s], c.m, c.H * 0.6, 'top', 8);
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 24, pk: 'mut'}); }},
+{id: 'foto-selo-titulo', name: 'Foto com selo e título', group: 'Foto + texto', mode: 'dark', tags: 'tutorial técnica foto selo título', fields: ['kicker', 'title', 'handle'],
+  sample: {kicker: 'DICA', title: 'Dupla exposição criativa', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: SHADE(0.0, 0.8)});
+    const kk = c.t('kicker', copy.kicker, {size: 30, fixUp: true, fw: 800, pk: 'on', ls: 3, w: 400, x: c.m + 26});
+    const kw = layoutText(Object.assign({}, kk, {w: 4000})).lines[0].w;
+    const t = c.t('title', copy.title, {fk: 'head', size: 120, lh: 1.04, fw: 800, fixUp: false}); c.fit(t, c.H * 0.3, 50);
+    const ty = c.H - c.m - 90 - c.h(t); t.y = ty;
+    c.r('chip', {x: c.m, y: ty - 78, w: kw + 52, h: 54, radius: 12, pk: 'acc'}); kk.y = ty - 78 + 11; kk.w = kw + 8; c.layers.push(c.layers.splice(c.layers.indexOf(kk), 1)[0]);
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 24, pk: 'fg'}); }},
+{id: 'foto-lista-numerada', name: 'Foto com lista numerada', group: 'Foto + texto', mode: 'dark', tags: 'lista foto serifado numerada', fields: ['title', 'items', 'handle'],
+  sample: {title: 'Nenhum empreendedor tem os 6:', items: 'Tempo livre\nSono em dia\nSaúde em dia\nLucro estável\nEquipe pronta\nAgenda cheia', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: {c1: 'rgba(0,0,0,0.7)', c2: 'rgba(0,0,0,0.05)', a: 270}});
+    const t = c.t('title', copy.title, {fk: 'serif', size: 100, lh: 1.04, fw: 400, w: 520, fixUp: false}); c.fit(t, 360, 44);
+    const l = c.t('body', copy.items.map((x, i) => (i + 1) + '- ' + x).join('\n'), {size: 40, lh: 1.34, fw: 700, w: 520}); c.fit(l, 520, 22);
+    c.stack([t, l], c.H * 0.3, c.H - c.m - 40, 'middle', 24);
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 24, pk: 'mut'}); }},
+{id: 'duas-pontas-curva', name: 'Duas pontas com linha curva', group: 'Foto + texto', mode: 'dark', tags: 'foto institucional título dois níveis', fields: ['kicker', 'title', 'handle'],
+  sample: {kicker: 'Bom design', title: 'Design bonito vende.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: SHADE(0.35, 0.55)});
+    c.r('curve', {shape: 'ellipse', x: 150, y: c.H * 0.2, w: 1100, h: c.H * 0.62, pk: 'none', pks: 'fg', stroke: '#fff', strokeW: 3, opacity: 0.8});
+    c.t('kicker', copy.kicker, {size: 62, fw: 700, w: 520, fk: 'head', fixUp: false, pk: 'fg', y: c.m});
+    const t = c.t('title', copy.title, {fk: 'head', size: 118, fw: 800, align: 'right', lh: 1.02, x: 380, w: 610, fixUp: false}); c.fit(t, 360, 44); t.y = c.H - c.m - 80 - c.h(t);
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 24, pk: 'mut', align: 'right', x: 380, w: 610}); }},
+{id: 'foto-topo-titulo-contador', name: 'Título no topo + foto + contador', group: 'Foto + texto', mode: 'light', tags: 'carrossel capa foto contador explicativo', fields: ['title', 'kicker', 'button', 'handle'],
+  sample: {title: 'Seu conteúdo desperta **interesse?**', kicker: 'Conteúdo que conecta', button: 'Arraste para o lado →', handle: '01/04'},
+  build(c) { const {copy} = c;
+    c.t('muted', copy.kicker, {size: 26, pk: 'mut', y: c.m - 30, fw: 600});
+    const t = c.t('title', copy.title, {fk: 'head', size: 88, fw: 800, lh: 1.08, em0: 'color', y: c.m + 20, fixUp: false}); c.fit(t, 300, 40);
+    const y = t.y + c.h(t) + 30, h = c.H - y - c.m - 70;
+    c.i('photo', {x: c.m, y, w: c.cw, h, radius: 20});
+    c.t('muted', copy.handle, {y: y + h + 22, size: 26, pk: 'mut', fw: 700, w: 300});
+    c.t('muted', copy.button, {x: c.m + 300, w: c.cw - 300, y: y + h + 22, size: 26, pk: 'mut', align: 'right', fw: 700}); }},
+{id: 'titulo-lateral', name: 'Título condensado na lateral', group: 'Foto + texto', mode: 'dark', tags: 'foto pessoa depoimento frase lateral', fields: ['title', 'sub'],
+  sample: {title: 'Quem tem **fome** não espera a oportunidade sentado.', sub: ''},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: {c1: 'rgba(0,0,0,0.05)', c2: 'rgba(0,0,0,0.7)', a: 270}});
+    const t = c.t('title', copy.title, {fk: 'cond', size: 110, lh: 1, align: 'right', x: 560, w: 440, fixUp: true, em0: 'color', fw: 400}); c.fit(t, c.H * 0.6, 40);
+    const items = [t]; if (copy.sub) items.push(c.t('body', copy.sub, {x: 560, w: 440, size: 36, align: 'right'}));
+    c.stack(items, c.m, c.H - c.m, 'middle', 24, 560, 440); }},
+{id: 'retrato-anotacoes', name: 'Retrato com anotações', group: 'Foto + texto', mode: 'dark', tags: 'autoridade anotações curadoria retrato', fields: ['title', 'sub', 'items', 'handle'],
+  sample: {title: 'Conheça a Curadoria', sub: 'Meu olhar sobre o mercado, na sua tela, de segunda a sexta.', items: 'tom de voz\ncores e contraste\nmenos é mais\nclareza primeiro', handle: '@seunegocio'},
+  build(c) { const {copy} = c, pos = [[70, 0.12], [740, 0.1], [60, 0.36], [770, 0.34]];
+    c.i('cutout', {x: 250, y: c.H * 0.06, w: 580, h: c.H * 0.6});
+    copy.items.slice(0, 4).forEach((it, i) => { const [x, f] = pos[i]; c.t('body', it, {fk: 'script', size: 38, lh: 1.1, w: 280, x, y: c.H * f, fw: 700, align: i % 2 ? 'left' : 'right', pk: 'fg'}); c.r('line', {x: i % 2 ? x - 40 : x + 290, y: c.H * f + 20, w: 40, h: 3, pk: 'acc'}); });
+    const t = c.t('title', copy.title, {fk: 'head', size: 108, fw: 800, fixUp: false, lh: 1.05}), s = c.t('body', copy.sub, {size: 42, pk: 'mut', w: 780, lh: 1.25});
+    c.stack([t, s], c.H * 0.7, c.H - c.m - 20, 'bottom', 18);
+    c.t('brand', copy.handle, {y: c.H - c.m - 4, size: 22, pk: 'mut'}); }},
+{id: 'titulo-topo-palavra-rodape', name: 'Frase com palavra gigante no rodapé', group: 'Foto + texto', mode: 'dark', tags: 'foto plateia resultado ação chamada', fields: ['kicker', 'title', 'sub', 'label'],
+  sample: {kicker: 'Conhecimento', title: 'só vira RESULTADO', sub: 'quando você', label: 'AGE.'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: {c1: 'rgba(0,0,0,0.75)', c2: 'rgba(0,0,0,0.78)', a: 0}});
+    const k = c.t('kicker', copy.kicker, {fk: 'cond', size: 74, align: 'center', fixUp: true, fw: 400}), t = c.t('title', copy.title, {fk: 'cond', size: 130, align: 'center', fixUp: true, lh: 1, fw: 400}); c.fit(t, 230, 50);
+    c.stack([k, t], c.m, c.H * 0.3, 'top', 0);
+    const s = c.t('body', copy.sub, {size: 40, ls: 8, align: 'center', fixUp: true, fw: 600}), l = c.t('title', copy.label, {fk: 'cond', size: 330, align: 'center', pk: 'acc', fixUp: true, fw: 400, lh: 0.9}); c.fit(l, 330, 80);
+    c.stack([s, l], c.H * 0.68, c.H - c.m, 'bottom', 0); }},
+{id: 'espaco-negativo', name: 'Título no espaço negativo', group: 'Foto + texto', mode: 'dark', tags: 'foto paisagem minimal sutil', fields: ['title', 'handle'],
+  sample: {title: 'a magia do **espaço negativo.**', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H});
+    const t = c.t('title', copy.title, {fk: 'head', size: 64, fw: 500, lh: 1.15, w: 420, y: c.m, em0: 'bold', fixUp: false}); c.fit(t, 300, 28);
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 24, pk: 'fg', opacity: 0.85}); }},
+{id: 'sujeito-deslocado', name: 'Sujeito deslocado + título', group: 'Foto + texto', mode: 'light', tags: 'respiro minimal pessoa movimento', fields: ['title', 'sub', 'handle'],
+  sample: {title: 'Você não precisa centralizar sempre!', sub: 'O que muda no design quando você tira o conteúdo do centro.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.i('cutout', {x: 480, y: c.H * 0.38, w: 600, h: c.H * 0.62});
+    const t = c.t('title', copy.title, {fk: 'head', size: 84, fw: 800, lh: 1.08, w: 700, fixUp: false}); c.fit(t, 330, 36);
+    const s = c.t('body', copy.sub, {size: 36, w: 560, pk: 'mut', lh: 1.3});
+    c.stack([t, s], c.m - 20, c.H * 0.45, 'top', 20);
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 24, pk: 'mut'}); }},
+{id: 'foto-cta-comente', name: 'Foto com chamada para comentar', group: 'Foto + texto', mode: 'dark', tags: 'engajamento lead comentário foto cta', fields: ['title', 'kicker', 'button', 'handle'],
+  sample: {title: 'Um ensaio fotográfico', kicker: 'Com a sua cara', button: 'QUERO MEU ENSAIO', handle: 'Comente'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: SHADE(0.5, 0.35)});
+    const t = c.t('title', copy.title, {fk: 'cond', size: 150, lh: 0.95, fixUp: true, fw: 400, pk: 'fg', w: 700}); c.fit(t, 420, 50);
+    const k = c.t('muted', copy.kicker, {size: 34, fw: 600, pk: 'fg', fixUp: true, ls: 3, w: 700});
+    c.stack([t, k], c.m, c.H * 0.45, 'top', 12);
+    const bw = 520, bx = c.W - c.m - bw, by = c.H - c.m - 230; c.r('cta-fill', {x: bx, y: by, w: bw, h: 190, radius: 8, pk: 'acc'});
+    c.t('muted', copy.handle, {x: bx + 24, w: bw - 48, y: by + 22, size: 26, pk: 'on', fixUp: true, ls: 4, fw: 700}); const b = c.t('cta-text', copy.button, {x: bx + 24, w: bw - 48, y: by + 66, size: 74, fk: 'cond', fixUp: true, fw: 400, pk: 'on', lh: 1}); c.fit(b, 100, 28); }},
+{id: 'arco-janela', name: 'Foto em arco', group: 'Foto + texto', mode: 'dark', tags: 'elegante editorial arco moldura', fields: ['title', 'sub', 'kicker', 'handle'],
+  sample: {kicker: 'MANIFESTO', title: 'Não existe estética certa. **Existe a sua.**', sub: 'Seu estilo diz quem você é antes de qualquer palavra.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 190, y: c.H * 0.2, w: 700, h: c.H * 0.62, shape: 'arch'});
+    c.t('kicker', copy.kicker, {size: 24, ls: 8, align: 'center', fixUp: true, pk: 'mut', y: c.m - 30});
+    const t = c.t('title', copy.title, {fk: 'cond', size: 104, lh: 1, align: 'center', fixUp: true, em0: 'color', fw: 400, y: c.m + 20}); c.fit(t, c.H * 0.17, 40);
+    c.t('body', copy.sub, {size: 30, align: 'center', pk: 'mut', y: c.H * 0.84, w: 760, x: 160, lh: 1.3});
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'selo-inclinado', name: 'Selo inclinado sobre a foto', group: 'Foto + texto', mode: 'dark', tags: 'pack oferta adesivo categoria foto', fields: ['title', 'kicker', 'handle'],
+  sample: {kicker: 'SUPER PACK', title: 'MÚSICA', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: SHADE(0, 0.55)});
+    const y = c.H * 0.66; c.r('sticker', {x: 130, y, w: 820, h: 210, radius: 20, pk: 'acc'});
+    const k = c.t('muted', copy.kicker, {size: 38, ls: 4, fixUp: true, fw: 800, pk: 'on', x: 170, w: 740, y: y + 16, align: 'left'});
+    const t = c.t('title', copy.title, {fk: 'cond', size: 150, fixUp: true, fw: 400, pk: 'on', x: 170, w: 740, y: y + 62, lh: 1}); c.fit(t, 140, 40, 1);
+    c.rotGroup([c.layers[c.layers.length - 3], k, t], 540, y + 105, -6);
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 24, pk: 'fg', align: 'center'}); }},
+{id: 'split-foto-bloco', name: 'Foto no topo + bloco de texto', group: 'Foto + texto', mode: 'dark', tags: 'prompt receita passo texto divisão', fields: ['kicker', 'title', 'sub', 'handle'],
+  sample: {kicker: 'PASSO A PASSO', title: 'Como organizar seu conteúdo', sub: 'Um roteiro simples para postar com constância, sem se perder no meio do caminho.', handle: '@seunegocio'},
+  build(c) { const {copy} = c, ph = Math.round(c.H * 0.52);
+    c.i('photo', {x: 0, y: 0, w: c.W, h: ph});
+    const k = c.t('kicker', copy.kicker, {size: 24, ls: 6, pk: 'acc', fixUp: true, fw: 800}), t = c.t('title', copy.title, {fk: 'head', size: 72, lh: 1.08, fw: 800, fixUp: false}), s = c.t('body', copy.sub, {size: 34, pk: 'mut', lh: 1.35});
+    c.fit(t, 200, 34); c.fit(s, 200, 22); c.stack([k, t, s], ph + 40, c.H - c.m - 30, 'top', 18);
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 22, pk: 'mut'}); }},
+{id: 'wordmark-foto', name: 'Wordmark fino sobre a foto', group: 'Foto + texto', mode: 'dark', tags: 'elegante premium minimalista foto', fields: ['title', 'sub'],
+  sample: {title: 'Atelier', sub: 'arraste para o lado'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: SHADE(0, 0.45)});
+    const t = c.t('title', copy.title, {fk: 'serif', size: 260, align: 'center', fw: 400, fixUp: true, lh: 1, ls: 6, opacity: 0.96}); c.fit(t, 320, 60);
+    t.y = c.H * 0.62; c.t('brand', copy.sub, {y: c.H - c.m - 26, size: 26, align: 'center', pk: 'fg', ls: 2}); }},
+
+/* ---- Camadas: texto atrás do sujeito recortado ---- */
+{id: 'palavra-atras-sujeito', name: 'Palavra gigante atrás do sujeito', group: 'Camadas', mode: 'accent', tags: 'camadas sujeito recortado destaque', fields: ['title', 'sub', 'handle'],
+  sample: {title: 'FOCO', sub: 'Como usar o desfoque em imagens e tipografias para criar movimento e profundidade.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.t('title', copy.title, {fk: 'black', size: 470, lh: 1, w: 1300, x: -110, y: c.H * 0.34, align: 'center', fw: 400, fixUp: true, pk: 'fg', blur: 9, opacity: 0.92});
+    c.i('cutout', {x: 90, y: c.H * 0.04, w: 900, h: c.H * 0.76});
+    const s = c.t('body', copy.sub, {size: 46, fw: 700, w: 640, lh: 1.2}); c.fit(s, 240, 26); s.y = c.H - c.m - 30 - c.h(s);
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 22, pk: 'fg', x: 740, w: 250, align: 'right'}); }},
+{id: 'letras-empilhadas', name: 'Letras empilhadas atrás do sujeito', group: 'Camadas', mode: 'dark', tags: 'camadas vertical impacto sujeito', fields: ['title', 'sub', 'handle'],
+  sample: {title: 'MARCA', sub: 'Inspiração diária', handle: '@seunegocio'},
+  build(c) { const {copy} = c, word = String(copy.title).replace(/\s+/g, '').split('').join('\n');
+    const w = c.t('display', word, {fk: 'black', size: 320, lh: 0.8, x: 80, w: 500, fw: 400, fixUp: true, pk: 'fg'}); c.fit(w, c.H - 2 * c.m, 60);
+    w.y = c.m;
+    c.i('cutout', {x: 250, y: c.H * 0.05, w: 800, h: c.H * 0.86});
+    c.t('body', copy.sub, {fk: 'script', size: 96, rot: -4, pk: 'acc', fw: 700, x: 450, w: 600, y: c.H - c.m - 190, align: 'left', fixUp: false, lh: 1});
+    c.t('brand', copy.handle, {y: c.H - c.m - 26, size: 24, pk: 'fg', x: 450, w: 500}); }},
+{id: 'pessoa-na-frente', name: 'Pessoa na frente da palavra', group: 'Camadas', mode: 'light', tags: 'camadas pack editorial sujeito', fields: ['kicker', 'title', 'handle'],
+  sample: {kicker: 'SUPER PACK', title: 'IDEIAS\nPRONTAS', handle: 'arraste para o lado'},
+  build(c) { const {copy} = c;
+    c.t('kicker', copy.kicker, {size: 26, ls: 6, align: 'center', pk: 'fg', fixUp: true, fw: 700, y: c.m - 30});
+    const t = c.t('title', copy.title, {fk: 'cond', size: 380, lh: 0.88, align: 'center', pk: 'fg', fixUp: true, fw: 400, y: c.m + 20}); c.fit(t, c.H * 0.62, 90);
+    c.i('cutout', {x: 160, y: c.H * 0.1, w: 760, h: c.H * 0.88});
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 24, pk: 'fg', align: 'center'}); }},
+{id: 'objeto-entre-palavras', name: 'Objeto entre duas palavras', group: 'Camadas', mode: 'light', tags: 'produto pack objeto centro palavras', fields: ['kicker', 'title', 'sub', 'handle'],
+  sample: {kicker: 'SUPER PACK DE', title: 'PROMPTS', sub: 'FILTROS\nPARA FOTOS', handle: '15 filtros que você vai querer testar'},
+  build(c) { const {copy} = c;
+    c.t('kicker', copy.kicker, {size: 30, ls: 5, align: 'center', pk: 'fg', fixUp: true, fw: 700, y: c.m - 30});
+    const t = c.t('title', copy.title, {fk: 'cond', size: 330, lh: 0.9, align: 'center', pk: 'fg', fixUp: true, fw: 400, y: c.m + 10}); c.fit(t, 300, 80);
+    const s = c.t('body', copy.sub, {fk: 'cond', size: 200, lh: 0.92, align: 'center', pk: 'fg', fixUp: true, fw: 400}); c.fit(s, 400, 60); s.y = c.H - c.m - 50 - c.h(s);
+    c.i('cutout', {x: 200, y: t.y + c.h(t) - 40, w: 680, h: s.y - (t.y + c.h(t)) + 80});
+    c.t('brand', copy.handle, {y: c.H - c.m - 14, size: 22, pk: 'mut', align: 'center'}); }}
+);
+
+</script>
+<script>
+/* Modelos · Promoção e evento, Estrutura, Capas de vídeo */
+const SH = (a, b, ang) => ({c1: 'rgba(0,0,0,' + a + ')', c2: 'rgba(0,0,0,' + b + ')', a: ang == null ? 180 : ang});
+LAYOUTS.push(
+/* ---- Promoção e evento ---- */
+{id: 'promo-faixas', name: 'Promoção com faixas de aviso', group: 'Promoção e evento', mode: 'accent', tags: 'oferta feirão liquidação campanha número', fields: ['num', 'title', 'sub', 'kicker', 'handle'],
+  sample: {kicker: 'FEIRÃO', num: '100', title: 'HORAS DE OFERTAS', sub: 'Aguardem!', handle: '#seunegocio'},
+  build(c) { const {copy} = c, band = (y, rot) => { const r = c.r('band', {x: -60, y, w: c.W + 120, h: 86, pk: 'fg'}), q = c.t('muted', Array(8).fill(copy.kicker).join('   ✦   '), {size: 40, fixUp: true, fw: 800, ls: 4, pk: 'rev', x: -40, w: 3000, y: y + 20}); c.rotGroup([r, q], c.W / 2, y + 43, rot); };
+    band(c.H * 0.08, -4); band(c.H * 0.86, -4);
+    c.i('cutout', {x: 520, y: c.H * 0.16, w: 520, h: c.H * 0.62});
+    const n = c.t('display', copy.num, {fk: 'cond', size: 520, lh: 0.85, fw: 400, w: 800, x: c.m - 20, y: c.H * 0.2, pk: 'fg', fixUp: true}); c.fit(n, 520, 100);
+    const t = c.t('title', copy.title, {fk: 'cond', size: 110, lh: 1, fw: 400, w: 700, pk: 'fg', fixUp: true}); c.fit(t, 230, 40);
+    c.stack([t, c.t('body', copy.sub, {size: 50, fw: 800, fixUp: true, pk: 'fg'})], c.H * 0.58, c.H * 0.84, 'top', 8);
+    c.t('brand', copy.handle, {y: c.H * 0.835 - 60, size: 28, pk: 'fg', fw: 700, x: c.m, w: 500}); }},
+{id: 'contagem-regressiva', name: 'Contagem regressiva', group: 'Promoção e evento', mode: 'dark', tags: 'evento lançamento urgência data local', fields: ['title', 'kicker', 'sub', 'label', 'handle'],
+  sample: {title: 'É AMANHÃ', kicker: 'Seu evento', sub: 'DIAS 17, 18 E 19 DE SETEMBRO', label: 'CIDADE · ESTADO', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H * 0.7}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: SH(0.0, 0.92, 180)});
+    c.t('kicker', copy.kicker, {size: 30, ls: 6, align: 'center', fixUp: true, fw: 700, y: c.m - 20});
+    const t = c.t('title', copy.title, {fk: 'cond', size: 300, lh: 0.9, align: 'center', pk: 'acc', fixUp: true, fw: 400}); c.fit(t, 330, 80, 1); t.y = c.H * 0.6;
+    const bx = (x, w, txt) => { c.r('pill', {x, y: c.H * 0.8, w, h: 100, radius: 14, pk: 'none', pks: 'line', stroke: '#fff', strokeW: 2}); const q = c.t('muted', txt, {x: x + 18, w: w - 36, y: c.H * 0.8 + 30, size: 28, fw: 700, align: 'center', fixUp: true, pk: 'fg', ls: 2}); c.fit(q, 60, 14); };
+    bx(c.m, 520, copy.sub); bx(c.m + 540, 360, copy.label);
+    c.t('brand', copy.handle, {y: c.H - c.m + 6, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'evento-tres-pessoas', name: 'Cartaz de evento com palestrantes', group: 'Promoção e evento', mode: 'dark', tags: 'evento palestrantes ingresso data local', fields: ['title', 'kicker', 'sub', 'label', 'button'],
+  sample: {kicker: 'EVENTO PRESENCIAL', title: 'O próximo nível da sua empresa exige outro nível de dono.', sub: 'DIAS 08 E 09 DE DEZEMBRO', label: 'CIDADE · ESTADO', button: 'GARANTA SUA VAGA'},
+  build(c) { const {copy} = c;
+    c.t('kicker', copy.kicker, {size: 26, ls: 6, align: 'center', fixUp: true, fw: 700, pk: 'mut', y: c.m - 30});
+    [[40, 0.11, 340, 0.4], [370, 0.08, 340, 0.43], [700, 0.11, 340, 0.4]].forEach(([x, f, w, h]) => c.i('cutout', {x, y: c.H * f + 30, w, h: c.H * h}));
+    const t = c.t('title', copy.title, {fk: 'cond', size: 104, lh: 1, align: 'center', fixUp: true, fw: 400, em0: 'color'}); c.fit(t, c.H * 0.2, 40); t.y = c.H * 0.56;
+    const p = (x, w, txt) => { c.r('pill', {x, y: c.H * 0.77, w, h: 90, radius: 12, pk: 'alt'}); const q = c.t('muted', txt, {x: x + 14, w: w - 28, y: c.H * 0.77 + 28, size: 24, fw: 700, align: 'center', fixUp: true, pk: 'fg', ls: 1}); c.fit(q, 40, 12); };
+    p(c.m, 500, copy.sub); p(c.m + 520, 380, copy.label);
+    c.r('cta-fill', {x: c.m, y: c.H * 0.77 + 120, w: c.cw, h: 96, radius: 12, pk: 'acc'}); const b = c.t('cta-text', copy.button, {align: 'center', size: 44, fk: 'cond', fixUp: true, fw: 400, pk: 'on', y: c.H * 0.77 + 120 + 26, lh: 1}); c.fit(b, 60, 20); }},
+{id: 'aniversario-selfie', name: 'Cartão de aniversário com selfie', group: 'Promoção e evento', mode: 'accent', tags: 'aniversário parabéns cliente relacionamento', fields: ['title', 'kicker', 'sub', 'handle'],
+  sample: {kicker: 'FELIZ', title: 'ANIVERSÁRIO', sub: 'Hoje celebramos sua história e agradecemos pela confiança.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.t('muted', copy.kicker, {fk: 'script', size: 90, pk: 'fg', fixUp: false, fw: 700, align: 'center', y: c.m - 30});
+    const t = c.t('title', copy.title, {fk: 'cond', size: 170, lh: 0.95, align: 'center', pk: 'fg', fixUp: true, fw: 400, y: c.m + 50}); c.fit(t, 200, 60);
+    [[40, 0.55, 120, 150], [900, 0.6, 130, 160], [70, 0.7, 110, 140]].forEach(([x, f, w, h], i) => { c.r('balloon', {shape: 'ellipse', x, y: c.H * f, w, h, pk: 'fg', opacity: 0.85}); });
+    const cy = c.H * 0.27, ch = c.H * 0.46; c.r('card', {x: 250, y: cy, w: 580, h: ch, radius: 36, pk: 'fg'});
+    c.i('thumb', {x: 272, y: cy + 22, w: 536, h: ch - 130, radius: 22, brief: 'Foto do aniversariante'});
+    c.t('muted', '♥  ◌  ➤', {x: 280, w: 400, y: cy + ch - 90, size: 34, pk: 'rev'});
+    const s = c.t('body', copy.sub, {size: 34, align: 'center', lh: 1.3, w: 800, x: 140, fw: 600, pk: 'fg'}); c.fit(s, 200, 20); s.y = c.H * 0.78;
+    c.t('brand', copy.handle, {y: c.H - c.m - 4, size: 22, pk: 'fg', align: 'center'}); }},
+{id: 'depoimento-conversa', name: 'Depoimento em conversa', group: 'Promoção e evento', mode: 'dark', tags: 'prova social depoimento cliente mensagem', fields: ['title', 'items', 'handle'],
+  sample: {title: 'O que nossos clientes dizem', items: 'Fechou, muito obrigado! Resolveu o que eu precisava.\nIndicando para todo mundo.\nAtendimento rápido e claro do começo ao fim.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    const t = c.t('title', copy.title, {fk: 'head', size: 66, fw: 800, align: 'center', fixUp: false, lh: 1.1}); c.fit(t, 200, 30); t.y = c.m - 20;
+    let y = t.y + c.h(t) + 70;
+    copy.items.slice(0, 4).forEach((it, i) => { const right = i % 2 === 1, w = 760, x = right ? c.W - c.m - w : c.m;
+      const tx = c.t('body', it, {x: x + 32, w: w - 64, size: 42, lh: 1.3, pk: right ? 'on' : 'fg', y: y + 24, fw: 500, fixUp: false}), h = c.h(tx) + 48;
+      c.r('bubble', {x, y, w, h, radius: 40, pk: right ? 'acc' : 'alt'}); c.layers.push(c.layers.splice(c.layers.indexOf(tx), 1)[0]); y += h + 34; });
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'oferta-desconto', name: 'Oferta com desconto em destaque', group: 'Promoção e evento', mode: 'dark', tags: 'ecommerce desconto oferta pix loja', fields: ['kicker', 'num', 'title', 'sub', 'handle'],
+  sample: {kicker: 'GANHE', num: '30%', title: 'OFF', sub: 'No Pix em compras acima de R$ 499', handle: '*Condições no regulamento. Imagens ilustrativas.'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: SH(0.55, 0.35)});
+    c.t('kicker', copy.kicker, {size: 34, ls: 12, align: 'center', fixUp: true, fw: 600, y: c.m - 10});
+    const n = c.t('display', copy.num + ' ' + copy.title, {fk: 'serif', size: 280, fw: 400, align: 'center', lh: 1, fixUp: false, y: c.m + 50, w: 940, x: 70}); c.fit(n, 360, 80);
+    c.t('body', copy.sub, {size: 36, align: 'center', fw: 600, y: n.y + c.h(n) + 20, w: 760, x: 160, lh: 1.25});
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 20, pk: 'mut', align: 'center'}); }},
+{id: 'produto-script', name: 'Produto com título manuscrito', group: 'Promoção e evento', mode: 'accent', tags: 'produto lançamento campanha manuscrito elegante', fields: ['kicker', 'title', 'sub', 'handle'],
+  sample: {kicker: 'Seu próximo', title: 'favorito', sub: 'pode começar por um olhar', handle: 'SEU NEGÓCIO'},
+  build(c) { const {copy} = c;
+    const k = c.t('kicker', copy.kicker, {fk: 'script', size: 100, align: 'center', pk: 'fg', fixUp: false, fw: 700, y: c.m - 10}), t = c.t('title', copy.title, {fk: 'script', size: 130, align: 'center', pk: 'fg', fixUp: false, fw: 700, y: c.m + 90}); c.fit(t, 200, 50);
+    c.i('cutout', {x: 150, y: c.H * 0.24, w: 780, h: c.H * 0.5});
+    c.t('body', copy.sub, {fk: 'script', size: 78, align: 'center', pk: 'fg', fixUp: false, fw: 700, y: c.H * 0.77, lh: 1.05}); 
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 28, ls: 6, pk: 'fg', align: 'right', fw: 700, fixUp: true}); }},
+{id: 'janela-retro', name: 'Janela retrô de erro', group: 'Promoção e evento', mode: 'light', tags: 'meme erros retrô tecnologia dica', fields: ['title', 'sub', 'kicker', 'handle'],
+  sample: {kicker: 'erro.exe', title: 'Não cometa esses erros!', sub: 'Para quem está começando', handle: '@seunegocio'},
+  build(c) { const {copy} = c, x = 150, y = c.H * 0.1, w = 780, h = c.H * 0.5;
+    c.bgRect({pk: 'alt'});
+    c.r('window', {x, y, w, h, pk: 'bg', pks: 'fg', stroke: '#000', strokeW: 5, radius: 4});
+    c.r('titlebar', {x, y, w, h: 60, pk: 'fg', radius: 4}); c.t('kicker', copy.kicker, {x: x + 20, w: 500, y: y + 14, size: 28, pk: 'bg', fixUp: false, fw: 600}); c.t('muted', '✕', {x: x + w - 56, w: 40, y: y + 12, size: 32, pk: 'bg', align: 'center'});
+    c.i('thumb', {x: x + 40, y: y + 100, w: w - 80, h: h - 160, brief: 'Imagem pixelada ou print'});
+    const t = c.t('title', copy.title, {fk: 'head', size: 112, fw: 900, align: 'center', lh: 1.02, fixUp: false}), s = c.t('body', copy.sub, {fk: 'script', size: 56, align: 'center', pk: 'acc', fw: 700});
+    c.fit(t, 330, 40); c.stack([t, s], y + h + 30, c.H - c.m - 20, 'top', 8);
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 22, pk: 'mut', align: 'center'}); }},
+
+/* ---- Estrutura ---- */
+{id: 'cards-ligados', name: 'Cards numerados ligados ao centro', group: 'Estrutura', mode: 'dark', tags: 'lista ferramentas pilares estrutura autoridade', fields: ['title', 'kicker', 'items', 'handle'],
+  sample: {kicker: 'GUIA RÁPIDO', title: '6 passos para **vender melhor**', items: 'Oferta clara\nPúblico certo\nProva social\nCanal ideal\nAção simples\nMedição', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.t('kicker', copy.kicker, {size: 24, ls: 6, align: 'center', pk: 'acc', fixUp: true, fw: 800, y: c.m - 30});
+    const t = c.t('title', copy.title, {fk: 'head', size: 72, fw: 800, align: 'center', lh: 1.08, fixUp: false, em0: 'color', y: c.m + 10}); c.fit(t, 200, 34);
+    const top = t.y + c.h(t) + 40, ch = 150, gap = (c.H - top - c.m - 60 - 3 * ch) / 2;
+    c.i('cutout', {x: 330, y: top + 40, w: 420, h: c.H - top - c.m - 140});
+    copy.items.slice(0, 6).forEach((it, i) => { const left = i < 3, x = left ? 40 : 740, y = top + (i % 3) * (ch + gap);
+      c.r('line', {x: left ? x + 300 : 690, y: y + ch / 2, w: left ? 60 : 50, h: 3, pk: 'acc'});
+      c.r('card', {x, y, w: 300, h: ch, radius: 18, pk: 'alt', pks: 'line', stroke: '#fff', strokeW: 1});
+      c.t('muted', '0' + (i + 1), {x: x + 22, w: 80, y: y + 18, size: 24, pk: 'acc', fw: 800});
+      const q = c.t('body', it, {x: x + 22, w: 256, y: y + 56, size: 34, fw: 700, lh: 1.15, fixUp: false}); c.fit(q, 80, 18);
+      c.r('toggle', {x: x + 236, y: y + 18, w: 44, h: 24, radius: 12, pk: 'acc'}); });
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'comparacao-linhas', name: 'Comparação em 3 linhas', group: 'Estrutura', mode: 'light', tags: 'comparação estudo tipografia antes depois opções', fields: ['title', 'items', 'handle'],
+  sample: {title: 'Aa', items: 'Elegante + atemporal\nMinimalista + limpo\nForte + impactante', handle: '@seunegocio'},
+  build(c) { const {copy} = c, n = 3, rh = (c.H - 2 * c.m) / n, fams = ['head', 'serif', 'cond'];
+    copy.items.slice(0, n).forEach((it, i) => { const y = c.m + i * rh;
+      const w = c.t('title', copy.title, {fk: fams[i], size: 300, align: 'center', fw: 800, lh: 1, fixUp: false, y: y + 10}); c.fit(w, rh - 90, 60);
+      c.t('muted', it, {size: 30, fw: 700, align: 'center', pk: 'fg', y: y + rh - 70});
+      if (i < n - 1) c.r('line', {x: c.m, y: y + rh - 14, w: c.cw, h: 2, pk: 'line'}); });
+    c.t('brand', copy.handle, {y: c.H - c.m + 8, size: 20, pk: 'mut', align: 'center'}); }},
+{id: 'grade-referencias', name: 'Grade de referências + texto', group: 'Estrutura', mode: 'dark', tags: 'moodboard referências editorial grade', fields: ['title', 'sub', 'kicker', 'items', 'handle'],
+  sample: {kicker: 'REFERÊNCIAS', title: 'Direção visual', sub: 'Texto de apoio com a descrição do conceito, do clima e do que se espera de cada imagem.', items: 'Ferramenta A\nFerramenta B', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: c.m, y: c.m, w: 560, h: 700});
+    c.t('kicker', copy.kicker, {x: 690, w: 300, y: c.m, size: 22, ls: 5, pk: 'acc', fixUp: true, fw: 800});
+    const t = c.t('title', copy.title, {fk: 'serif', size: 56, x: 690, w: 300, fixUp: false, lh: 1.05, fw: 400, y: c.m + 40}), s = c.t('body', copy.sub, {x: 690, w: 300, size: 22, pk: 'mut', lh: 1.4}); c.fit(t, 160, 26); c.fit(s, 440, 14);
+    c.stack([t, s], c.m + 40, c.m + 700, 'top', 16, 690, 300);
+    const th = 190, gy = c.m + 740;
+    [[0, 0], [1, 0], [0, 1], [1, 1]].forEach(([a, b]) => c.i('thumb', {x: c.m + a * (th + 16), y: gy + b * (th * 1.18 + 16), w: th, h: Math.round(th * 1.18)}));
+    const l = c.t('body', 'Ferramentas:\n' + copy.items.join('\n'), {x: 690, w: 300, y: gy + 20, size: 26, pk: 'fg', lh: 1.4, fw: 700});
+    const v = c.t('title', 'VISUAL\nREFERENCES', {fk: 'serif', size: 64, x: 690, w: 300, fw: 400, lh: 0.95, y: c.H - c.m - 150, fixUp: true}); c.fit(v, 150, 28); }},
+{id: 'passo-a-passo', name: 'Passo a passo em 3 etapas', group: 'Estrutura', mode: 'light', tags: 'processo etapas serviço como funciona', fields: ['title', 'kicker', 'items', 'handle'],
+  sample: {kicker: 'COMO FUNCIONA', title: 'Do primeiro contato ao resultado, em 3 passos', items: 'Conversa inicial|Entendemos seu objetivo e seu momento.\nPlano sob medida|Definimos o caminho e o que será entregue.\nExecução e ajuste|Acompanhamos e melhoramos a cada semana.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.t('kicker', copy.kicker, {size: 24, ls: 6, pk: 'acc', fixUp: true, fw: 800, y: c.m - 30});
+    const t = c.t('title', copy.title, {fk: 'head', size: 76, fw: 800, lh: 1.08, y: c.m + 10, fixUp: false}); c.fit(t, 250, 34);
+    const top = t.y + c.h(t) + 50, rh = (c.H - top - c.m - 40) / 3;
+    c.r('rail', {x: c.m + 44, y: top + 40, w: 4, h: rh * 2, pk: 'line'});
+    copy.items.slice(0, 3).forEach((it, i) => { const [a, b] = it.split('|'), y = top + i * rh;
+      c.r('dot', {shape: 'ellipse', x: c.m, y, w: 96, h: 96, pk: 'acc'}); c.t('title', String(i + 1), {x: c.m, w: 96, y: y + 14, size: 56, fk: 'head', fw: 900, align: 'center', pk: 'on', fixUp: false});
+      c.t('body', a, {x: c.m + 130, w: c.cw - 130, y: y + 4, size: 50, fk: 'head', fw: 800, fixUp: false}); const d = c.t('body', b || '', {x: c.m + 130, w: c.cw - 130, y: y + 66, size: 34, pk: 'mut', lh: 1.3}); c.fit(d, rh - 80, 18); });
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'antes-depois', name: 'Antes e depois', group: 'Estrutura', mode: 'light', tags: 'resultado transformação comparação serviço', fields: ['title', 'sub', 'kicker', 'label', 'handle'],
+  sample: {title: 'A diferença que um bom trabalho faz', kicker: 'ANTES', label: 'DEPOIS', sub: 'Resultado real de um cliente, com autorização.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    const t = c.t('title', copy.title, {fk: 'head', size: 80, fw: 800, align: 'center', lh: 1.08, fixUp: false, y: c.m}); c.fit(t, 260, 34);
+    const y = t.y + c.h(t) + 40, h = c.H - y - c.m - 130, w = (c.cw - 30) / 2;
+    c.i('thumb', {x: c.m, y, w, h, radius: 18, brief: 'Foto ANTES'}); c.i('thumb', {x: c.m + w + 30, y, w, h, radius: 18, brief: 'Foto DEPOIS'});
+    c.r('chip', {x: c.m + 20, y: y + 20, w: 190, h: 56, radius: 12, pk: 'fg'}); c.t('kicker', copy.kicker, {x: c.m + 20, w: 190, y: y + 30, size: 28, align: 'center', pk: 'bg', fw: 800, fixUp: true, ls: 3});
+    c.r('chip', {x: c.m + w + 50, y: y + 20, w: 190, h: 56, radius: 12, pk: 'acc'}); c.t('kicker', copy.label, {x: c.m + w + 50, w: 190, y: y + 30, size: 28, align: 'center', pk: 'on', fw: 800, fixUp: true, ls: 3});
+    c.t('body', copy.sub, {y: y + h + 26, size: 32, pk: 'mut', align: 'center'});
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'selos-confianca', name: 'Selos de confiança', group: 'Estrutura', mode: 'light', tags: 'confiança garantia loja ecommerce prova', fields: ['title', 'items', 'sub', 'handle'],
+  sample: {title: 'Por que escolher a gente', items: 'Garantia|de satisfação\nAtendimento|humano\nEntrega|no prazo\nPagamento|seguro', sub: '', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    const t = c.t('title', copy.title, {fk: 'head', size: 90, fw: 800, align: 'center', lh: 1.08, fixUp: false}); c.fit(t, 260, 36); t.y = c.m + 20;
+    const n = Math.min(4, copy.items.length), d = 200, gx = (c.W - n * d) / (n + 1), y = c.H * 0.38;
+    copy.items.slice(0, 4).forEach((it, i) => { const [a, b] = it.split('|'), x = gx + i * (d + gx);
+      c.r('seal', {shape: 'ellipse', x, y, w: d, h: d, pk: 'acc'}); c.t('title', '✓', {x, w: d, y: y + 40, size: 100, align: 'center', pk: 'on', fk: 'head', fixUp: false});
+      c.t('body', a, {x: x - gx / 2 + 6, w: d + gx - 12, y: y + d + 24, size: 30, fw: 800, align: 'center', fixUp: false}); c.t('body', b || '', {x: x - gx / 2 + 6, w: d + gx - 12, y: y + d + 66, size: 26, pk: 'mut', align: 'center'}); });
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'lista-icones', name: 'Lista com ícones', group: 'Estrutura', mode: 'light', tags: 'benefícios diferenciais serviço lista', fields: ['title', 'kicker', 'items', 'handle'],
+  sample: {kicker: 'DIFERENCIAIS', title: 'O que você recebe', items: 'Atendimento direto|Fale com quem decide.\nPrazo combinado|Sem surpresas no caminho.\nPreço transparente|Você sabe o que paga.\nSuporte depois|A gente continua junto.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.t('kicker', copy.kicker, {size: 24, ls: 6, pk: 'acc', fixUp: true, fw: 800, y: c.m - 30});
+    const t = c.t('title', copy.title, {fk: 'head', size: 96, fw: 800, lh: 1.05, y: c.m + 10, fixUp: false}); c.fit(t, 200, 40);
+    const top = t.y + c.h(t) + 50, rh = (c.H - top - c.m - 40) / 4;
+    copy.items.slice(0, 4).forEach((it, i) => { const [a, b] = it.split('|'), y = top + i * rh;
+      c.r('icon', {shape: 'ellipse', x: c.m, y, w: 84, h: 84, pk: 'acc'}); c.t('title', '✓', {x: c.m, w: 84, y: y + 10, size: 52, align: 'center', pk: 'on', fk: 'head', fixUp: false});
+      c.t('body', a, {x: c.m + 116, w: c.cw - 116, y: y - 2, size: 46, fw: 800, fk: 'head', fixUp: false}); c.t('body', b || '', {x: c.m + 116, w: c.cw - 116, y: y + 52, size: 32, pk: 'mut'}); });
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 22, pk: 'mut', align: 'center'}); }},
+{id: 'numeros-destaque', name: 'Números em destaque', group: 'Estrutura', mode: 'dark', tags: 'resultados números autoridade prova', fields: ['title', 'items', 'sub', 'handle'],
+  sample: {title: 'Nossos resultados', items: 'XX|clientes atendidos\nXX|anos de experiência\nXX|projetos entregues', sub: 'Troque XX pelos seus números reais e verificáveis.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    const t = c.t('title', copy.title, {fk: 'head', size: 90, fw: 800, lh: 1.05, fixUp: false}); c.fit(t, 200, 40); t.y = c.m + 10;
+    const top = t.y + c.h(t) + 40, rh = (c.H - top - c.m - 140) / 3;
+    copy.items.slice(0, 3).forEach((it, i) => { const [a, b] = it.split('|'), y = top + i * rh;
+      const n = c.t('display', a, {fk: 'cond', size: 220, lh: 1, fw: 400, w: 440, pk: 'acc', fixUp: false, y: y - 10}); c.fit(n, rh - 20, 60);
+      c.t('body', b || '', {x: 560, w: 430, y: y + rh / 2 - 40, size: 42, fw: 700, fixUp: false, lh: 1.15}); c.r('line', {x: c.m, y: y + rh - 8, w: c.cw, h: 2, pk: 'line'}); });
+    c.t('body', copy.sub, {y: c.H - c.m - 70, size: 26, pk: 'mut'}); }},
+
+/* ---- Capas de vídeo ---- */
+{id: 'legenda-caixa-branca', name: 'Legenda em caixa branca', group: 'Capas de vídeo', mode: 'dark', tags: 'reels vídeo legenda capa', fields: ['title'],
+  sample: {title: 'Talvez você esteja medindo o resultado errado'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H});
+    const t = c.t('title', copy.title, {fk: 'body', size: 50, fw: 700, align: 'center', pk: 'rev', lh: 1.2, x: c.m + 40, w: c.cw - 80, fixUp: false}); c.fit(t, 220, 24);
+    const h = c.h(t) + 60; t.y = c.H * 0.76 + 30; c.r('caption', {x: c.m, y: c.H * 0.76, w: c.cw, h, radius: 16, pk: 'fg'}); c.layers.push(c.layers.splice(c.layers.indexOf(t), 1)[0]); }},
+{id: 'legenda-amarela-topo', name: 'Legenda de impacto no topo', group: 'Capas de vídeo', mode: 'dark', tags: 'reels vídeo legenda amarela topo', fields: ['title', 'sub', 'handle'],
+  sample: {title: 'QUEM QUERIA FAZER ESSA MISSÃO DIFÍCIL?', sub: '', handle: ''},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H * 0.4, pk: 'none', grad: SH(0.55, 0, 180)});
+    const t = c.t('title', copy.title, {fk: 'cond', size: 96, fw: 400, align: 'center', pk: 'acc', fixUp: true, lh: 1.02, y: c.m}); c.fit(t, 330, 36);
+    if (copy.sub) c.t('body', copy.sub, {size: 44, fw: 700, align: 'center', y: t.y + c.h(t) + 12}); }},
+{id: 'moldura-arredondada', name: 'Vídeo em moldura arredondada', group: 'Capas de vídeo', mode: 'dark', tags: 'reels moldura palestra capa elegante', fields: ['title', 'handle'],
+  sample: {title: 'Todo empreendedor quando termina um projeto.', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    const t = c.t('title', copy.title, {fk: 'body', size: 54, fw: 700, align: 'center', lh: 1.2, y: c.m - 20, fixUp: false}); c.fit(t, 200, 26);
+    const y = t.y + c.h(t) + 36; c.i('photo', {x: 50, y, w: c.W - 100, h: c.H - y - 120, radius: 38});
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 24, pk: 'mut', align: 'center'}); }},
+{id: 'rotulos-sobre-imagem', name: 'Rótulos sobre a imagem', group: 'Capas de vídeo', mode: 'dark', tags: 'reels comparação rótulo capa duas ideias', fields: ['title', 'kicker', 'label'],
+  sample: {title: 'Mesma pessoa, dois resultados', kicker: 'Isso viraliza', label: 'Isso vende'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H * 0.25, pk: 'none', grad: SH(0.55, 0, 180)});
+    const t = c.t('title', copy.title, {fk: 'head', size: 64, fw: 800, align: 'center', lh: 1.1, y: c.m - 20, fixUp: false}); c.fit(t, 200, 28);
+    const lab = (txt, x) => { const q = c.t('body', txt, {x: x + 20, w: 380, y: c.H * 0.34 + 18, size: 44, fw: 800, pk: 'rev', fixUp: false, align: 'center'}); c.fit(q, 70, 20); c.r('label', {x, y: c.H * 0.34, w: 420, h: 100, pk: 'fg'}); c.layers.push(c.layers.splice(c.layers.indexOf(q), 1)[0]); };
+    lab(copy.kicker, 50); lab(copy.label, c.W - 470); }},
+{id: 'poster-cinema', name: 'Pôster cinematográfico', group: 'Capas de vídeo', mode: 'dark', tags: 'lançamento cinema pôster dramático título serifado', fields: ['kicker', 'title', 'num', 'sub'],
+  sample: {kicker: 'APRESENTA', title: 'A GRANDE\nVIRADA', num: '2', sub: 'ESTREIA EM BREVE · SÓ NOS MELHORES CANAIS'},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: SH(0.1, 0.9, 180)});
+    c.t('kicker', copy.kicker, {size: 24, ls: 10, align: 'center', fixUp: true, pk: 'mut', y: c.m - 20});
+    const n = c.t('display', copy.num, {fk: 'serif', size: 230, align: 'center', pk: 'acc', fw: 400, fixUp: false, lh: 1, y: c.H * 0.56});
+    const t = c.t('title', copy.title, {fk: 'serif', size: 160, align: 'center', pk: 'acc', fw: 400, fixUp: true, lh: 0.98, ls: 4}); c.fit(t, 330, 60);
+    c.stack([t], c.H * 0.6, c.H - c.m - 90, 'bottom', 0); n.size = 130; n.y = t.y - 150;
+    c.t('muted', copy.sub, {size: 22, ls: 4, align: 'center', fixUp: true, pk: 'mut', y: c.H - c.m - 40}); }},
+{id: 'crie-essa-imagem', name: 'Chamada "crie essa imagem"', group: 'Capas de vídeo', mode: 'dark', tags: 'pack ia prompt foto tutorial seta', fields: ['kicker', 'title', 'sub'],
+  sample: {kicker: 'CRIE ESSA\nIMAGEM', title: 'SUPER PACK DE **7**', sub: ''},
+  build(c) { const {copy} = c;
+    c.i('photo', {x: 0, y: 0, w: c.W, h: c.H}); c.r('overlay', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: SH(0.1, 0.78, 180)});
+    c.t('kicker', copy.kicker, {size: 40, fw: 900, lh: 1.05, fixUp: true, pk: 'fg', w: 360, y: c.m - 30, fk: 'black'});
+    c.t('muted', '↷', {size: 120, x: c.m + 240, y: c.m + 30, w: 160, pk: 'fg', fk: 'head', fixUp: false});
+    const t = c.t('title', copy.title, {fk: 'black', size: 150, fw: 400, lh: 1, fixUp: true, em0: 'color', align: 'left', w: 900}); c.fit(t, 330, 50); t.y = c.H - c.m - 40 - c.h(t); }},
+{id: 'logo-centrado', name: 'Logo e título centralizados', group: 'Capas de vídeo', mode: 'dark', tags: 'ferramenta novidade lançamento marca centro', fields: ['kicker', 'title', 'sub', 'handle'],
+  sample: {kicker: 'Seu Negócio', title: 'Novidade chegando', sub: 'Em breve', handle: '@seunegocio'},
+  build(c) { const {copy} = c;
+    c.bgRect({pk: 'none', grad: {c1: c.pal.bg, c2: c.pal.sec, a: 200}, gk: ['bg', 'sec']});
+    c.r('logo-mark', {shape: 'ellipse', x: c.W / 2 - 54, y: c.H * 0.34, w: 108, h: 108, pk: 'acc'});
+    const k = c.t('kicker', copy.kicker, {fk: 'serif', size: 76, align: 'center', fw: 400, fixUp: false, pk: 'fg', y: c.H * 0.34 + 140});
+    const t = c.t('title', copy.title, {fk: 'serif', size: 110, align: 'center', fw: 400, fixUp: false, lh: 1.05, y: k.y + 100}); c.fit(t, 320, 40);
+    c.t('body', copy.sub, {size: 40, align: 'center', pk: 'mut', y: t.y + c.h(t) + 24, fw: 500});
+    c.t('brand', copy.handle, {y: c.H - c.m - 6, size: 22, pk: 'mut', align: 'center'}); }}
+);
+
+</script>
+<script>
+/* Galeria de modelos de layout (folha de contato) e criação de peça a partir de um modelo */
+const lyState = {group: 'Todos', q: '', style: ''};
+const LY_LABEL = {title: 'Título (use **palavra** para destacar)', sub: 'Texto de apoio', kicker: 'Chamada / etiqueta', button: 'Botão ou chamada final', handle: '@ ou assinatura', num: 'Número', label: 'Texto 2', items: 'Itens (um por linha; "Título|descrição" quando houver os dois)'};
+const LY_NEUTRAL = () => makeTokens(DESIGN_STYLES[0], FONT_PAIRS[0], PHOTO_STYLES[0], {name: 'Neutro', accent: '#e4572e', second: '#1d3557', bg: '#f6f3ec', fg: '#141414', muted: '#6b6b6b'});
+
+/* estilos disponíveis para aplicar nos modelos: Kit de marca, estilos salvos e um neutro */
+function lyStyles(p) {
+  const out = [], b = brandOf(p);
+  if (isHex(b.pal.c60)) out.push({id: 'kit', name: 'Kit de marca (ao vivo)', tk: brandTokens(p)});
+  p.design.styles.filter(s => !s.kit).forEach(s => out.push({id: s.id, name: s.name, tk: s.tk}));
+  out.push({id: 'neutral', name: 'Neutro (laranja e azul)', tk: LY_NEUTRAL()});
+  return out;
+}
+const lyTokens = (p, id) => { const l = lyStyles(p); return (l.find(s => s.id === id) || l[0]).tk; };
+const lyFamilies = tk => [tk.head.family, tk.body.family, 'Anton', 'DM Serif Display', 'Caveat', 'Archivo Black', 'Permanent Marker'];
+
+function renderLayoutGallery(p, r) {
+  const styles = lyStyles(p); if (!styles.some(s => s.id === lyState.style)) lyState.style = styles[0].id;
+  const list = LAYOUTS.filter(l => (lyState.group === 'Todos' || l.group === lyState.group) && (!lyState.q || (l.name + ' ' + l.tags + ' ' + l.group).toLowerCase().includes(lyState.q.toLowerCase())));
+  const cnt = g => LAYOUTS.filter(l => g === 'Todos' || l.group === g).length;
+  r.innerHTML = `<div class="page-head"><div><h1>Modelos de layout</h1><p>${LAYOUTS.length} composições prontas. Escolha um modelo, preencha os textos e o Studio monta a peça com as cores e fontes do seu estilo ou Brand Kit. As áreas cinza são fotos ou sujeitos recortados: envie a sua imagem ou gere com IA.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzBack()">← Estúdio</button></div></div>
+  <div class="panel"><div class="ly-bar"><div class="tchips">${['Todos', ...LAYOUT_GROUPS].map(g => `<button class="tchip ${lyState.group === g ? 'on' : ''}" onclick="lyState.group='${g}';renderDesign()">${g} <small>${cnt(g)}</small></button>`).join('')}</div>
+    <div class="ly-tools"><input class="ly-search" placeholder="Buscar (ex.: oferta, depoimento, evento)" value="${esc(lyState.q)}" oninput="lyState.q=this.value;lySearchSoon()"><label class="ins inl">Estilo da prévia <select onchange="lyState.style=this.value;renderDesign()">${styles.map(s => `<option value="${esc(s.id)}" ${s.id === lyState.style ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label></div></div>
+    ${list.length ? `<div class="ly-grid">${list.map(l => `<article class="ly-card" onclick="lyUseOpen('${l.id}')"><canvas data-lay="${l.id}" width="240" height="300"></canvas><strong>${esc(l.name)}</strong><small class="muted block">${esc(l.group)}</small></article>`).join('')}</div>` : emptyState('Nenhum modelo encontrado', 'Tente outra palavra ou escolha outro grupo.', '')}
+    <p class="muted" style="font-size:11.5px;margin-top:12px">Layouts recriados como estrutura (posição, proporção e hierarquia). Nenhum texto, logo ou imagem dos posts de referência é usado. Fontes condensadas, serifadas e manuscritas dependem da internet para carregar.</p></div>`;
+  lyPaint(p, r, list);
+}
+const lySearchSoon = debounce(() => { const i = document.querySelector('.ly-search'), pos = i ? i.selectionStart : 0; renderDesign(); const j = document.querySelector('.ly-search'); if (j) { j.focus(); j.setSelectionRange(pos, pos); } }, 250);
+let lyToken = 0;
+async function lyPaint(p, r, list) {
+  const tok = ++lyToken, tk = lyTokens(p, lyState.style), fmt = FORMATS.feed45;
+  await ensureFonts(lyFamilies(tk));
+  const cvs = [...r.querySelectorAll('canvas[data-lay]')]; let n = 0;
+  for (const cv of cvs) {
+    if (tok !== lyToken || !cv.isConnected) return;
+    try { const lay = layoutById(cv.dataset.lay), s = buildLayoutSlide(lay, tk, {}, fmt, p.name); LAYOUT_PREVIEW = true; try { renderSlide(cv.getContext('2d'), s, fmt.w, fmt.h, cv.width / fmt.w); } finally { LAYOUT_PREVIEW = false; } } catch (e) { console.warn('modelo', cv.dataset.lay, e); }
+    if (++n % 6 === 0) await new Promise(res => setTimeout(res, 0));
+  }
+}
+function dzLayoutsOpen() { dz.view = 'layouts'; go('design'); renderDesign(); }
+
+/* ---- usar um modelo ---- */
+let lyUse = null;
+function lyUseOpen(id) {
+  const p = dzP(), lay = layoutById(id); if (!lay) return;
+  const styles = lyStyles(p); lyUse = {id, fmt: 'feed45', cw: 1080, ch: 1080, style: styles.some(s => s.id === lyState.style) ? lyState.style : styles[0].id};
+  const f = lay.fields.map(k => { const v = Array.isArray(lay.sample[k]) ? lay.sample[k].join('\n') : (lay.sample[k] || ''), multi = ['title', 'sub', 'items'].includes(k);
+    return `<div class="field"><label>${LY_LABEL[k] || k}</label>${multi ? `<textarea rows="${k === 'items' ? 5 : 2}" data-ly="${k}">${esc(v)}</textarea>` : `<input data-ly="${k}" value="${esc(v)}">`}</div>`; }).join('');
+  showModal(esc(lay.name), `<p class="muted" style="margin-top:0;font-size:12px">${esc(lay.group)} · ${esc(lay.tags.split(' ').join(' · '))}</p>${f}
+    <div class="ins-row"><label class="ins">Formato<select onchange="lyUse.fmt=this.value;$('lyCustom').style.display=this.value==='custom'?'flex':'none'">${fmtOptions('feed45')}</select></label><label class="ins">Estilo<select onchange="lyUse.style=this.value">${styles.map(s => `<option value="${esc(s.id)}" ${s.id === lyUse.style ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label></div>
+    <div class="ins-row" id="lyCustom" style="display:none"><label class="ins">Largura<input type="number" min="64" max="4096" value="1080" onchange="lyUse.cw=+this.value"></label><label class="ins">Altura<input type="number" min="64" max="4096" value="1080" onchange="lyUse.ch=+this.value"></label></div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" id="lyGo" onclick="lyUseRun()">Criar peça e abrir o editor</button></div>`);
+}
+async function lyUseRun() {
+  const p = dzP(), lay = layoutById(lyUse.id), btn = $('lyGo'); btn.disabled = true; btn.textContent = 'Montando…';
+  const copy = {}; document.querySelectorAll('[data-ly]').forEach(el => { copy[el.dataset.ly] = el.value.trim(); });
+  const tk = JSON.parse(JSON.stringify(lyTokens(p, lyUse.style))), fmt = resolveFmt(lyUse);
+  try {
+    await ensureFonts(lyFamilies(tk)); await brandFontsLoad(p);
+    const set = layoutSetFrom(lay, tk, copy, fmt, p.name, lay.name + ' · ' + p.name); set.slides[0] = buildLayoutSlide(lay, tk, copy, fmt, p.name);
+    await ensureSetResources(set);
+    p.design.sets.push(set); persist(); closeModal(); dzOpen(set.id); toast('Peça criada. Troque textos, fotos e cores no editor.');
+  } catch (e) { btn.disabled = false; btn.textContent = 'Criar peça e abrir o editor'; toast('Não consegui montar: ' + e.message); }
+}
+
+</script>
+<script>
 /* Exportação em camadas: PSD (uma camada raster por elemento, empilhadas como no editor) e ZIP de PNGs com manifesto.
    Limites: o texto vai como camada raster (não editável como texto no Photoshop) e as fontes não são embutidas. */
 class BW {
@@ -2587,7 +3298,7 @@ function layerName(L) {
 }
 function renderLayerData(L, box) {
   const c = document.createElement('canvas'); c.width = box.w; c.height = box.h; const ctx = c.getContext('2d'); ctx.translate(-box.x, -box.y);
-  if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') drawRect(ctx, L); else drawImageLayer(ctx, L);
+  drawLayer(ctx, L);
   return {canvas: c, data: ctx.getImageData(0, 0, box.w, box.h).data};
 }
 /* camadas de baixo para cima, cada uma recortada na sua caixa */
@@ -2600,7 +3311,7 @@ async function collectLayerItems(set, slide) {
   for (const L of slide.layers) {
     if (L.hidden || !LBOX[L.id]) continue; const b = LBOX[L.id], pad = L.type === 'text' ? Math.ceil(L.size * 0.3) + 10 : 0;
     const x = Math.max(0, Math.floor(b.x - pad)), y = Math.max(0, Math.floor(b.y - pad)), x2 = Math.min(W, Math.ceil(b.x + b.w + pad)), y2 = Math.min(H, Math.ceil(b.y + b.h + pad));
-    const box = {x, y, w: x2 - x, h: y2 - y}; if (box.w < 1 || box.h < 1) continue;
+    const box = L.rot || L.blur ? {x: 0, y: 0, w: W, h: H} : {x, y, w: x2 - x, h: y2 - y}; if (box.w < 1 || box.h < 1) continue;
     const r = renderLayerData(L, box); items.push({name: layerName(L), role: L.role, type: L.type, text: L.type === 'text' ? L.content.replace(/\*\*/g, '') : '', box, canvas: r.canvas, data: r.data});
   }
   return {items, comp: cctx.getImageData(0, 0, W, H).data, W, H};
@@ -2658,13 +3369,14 @@ function renderDesign() {
   if (dz.view === 'compose') return dzCompose(p, r);
   if (dz.view === 'variations') return renderVariations(p, r);
   if (dz.view === 'brand') return renderBrandKit(p, r);
+  if (dz.view === 'layouts') return renderLayoutGallery(p, r);
   dzEditorShell(p, r);
 }
 
 /* ================= INÍCIO ================= */
 function dzHome(p, r) {
   const {styles, sets} = p.design;
-  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzBrandOpen()">◈ Brand Kit</button><button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn" onclick="dzVarOpen()">⚡ Fábrica de variações</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzLayoutsOpen()">▦ Modelos de layout</button><button class="btn" onclick="dzBrandOpen()">◈ Brand Kit</button><button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn" onclick="dzVarOpen()">⚡ Fábrica de variações</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
   <div class="panel"><div class="section-row"><h3>Estilos de campanha salvos</h3><small class="muted">${styles.length} salvo(s)</small></div>
     ${styles.length ? `<div class="dz-styles">${styles.map(s => `<article class="dz-style"><div class="dz-sw">${[s.tk.bg, s.tk.fg, s.tk.accent, s.tk.muted].map(c => `<i style="background:${esc(c)}"></i>`).join('')}</div><strong>${esc(s.name)}</strong><small class="muted block">${esc(s.tk.head.family)} + ${esc(s.tk.body.family)} · ${esc((s.tk.photo || {}).name || 'foto')}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dzNew('${s.id}')">Usar em nova peça</button><button class="btn sm" onclick="dzStyleDel('${s.id}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhum estilo salvo', 'Crie uma peça, refine no editor e use “Salvar como estilo” para reaproveitar em toda a campanha.')}</div>
   <div class="panel" style="margin-top:14px"><div class="section-row"><h3>Peças do projeto</h3><small class="muted">${sets.length} peça(s)</small></div>
