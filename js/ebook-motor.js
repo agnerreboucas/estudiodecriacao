@@ -9,13 +9,13 @@ Tom: acolhedor, prático, sem jargão, nunca alarmista. Identidade: Playfair Dis
 Cada capítulo: abertura, caso prático fictício (nome + situação + resolução), 3 parágrafos de corpo, 1 caixa de apoio, colunas "Situações comuns" × "Faça assim" (4 itens), checklist de 4 perguntas e resumo de 3 frases. Fechamento com plano final, conclusão, bônus, caixa de contato e referências.
 REGRA CLÍNICA: nunca invente dados, doses, protocolos ou estatísticas; use [CONFIRMAR: ...] onde precisar da validação da autora.`};
 const motSkills = () => [MOT_SKILL_GENERIC, MOT_SKILL_MCS, ...(state.skills = Array.isArray(state.skills) ? state.skills : [])];
-const motM = () => { const p = curProject(); if (!p) return null; if (!p.motor || typeof p.motor !== 'object' || !p.motor.stage || !Array.isArray(p.motor.outline)) p.motor = normalizeMotor(p.motor); return p.motor; };
+const motM = () => { const eb = typeof ebCur === 'function' && eui.id ? ebCur() : null, h = eb || curProject(); if (!h) return null; if (!h.motor || typeof h.motor !== 'object' || !h.motor.stage || !Array.isArray(h.motor.outline)) h.motor = normalizeMotor(h.motor); return h.motor; };
 const motSkillCur = () => { const M = motM(); return motSkills().find(s => s.id === M.skillId) || MOT_SKILL_GENERIC; };
 const motSave = () => { persist(); AUTO_AT = Date.now(); };
 
 /* ---------- entrada ---------- */
-function motOpen(stage) { mot.open = true; edh.area = 'texto'; const M = motM(); if (stage) M.stage = stage; renderEditora(); }
-function motClose() { mot.open = false; edh.area = 'livros'; renderEditora(); }
+function motOpen(stage) { bookGoTab('conteudo'); const M = motM(); if (stage && M) { M.stage = stage; renderEditora(); } }
+function motClose() { bookTab('conteudo'); }
 function motStage(s) { const M = motM(); if (s === 'texto' && !M.approved) { toast('Aprove a estrutura primeiro.'); return; } M.stage = s; motSave(); renderEditora(); }
 
 /* ---------- tela ---------- */
@@ -24,6 +24,7 @@ function motRender(r, p) {
   r.innerHTML = edTabs('texto') + `<div class="page-head"><div><h1>Motor de texto</h1><p>Entre com uma ideia ou com o conteúdo bruto, escolha uma skill (o padrão de escrita), aprove a estrutura, deixe a IA escrever capítulo por capítulo, revise e mande para a Editora (4 versões) ou para a Diagramação (livro/revista). Se você já tem o texto pronto, vá direto ao passo 4.</p></div></div>
   <div class="mot-steps">${steps.map(([k, l]) => `<button class="tchip ${M.stage === k ? 'on' : ''}" onclick="motStage('${k}')">${l}</button>`).join('')}</div>
   <div id="motBody">${({material: motMaterial, estrutura: motEstrutura, texto: motTexto, enviar: motEnviar})[M.stage](M)}</div>`;
+  if (eui.id) { const t = r.querySelector(':scope > .edh-tabs'), h = r.querySelector(':scope > .page-head'); if (t) t.remove(); if (h) h.remove(); }
 }
 const motIn = (id, lab, val, ph, rows) => `<div class="field"><label>${lab}</label>${rows ? `<textarea id="${id}" rows="${rows}" placeholder="${esc(ph || '')}" oninput="motSet('${id}',this.value)">${esc(val)}</textarea>` : `<input id="${id}" value="${esc(val)}" placeholder="${esc(ph || '')}" oninput="motSet('${id}',this.value)">`}</div>`;
 function motSet(k, v) { const M = motM(); const map = {mIdea: 'idea', mSource: 'source', mAud: 'audience', mTone: 'tone', mTitle: 'title', mSub: 'subtitle', mAuthor: 'author', mFull: 'full'}; if (map[k]) M[map[k]] = v; if (k === 'mN') M.nch = Math.max(3, Math.min(14, Math.round(+v || 7))); motSave(); }
@@ -127,21 +128,19 @@ function motEnviar(M) {
   return `<p class="muted" style="font-size:13px;margin-top:0">Este é o texto completo. ${asm ? 'Veio dos capítulos aprovados; você ainda pode editar aqui.' : 'Cole o seu texto pronto aqui (com # para capítulos, ## para subtítulos, > dica: para caixas…).'} Depois escolha o destino.</p>
   ${asm ? `<div class="row-gap" style="margin-bottom:6px"><button class="btn sm" onclick="motReassemble()">Recompor a partir dos capítulos</button></div>` : ''}
   <textarea id="mFull" rows="18" style="width:100%;font-size:13px" oninput="motSet('mFull',this.value);motCountUpd()">${esc(txt)}</textarea><small class="muted" id="motCnt">${motCountTxt(txt)}</small>
-  <div class="mot-wrap" style="margin-top:12px"><div class="mot-ch"><b>→ Editora (e-book em 4 versões)</b><p class="muted" style="font-size:12px">Capítulos com caixas, checklists e resumo, versões celular, tablet, A4 P&B e A4 econômico, capa e EPUB.</p><div class="form-grid">${motIn('mTitle', 'Título', M.title, '')}${motIn('mAuthor', 'Autor(a)', M.author, '')}</div><button class="btn dark" onclick="motToEditora()">Criar e-book na Editora</button></div>
-  <div class="mot-ch"><b>→ Diagramação (livro/revista)</b><p class="muted" style="font-size:12px">Documento com colunas, margens, sangria e PDF de gráfica. Cada capítulo começa em página nova.</p><div class="field"><label>Formato</label><select id="mPre">${DTP_PRESETS.filter(x => x.id !== 'custom' && x.id !== 'flyer').map(x => `<option value="${x.id}">${esc(x.n)}</option>`).join('')}</select></div><button class="btn dark" onclick="motToDtp()">Criar documento na Diagramação</button></div></div>
+  <div class="mot-wrap" style="margin-top:12px"><div class="mot-ch"><b>Aplicar no e-book</b><p class="muted" style="font-size:12.5px">O texto entra na estrutura do e-book (capítulos, caixas, checklists e resumo, nas versões celular, tablet, A4 P&B e A4 econômico) e já vai diagramado para o miolo.</p><div class="form-grid">${motIn('mTitle', 'Título', M.title, '')}${motIn('mAuthor', 'Autor(a)', M.author, '')}</div><div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" onclick="motApplyBook(true)">Aplicar na estrutura e no miolo</button><button class="btn" onclick="motApplyBook(false)">Só na estrutura do e-book</button></div></div>
+  <div class="mot-ch"><b>Próximos passos</b><ol style="margin:6px 0 0 18px;padding:0;font-size:12.5px;line-height:1.7"><li>Aba <b>2 · Capa</b>: escolha um layout, uma referência ou crie do zero.</li><li>Aba <b>3 · Miolo</b>: a diagramação do livro, com grade, colunas e modelos de página.</li><li>Aba <b>Áudio</b>: narração do livro com voz de IA.</li><li>Aba <b>Publicar</b>: Amazon KDP, EPUB e flipbook.</li></ol></div></div>
   <div class="row-gap" style="margin-top:8px"><button class="btn sm" onclick="motDownMd()">Baixar .md</button></div>`;
 }
 const motCountTxt = t => `${String(t || '').split(/\s+/).filter(Boolean).length.toLocaleString('pt-BR')} palavras · ${(String(t || '').match(/^# /gm) || []).length} capítulo(s) · ${motConf(t)} marca(s) [CONFIRMAR]`;
 function motCountUpd() { const e = $('motCnt'); if (e) e.textContent = motCountTxt(motM().full); }
 function motReassemble() { const M = motM(); M.full = motAssemble(M); motSave(); renderEditora(); }
 function motDownMd() { const M = motM(); download((M.title || 'ebook').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.md', M.full || motAssemble(M), 'text/markdown'); }
-function motToEditora() {
-  const M = motM(), t = (M.full || '').trim(); if (!t) { toast('Não há texto para enviar.'); return; }
-  const eb = ebNew('blank', M.title || 'E-book', M.author || ''); if (M.subtitle) eb.subtitle = M.subtitle;
-  eb.sections = eb.sections.filter(s => s.type !== 'chapter'); const secs = ebImport(t, eb); if (!secs.length) { toast('Não encontrei capítulos. Use # no título de cada capítulo.'); return; }
-  let n = eb.sections.filter(s => s.type === 'chapter').length; secs.forEach(s => { n++; s.label = 'CAPÍTULO ' + ebPad2(n); });
-  const at = eb.sections.findIndex(x => x.type === 'text' && /plano|conclus/i.test(x.title)); if (at >= 0) eb.sections.splice(at, 0, ...secs); else eb.sections.push(...secs);
-  ebList().push(eb); persist(); mot.open = false; edh.area = 'livros'; toast(secs.length + ' capítulo(s) enviados à Editora.'); ebOpen(eb.id);
+function motApplyBook(withMiolo) {
+  const M = motM(), eb = ebCur(), t = (M.full || '').trim(); if (!eb) return; if (!t) { toast('Não há texto para aplicar.'); return; }
+  if (eb.sections.some(s => s.type === 'chapter' && (s.blocks || []).some(b => b.text && !/^\[/.test(b.text))) && !confirm('O e-book já tem capítulos escritos. Substituir os capítulos pelo texto do motor?')) return;
+  const n = bookApplyText(eb, t); if (!n) return; if (withMiolo) { const d = bookEnsureMiolo(eb, (eb.kdp && eb.kdp.trim) || 'kdp6x9'); bookSyncMiolo(eb, true); if (eb.coverSetId && !d.front) bookCoverToMiolo(true); }
+  toast(n + ' capítulo(s) aplicados' + (withMiolo ? ' na estrutura e no miolo.' : ' na estrutura do e-book.')); eui.bt = withMiolo ? 'miolo' : 'versoes'; renderEditora();
 }
 /* texto com marcações da Editora → matéria da Diagramação */
 function motToStory(text) {
@@ -163,10 +162,4 @@ function motToStory(text) {
     para.push(ln);
   }
   flush(); return out;
-}
-function motToDtp() {
-  const M = motM(), t = (M.full || '').trim(); if (!t) { toast('Não há texto para enviar.'); return; }
-  const d = dtpNew($('mPre').value, M.title || 'Documento'), story = motToStory(t); if (!story.length) { toast('Não encontrei texto.'); return; }
-  d.styles.list = Object.assign({}, d.styles.body, {n: 'Lista', indent: 0, align: 'left', after: 3}); d.story = story;
-  dtpList().push(d); persist(); mot.open = false; edh.area = 'diag'; toast('Documento criado na Diagramação.'); go('diagram'); dtpOpen(d.id);
 }

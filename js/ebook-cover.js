@@ -1,6 +1,6 @@
 /* ===== Engenheiro de capa: capas de livro (frente, capa completa KDP, Kindle e celular) com layouts prontos, referência (IA) e envio à Diagramação ===== */
 const cov = {ref: null, refBlob: null, busy: '', concepts: null, T: 0, nrm: null};
-const covC = () => { const p = curProject(); if (!p) return null; if (!p.cover || typeof p.cover !== 'object' || !p.cover.layout) p.cover = normalizeCover(p.cover); return p.cover; };
+const covC = () => { const eb = typeof ebCur === 'function' && eui.id ? ebCur() : null, h = eb || curProject(); if (!h) return null; if (!h.cover || typeof h.cover !== 'object' || !h.cover.layout) h.cover = normalizeCover(h.cover); return h.cover; };
 const COV_PALS = [
   ['Verde cuidado', {bg: '#4F8A55', fg: '#F4F1EC', accent: '#C9A876', second: '#6AA170'}], ['Vermelho e amarelo', {bg: '#DC2318', fg: '#FDB92F', accent: '#FDB92F', second: '#4A3B33'}], ['Preto e dourado', {bg: '#15120D', fg: '#F2E3B8', accent: '#D8A93A', second: '#6B5320'}],
   ['Laranja névoa', {bg: '#C96A2B', fg: '#FFFFFF', accent: '#FFE2B8', second: '#7A3B12'}], ['Verde escuro e linha dourada', {bg: '#173A32', fg: '#FFFFFF', accent: '#C9B26B', second: '#A8C66C'}], ['Azul-marinho', {bg: '#10264A', fg: '#FFFFFF', accent: '#F2B84B', second: '#4A74C9'}],
@@ -169,32 +169,26 @@ function covRender(r, p) {
   ${cov.ref ? `<div class="row-gap" style="flex-wrap:wrap;margin-bottom:8px"><span class="muted" style="font-size:12px">Referência escolhida.</span><button class="btn sm dark" onclick="ailStart(cov.ref,'cov')">✦ Ler layout com IA → peça editável</button><button class="btn sm" onclick="cov.ref=null;covRender()">Tirar</button></div>` : ''}
   </div><div class="cov-prev"><canvas id="covCv" class="cov-cv"></canvas><small class="muted block" id="covInfo"></small>
   <div class="row-gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn dark" onclick="covCreate()">Criar no Editor de Design</button><button class="btn" onclick="covMockupDown()">Mockup do livro (PNG)</button></div>
-  <div class="mot-ch" style="margin-top:10px"><b>Usar esta capa</b><div class="field" style="margin:6px 0"><label>Na Diagramação</label><div class="row-gap"><select id="covDoc">${(p.layouts || []).map(d => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join('') || '<option value="">(nenhum documento)</option>'}</select><button class="btn sm" onclick="covToDoc()">Inserir como página da capa</button></div></div>
-  <div class="field" style="margin:6px 0"><label>No e-book (Editora)</label><div class="row-gap"><select id="covEb">${(p.ebooks || []).map(e => `<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('') || '<option value="">(nenhum e-book)</option>'}</select><button class="btn sm" onclick="covToEbook()">Usar como capa</button></div></div></div></div></div>`;
+  <div class="mot-ch" style="margin-top:10px"><b>Esta capa é a do e-book</b><p class="muted" style="font-size:12px;margin:4px 0">Ao criar, ela fica ligada automaticamente ao e-book (versões e EPUB).</p><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="bookCoverToMiolo()" ${ebCur() && ebCur().coverSetId ? '' : 'disabled'}>Inserir como página 1 do miolo</button><button class="btn sm" onclick="covOpenSet()" ${ebCur() && ebCur().coverSetId ? '' : 'disabled'}>Abrir no Editor de Design</button></div></div></div></div>`;
+  if (eui.id) { const t = r.querySelector(':scope > .edh-tabs'), h = r.querySelector(':scope > .page-head'); if (t) t.remove(); if (h) h.remove(); }
   bankFill(); covPreview(); covThumbs(); if (ACC.covg && ACC.covg.gal) covGalPaint();
 }
-function covSet(k, v, soft) { const c = covC(); c[k] = v; persist(); if (soft) covPrevSoon(); else { covRender(curProject() && $('editoraRoot'), curProject()); } }
-function covPick(k) { const c = covC(), l = COV_LAYOUTS[k]; c.layout = k; c.head = l.head; c.body = l.body; if (l.pal && !cov.keepPal) c.pal = Object.assign({}, l.pal); persist(); covRender($('editoraRoot'), curProject()); }
-function covPal(i) { covC().pal = Object.assign({}, COV_PALS[i][1]); persist(); covRender($('editoraRoot'), curProject()); }
+function covSet(k, v, soft) { const c = covC(); c[k] = v; persist(); if (soft) covPrevSoon(); else { renderEditora(); } }
+function covPick(k) { const c = covC(), l = COV_LAYOUTS[k]; c.layout = k; c.head = l.head; c.body = l.body; if (l.pal && !cov.keepPal) c.pal = Object.assign({}, l.pal); persist(); renderEditora(); }
+function covPal(i) { covC().pal = Object.assign({}, COV_PALS[i][1]); persist(); renderEditora(); }
 function covPalSet(k, v) { covC().pal[k] = v; persist(); covPrevSoon(); }
-function covWrapOpen() { const c = covC(); c.mode = 'wrap'; persist(); edh.area = 'capa'; go('editora'); }
-function covPickImg() { dtpFilePick(r => { covC().imgId = r.id; persist(); covRender($('editoraRoot'), curProject()); }); }
+function covWrapOpen() { const c = covC(); c.mode = 'wrap'; persist(); if (eui.id) bookTab('capa'); else bookGoTab('capa'); }
+function covPickImg() { dtpFilePick(r => { covC().imgId = r.id; persist(); renderEditora(); }); }
 async function covCreate() {
   const p = curProject(), c = covC(), b = covBuild(c, c.mode), set = {id: uid('ds'), name: (c.mode === 'wrap' ? 'Capa completa · ' : 'Capa · ') + (c.title || 'livro'), format: {id: 'custom', w: b.W, h: b.H}, tk: Object.assign(brandTokens(p), {name: 'Capa', bg: b.bg, fg: c.pal.fg, accent: c.pal.accent, head: {family: c.head, weight: 700}, body: {family: c.body, weight: 400}}), slides: [{id: sid(), name: 'Capa', bg: b.bg, layers: b.layers}], created: new Date().toISOString(), updated: new Date().toISOString()};
-  await covFontsAndImgs(set); p.design.sets.push(set); c.setId = set.id; persist(); toast('Capa criada. Refine no Editor de Design; depois volte aqui para enviar.'); go('design'); dzOpen(set.id);
+  await covFontsAndImgs(set); p.design.sets.push(set); c.setId = set.id; const eb = ebCur(); if (eb) { if (c.mode !== 'wrap') eb.coverSetId = set.id; eb.cover = c; dz.pendingFrom = eb.id; } persist(); toast('Capa criada e ligada ao e-book. Refine no Editor de Design e volte pelo botão Voltar ao e-book.'); go('design'); dzOpen(set.id);
 }
 async function covRenderSetBlob(setId, maxW, type, q) {
   const p = curProject(), set = p.design.sets.find(s => s.id === setId); if (!set) throw new Error('A capa não existe mais. Crie de novo.'); await ensureSetResources(set); await ensureFonts(set.slides[0].layers.filter(l => l.type === 'text').map(l => l.family));
   const W = set.format.w, H = set.format.h, s = maxW ? Math.min(1, maxW / W) : 1, cv = document.createElement('canvas'); cv.width = Math.round(W * s); cv.height = Math.round(H * s); const x = cv.getContext('2d'); renderSlide(x, set.slides[0], W, H, s);
   return {cv, blob: await new Promise(r => cv.toBlob(r, type || 'image/png', q)), W, H};
 }
-async function covToDoc() {
-  const p = curProject(), c = covC(), id = $('covDoc').value, d = (p.layouts || []).find(x => x.id === id); if (!d) { toast('Escolha um documento da Diagramação.'); return; }
-  if (!c.setId) { toast('Crie a capa no Editor de Design primeiro (botão Criar no Editor de Design).'); return; }
-  try { const r = await covRenderSetBlob(c.setId, 2000, 'image/jpeg', 0.92), imgId = uid('img'); await imgPut(imgId, r.blob); const ar = r.W / r.H;
-    d.pages.unshift({items: [{id: uid('fr'), k: 'img', x: -d.bleed, y: -d.bleed, w: d.page.w + 2 * d.bleed, h: d.page.h + 2 * d.bleed, wrap: 'none', off: 0, imgId, zoom: 1, ar, fill: '', stroke: '', sw: 1, op: 1, px: 0, py: 0, text: '', st: 'body', pad: 4}]}); d.front = (d.front | 0) + 1; d.nPages = Math.max(d.nPages, d.front + 1); persist(); toast('Capa inserida como página 1 do documento “' + d.name + '”.'); } catch (e) { toast('Falhou: ' + e.message); }
-}
-function covToEbook() { const p = curProject(), c = covC(), eb = (p.ebooks || []).find(e => e.id === $('covEb').value); if (!eb) { toast('Escolha um e-book.'); return; } if (!c.setId) { toast('Crie a capa no Editor de Design primeiro.'); return; } eb.coverSetId = c.setId; persist(); toast('Capa ligada ao e-book “' + eb.name + '”.'); }
+function covOpenSet() { const eb = ebCur(); if (!eb || !eb.coverSetId) return; dz.pendingFrom = eb.id; go('design'); dzOpen(eb.coverSetId); }
 
 /* ---------- exportações ---------- */
 async function covExportWrap() {
@@ -218,15 +212,15 @@ async function covMockupDown() {
 
 /* ---------- IA: sugestões de conceito ---------- */
 async function covConcepts() {
-  const c = covC(), M = motM(); cov.busy = 'con'; covRender($('editoraRoot'), curProject());
+  const c = covC(), M = motM(); cov.busy = 'con'; renderEditora();
   try {
     const j = await motJSON('Você é diretor(a) de arte de capas de livros. Pense no mercado editorial brasileiro.', `Livro: ${c.title || M.title || '(sem título)'}${c.subtitle ? ' — ' + c.subtitle : ''}. Autor(a): ${c.author || M.author}. Tema: ${M.idea || '(não informado)'}. Público: ${M.audience || '(não informado)'}.\nProponha 3 conceitos de capa diferentes. JSON: {"concepts":[{"name":"...","why":"1 frase","layout":"${Object.keys(COV_LAYOUTS).join('|')}","palette":{"bg":"#RRGGBB","fg":"#RRGGBB","accent":"#RRGGBB","second":"#RRGGBB"},"head":"fonte","body":"fonte","imageBrief":"descrição da imagem ideal"}]}. Fontes só da lista: ${dtpFontList().slice(0, 70).join(', ')}.`, 2500);
     const fl = dtpFontList(), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v).toUpperCase() : d;
     cov.concepts = (j.concepts || []).slice(0, 3).map(k => ({name: String(k.name || 'Conceito').slice(0, 60), why: String(k.why || '').slice(0, 200), imageBrief: String(k.imageBrief || '').slice(0, 240), layout: COV_LAYOUTS[k.layout] ? k.layout : 'giant', pal: {bg: hex(k.palette && k.palette.bg, c.pal.bg), fg: hex(k.palette && k.palette.fg, c.pal.fg), accent: hex(k.palette && k.palette.accent, c.pal.accent), second: hex(k.palette && k.palette.second, c.pal.second)}, head: fl.includes(k.head) ? k.head : COV_LAYOUTS[k.layout] ? COV_LAYOUTS[k.layout].head : c.head, body: fl.includes(k.body) ? k.body : c.body}));
   } catch (e) { toast(motErr(e)); }
-  cov.busy = ''; covRender($('editoraRoot'), curProject());
+  cov.busy = ''; renderEditora();
 }
-function covApplyConcept(i) { const k = cov.concepts[i], c = covC(); if (!k) return; Object.assign(c, {layout: k.layout, pal: k.pal, head: k.head, body: k.body}); persist(); covRender($('editoraRoot'), curProject()); toast('Conceito aplicado. Suba a imagem sugerida na foto de fundo.'); }
+function covApplyConcept(i) { const k = cov.concepts[i], c = covC(); if (!k) return; Object.assign(c, {layout: k.layout, pal: k.pal, head: k.head, body: k.body}); persist(); renderEditora(); toast('Conceito aplicado. Suba a imagem sugerida na foto de fundo.'); }
 
 /* miniaturas dos layouts de capa (com a paleta e as fontes de cada um) */
 async function covThumbs() {
@@ -247,5 +241,5 @@ async function covGalPaint() {
 cov.GT = 0;
 async function covFromGallery(id) {
   const p = curProject(), c = covC(), lay = layoutById(id); if (!lay) return; toast('Abrindo o layout na capa…'); const tk = covGalTokens(), fmt = resolveFmt({fmt: 'custom', cw: 1200, ch: 1800});
-  try { await ensureFonts(lyFamilies(tk)); const copy = covGalCopy(lay), set = layoutSetFrom(lay, tk, copy, fmt, p.name, 'Capa · ' + lay.name + ' · ' + (c.title || p.name)); set.slides[0] = buildLayoutSlide(lay, tk, copy, fmt, p.name); await ensureSetResources(set); p.design.sets.push(set); c.setId = set.id; persist(); go('design'); dzOpen(set.id); toast('Capa criada a partir do layout. Edite os textos e a imagem.'); } catch (e) { toast('Não consegui abrir: ' + e.message); }
+  try { await ensureFonts(lyFamilies(tk)); const copy = covGalCopy(lay), set = layoutSetFrom(lay, tk, copy, fmt, p.name, 'Capa · ' + lay.name + ' · ' + (c.title || p.name)); set.slides[0] = buildLayoutSlide(lay, tk, copy, fmt, p.name); await ensureSetResources(set); p.design.sets.push(set); c.setId = set.id; const eb = ebCur(); if (eb) { eb.coverSetId = set.id; dz.pendingFrom = eb.id; } persist(); go('design'); dzOpen(set.id); toast('Capa criada a partir do layout. Edite os textos e a imagem.'); } catch (e) { toast('Não consegui abrir: ' + e.message); }
 }

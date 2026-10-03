@@ -67,7 +67,7 @@ async function ailToSlide() {
   });
   const tk = brandTokens(p); Object.assign(tk, {name: 'Layout lido', bg: r.bg, fg: r.blocks.find(b => b.role === 'title') ? r.blocks.find(b => b.role === 'title').color : '#111111'});
   const set = {id: uid('ds'), name: 'Layout lido · ' + new Date().toLocaleDateString('pt-BR'), format: {id: 'custom', w: W, h: H}, tk, slides: [{id: sid(), name: 'Layout', bg: r.bg, layers: L}], created: new Date().toISOString(), updated: new Date().toISOString()};
-  await ensureSetResources(set); p.design.sets.push(set); persist(); closeModal(); go('design'); dzOpen(set.id);
+  await ensureSetResources(set); p.design.sets.push(set); if (ail.from === 'cov' && ebCur()) { const eb = ebCur(); eb.coverSetId = set.id; covC().setId = set.id; dz.pendingFrom = eb.id; } persist(); closeModal(); go('design'); dzOpen(set.id);
   toast('Peça criada. Troque os textos e imagens; use ★ Modelo no editor para guardar na galeria de layouts.');
 }
 

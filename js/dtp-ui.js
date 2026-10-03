@@ -1,5 +1,5 @@
 /* ===== Diagramação · telas: biblioteca, mesa de trabalho com réguas/guias, matéria, estilos, página e objetos ===== */
-const dui = {id: '', view: 'layout', pi: 0, z: 1, vx: 30, vy: 30, tool: 'v', sel: null, tab: 'texto', show: {margins: true, cols: true, grid: true, mod: true, guides: true, bleed: true, rulers: true}, hist: [], hi: -1, flow: null, imgs: {}, thumbs: {}, drag: null, mouse: null, sw: 0, ref: null, refOn: false, refOp: 0.45, space: false, refRes: null};
+const dui = {fromBook: '', id: '', view: 'layout', pi: 0, z: 1, vx: 30, vy: 30, tool: 'v', sel: null, tab: 'texto', show: {margins: true, cols: true, grid: true, mod: true, guides: true, bleed: true, rulers: true}, hist: [], hi: -1, flow: null, imgs: {}, thumbs: {}, drag: null, mouse: null, sw: 0, ref: null, refOn: false, refOp: 0.45, space: false, refRes: null};
 const DTP_RULER = 22;
 const dtpList = () => { const p = curProject(); if (!p) return []; p.layouts = Array.isArray(p.layouts) ? p.layouts : []; return p.layouts; };
 const dtpDoc = () => dtpList().find(d => d.id === dui.id);
@@ -26,7 +26,7 @@ function dtpCreate() { const d = dtpNew($('dtpPre').value, $('dtpNm').value.trim
 function dtpOpen(id) { dui.id = id; dui.pi = 0; dui.sel = null; dui.hist = []; dui.hi = -1; dui.sw = 0; dui.tab = 'texto'; dui.view = 'layout'; dui.refOn = false; dui.ref = null; dui.refRes = null; dtpSnap(); renderDiagram(); }
 function dtpDup(id) { const d = dtpList().find(x => x.id === id); if (!d) return; const c = JSON.parse(JSON.stringify(d)); c.id = uid('dtp'); c.name += ' (cópia)'; dtpList().push(c); persist(); renderDiagram(); }
 function dtpDel(id) { const d = dtpList().find(x => x.id === id); if (!d || !confirm('Excluir o documento “' + d.name + '”? Não dá para desfazer.')) return; const p = curProject(); p.layouts = p.layouts.filter(x => x.id !== id); persist(); renderDiagram(); }
-function dtpBack() { dui.id = ''; renderDiagram(); }
+function dtpBack() { if (dui.fromBook && ebList().some(e => e.id === dui.fromBook)) { const id = dui.fromBook; dui.fromBook = ''; dui.id = ''; eui.id = id; eui.bt = 'miolo'; edh.area = 'livros'; go('editora'); return; } dui.id = ''; renderDiagram(); }
 
 /* ---------- histórico e salvamento automático ---------- */
 function dtpSnap() { const d = dtpDoc(); if (!d) return; const s = JSON.stringify(d); if (dui.hist[dui.hi] === s) return; dui.hist = dui.hist.slice(0, dui.hi + 1); dui.hist.push(s); while (dui.hist.length > histLimit() + 1) dui.hist.shift(); dui.hi = dui.hist.length - 1; }
@@ -40,7 +40,7 @@ function dtpStatus() { const el = $('dtpAuto'); if (el) el.innerHTML = `✓ Salv
 /* ---------- editor ---------- */
 function dtpEditor(p, r) {
   const d = dtpDoc(), u = d.unit;
-  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dtpBack()">← Diagramação</button><input class="dz-name" value="${esc(d.name)}" onchange="dtpDoc().name=this.value;dtpTouch()">
+  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dtpBack()">${dui.fromBook ? '← Voltar ao e-book' : '← Diagramação'}</button><input class="dz-name" value="${esc(d.name)}" onchange="dtpDoc().name=this.value;dtpTouch()">
     <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dtpRedo()" title="Refazer (Ctrl+Y)">↷</button>
     <select class="sm" onchange="histSetLimit(this.value);dtpStatus()" title="Passos de histórico">${HIST_OPTS.map(n => `<option value="${n}" ${n === histLimit() ? 'selected' : ''}>${n} passos</option>`).join('')}</select>
     <button class="btn sm" onclick="flipRead('dtp',dui.id)" title="Folhear em tela cheia">📖 Folhear</button><button class="btn sm dark" onclick="dtpTabSet('exportar')">Exportar PDF</button></div></div>

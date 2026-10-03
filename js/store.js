@@ -144,7 +144,7 @@ function normalizeEbooks(x) {
   const lines = a => (Array.isArray(a) ? a : []).slice(0, 80).map(t => str(t, 1200));
   const D = {primary: '#4F8A55', light: '#6AA170', terra: '#B99B78', gold: '#C9A876', bg: '#F4F1EC', box: '#F7F4EE', text: '#3A3733', soft: '#4A4741'};
   return (Array.isArray(x) ? x : []).filter(e => e && safeId(e.id)).slice(0, 200).map(e => ({
-    id: e.id, name: str(e.name, 120) || 'E-book', title: str(e.title, 200), subtitle: str(e.subtitle, 300), author: str(e.author, 200), collection: str(e.collection, 200), footer: str(e.footer, 80), coverSetId: safeId(e.coverSetId) ? e.coverSetId : '', created: str(e.created, 40),
+    id: e.id, dtpId: safeId(e.dtpId) ? e.dtpId : '', motor: normalizeMotor(e.motor), cover: normalizeCover(e.cover), kdp: normalizeKdp(e.kdp), name: str(e.name, 120) || 'E-book', title: str(e.title, 200), subtitle: str(e.subtitle, 300), author: str(e.author, 200), collection: str(e.collection, 200), footer: str(e.footer, 80), coverSetId: safeId(e.coverSetId) ? e.coverSetId : '', created: str(e.created, 40),
     brand: {h: str(e.brand && e.brand.h, 60) || 'Playfair Display', b: str(e.brand && e.brand.b, 60) || 'Montserrat', c: Object.fromEntries(Object.keys(D).map(k => [k, hex(e.brand && e.brand.c && e.brand.c[k], D[k])]))},
     terms: {keep: str(e.terms && e.terms.keep, 80), avoid: (e.terms && Array.isArray(e.terms.avoid) ? e.terms.avoid : []).slice(0, 50).map(t => str(t, 80))},
     sections: (Array.isArray(e.sections) ? e.sections : []).filter(s => s && safeId(s.id)).slice(0, 300).map(s => ({id: s.id, type: STYPES.includes(s.type) ? s.type : 'text', label: str(s.label, 80), title: str(s.title, 300), subtitle: str(s.subtitle, 400), opener: !!s.opener, inToc: s.inToc !== false,

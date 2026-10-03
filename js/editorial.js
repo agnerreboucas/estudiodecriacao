@@ -247,7 +247,7 @@ function eToDesign() {
   else lines = [`${P[0].slice(0, 90)} | ${(P[1] || '').slice(0, 120)}`, ...P.slice(2, -1).map((x, i) => `${c.parts[i + 2].label}: ${x}`), `${P[P.length - 1].slice(0, 90)} | Saiba mais`];
   dzNew(); dz.cmp.text = lines.join('\n'); dz.cmp.name = (s.ideas[s.chosen].tese || '').slice(0, 50); go('design'); toast('Texto enviado. Escolha estilo, fontes e gere as peças.');
 }
-function eToMotor() { const s = EDS(), M = motM(); M.idea = s.ideas[s.chosen].tese; M.source = (s.input.slice(0, 20000) + '\n\n--- Conteúdo editorial ---\n' + eMd()).slice(0, 60000); M.stage = 'material'; persist(); edh.area = 'texto'; mot.open = true; go('editora'); toast('Tese e conteúdo enviados ao Motor de texto.'); }
+function eToMotor() { const s = EDS(), t = s.ideas[s.chosen].tese, eb = bookNew((t || 'Novo e-book').slice(0, 60), ''); const M = (eb.motor = normalizeMotor({})); M.idea = t; M.source = (s.input.slice(0, 20000) + '\n\n--- Conteúdo editorial ---\n' + eMd()).slice(0, 60000); persist(); edh.area = 'livros'; ebOpen(eb.id); go('editora'); toast('Novo e-book criado com a tese e o conteúdo editorial. Gere a estrutura no motor.'); }
 
 /* ---------- memória e DNA ---------- */
 function eMemory() {

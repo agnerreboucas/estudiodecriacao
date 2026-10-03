@@ -8,11 +8,8 @@ const ebTypeLabel = {title: 'Página de título', toc: 'Sumário', chapter: 'Cap
 /* ---------- biblioteca ---------- */
 function renderEditora() {
   const r = $('editoraRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Editora'); return; }
-  if (typeof mot !== 'undefined' && mot.open) return motRender(r, p);
-  if (edh.area === 'capa') return covRender(r, p);
-  if (edh.area === 'amazon') return kdpRender(r, p);
+  if (eui.id && ebCur()) return bookRender(p, r);
   if (edh.area === 'banca') return bancaRender(r, p);
-  if (eui.id && ebCur()) return ebEditor(p, r);
   const list = ebList();
   r.innerHTML = `<div class="page-head"><div><h1>Editora</h1><p>Produza e-books completos: capítulos, caixas e checklists diagramados em 4 versões (celular, tablet 6×9, A4 preto e branco e A4 econômico), capa criada no Editor de Design, documento de revisão e EPUB.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button></div></div>
   ${list.length ? `<div class="dz-sets">${list.map(e => `<article class="dz-set eb-card"><div class="eb-cover" style="background:${esc(e.brand.c.primary)}"><small style="color:${esc(e.brand.c.gold)}">${esc((e.sections.find(s => s.type === 'title') || {}).label || 'GUIA PRÁTICO')}</small><b style="font-family:'${esc(e.brand.h)}',serif">${esc(e.title)}</b></div><strong>${esc(e.name)}</strong><small class="muted block">${esc(e.author || 'sem autor')} · ${e.sections.length} seções${e.coverSetId ? ' · com capa' : ''}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="ebOpen('${esc(e.id)}')">Abrir editor</button><button class="btn sm" onclick="ebDup('${esc(e.id)}')">Duplicar</button><button class="btn sm" onclick="ebDel('${esc(e.id)}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhum e-book ainda', 'Comece pelo modelo da coleção Método Cuidado Seguro (36 páginas, 7 capítulos) ou por um e-book em branco.', '<button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button>')}`;
@@ -23,7 +20,7 @@ function ebNewOpen() {
   <small class="muted block">O modelo traz só a estrutura e textos de exemplo entre [colchetes]. O Studio não inventa conteúdo técnico: o texto vem do manuscrito da autora.</small><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="ebCreate()">Criar</button></div>`);
 }
 function ebCreate() { const pre = $('ebPreset').value, t = $('ebTitle').value.trim(), a = $('ebAuthor').value.trim(), eb = ebNew(pre, t, a); if (t) { const ts = eb.sections.find(s => s.type === 'title'); if (ts) ts.title = t; } ebList().push(eb); persist(); closeModal(); ebOpen(eb.id); }
-function ebOpen(id) { eui.id = id; eui.sec = ''; eui.page = 0; eui.cache = {}; eui.hist = []; eui.hi = -1; eui.checks = null; ebSnap(); renderEditora(); }
+function ebOpen(id) { eui.id = id; eui.bt = 'conteudo'; eui.sec = ''; eui.page = 0; eui.cache = {}; eui.hist = []; eui.hi = -1; eui.checks = null; ebSnap(); renderEditora(); }
 function ebDup(id) { const e = ebList().find(x => x.id === id); if (!e) return; const c = JSON.parse(JSON.stringify(e)); c.id = uid('ebk'); c.name = e.name + ' (cópia)'; c.sections.forEach(s => { s.id = uid('sc'); s.blocks.forEach(b => { b.id = uid('bk'); }); }); ebList().push(c); persist(); renderEditora(); }
 function ebDel(id) { const e = ebList().find(x => x.id === id); if (!e || !confirm('Excluir o e-book “' + e.name + '”? Não dá para desfazer (a capa no Editor de Design não é apagada).')) return; const p = curProject(); p.ebooks = ebList().filter(x => x.id !== id); persist(); renderEditora(); }
 function ebBack() { eui.id = ''; renderEditora(); }
@@ -41,7 +38,7 @@ function ebStatus() { const el = $('ebAuto'); if (el) el.innerHTML = `✓ Salvo 
 /* ---------- editor ---------- */
 function ebEditor(p, r) {
   const eb = ebCur(), sec = ebSecCur(); if (!eui.sec && sec) eui.sec = sec.id;
-  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="ebBack()">← Editora</button><button class="btn sm" onclick="flipRead('eb',eui.id)" title="Folhear em tela cheia">📖 Folhear</button><input class="dz-name" value="${esc(eb.name)}" onchange="ebCur().name=this.value;ebTouch()"><div class="row-gap"><button class="btn sm" onclick="ebUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="ebRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="ebAuto"></span></div></div>
+  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="bookTab('conteudo')">← Conteúdo</button><input class="dz-name" value="${esc(eb.name)}" onchange="ebCur().name=this.value;ebTouch()"><div class="row-gap"><button class="btn sm" onclick="ebUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="ebRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="ebAuto"></span></div></div>
   <div class="eb-wrap"><div class="eb-left" id="ebLeft">${ebStructHTML(eb)}</div><div class="eb-mid"><div class="eb-vers">${Object.values(EB_FORMATS).map(f => `<button class="tchip ${eui.ver === f.id ? 'on' : ''}" onclick="ebVer('${f.id}')">${esc(f.short)}</button>`).join('')}<button class="btn sm" onclick="ebOverview()">▦ Todas as páginas</button></div>
     <div class="eb-stage" id="ebStage"><canvas id="ebCanvas"></canvas></div><div class="eb-pager"><button class="btn sm" onclick="ebGo(eui.page-1)">‹</button><span id="ebPageInfo">…</span><button class="btn sm" onclick="ebGo(eui.page+1)">›</button><span class="muted" id="ebIssues"></span></div></div>
   <div class="eb-right"><div class="matrix-tabs">${[['conteudo', 'Conteúdo'], ['identidade', 'Identidade'], ['verificar', 'Verificar'], ['exportar', 'Capa e exportar']].map(([k, l]) => `<button class="${eui.tab === k ? 'active' : ''}" onclick="eui.tab='${k}';ebRenderRight()">${l}</button>`).join('')}</div><div id="ebRight"></div></div></div>`;

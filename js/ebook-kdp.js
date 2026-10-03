@@ -2,8 +2,8 @@
    Valores de referência do KDP (confira sempre no painel do KDP antes de publicar: eles mudam). */
 const KDP_PAPER = {'bw-white': {n: 'Preto e branco · papel branco', k: 0.002252}, 'bw-cream': {n: 'Preto e branco · papel creme', k: 0.0025}, 'color-std': {n: 'Cor padrão', k: 0.002252}, 'color-premium': {n: 'Cor premium', k: 0.002347}};
 const kdpTrims = () => DTP_PRESETS.filter(x => x.kdp);
-const kdpK = () => { const p = curProject(); if (!p) return null; if (!p.kdp || typeof p.kdp !== 'object' || !p.kdp.trim) p.kdp = normalizeKdp(p.kdp); return p.kdp; };
-const kdpDocCur = () => { const p = curProject(), k = kdpK(); return p && k ? (p.layouts || []).find(d => d.id === k.docId) : null; };
+const kdpK = () => { const eb = typeof ebCur === 'function' && eui.id ? ebCur() : null, h = eb || curProject(); if (!h) return null; if (!h.kdp || typeof h.kdp !== 'object' || !h.kdp.trim) h.kdp = normalizeKdp(h.kdp); return h.kdp; };
+const kdpDocCur = () => { const p = curProject(), eb = typeof ebCur === 'function' && eui.id ? ebCur() : null; return p && eb ? (p.layouts || []).find(d => d.id === eb.dtpId) : null; };
 const kdp = {cnt: 0, checks: null};
 function kdpMinInside(pages) { return pages <= 150 ? 0.375 : pages <= 300 ? 0.5 : pages <= 500 ? 0.625 : pages <= 700 ? 0.75 : 0.875; }
 function kdpCalc(k, pagesN) {
@@ -16,11 +16,10 @@ const kdpIn = v => (+v).toFixed(3).replace('.', ',') + ' pol. (' + (v * 25.4).to
 
 function kdpRender(r, p) {
   const k = kdpK(), calc = kdpCalc(k, kdpPages()), docs = p.layouts || [], doc = kdpDocCur(), ebs = p.ebooks || [];
-  r.innerHTML = edTabs('amazon') + `<div class="page-head"><div><h1>Amazon KDP</h1><p>Feche o livro para publicar na Amazon: formato do miolo, lombada, capa completa (contracapa + lombada + capa), checklist e arquivos prontos. Os números seguem as regras do KDP; confira no painel do KDP antes de enviar, porque elas mudam.</p></div></div>
+  r.innerHTML = (eui.id ? '' : edTabs('amazon')) + `<div class="page-head"><div><h1>Publicar</h1><p>Amazon KDP: formato do miolo, lombada, capa completa (contracapa + lombada + capa), checklist e arquivos prontos. Os números seguem as regras do KDP; confira no painel do KDP antes de enviar, porque elas mudam.</p></div></div>
   <div class="mot-wrap"><div>
   <div class="form-grid"><div class="field"><label>Formato do livro impresso (corte)</label><select onchange="kdpSet('trim',this.value)">${kdpTrims().map(x => `<option value="${x.id}" ${x.id === k.trim ? 'selected' : ''}>${esc(x.n.replace('Amazon KDP · ', ''))}</option>`).join('')}</select></div>
   <div class="field"><label>Papel e tinta</label><select onchange="kdpSet('paper',this.value)">${Object.entries(KDP_PAPER).map(([id, v]) => `<option value="${id}" ${id === k.paper ? 'selected' : ''}>${v.n}</option>`).join('')}</select></div>
-  <div class="field"><label>Documento do miolo (Diagramação)</label><select onchange="kdpSet('docId',this.value)"><option value="">— nenhum —</option>${docs.map(d => `<option value="${esc(d.id)}" ${d.id === k.docId ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}</select></div>
   <div class="field"><label>Número de páginas ${doc ? '(vazio = contar do documento)' : ''}</label><input type="number" min="0" max="900" value="${k.pages || ''}" placeholder="${kdp.cnt || 24}" onchange="kdpSet('pages',+this.value||0)"></div></div>
   <div class="okr-label">MEDIDAS CALCULADAS (${calc.pages} páginas)</div>
   <table class="ail-t"><tr><td>Corte (página)</td><td><b>${calc.tw} × ${calc.th} pol.</b> (${(calc.tw * 25.4).toFixed(1)} × ${(calc.th * 25.4).toFixed(1)} mm)</td></tr>
@@ -50,11 +49,11 @@ function kdpApplyTo(d, calc) {
 async function kdpApplyDoc() {
   const p = curProject(), k = kdpK(), calc = kdpCalc(k, kdpPages());
   let d = kdpDocCur();
-  if (!d) { d = dtpNew(k.trim, 'Miolo · ' + (p.cover && p.cover.title || 'livro')); k.docId = d.id; (p.layouts = p.layouts || []).push(d); }
+  if (!d) { d = bookEnsureMiolo(ebCur(), k.trim); bookSyncMiolo(ebCur(), true); }
   else if (!confirm('Ajustar “' + d.name + '” ao formato KDP ' + calc.tw + '×' + calc.th + ' pol.? Tamanho, margens e sangria mudam (o texto é mantido).')) return;
   kdpApplyTo(d, calc); persist(); kdp.checks = null; await kdpCount(); renderEditora(); toast('Documento ajustado ao formato KDP.');
 }
-function kdpOpenDoc() { const d = kdpDocCur(); if (!d) return; edh.area = 'diag'; go('diagram'); dtpOpen(d.id); }
+function kdpOpenDoc() { if (!kdpDocCur()) return; bookMioloOpen(); }
 async function kdpVerify() {
   const d = kdpDocCur(), k = kdpK(); if (!d) return; await dtpFonts(d); await dtpLoadImgs(d); const f = dtpFlow(d), pages = dtpPageCount(d, f), calc = kdpCalc(k, k.pages || pages), out = [];
   const ck = (ok, t, warn) => out.push({ok, warn: !ok && warn, t});

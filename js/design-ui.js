@@ -36,8 +36,8 @@ function dzNew(styleId) {
   if (st) { dz.cmp.pick = {design: st.tk.designId, font: st.tk.fontId, photo: st.tk.photoId}; }
   go('design');
 }
-function dzOpen(id) { dz.setId = id; dz.slide = 0; dz.sel = ''; dz.view = 'editor'; dz.hist = []; dz.hi = -1; dz.mode = 'select'; renderDesign(); }
-function dzBack() { dz.view = 'home'; renderDesign(); }
+function dzOpen(id) { dz.fromBook = dz.pendingFrom || ''; dz.pendingFrom = ''; dz.setId = id; dz.slide = 0; dz.sel = ''; dz.view = 'editor'; dz.hist = []; dz.hi = -1; dz.mode = 'select'; renderDesign(); }
+function dzBack() { if (dz.fromBook && ebList().some(e => e.id === dz.fromBook)) { const id = dz.fromBook; dz.fromBook = ''; eui.id = id; eui.bt = 'capa'; edh.area = 'livros'; go('editora'); return; } dz.view = 'home'; renderDesign(); }
 function dzDup(id) { const p = dzP(), s = JSON.parse(JSON.stringify(p.design.sets.find(x => x.id === id))); s.id = uid('ds'); s.name += ' (cópia)'; p.design.sets.push(s); persist(); renderDesign(); }
 function dzSetDel(id) { if (!confirm('Excluir esta peça?')) return; const p = dzP(); p.design.sets = p.design.sets.filter(s => s.id !== id); persist(); renderDesign(); }
 function dzStyleDel(id) { if (!confirm('Excluir este estilo salvo?')) return; const p = dzP(); p.design.styles = p.design.styles.filter(s => s.id !== id); persist(); renderDesign(); }
@@ -140,7 +140,7 @@ async function dzGenerate() {
 /* ================= EDITOR ================= */
 function dzEditorShell(p, r) {
   const s = dzSet();
-  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">← Estúdio</button><input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="dzAuto"></span>
+  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">${dz.fromBook ? '← Voltar ao e-book' : '← Estúdio'}</button><input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="dzAuto"></span>
     <button class="btn sm ${dz.mode === 'emphasis' ? 'dark' : ''}" onclick="dzModeEm()" title="Clique em palavras do texto para destacar">✦ Destacar por clique</button><button class="btn sm ${dz.mode === 'fmt' ? 'dark' : ''}" onclick="dzModeFmt()" title="Clique numa palavra do slide para formatar só ela (Shift estende)">✎ Formatar palavra</button>
     ${dzSet().deck ? '<button class="btn sm dark" onclick="dzPresentDeck()" title="Apresentar e baixar em HTML">▶ Apresentar</button>' : ''}<button class="btn sm" onclick="dzResizeOpen(dz.setId)" title="Adaptar esta arte para outras medidas">⤢ Tamanhos</button>
     <button class="btn sm" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta peça">⚡ Variações</button><button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddLogo()">＋ Logo</button><button class="btn sm" onclick="dzAddImage()" title="Inserir imagem do seu computador">＋ Imagem</button><button class="btn sm" onclick="dzAddVideo()" title="Inserir vídeo: link do YouTube/Vimeo/mp4 ou arquivo">＋ Vídeo</button><button class="btn sm" onclick="dzAddPhoto()" title="Quadro de foto para enviar ou gerar com IA">＋ Foto</button><button class="btn sm" onclick="dzLayerDup()" title="Duplicar o elemento selecionado: texto, imagem, forma ou logo (Ctrl+D)">⧉ Duplicar</button>
