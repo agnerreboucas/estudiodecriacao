@@ -219,7 +219,7 @@ function placeholderArt(ctx, L) {
 }
 /* camada vetorial (símbolos de logo): d em viewBox 100×100, escalada para a caixa x,y,w,h */
 function drawPathLayer(ctx, L) {
-  ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; ctx.translate(L.x, L.y); ctx.scale(L.w / 100, L.h / 100);
+  ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; ctx.translate(L.x, L.y); ctx.scale(L.w / (L.vb || 100), L.h / (L.vb || 100));
   const p = new Path2D(L.d);
   if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(p, L.rule || 'nonzero'); }
   if (L.stroke && L.strokeW) { ctx.lineWidth = L.strokeW; ctx.strokeStyle = L.stroke; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(p); }
