@@ -138,13 +138,13 @@ async function dzGenerate() {
 /* ================= EDITOR ================= */
 function dzEditorShell(p, r) {
   const s = dzSet();
-  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">← Estúdio</button><input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>
+  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">← Estúdio</button><input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="dzAuto"></span>
     <button class="btn sm ${dz.mode === 'emphasis' ? 'dark' : ''}" onclick="dzModeEm()" title="Clique em palavras do texto para destacar">✦ Destacar por clique</button><button class="btn sm ${dz.mode === 'fmt' ? 'dark' : ''}" onclick="dzModeFmt()" title="Clique numa palavra do slide para formatar só ela (Shift estende)">✎ Formatar palavra</button>
     ${dzSet().deck ? '<button class="btn sm dark" onclick="dzPresentDeck()" title="Apresentar e baixar em HTML">▶ Apresentar</button>' : ''}<button class="btn sm" onclick="dzResizeOpen(dz.setId)" title="Adaptar esta arte para outras medidas">⤢ Tamanhos</button>
     <button class="btn sm" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta peça">⚡ Variações</button><button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddLogo()">＋ Logo</button><button class="btn sm" onclick="dzAddImage()" title="Inserir imagem do seu computador">＋ Imagem</button><button class="btn sm" onclick="dzAddVideo()" title="Inserir vídeo: link do YouTube/Vimeo/mp4 ou arquivo">＋ Vídeo</button><button class="btn sm" onclick="dzAddPhoto()" title="Quadro de foto para enviar ou gerar com IA">＋ Foto</button><button class="btn sm" onclick="dzLayerDup()" title="Duplicar o elemento selecionado: texto, imagem, forma ou logo (Ctrl+D)">⧉ Duplicar</button>
     <button class="btn sm dark" id="dzSaveBtn" onclick="dzSaveNow()" title="Salvar agora (o editor também salva sozinho)">Salvar</button><button class="btn sm" onclick="dzSaveTemplate()" title="Guardar esta peça ou apresentação como modelo">★ Modelo</button><button class="btn sm" onclick="dzSaveStyle()">Salvar como estilo</button><button class="btn sm" onclick="dzApplyStyleModal()">Aplicar estilo…</button><button class="btn sm" onclick="dzExportOne()">PNG</button><button class="btn sm" onclick="dzExportPDF()" title="PDF com uma página por slide">⬇ PDF</button><button class="btn sm" onclick="dzExportPSD()" title="Photoshop em camadas">PSD</button><button class="btn sm" onclick="dzExportLayers()" title="PNG por camada + manifesto">Camadas</button><button class="btn sm dark" onclick="dzExportAll()">Baixar todos (ZIP)</button></div></div>
   <div class="dz-editor"><div class="dz-slides" id="dzSlides"></div><div class="dz-stage" id="dzStage"><canvas id="dzCanvas"></canvas></div><div class="dz-insp" id="dzInsp"></div></div><input type="file" id="dzFile" accept="image/*" hidden>`;
-  dzBindCanvas(); dzSlidesPanel(); dzInspector(); dzFit(); ensureSetResources(s).then(() => { dzDraw(); dzSlidesPanel(); });
+  dzBindCanvas(); dzSlidesPanel(); dzInspector(); dzFit(); dzAutoUpdate(); ensureSetResources(s).then(() => { dzDraw(); dzSlidesPanel(); });
   if (dz.hist.length === 0) dzSnap();
 }
 function dzFit() {
@@ -178,11 +178,20 @@ function dzSlideDel() { const s = dzSet(); if (s.slides.length < 2) { toast('A p
 function dzSlideMove(d) { const s = dzSet(), j = dz.slide + d; if (j < 0 || j >= s.slides.length) return; [s.slides[dz.slide], s.slides[j]] = [s.slides[j], s.slides[dz.slide]]; dz.slide = j; dzCommit(); dzSlidesPanel(); dzDraw(); }
 
 /* histórico e persistência */
-function dzSnap() { const s = dzSet(); dz.hist = dz.hist.slice(0, dz.hi + 1); dz.hist.push(JSON.stringify(s.slides)); if (dz.hist.length > 60) dz.hist.shift(); dz.hi = dz.hist.length - 1; }
-function dzCommit() { const s = dzSet(); s.updated = new Date().toISOString(); dzSnap(); persist(); }
+/* histórico: 20, 40 ou 60 passos (preferência guardada neste navegador, vale para o editor e para o Laboratório do Logo) */
+const HIST_OPTS = [20, 40, 60];
+function histLimit() { try { const v = +localStorage.getItem('ampl_hist'); return HIST_OPTS.includes(v) ? v : 60; } catch (e) { return 60; } }
+function histSetLimit(v) { v = +v; if (!HIST_OPTS.includes(v)) return; try { localStorage.setItem('ampl_hist', String(v)); } catch (e) { /* sem armazenamento */ }
+  while (dz.hist.length > v + 1) { dz.hist.shift(); } dz.hi = Math.min(dz.hi, dz.hist.length - 1); if (typeof lgH !== 'undefined') { while (lgH.stack.length > v + 1) lgH.stack.shift(); lgH.i = Math.min(lgH.i, lgH.stack.length - 1); }
+  dzAutoUpdate(); if (typeof lgBarUpdate === 'function') lgBarUpdate(); toast('Histórico: ' + v + ' passos.'); }
+const histSelect = () => `<select class="hist-sel" onchange="histSetLimit(this.value)" title="Quantos passos o desfazer guarda">${HIST_OPTS.map(n => `<option value="${n}" ${n === histLimit() ? 'selected' : ''}>${n} passos</option>`).join('')}</select>`;
+let AUTO_AT = 0; const autoTime = () => { const d = new Date(AUTO_AT || Date.now()); return d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit', second: '2-digit'}); };
+function dzAutoUpdate() { const el = $('dzAuto'); if (el) el.innerHTML = `✓ Salvo automaticamente às ${autoTime()} · passo <b>${Math.max(0, dz.hi)}</b> de ${Math.max(0, dz.hist.length - 1)} <small>(máx. ${histLimit()})</small>`; }
+function dzSnap() { const s = dzSet(); dz.hist = dz.hist.slice(0, dz.hi + 1); dz.hist.push(JSON.stringify(s.slides)); const lim = histLimit() + 1; while (dz.hist.length > lim) dz.hist.shift(); dz.hi = dz.hist.length - 1; }
+function dzCommit() { const s = dzSet(); s.updated = new Date().toISOString(); dzSnap(); persist(); AUTO_AT = Date.now(); dzAutoUpdate(); }
 function dzCommitSoon() { clearTimeout(dz.saveT); dz.saveT = setTimeout(() => { dzCommit(); dzSlidesPanel(); }, 400); }
 function dzUndo() { if (dz.hi <= 0) return; dz.hi--; dzRestore(); } function dzRedo() { if (dz.hi >= dz.hist.length - 1) return; dz.hi++; dzRestore(); }
-function dzRestore() { const s = dzSet(); s.slides = JSON.parse(dz.hist[dz.hi]); dz.slide = Math.min(dz.slide, s.slides.length - 1); if (!dzLayer()) dz.sel = ''; persist(); ensureSetResources(s).then(() => { dzSlidesPanel(); dzInspector(); dzDraw(); }); }
+function dzRestore() { const s = dzSet(); s.slides = JSON.parse(dz.hist[dz.hi]); dz.slide = Math.min(dz.slide, s.slides.length - 1); if (!dzLayer()) dz.sel = ''; persist(); AUTO_AT = Date.now(); dzAutoUpdate(); ensureSetResources(s).then(() => { dzSlidesPanel(); dzInspector(); dzDraw(); }); }
 
 /* interação no canvas */
 function dzBindCanvas() {
@@ -203,6 +212,10 @@ function dzBindCanvas() {
     const cur = dzLayer(), cb = cur && LBOX[cur.id], hh = cb && dzHandleAt(cur, cb, p);
     if (hh) { dz.drag = {t: 'resize', h: hh.k, o: {x: cur.x, y: cur.y, w: cur.w, hh: cb.h, size: cur.size, ls: cur.ls, blur: cur.blur, spans: cur.spans ? JSON.parse(JSON.stringify(cur.spans)) : null, hb: cur.h}, ch: false}; return; }
     const hit = [...s.layers].reverse().find(l => !l.hidden && LBOX[l.id] && p.x >= LBOX[l.id].x && p.x <= LBOX[l.id].x + LBOX[l.id].w && p.y >= LBOX[l.id].y && p.y <= LBOX[l.id].y + LBOX[l.id].h && !(l.role === 'overlay'));
+    if (hit && e.altKey) {   // Alt + clique/arrasto: duplica o elemento e arrasta a cópia (o original fica no lugar)
+      const c = JSON.parse(JSON.stringify(hit)); c.id = lid(); s.layers.splice(s.layers.indexOf(hit) + 1, 0, c); dz.sel = c.id; dz.range = null;
+      dz.drag = {t: 'move', sx: p.x, sy: p.y, x: c.x, y: c.y, ch: true, dup: true, moved: false}; dzInspector(); dzDraw(); return;
+    }
     if (hit) { dz.sel = hit.id; dz.drag = {t: 'move', sx: p.x, sy: p.y, x: hit.x, y: hit.y, ch: false}; } else dz.sel = '';
     dzInspector(); dzDraw();
   });
@@ -210,10 +223,11 @@ function dzBindCanvas() {
     const L = dzLayer(), p = pt(e);
     if (!dz.drag) { const b = L && LBOX[L.id], h = b && dz.mode === 'select' && dzHandleAt(L, b, p); cv.style.cursor = h ? h.c : ''; return; }
     const d = dz.drag; if (!L) return; d.ch = true;
-    if (d.t === 'move') { L.x = Math.round(d.x + p.x - d.sx); L.y = Math.round(d.y + p.y - d.sy); } else dzResize(L, d, p, e.shiftKey);
+    if (d.t === 'move') { if (d.dup && Math.hypot(p.x - d.sx, p.y - d.sy) > 3 / dz.scale) d.moved = true; L.x = Math.round(d.x + p.x - d.sx); L.y = Math.round(d.y + p.y - d.sy); } else dzResize(L, d, p, e.shiftKey);
     dzDraw();
   });
-  const end = () => { if (dz.drag && dz.drag.ch) { dzCommit(); dzInspector(); dzSlidesPanel(); } dz.drag = null; };
+  const end = () => { if (dz.drag && dz.drag.dup && !dz.drag.moved) { const L = dzLayer(); if (L) { L.x += 30; L.y += 30; dzDraw(); } }   // Alt+clique sem arrastar: cópia deslocada
+    if (dz.drag && dz.drag.ch) { dzCommit(); dzInspector(); dzSlidesPanel(); } dz.drag = null; };
   cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
   cv.addEventListener('dblclick', e => {
     const p = pt(e), L = dzLayer(), b = L && L.type === 'text' && LBOX[L.id], w = b && b.words.find(w => p.x >= w.x && p.x <= w.x + w.w && p.y >= w.y && p.y <= w.y + w.h);

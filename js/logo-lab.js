@@ -167,11 +167,13 @@ function lgGenerate(p, brief, n, seed) {
 }
 
 /* ---------- páginas ---------- */
-function dzLogoOpen() { const p = dzP(); if (!p) return; if (lg.pid !== p.id) { lg.pid = p.id; lg.items = []; lg.cur = null; lg.fav = {}; lg.view = 'brief'; lg.step = 0; lgH.stack = []; lgH.i = -1; lgNav.stack = []; lgNav.i = -1; lgNav.last = ''; } const L = lgLab(p); lg.brief = Object.assign(lgBriefDefault(p), L.brief || {}); if (!lg.brief.name) lg.brief.name = p.name || ''; lg.view = lg.items.length && lg.cur ? lg.view : 'brief'; lg.items = lg.items.length ? lg.items : []; dz.view = 'logolab'; go('design'); renderDesign(); }
+function dzLogoOpen() { const p = dzP(); if (!p) return; if (lg.pid !== p.id) { lg.pid = p.id; lg.items = []; lg.cur = null; lg.fav = {}; lg.view = 'brief'; lg.step = 0; lgH.stack = []; lgH.i = -1; lgNav.stack = []; lgNav.i = -1; lgNav.last = ''; const dr = lgLab(p).draft; if (dr && dr.name) { lg.cur = JSON.parse(JSON.stringify(dr)); lg.view = 'edit'; toast('Rascunho do logo “' + dr.name + '” recuperado.'); } } const L = lgLab(p); lg.brief = Object.assign(lgBriefDefault(p), L.brief || {}); if (!lg.brief.name) lg.brief.name = p.name || ''; if (!(lg.cur && (lg.items.length || lg.view === 'edit'))) lg.view = 'brief'; dz.view = 'logolab'; go('design'); renderDesign(); }
 /* ---------- desfazer/refazer (dados) e voltar/avançar (páginas) ---------- */
 const lgH = {stack: [], i: -1}, lgNav = {stack: [], i: -1, restoring: false, last: ''};
+/* autosave do Laboratório do Logo: o briefing e o logo em edição ficam salvos a cada passo (rascunho recuperável) */
+function lgAutoSave() { const p = dzP(); if (!p || !lg.brief) return; const L = lgLab(p); L.brief = JSON.parse(JSON.stringify(lg.brief)); L.draft = lg.cur && ['edit', 'pres', 'mock', 'board'].includes(lg.view) ? JSON.parse(JSON.stringify(lg.cur)) : (lg.cur ? L.draft || null : null); persist(); AUTO_AT = Date.now(); lgBarUpdate(); }
 const lgSnap = () => JSON.stringify({brief: lg.brief, cur: lg.cur, items: lg.items, fav: lg.fav});
-function lgCommit() { if (!lg.brief) return; const sn = lgSnap(); if (lgH.stack[lgH.i] === sn) return; lgH.stack = lgH.stack.slice(0, lgH.i + 1); lgH.stack.push(sn); if (lgH.stack.length > 80) lgH.stack.shift(); lgH.i = lgH.stack.length - 1; }
+function lgCommit() { if (!lg.brief) return; const sn = lgSnap(); if (lgH.stack[lgH.i] === sn) return; lgH.stack = lgH.stack.slice(0, lgH.i + 1); lgH.stack.push(sn); while (lgH.stack.length > histLimit() + 1) lgH.stack.shift(); lgH.i = lgH.stack.length - 1; lgAutoSave(); }
 let lgCommitT = 0; const lgCommitSoon = () => { clearTimeout(lgCommitT); lgCommitT = setTimeout(() => { lgCommit(); lgBarUpdate(); }, 450); };
 function lgRestore(i) { const o = JSON.parse(lgH.stack[i]); lgH.i = i; lg.brief = o.brief; lg.cur = o.cur; lg.items = o.items; lg.fav = o.fav || {}; if (lg.view === 'edit' && !lg.cur) lg.view = lg.items.length ? 'grid' : 'brief'; if (lg.view === 'grid' && !lg.items.length) lg.view = 'brief'; renderDesign(); }
 function lgUndo() { lgCommit(); if (lgH.i > 0) lgRestore(lgH.i - 1); else toast('Nada para desfazer.'); }
@@ -185,7 +187,7 @@ function lgClearSel() {
 }
 function lgBarHTML() {
   const cu = lgH.i > 0, re = lgH.i < lgH.stack.length - 1, ba = lgNav.i > 0, fo = lgNav.i < lgNav.stack.length - 1, b = (fn, on, t, tip) => `<button class="btn sm" ${on ? '' : 'disabled'} onclick="${fn}" title="${tip}">${t}</button>`;
-  return `<span class="lg-bar" id="lgBar">${b('lgBack()', ba, '‹ Voltar', 'Página anterior (Alt+←)')}${b('lgForward()', fo, 'Avançar ›', 'Próxima página (Alt+→)')}<i></i>${b('lgUndo()', cu, '↶ Desfazer', 'Desfazer (Ctrl+Z)')}${b('lgRedo()', re, '↷ Refazer', 'Refazer (Ctrl+Y)')}<i></i>${b('lgClearSel()', true, '⊘ Desmarcar tudo', 'Limpa as seleções desta tela')}</span>`;
+  return `<span class="lg-bar" id="lgBar">${b('lgBack()', ba, '‹ Voltar', 'Página anterior (Alt+←)')}${b('lgForward()', fo, 'Avançar ›', 'Próxima página (Alt+→)')}<i></i>${b('lgUndo()', cu, '↶ Desfazer', 'Desfazer (Ctrl+Z)')}${b('lgRedo()', re, '↷ Refazer', 'Refazer (Ctrl+Y)')}<i></i>${b('lgClearSel()', true, '⊘ Desmarcar tudo', 'Limpa as seleções desta tela')}<i></i>${histSelect()}<span class="dz-auto">✓ salvo ${autoTime()} · passo ${Math.max(0, lgH.i)}/${Math.max(0, lgH.stack.length - 1)}</span></span>`;
 }
 function lgBarUpdate() { const el = $('lgBar'); if (el) el.outerHTML = lgBarHTML(); }
 document.addEventListener('keydown', e => {

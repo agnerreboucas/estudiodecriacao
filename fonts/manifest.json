@@ -1,0 +1,338 @@
+{
+ "generated": "2026-10-03T11:42:07.794Z",
+ "families": [
+  {
+   "family": "Bilgie",
+   "cat": "serif",
+   "files": [
+    {
+     "path": "Bilgie.ttf",
+     "weight": 400,
+     "italic": false,
+     "variable": null
+    }
+   ]
+  },
+  {
+   "family": "CS Gorila",
+   "cat": "display",
+   "files": [
+    {
+     "path": "CSGorila-Italic.woff2",
+     "weight": 400,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "CSGorila-Regular.woff2",
+     "weight": 400,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "CSGorila-ReverseItalic.woff2",
+     "weight": 400,
+     "italic": true,
+     "variable": null
+    }
+   ]
+  },
+  {
+   "family": "Gleh",
+   "cat": "sans",
+   "files": [
+    {
+     "path": "Gleh-Bold.woff2",
+     "weight": 700,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Gleh-BoldSlanted.woff2",
+     "weight": 700,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Gleh-ExtraBold.woff2",
+     "weight": 800,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Gleh-ExtraBoldSlanted.woff2",
+     "weight": 800,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Gleh-Light.woff2",
+     "weight": 300,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Gleh-LightSlanted.woff2",
+     "weight": 300,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Gleh-Medium.woff2",
+     "weight": 500,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Gleh-MediumSlanted.woff2",
+     "weight": 500,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Gleh-Regular.woff2",
+     "weight": 400,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Gleh-SemiBold.woff2",
+     "weight": 600,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Gleh-SemiBoldSlanted.woff2",
+     "weight": 600,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Gleh-Slanted.woff2",
+     "weight": 400,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Gleh-VF.otf",
+     "weight": 800,
+     "italic": false,
+     "variable": [
+      300,
+      800
+     ]
+    }
+   ]
+  },
+  {
+   "family": "MANIGE",
+   "cat": "display",
+   "files": [
+    {
+     "path": "MANIGE.woff2",
+     "weight": 400,
+     "italic": false,
+     "variable": null
+    }
+   ]
+  },
+  {
+   "family": "Moon Walk",
+   "cat": "display",
+   "files": [
+    {
+     "path": "Moon-Walk.ttf",
+     "weight": 400,
+     "italic": false,
+     "variable": null
+    }
+   ]
+  },
+  {
+   "family": "Oliviar Sans",
+   "cat": "display",
+   "files": [
+    {
+     "path": "OliviarSans-BlackEx.otf",
+     "weight": 900,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "OliviarSans-BoldEx.otf",
+     "weight": 700,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "OliviarSans-LightEx.otf",
+     "weight": 400,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "OliviarSans-RegularEx.otf",
+     "weight": 400,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "OliviarSans-SemiBoldEx.otf",
+     "weight": 500,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "OliviarSans-ThinEx.otf",
+     "weight": 100,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "OliviarSans-UltraLightEx.otf",
+     "weight": 200,
+     "italic": false,
+     "variable": null
+    }
+   ]
+  },
+  {
+   "family": "Pripun",
+   "cat": "round",
+   "files": [
+    {
+     "path": "Pripun-Black.woff2",
+     "weight": 900,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Pripun-BlackItalic.woff2",
+     "weight": 900,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Pripun-Bold.woff2",
+     "weight": 700,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Pripun-BoldItalic.woff2",
+     "weight": 700,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Pripun-ExtraBold.woff2",
+     "weight": 800,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Pripun-ExtraBoldItalic.woff2",
+     "weight": 800,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Pripun-ExtraLight.woff2",
+     "weight": 200,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Pripun-ExtraLightItalic.woff2",
+     "weight": 200,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Pripun-Italic.woff2",
+     "weight": 400,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Pripun-Light.woff2",
+     "weight": 300,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Pripun-LightItalic.woff2",
+     "weight": 300,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Pripun-Medium.woff2",
+     "weight": 500,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Pripun-MediumItalic.woff2",
+     "weight": 500,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Pripun-Regular.woff2",
+     "weight": 400,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Pripun-SemiBold.woff2",
+     "weight": 600,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Pripun-SemiBoldItalic.woff2",
+     "weight": 600,
+     "italic": true,
+     "variable": null
+    },
+    {
+     "path": "Pripun-Thin.woff2",
+     "weight": 100,
+     "italic": false,
+     "variable": null
+    },
+    {
+     "path": "Pripun-ThinItalic.woff2",
+     "weight": 100,
+     "italic": true,
+     "variable": null
+    }
+   ]
+  },
+  {
+   "family": "Rigter",
+   "cat": "display",
+   "files": [
+    {
+     "path": "Rigter.woff2",
+     "weight": 400,
+     "italic": false,
+     "variable": null
+    }
+   ]
+  },
+  {
+   "family": "The Harmony",
+   "cat": "serif",
+   "files": [
+    {
+     "path": "TheHarmony.woff",
+     "weight": 400,
+     "italic": false,
+     "variable": null
+    }
+   ]
+  }
+ ]
+}
