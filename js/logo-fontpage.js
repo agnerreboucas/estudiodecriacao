@@ -1,5 +1,5 @@
 /* ===== Laboratório do Logo · logos tipográficos e página de fontes (prévia das famílias) ===== */
-const lgF = {mode: 'edit', q: '', cat: '', sel: '', hw: 0, tf: '', tw: 400, hf2: '', text: '', shown: 36, onlyFav: false};
+const lgF = {mode: 'edit', q: '', cat: '', sel: '', hw: 0, tf: '', tw: 400, hf2: '', text: '', shown: 36, onlyFav: false, mine: false, manage: false};
 
 function lgSetRole(v) { const c = lg.cur; c.font = v; delete c.hf; delete c.hw; delete c.tf; delete c.tw; delete c.hf2; renderDesign(); }
 function lgSetKind(k) {
@@ -21,20 +21,20 @@ function lgFontsOpen(mode) {
   else { lgF.sel = ''; lgF.text = lg.brief.name || 'Sua Marca'; }
   lg.view = 'fonts'; renderDesign();
 }
-function lgFontList() { const q = lgNorm(lgF.q).trim(); const fav = lg.brief.fontFavs || []; return LG_TYPEFACES.filter(f => (!lgF.cat || f.cat === lgF.cat) && (!q || lgNorm(f.family).includes(q)) && (!lgF.onlyFav || fav.includes(f.family))); }
+function lgFontList() { const q = lgNorm(lgF.q).trim(); const fav = lg.brief.fontFavs || []; return LG_TYPEFACES.filter(f => (!lgF.mine || f.mine) && (!lgF.cat || f.cat === lgF.cat) && (!q || lgNorm(f.family).includes(q)) && (!lgF.onlyFav || fav.includes(f.family))); }
 const lgCatLabel = id => (LG_FONT_CATS.find(c => c[0] === id) || [0, id])[1];
 function lgFontCard(f) {
   const fav = (lg.brief.fontFavs || []).includes(f.family), sel = lgF.sel === f.family, w = lgDefaultWeight(f.family), sc = Math.min(1.5, f.scale || 1);
-  return `<button class="lg-fcard ${sel ? 'on' : ''}" onclick="lgFontPick('${esc(f.family)}')" data-fam="${esc(f.family)}"><span class="lg-fsample" style="font-family:'${esc(f.family)}',system-ui,sans-serif;font-weight:${w};font-size:${Math.round(28 * sc)}px">${esc(lgF.text || 'Sua Marca')}</span><span class="lg-fmeta"><b>${esc(f.family)}</b><small>${esc(lgCatLabel(f.cat))} · ${lgWeightsOf(f.family).length} peso(s)</small></span><i class="lg-fstar ${fav ? 'on' : ''}" title="Favorita" onclick="event.stopPropagation();lgFontFav('${esc(f.family)}')">${fav ? '★' : '☆'}</i></button>`;
+  return `<button class="lg-fcard ${sel ? 'on' : ''}" onclick="lgFontPick('${esc(f.family)}')" data-fam="${esc(f.family)}">${f.mine ? '<em class="lg-mine-tag">sua</em>' : ''}<span class="lg-fsample" style="font-family:'${esc(f.family)}',system-ui,sans-serif;font-weight:${w};font-size:${Math.round(28 * sc)}px">${esc(lgF.text || 'Sua Marca')}</span><span class="lg-fmeta"><b>${esc(f.family)}</b><small>${esc(lgCatLabel(f.cat))} · ${lgWeightsOf(f.family).length} peso(s)</small></span><i class="lg-fstar ${fav ? 'on' : ''}" title="Favorita" onclick="event.stopPropagation();lgFontFav('${esc(f.family)}')">${fav ? '★' : '☆'}</i></button>`;
 }
 function lgFontsPage(p, r) {
   const list = lgFontList(), shown = list.slice(0, lgF.shown), edit = lgF.mode === 'edit', fav = lg.brief.fontFavs || [];
   r.innerHTML = `<div class="page-head"><div><h1>${edit ? 'Escolher fonte do logo' : 'Fontes favoritas para os logos'}</h1><p>${edit ? 'Veja cada família com o nome da sua marca, escolha o peso e o par para o slogan.' : 'Marque com ★ as fontes que você quer ver nos logos tipográficos. Elas passam na frente na geração.'}</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="lgFontsDone(${edit ? 'false' : 'true'})">${edit ? '← Cancelar' : 'Concluir'}</button></div></div>
   <div class="lg-fonts"><div class="lg-flist"><div class="row-gap" style="margin-bottom:8px"><input class="lg-search" id="lgFq" placeholder="Buscar fonte…" value="${esc(lgF.q)}" oninput="lgF.q=this.value;lgF.shown=36;lgFontsRefresh()"><input class="lg-search" style="max-width:240px" placeholder="Texto de teste" value="${esc(lgF.text)}" oninput="lgF.text=this.value;lgFontsRefresh()"></div>
-    <div class="tchips" style="margin-bottom:8px"><button class="tchip ${lgF.cat ? '' : 'on'}" onclick="lgF.cat='';lgF.shown=36;lgFontsRefresh()">Todas (${LG_TYPEFACES.length})</button>${LG_FONT_CATS.map(c => `<button class="tchip ${lgF.cat === c[0] ? 'on' : ''}" onclick="lgF.cat='${c[0]}';lgF.shown=36;lgFontsRefresh()">${esc(c[1])} (${LG_TYPEFACES.filter(f => f.cat === c[0]).length})</button>`).join('')}<button class="tchip ${lgF.onlyFav ? 'on' : ''}" onclick="lgF.onlyFav=!lgF.onlyFav;lgFontsRefresh()">★ Favoritas (${fav.length})</button></div>
+    <div class="tchips" style="margin-bottom:8px"><button class="tchip ${lgF.cat ? '' : 'on'}" onclick="lgF.cat='';lgF.shown=36;lgFontsRefresh()">Todas (${LG_TYPEFACES.length})</button>${LG_FONT_CATS.map(c => `<button class="tchip ${lgF.cat === c[0] ? 'on' : ''}" onclick="lgF.cat='${c[0]}';lgF.shown=36;lgFontsRefresh()">${esc(c[1])} (${LG_TYPEFACES.filter(f => f.cat === c[0]).length})</button>`).join('')}<button class="tchip ${lgF.onlyFav ? 'on' : ''}" onclick="lgF.onlyFav=!lgF.onlyFav;lgFontsRefresh()">★ Favoritas (${fav.length})</button><button class="tchip ${lgF.mine ? 'on' : ''}" onclick="lgF.mine=!lgF.mine;lgF.shown=36;lgFontsRefresh()">Minhas fontes (${myFonts().length})</button><button class="tchip ${lgF.manage ? 'on' : ''}" onclick="lgF.manage=!lgF.manage;renderDesign()">＋ Enviar / gerenciar</button></div>${lgF.manage ? myManagerHTML() : ''}
     <div class="lg-fgrid" id="lgFgrid">${shown.map(lgFontCard).join('') || '<small class="muted">Nenhuma fonte encontrada.</small>'}</div>${list.length > shown.length ? `<div class="row-gap" style="margin-top:10px"><button class="btn" onclick="lgF.shown+=36;lgFontsRefresh()">Mostrar mais (${list.length - shown.length})</button></div>` : ''}</div>
   ${edit ? `<div class="lg-fdetail" id="lgFdetail">${lgFontDetail()}</div>` : ''}</div>`;
-  lgFontsLoad(shown.map(f => f.family)); if (edit) lgFontPaint();
+  lgFontsLoad(shown.map(f => f.family).concat(lgF.manage ? myFonts().map(f => f.family) : [])); if (edit) lgFontPaint();
 }
 function lgFontsRefresh() { const s = $('lgFq'), pos = s ? s.selectionStart : 0; renderDesign(); const n = $('lgFq'); if (n && lgF.q) { n.focus(); n.setSelectionRange(pos, pos); } }
 async function lgFontsLoad(fams) { await ensureFonts(fams); }

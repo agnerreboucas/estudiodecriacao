@@ -32,6 +32,7 @@ function fmtPicker(who, o) {
 /* ---- fontes (Google Fonts, carregadas sob demanda) ---- */
 const FONTS_LOADED = new Set();
 function ensureFont(family) {
+  if (typeof MYFONT_SET !== 'undefined' && MYFONT_SET.has(family)) return Promise.race([myFontLoad(family), new Promise(r => setTimeout(r, 4000))]);
   if (!family || FONTS_LOADED.has(family) || !(family in FONT_META)) return Promise.resolve();
   FONTS_LOADED.add(family);
   const w = FONT_META[family], link = document.createElement('link');
