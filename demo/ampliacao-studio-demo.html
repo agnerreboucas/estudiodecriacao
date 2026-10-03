@@ -1238,7 +1238,12 @@ function openCreative(id) {
   showModal(c.title, `<div class="two"><div class="canvas" style="min-height:300px"><div class="poster" style="width:260px"><h2>${esc(c.title)}</h2><p>${esc(p ? p.name : '')} · ${esc(c.type)}</p></div></div>
     <div class="panel"><h3>Direção</h3><div class="kv"><span>Formato</span><strong>${esc(c.type)}</strong></div><div class="kv"><span>Status</span><strong>${esc(c.status)}</strong></div>
     ${c.brief ? `<div class="kv"><span>Briefing</span><strong>${esc(c.brief)}</strong></div>` : ''}${c.copy ? `<div class="kv"><span>Copy ${tag('recomendacao')}</span><strong style="white-space:pre-wrap">${esc(c.copy)}</strong></div>` : ''}
-    <div class="modal-actions" style="flex-wrap:wrap;justify-content:flex-start"><button class="btn dark" onclick="creativeToApproval('${c.id}')">Enviar para aprovação</button><button class="btn" onclick="creativeAICopy('${c.id}')">✦ Gerar copy</button><button class="btn" onclick="creativeDelete('${c.id}')">Excluir</button></div></div></div>`);
+    <div class="modal-actions" style="flex-wrap:wrap;justify-content:flex-start"><button class="btn dark" onclick="creativeToApproval('${c.id}')">Enviar para aprovação</button><button class="btn" onclick="creativeAICopy('${c.id}')">✦ Gerar copy</button><button class="btn orange" onclick="creativeToDesign('${c.id}')">Abrir no Editor de Design</button><button class="btn" onclick="creativeDelete('${c.id}')">Excluir</button></div></div></div>`);
+}
+function creativeToDesign(id) {
+  const c = state.creatives.find(x => x.id === id); if (!c || typeof dzNew !== 'function') return;
+  const t = String(c.type).toLowerCase(), fmt = /stor/.test(t) ? 'story' : /carross/.test(t) ? 'ig34' : /post/.test(t) ? 'feed45' : 'ad45';
+  if (projectById(c.projectId)) setActiveProject(c.projectId); closeModal(); dzNew(); dz.cmp.name = c.title; dz.cmp.text = c.brief || ''; dz.cmp.fmt = fmt; renderDesign();
 }
 function creativeToApproval(id) {
   const c = state.creatives.find(x => x.id === id), p = projectById(c.projectId); if (!p) return;
@@ -1286,7 +1291,12 @@ function confirmCreation(type) {
   if (type === 'project') { closeModal(); openWizard(name.replace(/ — novo conceito$/, '')); return; }
   if (!p) { toast('Escolha um projeto.'); return; }
   state.creatives.unshift({id: uid('c'), projectId: p.id, title: name, type: CREATION_NAMES[type], cls: 'a5', status: 'Rascunho', brief, created: new Date().toISOString()});
-  persist(); closeModal(); renderHome(); toast(CREATION_NAMES[type] + ' criado em ' + p.name + '.');
+  persist(); closeModal(); renderHome();
+  /* anúncio/post/story abrem direto o Estúdio de Design (tela de composição já preenchida); vídeo vai ao Video Lab */
+  const FMT = {ad: 'ad45', post: 'feed45', carousel: 'ig34', story: 'story', stories: 'story'};
+  if (FMT[type] && typeof dzNew === 'function') { setActiveProject(p.id); dzNew(); dz.cmp.name = name; dz.cmp.text = brief === 'Criado a partir do contexto atual.' ? '' : brief; dz.cmp.fmt = FMT[type]; renderDesign(); toast(CREATION_NAMES[type] + ' criado em ' + p.name + '. Escolha o estilo e gere as peças.'); return; }
+  if (type === 'video') { setActiveProject(p.id); go('videoLab'); toast('Vídeo criado em ' + p.name + '.'); return; }
+  toast(CREATION_NAMES[type] + ' criado em ' + p.name + '.');
 }
 function createProject() {
   const n = $('npName').value.trim() || 'Novo projeto'; const p = newProject(n, 'Projeto criado no Ampliação Studio', {category: $('npCat').value, goal: $('npGoal').value.trim()});
