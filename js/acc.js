@@ -21,7 +21,7 @@ function accAuto(root, sel, key, opt) {
   const wrap = (name, after) => { const f = window[name]; if (typeof f !== 'function') return; window[name] = function () { const r = f.apply(this, arguments); try { after(); } catch (e) { console.warn(name, e); } return r; }; };
   wrap('dzInspector', () => { const L = typeof dzLayer === 'function' ? dzLayer() : null; accAuto($('dzInsp'), 'h4', 'dz-' + (L ? L.type + (L.role === 'logo' ? 'L' : '') : 'none')); });
   wrap('dtpPanel', () => { const it = dui.tab === 'objeto' && typeof dtpSelItem === 'function' ? dtpSelItem() : null; accAuto($('dtpPanel'), '.okr-label', 'dtp-' + dui.tab + (it ? it.k : '')); });
-  wrap('covRender', () => accAuto(document.querySelector('.cov-form'), '.okr-label', 'cov'));
+  wrap('covRender', () => accAuto(document.querySelector('.cov-form'), '.okr-label', 'cov', {open: [0, 1, 2]}));
 })();
 
 /* ---------- "Não comece do zero": tudo o que existe para partir de uma base ---------- */
@@ -40,7 +40,7 @@ const startLayList = () => LAYOUTS.filter(l => start.group === 'Todos' || l.grou
 function startLayBody() { return `<div class="tchips">${['Todos', ...LAYOUT_GROUPS].map(g => `<button class="tchip ${start.group === g ? 'on' : ''}" onclick="startGroup('${g}')">${g}</button>`).join('')}</div><div class="ly-grid start-lay">${startLayList().map(l => `<article class="ly-card" onclick="lyQuick('${l.id}')"><canvas data-lay="${l.id}" width="200" height="250"></canvas><strong>${esc(l.name)}</strong></article>`).join('')}</div>`; }
 function startGroup(g) { start.group = g; const b = document.querySelector('#acc-start-lay .lg-acc-b'); if (b) { b.innerHTML = startLayBody(); startPaint(); } }
 function startPaint() { const box = $('startBox'), p = dzP(); if (box && p && ACC.start && ACC.start.lay && typeof lyPaint === 'function') { if (typeof lyState !== 'undefined' && !lyState.style) { const s = lyStyles(p); lyState.style = s[0].id; } lyPaint(p, box, startLayList()); } }
-ACC_ON['start-lay'] = startPaint;
+ACC_ON['start-lay'] = startPaint; ACC_ON['covg-gal'] = () => covGalPaint();
 function startInit() { bankFill(); startPaint(); }
 function startRef(id) {
   showModal('Usar esta referência', `<p class="muted" style="font-size:13px;margin-top:0">A IA lê fontes, cores, tamanhos e blocos e monta uma peça editável no Editor de Design. Use ★ Modelo no editor para guardar na galeria.</p><div class="modal-actions" style="flex-wrap:wrap"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn" onclick="closeModal();go('inspiration')">Ver na Inspiração</button><button class="btn dark" onclick="startRefRead('${esc(id)}')">✦ Ler layout (IA)</button></div>`);

@@ -1,6 +1,6 @@
 /* ===== Inspiração: o nosso Pinterest. Referências por categoria (imagens, links e paletas), quadros, busca, filtro por cor ===== */
 const INSPO_CATS = [
-  {id: 'posts', label: 'Posts', hint: 'Feed, carrosséis, stories e capas'}, {id: 'capas', label: 'Capas de livro', hint: 'Capas, tipografia de título, mockups'}, {id: 'diagramacao', label: 'Diagramação', hint: 'Grids, hierarquia, composição de página'}, {id: 'logos', label: 'Logos', hint: 'Marcas, símbolos e lockups'},
+  {id: 'posts', label: 'Posts', hint: 'Feed, carrosséis, stories e capas'}, {id: 'fontes', label: 'Fontes e tipografia', hint: 'Especímenes, pares e fichas de fontes'}, {id: 'capas', label: 'Capas de livro', hint: 'Capas, tipografia de título, mockups'}, {id: 'diagramacao', label: 'Diagramação', hint: 'Grids, hierarquia, composição de página'}, {id: 'logos', label: 'Logos', hint: 'Marcas, símbolos e lockups'},
   {id: 'cartaz', label: 'Cartaz e pôster', hint: 'Cartazes, flyers, eventos e capas'}, {id: 'foto', label: 'Fotografia', hint: 'Luz, enquadramento, direção de arte'}, {id: 'estilos', label: 'Estilos de design', hint: 'Movimentos, tendências e linguagens visuais'}, {id: 'cores', label: 'Cores', hint: 'Paletas e combinações'}
 ];
 const INSPO_HUES = [['red', 'Vermelho', '#e5484d'], ['orange', 'Laranja', '#f08a24'], ['yellow', 'Amarelo', '#f5c518'], ['green', 'Verde', '#30a46c'], ['teal', 'Turquesa', '#12a594'], ['blue', 'Azul', '#3e63dd'], ['purple', 'Roxo', '#8e4ec6'], ['pink', 'Rosa', '#e93d82'], ['neutral', 'Neutras', '#8b8d98']];
@@ -26,8 +26,9 @@ async function inspoMake(file, opt) {
 }
 async function inspoAddFiles(files, opt) {
   const list = [...files], ok = [], bad = []; toast('Adicionando ' + list.length + ' referência(s)…');
-  for (const f of list) { try { const it = await inspoMake(f, opt); inspo().items.unshift(it); ok.push(it); } catch (e) { bad.push(f.name + ' (' + e.message + ')'); } }
-  persist(); renderInspiration(); toast(ok.length + ' adicionada(s)' + (bad.length ? '. Não consegui: ' + bad.join('; ') : '.')); return ok;
+  const auto = opt.cat === 'auto'; if (auto) opt = Object.assign({}, opt, {cat: 'posts'});
+  for (const f of list) { try { const it = await inspoMake(f, opt); if (auto) { toast('Classificando ' + (ok.length + 1) + ' de ' + list.length + '…'); await inspoAutoCat(it, f); } inspo().items.unshift(it); ok.push(it); } catch (e) { bad.push(f.name + ' (' + e.message + ')'); } }
+  persist(); renderInspiration(); toast(ok.length + ' adicionada(s)' + (auto ? ' e organizada(s) por categoria: ' + Object.entries(ok.reduce((a, i) => { a[i.cat] = (a[i.cat] || 0) + 1; return a; }, {})).map(([k, n]) => (inspoCats().find(c => c.id === k) || {label: k}).label + ' ' + n).join(', ') : '') + (bad.length ? '. Não consegui: ' + bad.join('; ') : '.')); return ok;
 }
 
 /* ---------- renderização ---------- */
@@ -69,7 +70,7 @@ function inspoBulkBar(list) {
   const n = insp.sel.size, I = inspo();
   return `<div class="in-bulk"><b>${n} selecionada(s)</b><button class="btn sm" onclick="insp.sel=new Set(inspoFiltered().map(i=>i.id));renderInspiration()">Selecionar todas (${list.length})</button><button class="btn sm" onclick="insp.sel.clear();renderInspiration()">⊘ Desmarcar tudo</button>
   <select onchange="inspoBulkMove(this.value);this.value=''"><option value="">Mover para categoria…</option>${inspoCats().map(c => `<option value="${esc(c.id)}">${esc(c.label)}</option>`).join('')}</select>
-  <select onchange="inspoBulkBoard(this.value);this.value=''"><option value="">Adicionar ao quadro…</option>${I.boards.map(b => `<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('')}</select><button class="btn sm" onclick="inspoBulkFav()">★ Favoritar</button><button class="btn sm" onclick="inspoBulkDel()">Excluir</button></div>`;
+  <select onchange="inspoBulkBoard(this.value);this.value=''"><option value="">Adicionar ao quadro…</option>${I.boards.map(b => `<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('')}</select><button class="btn sm" onclick="inspoReclass()" title="A IA move cada imagem para a categoria certa">✦ Reclassificar (IA)</button><button class="btn sm" onclick="inspoBulkFav()">★ Favoritar</button><button class="btn sm" onclick="inspoBulkDel()">Excluir</button></div>`;
 }
 const inspoSelItems = () => inspo().items.filter(i => insp.sel.has(i.id));
 function inspoBulkMove(c) { if (!c) return; inspoSelItems().forEach(i => { i.cat = c; }); persist(); toast('Movidas para ' + inspoCatLabel(c) + '.'); renderInspiration(); }
@@ -86,7 +87,7 @@ let INSPO_PENDING = [];
 function inspoAddOpen(files) {
   INSPO_PENDING = files ? [...files] : []; const I = inspo(), cat = ['all', 'fav'].includes(insp.cat) ? 'posts' : insp.cat;
   showModal('Adicionar referências', `<div class="in-dz" id="inDz" onclick="inspoPick()"><b>Arraste imagens aqui, cole (Ctrl+V) ou clique para escolher</b><small id="inPend">${INSPO_PENDING.length ? INSPO_PENDING.length + ' imagem(ns) pronta(s)' : 'PNG, JPG, WebP, GIF ou SVG · até 12 MB cada'}</small></div>
-  <div class="form-grid"><div class="field"><label>Categoria</label><select id="inCat">${inspoCats().map(c => `<option value="${esc(c.id)}" ${c.id === cat ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select></div><div class="field"><label>Quadro (opcional)</label><select id="inBoard"><option value="">—</option>${I.boards.map(b => `<option value="${esc(b.id)}" ${b.id === insp.board ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></div></div>
+  <div class="form-grid"><div class="field"><label>Categoria</label><select id="inCat"><option value="auto" selected>✦ Classificar automaticamente (IA)</option>${inspoCats().map(c => `<option value="${esc(c.id)}">${esc(c.label)}</option>`).join('')}</select></div><div class="field"><label>Quadro (opcional)</label><select id="inBoard"><option value="">—</option>${I.boards.map(b => `<option value="${esc(b.id)}" ${b.id === insp.board ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></div></div>
   <div class="field"><label>Tags (separe por vírgula)</label><input id="inTags" placeholder="minimalista, serifa, verde"></div><div class="field"><label>Título <small class="muted">(vazio = nome do arquivo)</small></label><input id="inTitle"></div>
   <div class="field"><label>…ou salve um link</label><input id="inUrl" placeholder="https://… (página ou imagem)"></div>
   <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="inspoAddGo()">Adicionar</button></div>`);
@@ -151,3 +152,22 @@ document.addEventListener('dragleave', e => { if (ui.page === 'inspiration' && !
 document.addEventListener('drop', e => { if (ui.page !== 'inspiration' || !e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); const d = $('inDrop'); if (d) d.classList.remove('on'); if (!$('inDz')) inspoAddOpen(e.dataTransfer.files); });
 
 async function inspoReadLayout(id) { const it = inspo().items.find(x => x.id === id), b = it && await imgGet(it.imgId); if (!b) { toast('Imagem não encontrada.'); return; } ailStart(b, 'inspo'); }
+
+/* classificação automática: IA de visão (api/ai.php) e, se não houver IA, pistas do nome e da proporção */
+const INSPO_AUTO_PROMPT = `Classifique esta imagem de referência de design em UMA categoria: posts (feed, carrossel, stories, anúncio de rede social), capas (capa de livro, e-book, revista, disco), diagramacao (páginas internas de livro/revista/jornal, grids, layouts de página, wireframes), logos (marcas, símbolos, lockups), cartaz (cartaz, pôster, flyer, evento), foto (fotografia, direção de arte), estilos (movimentos, tendências, ilustração, linguagem visual), cores (paletas), fontes (especímenes de fontes, alfabetos, pares tipográficos, fichas de tipografia). JSON: {"cat":"...","titulo":"título curto (até 6 palavras)","tags":["até 5 tags"]}`;
+const INSPO_AUTO_IDS = ['posts', 'capas', 'diagramacao', 'logos', 'cartaz', 'foto', 'estilos', 'cores', 'fontes'];
+function inspoGuessCat(it, name) {
+  const n = String(name || '').toLowerCase(), r = it.w && it.h ? it.w / it.h : 1;
+  if (/font|tipo|typeface|specimen|alfabet/.test(n)) return 'fontes'; if (/logo|marca|brand/.test(n)) return 'logos'; if (/capa|cover/.test(n)) return 'capas'; if (/cartaz|poster|flyer/.test(n)) return 'cartaz'; if (/paleta|palette|cores|color/.test(n)) return 'cores'; if (/revista|livro|magazine|spread|layout|diagrama/.test(n)) return 'diagramacao';
+  return r > 0.6 && r < 0.72 ? 'capas' : 'posts';
+}
+async function inspoAutoCat(it, file) {
+  let cat = '', tit = '', tags = [];
+  try { const r = await aiVisionJSON(INSPO_AUTO_PROMPT, 'Classifique a imagem.', file, 400), j = r.json || {}; if (INSPO_AUTO_IDS.includes(j.cat)) cat = j.cat; tit = String(j.titulo || '').slice(0, 80); tags = (Array.isArray(j.tags) ? j.tags : []).slice(0, 5).map(t => String(t).slice(0, 24)).filter(Boolean); } catch (e) { /* sem IA: usa as pistas */ }
+  it.cat = cat || inspoGuessCat(it, file.name); if (tit && /^[\w\-. ()]+$/.test(it.title) ) it.title = tit; if (tags.length) it.tags = [...new Set([...(it.tags || []), ...tags])].slice(0, 20); it.auto = !!cat; return it.cat;
+}
+async function inspoReclass() {
+  const list = inspoSelItems(); if (!list.length) { toast('Selecione as imagens.'); return; } let n = 0;
+  for (const it of list) { if (!it.imgId) continue; const b = await imgGet(it.imgId); if (!b) continue; toast('Classificando ' + (++n) + ' de ' + list.length + '…'); await inspoAutoCat(it, new File([b], it.title || 'img', {type: b.type})); }
+  persist(); renderInspiration(); toast(n + ' reclassificada(s).');
+}

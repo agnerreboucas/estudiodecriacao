@@ -1,5 +1,5 @@
 /* ===== Editora · hub: abas (e-books, motor de texto, engenheiro de capa, diagramação, Amazon) e banco de referências compartilhado ===== */
-const EDH_TABS = [['livros', 'E-books', 'book'], ['texto', 'Motor de texto', 'sparkles'], ['capa', 'Engenheiro de capa', 'palette'], ['diag', 'Diagramação', 'layout'], ['amazon', 'Amazon KDP', 'send']];
+const EDH_TABS = [['livros', 'E-books', 'book'], ['texto', 'Motor de texto', 'sparkles'], ['capa', 'Engenheiro de capa', 'palette'], ['diag', 'Diagramação', 'layout'], ['amazon', 'Amazon KDP', 'send'], ['banca', 'Banca', 'library']];
 const edh = {area: 'livros'};
 function edTabs(active) {
   return `<div class="edh-tabs">${EDH_TABS.map(([k, l, ic]) => `<button class="edh-tab ${active === k ? 'on' : ''}" onclick="edGo('${k}')">${ico(ic, 15)} ${l}</button>`).join('')}</div>`;

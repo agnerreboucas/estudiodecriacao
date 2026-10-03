@@ -1,0 +1,79 @@
+/* ===== Banca e folheador: livros e revistas que viram a página com o arraste (com som), em tela cheia ===== */
+const FLIP_CSS = 'html,body{margin:0;height:100%;background:radial-gradient(ellipse at 50% 35%,#4a4036 0%,#241f1a 70%);overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#fff}#stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;perspective:2400px;user-select:none;-webkit-user-select:none;touch-action:none;cursor:grab}#stage.drag{cursor:grabbing}#book{position:relative;transform-style:preserve-3d;transition:transform .55s ease;filter:drop-shadow(0 24px 40px rgba(0,0,0,.55))}.leaf{position:absolute;top:0;height:100%;transform-origin:left center;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.45,.05,.25,1)}.leaf.nodrag{transition:none}.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#fbfaf6;overflow:hidden}.face img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}.face.back{transform:rotateY(180deg)}.face .sh{position:absolute;inset:0;pointer-events:none;opacity:0}.front .sh{background:linear-gradient(90deg,rgba(0,0,0,.35),rgba(0,0,0,0) 40%)}.back .sh{background:linear-gradient(270deg,rgba(0,0,0,.35),rgba(0,0,0,0) 40%)}.face.right-edge:after{content:"";position:absolute;left:0;top:0;bottom:0;width:18px;background:linear-gradient(90deg,rgba(0,0,0,.22),rgba(0,0,0,0));pointer-events:none}.face.left-edge:after{content:"";position:absolute;right:0;top:0;bottom:0;width:18px;background:linear-gradient(270deg,rgba(0,0,0,.22),rgba(0,0,0,0));pointer-events:none}#bar{position:fixed;top:10px;right:10px;display:flex;gap:6px;z-index:50}#bar button{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:999px;padding:8px 13px;font:600 13px system-ui;cursor:pointer;backdrop-filter:blur(6px)}#bar button:hover{background:rgba(255,255,255,.26)}#ttl{position:fixed;top:14px;left:16px;font:600 14px system-ui;opacity:.85;max-width:50vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#pg{position:fixed;bottom:14px;left:0;right:0;text-align:center;font:600 13px system-ui;opacity:.8}.nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:0;color:#fff;width:42px;height:64px;border-radius:12px;font-size:24px;cursor:pointer;z-index:40}.nav:hover{background:rgba(255,255,255,.25)}#pv{left:8px}#nx{right:8px}';
+const FLIP_JS = `
+var imgs=window.__PAGES__,ttl=window.__TITLE__,ar=window.__AR__||0.66,N=imgs.length,spread=true,L=0,cur=0,pw=0,ph=0,sound=true,ac=null,drag=null;
+var stage=document.getElementById('stage'),book=document.getElementById('book'),pgEl=document.getElementById('pg');
+document.getElementById('ttl').textContent=ttl;
+function snd(vol){if(!sound)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();var d=0.38,n=Math.floor(ac.sampleRate*d),b=ac.createBuffer(1,n,ac.sampleRate),x=b.getChannelData(0),i;for(i=0;i<n;i++){var t=i/n;x[i]=(Math.random()*2-1)*Math.pow(1-t,2.2)*(t<0.04?t/0.04:1)}var s=ac.createBufferSource();s.buffer=b;var f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=2200;f.Q.value=0.7;var g=ac.createGain();g.gain.value=vol||0.35;s.connect(f);f.connect(g);g.connect(ac.destination);s.start()}catch(e){}}
+function build(){spread=window.innerWidth>=window.innerHeight*0.95;L=spread?Math.ceil(N/2):N;book.innerHTML='';var k;for(k=0;k<L;k++){var leaf=document.createElement('div');leaf.className='leaf';leaf.id='lf'+k;var fi=spread?2*k:k,bi=spread?2*k+1:-1;leaf.innerHTML='<div class="face front'+(spread?' right-edge':'')+'">'+(imgs[fi]?'<img src="'+imgs[fi]+'">':'')+'<div class="sh"></div></div><div class="face back'+(spread?' left-edge':'')+'">'+(bi>=0&&imgs[bi]?'<img src="'+imgs[bi]+'">':'')+'<div class="sh"></div></div>';book.appendChild(leaf)}size();place(false)}
+function size(){var aw=window.innerWidth*0.94,ah=window.innerHeight*0.88;ph=Math.min(ah,spread?aw/(2*ar):aw/ar);pw=ph*ar;book.style.width=(spread?2*pw:pw)+'px';book.style.height=ph+'px';var ls=book.children,k;for(k=0;k<ls.length;k++){ls[k].style.width=pw+'px';ls[k].style.left=(spread?pw:0)+'px'}}
+function place(anim){var k,ls=book.children;for(k=0;k<ls.length;k++){var lf=ls[k];lf.classList.remove('nodrag');lf.style.transform='rotateY('+(k<cur?-180:0)+'deg)';lf.style.zIndex=k<cur?(k+1):(L-k)}var sx=0;if(spread){if(cur===0)sx=-pw/2;else if(cur===L)sx=pw/2}book.style.transform='translateX('+sx+'px)';var a,b;if(spread){a=cur===0?0:2*(cur-1)+2;b=cur===L?N:2*cur+1;pgEl.textContent=(cur===0?'1':a+(a<N?' – '+Math.min(N,2*cur+1):''))+' / '+N}else pgEl.textContent=(cur+1)+' / '+N}
+function go(d){var n=Math.max(0,Math.min(L,cur+d));if(n===cur)return;snd(0.3);cur=n;place(true)}
+function shade(lf,p){var s=lf.querySelectorAll('.sh'),i;for(i=0;i<s.length;i++)s[i].style.opacity=Math.sin(p*Math.PI)}
+stage.addEventListener('pointerdown',function(e){if(e.target.closest('#bar,.nav'))return;var r=book.getBoundingClientRect(),x=e.clientX,right=spread?(x>=r.left+r.width/2):(x>=r.left+r.width*0.35);var idx=right?cur:cur-1;if(idx<0||idx>=L){drag=null;return}drag={idx:idx,fwd:right,x0:x,moved:false,p:0,t0:Date.now()};try{stage.setPointerCapture(e.pointerId)}catch(_){}});
+stage.addEventListener('pointermove',function(e){if(!drag)return;var dx=e.clientX-drag.x0;if(!drag.moved&&Math.abs(dx)<6)return;if(!drag.moved){drag.moved=true;stage.classList.add('drag');document.getElementById('lf'+drag.idx).classList.add('nodrag');document.getElementById('lf'+drag.idx).style.zIndex=999;snd(0.18)}var span=(spread?pw:pw*0.8),p=drag.fwd?Math.max(0,Math.min(1,-dx/span)):Math.max(0,Math.min(1,1+dx/span)-0);if(!drag.fwd)p=Math.max(0,Math.min(1,dx/span));var ang=drag.fwd?-180*p:-180*(1-p);var lf=document.getElementById('lf'+drag.idx);lf.style.transform='rotateY('+ang+'deg)';drag.p=p;shade(lf,p)});
+function endDrag(e){if(!drag)return;var d=drag;drag=null;stage.classList.remove('drag');var lf=document.getElementById('lf'+d.idx);shade(lf,0);var lfs=lf.querySelectorAll('.sh'),i;for(i=0;i<lfs.length;i++)lfs[i].style.opacity=0;if(!d.moved){if(d.fwd)go(1);else go(-1);return}var fast=(Date.now()-d.t0)<260&&d.p>0.08;if(d.p>0.32||fast){if(d.fwd){cur=d.idx+1}else{cur=d.idx}snd(0.25)}place(true)}
+stage.addEventListener('pointerup',endDrag);stage.addEventListener('pointercancel',endDrag);
+document.getElementById('pv').onclick=function(){go(-1)};document.getElementById('nx').onclick=function(){go(1)};
+document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ')go(1);else if(e.key==='ArrowLeft'||e.key==='PageUp')go(-1);else if(e.key==='Home'){cur=0;place(true)}else if(e.key==='End'){cur=L;place(true)}else if(e.key==='Escape'&&!document.fullscreenElement&&window.parent!==window)window.parent.postMessage('flip-close','*')});
+document.getElementById('fs').onclick=function(){var d=document,el=d.documentElement;if(d.fullscreenElement){d.exitFullscreen()}else if(el.requestFullscreen){el.requestFullscreen().catch(function(){window.parent.postMessage('flip-fs','*')})}else window.parent.postMessage('flip-fs','*')};
+document.getElementById('sd').onclick=function(){sound=!sound;this.textContent=sound?'Som ligado':'Som desligado'};
+var cl=document.getElementById('cl');if(window.parent===window)cl.style.display='none';cl.onclick=function(){window.parent.postMessage('flip-close','*')};
+window.addEventListener('resize',function(){var was=spread;if(was!==(window.innerWidth>=window.innerHeight*0.95)){var pageNow=spread?Math.max(0,2*cur-1):cur;build();cur=spread?Math.ceil((pageNow+1)/2):pageNow;if(cur>L)cur=L;place(false)}else{size();place(false)}});
+build();`;
+function flipHTML(title, pages, ar) {
+  const safe = JSON.stringify(pages).replace(/</g, '\\u003c');
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>${FLIP_CSS}</style></head><body><div id="ttl"></div><div id="stage"><div id="book"></div></div><button class="nav" id="pv" aria-label="Página anterior">‹</button><button class="nav" id="nx" aria-label="Próxima página">›</button><div id="pg"></div><div id="bar"><button id="sd">Som ligado</button><button id="fs">Tela cheia</button><button id="cl">Fechar</button></div><script>window.__PAGES__=${safe};window.__TITLE__=${JSON.stringify(String(title)).replace(/</g, '\\u003c')};window.__AR__=${(+ar || 0.66).toFixed(4)};<\/script><script>${FLIP_JS}<\/script></body></html>`;
+}
+/* abre no próprio Studio, em tela cheia */
+function flipOpen(title, pages, ar) {
+  const ov = document.createElement('div'); ov.className = 'flip-ov'; ov.id = 'flipOv';
+  ov.innerHTML = `<iframe allow="fullscreen" allowfullscreen title="${esc(title)}"></iframe>`; document.body.appendChild(ov); const fr = ov.querySelector('iframe'); fr.srcdoc = flipHTML(title, pages, ar);
+  const onMsg = e => { if (e.data === 'flip-close') close(); else if (e.data === 'flip-fs') { (ov.requestFullscreen ? ov.requestFullscreen() : Promise.reject()).catch(() => { ov.classList.add('full'); }); } };
+  const close = () => { window.removeEventListener('message', onMsg); if (document.fullscreenElement) document.exitFullscreen().catch(() => 0); ov.remove(); };
+  window.addEventListener('message', onMsg); setTimeout(() => fr.focus(), 100); return ov;
+}
+const flipDown = (title, pages, ar) => download((title || 'livro').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-flipbook.html', flipHTML(title, pages, ar), 'text/html');
+
+/* ---------- páginas de cada tipo de material ---------- */
+async function flipScale(cv, w) { const s = Math.min(1, (w || 760) / cv.width), c = document.createElement('canvas'); c.width = Math.round(cv.width * s); c.height = Math.round(cv.height * s); const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(cv, 0, 0, c.width, c.height); return {url: c.toDataURL('image/jpeg', 0.82), w: c.width, h: c.height}; }
+async function flipPagesEbook(eb, only1) {
+  const fid = 'tablet', r = ebBuild(eb, fid), F = r.fmt, out = []; await ensureFonts([eb.brand.h, eb.brand.b]); const cb = eb.coverSetId ? await ebCoverBitmap(eb) : null;
+  for (let i = 0; i < r.pages.length; i++) { const cv = document.createElement('canvas'); cv.width = F.w; cv.height = F.h; await ebRenderPage(cv, r.pages[i], F, eb, cb); out.push(await flipScale(cv)); if (only1) break; if (i % 4 === 0) await new Promise(rs => setTimeout(rs, 0)); }
+  return out;
+}
+async function flipPagesDoc(d, only1) {
+  await dtpFonts(d); await dtpLoadImgs(d); const f = dtpFlow(d), n = only1 ? 1 : dtpPageCount(d, f), out = [];
+  for (let i = 0; i < n; i++) { const {cv} = await dtpRenderPage(d, f, i, 100, 0, false); out.push(await flipScale(cv)); if (i % 4 === 0) await new Promise(rs => setTimeout(rs, 0)); }
+  return out;
+}
+async function flipPagesSet(set, only1) {
+  await ensureSetResources(set); await ensureFonts(set.slides.flatMap(s => s.layers.filter(l => l.type === 'text').map(l => l.family))); const W = set.format.w, H = set.format.h, out = [];
+  for (const sl of (only1 ? set.slides.slice(0, 1) : set.slides)) { const cv = document.createElement('canvas'), s = Math.min(1, 900 / W); cv.width = Math.round(W * s); cv.height = Math.round(H * s); const x = cv.getContext('2d'); renderSlide(x, sl, W, H, s); out.push(await flipScale(cv, 900)); }
+  return out;
+}
+const FLIP_CACHE = new Map();
+async function flipGet(kind, id, only1) {
+  const p = curProject(), key = kind + id + (only1 ? 't' : 'f'); let src, title;
+  if (kind === 'eb') { src = (p.ebooks || []).find(x => x.id === id); title = src && src.title; } else if (kind === 'dtp') { src = (p.layouts || []).find(x => x.id === id); title = src && src.name; } else { src = p.design.sets.find(x => x.id === id); title = src && src.name; }
+  if (!src) throw new Error('Material não encontrado.'); const sig = JSON.stringify(src).length + ':' + (src.updated || ''), c = FLIP_CACHE.get(key); if (c && c.sig === sig) return {pages: c.pages, title}; if (!only1) { const t = FLIP_CACHE.get(kind + id + 't'); void t; }
+  const pages = kind === 'eb' ? await flipPagesEbook(src, only1) : kind === 'dtp' ? await flipPagesDoc(src, only1) : await flipPagesSet(src, only1); FLIP_CACHE.set(key, {sig, pages}); return {pages, title};
+}
+async function flipRead(kind, id) { try { toast('Preparando as páginas…'); const {pages, title} = await flipGet(kind, id, false); if (!pages.length) throw new Error('sem páginas'); flipOpen(title || 'Livro', pages.map(x => x.url), pages[0].w / pages[0].h); } catch (e) { toast('Não consegui abrir: ' + e.message); } }
+async function flipSave(kind, id) { try { toast('Montando o flipbook…'); const {pages, title} = await flipGet(kind, id, false); flipDown(title || 'livro', pages.map(x => x.url), pages[0].w / pages[0].h); toast('Flipbook baixado: um HTML único para abrir no navegador ou enviar ao cliente.'); } catch (e) { toast('Falhou: ' + e.message); } }
+
+/* ---------- a banca ---------- */
+const banca = {thumbs: new Map(), tt: 0};
+function bancaItems(p) {
+  return [['E-books', (p.ebooks || []).map(e => ({kind: 'eb', id: e.id, title: e.title || e.name, sub: (e.author || '') + ' · ' + e.sections.length + ' seções'}))], ['Livros e revistas (Diagramação)', (p.layouts || []).map(d => ({kind: 'dtp', id: d.id, title: d.name, sub: d.story.length + ' blocos · ' + dtpFmt(d.page.w, d.unit) + '×' + dtpFmt(d.page.h, d.unit) + ' ' + DTP_UL[d.unit]}))], ['Capas, apresentações e peças', p.design.sets.slice().reverse().slice(0, 30).map(s => ({kind: 'ds', id: s.id, title: s.name, sub: s.slides.length + ' slide(s)'}))]];
+}
+function bancaRender(r, p) {
+  const sh = bancaItems(p), tot = sh.reduce((a, s) => a + s[1].length, 0);
+  r.innerHTML = edTabs('banca') + `<div class="page-head"><div><h1>Banca</h1><p>Seus livros, revistas e apresentações em uma estante. Clique para folhear em tela cheia: arraste a página para virar, com o som da folha. Baixe como um flipbook (HTML único) para mandar ao cliente.</p></div></div>
+  ${tot ? sh.filter(s => s[1].length).map(([t, list]) => `<div class="bk-shelf"><div class="okr-label">${esc(t)}</div><div class="bk-row">${list.map(b => `<div class="bk-item"><button class="bk-book" onclick="flipRead('${b.kind}','${esc(b.id)}')" title="Abrir para folhear"><canvas data-bk="${b.kind}|${esc(b.id)}" width="150" height="210"></canvas><i class="bk-spine"></i></button><strong>${esc(b.title)}</strong><small class="muted">${esc(b.sub)}</small><div class="row-gap"><button class="btn sm" onclick="flipRead('${b.kind}','${esc(b.id)}')">Folhear</button><button class="btn sm" onclick="flipSave('${b.kind}','${esc(b.id)}')" title="Baixar flipbook em HTML">⬇ HTML</button></div></div>`).join('')}</div><div class="bk-board"></div></div>`).join('') : emptyState('A banca está vazia', 'Crie um e-book, um documento na Diagramação ou uma peça no Estúdio e ele aparece aqui.', '')}`;
+  bancaThumbs();
+}
+async function bancaThumbs() {
+  const cvs = [...document.querySelectorAll('canvas[data-bk]')], my = ++banca.tt;
+  for (const cv of cvs) { if (my !== banca.tt || !cv.isConnected) return; const [kind, id] = cv.dataset.bk.split('|'); try { let t = banca.thumbs.get(kind + id); if (!t) { const {pages} = await flipGet(kind, id, true); t = pages[0]; banca.thumbs.set(kind + id, t); } const im = new Image(); im.onload = () => { const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); const s = Math.max(cv.width / im.width, cv.height / im.height); x.drawImage(im, (cv.width - im.width * s) / 2, 0, im.width * s, im.height * s); }; im.src = t.url; } catch (e) { const x = cv.getContext('2d'); x.fillStyle = '#ddd'; x.fillRect(0, 0, cv.width, cv.height); } await new Promise(r => setTimeout(r, 0)); }
+}

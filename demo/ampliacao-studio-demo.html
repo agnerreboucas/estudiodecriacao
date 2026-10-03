@@ -525,6 +525,9 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .ed-ev{border-bottom:1px solid #eee;padding:6px 0;font-size:13px}.ed-badge{display:inline-block;color:#fff;border-radius:6px;padding:1px 7px;font-size:10.5px;font-weight:700;margin-right:4px}.ed-hl{display:block;width:100%;text-align:left;border:1.5px solid #e2e2e2;border-radius:10px;padding:8px 10px;margin-bottom:6px;background:#fff;cursor:pointer}.ed-hl.on{border-color:#111;background:#f6f6f2}.ed-hl small{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#888}.ed-hl b{display:block;font-size:14px;margin:2px 0}.ed-hl em{font-size:11.5px;color:#777;font-style:normal}
 .ed-bad{border-color:#f59e0b!important;background:#fffbeb}.ed-ok{background:#ecfdf3;border:1.5px solid #86efac}.ed-scores{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0}.ed-scores div{border:1.5px solid #e6e6e6;border-radius:10px;text-align:center;padding:6px 2px}.ed-scores b{display:block;font-size:20px}.ed-scores small{font-size:10.5px;color:#777}
 .ed-files{display:flex;flex-direction:column;gap:2px;max-height:520px;overflow:auto}.ed-files button{text-align:left;border:0;background:none;padding:5px 8px;border-radius:6px;font-size:12.5px;cursor:pointer}.ed-files button.on{background:#111;color:#fff}.ed-pre{white-space:pre-wrap;font:12.5px/1.55 ui-monospace,monospace;background:#faf9f6;border:1.5px solid #e6e6e6;border-radius:12px;padding:14px;max-height:560px;overflow:auto;margin:0}
+.flip-ov{position:fixed;inset:0;z-index:9999;background:#000}.flip-ov iframe{width:100%;height:100%;border:0;display:block}
+.bk-shelf{margin:14px 0 26px}.bk-row{display:flex;flex-wrap:wrap;gap:22px;padding:18px 14px 6px;background:linear-gradient(180deg,#f4efe6,#ebe4d6)}.bk-item{width:160px;display:flex;flex-direction:column;gap:4px;font-size:12.5px}.bk-book{position:relative;border:0;padding:0;background:none;cursor:pointer;transform:perspective(600px) rotateY(-12deg);transition:transform .25s;box-shadow:8px 10px 18px rgba(0,0,0,.35);border-radius:2px 5px 5px 2px;overflow:hidden;width:150px;height:210px}.bk-book:hover{transform:perspective(600px) rotateY(0deg) translateY(-6px)}.bk-book canvas{width:150px;height:210px;display:block;background:#ddd}.bk-spine{position:absolute;left:0;top:0;bottom:0;width:10px;background:linear-gradient(90deg,rgba(0,0,0,.35),rgba(255,255,255,.18) 60%,rgba(0,0,0,0))}.bk-board{height:14px;background:linear-gradient(180deg,#a27b4c,#7d5a33);border-radius:0 0 8px 8px;box-shadow:0 6px 10px rgba(0,0,0,.25)}
+.cov-lays{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))!important}.cov-lay canvas{width:100%;height:auto;border-radius:6px;background:#eee}
 
 </style>
 </head>
@@ -5236,7 +5239,7 @@ async function lgPrEdit() {
 <script>
 /* ===== Inspiração: o nosso Pinterest. Referências por categoria (imagens, links e paletas), quadros, busca, filtro por cor ===== */
 const INSPO_CATS = [
-  {id: 'posts', label: 'Posts', hint: 'Feed, carrosséis, stories e capas'}, {id: 'capas', label: 'Capas de livro', hint: 'Capas, tipografia de título, mockups'}, {id: 'diagramacao', label: 'Diagramação', hint: 'Grids, hierarquia, composição de página'}, {id: 'logos', label: 'Logos', hint: 'Marcas, símbolos e lockups'},
+  {id: 'posts', label: 'Posts', hint: 'Feed, carrosséis, stories e capas'}, {id: 'fontes', label: 'Fontes e tipografia', hint: 'Especímenes, pares e fichas de fontes'}, {id: 'capas', label: 'Capas de livro', hint: 'Capas, tipografia de título, mockups'}, {id: 'diagramacao', label: 'Diagramação', hint: 'Grids, hierarquia, composição de página'}, {id: 'logos', label: 'Logos', hint: 'Marcas, símbolos e lockups'},
   {id: 'cartaz', label: 'Cartaz e pôster', hint: 'Cartazes, flyers, eventos e capas'}, {id: 'foto', label: 'Fotografia', hint: 'Luz, enquadramento, direção de arte'}, {id: 'estilos', label: 'Estilos de design', hint: 'Movimentos, tendências e linguagens visuais'}, {id: 'cores', label: 'Cores', hint: 'Paletas e combinações'}
 ];
 const INSPO_HUES = [['red', 'Vermelho', '#e5484d'], ['orange', 'Laranja', '#f08a24'], ['yellow', 'Amarelo', '#f5c518'], ['green', 'Verde', '#30a46c'], ['teal', 'Turquesa', '#12a594'], ['blue', 'Azul', '#3e63dd'], ['purple', 'Roxo', '#8e4ec6'], ['pink', 'Rosa', '#e93d82'], ['neutral', 'Neutras', '#8b8d98']];
@@ -5262,8 +5265,9 @@ async function inspoMake(file, opt) {
 }
 async function inspoAddFiles(files, opt) {
   const list = [...files], ok = [], bad = []; toast('Adicionando ' + list.length + ' referência(s)…');
-  for (const f of list) { try { const it = await inspoMake(f, opt); inspo().items.unshift(it); ok.push(it); } catch (e) { bad.push(f.name + ' (' + e.message + ')'); } }
-  persist(); renderInspiration(); toast(ok.length + ' adicionada(s)' + (bad.length ? '. Não consegui: ' + bad.join('; ') : '.')); return ok;
+  const auto = opt.cat === 'auto'; if (auto) opt = Object.assign({}, opt, {cat: 'posts'});
+  for (const f of list) { try { const it = await inspoMake(f, opt); if (auto) { toast('Classificando ' + (ok.length + 1) + ' de ' + list.length + '…'); await inspoAutoCat(it, f); } inspo().items.unshift(it); ok.push(it); } catch (e) { bad.push(f.name + ' (' + e.message + ')'); } }
+  persist(); renderInspiration(); toast(ok.length + ' adicionada(s)' + (auto ? ' e organizada(s) por categoria: ' + Object.entries(ok.reduce((a, i) => { a[i.cat] = (a[i.cat] || 0) + 1; return a; }, {})).map(([k, n]) => (inspoCats().find(c => c.id === k) || {label: k}).label + ' ' + n).join(', ') : '') + (bad.length ? '. Não consegui: ' + bad.join('; ') : '.')); return ok;
 }
 
 /* ---------- renderização ---------- */
@@ -5305,7 +5309,7 @@ function inspoBulkBar(list) {
   const n = insp.sel.size, I = inspo();
   return `<div class="in-bulk"><b>${n} selecionada(s)</b><button class="btn sm" onclick="insp.sel=new Set(inspoFiltered().map(i=>i.id));renderInspiration()">Selecionar todas (${list.length})</button><button class="btn sm" onclick="insp.sel.clear();renderInspiration()">⊘ Desmarcar tudo</button>
   <select onchange="inspoBulkMove(this.value);this.value=''"><option value="">Mover para categoria…</option>${inspoCats().map(c => `<option value="${esc(c.id)}">${esc(c.label)}</option>`).join('')}</select>
-  <select onchange="inspoBulkBoard(this.value);this.value=''"><option value="">Adicionar ao quadro…</option>${I.boards.map(b => `<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('')}</select><button class="btn sm" onclick="inspoBulkFav()">★ Favoritar</button><button class="btn sm" onclick="inspoBulkDel()">Excluir</button></div>`;
+  <select onchange="inspoBulkBoard(this.value);this.value=''"><option value="">Adicionar ao quadro…</option>${I.boards.map(b => `<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('')}</select><button class="btn sm" onclick="inspoReclass()" title="A IA move cada imagem para a categoria certa">✦ Reclassificar (IA)</button><button class="btn sm" onclick="inspoBulkFav()">★ Favoritar</button><button class="btn sm" onclick="inspoBulkDel()">Excluir</button></div>`;
 }
 const inspoSelItems = () => inspo().items.filter(i => insp.sel.has(i.id));
 function inspoBulkMove(c) { if (!c) return; inspoSelItems().forEach(i => { i.cat = c; }); persist(); toast('Movidas para ' + inspoCatLabel(c) + '.'); renderInspiration(); }
@@ -5322,7 +5326,7 @@ let INSPO_PENDING = [];
 function inspoAddOpen(files) {
   INSPO_PENDING = files ? [...files] : []; const I = inspo(), cat = ['all', 'fav'].includes(insp.cat) ? 'posts' : insp.cat;
   showModal('Adicionar referências', `<div class="in-dz" id="inDz" onclick="inspoPick()"><b>Arraste imagens aqui, cole (Ctrl+V) ou clique para escolher</b><small id="inPend">${INSPO_PENDING.length ? INSPO_PENDING.length + ' imagem(ns) pronta(s)' : 'PNG, JPG, WebP, GIF ou SVG · até 12 MB cada'}</small></div>
-  <div class="form-grid"><div class="field"><label>Categoria</label><select id="inCat">${inspoCats().map(c => `<option value="${esc(c.id)}" ${c.id === cat ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select></div><div class="field"><label>Quadro (opcional)</label><select id="inBoard"><option value="">—</option>${I.boards.map(b => `<option value="${esc(b.id)}" ${b.id === insp.board ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></div></div>
+  <div class="form-grid"><div class="field"><label>Categoria</label><select id="inCat"><option value="auto" selected>✦ Classificar automaticamente (IA)</option>${inspoCats().map(c => `<option value="${esc(c.id)}">${esc(c.label)}</option>`).join('')}</select></div><div class="field"><label>Quadro (opcional)</label><select id="inBoard"><option value="">—</option>${I.boards.map(b => `<option value="${esc(b.id)}" ${b.id === insp.board ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></div></div>
   <div class="field"><label>Tags (separe por vírgula)</label><input id="inTags" placeholder="minimalista, serifa, verde"></div><div class="field"><label>Título <small class="muted">(vazio = nome do arquivo)</small></label><input id="inTitle"></div>
   <div class="field"><label>…ou salve um link</label><input id="inUrl" placeholder="https://… (página ou imagem)"></div>
   <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="inspoAddGo()">Adicionar</button></div>`);
@@ -5387,6 +5391,25 @@ document.addEventListener('dragleave', e => { if (ui.page === 'inspiration' && !
 document.addEventListener('drop', e => { if (ui.page !== 'inspiration' || !e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); const d = $('inDrop'); if (d) d.classList.remove('on'); if (!$('inDz')) inspoAddOpen(e.dataTransfer.files); });
 
 async function inspoReadLayout(id) { const it = inspo().items.find(x => x.id === id), b = it && await imgGet(it.imgId); if (!b) { toast('Imagem não encontrada.'); return; } ailStart(b, 'inspo'); }
+
+/* classificação automática: IA de visão (api/ai.php) e, se não houver IA, pistas do nome e da proporção */
+const INSPO_AUTO_PROMPT = `Classifique esta imagem de referência de design em UMA categoria: posts (feed, carrossel, stories, anúncio de rede social), capas (capa de livro, e-book, revista, disco), diagramacao (páginas internas de livro/revista/jornal, grids, layouts de página, wireframes), logos (marcas, símbolos, lockups), cartaz (cartaz, pôster, flyer, evento), foto (fotografia, direção de arte), estilos (movimentos, tendências, ilustração, linguagem visual), cores (paletas), fontes (especímenes de fontes, alfabetos, pares tipográficos, fichas de tipografia). JSON: {"cat":"...","titulo":"título curto (até 6 palavras)","tags":["até 5 tags"]}`;
+const INSPO_AUTO_IDS = ['posts', 'capas', 'diagramacao', 'logos', 'cartaz', 'foto', 'estilos', 'cores', 'fontes'];
+function inspoGuessCat(it, name) {
+  const n = String(name || '').toLowerCase(), r = it.w && it.h ? it.w / it.h : 1;
+  if (/font|tipo|typeface|specimen|alfabet/.test(n)) return 'fontes'; if (/logo|marca|brand/.test(n)) return 'logos'; if (/capa|cover/.test(n)) return 'capas'; if (/cartaz|poster|flyer/.test(n)) return 'cartaz'; if (/paleta|palette|cores|color/.test(n)) return 'cores'; if (/revista|livro|magazine|spread|layout|diagrama/.test(n)) return 'diagramacao';
+  return r > 0.6 && r < 0.72 ? 'capas' : 'posts';
+}
+async function inspoAutoCat(it, file) {
+  let cat = '', tit = '', tags = [];
+  try { const r = await aiVisionJSON(INSPO_AUTO_PROMPT, 'Classifique a imagem.', file, 400), j = r.json || {}; if (INSPO_AUTO_IDS.includes(j.cat)) cat = j.cat; tit = String(j.titulo || '').slice(0, 80); tags = (Array.isArray(j.tags) ? j.tags : []).slice(0, 5).map(t => String(t).slice(0, 24)).filter(Boolean); } catch (e) { /* sem IA: usa as pistas */ }
+  it.cat = cat || inspoGuessCat(it, file.name); if (tit && /^[\w\-. ()]+$/.test(it.title) ) it.title = tit; if (tags.length) it.tags = [...new Set([...(it.tags || []), ...tags])].slice(0, 20); it.auto = !!cat; return it.cat;
+}
+async function inspoReclass() {
+  const list = inspoSelItems(); if (!list.length) { toast('Selecione as imagens.'); return; } let n = 0;
+  for (const it of list) { if (!it.imgId) continue; const b = await imgGet(it.imgId); if (!b) continue; toast('Classificando ' + (++n) + ' de ' + list.length + '…'); await inspoAutoCat(it, new File([b], it.title || 'img', {type: b.type})); }
+  persist(); renderInspiration(); toast(n + ' reclassificada(s).');
+}
 
 </script>
 <script>
@@ -5697,6 +5720,7 @@ function renderEditora() {
   if (typeof mot !== 'undefined' && mot.open) return motRender(r, p);
   if (edh.area === 'capa') return covRender(r, p);
   if (edh.area === 'amazon') return kdpRender(r, p);
+  if (edh.area === 'banca') return bancaRender(r, p);
   if (eui.id && ebCur()) return ebEditor(p, r);
   const list = ebList();
   r.innerHTML = `<div class="page-head"><div><h1>Editora</h1><p>Produza e-books completos: capítulos, caixas e checklists diagramados em 4 versões (celular, tablet 6×9, A4 preto e branco e A4 econômico), capa criada no Editor de Design, documento de revisão e EPUB.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button></div></div>
@@ -5726,7 +5750,7 @@ function ebStatus() { const el = $('ebAuto'); if (el) el.innerHTML = `✓ Salvo 
 /* ---------- editor ---------- */
 function ebEditor(p, r) {
   const eb = ebCur(), sec = ebSecCur(); if (!eui.sec && sec) eui.sec = sec.id;
-  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="ebBack()">← Editora</button><input class="dz-name" value="${esc(eb.name)}" onchange="ebCur().name=this.value;ebTouch()"><div class="row-gap"><button class="btn sm" onclick="ebUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="ebRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="ebAuto"></span></div></div>
+  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="ebBack()">← Editora</button><button class="btn sm" onclick="flipRead('eb',eui.id)" title="Folhear em tela cheia">📖 Folhear</button><input class="dz-name" value="${esc(eb.name)}" onchange="ebCur().name=this.value;ebTouch()"><div class="row-gap"><button class="btn sm" onclick="ebUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="ebRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="ebAuto"></span></div></div>
   <div class="eb-wrap"><div class="eb-left" id="ebLeft">${ebStructHTML(eb)}</div><div class="eb-mid"><div class="eb-vers">${Object.values(EB_FORMATS).map(f => `<button class="tchip ${eui.ver === f.id ? 'on' : ''}" onclick="ebVer('${f.id}')">${esc(f.short)}</button>`).join('')}<button class="btn sm" onclick="ebOverview()">▦ Todas as páginas</button></div>
     <div class="eb-stage" id="ebStage"><canvas id="ebCanvas"></canvas></div><div class="eb-pager"><button class="btn sm" onclick="ebGo(eui.page-1)">‹</button><span id="ebPageInfo">…</span><button class="btn sm" onclick="ebGo(eui.page+1)">›</button><span class="muted" id="ebIssues"></span></div></div>
   <div class="eb-right"><div class="matrix-tabs">${[['conteudo', 'Conteúdo'], ['identidade', 'Identidade'], ['verificar', 'Verificar'], ['exportar', 'Capa e exportar']].map(([k, l]) => `<button class="${eui.tab === k ? 'active' : ''}" onclick="eui.tab='${k}';ebRenderRight()">${l}</button>`).join('')}</div><div id="ebRight"></div></div></div>`;
@@ -6199,7 +6223,7 @@ function dtpEditor(p, r) {
   r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dtpBack()">← Diagramação</button><input class="dz-name" value="${esc(d.name)}" onchange="dtpDoc().name=this.value;dtpTouch()">
     <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dtpRedo()" title="Refazer (Ctrl+Y)">↷</button>
     <select class="sm" onchange="histSetLimit(this.value);dtpStatus()" title="Passos de histórico">${HIST_OPTS.map(n => `<option value="${n}" ${n === histLimit() ? 'selected' : ''}>${n} passos</option>`).join('')}</select>
-    <button class="btn sm dark" onclick="dtpTabSet('exportar')">Exportar PDF</button></div></div>
+    <button class="btn sm" onclick="flipRead('dtp',dui.id)" title="Folhear em tela cheia">📖 Folhear</button><button class="btn sm dark" onclick="dtpTabSet('exportar')">Exportar PDF</button></div></div>
   <div class="dtp-bar"><div class="row-gap">${[['v', 'Selecionar', 'V'], ['t', 'Texto', 'T'], ['i', 'Imagem', 'I'], ['r', 'Retângulo', 'R']].map(([k, l, h]) => `<button class="tchip ${dui.tool === k ? 'on' : ''}" data-tool="${k}" onclick="dtpTool('${k}')" title="${l} (${h})">${l}</button>`).join('')}</div>
     <div class="row-gap" style="flex-wrap:wrap">${[['margins', 'Margens'], ['cols', 'Colunas'], ['grid', 'Linha de base'], ['mod', 'Grade modular'], ['guides', 'Guias'], ['bleed', 'Sangria'], ['rulers', 'Réguas']].map(([k, l]) => `<label class="dtp-chk"><input type="checkbox" ${dui.show[k] ? 'checked' : ''} onchange="dui.show.${k}=this.checked;dtpDraw()"> ${l}</label>`).join('')}</div>
     <div class="row-gap"><select class="sm" onchange="dtpDoc().unit=this.value;dtpTouch();dtpPanel();dtpDraw()" title="Unidade de medida">${Object.keys(DTP_U).map(k => `<option value="${k}" ${k === u ? 'selected' : ''}>${DTP_UL[k]}</option>`).join('')}</select><button class="btn sm" onclick="dtpZoom(0.8)">−</button><span id="dtpZ" class="muted" style="min-width:44px;text-align:center;font-size:12px"></span><button class="btn sm" onclick="dtpZoom(1.25)">＋</button><button class="btn sm" onclick="dtpFit()">Ajustar</button>
@@ -6824,7 +6848,7 @@ function renderFontsPage(p, r) {
 </script>
 <script>
 /* ===== Editora · hub: abas (e-books, motor de texto, engenheiro de capa, diagramação, Amazon) e banco de referências compartilhado ===== */
-const EDH_TABS = [['livros', 'E-books', 'book'], ['texto', 'Motor de texto', 'sparkles'], ['capa', 'Engenheiro de capa', 'palette'], ['diag', 'Diagramação', 'layout'], ['amazon', 'Amazon KDP', 'send']];
+const EDH_TABS = [['livros', 'E-books', 'book'], ['texto', 'Motor de texto', 'sparkles'], ['capa', 'Engenheiro de capa', 'palette'], ['diag', 'Diagramação', 'layout'], ['amazon', 'Amazon KDP', 'send'], ['banca', 'Banca', 'library']];
 const edh = {area: 'livros'};
 function edTabs(active) {
   return `<div class="edh-tabs">${EDH_TABS.map(([k, l, ic]) => `<button class="edh-tab ${active === k ? 'on' : ''}" onclick="edGo('${k}')">${ico(ic, 15)} ${l}</button>`).join('')}</div>`;
@@ -6851,6 +6875,88 @@ async function bankPick(ctx, id) {
   const it = inspo().items.find(i => i.id === id), b = it && await imgGet(it.imgId); if (!b) { toast('Imagem não encontrada.'); return; } const bm = await createImageBitmap(b);
   if (ctx === 'dtp') { dui.ref = bm; dui.refOn = true; dui.refRes = null; dtpPanel(); dtpDraw(); toast('Referência carregada sobre a página.'); }
   else if (ctx === 'cov') { cov.ref = bm; cov.refBlob = b; covRender(); toast('Referência escolhida para a capa.'); }
+}
+
+</script>
+<script>
+/* ===== Banca e folheador: livros e revistas que viram a página com o arraste (com som), em tela cheia ===== */
+const FLIP_CSS = 'html,body{margin:0;height:100%;background:radial-gradient(ellipse at 50% 35%,#4a4036 0%,#241f1a 70%);overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#fff}#stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;perspective:2400px;user-select:none;-webkit-user-select:none;touch-action:none;cursor:grab}#stage.drag{cursor:grabbing}#book{position:relative;transform-style:preserve-3d;transition:transform .55s ease;filter:drop-shadow(0 24px 40px rgba(0,0,0,.55))}.leaf{position:absolute;top:0;height:100%;transform-origin:left center;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.45,.05,.25,1)}.leaf.nodrag{transition:none}.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#fbfaf6;overflow:hidden}.face img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}.face.back{transform:rotateY(180deg)}.face .sh{position:absolute;inset:0;pointer-events:none;opacity:0}.front .sh{background:linear-gradient(90deg,rgba(0,0,0,.35),rgba(0,0,0,0) 40%)}.back .sh{background:linear-gradient(270deg,rgba(0,0,0,.35),rgba(0,0,0,0) 40%)}.face.right-edge:after{content:"";position:absolute;left:0;top:0;bottom:0;width:18px;background:linear-gradient(90deg,rgba(0,0,0,.22),rgba(0,0,0,0));pointer-events:none}.face.left-edge:after{content:"";position:absolute;right:0;top:0;bottom:0;width:18px;background:linear-gradient(270deg,rgba(0,0,0,.22),rgba(0,0,0,0));pointer-events:none}#bar{position:fixed;top:10px;right:10px;display:flex;gap:6px;z-index:50}#bar button{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:999px;padding:8px 13px;font:600 13px system-ui;cursor:pointer;backdrop-filter:blur(6px)}#bar button:hover{background:rgba(255,255,255,.26)}#ttl{position:fixed;top:14px;left:16px;font:600 14px system-ui;opacity:.85;max-width:50vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#pg{position:fixed;bottom:14px;left:0;right:0;text-align:center;font:600 13px system-ui;opacity:.8}.nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:0;color:#fff;width:42px;height:64px;border-radius:12px;font-size:24px;cursor:pointer;z-index:40}.nav:hover{background:rgba(255,255,255,.25)}#pv{left:8px}#nx{right:8px}';
+const FLIP_JS = `
+var imgs=window.__PAGES__,ttl=window.__TITLE__,ar=window.__AR__||0.66,N=imgs.length,spread=true,L=0,cur=0,pw=0,ph=0,sound=true,ac=null,drag=null;
+var stage=document.getElementById('stage'),book=document.getElementById('book'),pgEl=document.getElementById('pg');
+document.getElementById('ttl').textContent=ttl;
+function snd(vol){if(!sound)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();var d=0.38,n=Math.floor(ac.sampleRate*d),b=ac.createBuffer(1,n,ac.sampleRate),x=b.getChannelData(0),i;for(i=0;i<n;i++){var t=i/n;x[i]=(Math.random()*2-1)*Math.pow(1-t,2.2)*(t<0.04?t/0.04:1)}var s=ac.createBufferSource();s.buffer=b;var f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=2200;f.Q.value=0.7;var g=ac.createGain();g.gain.value=vol||0.35;s.connect(f);f.connect(g);g.connect(ac.destination);s.start()}catch(e){}}
+function build(){spread=window.innerWidth>=window.innerHeight*0.95;L=spread?Math.ceil(N/2):N;book.innerHTML='';var k;for(k=0;k<L;k++){var leaf=document.createElement('div');leaf.className='leaf';leaf.id='lf'+k;var fi=spread?2*k:k,bi=spread?2*k+1:-1;leaf.innerHTML='<div class="face front'+(spread?' right-edge':'')+'">'+(imgs[fi]?'<img src="'+imgs[fi]+'">':'')+'<div class="sh"></div></div><div class="face back'+(spread?' left-edge':'')+'">'+(bi>=0&&imgs[bi]?'<img src="'+imgs[bi]+'">':'')+'<div class="sh"></div></div>';book.appendChild(leaf)}size();place(false)}
+function size(){var aw=window.innerWidth*0.94,ah=window.innerHeight*0.88;ph=Math.min(ah,spread?aw/(2*ar):aw/ar);pw=ph*ar;book.style.width=(spread?2*pw:pw)+'px';book.style.height=ph+'px';var ls=book.children,k;for(k=0;k<ls.length;k++){ls[k].style.width=pw+'px';ls[k].style.left=(spread?pw:0)+'px'}}
+function place(anim){var k,ls=book.children;for(k=0;k<ls.length;k++){var lf=ls[k];lf.classList.remove('nodrag');lf.style.transform='rotateY('+(k<cur?-180:0)+'deg)';lf.style.zIndex=k<cur?(k+1):(L-k)}var sx=0;if(spread){if(cur===0)sx=-pw/2;else if(cur===L)sx=pw/2}book.style.transform='translateX('+sx+'px)';var a,b;if(spread){a=cur===0?0:2*(cur-1)+2;b=cur===L?N:2*cur+1;pgEl.textContent=(cur===0?'1':a+(a<N?' – '+Math.min(N,2*cur+1):''))+' / '+N}else pgEl.textContent=(cur+1)+' / '+N}
+function go(d){var n=Math.max(0,Math.min(L,cur+d));if(n===cur)return;snd(0.3);cur=n;place(true)}
+function shade(lf,p){var s=lf.querySelectorAll('.sh'),i;for(i=0;i<s.length;i++)s[i].style.opacity=Math.sin(p*Math.PI)}
+stage.addEventListener('pointerdown',function(e){if(e.target.closest('#bar,.nav'))return;var r=book.getBoundingClientRect(),x=e.clientX,right=spread?(x>=r.left+r.width/2):(x>=r.left+r.width*0.35);var idx=right?cur:cur-1;if(idx<0||idx>=L){drag=null;return}drag={idx:idx,fwd:right,x0:x,moved:false,p:0,t0:Date.now()};try{stage.setPointerCapture(e.pointerId)}catch(_){}});
+stage.addEventListener('pointermove',function(e){if(!drag)return;var dx=e.clientX-drag.x0;if(!drag.moved&&Math.abs(dx)<6)return;if(!drag.moved){drag.moved=true;stage.classList.add('drag');document.getElementById('lf'+drag.idx).classList.add('nodrag');document.getElementById('lf'+drag.idx).style.zIndex=999;snd(0.18)}var span=(spread?pw:pw*0.8),p=drag.fwd?Math.max(0,Math.min(1,-dx/span)):Math.max(0,Math.min(1,1+dx/span)-0);if(!drag.fwd)p=Math.max(0,Math.min(1,dx/span));var ang=drag.fwd?-180*p:-180*(1-p);var lf=document.getElementById('lf'+drag.idx);lf.style.transform='rotateY('+ang+'deg)';drag.p=p;shade(lf,p)});
+function endDrag(e){if(!drag)return;var d=drag;drag=null;stage.classList.remove('drag');var lf=document.getElementById('lf'+d.idx);shade(lf,0);var lfs=lf.querySelectorAll('.sh'),i;for(i=0;i<lfs.length;i++)lfs[i].style.opacity=0;if(!d.moved){if(d.fwd)go(1);else go(-1);return}var fast=(Date.now()-d.t0)<260&&d.p>0.08;if(d.p>0.32||fast){if(d.fwd){cur=d.idx+1}else{cur=d.idx}snd(0.25)}place(true)}
+stage.addEventListener('pointerup',endDrag);stage.addEventListener('pointercancel',endDrag);
+document.getElementById('pv').onclick=function(){go(-1)};document.getElementById('nx').onclick=function(){go(1)};
+document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ')go(1);else if(e.key==='ArrowLeft'||e.key==='PageUp')go(-1);else if(e.key==='Home'){cur=0;place(true)}else if(e.key==='End'){cur=L;place(true)}else if(e.key==='Escape'&&!document.fullscreenElement&&window.parent!==window)window.parent.postMessage('flip-close','*')});
+document.getElementById('fs').onclick=function(){var d=document,el=d.documentElement;if(d.fullscreenElement){d.exitFullscreen()}else if(el.requestFullscreen){el.requestFullscreen().catch(function(){window.parent.postMessage('flip-fs','*')})}else window.parent.postMessage('flip-fs','*')};
+document.getElementById('sd').onclick=function(){sound=!sound;this.textContent=sound?'Som ligado':'Som desligado'};
+var cl=document.getElementById('cl');if(window.parent===window)cl.style.display='none';cl.onclick=function(){window.parent.postMessage('flip-close','*')};
+window.addEventListener('resize',function(){var was=spread;if(was!==(window.innerWidth>=window.innerHeight*0.95)){var pageNow=spread?Math.max(0,2*cur-1):cur;build();cur=spread?Math.ceil((pageNow+1)/2):pageNow;if(cur>L)cur=L;place(false)}else{size();place(false)}});
+build();`;
+function flipHTML(title, pages, ar) {
+  const safe = JSON.stringify(pages).replace(/</g, '\\u003c');
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>${FLIP_CSS}</style></head><body><div id="ttl"></div><div id="stage"><div id="book"></div></div><button class="nav" id="pv" aria-label="Página anterior">‹</button><button class="nav" id="nx" aria-label="Próxima página">›</button><div id="pg"></div><div id="bar"><button id="sd">Som ligado</button><button id="fs">Tela cheia</button><button id="cl">Fechar</button></div><script>window.__PAGES__=${safe};window.__TITLE__=${JSON.stringify(String(title)).replace(/</g, '\\u003c')};window.__AR__=${(+ar || 0.66).toFixed(4)};<\/script><script>${FLIP_JS}<\/script></body></html>`;
+}
+/* abre no próprio Studio, em tela cheia */
+function flipOpen(title, pages, ar) {
+  const ov = document.createElement('div'); ov.className = 'flip-ov'; ov.id = 'flipOv';
+  ov.innerHTML = `<iframe allow="fullscreen" allowfullscreen title="${esc(title)}"></iframe>`; document.body.appendChild(ov); const fr = ov.querySelector('iframe'); fr.srcdoc = flipHTML(title, pages, ar);
+  const onMsg = e => { if (e.data === 'flip-close') close(); else if (e.data === 'flip-fs') { (ov.requestFullscreen ? ov.requestFullscreen() : Promise.reject()).catch(() => { ov.classList.add('full'); }); } };
+  const close = () => { window.removeEventListener('message', onMsg); if (document.fullscreenElement) document.exitFullscreen().catch(() => 0); ov.remove(); };
+  window.addEventListener('message', onMsg); setTimeout(() => fr.focus(), 100); return ov;
+}
+const flipDown = (title, pages, ar) => download((title || 'livro').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-flipbook.html', flipHTML(title, pages, ar), 'text/html');
+
+/* ---------- páginas de cada tipo de material ---------- */
+async function flipScale(cv, w) { const s = Math.min(1, (w || 760) / cv.width), c = document.createElement('canvas'); c.width = Math.round(cv.width * s); c.height = Math.round(cv.height * s); const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(cv, 0, 0, c.width, c.height); return {url: c.toDataURL('image/jpeg', 0.82), w: c.width, h: c.height}; }
+async function flipPagesEbook(eb, only1) {
+  const fid = 'tablet', r = ebBuild(eb, fid), F = r.fmt, out = []; await ensureFonts([eb.brand.h, eb.brand.b]); const cb = eb.coverSetId ? await ebCoverBitmap(eb) : null;
+  for (let i = 0; i < r.pages.length; i++) { const cv = document.createElement('canvas'); cv.width = F.w; cv.height = F.h; await ebRenderPage(cv, r.pages[i], F, eb, cb); out.push(await flipScale(cv)); if (only1) break; if (i % 4 === 0) await new Promise(rs => setTimeout(rs, 0)); }
+  return out;
+}
+async function flipPagesDoc(d, only1) {
+  await dtpFonts(d); await dtpLoadImgs(d); const f = dtpFlow(d), n = only1 ? 1 : dtpPageCount(d, f), out = [];
+  for (let i = 0; i < n; i++) { const {cv} = await dtpRenderPage(d, f, i, 100, 0, false); out.push(await flipScale(cv)); if (i % 4 === 0) await new Promise(rs => setTimeout(rs, 0)); }
+  return out;
+}
+async function flipPagesSet(set, only1) {
+  await ensureSetResources(set); await ensureFonts(set.slides.flatMap(s => s.layers.filter(l => l.type === 'text').map(l => l.family))); const W = set.format.w, H = set.format.h, out = [];
+  for (const sl of (only1 ? set.slides.slice(0, 1) : set.slides)) { const cv = document.createElement('canvas'), s = Math.min(1, 900 / W); cv.width = Math.round(W * s); cv.height = Math.round(H * s); const x = cv.getContext('2d'); renderSlide(x, sl, W, H, s); out.push(await flipScale(cv, 900)); }
+  return out;
+}
+const FLIP_CACHE = new Map();
+async function flipGet(kind, id, only1) {
+  const p = curProject(), key = kind + id + (only1 ? 't' : 'f'); let src, title;
+  if (kind === 'eb') { src = (p.ebooks || []).find(x => x.id === id); title = src && src.title; } else if (kind === 'dtp') { src = (p.layouts || []).find(x => x.id === id); title = src && src.name; } else { src = p.design.sets.find(x => x.id === id); title = src && src.name; }
+  if (!src) throw new Error('Material não encontrado.'); const sig = JSON.stringify(src).length + ':' + (src.updated || ''), c = FLIP_CACHE.get(key); if (c && c.sig === sig) return {pages: c.pages, title}; if (!only1) { const t = FLIP_CACHE.get(kind + id + 't'); void t; }
+  const pages = kind === 'eb' ? await flipPagesEbook(src, only1) : kind === 'dtp' ? await flipPagesDoc(src, only1) : await flipPagesSet(src, only1); FLIP_CACHE.set(key, {sig, pages}); return {pages, title};
+}
+async function flipRead(kind, id) { try { toast('Preparando as páginas…'); const {pages, title} = await flipGet(kind, id, false); if (!pages.length) throw new Error('sem páginas'); flipOpen(title || 'Livro', pages.map(x => x.url), pages[0].w / pages[0].h); } catch (e) { toast('Não consegui abrir: ' + e.message); } }
+async function flipSave(kind, id) { try { toast('Montando o flipbook…'); const {pages, title} = await flipGet(kind, id, false); flipDown(title || 'livro', pages.map(x => x.url), pages[0].w / pages[0].h); toast('Flipbook baixado: um HTML único para abrir no navegador ou enviar ao cliente.'); } catch (e) { toast('Falhou: ' + e.message); } }
+
+/* ---------- a banca ---------- */
+const banca = {thumbs: new Map(), tt: 0};
+function bancaItems(p) {
+  return [['E-books', (p.ebooks || []).map(e => ({kind: 'eb', id: e.id, title: e.title || e.name, sub: (e.author || '') + ' · ' + e.sections.length + ' seções'}))], ['Livros e revistas (Diagramação)', (p.layouts || []).map(d => ({kind: 'dtp', id: d.id, title: d.name, sub: d.story.length + ' blocos · ' + dtpFmt(d.page.w, d.unit) + '×' + dtpFmt(d.page.h, d.unit) + ' ' + DTP_UL[d.unit]}))], ['Capas, apresentações e peças', p.design.sets.slice().reverse().slice(0, 30).map(s => ({kind: 'ds', id: s.id, title: s.name, sub: s.slides.length + ' slide(s)'}))]];
+}
+function bancaRender(r, p) {
+  const sh = bancaItems(p), tot = sh.reduce((a, s) => a + s[1].length, 0);
+  r.innerHTML = edTabs('banca') + `<div class="page-head"><div><h1>Banca</h1><p>Seus livros, revistas e apresentações em uma estante. Clique para folhear em tela cheia: arraste a página para virar, com o som da folha. Baixe como um flipbook (HTML único) para mandar ao cliente.</p></div></div>
+  ${tot ? sh.filter(s => s[1].length).map(([t, list]) => `<div class="bk-shelf"><div class="okr-label">${esc(t)}</div><div class="bk-row">${list.map(b => `<div class="bk-item"><button class="bk-book" onclick="flipRead('${b.kind}','${esc(b.id)}')" title="Abrir para folhear"><canvas data-bk="${b.kind}|${esc(b.id)}" width="150" height="210"></canvas><i class="bk-spine"></i></button><strong>${esc(b.title)}</strong><small class="muted">${esc(b.sub)}</small><div class="row-gap"><button class="btn sm" onclick="flipRead('${b.kind}','${esc(b.id)}')">Folhear</button><button class="btn sm" onclick="flipSave('${b.kind}','${esc(b.id)}')" title="Baixar flipbook em HTML">⬇ HTML</button></div></div>`).join('')}</div><div class="bk-board"></div></div>`).join('') : emptyState('A banca está vazia', 'Crie um e-book, um documento na Diagramação ou uma peça no Estúdio e ele aparece aqui.', '')}`;
+  bancaThumbs();
+}
+async function bancaThumbs() {
+  const cvs = [...document.querySelectorAll('canvas[data-bk]')], my = ++banca.tt;
+  for (const cv of cvs) { if (my !== banca.tt || !cv.isConnected) return; const [kind, id] = cv.dataset.bk.split('|'); try { let t = banca.thumbs.get(kind + id); if (!t) { const {pages} = await flipGet(kind, id, true); t = pages[0]; banca.thumbs.set(kind + id, t); } const im = new Image(); im.onload = () => { const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); const s = Math.max(cv.width / im.width, cv.height / im.height); x.drawImage(im, (cv.width - im.width * s) / 2, 0, im.width * s, im.height * s); }; im.src = t.url; } catch (e) { const x = cv.getContext('2d'); x.fillStyle = '#ddd'; x.fillRect(0, 0, cv.width, cv.height); } await new Promise(r => setTimeout(r, 0)); }
 }
 
 </script>
@@ -7362,7 +7468,7 @@ function dzEditorShell(p, r) {
     <button class="btn sm ${dz.mode === 'emphasis' ? 'dark' : ''}" onclick="dzModeEm()" title="Clique em palavras do texto para destacar">✦ Destacar por clique</button><button class="btn sm ${dz.mode === 'fmt' ? 'dark' : ''}" onclick="dzModeFmt()" title="Clique numa palavra do slide para formatar só ela (Shift estende)">✎ Formatar palavra</button>
     ${dzSet().deck ? '<button class="btn sm dark" onclick="dzPresentDeck()" title="Apresentar e baixar em HTML">▶ Apresentar</button>' : ''}<button class="btn sm" onclick="dzResizeOpen(dz.setId)" title="Adaptar esta arte para outras medidas">⤢ Tamanhos</button>
     <button class="btn sm" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta peça">⚡ Variações</button><button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddLogo()">＋ Logo</button><button class="btn sm" onclick="dzAddImage()" title="Inserir imagem do seu computador">＋ Imagem</button><button class="btn sm" onclick="dzAddVideo()" title="Inserir vídeo: link do YouTube/Vimeo/mp4 ou arquivo">＋ Vídeo</button><button class="btn sm" onclick="dzAddPhoto()" title="Quadro de foto para enviar ou gerar com IA">＋ Foto</button><button class="btn sm" onclick="dzLayerDup()" title="Duplicar o elemento selecionado: texto, imagem, forma ou logo (Ctrl+D)">⧉ Duplicar</button>
-    <button class="btn sm dark" id="dzSaveBtn" onclick="dzSaveNow()" title="Salvar agora (o editor também salva sozinho)">Salvar</button><button class="btn sm" onclick="dzSaveTemplate()" title="Guardar esta peça ou apresentação como modelo">★ Modelo</button><button class="btn sm" onclick="dzSaveStyle()">Salvar como estilo</button><button class="btn sm" onclick="dzApplyStyleModal()">Aplicar estilo…</button><button class="btn sm" onclick="dzExportOne()">PNG</button><button class="btn sm" onclick="dzExportPDF()" title="PDF com uma página por slide">⬇ PDF</button><button class="btn sm" onclick="dzExportPSD()" title="Photoshop em camadas">PSD</button><button class="btn sm" onclick="dzExportLayers()" title="PNG por camada + manifesto">Camadas</button><button class="btn sm dark" onclick="dzExportAll()">Baixar todos (ZIP)</button></div></div>
+    <button class="btn sm dark" id="dzSaveBtn" onclick="dzSaveNow()" title="Salvar agora (o editor também salva sozinho)">Salvar</button><button class="btn sm" onclick="dzSaveTemplate()" title="Guardar esta peça ou apresentação como modelo">★ Modelo</button><button class="btn sm" onclick="dzSaveStyle()">Salvar como estilo</button><button class="btn sm" onclick="dzApplyStyleModal()">Aplicar estilo…</button><button class="btn sm" onclick="dzExportOne()">PNG</button><button class="btn sm" onclick="dzExportPDF()" title="PDF com uma página por slide">⬇ PDF</button><button class="btn sm" onclick="dzExportPSD()" title="Photoshop em camadas">PSD</button><button class="btn sm" onclick="dzExportLayers()" title="PNG por camada + manifesto">Camadas</button><button class="btn sm" onclick="flipRead('ds', dz.setId)" title="Folhear como livro, em tela cheia">📖 Folhear</button><button class="btn sm dark" onclick="dzExportAll()">Baixar todos (ZIP)</button></div></div>
   <div class="dz-editor"><div class="dz-slides" id="dzSlides"></div><div class="dz-stage" id="dzStage"><canvas id="dzCanvas"></canvas></div><div class="dz-insp" id="dzInsp"></div></div><input type="file" id="dzFile" accept="image/*" hidden>`;
   dzBindCanvas(); dzSlidesPanel(); dzInspector(); dzFit(); dzAutoUpdate(); ensureSetResources(s).then(() => { dzDraw(); dzSlidesPanel(); });
   if (dz.hist.length === 0) dzSnap();
@@ -9052,7 +9158,7 @@ const covPh = (f, o) => IM('photo', Object.assign({imgId: f.imgId || '', brief: 
 
 /* ---------- layouts: cada um recebe o formulário f e a região da frente R ({x,y,w,h,full}) ---------- */
 const COV_LAYOUTS = {
-  giant: {n: 'Tipografia gigante', head: 'Anton', body: 'Montserrat', build(f, R) {
+  giant: {n: 'Tipografia gigante', pal: {bg: '#1B1B1B', fg: '#F2EFE8', accent: '#E5B53B', second: '#8C8C8C'}, head: 'Anton', body: 'Montserrat', build(f, R) {
     const u = R.w / 1000, p = f.pal, pad = 70 * u, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))], W = R.w - 2 * pad, words = f.title.toUpperCase().split(/\s+/).filter(Boolean);
     const content = words.length <= 5 ? words.join('\n') : f.title.toUpperCase();
     L.push(covTxt('kicker', {x: R.x + pad, y: R.y + pad * 0.8, w: W, content: (f.collection || f.tagline || '').toUpperCase(), family: f.body, size: 34 * u, weight: 700, color: p.second, ls: 6 * u, fitW: W}));
@@ -9060,7 +9166,7 @@ const COV_LAYOUTS = {
     if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: R.y + pad * 1.9 + th + 30 * u, w: W, content: f.subtitle.toUpperCase(), family: f.head, size: 70 * u, weight: 400, color: p.accent, lh: 1.1, ls: 3 * u, fitW: W}));
     const a = covTxt('author', {x: R.x + pad, y: R.y + R.h - pad * 1.2 - 360 * u, w: W * 0.62, content: f.author.toUpperCase().split(/\s+/).join('\n'), family: f.head, size: 150 * u, weight: 700, color: p.second === p.bg ? p.accent : p.second, lh: 0.95, fitW: W * 0.62, fitH: 360 * u, minS: 30 * u}); a.y = R.y + R.h - pad - layoutText(a).h; L.push(a);
     return L; }},
-  photo: {n: 'Foto com título branco', head: 'Montserrat', body: 'Montserrat', build(f, R) {
+  photo: {n: 'Foto com título branco', pal: {bg: '#2A1E14', fg: '#FFFFFF', accent: '#F2C27B', second: '#C96A2B'}, head: 'Montserrat', body: 'Montserrat', build(f, R) {
     const u = R.w / 1000, p = f.pal, pad = 80 * u, W = R.w - 2 * pad, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg})), covPh(f, Object.assign({}, R.full))];
     L.push(RC('shade', Object.assign({}, R.full, {fill: '#000000', opacity: 0.55, grad: {a: 0, c1: 'rgba(0,0,0,0.65)', c2: 'rgba(0,0,0,0)'}})));
     L.push(covTxt('author', {x: R.x + pad, y: R.y + pad, w: W, content: f.author, family: f.body, size: 78 * u, weight: 400, color: '#FFFFFF', fitW: W}));
@@ -9068,14 +9174,14 @@ const COV_LAYOUTS = {
     if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: R.y + R.h * 0.3 + layoutText(t).h + 40 * u, w: W, content: f.subtitle, family: f.body, size: 58 * u, weight: 400, color: '#FFFFFF', lh: 1.3, fitW: W}));
     if (f.collection) L.push(covTxt('selo', {x: R.x + pad, y: R.y + R.h - pad - 40 * u, w: W, content: f.collection.toUpperCase(), family: f.body, size: 30 * u, weight: 700, color: '#FFFFFF', ls: 8 * u, align: 'center', fitW: W}));
     return L; }},
-  band: {n: 'Foto em cima, faixa de cor embaixo', head: 'Playfair Display', body: 'Montserrat', build(f, R) {
+  band: {n: 'Foto em cima, faixa de cor embaixo', pal: {bg: '#F4EFE6', fg: '#2B2B2B', accent: '#B4532A', second: '#7B8F5E'}, head: 'Playfair Display', body: 'Montserrat', build(f, R) {
     const u = R.w / 1000, p = f.pal, pad = 70 * u, W = R.w - 2 * pad, ph = R.h * 0.56, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg})), covPh(f, {x: R.full.x, y: R.full.y, w: R.full.w, h: ph + (R.y - R.full.y)})];
     L.push(RC('band', {x: R.full.x, y: R.y + ph - 10 * u, w: R.full.w, h: 14 * u, fill: p.accent}));
     const t = covTxt('title', {x: R.x + pad, y: R.y + ph + 60 * u, w: W, content: f.title, family: f.head, size: 130 * u, weight: 700, color: p.fg, lh: 1.08, fitW: W, fitH: R.h * 0.22, minS: 36 * u}); L.push(t);
     if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: R.y + ph + 60 * u + layoutText(t).h + 20 * u, w: W, content: f.subtitle, family: f.body, size: 46 * u, weight: 400, color: p.accent, lh: 1.3, fitW: W}));
     L.push(covTxt('author', {x: R.x + pad, y: R.y + R.h - pad - 60 * u, w: W, content: f.author.toUpperCase(), family: f.body, size: 46 * u, weight: 700, color: p.fg, ls: 6 * u, fitW: W}));
     return L; }},
-  line: {n: 'Linha dourada sobre fundo escuro', head: 'Montserrat', body: 'Cormorant Garamond', build(f, R) {
+  line: {n: 'Linha dourada sobre fundo escuro', pal: {bg: '#173A32', fg: '#FFFFFF', accent: '#C9B26B', second: '#A8C66C'}, head: 'Montserrat', body: 'Cormorant Garamond', build(f, R) {
     const u = R.w / 1000, p = f.pal, pad = 80 * u, W = R.w - 2 * pad, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))];
     L.push(covTxt('author', {x: R.x + pad, y: R.y + pad * 0.9, w: W, content: f.author.toUpperCase(), family: f.body, size: 62 * u, weight: 600, color: p.fg, ls: 12 * u, align: 'center', fitW: W}));
     L.push({id: lid(), type: 'path', role: 'art', vb: 100, x: R.x + R.w * 0.12, y: R.y + R.h * 0.12, w: R.w * 0.8, h: R.h * 0.5, d: 'M50 100 C48 82 50 70 50 56 C40 52 28 46 20 34 C32 30 44 36 50 48 C54 36 64 26 80 20 C78 34 68 46 54 54 M50 70 C38 66 26 66 14 58 C26 52 40 56 50 66 M50 76 C60 68 74 66 90 70 C80 80 64 82 50 78', rule: '', fill: '', stroke: p.accent, strokeW: 3 * u, opacity: 1});
@@ -9083,7 +9189,7 @@ const COV_LAYOUTS = {
     const yb = R.y + R.h * 0.68 + layoutText(t).h + 22 * u; L.push(RC('rule', {x: R.x, y: yb, w: R.w, h: 3 * u, fill: p.accent}));
     if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: yb + 26 * u, w: W, content: f.subtitle, family: f.head, size: 52 * u, weight: 700, color: p.second, fitW: W}));
     return L; }},
-  serif: {n: 'Minimalista serifado, centralizado', head: 'Playfair Display', body: 'Montserrat', build(f, R) {
+  serif: {n: 'Minimalista serifado, centralizado', pal: {bg: '#4F8A55', fg: '#F4F1EC', accent: '#C9A876', second: '#6AA170'}, head: 'Playfair Display', body: 'Montserrat', build(f, R) {
     const u = R.w / 1000, p = f.pal, pad = 90 * u, W = R.w - 2 * pad, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg})), RC('frame', {x: R.x + 40 * u, y: R.y + 40 * u, w: R.w - 80 * u, h: R.h - 80 * u, fill: '', stroke: p.accent, strokeW: 3 * u, radius: 0})];
     if (f.imgId) L.push(covPh(f, {x: R.x + 40 * u, y: R.y + 40 * u, w: R.w - 80 * u, h: R.h * 0.42}));
     const y0 = R.y + R.h * (f.imgId ? 0.5 : 0.24);
@@ -9093,21 +9199,65 @@ const COV_LAYOUTS = {
     if (f.subtitle) { const s = covTxt('subtitle', {x: R.x + pad, y: y0 + th + 70 * u, w: W, content: f.subtitle, family: f.body, size: 52 * u, weight: 400, color: p.fg, lh: 1.35, align: 'center', fitW: W}); const n = plainOf(s.content).length; if (n) s.spans = [{s: 0, e: n, st: {italic: true}}]; L.push(s); }
     L.push(covTxt('author', {x: R.x + pad, y: R.y + R.h - 190 * u, w: W, content: f.author, family: f.head, size: 56 * u, weight: 600, color: p.fg, align: 'center', fitW: W}));
     return L; }},
-  circle: {n: 'Círculo com imagem', head: 'DM Serif Display', body: 'Montserrat', build(f, R) {
+  circle: {n: 'Círculo com imagem', pal: {bg: '#E9DCCB', fg: '#3A2A20', accent: '#B4532A', second: '#D9A066'}, head: 'DM Serif Display', body: 'Montserrat', build(f, R) {
     const u = R.w / 1000, p = f.pal, pad = 80 * u, W = R.w - 2 * pad, d = R.w * 0.72, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))];
     L.push(covTxt('author', {x: R.x + pad, y: R.y + pad, w: W, content: f.author.toUpperCase(), family: f.body, size: 40 * u, weight: 700, color: p.accent, ls: 8 * u, align: 'center', fitW: W}));
     L.push(RC('disc', {x: R.x + (R.w - d) / 2, y: R.y + R.h * 0.12, w: d, h: d, fill: p.second, radius: d / 2})); if (f.imgId) L.push(covPh(f, {x: R.x + (R.w - d) / 2, y: R.y + R.h * 0.12, w: d, h: d, radius: d / 2}));
     const ty = R.y + R.h * 0.12 + d + 50 * u, t = covTxt('title', {x: R.x + pad, y: ty, w: W, content: f.title, family: f.head, size: 120 * u, weight: 400, color: p.fg, lh: 1.05, align: 'center', fitW: W, fitH: R.h * 0.16, minS: 30 * u}); L.push(t);
     if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: ty + layoutText(t).h + 16 * u, w: W, content: f.subtitle, family: f.body, size: 42 * u, weight: 400, color: p.fg, align: 'center', fitW: W}));
     return L; }},
-  duo: {n: 'Duotone com título sobreposto', head: 'Bebas Neue', body: 'Montserrat', build(f, R) {
+  duo: {n: 'Duotone com título sobreposto', pal: {bg: '#C96A2B', fg: '#FFFFFF', accent: '#FFE2B8', second: '#7A3B12'}, head: 'Bebas Neue', body: 'Montserrat', build(f, R) {
     const u = R.w / 1000, p = f.pal, pad = 60 * u, W = R.w - 2 * pad, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))];
     L.push(covPh(f, Object.assign({}, R.full, {filter: 'grayscale(1) contrast(1.6)', ovColor: p.bg, ovMode: 'multiply'})));
     const t = covTxt('title', {x: R.x + pad, y: R.y + pad, w: W, content: f.title.toUpperCase(), family: f.head, size: 230 * u, weight: 400, color: p.fg, lh: 0.95, fitW: W, fitH: R.h * 0.32, minS: 40 * u}); L.push(t);
     if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: R.y + pad + layoutText(t).h + 20 * u, w: W, content: f.subtitle.toUpperCase(), family: f.body, size: 40 * u, weight: 700, color: p.accent, ls: 4 * u, fitW: W}));
     const a = covTxt('author', {x: R.x + pad, y: R.y + R.h * 0.62, w: W, content: f.author.toUpperCase().split(/\s+/).join('\n'), family: f.head, size: 300 * u, weight: 400, color: p.fg, lh: 0.9, fitW: W, fitH: R.h * 0.34, minS: 40 * u}); a.y = R.y + R.h - pad - layoutText(a).h; L.push(a);
     return L; }},
-  grid: {n: 'Grade modular (estilo adidas)', head: 'Archivo Black', body: 'Inter', build(f, R) {
+  severina: {n: 'Cor sobre cor, título condensado', pal: {bg: '#DC2318', fg: '#FDB92F', accent: '#FDB92F', second: '#4A3B33'}, head: 'Anton', body: 'Montserrat', build(f, R) {
+    const u = R.w / 1000, p = f.pal, pad = 64 * u, W = R.w - 2 * pad, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))];
+    L.push(covTxt('kicker', {x: R.x + pad, y: R.y + pad * 0.7, w: W, content: (f.collection || f.tagline || '').toUpperCase(), family: f.body, size: 30 * u, weight: 700, color: p.fg, ls: 5 * u, fitW: W}));
+    const t = covTxt('title', {x: R.x + pad, y: R.y + pad * 1.8, w: W, content: f.title.toUpperCase().split(/\s+/).join('\n'), family: f.head, size: 400 * u, weight: 400, color: p.fg, lh: 0.92, fitW: W * 0.9, fitH: R.h * 0.5, minS: 60 * u}); L.push(t); const th = layoutText(t).h;
+    if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad + 20 * u, y: R.y + pad * 1.8 + th + 14 * u, w: W, content: f.subtitle.toUpperCase(), family: f.head, size: 64 * u, weight: 400, color: p.fg, ls: 2 * u, lh: 1.05, fitW: W * 0.8}));
+    const a = covTxt('author', {x: R.x + pad, y: R.y + R.h * 0.62, w: W * 0.6, content: f.author.toUpperCase().split(/\s+/).join('\n'), family: f.head, size: 220 * u, weight: 400, color: p.second, lh: 0.92, fitW: W * 0.6, fitH: R.h * 0.3, minS: 40 * u}); a.y = R.y + R.h - pad - layoutText(a).h; L.push(a);
+    L.push(covTxt('selo', {x: R.x + R.w - pad - 360 * u, y: R.y + R.h - pad - 40 * u, w: 360 * u, content: (f.tagline || '').toUpperCase(), family: f.body, size: 30 * u, weight: 700, color: p.fg, ls: 6 * u, align: 'right', fitW: 360 * u}));
+    return L; }},
+  photo2: {n: 'Foto de paisagem, título branco forte', pal: {bg: '#B8541F', fg: '#FFFFFF', accent: '#FFE2B8', second: '#7A3B12'}, head: 'Montserrat', body: 'Montserrat', build(f, R) {
+    const u = R.w / 1000, p = f.pal, pad = 70 * u, W = R.w - 2 * pad, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg})), covPh(f, Object.assign({}, R.full))];
+    L.push(RC('shade', Object.assign({}, R.full, {fill: '#000000', opacity: 0.5, grad: {a: 0, c1: 'rgba(40,10,0,0.45)', c2: 'rgba(40,10,0,0.05)'}})));
+    const au = covTxt('author', {x: R.x + pad, y: R.y + pad * 0.8, w: W, content: f.author, family: f.body, size: 110 * u, weight: 400, color: p.fg, lh: 1.05, fitW: W, fitH: 250 * u, minS: 30 * u}); L.push(au); let yy = R.y + pad * 0.8 + layoutText(au).h + 20 * u;
+    if (f.tagline) { L.push(covTxt('tagline', {x: R.x + pad, y: yy, w: W, content: f.tagline, family: f.body, size: 36 * u, weight: 700, color: p.fg, fitW: W})); yy += 70 * u; }
+    const ty = Math.max(R.y + R.h * 0.22, yy + 40 * u), t = covTxt('title', {x: R.x + pad, y: ty, w: W, content: f.title.toUpperCase(), family: f.head, size: 190 * u, weight: 800, color: p.fg, lh: 1.0, fitW: W * 0.92, fitH: R.h * 0.4, minS: 40 * u}); L.push(t);
+    if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: ty + layoutText(t).h + 30 * u, w: W, content: f.subtitle, family: f.body, size: 54 * u, weight: 400, color: p.fg, lh: 1.25, fitW: W}));
+    if (f.collection) L.push(covTxt('selo', {x: R.x + pad, y: R.y + R.h - pad - 30 * u, w: W, content: f.collection.toUpperCase(), family: f.body, size: 28 * u, weight: 700, color: p.fg, ls: 10 * u, align: 'center', fitW: W}));
+    return L; }},
+  gold: {n: 'Cinematográfico dourado', pal: {bg: '#15120D', fg: '#F2E3B8', accent: '#D8A93A', second: '#6B5320'}, head: 'Cinzel', body: 'Cinzel', build(f, R) {
+    const u = R.w / 1000, p = f.pal, pad = 80 * u, W = R.w - 2 * pad, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg})), covPh(f, Object.assign({}, R.full, {opacity: 0.55}))];
+    L.push(RC('glow', {x: R.full.x, y: R.full.y, w: R.full.w, h: R.full.h * 0.7, fill: '#000', grad: {a: 180, c1: 'rgba(216,169,58,0.38)', c2: 'rgba(0,0,0,0)'}}));
+    L.push(RC('shade', Object.assign({}, R.full, {fill: '#000', grad: {a: 0, c1: 'rgba(0,0,0,0.85)', c2: 'rgba(0,0,0,0)'}})));
+    const ws = f.title.toUpperCase().split(/\s+/).filter(Boolean), last = ws.length > 2 ? ws.pop() : '', first = ws.join(' '), y0 = R.y + R.h * 0.5;
+    if (last) L.push(covTxt('kicker', {x: R.x + pad, y: y0 - 20 * u, w: W, content: first, family: f.head, size: 76 * u, weight: 600, color: p.accent, ls: 6 * u, align: 'center', fitW: W}));
+    L.push(covTxt('title', {x: R.x + pad, y: y0 + (last ? 90 : 0) * u, w: W, content: last || first, family: f.head, size: 300 * u, weight: 900, color: p.accent, lh: 1, align: 'center', fitW: W, fitH: R.h * 0.2, minS: 50 * u}));
+    if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: R.y + R.h * 0.82, w: W, content: f.subtitle.toUpperCase(), family: f.body, size: 34 * u, weight: 400, color: p.fg, ls: 8 * u, align: 'center', fitW: W}));
+    L.push(covTxt('author', {x: R.x + pad, y: R.y + R.h - pad - 40 * u, w: W, content: f.author.toUpperCase(), family: f.body, size: 40 * u, weight: 400, color: p.fg, ls: 14 * u, align: 'center', fitW: W}));
+    return L; }},
+  vertical: {n: 'Palavra gigante na vertical', pal: {bg: '#2B2B2B', fg: '#FFFFFF', accent: '#9A9A9A', second: '#5A5A5A'}, head: 'Bebas Neue', body: 'Montserrat', build(f, R) {
+    const u = R.w / 1000, p = f.pal, pad = 60 * u, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))], len = R.h - 2 * pad;
+    const t = covTxt('title', {x: 0, y: 0, w: len, content: f.title.toUpperCase(), family: f.head, size: 520 * u, weight: 400, color: p.second, lh: 1, fitW: len, fitH: R.w * 0.36, minS: 60 * u}), th = layoutText(t).h;
+    t.x = R.x + pad + th / 2 - len / 2; t.y = R.y + R.h / 2 - th / 2; t.rot = -90; L.push(t);
+    const cx = R.x + pad + th + 60 * u, cw = R.x + R.w - pad - cx;
+    L.push(covTxt('kicker', {x: cx, y: R.y + pad, w: cw, content: (f.collection || '').toUpperCase(), family: f.body, size: 28 * u, weight: 700, color: p.accent, ls: 6 * u, fitW: cw}));
+    L.push(covTxt('subtitle', {x: cx, y: R.y + R.h * 0.3, w: cw, content: f.subtitle || f.tagline || '', family: f.body, size: 44 * u, weight: 700, color: p.fg, lh: 1.25, fitW: cw, fitH: R.h * 0.35, minS: 20 * u}));
+    L.push(RC('rule', {x: cx, y: R.y + R.h - pad - 200 * u, w: cw, h: 3 * u, fill: p.accent}));
+    L.push(covTxt('author', {x: cx, y: R.y + R.h - pad - 170 * u, w: cw, content: f.author, family: f.body, size: 40 * u, weight: 700, color: p.fg, lh: 1.2, fitW: cw}));
+    return L; }},
+  bigblack: {n: 'Autor dourado, título preto enorme', pal: {bg: '#FFFFFF', fg: '#111111', accent: '#C9A227', second: '#444444'}, head: 'Anton', body: 'Montserrat', build(f, R) {
+    const u = R.w / 1000, p = f.pal, pad = 70 * u, W = R.w - 2 * pad, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))];
+    L.push(covTxt('author', {x: R.x + pad, y: R.y + pad * 1.1, w: W, content: f.author.toUpperCase(), family: f.body, size: 70 * u, weight: 800, color: p.accent, ls: 14 * u, align: 'center', fitW: W}));
+    const t = covTxt('title', {x: R.x + pad, y: R.y + R.h * 0.22, w: W, content: f.title.toUpperCase().split(/\s+/).length <= 5 ? f.title.toUpperCase().split(/\s+/).join('\n') : f.title.toUpperCase(), family: f.head, size: 330 * u, weight: 400, color: p.fg, lh: 0.95, align: 'center', fitW: W, fitH: R.h * 0.5, minS: 50 * u}); L.push(t);
+    if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: R.y + R.h * 0.22 + layoutText(t).h + 40 * u, w: W, content: f.subtitle.toUpperCase(), family: f.body, size: 56 * u, weight: 800, color: p.accent, ls: 4 * u, lh: 1.2, align: 'center', fitW: W}));
+    L.push(covTxt('selo', {x: R.x + pad, y: R.y + R.h - pad - 30 * u, w: W, content: (f.collection || '').toUpperCase(), family: f.body, size: 30 * u, weight: 700, color: p.second, ls: 10 * u, align: 'center', fitW: W}));
+    return L; }},
+  grid: {n: 'Grade modular (estilo adidas)', pal: {bg: '#FFFFFF', fg: '#111111', accent: '#00AEEF', second: '#FF8FA3'}, head: 'Archivo Black', body: 'Inter', build(f, R) {
     const u = R.w / 1000, p = f.pal, gx = R.w / 6, gy = R.h / 8, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))];
     for (let i = 1; i < 6; i++) L.push(RC('gridline', {x: R.x + i * gx - 1, y: R.y, w: 2 * u, h: R.h, fill: p.accent, opacity: 0.25}));
     for (let j = 1; j < 8; j++) L.push(RC('gridline', {x: R.x, y: R.y + j * gy - 1, w: R.w, h: 2 * u, fill: p.accent, opacity: 0.25}));
@@ -9141,7 +9291,7 @@ async function covFontsAndImgs(set) { await ensureFonts(set.slides[0].layers.fil
 async function covPreview() {
   const c = covC(), cv = $('covCv'); if (!cv || !c) return; const mode = c.mode, b = covBuild(c, mode), set = {id: 'cov-prev', format: {id: 'custom', w: b.W, h: b.H}, tk: {}, slides: [{id: 'p', name: 'p', bg: b.bg, layers: b.layers}]};
   const my = ++cov.T; await covFontsAndImgs(set); if (my !== cov.T || !$('covCv')) return;
-  const sc = Math.min(1, 900 / b.W); cv.width = Math.round(b.W * sc); cv.height = Math.round(b.H * sc); const x = cv.getContext('2d'); x.save(); x.scale(sc, sc); renderSlide(x, set.slides[0], b.W, b.H, 1); x.restore();
+  const sc = Math.min(1, 900 / b.W); cv.width = Math.round(b.W * sc); cv.height = Math.round(b.H * sc); const x = cv.getContext('2d'); renderSlide(x, set.slides[0], b.W, b.H, sc);
   const info = $('covInfo'); if (info) info.textContent = mode === 'wrap' ? `Capa completa ${b.calc.wrapW.toFixed(2)} × ${b.calc.wrapH.toFixed(2)} pol. · lombada ${b.calc.spine.toFixed(3)} pol. · ${b.W} × ${b.H} px` : `${b.W} × ${b.H} px`;
 }
 const covPrevSoon = () => { clearTimeout(cov.tm); cov.tm = setTimeout(covPreview, 260); };
@@ -9154,7 +9304,8 @@ function covRender(r, p) {
   <div class="okr-label">FORMATO</div><div class="tchips">${Object.entries(COV_MODES).map(([k, v]) => `<button class="tchip ${c.mode === k ? 'on' : ''}" onclick="covSet('mode','${k}')">${esc(v.n)}</button>`).join('')}</div>
   <div class="okr-label" style="margin-top:10px">TEXTOS</div><div class="form-grid">${[['title', 'Título'], ['subtitle', 'Subtítulo'], ['author', 'Autor(a)'], ['collection', 'Coleção / selo / editora'], ['tagline', 'Chamada (contracapa)']].map(([k, l]) => `<div class="field"><label>${l}</label><input value="${esc(c[k])}" oninput="covSet('${k}',this.value,true)"></div>`).join('')}</div>
   ${c.mode === 'wrap' ? `<div class="field"><label>Texto da contracapa (sinopse)</label><textarea rows="4" oninput="covSet('blurb',this.value,true)">${esc(c.blurb)}</textarea></div>` : ''}
-  <div class="okr-label">LAYOUT</div><div class="cov-lays">${Object.entries(L).map(([k, v]) => `<button class="cov-lay ${c.layout === k ? 'on' : ''}" onclick="covPick('${k}')"><b>${esc(v.n)}</b><small class="muted">${esc(v.head)} + ${esc(v.body)}</small></button>`).join('')}</div>
+  <div class="okr-label">LAYOUT (um clique aplica fontes e paleta)</div><label class="dtp-chk"><input type="checkbox" ${cov.keepPal ? 'checked' : ''} onchange="cov.keepPal=this.checked"> Manter a minha paleta ao trocar de layout</label><div class="cov-lays">${Object.entries(L).map(([k, v]) => `<button class="cov-lay ${c.layout === k ? 'on' : ''}" onclick="covPick('${k}')"><canvas data-cl="${k}" width="120" height="180"></canvas><b>${esc(v.n)}</b><small class="muted">${esc(v.head)} + ${esc(v.body)}</small></button>`).join('')}</div>
+  ${accSec('covg', 'gal', 'Modelos de layout da galeria (' + LAYOUTS.length + ')', 'um clique cria a capa', covGalBody(), false)}
   <div class="okr-label" style="margin-top:10px">PALETA</div><div class="tchips">${COV_PALS.map(([n, pl], i) => `<button class="tchip" onclick="covPal(${i})" title="${esc(n)}"><span class="cov-sw" style="background:${pl.bg}"></span><span class="cov-sw" style="background:${pl.fg}"></span><span class="cov-sw" style="background:${pl.accent}"></span> ${esc(n)}</button>`).join('')}</div>
   <div class="row-gap" style="margin:6px 0;flex-wrap:wrap">${[['bg', 'Fundo'], ['fg', 'Texto'], ['accent', 'Destaque'], ['second', 'Apoio']].map(([k, l]) => `<label class="dtp-chk">${l} <input type="color" value="${c.pal[k]}" onchange="covPalSet('${k}',this.value)"></label>`).join('')}</div>
   <div class="row-gap" style="margin-bottom:4px"><button class="btn sm" onclick="fbOpen(f => covSet('head', f), covC().head)">Aa Ver fontes do título</button><button class="btn sm" onclick="fbOpen(f => covSet('body', f), covC().body)">Aa Ver fontes do texto</button></div><div class="form-grid"><div class="field"><label>Fonte dos títulos</label><select onchange="covSet('head',this.value)">${dtpFontOpts(c.head)}</select></div><div class="field"><label>Fonte do texto</label><select onchange="covSet('body',this.value)">${dtpFontOpts(c.body)}</select></div></div>
@@ -9166,10 +9317,10 @@ function covRender(r, p) {
   <div class="row-gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn dark" onclick="covCreate()">Criar no Editor de Design</button><button class="btn" onclick="covMockupDown()">Mockup do livro (PNG)</button></div>
   <div class="mot-ch" style="margin-top:10px"><b>Usar esta capa</b><div class="field" style="margin:6px 0"><label>Na Diagramação</label><div class="row-gap"><select id="covDoc">${(p.layouts || []).map(d => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join('') || '<option value="">(nenhum documento)</option>'}</select><button class="btn sm" onclick="covToDoc()">Inserir como página da capa</button></div></div>
   <div class="field" style="margin:6px 0"><label>No e-book (Editora)</label><div class="row-gap"><select id="covEb">${(p.ebooks || []).map(e => `<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('') || '<option value="">(nenhum e-book)</option>'}</select><button class="btn sm" onclick="covToEbook()">Usar como capa</button></div></div></div></div></div>`;
-  bankFill(); covPreview();
+  bankFill(); covPreview(); covThumbs(); if (ACC.covg && ACC.covg.gal) covGalPaint();
 }
 function covSet(k, v, soft) { const c = covC(); c[k] = v; persist(); if (soft) covPrevSoon(); else { covRender(curProject() && $('editoraRoot'), curProject()); } }
-function covPick(k) { const c = covC(), l = COV_LAYOUTS[k]; c.layout = k; c.head = l.head; c.body = l.body; persist(); covRender($('editoraRoot'), curProject()); }
+function covPick(k) { const c = covC(), l = COV_LAYOUTS[k]; c.layout = k; c.head = l.head; c.body = l.body; if (l.pal && !cov.keepPal) c.pal = Object.assign({}, l.pal); persist(); covRender($('editoraRoot'), curProject()); }
 function covPal(i) { covC().pal = Object.assign({}, COV_PALS[i][1]); persist(); covRender($('editoraRoot'), curProject()); }
 function covPalSet(k, v) { covC().pal[k] = v; persist(); covPrevSoon(); }
 function covWrapOpen() { const c = covC(); c.mode = 'wrap'; persist(); edh.area = 'capa'; go('editora'); }
@@ -9180,7 +9331,7 @@ async function covCreate() {
 }
 async function covRenderSetBlob(setId, maxW, type, q) {
   const p = curProject(), set = p.design.sets.find(s => s.id === setId); if (!set) throw new Error('A capa não existe mais. Crie de novo.'); await ensureSetResources(set); await ensureFonts(set.slides[0].layers.filter(l => l.type === 'text').map(l => l.family));
-  const W = set.format.w, H = set.format.h, s = maxW ? Math.min(1, maxW / W) : 1, cv = document.createElement('canvas'); cv.width = Math.round(W * s); cv.height = Math.round(H * s); const x = cv.getContext('2d'); x.save(); x.scale(s, s); renderSlide(x, set.slides[0], W, H, 1); x.restore();
+  const W = set.format.w, H = set.format.h, s = maxW ? Math.min(1, maxW / W) : 1, cv = document.createElement('canvas'); cv.width = Math.round(W * s); cv.height = Math.round(H * s); const x = cv.getContext('2d'); renderSlide(x, set.slides[0], W, H, s);
   return {cv, blob: await new Promise(r => cv.toBlob(r, type || 'image/png', q)), W, H};
 }
 async function covToDoc() {
@@ -9223,6 +9374,28 @@ async function covConcepts() {
 }
 function covApplyConcept(i) { const k = cov.concepts[i], c = covC(); if (!k) return; Object.assign(c, {layout: k.layout, pal: k.pal, head: k.head, body: k.body}); persist(); covRender($('editoraRoot'), curProject()); toast('Conceito aplicado. Suba a imagem sugerida na foto de fundo.'); }
 
+/* miniaturas dos layouts de capa (com a paleta e as fontes de cada um) */
+async function covThumbs() {
+  const cvs = [...document.querySelectorAll('canvas[data-cl]')], my = ++cov.TT; await ensureFonts(Object.values(COV_LAYOUTS).flatMap(l => [l.head, l.body]));
+  for (const cv of cvs) { if (my !== cov.TT || !cv.isConnected) return; const l = COV_LAYOUTS[cv.dataset.cl], f = {title: 'Título do livro', subtitle: 'Subtítulo de exemplo', author: 'Nome do Autor', collection: 'Editora', tagline: 'Autor de outro livro', pal: l.pal || covC().pal, head: l.head, body: l.body, imgId: ''}, R = {x: 0, y: 0, w: 1600, h: 2400}; R.full = R;
+    try { const x = cv.getContext('2d'), sl = {id: 't', name: 't', bg: f.pal.bg, layers: l.build(f, R)}; LAYOUT_PREVIEW = true; try { renderSlide(x, sl, 1600, 2400, cv.width / 1600); } finally { LAYOUT_PREVIEW = false; } } catch (e) { console.warn('thumb', e); } await new Promise(r => setTimeout(r, 0)); }
+}
+cov.TT = 0; cov.keepPal = false; cov.gal = 'Todos';
+/* os modelos de layout da galeria (73) aplicados à capa: um clique cria a peça com os textos do livro e as cores da paleta */
+function covGalTokens() { const p = curProject(), c = covC(), tk = JSON.parse(JSON.stringify(lyTokens(p, 'neutral'))); Object.assign(tk, {bg: c.pal.bg, fg: c.pal.fg, accent: c.pal.accent, second: c.pal.second, muted: c.pal.fg}); tk.head = {family: c.head, weight: 700}; tk.body = {family: c.body, weight: 400}; return tk; }
+function covGalCopy(lay) { const c = covC(), copy = {}; lay.fields.forEach(k => { const sm = Array.isArray(lay.sample[k]) ? lay.sample[k].join('\n') : (lay.sample[k] || ''); copy[k] = k === 'title' ? (c.title || sm) : k === 'sub' ? (c.subtitle || sm) : k === 'kicker' ? (c.collection || sm) : k === 'handle' ? (c.author || sm) : k === 'button' ? (c.tagline || 'Leia agora') : sm; }); return copy; }
+function covGalBody() { const l = LAYOUTS.filter(x => cov.gal === 'Todos' || x.group === cov.gal); return `<div class="tchips">${['Todos', ...LAYOUT_GROUPS].map(g => `<button class="tchip ${cov.gal === g ? 'on' : ''}" onclick="covGalGroup('${g}')">${g}</button>`).join('')}</div><div class="ly-grid start-lay">${l.map(x => `<article class="ly-card" onclick="covFromGallery('${x.id}')"><canvas data-cg="${x.id}" width="150" height="225"></canvas><strong>${esc(x.name)}</strong></article>`).join('')}</div>`; }
+function covGalGroup(g) { cov.gal = g; const b = document.querySelector('#acc-covg-gal .lg-acc-b'); if (b) { b.innerHTML = covGalBody(); covGalPaint(); } }
+async function covGalPaint() {
+  const cvs = [...document.querySelectorAll('canvas[data-cg]')]; if (!cvs.length) return; const my = ++cov.GT, tk = covGalTokens(); await ensureFonts(lyFamilies(tk)); const fmt = resolveFmt({fmt: 'custom', cw: 1200, ch: 1800}); let n = 0;
+  for (const cv of cvs) { if (my !== cov.GT || !cv.isConnected) return; try { const lay = layoutById(cv.dataset.cg), s = buildLayoutSlide(lay, tk, covGalCopy(lay), fmt, curProject().name); LAYOUT_PREVIEW = true; try { renderSlide(cv.getContext('2d'), s, fmt.w, fmt.h, cv.width / fmt.w); } finally { LAYOUT_PREVIEW = false; } } catch (e) { console.warn('gal', e); } if (++n % 5 === 0) await new Promise(r => setTimeout(r, 0)); }
+}
+cov.GT = 0;
+async function covFromGallery(id) {
+  const p = curProject(), c = covC(), lay = layoutById(id); if (!lay) return; toast('Abrindo o layout na capa…'); const tk = covGalTokens(), fmt = resolveFmt({fmt: 'custom', cw: 1200, ch: 1800});
+  try { await ensureFonts(lyFamilies(tk)); const copy = covGalCopy(lay), set = layoutSetFrom(lay, tk, copy, fmt, p.name, 'Capa · ' + lay.name + ' · ' + (c.title || p.name)); set.slides[0] = buildLayoutSlide(lay, tk, copy, fmt, p.name); await ensureSetResources(set); p.design.sets.push(set); c.setId = set.id; persist(); go('design'); dzOpen(set.id); toast('Capa criada a partir do layout. Edite os textos e a imagem.'); } catch (e) { toast('Não consegui abrir: ' + e.message); }
+}
+
 </script>
 <script>
 /* ===== Menus recolhíveis (acordeão) nos painéis de atributos e bloco "Não comece do zero" ===== */
@@ -9248,7 +9421,7 @@ function accAuto(root, sel, key, opt) {
   const wrap = (name, after) => { const f = window[name]; if (typeof f !== 'function') return; window[name] = function () { const r = f.apply(this, arguments); try { after(); } catch (e) { console.warn(name, e); } return r; }; };
   wrap('dzInspector', () => { const L = typeof dzLayer === 'function' ? dzLayer() : null; accAuto($('dzInsp'), 'h4', 'dz-' + (L ? L.type + (L.role === 'logo' ? 'L' : '') : 'none')); });
   wrap('dtpPanel', () => { const it = dui.tab === 'objeto' && typeof dtpSelItem === 'function' ? dtpSelItem() : null; accAuto($('dtpPanel'), '.okr-label', 'dtp-' + dui.tab + (it ? it.k : '')); });
-  wrap('covRender', () => accAuto(document.querySelector('.cov-form'), '.okr-label', 'cov'));
+  wrap('covRender', () => accAuto(document.querySelector('.cov-form'), '.okr-label', 'cov', {open: [0, 1, 2]}));
 })();
 
 /* ---------- "Não comece do zero": tudo o que existe para partir de uma base ---------- */
@@ -9267,7 +9440,7 @@ const startLayList = () => LAYOUTS.filter(l => start.group === 'Todos' || l.grou
 function startLayBody() { return `<div class="tchips">${['Todos', ...LAYOUT_GROUPS].map(g => `<button class="tchip ${start.group === g ? 'on' : ''}" onclick="startGroup('${g}')">${g}</button>`).join('')}</div><div class="ly-grid start-lay">${startLayList().map(l => `<article class="ly-card" onclick="lyQuick('${l.id}')"><canvas data-lay="${l.id}" width="200" height="250"></canvas><strong>${esc(l.name)}</strong></article>`).join('')}</div>`; }
 function startGroup(g) { start.group = g; const b = document.querySelector('#acc-start-lay .lg-acc-b'); if (b) { b.innerHTML = startLayBody(); startPaint(); } }
 function startPaint() { const box = $('startBox'), p = dzP(); if (box && p && ACC.start && ACC.start.lay && typeof lyPaint === 'function') { if (typeof lyState !== 'undefined' && !lyState.style) { const s = lyStyles(p); lyState.style = s[0].id; } lyPaint(p, box, startLayList()); } }
-ACC_ON['start-lay'] = startPaint;
+ACC_ON['start-lay'] = startPaint; ACC_ON['covg-gal'] = () => covGalPaint();
 function startInit() { bankFill(); startPaint(); }
 function startRef(id) {
   showModal('Usar esta referência', `<p class="muted" style="font-size:13px;margin-top:0">A IA lê fontes, cores, tamanhos e blocos e monta uma peça editável no Editor de Design. Use ★ Modelo no editor para guardar na galeria.</p><div class="modal-actions" style="flex-wrap:wrap"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn" onclick="closeModal();go('inspiration')">Ver na Inspiração</button><button class="btn dark" onclick="startRefRead('${esc(id)}')">✦ Ler layout (IA)</button></div>`);

@@ -11,6 +11,7 @@ function renderEditora() {
   if (typeof mot !== 'undefined' && mot.open) return motRender(r, p);
   if (edh.area === 'capa') return covRender(r, p);
   if (edh.area === 'amazon') return kdpRender(r, p);
+  if (edh.area === 'banca') return bancaRender(r, p);
   if (eui.id && ebCur()) return ebEditor(p, r);
   const list = ebList();
   r.innerHTML = `<div class="page-head"><div><h1>Editora</h1><p>Produza e-books completos: capítulos, caixas e checklists diagramados em 4 versões (celular, tablet 6×9, A4 preto e branco e A4 econômico), capa criada no Editor de Design, documento de revisão e EPUB.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button></div></div>
@@ -40,7 +41,7 @@ function ebStatus() { const el = $('ebAuto'); if (el) el.innerHTML = `✓ Salvo 
 /* ---------- editor ---------- */
 function ebEditor(p, r) {
   const eb = ebCur(), sec = ebSecCur(); if (!eui.sec && sec) eui.sec = sec.id;
-  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="ebBack()">← Editora</button><input class="dz-name" value="${esc(eb.name)}" onchange="ebCur().name=this.value;ebTouch()"><div class="row-gap"><button class="btn sm" onclick="ebUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="ebRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="ebAuto"></span></div></div>
+  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="ebBack()">← Editora</button><button class="btn sm" onclick="flipRead('eb',eui.id)" title="Folhear em tela cheia">📖 Folhear</button><input class="dz-name" value="${esc(eb.name)}" onchange="ebCur().name=this.value;ebTouch()"><div class="row-gap"><button class="btn sm" onclick="ebUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="ebRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="ebAuto"></span></div></div>
   <div class="eb-wrap"><div class="eb-left" id="ebLeft">${ebStructHTML(eb)}</div><div class="eb-mid"><div class="eb-vers">${Object.values(EB_FORMATS).map(f => `<button class="tchip ${eui.ver === f.id ? 'on' : ''}" onclick="ebVer('${f.id}')">${esc(f.short)}</button>`).join('')}<button class="btn sm" onclick="ebOverview()">▦ Todas as páginas</button></div>
     <div class="eb-stage" id="ebStage"><canvas id="ebCanvas"></canvas></div><div class="eb-pager"><button class="btn sm" onclick="ebGo(eui.page-1)">‹</button><span id="ebPageInfo">…</span><button class="btn sm" onclick="ebGo(eui.page+1)">›</button><span class="muted" id="ebIssues"></span></div></div>
   <div class="eb-right"><div class="matrix-tabs">${[['conteudo', 'Conteúdo'], ['identidade', 'Identidade'], ['verificar', 'Verificar'], ['exportar', 'Capa e exportar']].map(([k, l]) => `<button class="${eui.tab === k ? 'active' : ''}" onclick="eui.tab='${k}';ebRenderRight()">${l}</button>`).join('')}</div><div id="ebRight"></div></div></div>`;
