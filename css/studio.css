@@ -52,8 +52,6 @@
 @media(max-width:900px){.jp-journey-edit{grid-template-columns:1fr 1fr}.jp-checklist,.jp-ident{grid-template-columns:1fr}}
 @media(max-width:760px){.jp-journey-edit{grid-template-columns:1fr}.page-head{flex-direction:column;align-items:flex-start;gap:10px}.page-head .actions{flex-wrap:wrap}.proj-select select{max-width:46vw}}
 
-/* barra lateral no celular: rolagem horizontal em vez de transbordar */
-@media(max-width:760px){.rail{width:100%!important;height:54px!important;flex-direction:row!important;align-items:center;overflow:hidden}.logo{margin:0 8px 0 0!important}.rail-nav{overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}.rail-nav::-webkit-scrollbar{display:none}.rail-nav button,.rail-bottom button{flex:0 0 auto}.logo{flex:0 0 auto}.rail button::after{display:none!important}.topbar{padding:0 12px;gap:6px}}
 
 /* assistente de novo projeto e fluxo do projeto */
 .wiz-panel{max-width:860px}.wiz-tabs{margin:10px 0 14px}.wiz-big{font-size:14px}.wiz-nav{display:flex;justify-content:space-between;max-width:860px;margin-top:16px}
