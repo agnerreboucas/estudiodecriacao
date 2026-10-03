@@ -4,21 +4,100 @@ const lpCur = () => { const p = curProject(); return p && p.landings.find(x => x
 const lpA = esc;
 
 function renderLandings() {
-  const r = $('landingsRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Landing pages'); return; }
+  const r = $('landingsRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Sites e landing pages'); return; }
   if (lpUI.id && !lpCur()) lpUI.id = '';
   if (lpUI.id) return lpEditor(r, p, lpCur());
-  eSrc.sink = null; eSrc.render = null;
-  r.innerHTML = `<div class="page-head"><div><h1>Landing pages</h1><p>Escolha o tipo de produto, passe os insumos do projeto (descrição, site, imagem, áudio, atributos) e a página é montada em blocos editáveis, com HTML responsivo pronto para publicar.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="lpNewModal()">＋ Nova landing page</button></div></div>
-  ${p.landings.length ? `<div class="lp-list">${p.landings.map(l => { const t = LP_TYPE_INFO[l.type]; return `<div class="panel lp-card"><div><span class="so-badge" style="margin:0 6px 0 0">${lpA(t ? t.label : 'Simples')}</span><small class="muted">${lpA(l.status)}</small><h3 style="margin:6px 0 2px">${lpA(l.name)}</h3><small class="muted block">${(l.blocks || []).filter(b => b.on).length ? (l.blocks.filter(b => b.on).length + ' blocos') : 'formato simples (será convertido ao abrir)'}${lpPending(l) ? ` · <span class="so-warn">${lpPending(l)} item(ns) a confirmar</span>` : ''}</small></div><div class="row-gap"><button class="btn sm dark" onclick="lpOpen('${l.id}')">Abrir</button><button class="btn sm" onclick="lpExport('${l.id}')">⬇ HTML</button><button class="btn sm" onclick="lpDelete('${l.id}')">Excluir</button></div></div>`; }).join('')}</div>` : `<div class="panel"><h3>Nenhuma landing page ainda</h3><p class="muted">Comece pelo tipo de produto: cada um já vem com a estrutura de blocos que mais costuma converter.</p><button class="btn dark" onclick="lpNewModal()">＋ Nova landing page</button></div>`}${lpRefsHTML()}`;
+  eSrc.sink = null; eSrc.render = null; const T = lpUI.main || 'paginas';
+  r.innerHTML = `<div class="page-head"><div><h1>Sites e landing pages</h1><p>Escolha o produto do projeto e o tipo de página; a página nasce dos benefícios e características dele, com variações A/B para ver qual converte mais.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="lpNewModal()">＋ Nova página</button></div></div>
+  <div class="edh-tabs">${[['paginas', 'Páginas'], ['produtos', 'Produtos do projeto'], ['refs', 'Referências']].map(([k, t]) => `<button class="edh-tab ${T === k ? 'on' : ''}" onclick="lpUI.main='${k}';renderLandings()">${t}</button>`).join('')}</div><div id="lpMain"></div>`;
+  ({paginas: lpMainPaginas, produtos: lpMainProdutos, refs: lpMainRefs})[T]($('lpMain'), p);
 }
-function lpNewModal() {
-  showModal('Nova landing page', `<div class="field"><label>Nome interno</label><input id="lpnName" placeholder="Ex.: Curso Finanças sem medo — lançamento"></div><div class="okr-label">TIPO DE PRODUTO</div><div class="lp-types">${Object.entries(LP_TYPE_INFO).map(([k, t], i) => `<label class="lp-type"><input type="radio" name="lpnT" value="${k}" ${i === 0 ? 'checked' : ''}><b>${lpA(t.label)}</b><small class="muted">${lpA(t.why)}</small><small class="mono muted">${t.blocks.map(b => LP_BLOCK[b].label).join(' → ')}</small></label>`).join('')}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="lpCreate()">Criar e abrir</button></div>`);
+const lpMainRefs = b => { b.innerHTML = lpRefsHTML().replace('style="margin-top:14px"', ''); };
+
+/* ---------- lista de páginas, agrupadas por variação (A/B) + medição ---------- */
+async function lpLoadStats(p) {
+  if (!canUseApi() || lpUI.statsAt === p.id + p.landings.length) return; lpUI.statsAt = p.id + p.landings.length;
+  try { const j = await api('lp.php?action=stats&ids=' + encodeURIComponent(p.landings.map(l => l.id).join(','))); lpUI.stats = j.stats || {}; if (lpUI.main === 'paginas' && ui.page === 'landings' && !lpUI.id) renderLandings(); } catch (e) { lpUI.stats = lpUI.stats || {}; }
+}
+function lpGroups(p) { const g = new Map(); p.landings.forEach(l => { const k = l.group || l.id; if (!g.has(k)) g.set(k, []); g.get(k).push(l); }); return [...g.values()].map(a => a.sort((x, y) => (x.variant || 'A').localeCompare(y.variant || 'A'))); }
+/* duas proporções: só declara vencedor com amostra mínima e diferença estatisticamente clara (z ≥ 1,96) */
+function lpAB(a, b) {
+  const MIN = 100; if (a.view < MIN || b.view < MIN) return {ok: false, msg: `sem amostra suficiente (mínimo de ${MIN} visitas por versão)`};
+  const pa = a.lead / a.view, pb = b.lead / b.view, pp = (a.lead + b.lead) / (a.view + b.view), se = Math.sqrt(pp * (1 - pp) * (1 / a.view + 1 / b.view)); if (!se) return {ok: false, msg: 'sem leads suficientes para comparar'};
+  const z = (pa - pb) / se; return Math.abs(z) >= 1.96 ? {ok: true, win: z > 0 ? 'a' : 'b', msg: 'diferença estatisticamente clara (95%)'} : {ok: false, msg: 'diferença ainda dentro do acaso: continue o teste'};
+}
+function lpMainPaginas(b, p) {
+  lpLoadStats(p); const S = lpUI.stats || {}, groups = lpGroups(p), st = l => S[l.id] || {view: 0, cta: 0, lead: 0};
+  b.innerHTML = groups.length ? groups.map(g => { const win = g.length > 1 ? (() => { const best = g.slice().sort((x, y) => (st(y).lead / Math.max(1, st(y).view)) - (st(x).lead / Math.max(1, st(x).view))); const r = lpAB(st(best[0]), st(best[1])); return r.ok ? {id: best[0].id, msg: r.msg} : {id: '', msg: r.msg}; })() : null;
+    return `<div class="panel lp-group"><div class="section-row"><div><h3 style="margin:0">${lpA(g[0].name.replace(/ · [A-Z]$/, ''))}</h3><small class="muted">${lpA((LP_TYPE_INFO[g[0].type] || {label: 'Simples'}).label)}${g[0].productId ? ' · ' + lpA(((p.products || []).find(x => x.id === g[0].productId) || {}).name || '') : ''}</small></div><div class="row-gap"><button class="btn sm" onclick="lpVariantModal('${g[0].id}')">＋ Variação</button></div></div>
+    <div class="lp-vars">${g.map(l => { const s = st(l), cv = s.view ? s.lead / s.view * 100 : 0; return `<div class="lp-var ${win && win.id === l.id ? 'win' : ''}"><div class="row-gap" style="justify-content:space-between"><b>${g.length > 1 || l.variant ? 'Versão ' + (l.variant || 'A') : lpA(l.name)}</b>${win && win.id === l.id ? '<span class="so-badge ok" style="margin:0">vencedora</span>' : `<small class="muted">${lpA(l.status)}</small>`}</div>${l.angle ? `<small class="muted block">Abordagem: ${lpA(l.angle)}</small>` : ''}<small class="muted block">${(l.blocks || []).filter(x => x.on).length ? l.blocks.filter(x => x.on).length + ' blocos' : 'formato simples'}${lpPending(l) ? ` · <span class="so-warn">${lpPending(l)} a confirmar</span>` : ''}</small>
+      <div class="lp-stats"><span><b>${s.view}</b><small>visitas</small></span><span><b>${s.lead}</b><small>leads</small></span><span><b>${s.view ? cv.toFixed(1).replace('.', ',') + '%' : '—'}</b><small>conversão</small></span></div>
+      <div class="row-gap" style="margin-top:6px;flex-wrap:wrap"><button class="btn sm dark" onclick="lpOpen('${l.id}')">Abrir</button><button class="btn sm" onclick="lpExport('${l.id}')">⬇ HTML</button><button class="btn sm" onclick="lpDelete('${l.id}')">×</button></div></div>`; }).join('')}</div>
+    ${win ? `<small class="muted block" style="margin-top:6px">${lpA(win.msg)}${!canUseApi() ? ' · a medição precisa do servidor (Hostinger) e da URL de leads configurada' : ''}</small>` : ''}</div>`; }).join('') : `<div class="panel"><h3>Nenhuma página ainda</h3><p class="muted">Comece pelo produto e pelo tipo de página: cada tipo já vem com a estrutura de blocos que mais costuma converter.</p><button class="btn dark" onclick="lpNewModal()">＋ Nova página</button></div>`;
+}
+function lpVariantModal(id) {
+  const l = curProject().landings.find(x => x.id === id), ang = ['Dor e urgência', 'Benefício principal', 'Prova e resultado', 'Curiosidade', 'Simplicidade e facilidade', 'Garantia e segurança'];
+  showModal('Nova variação (teste A/B)', `<p style="margin-top:0;font-size:13px">Cria uma cópia da página para testar contra a original. Mude <b>uma coisa de cada vez</b> (a abordagem do topo) para o resultado ser claro.</p><div class="field"><label>Abordagem desta variação</label><select id="lvA">${ang.map(a => `<option>${a}</option>`).join('')}</select></div><label class="ins inl"><input type="checkbox" id="lvG" checked> reescrever o topo e o botão com essa abordagem (IA)</label><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="lpVariantMake('${id}')">Criar variação</button></div>`);
+}
+async function lpVariantMake(id) {
+  const p = curProject(), src = p.landings.find(x => x.id === id), ang = $('lvA').value, gen = $('lvG').checked; closeModal();
+  if (!src.group) { src.group = uid('lg'); src.variant = 'A'; src.name = src.name.replace(/ · [A-Z]$/, ''); }
+  const used = p.landings.filter(x => x.group === src.group).map(x => x.variant), v = 'ABCDEFGH'.split('').find(c => !used.includes(c)) || 'Z', c = JSON.parse(JSON.stringify(src));
+  c.id = uid('lp'); c.variant = v; c.angle = ang; c.status = 'Rascunho'; c.name = src.name.replace(/ · [A-Z]$/, '') + ' · ' + v; c.blocks.forEach(b => { b.id = uid('bk'); }); p.landings.push(c); persist();
+  lpUI.id = c.id; lpUI.tab = 'blocos'; renderLandings();
+  if (gen && aiReady()) { lpUI.busy = 'gen'; renderLandings(); try { await lpRewriteTop(c); toast('Variação criada com a abordagem “' + ang + '”.'); } catch (e) { toast(eErr(e)); } lpUI.busy = ''; renderLandings(); } else toast('Variação ' + v + ' criada. Edite o topo para testar a abordagem.');
+}
+async function lpRewriteTop(l) {
+  const h = l.blocks.find(b => b.t === 'hero'); if (!h) return;
+  const j = await motJSON('Você é um redator de resposta direta. Reescreva só o topo de uma landing page com a ABORDAGEM pedida, mantendo os fatos. Nunca invente dados, números, depoimentos ou garantias: use [CONFIRMAR: …] quando faltar. ' + (eBrandTxt() ? '\n' + eBrandTxt().slice(0, 4000) : ''), `ABORDAGEM: ${l.angle}\nPRODUTO: ${l.product.nome || l.name}\n${lpProductFacts(l)}INSUMOS:\n${(l.input || '').slice(0, 6000)}\nTOPO ATUAL: título="${h.title}" subtítulo="${h.text}" botão="${h.cta}"\nJSON: {"kicker":"","title":"até 80 caracteres; **negrito** em 1-2 palavras","text":"até 180","cta":"","note":""}`, 1200);
+  ['kicker', 'title', 'text', 'cta', 'note'].forEach(k => { if (j[k] != null) h[k] = String(j[k]).slice(0, k === 'text' ? 400 : 300); }); l.headline = h.title; l.sub = h.text; persist();
+}
+
+/* ---------- produtos do projeto ---------- */
+function lpMainProdutos(b, p) {
+  b.innerHTML = `<div class="panel"><div class="section-row"><div><h3>Produtos do projeto</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">A fonte dos fatos: benefícios, características, objeções e provas reais. As páginas e os sites são gerados a partir da seleção que você fizer aqui, sem inventar o que não estiver cadastrado.</p></div><button class="btn dark sm" onclick="prodModal('')">＋ Novo produto</button></div>
+  ${(p.products || []).length ? p.products.map(x => `<div class="list-item"><div><strong>${lpA(x.name)}</strong><small>${lpA((LP_TYPE_INFO[x.type] || {label: 'Produto'}).label)} · ${x.benefits.length} benefício(s) · ${x.features.length} característica(s)${x.price ? ' · ' + lpA(x.price) : ''}</small></div><div class="row-gap"><button class="btn sm dark" onclick="lpNewFromProduct('${x.id}')">Criar página</button><button class="btn sm" onclick="prodModal('${x.id}')">Editar</button><button class="btn sm" onclick="prodDel('${x.id}')">×</button></div></div>`).join('') : '<p class="muted" style="margin-top:10px">Nenhum produto ainda. Cadastre o primeiro: nome, para quem é, benefícios e características.</p>'}</div>`;
+}
+function prodModal(id) {
+  const x = id ? curProject().products.find(y => y.id === id) : {name: '', type: 'produto', summary: '', price: '', audience: '', checkout: '', benefits: [], features: [], objections: [], proofs: []}, ta = (k, l, ph) => `<div class="field full"><label>${l} (um por linha)</label><textarea id="pd_${k}" rows="4" placeholder="${lpA(ph || '')}">${lpA((x[k] || []).join('\n'))}</textarea></div>`;
+  showModal(id ? 'Editar produto' : 'Novo produto', `<div class="form-grid"><div class="field"><label>Nome</label><input id="pd_name" value="${lpA(x.name)}"></div><div class="field"><label>Tipo</label><select id="pd_type">${['produto', 'curso', 'ebook', 'servico', 'evento', 'cadastro'].map(t => `<option value="${t}" ${x.type === t ? 'selected' : ''}>${lpA((LP_TYPE_INFO[t] || {label: 'Produto físico / catálogo'}).label)}</option>`).join('')}</select></div>
+    <div class="field full"><label>Descrição</label><textarea id="pd_summary" rows="3">${lpA(x.summary)}</textarea></div><div class="field"><label>Preço e condição</label><input id="pd_price" value="${lpA(x.price)}"></div><div class="field"><label>Link de compra / inscrição</label><input id="pd_checkout" value="${lpA(x.checkout)}" placeholder="https://…"></div><div class="field full"><label>Público</label><input id="pd_audience" value="${lpA(x.audience)}"></div>
+    ${ta('benefits', 'Benefícios (o que a pessoa ganha)', 'Ex.: Entende a parcela antes de assinar')}${ta('features', 'Características (o que o produto é ou tem)', 'Ex.: 6 módulos em vídeo; planilha de comparação')}${ta('objections', 'Objeções comuns', 'Ex.: Não tenho tempo')}${ta('proofs', 'Provas reais (números, depoimentos autorizados, casos)', 'Só o que existe de verdade')}</div>
+  <div class="modal-actions"><button class="btn" onclick="prodSuggest()" ${aiReady() ? '' : 'disabled'} title="Sugere benefícios e características a partir da descrição">✦ Sugerir da descrição</button><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="prodSave('${id}')">Salvar</button></div>`);
   document.getElementById('modalBox').classList.add('wide');
 }
+const prodLines = id => $(id).value.split('\n').map(t => t.trim()).filter(Boolean);
+function prodSave(id) {
+  const p = curProject(), name = $('pd_name').value.trim(); if (!name) { toast('Dê um nome ao produto.'); return; }
+  const o = normalizeProducts([{id: id || uid('pr'), name, type: $('pd_type').value, summary: $('pd_summary').value, price: $('pd_price').value, audience: $('pd_audience').value, checkout: $('pd_checkout').value.trim(), benefits: prodLines('pd_benefits'), features: prodLines('pd_features'), objections: prodLines('pd_objections'), proofs: prodLines('pd_proofs'), images: id ? (p.products.find(y => y.id === id) || {}).images : []}])[0];
+  if (id) p.products[p.products.findIndex(y => y.id === id)] = o; else p.products.push(o); persist(); closeModal(); renderLandings();
+}
+function prodDel(id) { if (!confirm('Excluir este produto? As páginas já criadas continuam.')) return; const p = curProject(); p.products = p.products.filter(x => x.id !== id); persist(); renderLandings(); }
+async function prodSuggest() {
+  const d = $('pd_summary').value.trim(); if (!d) { toast('Escreva a descrição primeiro.'); return; } const btn = event && event.target; if (btn) { btn.disabled = true; btn.textContent = 'Pensando…'; }
+  try { const j = await aiJSON('Você ajuda a organizar fatos de um produto. Com base SÓ na descrição, sugira benefícios (o que a pessoa ganha) e características (o que o produto é/tem). Não invente números, prazos, garantias nem resultados. Se algo for suposição, termine o item com " [CONFIRMAR]". JSON: {"benefits":[""],"features":[""],"objections":[""]}', d);
+    ['benefits', 'features', 'objections'].forEach(k => { const t = $('pd_' + k); const add = (Array.isArray(j[k]) ? j[k] : []).slice(0, 8).map(x => String(x).slice(0, 300)); t.value = [t.value.trim(), ...add].filter(Boolean).join('\n'); }); toast('Sugestões adicionadas. Revise antes de salvar.'); } catch (e) { toast(e.message); }
+  if (btn) { btn.disabled = false; btn.textContent = '✦ Sugerir da descrição'; }
+}
+function lpNewFromProduct(id) { lpNewModal(id); }
+/* fatos do produto selecionado, para o prompt */
+function lpProductFacts(l) {
+  const p = curProject(), x = (p.products || []).find(y => y.id === l.productId); if (!x) return '';
+  const pick = (arr, sel) => (l.pick && l.pick.all !== false) ? arr : arr.filter((_, i) => (sel || []).includes(i));
+  return `PRODUTO DO PROJETO (fatos cadastrados; use SÓ estes):\nBenefícios: ${pick(x.benefits, l.pick && l.pick.b).join(' | ') || '(nenhum)'}\nCaracterísticas: ${pick(x.features, l.pick && l.pick.f).join(' | ') || '(nenhuma)'}\nObjeções: ${x.objections.join(' | ') || '(nenhuma)'}\nProvas reais: ${x.proofs.join(' | ') || '(nenhuma: use [CONFIRMAR])'}\n\n`;
+}
+function lpNewModal(productId) {
+  const p = curProject(), prods = p.products || [], pr = prods.find(x => x.id === productId), def = pr ? (LP_TYPE_INFO[pr.type] ? pr.type : 'generico') : 'curso';
+  showModal('Nova página', `<div class="field"><label>Produto do projeto</label><select id="lpnP" onchange="lpnPick(this.value)"><option value="">— sem produto (preencho depois) —</option>${prods.map(x => `<option value="${x.id}" ${x.id === productId ? 'selected' : ''}>${lpA(x.name)}</option>`).join('')}</select>${prods.length ? '' : '<small class="muted block">Cadastre produtos na aba “Produtos do projeto” para gerar a página a partir dos benefícios e características.</small>'}</div>
+  <div class="field"><label>Nome interno</label><input id="lpnName" value="${lpA(pr ? 'LP — ' + pr.name : '')}" placeholder="Ex.: Curso Finanças — lançamento"></div><div class="okr-label">TIPO DE PÁGINA</div><div class="lp-types">${Object.entries(LP_TYPE_INFO).map(([k, t]) => `<label class="lp-type"><input type="radio" name="lpnT" value="${k}" ${k === def ? 'checked' : ''}><b>${lpA(t.label)}</b><small class="muted">${lpA(t.why)}</small><small class="mono muted">${t.blocks.map(b => LP_BLOCK[b].label).join(' → ')}</small></label>`).join('')}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="lpCreate()">Criar e abrir</button></div>`);
+  document.getElementById('modalBox').classList.add('wide');
+}
+function lpnPick(id) { const x = curProject().products.find(y => y.id === id); if (!x) return; const n = $('lpnName'); if (!n.value.trim() || /^LP — /.test(n.value)) n.value = 'LP — ' + x.name; const t = document.querySelector(`input[name=lpnT][value="${LP_TYPE_INFO[x.type] ? x.type : 'generico'}"]`); if (t) t.checked = true; }
 function lpTheme(p) { try { const tk = lyStyles(p)[0].tk; return {accent: tk.accent, bg: tk.bg, fg: tk.fg, dark: false, head: tk.head.family, body: tk.body.family}; } catch (e) { return {}; } }
 function lpCreate(init) {
   const p = curProject(), t = init && init.type || (document.querySelector('input[name=lpnT]:checked') || {}).value || 'generico', name = init && init.name || ($('lpnName') && $('lpnName').value.trim()) || 'LP — ' + LP_TYPE_INFO[t].label;
-  const l = normalizeLandings([Object.assign({id: uid('lp'), name, type: t, goal: LP_TYPE_INFO[t].goal === 'lead' ? 'Gerar lead' : 'Conteúdo', cta: LP_TYPE_INFO[t].cta, theme: lpTheme(p), blocks: lpStructure(t), whatsapp: '', status: 'Rascunho'}, init || {})])[0];
+  const pid = init && init.productId || ($('lpnP') && $('lpnP').value) || '', pr = pid && (p.products || []).find(x => x.id === pid), prod = pr ? {nome: pr.name, preco: pr.price, publico: pr.audience, checkout: pr.checkout, data: '', local: ''} : undefined;
+  const l = normalizeLandings([Object.assign({id: uid('lp'), name, type: t, productId: pr ? pr.id : '', product: prod, input: pr ? [pr.summary && 'Descrição: ' + pr.summary].filter(Boolean).join('\n') : '', goal: LP_TYPE_INFO[t].goal === 'lead' ? 'Gerar lead' : 'Conteúdo', cta: LP_TYPE_INFO[t].cta, theme: lpTheme(p), blocks: lpStructure(t), whatsapp: '', status: 'Rascunho'}, init || {})])[0];
   p.landings.push(l); persist(); closeModal(); lpUI.id = l.id; lpUI.tab = 'produto'; if (ui.page !== 'landings') go('landings'); else renderLandings(); return l;
 }
 function lpOpen(id) {
@@ -45,7 +124,10 @@ function lpSet(path, v) { const l = lpCur(), a = path.split('.'); let o = l; for
 
 function lpTabProduto(b, l, p) {
   const t = LP_TYPE_INFO[l.type] || LP_TYPE_INFO.generico, ev = l.type === 'evento', ready = aiReady(), agentOK = !!(EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief);
+  const prods = p.products || [], pr = prods.find(x => x.id === l.productId), pk = (arr, key) => arr.map((t, i) => `<label class="lp-pk"><input type="checkbox" ${l.pick.all !== false || l.pick[key].includes(i) ? 'checked' : ''} onchange="lpPick('${key}',${i},this.checked)"> ${lpA(t)}</label>`).join('') || '<small class="muted">nenhum cadastrado</small>';
   b.innerHTML = `${lpIn('Nome interno', l.name, `lpSet('name',this.value)`)}
+  <div class="field"><label>Produto do projeto</label><select onchange="lpUseProduct(this.value)"><option value="">— nenhum —</option>${prods.map(x => `<option value="${x.id}" ${x.id === l.productId ? 'selected' : ''}>${lpA(x.name)}</option>`).join('')}</select>${l.variant ? `<small class="muted block">Versão ${l.variant}${l.angle ? ' · abordagem: ' + lpA(l.angle) : ''} (teste A/B)</small>` : ''}</div>
+  ${pr ? accSec('lp', 'pick', 'Benefícios e características usados', `${pr.benefits.length + pr.features.length} cadastrados`, `<div class="okr-label">BENEFÍCIOS</div>${pk(pr.benefits, 'b')}<div class="okr-label" style="margin-top:8px">CARACTERÍSTICAS</div>${pk(pr.features, 'f')}<small class="muted block" style="margin-top:6px">Desmarque o que não deve entrar nesta página. Dá para editar os fatos na aba “Produtos do projeto”.</small>`, false) : ''}
   <div class="field"><label>Tipo de produto</label><select onchange="lpChangeType(this.value)">${Object.entries(LP_TYPE_INFO).map(([k, x]) => `<option value="${k}" ${l.type === k ? 'selected' : ''}>${lpA(x.label)}</option>`).join('')}</select><small class="muted block">${lpA(t.why)}</small></div>
   ${accSec('lp', 'prod', 'Dados do produto', lpA(l.product.nome || ''), lpIn('Nome do produto', l.product.nome, `lpSet('product.nome',this.value)`) + lpIn('Preço e condição', l.product.preco, `lpSet('product.preco',this.value)`, 0, 'Ex.: 12x de R$ 49,90 ou R$ 497 à vista') + lpIn('Público', l.product.publico, `lpSet('product.publico',this.value)`, 2) + lpIn('Link de compra / inscrição (checkout)', l.product.checkout, `lpSet('product.checkout',this.value)`, 0, 'https://…') + (ev ? lpIn('Data e hora (AAAA-MM-DDTHH:MM)', l.product.data, `lpSet('product.data',this.value)`, 0, '2026-11-20T19:00') + lpIn('Local ou link online', l.product.local, `lpSet('product.local',this.value)`) : '') + lpIn('WhatsApp (só números, com DDI)', l.whatsapp, `lpSet('whatsapp',this.value.replace(/\\D/g,''))`, 0, '5511999999999'), true)}
   <div class="field"><label>Insumos <small class="muted">${l.input.length.toLocaleString('pt-BR')} caracteres</small></label><textarea rows="9" oninput="lpCur().input=this.value;persist()" placeholder="Cole a descrição do produto, a ementa, o roteiro do evento, o que o cliente recebe, garantia, depoimentos reais… Quanto mais concreto, menos [CONFIRMAR] na página.">${lpA(l.input)}</textarea></div>
@@ -62,7 +144,7 @@ function lpChangeType(t) {
 }
 function lpPrompt(l) {
   const t = LP_TYPE_INFO[l.type], P = l.product, blocks = l.blocks.filter(b => b.on);
-  return `${lpRefPrompt(l)}PRODUTO: ${t.label}\nNome: ${P.nome || '(não informado)'}\nPreço/condição: ${P.preco || '(não informado)'}\nPúblico: ${P.publico || '(não informado)'}\nLink de compra: ${P.checkout ? 'informado' : 'não informado'}${l.type === 'evento' ? `\nData/hora: ${P.data || '(não informada)'}\nLocal: ${P.local || '(não informado)'}` : ''}\nWhatsApp de contato: ${l.whatsapp ? 'sim' : 'não'}\n\nINSUMOS (única fonte de fatos):\n${l.input || '(vazio)'}\n\n${lpUI.useAgent && EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief ? 'IDEIA E BRIEFING DO AGENTE EDITORIAL:\n' + eCtx() + '\n' : ''}ESTRUTURA DA PÁGINA (na ordem; devolva um objeto por bloco):\n${blocks.map((b, i) => `${i + 1}. t="${b.t}" — ${LP_BLOCK[b.t].ai}`).join('\n')}\n\nFormato: JSON {"blocks":[{"t":"hero","kicker":"","title":"","text":"","cta":"","note":"","name":"","price":"","items":[{"t":"","d":""}],"yes":[],"no":[]}]} usando só os campos pedidos em cada bloco.\nRegras: português do Brasil, frases curtas e específicas; use **negrito** para 1 ou 2 palavras-chave do título; NUNCA invente números, depoimentos, nomes, prazos, garantias, preços, credenciais ou resultados: onde o insumo não trouxer o dado, escreva [CONFIRMAR: o que falta]; não prometa resultado garantido; conteúdo de saúde, finanças ou jurídico sem promessa de cura, ganho ou aprovação.`;
+  return `${lpRefPrompt(l)}${lpProductFacts(l)}${l.angle ? 'ABORDAGEM DESTA VARIAÇÃO (A/B): ' + l.angle + ' — o topo e o botão devem seguir essa abordagem.\n\n' : ''}PRODUTO: ${t.label}\nNome: ${P.nome || '(não informado)'}\nPreço/condição: ${P.preco || '(não informado)'}\nPúblico: ${P.publico || '(não informado)'}\nLink de compra: ${P.checkout ? 'informado' : 'não informado'}${l.type === 'evento' ? `\nData/hora: ${P.data || '(não informada)'}\nLocal: ${P.local || '(não informado)'}` : ''}\nWhatsApp de contato: ${l.whatsapp ? 'sim' : 'não'}\n\nINSUMOS (única fonte de fatos):\n${l.input || '(vazio)'}\n\n${lpUI.useAgent && EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief ? 'IDEIA E BRIEFING DO AGENTE EDITORIAL:\n' + eCtx() + '\n' : ''}ESTRUTURA DA PÁGINA (na ordem; devolva um objeto por bloco):\n${blocks.map((b, i) => `${i + 1}. t="${b.t}" — ${LP_BLOCK[b.t].ai}`).join('\n')}\n\nFormato: JSON {"blocks":[{"t":"hero","kicker":"","title":"","text":"","cta":"","note":"","name":"","price":"","items":[{"t":"","d":""}],"yes":[],"no":[]}]} usando só os campos pedidos em cada bloco.\nRegras: português do Brasil, frases curtas e específicas; use **negrito** para 1 ou 2 palavras-chave do título; NUNCA invente números, depoimentos, nomes, prazos, garantias, preços, credenciais ou resultados: onde o insumo não trouxer o dado, escreva [CONFIRMAR: o que falta]; não prometa resultado garantido; conteúdo de saúde, finanças ou jurídico sem promessa de cura, ganho ou aprovação.`;
 }
 async function lpGenerate() {
   const l = lpCur(); if (lpUI.busy) return; if (!l.input.trim() && !l.product.nome) { toast('Escreva os insumos ou ao menos o nome do produto.'); return; }
@@ -166,4 +248,15 @@ async function lpRefScan(id) {
 function lpRefPrompt(l) {
   const R = lpRefs().items.filter(r => r.use && r.scan && (r.type === l.type || r.type === 'cadastro' && l.type === 'cadastro')).slice(0, 3);
   return R.length ? 'REFERÊNCIAS DE ESTRUTURA (use só como inspiração de ordem, tom e tamanho dos blocos; NÃO copie frases nem marcas):\n' + R.map(r => `- ${r.title}: títulos [${r.scan.headings.slice(0, 10).join(' | ')}]; botões [${r.scan.ctas.slice(0, 6).join(' | ')}]`).join('\n') + '\n\n' : '';
+}
+
+function lpUseProduct(id) {
+  const l = lpCur(), x = curProject().products.find(y => y.id === id); l.productId = id || ''; l.pick = {b: [], f: [], all: true};
+  if (x) { Object.assign(l.product, {nome: x.name, preco: x.price || l.product.preco, publico: x.audience || l.product.publico, checkout: x.checkout || l.product.checkout}); if (x.summary && !/Descrição:/.test(l.input)) l.input = ((l.input ? l.input + '\n\n' : '') + 'Descrição: ' + x.summary).slice(0, 60000); }
+  persist(); renderLandings();
+}
+function lpPick(key, i, on) {
+  const l = lpCur(), x = curProject().products.find(y => y.id === l.productId); if (!x) return;
+  if (l.pick.all !== false) { l.pick = {b: x.benefits.map((_, n) => n), f: x.features.map((_, n) => n), all: false}; }
+  const a = l.pick[key], at = a.indexOf(i); if (on && at < 0) a.push(i); if (!on && at >= 0) a.splice(at, 1); persist();
 }

@@ -29,7 +29,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, social: {}, competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, social: {}, products: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -178,12 +178,18 @@ function normalizeSocial(x) {
 }
 /* Landing pages: dados do produto, insumos, blocos (tipos fixos, textos limitados), visual e rastreio. Mantém os campos antigos (headline, sub, bullets, cta, whatsapp). */
 const LP_BLOCK_TYPES = ['hero', 'numeros', 'dor', 'solucao', 'beneficios', 'passos', 'conteudo', 'amostra', 'para_quem', 'autoridade', 'prova', 'oferta', 'bonus', 'garantia', 'faq', 'programa', 'palestrantes', 'local', 'ingressos', 'texto', 'cta_final', 'form'];
+/* Produtos do projeto: a fonte dos fatos (benefícios, características, objeções, provas) que alimenta as landing pages e os sites */
+function normalizeProducts(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), lines = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(t => str(t, n)).filter(Boolean), TY = ['curso', 'ebook', 'servico', 'evento', 'produto', 'cadastro'];
+  return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 200).map(r => ({id: r.id, name: str(r.name, 160) || 'Produto', type: TY.includes(r.type) ? r.type : 'produto', summary: str(r.summary, 2000), price: str(r.price, 80), audience: str(r.audience, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(r.checkout || '') ? r.checkout : '',
+    benefits: lines(r.benefits, 300, 30), features: lines(r.features, 300, 40), objections: lines(r.objections, 300, 20), proofs: lines(r.proofs, 400, 20), images: (Array.isArray(r.images) ? r.images : []).filter(sid).slice(0, 8), created: str(r.created, 40) || new Date().toISOString()}));
+}
 function normalizeLandings(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TY = ['curso', 'ebook', 'servico', 'evento', 'cadastro', 'generico'];
   return (Array.isArray(x) ? x : []).filter(l => l && typeof l === 'object').slice(0, 200).map(l => {
     const pr = l.product || {}, th = l.theme || {}, tr = l.tracking || {};
     return {id: sid(l.id) ? l.id : uid('lp'), name: str(l.name, 120) || 'Landing page', goal: str(l.goal, 30) || 'Gerar lead', headline: str(l.headline, 300), sub: str(l.sub, 500), bullets: str(l.bullets, 3000), cta: str(l.cta, 80) || 'Enviar', whatsapp: str(l.whatsapp, 20).replace(/\D/g, ''), status: str(l.status, 30) || 'Rascunho',
-      type: TY.includes(l.type) ? l.type : '', product: {nome: str(pr.nome, 160), preco: str(pr.preco, 80), publico: str(pr.publico, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(pr.checkout || '') ? pr.checkout : '', data: str(pr.data, 80), local: str(pr.local, 200)}, input: str(l.input, 60000),
+      type: TY.includes(l.type) ? l.type : '', productId: sid(l.productId) ? l.productId : '', pick: {b: (l.pick && Array.isArray(l.pick.b) ? l.pick.b : []).slice(0, 40).map(n => Math.max(0, Math.round(+n) || 0)), f: (l.pick && Array.isArray(l.pick.f) ? l.pick.f : []).slice(0, 40).map(n => Math.max(0, Math.round(+n) || 0)), all: !l.pick || l.pick.all !== false}, group: sid(l.group) ? l.group : '', variant: /^[A-Z]$/.test(l.variant || '') ? l.variant : '', angle: str(l.angle, 120), product: {nome: str(pr.nome, 160), preco: str(pr.preco, 80), publico: str(pr.publico, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(pr.checkout || '') ? pr.checkout : '', data: str(pr.data, 80), local: str(pr.local, 200)}, input: str(l.input, 60000),
       theme: {accent: hex(th.accent, '#e4572e'), bg: hex(th.bg, '#ffffff'), fg: hex(th.fg, '#141414'), dark: !!th.dark, head: str(th.head, 60) || 'Poppins', body: str(th.body, 60) || 'Inter'},
       tracking: {metaPixel: /^\d{5,20}$/.test(tr.metaPixel || '') ? tr.metaPixel : '', ga4: /^G-[A-Z0-9]{4,14}$/.test(tr.ga4 || '') ? tr.ga4 : ''}, privacyUrl: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(l.privacyUrl || '') ? l.privacyUrl : '',
       blocks: (Array.isArray(l.blocks) ? l.blocks : []).filter(b => b && LP_BLOCK_TYPES.includes(b.t)).slice(0, 40).map(b => ({id: sid(b.id) ? b.id : uid('bk'), t: b.t, on: b.on !== false, title: str(b.title, 300), text: str(b.text, 3000), kicker: str(b.kicker, 120), cta: str(b.cta, 80), note: str(b.note, 300), name: str(b.name, 160), price: str(b.price, 80), imgId: sid(b.imgId) ? b.imgId : '',
@@ -225,7 +231,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
