@@ -281,7 +281,4 @@ function performanceHTML(p) {
   ${inbox ? `<div class="panel" style="margin-top:14px"><h3>Leads recebidos</h3><div id="leadsInbox"><p class="muted">Carregando…</p></div></div>` : ''}
   <div class="panel" style="margin-top:14px"><h3>Registros</h3>${p.metrics.length ? `<div class="table-wrap"><table class="tbl"><thead><tr><th>Data</th><th>Invest.</th><th>Impr.</th><th>Cliques</th><th>Leads</th><th>Vendas</th><th>Origem</th><th></th></tr></thead><tbody>${p.metrics.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 60).map(m => `<tr><td>${fmtDate(m.date)}</td><td>${fmtMoney(m.spend)}</td><td>${fmtNum(m.impressions)}</td><td>${fmtNum(m.clicks)}</td><td>${fmtNum(m.leads)}</td><td>${fmtNum(m.conversions)}</td><td>${esc(m.source)}${m.conceptId ? ' · matriz' : ''}</td><td><button class="btn sm" onclick="metricDelete('${m.id}')">×</button></td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Nenhum registro. Use “Registrar métricas” ou importe do Meta Ads.</p>'}</div>`;
 }
-function renderAnalyticsPage() {
-  const p = curProject(), r = $('analyticsRoot'); if (!p) { r.innerHTML = noProject('Performance & Learning'); return; }
-  r.innerHTML = hubHead('Performance & Learning', 'O resultado volta para o projeto e recalibra a matriz.', '') + performanceHTML(p);
-}
+function renderAnalyticsPage() { renderSocialAnalytics(); }
