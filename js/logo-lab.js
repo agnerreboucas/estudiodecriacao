@@ -12,6 +12,8 @@ const lgSymDef = (id, sp) => { if (String(id).startsWith('ic:')) { const ic = lg
 const LG_SEG_ICONS = {beleza: ['beleza', 'natureza', 'atendimento'], comida: ['alimentos', 'vendas'], construcao: ['casa', 'ferramentas', 'negocios'], imobiliaria: ['casa', 'negocios', 'justica'], saude: ['saude', 'atendimento'], fitness: ['esporte', 'vendas'], tecnologia: ['tecnologia', 'atendimento'], moda: ['beleza', 'vendas'], educacao: ['educacao', 'atendimento'], juridico: ['justica', 'seguranca', 'negocios'], financas: ['negocios', 'vendas', 'justica'], foto: ['musica', 'vendas'], natureza: ['natureza', 'viagem'], musica: ['musica', 'eventos'], marketing: ['vendas', 'comunicacao', 'negocios'], limpeza: ['casa', 'atendimento', 'energia'], auto: ['transporte', 'ferramentas', 'vendas'], pets: ['animais', 'atendimento'], outro: ['negocios', 'vendas', 'atendimento']};
 const lgNorm = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 [['hipster', ['arc', 'ribbon']], ['vintage', ['arc', 'ribbon']], ['conservador', ['arc', 'ribbon']], ['formal', ['ribbon']], ['moderno', ['mono', 'overlap']], ['minimalista', ['mono']], ['tech', ['mono', 'overlap']], ['criativo', ['overlap', 'mono']], ['jovem', ['mono']], ['divertido', ['arc', 'overlap']], ['elegante', ['mono']]].forEach(([id, cs]) => { const st = lgStyle(id); if (st) cs.forEach(c => { if (!st.comps.includes(c)) st.comps.push(c); }); });
+const LG_TP_COMPS = [['tp-plain', 'Só o nome'], ['tp-underline', 'Nome com sublinhado'], ['tp-dot', 'Nome com ponto colorido'], ['tp-split', 'Nome em duas cores'], ['tp-initial', 'Inicial em destaque'], ['tp-stack', 'Nome empilhado'], ['tp-boxed', 'Nome em caixa'], ['tp-lines', 'Slogan entre linhas'], ['tp-bar', 'Barra lateral'], ['tp-mix', 'Duas fontes misturadas']];
+const lgIsType = sp => String(sp.comp || '').startsWith('tp-');
 const LG_COMPS = [['stack', 'Empilhada'], ['horizontal', 'Lado a lado'], ['wordmark', 'Só o nome'], ['pill', 'Pílula'], ['badge', 'Selo redondo'], ['sidebar', 'Barra lateral'], ['frame', 'Moldura'], ['lines', 'Linhas'], ['arc', 'Selo com texto em arco'], ['ribbon', 'Emblema com faixa'], ['mono', 'Monograma'], ['overlap', 'Formas sobrepostas']];
 const lgLab = p => { p.design.logoLab = p.design.logoLab || {saved: [], brief: null}; return p.design.logoLab; };
 
@@ -49,7 +51,7 @@ function lgColors(sp) {
 
 /* ---------- construção do logo: devolve um slide pronto (camadas) ---------- */
 function lgBuild(sp, o) {
-  o = o || {}; const C = lgColors(sp), F = LG_FONTS[sp.font] || LG_FONTS.geo, SY = lgSymDef(sp.sym, sp), layers = [];
+  o = o || {}; const C = lgColors(sp), F = lgFontOf(sp), SY = lgSymDef(sp.sym || 'sparkle', sp), layers = [];
   const nm = F.upper ? String(sp.name || '').toUpperCase() : String(sp.name || ''), tgU = F.tls >= 4, tg = sp.tag ? (tgU ? String(sp.tag).toUpperCase() : String(sp.tag)) : '';
   const N = 110 * (F.scale || 1) * (sp.nameScale || 1), big = ['stack', 'badge', 'frame', 'lines', 'arc', 'ribbon', 'mono', 'overlap'].includes(sp.comp), S = (big ? 190 : sp.comp === 'pill' ? 120 : 160) * (sp.symScale || 1), TS = 30;
   const mw = (txt, fam, wt, size, ls) => { const L = T('t', {content: txt, family: fam, weight: wt, size, ls, w: 99999, lh: 1, upper: false}); const ln = layoutText(L).lines[0]; return ln ? ln.w : 0; };
@@ -59,7 +61,24 @@ function lgBuild(sp, o) {
   const rect = (role, o2) => { const L = RC(role, o2); layers.push(L); return L; };
   const nw = mw(nm, F.head, F.hw, N, F.ls), nh = N, tw = tg ? mw(tg, F.tag, F.tw, TS, F.tls) : 0;
   const comp = sp.comp;
-  if (comp === 'arc') {
+  if (String(comp).startsWith('tp-')) {
+    const words = nm.split(/\s+/).filter(Boolean), Nt = N * 1.25, nwt = mw(nm, F.head, F.hw, Nt, F.ls), nht = Nt, sp1 = Nt * 0.3, ba = Math.max(5, Nt * 0.07);
+    const place = (txt, size, col, x, y, fam, wt, ls) => text('title', txt, fam || F.head, wt || F.hw, size, col, ls == null ? F.ls : ls, x, y);
+    const tagAt = (y, w0) => { if (tg) text('body', tg, F.tag, F.tw, TS, C.mut, F.tls, -tw / 2, y); };
+    if (comp === 'tp-plain') { place(nm, Nt, C.text, -nwt / 2, 0); tagAt(nht + 10); }
+    else if (comp === 'tp-underline') { place(nm, Nt, C.text, -nwt / 2, 0); rect('accent', {x: -nwt / 2, y: nht + 8, w: nwt, h: ba, fill: C.acc, radius: ba / 2}); tagAt(nht + 8 + ba + 14); }
+    else if (comp === 'tp-dot') { const dw = mw('.', F.head, F.hw, Nt, 0), tot = nwt + dw; place(nm, Nt, C.text, -tot / 2, 0); place('.', Nt, C.acc, -tot / 2 + nwt, 0, null, null, 0); tagAt(nht + 10); }
+    else if (comp === 'tp-split') { const a = words.length > 1 ? words[0] : nm.slice(0, Math.ceil(nm.length / 2)), b = words.length > 1 ? words.slice(1).join(' ') : nm.slice(Math.ceil(nm.length / 2)), wa = mw(a, F.head, F.hw, Nt, F.ls), wb = mw(b, F.head, F.hw, Nt, F.ls), gap = words.length > 1 ? sp1 : 0, tot = wa + gap + wb;
+      place(a, Nt, C.main !== C.bg ? C.main : C.text, -tot / 2, 0); place(b, Nt, C.acc, -tot / 2 + wa + gap, 0); tagAt(nht + 10); }
+    else if (comp === 'tp-initial') { const ch = nm.slice(0, 1), rest = nm.slice(1), BS = Nt * 1.75, wi = mw(ch, F.head, F.hw, BS, 0), wr = mw(rest, F.head, F.hw, Nt, F.ls), tot = wi + 6 + wr;
+      place(ch, BS, C.acc, -tot / 2, 0, null, null, 0); place(rest, Nt, C.text, -tot / 2 + wi + 6, (BS - Nt) * 0.82); tagAt(BS + 10); }
+    else if (comp === 'tp-stack') { const ws = words.length > 1 ? words : [nm.slice(0, Math.ceil(nm.length / 2)), nm.slice(Math.ceil(nm.length / 2))], sz = Nt * (ws.length > 2 ? 0.8 : 1); let y = 0; ws.forEach((wd, i) => { const w1 = mw(wd, F.head, F.hw, sz, F.ls); place(wd, sz, i === 1 && ws.length === 2 ? C.acc : C.text, -w1 / 2, y); y += sz * 0.95; }); tagAt(y + 14); }
+    else if (comp === 'tp-boxed') { const pd = Nt * 0.32; rect('box', {x: -nwt / 2 - pd, y: 0, w: nwt + 2 * pd, h: nht + 2 * pd, fill: '', stroke: C.main, strokeW: Math.max(4, Nt * 0.05), radius: 0}); place(nm, Nt, C.text, -nwt / 2, pd); tagAt(nht + 2 * pd + 16); }
+    else if (comp === 'tp-lines') { place(nm, Nt, C.text, -nwt / 2, 0); if (tg) { const g = 24, ly = nht + 12 + TS * 0.55, lw = Math.max(60, (nwt - tw) / 2 - g); text('body', tg, F.tag, F.tw, TS, C.mut, F.tls, -tw / 2, nht + 12); rect('line', {x: -tw / 2 - g - lw, y: ly, w: lw, h: 3, fill: C.acc}); rect('line', {x: tw / 2 + g, y: ly, w: lw, h: 3, fill: C.acc}); } }
+    else if (comp === 'tp-bar') { const bh = nht + (tg ? TS + 16 : 0); rect('bar', {x: -nwt / 2 - 38, y: 4, w: 10, h: bh - 8, fill: C.acc, radius: 5}); place(nm, Nt, C.text, -nwt / 2, 0); if (tg) text('body', tg, F.tag, F.tw, TS, C.mut, F.tls, -nwt / 2, nht + 12); }
+    else if (comp === 'tp-mix') { const f2 = sp.hf2 || F.tag, w2 = sp.hw2 || lgDefaultWeight(f2), sc2 = (LG_TF[f2] || {}).scale || 1, N2 = Nt * 0.95 * sc2, a = words[0] || nm, b = words.slice(1).join(' ') || '', wa = mw(a, F.head, F.hw, Nt, F.ls), wb = b ? mw(b, f2, w2, N2, 0) : 0, gap = b ? sp1 : 0, tot = wa + gap + wb;
+      place(a, Nt, C.text, -tot / 2, 0); if (b) place(b, N2, C.acc, -tot / 2 + wa + gap, (Nt - N2) * 0.82, f2, w2, 0); tagAt(nht + 10); }
+  } else if (comp === 'arc') {
     const R = Math.max(S * 1.3, 235), ring = (r, w) => rect('ring', {x: -r, y: -r, w: 2 * r, h: 2 * r, shape: 'ellipse', fill: '', stroke: C.main, strokeW: w});
     ring(R, 8); ring(R - 24, 2); sym(-S * 0.36, -S * 0.36 - 8, S * 0.72);
     const arcText = (txt, fam, wt, size, color, ls, r, top) => { const cw = [...txt].map(ch => (ch === ' ' ? size * 0.34 : mw(ch, fam, wt, size, ls)) + ls); let tot = cw.reduce((a, b) => a + b, 0), sz = size; while (tot / r > 2.9 && sz > 12) { sz *= 0.92; tot *= 0.92; for (let i = 0; i < cw.length; i++) cw[i] *= 0.92; } let cum = 0;
@@ -114,7 +133,9 @@ function lgBuild(sp, o) {
   const dx = Math.round((W - bw * k) / 2), dy = Math.round((H - bh * k) / 2); sl.layers.forEach(l => { l.x += dx; l.y += dy; });
   return {slide: sl, W, H};
 }
-async function lgFonts(sp) { const F = LG_FONTS[sp.font] || LG_FONTS.geo; await ensureFonts([F.head, F.tag]); }
+/* fonte efetiva: o papel (LG_FONTS) pode ser trocado por qualquer família do catálogo */
+function lgFontOf(sp) { const F0 = LG_FONTS[sp.font] || LG_FONTS.geo, F = Object.assign({}, F0); if (sp.hf) { F.head = sp.hf; F.hw = sp.hw || lgDefaultWeight(sp.hf); F.scale = (LG_TF[sp.hf] || {}).scale || 1; } if (sp.tf) { F.tag = sp.tf; F.tw = sp.tw || 400; } if (sp.ls != null) F.ls = sp.ls; if (sp.up != null) F.upper = sp.up; return F; }
+async function lgFonts(sp) { const F = lgFontOf(sp); await ensureFonts([F.head, F.tag, sp.hf2].filter(Boolean)); }
 async function lgPaint(cv, sp, o) { await lgFonts(sp); const r = lgBuild(sp, o); renderSlide(cv.getContext('2d'), r.slide, r.W, r.H, cv.width / r.W); return r; }
 
 /* ---------- geração ---------- */
@@ -130,9 +151,17 @@ function lgGenerate(p, brief, n, seed) {
     const st = sts[out.length % sts.length], useIc = brief.icons !== false && rnd() < (brief.iconCats && brief.iconCats.length ? 0.85 : 0.4) && icPool.length;
     const symPool = rnd() < 0.6 ? seg.sym.concat(st.sym) : st.sym.concat(seg.sym), sym = useIc ? 'ic:' + pick(icPool)[0] : pick(symPool.filter(x => LG_SYMBOLS[x]));
     const sp = {id: uid('lg'), name: brief.name, tag: brief.noTag ? '' : brief.tag, sym, icw: 2.4, style: st.id, font: pick(st.fonts), comp: pick(st.comps), mode: pick(st.modes), pal: (pick(pals)).c.slice(), palId: '', symScale: 1, nameScale: 1, grad: rnd() < 0.22, monoRound: rnd() < 0.4};
+    const kind = brief.kind || 'symbol', isType = kind === 'type' || (kind === 'both' && rnd() < 0.45);
+    if (isType) {   // logo só tipográfico: família do catálogo (favoritas > categorias do estilo), fonte de apoio de par e composição sem símbolo
+      const favs = (brief.fontFavs || []).filter(f => LG_TF[f]), cats2 = LG_STYLE_FONTCATS[st.id] || ['sans'], poolF = favs.length ? favs.map(f => LG_TF[f]) : LG_TYPEFACES.filter(f => cats2.includes(f.cat)), tf0 = pick(poolF);
+      const ws = lgWeightsOf(tf0.family), hw = ws.length > 1 && rnd() < 0.6 ? pick(ws.filter(w => w >= 600).length ? ws.filter(w => w >= 600) : ws) : lgDefaultWeight(tf0.family), script = tf0.cat === 'script', up = script ? false : (tf0.cat === 'cond' || tf0.cat === 'display') ? rnd() < 0.8 : rnd() < 0.4;
+      const comps = script ? ['tp-plain', 'tp-underline', 'tp-dot', 'tp-lines', 'tp-bar'] : ['tp-plain', 'tp-underline', 'tp-dot', 'tp-split', 'tp-initial', 'tp-stack', 'tp-boxed', 'tp-lines', 'tp-bar', 'tp-mix'];
+      Object.assign(sp, {sym: 'sparkle', comp: pick(comps), hf: tf0.family, hw, up, ls: up ? pick([2, 6, 10]) : 0, tf: pick(lgPairs(tf0.family, 4)), tw: 400, grad: false});
+      if (sp.comp === 'tp-mix') { const sc = LG_TYPEFACES.filter(f => f.cat === 'script'); sp.hf2 = pick(sc).family; sp.hw2 = lgDefaultWeight(sp.hf2); }
+    }
     if (brief.rule603010) sp.rule = lgAutoRule(sp);
     sp.palId = pals.find(x => x.c.join() === sp.pal.join()).id;
-    const key = [sp.sym, sp.font, sp.comp, sp.mode, sp.palId].join('|'); if (seen.has(key)) continue; seen.add(key); out.push(sp);
+    const key = [isType ? sp.hf + sp.hw : sp.sym, sp.font, sp.comp, sp.mode, sp.palId].join('|'); if (seen.has(key)) continue; seen.add(key); out.push(sp);
   }
   return out;
 }
@@ -166,11 +195,11 @@ document.addEventListener('keydown', e => {
 function renderLogoLab(p, r) {
   if (!lg.brief) lg.brief = lgBriefDefault(p);
   lgCommit();
-  let v = lg.view; if ((v === 'grid' && !lg.items.length) || ((v === 'edit' || v === 'mock' || v === 'board') && !lg.cur)) { v = 'brief'; lg.view = 'brief'; }
+  let v = lg.view; if ((v === 'grid' && !lg.items.length) || ((v === 'edit' || v === 'mock' || v === 'board') && !lg.cur) || (v === 'fonts' && lgF.mode === 'edit' && !lg.cur)) { v = 'brief'; lg.view = 'brief'; }
   const key = v + '|' + (v === 'brief' ? lg.step || 0 : 0);
   if (!lgNav.restoring && key !== lgNav.last) { lgNav.stack = lgNav.stack.slice(0, lgNav.i + 1); lgNav.stack.push({view: v, step: lg.step || 0}); lgNav.i = lgNav.stack.length - 1; }
   lgNav.last = key; lgNav.restoring = false;
-  if (v === 'grid') lgGridPage(p, r); else if (v === 'edit') lgEditPage(p, r); else if (v === 'mock') lgMockPage(p, r); else if (v === 'board') lgBoardPage(p, r); else lgBriefPage(p, r);
+  if (v === 'grid') lgGridPage(p, r); else if (v === 'edit') lgEditPage(p, r); else if (v === 'mock') lgMockPage(p, r); else if (v === 'board') lgBoardPage(p, r); else if (v === 'fonts') lgFontsPage(p, r); else lgBriefPage(p, r);
   const ac = r.querySelector('.page-head .actions'); if (ac) ac.insertAdjacentHTML('afterbegin', lgBarHTML());
 }
 const lgChip = (on, fn, label) => `<button class="tchip ${on ? 'on' : ''}" onclick="${fn}">${esc(label)}</button>`;
@@ -180,7 +209,9 @@ function lgBriefPage(p, r) {
   const head = `<div class="page-head"><div><h1>Laboratório do Logo</h1><p>Responda 4 perguntas curtas. O Studio monta dezenas de logos vetoriais; você escolhe, refina e leva para o Brand Kit.</p></div><div class="actions">${projectSelect()}${saved.length ? `<button class="btn" onclick="lgSavedOpen()">Meus logos (${saved.length})</button>` : ''}<button class="btn" onclick="dzBack()">Estúdio</button></div></div>
   <div class="lg-steps">${LG_STEPS.map((t, i) => `<button class="${i === st ? 'on' : i < st ? 'done' : ''}" onclick="lgStep(${i})"><i>${i + 1}</i>${t}</button>`).join('')}</div>`;
   let body = '';
-  if (st === 0) body = `<h2 class="lg-q">Que tipo de negócio você tem?</h2><p class="muted">Isso ajuda a oferecer símbolos e slogans mais certos.</p><div class="tchips lg-big">${LG_SEGMENTS.map(s => lgChip(s.id === b.seg, `lg.brief.seg='${s.id}';lg.brief.tag='';renderDesign()`, s.label)).join('')}</div>`;
+  if (st === 0) body = `<h2 class="lg-q">Que tipo de negócio você tem?</h2><p class="muted">Isso ajuda a oferecer símbolos e slogans mais certos.</p><div class="tchips lg-big">${LG_SEGMENTS.map(s => lgChip(s.id === b.seg, `lg.brief.seg='${s.id}';lg.brief.tag='';renderDesign()`, s.label)).join('')}</div>
+    <h2 class="lg-q" style="margin-top:24px">Que tipo de logo?</h2><div class="tchips lg-big">${[['symbol', 'Símbolo + nome'], ['type', 'Só tipografia'], ['both', 'Os dois']].map(([k, l]) => lgChip((b.kind || 'symbol') === k, `lg.brief.kind='${k}';renderDesign()`, l)).join('')}</div>
+    ${(b.kind === 'type' || b.kind === 'both') ? `<p class="muted" style="margin-top:8px">Logos tipográficos usam só letras (com detalhes como sublinhado, ponto colorido ou duas cores). ${(b.fontFavs || []).length ? `<b>${b.fontFavs.length}</b> fonte(s) favorita(s) marcada(s).` : 'As fontes saem das famílias que combinam com o estilo.'} <button class="btn sm" onclick="lgFontsOpen('brief')">Ver prévia das fontes e marcar favoritas</button></p>` : ''}`;
   else if (st === 1) body = `<h2 class="lg-q">Qual estilo você quer para o seu logo?</h2><p class="muted">As fontes, ícones e cores refletem o estilo. Escolha até 4.</p><div class="tchips lg-big">${LG_STYLES.map(s => lgChip(b.styles.includes(s.id), `lgTogStyle('${s.id}')`, s.label)).join('')}</div>`;
   else if (st === 2) body = `<h2 class="lg-q">Que texto você quer no seu logo?</h2><p class="muted">Normalmente é o nome da marca.</p><div class="field" style="max-width:520px"><input id="lgName" value="${esc(b.name)}" placeholder="Ex.: seu nome comercial" oninput="lg.brief.name=this.value" onchange="lgCommit();lgBarUpdate()"></div>
     <h2 class="lg-q" style="margin-top:22px">Qual é o seu lema ou slogan? <small class="muted">(opcional)</small></h2><div class="field" style="max-width:520px"><input id="lgTag" value="${esc(b.tag)}" placeholder="Ex.: ${esc(sg.tag[0])}" oninput="lg.brief.tag=this.value;lg.brief.noTag=false" onchange="lgCommit();lgBarUpdate()"></div>
@@ -219,7 +250,7 @@ function lgGridPage(p, r) {
   r.innerHTML = `<div class="page-head"><div><h1>${esc(lg.brief.name)} · ${lg.items.length} logos</h1><p>Marque os favoritos com ★ e clique em Editar para ajustar símbolo, fonte, cores e composição.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="lg.view='brief';lg.step=0;renderDesign()">Ajustar briefing</button><button class="btn" onclick="lgIconModal()" title="Troca o símbolo de todos os logos de uma vez, mantendo fonte, composição e cores">Ver outros ícones</button>${lg.items.some(i => i.orig) ? '<button class="btn" onclick="lgRevertIcons()">Reverter ícones</button>' : ''}<button class="btn" onclick="lg.items.forEach(i=>lg.fav[i.id]=true);renderDesign()">★ Marcar todos</button><button class="btn" onclick="lgRun(true)">＋ Gerar mais</button></div></div>
   <div class="vf-bar"><div class="matrix-tabs">${[['all', 'Todos (' + lg.items.length + ')'], ['fav', '★ Favoritos (' + nf + ')']].map(([k, l]) => `<button class="${lg.filter === k ? 'active' : ''}" onclick="lg.filter='${k}';renderDesign()">${l}</button>`).join('')}</div></div>
   <div class="vf-grid lg-grid">${view.map(it => it.kind === 'ai' ? `<article class="vf-card"><canvas data-ai="${it.imgId}" width="300" height="300"></canvas><div class="vf-meta"><b>Conceito com IA</b><small>${esc(it.note || '')}</small></div><div class="row-gap"><button class="btn sm" onclick="lgAISave('${it.id}')">Salvar no Brand Kit</button></div></article>`
-    : `<article class="vf-card"><canvas data-lg="${it.id}" width="300" height="200"></canvas><div class="vf-meta"><b>${esc((LG_FONTS[it.font] || {}).label || '')} · ${esc(it.comp)}</b><small>${esc(lgSymDef(it.sym, it).label || '')} · ${esc(it.mode === 'color' ? 'cor cheia' : it.mode === 'dark' ? 'escuro' : 'claro')}</small></div><div class="row-gap"><button class="btn sm ${lg.fav[it.id] ? 'dark' : ''}" onclick="lg.fav['${it.id}']=!lg.fav['${it.id}'];renderDesign()">★</button><button class="btn sm dark" onclick="lgEdit('${it.id}')">Editar</button></div></article>`).join('')}</div>`;
+    : `<article class="vf-card"><canvas data-lg="${it.id}" width="300" height="200"></canvas><div class="vf-meta"><b>${it.hf ? esc(it.hf) : esc((LG_FONTS[it.font] || {}).label || '')} · ${esc(((LG_TP_COMPS.concat(LG_COMPS)).find(c => c[0] === it.comp) || [0, it.comp])[1])}</b><small>${lgIsType(it) ? 'só tipografia' : esc(lgSymDef(it.sym, it).label || '')} · ${esc(it.mode === 'color' ? 'cor cheia' : it.mode === 'dark' ? 'escuro' : 'claro')}</small></div><div class="row-gap"><button class="btn sm ${lg.fav[it.id] ? 'dark' : ''}" onclick="lg.fav['${it.id}']=!lg.fav['${it.id}'];renderDesign()">★</button><button class="btn sm dark" onclick="lgEdit('${it.id}')">Editar</button></div></article>`).join('')}</div>`;
   lgPaintGrid();
 }
 async function lgPaintGrid() {
@@ -239,9 +270,11 @@ function lgEditPage(p, r) {
     <div class="row-gap" style="margin-top:12px"><button class="btn dark" onclick="lgSaveKit()">Salvar no Brand Kit</button><button class="btn" onclick="lgDownload('png')">PNG transparente</button><button class="btn" onclick="lgDownload('svg')">SVG</button><button class="btn" onclick="lgToEditor()">Abrir no Editor</button><button class="btn" onclick="lgMockOpen()">Ver em mockups</button><button class="btn" onclick="lgBoardOpen()">Prancha de marca</button><button class="btn" onclick="lgPackageDown()">Pacote ZIP</button><button class="btn" onclick="lgSaveLab()">Guardar em Meus logos</button></div>
     <small class="muted block" style="margin-top:6px">No SVG o texto sai como texto (a fonte precisa estar instalada onde for aberto). O PNG sai com a fonte já aplicada.</small></div>
   <div class="panel"><div class="field"><label>Nome</label><input value="${esc(s.name)}" oninput="lgSet('name',this.value,1)"></div><div class="field"><label>Slogan</label><input value="${esc(s.tag)}" oninput="lgSet('tag',this.value,1)"></div>
-    <div class="okr-label">SÍMBOLO</div>${pickS}
-    <div class="ins-row"><label class="ins">Fonte<select onchange="lgSet('font',this.value)">${Object.entries(LG_FONTS).map(([k, f]) => `<option value="${k}" ${s.font === k ? 'selected' : ''}>${esc(f.label)} · ${esc(f.head)}</option>`).join('')}</select></label>
-    <label class="ins">Composição<select onchange="lgSet('comp',this.value)">${LG_COMPS.map(([k, l]) => `<option value="${k}" ${s.comp === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
+    <div class="okr-label">TIPO DE LOGO</div><div class="row-gap" style="margin:4px 0 10px"><button class="btn sm ${lgIsType(s) ? '' : 'dark'}" onclick="lgSetKind('symbol')">Símbolo + nome</button><button class="btn sm ${lgIsType(s) ? 'dark' : ''}" onclick="lgSetKind('type')">Só tipografia</button></div>
+    <div class="lg-fontbox"><div><b style="font-size:15px;font-family:'${esc(lgFontOf(s).head)}',system-ui">${esc(lgFontOf(s).head)}</b> <small class="muted">${esc(LG_WEIGHT_NAMES[lgFontOf(s).hw] || lgFontOf(s).hw)} ${lgFontOf(s).hw} · apoio: ${esc(lgFontOf(s).tag)}</small></div><button class="btn sm dark" onclick="lgFontsOpen('edit')">Escolher fonte (prévia das famílias)</button></div>
+    ${lgIsType(s) ? lgTypeOpts(s) : '<div class="okr-label">SÍMBOLO</div>' + pickS}
+    <div class="ins-row"><label class="ins">Conjunto de fontes<select onchange="lgSetRole(this.value)">${Object.entries(LG_FONTS).map(([k, f]) => `<option value="${k}" ${s.font === k ? 'selected' : ''}>${esc(f.label)} · ${esc(f.head)}</option>`).join('')}</select></label>
+    <label class="ins">Composição<select onchange="lgSet('comp',this.value)">${(lgIsType(s) ? LG_TP_COMPS : LG_COMPS).map(([k, l]) => `<option value="${k}" ${s.comp === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
     <div class="ins-row"><label class="ins">Símbolo <b>${Math.round(s.symScale * 100)}%</b><input type="range" min="50" max="180" value="${Math.round(s.symScale * 100)}" oninput="lgSet('symScale',this.value/100,1);this.previousElementSibling.textContent=this.value+'%'"></label>${String(s.sym).startsWith('ic:') && !lgIsFillIcon(lgIcon(s.sym.slice(3)) || []) ? `<label class="ins">Traço do ícone <b>${s.icw || 2}</b><input type="range" min="1" max="3.5" step="0.1" value="${s.icw || 2}" oninput="lgSet('icw',+this.value,1);this.previousElementSibling.textContent=this.value"></label>` : ''}<label class="ins">Nome <b>${Math.round(s.nameScale * 100)}%</b><input type="range" min="60" max="160" value="${Math.round(s.nameScale * 100)}" oninput="lgSet('nameScale',this.value/100,1);this.previousElementSibling.textContent=this.value+'%'"></label></div>
     <label class="check" style="margin:4px 0 10px"><input type="checkbox" ${s.grad ? 'checked' : ''} onchange="lgSet('grad',this.checked)"> Degradê no símbolo</label>
     ${lgToneHTML(s)}

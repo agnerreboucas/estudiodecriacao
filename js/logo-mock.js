@@ -51,6 +51,7 @@ const lgCanvasPNG = cv => new Promise(res => cv.toBlob(res, 'image/png'));
 
 /* ---------- prancha de marca ---------- */
 function lgDrawSymbol(c, sp, x, y, s, cols) {
+  if (lgIsType(sp)) { const F = lgFontOf(sp), ch = (String(sp.name || 'A').match(/\S/) || ['A'])[0]; c.save(); c.font = `${F.hw} ${s * 1.05}px "${F.head}", sans-serif`; c.fillStyle = cols.main; c.textBaseline = 'alphabetic'; const w = c.measureText(ch).width; c.fillText(ch, x + (s - w) / 2, y + s * 0.88); c.restore(); return; }
   const def = lgSymDef(sp.sym, sp), vb = def.vb || 100;
   def.parts.forEach(pt => { const path = new Path2D(pt.d), col = cols[pt.role] || cols.main; c.save(); c.translate(x, y); c.scale(s / vb, s / vb);
     if (pt.stroke) { c.lineWidth = pt.sw || 2; c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = col; c.stroke(path); } else { c.fillStyle = col; c.fill(path, pt.rule || 'nonzero'); } c.restore(); });
