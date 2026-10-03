@@ -139,3 +139,8 @@
 .lg-search{width:100%;padding:9px 12px;border:1.5px solid #e4e4e4;border-radius:10px;font:inherit}
 .lg-icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:5px;max-height:260px;overflow:auto;padding:2px}
 .lg-ic{border:1.5px solid #ececec;border-radius:9px;background:#fff;padding:8px;cursor:pointer;color:#111;display:block}.lg-ic svg{width:100%;height:auto;display:block}.lg-ic:hover{border-color:#999}.lg-ic.on{border-color:#111;box-shadow:0 0 0 1px #111}
+
+.lg-steps{display:flex;gap:8px;margin:4px 0 16px;flex-wrap:wrap}.lg-steps button{display:flex;align-items:center;gap:8px;border:1.5px solid #e4e4e4;background:#fff;border-radius:999px;padding:7px 14px 7px 8px;font:inherit;font-size:13px;cursor:pointer;color:#555}
+.lg-steps button i{font-style:normal;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#eee;font-size:12px;font-weight:700}.lg-steps button.on{border-color:#111;color:#111}.lg-steps button.on i{background:#111;color:#fff}.lg-steps button.done i{background:#2f9e5b;color:#fff}
+.lg-step{min-height:360px}.lg-q{font-size:26px;margin:6px 0 4px}.lg-big .tchip{font-size:15px;padding:10px 18px}.lg-nav{display:flex;justify-content:space-between;align-items:center;margin-top:26px;padding-top:16px;border-top:1px solid #eee}
+.lg-mocks{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}.lg-mocks .vf-card canvas{width:100%;height:auto;background:#fff}

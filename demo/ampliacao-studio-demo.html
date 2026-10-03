@@ -408,6 +408,11 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .lg-icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:5px;max-height:260px;overflow:auto;padding:2px}
 .lg-ic{border:1.5px solid #ececec;border-radius:9px;background:#fff;padding:8px;cursor:pointer;color:#111;display:block}.lg-ic svg{width:100%;height:auto;display:block}.lg-ic:hover{border-color:#999}.lg-ic.on{border-color:#111;box-shadow:0 0 0 1px #111}
 
+.lg-steps{display:flex;gap:8px;margin:4px 0 16px;flex-wrap:wrap}.lg-steps button{display:flex;align-items:center;gap:8px;border:1.5px solid #e4e4e4;background:#fff;border-radius:999px;padding:7px 14px 7px 8px;font:inherit;font-size:13px;cursor:pointer;color:#555}
+.lg-steps button i{font-style:normal;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#eee;font-size:12px;font-weight:700}.lg-steps button.on{border-color:#111;color:#111}.lg-steps button.on i{background:#111;color:#fff}.lg-steps button.done i{background:#2f9e5b;color:#fff}
+.lg-step{min-height:360px}.lg-q{font-size:26px;margin:6px 0 4px}.lg-big .tchip{font-size:15px;padding:10px 18px}.lg-nav{display:flex;justify-content:space-between;align-items:center;margin-top:26px;padding-top:16px;border-top:1px solid #eee}
+.lg-mocks{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}.lg-mocks .vf-card canvas{width:100%;height:auto;background:#fff}
+
 </style>
 </head>
 <body>
@@ -2282,7 +2287,8 @@ function placeholderArt(ctx, L) {
 function drawPathLayer(ctx, L) {
   ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; ctx.translate(L.x, L.y); ctx.scale(L.w / (L.vb || 100), L.h / (L.vb || 100));
   const p = new Path2D(L.d);
-  if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(p, L.rule || 'nonzero'); }
+  if (L.fill && L.grad) { const vb = L.vb || 100, g = ctx.createLinearGradient(0, 0, vb, vb); g.addColorStop(0, L.fill); g.addColorStop(1, L.grad); ctx.fillStyle = g; ctx.fill(p, L.rule || 'nonzero'); }
+  else if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(p, L.rule || 'nonzero'); }
   if (L.stroke && L.strokeW) { ctx.lineWidth = L.strokeW; ctx.strokeStyle = L.stroke; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(p); }
   ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h};
 }
@@ -4153,6 +4159,8 @@ const lgIcon = name => { if (!LG_ICON_MAP) { LG_ICON_MAP = {}; LG_ICONS.forEach(
 const lgSymDef = (id, sp) => { if (String(id).startsWith('ic:')) { const ic = lgIcon(id.slice(3)); return ic ? {label: ic[1], vb: 24, parts: [{d: ic[3], role: 'main', stroke: true, sw: (sp && sp.icw) || 2}]} : LG_SYMBOLS.sparkle; } return LG_SYMBOLS[id] || LG_SYMBOLS.sparkle; };
 const LG_SEG_ICONS = {beleza: ['beleza', 'natureza'], comida: ['alimentos'], construcao: ['casa', 'ferramentas'], imobiliaria: ['casa'], saude: ['saude'], fitness: ['esporte'], tecnologia: ['tecnologia'], moda: ['beleza'], educacao: ['educacao'], juridico: ['seguranca', 'negocios'], financas: ['negocios'], foto: ['musica'], natureza: ['natureza', 'viagem'], musica: ['musica', 'eventos'], marketing: ['comunicacao', 'negocios', 'formas'], limpeza: ['casa', 'energia'], auto: ['transporte', 'ferramentas'], pets: ['animais'], outro: ['formas', 'negocios']};
 const lgNorm = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+[['hipster', ['arc', 'ribbon']], ['vintage', ['arc', 'ribbon']], ['conservador', ['arc', 'ribbon']], ['formal', ['ribbon']], ['moderno', ['mono', 'overlap']], ['minimalista', ['mono']], ['tech', ['mono', 'overlap']], ['criativo', ['overlap', 'mono']], ['jovem', ['mono']], ['divertido', ['arc', 'overlap']], ['elegante', ['mono']]].forEach(([id, cs]) => { const st = lgStyle(id); if (st) cs.forEach(c => { if (!st.comps.includes(c)) st.comps.push(c); }); });
+const LG_COMPS = [['stack', 'Empilhada'], ['horizontal', 'Lado a lado'], ['wordmark', 'Só o nome'], ['pill', 'Pílula'], ['badge', 'Selo redondo'], ['sidebar', 'Barra lateral'], ['frame', 'Moldura'], ['lines', 'Linhas'], ['arc', 'Selo com texto em arco'], ['ribbon', 'Emblema com faixa'], ['mono', 'Monograma'], ['overlap', 'Formas sobrepostas']];
 const lgLab = p => { p.design.logoLab = p.design.logoLab || {saved: [], brief: null}; return p.design.logoLab; };
 
 function lgBriefDefault(p) {
@@ -4177,15 +4185,36 @@ function lgColors(sp) {
 function lgBuild(sp, o) {
   o = o || {}; const C = lgColors(sp), F = LG_FONTS[sp.font] || LG_FONTS.geo, SY = lgSymDef(sp.sym, sp), layers = [];
   const nm = F.upper ? String(sp.name || '').toUpperCase() : String(sp.name || ''), tgU = F.tls >= 4, tg = sp.tag ? (tgU ? String(sp.tag).toUpperCase() : String(sp.tag)) : '';
-  const N = 110 * (F.scale || 1) * (sp.nameScale || 1), big = ['stack', 'badge', 'frame', 'lines'].includes(sp.comp), S = (big ? 190 : sp.comp === 'pill' ? 120 : 160) * (sp.symScale || 1), TS = 30;
+  const N = 110 * (F.scale || 1) * (sp.nameScale || 1), big = ['stack', 'badge', 'frame', 'lines', 'arc', 'ribbon', 'mono', 'overlap'].includes(sp.comp), S = (big ? 190 : sp.comp === 'pill' ? 120 : 160) * (sp.symScale || 1), TS = 30;
   const mw = (txt, fam, wt, size, ls) => { const L = T('t', {content: txt, family: fam, weight: wt, size, ls, w: 99999, lh: 1, upper: false}); const ln = layoutText(L).lines[0]; return ln ? ln.w : 0; };
   const text = (role, txt, fam, wt, size, color, ls, x, y) => { const w = mw(txt, fam, wt, size, ls) + 8; const L = T(role, {content: txt, family: fam, weight: wt, size, color, ls, x, y, w, lh: 1, align: 'left', upper: false, fixUp: false}); layers.push(L); return L; };
   const sym = (x, y, s, on) => { SY.parts.forEach(pt => { const col = on ? (pt.role === 'acc' ? on.acc : pt.role === 'sec' ? on.sec : on.main) : (pt.role === 'acc' ? C.acc : pt.role === 'sec' ? C.sec : C.main);
-    layers.push({id: lid(), type: 'path', role: 'logo-symbol', vb: SY.vb || 100, x, y, w: s, h: s, d: pt.d, rule: pt.rule || '', fill: pt.stroke ? '' : col, stroke: pt.stroke ? col : '', strokeW: pt.sw || 0, opacity: 1}); }); };
+    layers.push({id: lid(), type: 'path', role: 'logo-symbol', vb: SY.vb || 100, x, y, w: s, h: s, d: pt.d, rule: pt.rule || '', fill: pt.stroke ? '' : col, grad: (sp.grad && !pt.stroke && pt.role === 'main' && !on) ? (C.acc !== col ? C.acc : C.sec) : '', stroke: pt.stroke ? col : '', strokeW: pt.sw || 0, opacity: 1}); }); };
   const rect = (role, o2) => { const L = RC(role, o2); layers.push(L); return L; };
   const nw = mw(nm, F.head, F.hw, N, F.ls), nh = N, tw = tg ? mw(tg, F.tag, F.tw, TS, F.tls) : 0;
   const comp = sp.comp;
-  if (comp === 'stack' || comp === 'wordmark' || comp === 'badge' || comp === 'lines' || comp === 'frame') {
+  if (comp === 'arc') {
+    const R = Math.max(S * 1.3, 235), ring = (r, w) => rect('ring', {x: -r, y: -r, w: 2 * r, h: 2 * r, shape: 'ellipse', fill: '', stroke: C.main, strokeW: w});
+    ring(R, 8); ring(R - 24, 2); sym(-S * 0.36, -S * 0.36 - 8, S * 0.72);
+    const arcText = (txt, fam, wt, size, color, ls, r, top) => { const cw = [...txt].map(ch => (ch === ' ' ? size * 0.34 : mw(ch, fam, wt, size, ls)) + ls); let tot = cw.reduce((a, b) => a + b, 0), sz = size; while (tot / r > 2.9 && sz > 12) { sz *= 0.92; tot *= 0.92; for (let i = 0; i < cw.length; i++) cw[i] *= 0.92; } let cum = 0;
+      [...txt].forEach((ch, i) => { const half = cw[i] / 2, off = cum + half - tot / 2; cum += cw[i]; if (ch === ' ') return; const th = top ? -Math.PI / 2 + off / r : Math.PI / 2 - off / r, px = r * Math.cos(th), py = r * Math.sin(th), bw = sz * 1.5, L = T('t', {content: ch, family: fam, weight: wt, size: sz, color, ls: 0, x: px - bw / 2, y: py - sz * 0.5, w: bw, lh: 1, align: 'center', upper: false, fixUp: false, rot: Math.round((th * 180 / Math.PI + (top ? 90 : -90)) * 10) / 10}); layers.push(L); }); };
+    arcText(nm, F.head, F.hw, 54 * (F.scale || 1), C.text, F.ls, R - 66, true); if (tg) arcText(tg, F.tag, F.tw, 26, C.mut, Math.min(F.tls, 3), R - 56, false);
+  } else if (comp === 'ribbon') {
+    const H = S * 1.35, pts = [0, 1, 2, 3, 4, 5].map(i => [50 + 48 * Math.cos((-90 + 60 * i) * Math.PI / 180), 50 + 48 * Math.sin((-90 + 60 * i) * Math.PI / 180)]);
+    layers.push({id: lid(), type: 'path', role: 'logo-shape', vb: 100, x: -H / 2, y: 0, w: H, h: H, d: lgPoly(pts), rule: '', fill: C.main, stroke: '', strokeW: 0, opacity: 1});
+    const on = {main: readable(C.main), acc: contrast(C.acc, C.main) >= 2 ? C.acc : readable(C.main), sec: readable(C.main)}; sym(-S * 0.42, H / 2 - S * 0.5, S * 0.84, on);
+    const fw = Math.max(nw + 90, H * 0.9), fh = N * 1.35, fy = H * 0.72, fc = contrast(C.acc, C.bg) >= 1.5 ? C.acc : C.text;
+    rect('ribbon', {x: -fw / 2, y: fy, w: fw, h: fh, fill: fc, radius: 6}); text('title', nm, F.head, F.hw, N, readable(fc), F.ls, -nw / 2, fy + (fh - nh) / 2);
+    if (tg) text('body', tg, F.tag, F.tw, TS, C.mut, F.tls, -tw / 2, fy + fh + 18);
+  } else if (comp === 'mono') {
+    const D = S * 1.15, ch = (nm.match(/\S/) || ['A'])[0].toUpperCase(), fs = D * 0.62;
+    rect('mono', {x: -D / 2, y: 0, w: D, h: D, fill: C.main, radius: sp.monoRound ? D / 2 : D * 0.26}); const lw = mw(ch, F.head, F.hw, fs, 0);
+    text('title', ch, F.head, F.hw, fs, readable(C.main), 0, -lw / 2, D / 2 - fs / 2); text('title', nm, F.head, F.hw, N * 0.8, C.text, F.ls, -nw * 0.8 / 2, D + 26);
+    if (tg) text('body', tg, F.tag, F.tw, TS, C.mut, F.tls, -tw / 2, D + 26 + N * 0.8 + 12);
+  } else if (comp === 'overlap') {
+    const d = S * 0.95; rect('o1', {x: -d * 0.72, y: 0, w: d, h: d, shape: 'ellipse', fill: C.main, opacity: 0.92}); rect('o2', {x: -d * 0.28, y: 0, w: d, h: d, shape: 'ellipse', fill: C.acc !== C.main ? C.acc : C.sec, opacity: 0.78});
+    text('title', nm, F.head, F.hw, N, C.text, F.ls, -nw / 2, d + 28); if (tg) text('body', tg, F.tag, F.tw, TS, C.mut, F.tls, -tw / 2, d + 28 + nh + 10);
+  } else if (comp === 'stack' || comp === 'wordmark' || comp === 'badge' || comp === 'lines' || comp === 'frame') {
     const hasSym = comp !== 'wordmark', cw = Math.max(nw, tw, hasSym ? S : 0);
     let y = 0, pad = 0, boxTop = 0;
     if (comp === 'frame') { pad = 70; y = pad; }
@@ -4234,7 +4263,7 @@ function lgGenerate(p, brief, n, seed) {
   for (let g = 0; g < n * 8 && out.length < n; g++) {
     const st = sts[out.length % sts.length], useIc = brief.icons !== false && rnd() < (brief.iconCats && brief.iconCats.length ? 0.85 : 0.4) && icPool.length;
     const symPool = rnd() < 0.6 ? seg.sym.concat(st.sym) : st.sym.concat(seg.sym), sym = useIc ? 'ic:' + pick(icPool)[0] : pick(symPool.filter(x => LG_SYMBOLS[x]));
-    const sp = {id: uid('lg'), name: brief.name, tag: brief.noTag ? '' : brief.tag, sym, icw: 2.4, style: st.id, font: pick(st.fonts), comp: pick(st.comps), mode: pick(st.modes), pal: (pick(pals)).c.slice(), palId: '', symScale: 1, nameScale: 1};
+    const sp = {id: uid('lg'), name: brief.name, tag: brief.noTag ? '' : brief.tag, sym, icw: 2.4, style: st.id, font: pick(st.fonts), comp: pick(st.comps), mode: pick(st.modes), pal: (pick(pals)).c.slice(), palId: '', symScale: 1, nameScale: 1, grad: rnd() < 0.22, monoRound: rnd() < 0.4};
     sp.palId = pals.find(x => x.c.join() === sp.pal.join()).id;
     const key = [sp.sym, sp.font, sp.comp, sp.mode, sp.palId].join('|'); if (seen.has(key)) continue; seen.add(key); out.push(sp);
   }
@@ -4247,33 +4276,45 @@ function renderLogoLab(p, r) {
   if (!lg.brief) lg.brief = lgBriefDefault(p);
   if (lg.view === 'grid' && lg.items.length) return lgGridPage(p, r);
   if (lg.view === 'edit' && lg.cur) return lgEditPage(p, r);
+  if (lg.view === 'mock' && lg.cur) return lgMockPage(p, r);
+  if (lg.view === 'board' && lg.cur) return lgBoardPage(p, r);
   lgBriefPage(p, r);
 }
 const lgChip = (on, fn, label) => `<button class="tchip ${on ? 'on' : ''}" onclick="${fn}">${esc(label)}</button>`;
+const LG_STEPS = ['Negócio', 'Estilo', 'Texto', 'Cores e ícones'];
 function lgBriefPage(p, r) {
-  const b = lg.brief, sg = lgSegment(b.seg), bp = lgBrandPalette(p), saved = lgLab(p).saved;
-  r.innerHTML = `<div class="page-head"><div><h1>Laboratório do Logo</h1><p>Conte o básico, escolha o estilo e as cores. O Studio monta dezenas de logos vetoriais; você refina, salva no Brand Kit e usa nas peças.</p></div><div class="actions">${projectSelect()}${saved.length ? `<button class="btn" onclick="lgSavedOpen()">Meus logos (${saved.length})</button>` : ''}<button class="btn" onclick="dzBack()">Estúdio</button></div></div>
-  <div class="two dz-compose"><div class="panel"><h3>1. Sua marca</h3>
-    <div class="field"><label>Nome da marca</label><input id="lgName" value="${esc(b.name)}" oninput="lg.brief.name=this.value"></div>
-    <div class="field"><label>Segmento</label><select onchange="lg.brief.seg=this.value;lg.brief.tag='';renderDesign()">${LG_SEGMENTS.map(s => `<option value="${s.id}" ${s.id === b.seg ? 'selected' : ''}>${esc(s.label)}</option>`).join('')}</select></div>
-    <div class="field"><label>Slogan <small class="muted">(opcional)</small></label><input id="lgTag" value="${esc(b.tag)}" placeholder="Ex.: ${esc(sg.tag[0])}" oninput="lg.brief.tag=this.value;lg.brief.noTag=false"><div class="tchips" style="margin-top:6px">${sg.tag.map(t => `<button class="tchip" onclick="lg.brief.tag=${esc(JSON.stringify(t)).replace(/"/g, '&quot;')};lg.brief.noTag=false;$('lgTag').value=lg.brief.tag">${esc(t)}</button>`).join('')}${lgChip(b.noTag, 'lg.brief.noTag=!lg.brief.noTag;renderDesign()', 'Sem slogan')}</div></div>
-    <h3 style="margin-top:14px">2. Estilo <small class="muted">escolha até 4</small></h3><div class="tchips">${LG_STYLES.map(s => lgChip(b.styles.includes(s.id), `lgTogStyle('${s.id}')`, s.label)).join('')}</div></div>
-  <div class="panel"><h3>3. Cores</h3>
-    ${bp ? `<label class="check"><input type="checkbox" ${b.useBrand ? 'checked' : ''} onchange="lg.brief.useBrand=this.checked;renderDesign()"> Incluir as cores do Brand Kit <span class="bk-chips" style="display:inline-flex;vertical-align:middle;margin-left:6px">${bp.c.map(c => `<i class="bk-chip" style="background:${c};width:14px;height:14px"></i>`).join('')}</span></label>` : '<small class="muted block">Quando houver um Brand Kit, as cores dele aparecem aqui como opção.</small>'}
-    <div class="okr-label" style="margin-top:10px">CLIMA <small class="muted">(deixe vazio para seguir o estilo)</small></div><div class="tchips">${LG_MOODS.map(m => lgChip(b.mood.includes(m), `lgTogMood('${m}')`, m)).join('')}</div>
+  const b = lg.brief, sg = lgSegment(b.seg), bp = lgBrandPalette(p), saved = lgLab(p).saved, st = lg.step || 0, last = st === LG_STEPS.length - 1;
+  const head = `<div class="page-head"><div><h1>Laboratório do Logo</h1><p>Responda 4 perguntas curtas. O Studio monta dezenas de logos vetoriais; você escolhe, refina e leva para o Brand Kit.</p></div><div class="actions">${projectSelect()}${saved.length ? `<button class="btn" onclick="lgSavedOpen()">Meus logos (${saved.length})</button>` : ''}<button class="btn" onclick="dzBack()">Estúdio</button></div></div>
+  <div class="lg-steps">${LG_STEPS.map((t, i) => `<button class="${i === st ? 'on' : i < st ? 'done' : ''}" onclick="lgStep(${i})"><i>${i + 1}</i>${t}</button>`).join('')}</div>`;
+  let body = '';
+  if (st === 0) body = `<h2 class="lg-q">Que tipo de negócio você tem?</h2><p class="muted">Isso ajuda a oferecer símbolos e slogans mais certos.</p><div class="tchips lg-big">${LG_SEGMENTS.map(s => lgChip(s.id === b.seg, `lg.brief.seg='${s.id}';lg.brief.tag='';renderDesign()`, s.label)).join('')}</div>`;
+  else if (st === 1) body = `<h2 class="lg-q">Qual estilo você quer para o seu logo?</h2><p class="muted">As fontes, ícones e cores refletem o estilo. Escolha até 4.</p><div class="tchips lg-big">${LG_STYLES.map(s => lgChip(b.styles.includes(s.id), `lgTogStyle('${s.id}')`, s.label)).join('')}</div>`;
+  else if (st === 2) body = `<h2 class="lg-q">Que texto você quer no seu logo?</h2><p class="muted">Normalmente é o nome da marca.</p><div class="field" style="max-width:520px"><input id="lgName" value="${esc(b.name)}" placeholder="Ex.: seu nome comercial" oninput="lg.brief.name=this.value"></div>
+    <h2 class="lg-q" style="margin-top:22px">Qual é o seu lema ou slogan? <small class="muted">(opcional)</small></h2><div class="field" style="max-width:520px"><input id="lgTag" value="${esc(b.tag)}" placeholder="Ex.: ${esc(sg.tag[0])}" oninput="lg.brief.tag=this.value;lg.brief.noTag=false"></div>
+    <div class="tchips" style="margin-top:6px">${sg.tag.map(t => `<button class="tchip" onclick="lg.brief.tag=this.textContent;lg.brief.noTag=false;$('lgTag').value=lg.brief.tag">${esc(t)}</button>`).join('')}${lgChip(b.noTag, 'lg.brief.noTag=!lg.brief.noTag;renderDesign()', 'Sem slogan')}${aiReady() ? '<button class="tchip" onclick="lgTagAI()">✦ Sugestões com IA</button>' : ''}</div><div class="tchips" id="lgTagAI" style="margin-top:6px"></div><small class="muted block" style="margin-top:6px">Sugestões de slogan podem ser imprecisas. Confira antes de usar.</small>`;
+  else body = `<h2 class="lg-q">Cores e ícones</h2>${bp ? `<label class="check"><input type="checkbox" ${b.useBrand ? 'checked' : ''} onchange="lg.brief.useBrand=this.checked;renderDesign()"> Incluir as cores do Brand Kit <span class="bk-chips" style="display:inline-flex;vertical-align:middle;margin-left:6px">${bp.c.map(c => `<i class="bk-chip" style="background:${c};width:14px;height:14px"></i>`).join('')}</span></label>` : '<small class="muted block">Quando houver um Brand Kit, as cores dele aparecem aqui como opção.</small>'}
+    <div class="okr-label" style="margin-top:10px">CLIMA <small class="muted">(vazio = segue o estilo)</small></div><div class="tchips">${LG_MOODS.map(m => lgChip(b.mood.includes(m), `lgTogMood('${m}')`, m)).join('')}</div>
     <div class="okr-label" style="margin-top:10px">PALETAS ESPECÍFICAS <small class="muted">(${b.palIds.length} marcada(s))</small></div><div class="lg-pals">${LG_PALETTES.map(x => `<button class="lg-pal ${b.palIds.includes(x.id) ? 'on' : ''}" title="${esc(x.name)}" onclick="lgTogPal('${x.id}')">${x.c.map(c => `<i style="background:${c}"></i>`).join('')}<span>${esc(x.name)}</span></button>`).join('')}</div>
-    <div class="row-gap" style="margin-top:16px"><label class="ins" style="margin:0">Quantidade <b>${b.n}</b><input type="range" min="12" max="60" step="6" value="${b.n}" oninput="lg.brief.n=+this.value;this.previousElementSibling.textContent=this.value"></label><button class="btn dark" onclick="lgRun()">Gerar logos</button></div>
-    <div class="okr-label" style="margin-top:12px">BIBLIOTECA DE ÍCONES <small class="muted">(${LG_ICONS.length} ícones)</small></div>
-    <label class="check"><input type="checkbox" ${b.icons !== false ? 'checked' : ''} onchange="lg.brief.icons=this.checked;renderDesign()"> Usar ícones da biblioteca nos logos</label>
+    <div class="okr-label" style="margin-top:12px">BIBLIOTECA DE ÍCONES <small class="muted">(${LG_ICONS.length} ícones)</small></div><label class="check"><input type="checkbox" ${b.icons !== false ? 'checked' : ''} onchange="lg.brief.icons=this.checked;renderDesign()"> Usar ícones da biblioteca nos logos</label>
     <div class="tchips" style="margin-top:6px">${LG_ICON_CATS.map(c => lgChip((b.iconCats || []).includes(c[0]), `lgTogIconCat('${c[0]}')`, c[1])).join('')}</div><small class="muted block">Sem categoria marcada, usa as do segmento (${(LG_SEG_ICONS[b.seg] || []).map(id => (LG_ICON_CATS.find(c => c[0] === id) || [0, id])[1]).join(', ')}).</small>
-    ${imageReady() ? `<div class="row-gap" style="margin-top:8px"><button class="btn sm" onclick="lgAIRun()" title="Gera conceitos de logo com IA de imagem (o texto da IA pode vir com erros)">✦ Conceitos com IA</button></div>` : ''}</div></div>`;
+    <div class="row-gap" style="margin-top:14px"><label class="ins" style="margin:0">Quantidade <b>${b.n}</b><input type="range" min="12" max="60" step="6" value="${b.n}" oninput="lg.brief.n=+this.value;this.previousElementSibling.textContent=this.value"></label></div>
+    ${imageReady() ? `<div class="row-gap" style="margin-top:8px"><button class="btn sm" onclick="lgAIRun()" title="Gera conceitos de logo com IA de imagem (o texto da IA pode vir com erros)">✦ Conceitos com IA</button></div>` : ''}`;
+  r.innerHTML = head + `<div class="panel lg-step">${body}<div class="lg-nav">${st > 0 ? `<button class="btn" onclick="lgStep(${st - 1})">← Voltar</button>` : '<span></span>'}<div class="row-gap">${!last ? `<button class="btn" onclick="lgStep(${st + 1})">Pular</button><button class="btn dark" onclick="lgStep(${st + 1})">Próximo →</button>` : '<button class="btn dark" onclick="lgRun()">Gerar logos</button>'}</div></div></div>`;
+  const f = $(st === 2 ? 'lgName' : ''); if (f && !b.name) f.focus();
+}
+function lgStep(i) { lg.step = Math.max(0, Math.min(LG_STEPS.length - 1, i)); renderDesign(); }
+async function lgTagAI() {
+  const b = lg.brief, box = $('lgTagAI'); if (!b.name.trim()) { toast('Escreva o nome primeiro.'); return; } box.innerHTML = '<small class="muted">Pensando…</small>';
+  try { const j = await aiJSON('Você sugere slogans curtos (até 6 palavras) para logos de pequenas empresas brasileiras. Não prometa resultados nem invente fatos.', `Marca: ${b.name}. Segmento: ${lgSegment(b.seg).label}. Estilos: ${b.styles.join(', ')}. Devolva {"slogans":["...","...","...","...","..."]}`);
+    box.innerHTML = (j.slogans || []).slice(0, 6).map(t => `<button class="tchip" onclick="lg.brief.tag=this.textContent;lg.brief.noTag=false;$('lgTag').value=lg.brief.tag">${esc(String(t))}</button>`).join('') || '<small class="muted">Sem sugestões.</small>';
+  } catch (e) { box.innerHTML = ''; toast(e.message); }
 }
 function lgTogStyle(id) { const a = lg.brief.styles; const i = a.indexOf(id); if (i >= 0) a.splice(i, 1); else { if (a.length >= 4) a.shift(); a.push(id); } renderDesign(); }
 function lgTogIconCat(id) { lg.brief.iconCats = lg.brief.iconCats || []; tog(lg.brief.iconCats, id); renderDesign(); }
 function lgTogMood(m) { tog(lg.brief.mood, m); renderDesign(); }
 function lgTogPal(id) { tog(lg.brief.palIds, id); renderDesign(); }
 async function lgRun(more) {
-  const p = dzP(), b = lg.brief; b.name = ($('lgName') ? $('lgName').value : b.name).trim(); if (!b.name) { toast('Escreva o nome da marca.'); return; }
+  const p = dzP(), b = lg.brief; b.name = String(b.name || '').trim(); if (!b.name) { toast('Escreva o nome da marca.'); lg.step = 2; renderDesign(); return; }
   if (!b.styles.length) { toast('Escolha ao menos um estilo.'); return; }
   lgLab(p).brief = JSON.parse(JSON.stringify(b)); persist(); lg.seed = more ? lg.seed + 1 : Date.now() % 100000;
   const gen = lgGenerate(p, b, b.n, lg.seed); if (!gen.length) { toast('Não consegui montar opções com essas escolhas.'); return; }
@@ -4281,7 +4322,7 @@ async function lgRun(more) {
 }
 function lgGridPage(p, r) {
   const view = lg.items.filter(i => lg.filter === 'fav' ? lg.fav[i.id] : true), nf = lg.items.filter(i => lg.fav[i.id]).length;
-  r.innerHTML = `<div class="page-head"><div><h1>${esc(lg.brief.name)} · ${lg.items.length} logos</h1><p>Marque os favoritos com ★ e clique em Editar para ajustar símbolo, fonte, cores e composição.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="lg.view='brief';renderDesign()">Ajustar briefing</button><button class="btn" onclick="lgRun(true)">＋ Gerar mais</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>${esc(lg.brief.name)} · ${lg.items.length} logos</h1><p>Marque os favoritos com ★ e clique em Editar para ajustar símbolo, fonte, cores e composição.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="lg.view='brief';lg.step=0;renderDesign()">Ajustar briefing</button><button class="btn" onclick="lgIconModal()" title="Troca o símbolo de todos os logos de uma vez, mantendo fonte, composição e cores">Ver outros ícones</button>${lg.items.some(i => i.orig) ? '<button class="btn" onclick="lgRevertIcons()">Reverter ícones</button>' : ''}<button class="btn" onclick="lgRun(true)">＋ Gerar mais</button></div></div>
   <div class="vf-bar"><div class="matrix-tabs">${[['all', 'Todos (' + lg.items.length + ')'], ['fav', '★ Favoritos (' + nf + ')']].map(([k, l]) => `<button class="${lg.filter === k ? 'active' : ''}" onclick="lg.filter='${k}';renderDesign()">${l}</button>`).join('')}</div></div>
   <div class="vf-grid lg-grid">${view.map(it => it.kind === 'ai' ? `<article class="vf-card"><canvas data-ai="${it.imgId}" width="300" height="300"></canvas><div class="vf-meta"><b>Conceito com IA</b><small>${esc(it.note || '')}</small></div><div class="row-gap"><button class="btn sm" onclick="lgAISave('${it.id}')">Salvar no Brand Kit</button></div></article>`
     : `<article class="vf-card"><canvas data-lg="${it.id}" width="300" height="200"></canvas><div class="vf-meta"><b>${esc((LG_FONTS[it.font] || {}).label || '')} · ${esc(it.comp)}</b><small>${esc(lgSymDef(it.sym, it).label || '')} · ${esc(it.mode === 'color' ? 'cor cheia' : it.mode === 'dark' ? 'escuro' : 'claro')}</small></div><div class="row-gap"><button class="btn sm ${lg.fav[it.id] ? 'dark' : ''}" onclick="lg.fav['${it.id}']=!lg.fav['${it.id}'];renderDesign()">★</button><button class="btn sm dark" onclick="lgEdit('${it.id}')">Editar</button></div></article>`).join('')}</div>`;
@@ -4301,13 +4342,14 @@ function lgEditPage(p, r) {
   r.innerHTML = `<div class="page-head"><div><h1>Editar logo</h1><p>Mexa em qualquer parte; a prévia atualiza na hora.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="lg.view=lg.items.length?'grid':'brief';renderDesign()">← Voltar</button></div></div>
   <div class="two dz-compose"><div class="panel"><canvas id="lgBig" width="720" height="480" style="width:100%;max-width:720px;border:1px solid #e6e6e6;border-radius:12px"></canvas>
     <div class="row-gap" style="margin-top:12px">${['light', 'dark', 'color'].map(m => `<button class="btn sm ${s.mode === m ? 'dark' : ''}" onclick="lgSet('mode','${m}')">${{light: 'Fundo claro', dark: 'Fundo escuro', color: 'Fundo colorido'}[m]}</button>`).join('')}</div>
-    <div class="row-gap" style="margin-top:12px"><button class="btn dark" onclick="lgSaveKit()">Salvar no Brand Kit</button><button class="btn" onclick="lgDownload('png')">PNG transparente</button><button class="btn" onclick="lgDownload('svg')">SVG</button><button class="btn" onclick="lgToEditor()">Abrir no Editor</button><button class="btn" onclick="lgSaveLab()">Guardar em Meus logos</button></div>
+    <div class="row-gap" style="margin-top:12px"><button class="btn dark" onclick="lgSaveKit()">Salvar no Brand Kit</button><button class="btn" onclick="lgDownload('png')">PNG transparente</button><button class="btn" onclick="lgDownload('svg')">SVG</button><button class="btn" onclick="lgToEditor()">Abrir no Editor</button><button class="btn" onclick="lgMockOpen()">Ver em mockups</button><button class="btn" onclick="lgBoardOpen()">Prancha de marca</button><button class="btn" onclick="lgPackageDown()">Pacote ZIP</button><button class="btn" onclick="lgSaveLab()">Guardar em Meus logos</button></div>
     <small class="muted block" style="margin-top:6px">No SVG o texto sai como texto (a fonte precisa estar instalada onde for aberto). O PNG sai com a fonte já aplicada.</small></div>
   <div class="panel"><div class="field"><label>Nome</label><input value="${esc(s.name)}" oninput="lgSet('name',this.value,1)"></div><div class="field"><label>Slogan</label><input value="${esc(s.tag)}" oninput="lgSet('tag',this.value,1)"></div>
     <div class="okr-label">SÍMBOLO</div>${pickS}
     <div class="ins-row"><label class="ins">Fonte<select onchange="lgSet('font',this.value)">${Object.entries(LG_FONTS).map(([k, f]) => `<option value="${k}" ${s.font === k ? 'selected' : ''}>${esc(f.label)} · ${esc(f.head)}</option>`).join('')}</select></label>
-    <label class="ins">Composição<select onchange="lgSet('comp',this.value)">${[['stack', 'Empilhada'], ['horizontal', 'Lado a lado'], ['wordmark', 'Só o nome'], ['pill', 'Pílula'], ['badge', 'Selo redondo'], ['sidebar', 'Barra lateral'], ['frame', 'Moldura'], ['lines', 'Linhas']].map(([k, l]) => `<option value="${k}" ${s.comp === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
+    <label class="ins">Composição<select onchange="lgSet('comp',this.value)">${LG_COMPS.map(([k, l]) => `<option value="${k}" ${s.comp === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
     <div class="ins-row"><label class="ins">Símbolo <b>${Math.round(s.symScale * 100)}%</b><input type="range" min="50" max="180" value="${Math.round(s.symScale * 100)}" oninput="lgSet('symScale',this.value/100,1);this.previousElementSibling.textContent=this.value+'%'"></label>${String(s.sym).startsWith('ic:') ? `<label class="ins">Traço do ícone <b>${s.icw || 2}</b><input type="range" min="1" max="3.5" step="0.1" value="${s.icw || 2}" oninput="lgSet('icw',+this.value,1);this.previousElementSibling.textContent=this.value"></label>` : ''}<label class="ins">Nome <b>${Math.round(s.nameScale * 100)}%</b><input type="range" min="60" max="160" value="${Math.round(s.nameScale * 100)}" oninput="lgSet('nameScale',this.value/100,1);this.previousElementSibling.textContent=this.value+'%'"></label></div>
+    <label class="check" style="margin:4px 0 10px"><input type="checkbox" ${s.grad ? 'checked' : ''} onchange="lgSet('grad',this.checked)"> Degradê no símbolo</label>
     <div class="okr-label">PALETA</div><div class="lg-pals">${pal.map(x => `<button class="lg-pal ${s.pal.join() === x.c.join() ? 'on' : ''}" title="${esc(x.name)}" onclick="lgSetPal('${x.id}')">${x.c.map(c => `<i style="background:${c}"></i>`).join('')}<span>${esc(x.name)}</span></button>`).join('')}</div>
     <div class="okr-label" style="margin-top:8px">AJUSTE FINO DAS 5 CORES <small class="muted">escura · principal · apoio · destaque · clara</small></div><div class="bk-chips">${s.pal.map((c, i) => `<input type="color" value="${c}" oninput="lgSetColor(${i},this.value)" style="width:42px;height:34px;padding:0;border:1px solid #ddd;border-radius:8px">`).join('')}</div></div></div>`;
   lgDrawBig(); lgSymCanvases();
@@ -4335,13 +4377,14 @@ function lgSetColor(i, v) { lg.cur.pal[i] = v; lg.cur.palId = ''; lgDrawBig(); }
 
 /* ---------- saída: PNG, SVG, Brand Kit, Editor ---------- */
 function lgSVG(sp, o) {
-  const r = lgBuild(sp, o), e = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'), P = [];
+  const r = lgBuild(sp, o), e = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'), P = [], DEFS = []; let gi = 0;
   r.slide.layers.forEach(l => {
     if (l.type === 'rect') { const f = l.fill || 'none', st = l.stroke ? ` stroke="${e(l.stroke)}" stroke-width="${l.strokeW || 0}"` : ''; P.push(l.shape === 'ellipse' ? `<ellipse cx="${l.x + l.w / 2}" cy="${l.y + l.h / 2}" rx="${l.w / 2}" ry="${l.h / 2}" fill="${e(f)}"${st}/>` : `<rect x="${l.x}" y="${l.y}" width="${l.w}" height="${l.h}" rx="${l.radius || 0}" fill="${e(f)}"${st}/>`); }
-    else if (l.type === 'path') P.push(`<path transform="translate(${l.x} ${l.y}) scale(${l.w / (l.vb || 100)} ${l.h / (l.vb || 100)})" d="${e(l.d)}" fill="${l.fill ? e(l.fill) : 'none'}" fill-rule="${l.rule || 'nonzero'}"${l.stroke ? ` stroke="${e(l.stroke)}" stroke-width="${l.strokeW}" stroke-linecap="round" stroke-linejoin="round"` : ''}/>`);
-    else if (l.type === 'text') P.push(`<text x="${l.x}" y="${(l.y + l.size * 0.82).toFixed(1)}" font-family="${e(l.family)}, sans-serif" font-weight="${l.weight}" font-size="${l.size}" letter-spacing="${l.ls || 0}" fill="${e(l.color)}">${e(l.content)}</text>`);
+    else if (l.type === 'path') { let fill = l.fill ? e(l.fill) : 'none'; if (l.fill && l.grad) { const id = 'g' + (gi++), vb = l.vb || 100; DEFS.push(`<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="${vb}" y2="${vb}"><stop offset="0" stop-color="${e(l.fill)}"/><stop offset="1" stop-color="${e(l.grad)}"/></linearGradient>`); fill = `url(#${id})`; }
+      P.push(`<path transform="translate(${l.x} ${l.y}) scale(${l.w / (l.vb || 100)} ${l.h / (l.vb || 100)})" d="${e(l.d)}" fill="${fill}" fill-rule="${l.rule || 'nonzero'}"${l.stroke ? ` stroke="${e(l.stroke)}" stroke-width="${l.strokeW}" stroke-linecap="round" stroke-linejoin="round"` : ''}/>`); }
+    else if (l.type === 'text') { const ctr = l.align === 'center', tx = ctr ? l.x + l.w / 2 : l.x, ty = l.y + l.size * 0.82, rot = l.rot ? ` transform="rotate(${l.rot} ${l.x + l.w / 2} ${l.y + l.size / 2})"` : ''; P.push(`<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}"${ctr ? ' text-anchor="middle"' : ''}${rot} font-family="${e(l.family)}, sans-serif" font-weight="${l.weight}" font-size="${l.size}" letter-spacing="${l.ls || 0}" fill="${e(l.color)}">${e(l.content)}</text>`); }
   });
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${r.W} ${r.H}" width="${r.W}" height="${r.H}">${o && o.transparent ? '' : `<rect width="${r.W}" height="${r.H}" fill="${e(r.slide.bg)}"/>`}${P.join('')}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${r.W} ${r.H}" width="${r.W}" height="${r.H}">${DEFS.length ? '<defs>' + DEFS.join('') + '</defs>' : ''}${o && o.transparent ? '' : `<rect width="${r.W}" height="${r.H}" fill="${e(r.slide.bg)}"/>`}${P.join('')}</svg>`;
 }
 async function lgBlob(sp, o) { await lgFonts(sp); const r = lgBuild(sp, o), cv = document.createElement('canvas'); cv.width = r.W; cv.height = r.H; renderSlide(cv.getContext('2d'), r.slide, r.W, r.H, 1); return new Promise(res => cv.toBlob(res, 'image/png')); }
 const lgFile = sp => (sp.name || 'logo').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'logo';
@@ -4364,7 +4407,7 @@ async function lgToEditor() {
   p.design.sets.push(set); persist(); dz.view = 'home'; dzOpen(set.id);
 }
 async function lgAIRun() {
-  const p = dzP(), b = lg.brief; b.name = ($('lgName') ? $('lgName').value : b.name).trim(); if (!b.name) { toast('Escreva o nome da marca.'); return; }
+  const p = dzP(), b = lg.brief; b.name = String(b.name || '').trim(); if (!b.name) { toast('Escreva o nome da marca.'); return; }
   const sg = lgSegment(b.seg), st = b.styles.map(id => lgStyle(id).label).join(', '), pal = (LG_PALETTES.find(x => x.id === b.palIds[0]) || lgBrandPalette(p) || LG_PALETTES[0]).c;
   const prompt = `Professional brand logo for "${b.name}", a ${sg.ai}. Style: ${st}. Flat vector logo mark with simple geometric shapes, limited palette (${pal.slice(1, 4).join(', ')}), centered on a plain light background, generous margins, no mockup, no photograph.`;
   toast('Gerando conceitos…'); try {
@@ -4373,6 +4416,133 @@ async function lgAIRun() {
   } catch (e) { toast(e.message); }
 }
 async function lgAISave(id) { const p = dzP(), b = brandOf(p), it = lg.items.find(i => i.id === id); await loadImage(it.imgId); const bm = IMGS.get(it.imgId); b.logos.push({id: uid('lg'), name: (lg.brief.name || 'Logo') + ' · IA', imgId: it.imgId, tone: 'any', w: bm.width, h: bm.height}); if (!b.extracted.length) { b.extracted = extractColors(bm); if (b.extracted[0]) { b.primary = b.extracted[0]; brandRecalc(p); } } persist(); toast('Conceito salvo no Brand Kit.'); }
+
+/* ---------- trocar o ícone de todos os logos da grade ---------- */
+const lgM = {q: '', cat: ''};
+function lgIconModal() {
+  lgM.q = ''; lgM.cat = '';
+  showModal('Escolher ícone para todos os logos', `<input class="lg-search" id="lgMq" placeholder="Buscar: casa, café, raio…" oninput="lgM.q=this.value;lgModalGrid()"><div class="tchips" style="margin:8px 0" id="lgMcats"></div><div class="lg-icons" id="lgMgrid" style="max-height:340px"></div><div class="modal-actions"><button class="btn" onclick="lgIconRandom()">Aleatório</button><button class="btn" onclick="closeModal()">Fechar</button></div>`);
+  lgModalGrid();
+}
+function lgModalGrid() {
+  const q = lgNorm(lgM.q).trim().split(/\s+/).filter(Boolean), ci = lgM.cat ? LG_ICON_CATS.findIndex(c => c[0] === lgM.cat) : -1;
+  $('lgMcats').innerHTML = `<button class="tchip ${lgM.cat ? '' : 'on'}" onclick="lgM.cat='';lgModalGrid()">Todas</button>` + LG_ICON_CATS.map(c => `<button class="tchip ${lgM.cat === c[0] ? 'on' : ''}" onclick="lgM.cat='${c[0]}';lgModalGrid()">${esc(c[1])}</button>`).join('');
+  const list = LG_ICONS.filter(i => (ci < 0 || i[2] === ci) && q.every(w => lgNorm(i[0] + ' ' + i[1] + ' ' + i[4]).includes(w)));
+  $('lgMgrid').innerHTML = list.length ? list.slice(0, 200).map(i => `<button class="lg-ic" title="${esc(i[1])}" onclick="lgApplyIconAll('ic:${i[0]}')">${lgIconSVG(i[3], 1.8)}</button>`).join('') : '<small class="muted">Nenhum ícone encontrado.</small>';
+}
+function lgApplyIconAll(sym) { lg.items.forEach(it => { if (it.kind) return; if (!it.orig) it.orig = it.sym; it.sym = sym; }); closeModal(); renderDesign(); toast('Ícone aplicado em todos os logos.'); }
+function lgIconRandom() { const pool = LG_ICONS.filter(i => !lgM.cat || LG_ICON_CATS[i[2]][0] === lgM.cat); lgApplyIconAll('ic:' + pool[Math.floor(Math.random() * pool.length)][0]); }
+function lgRevertIcons() { lg.items.forEach(it => { if (it.orig) { it.sym = it.orig; delete it.orig; } }); renderDesign(); }
+
+</script>
+<script>
+/* ===== Laboratório do Logo · aplicações: mockups desenhados, prancha de marca e pacote ZIP ===== */
+const lgLogoBM = {};
+async function lgBitmap(sp, mode) { const s2 = Object.assign({}, sp, {mode}), b = await lgBlob(s2, {tight: true, transparent: true}); return createImageBitmap(b); }
+function lgRR(x, ctx, X, Y, W, H, r) { ctx.beginPath(); ctx.moveTo(X + r, Y); ctx.arcTo(X + W, Y, X + W, Y + H, r); ctx.arcTo(X + W, Y + H, X, Y + H, r); ctx.arcTo(X, Y + H, X, Y, r); ctx.arcTo(X, Y, X + W, Y, r); ctx.closePath(); }
+const lgShadow = (c, b, y, a) => { c.shadowColor = `rgba(20,30,50,${a == null ? 0.18 : a})`; c.shadowBlur = b; c.shadowOffsetY = y; };
+const lgNoShadow = c => { c.shadowColor = 'transparent'; c.shadowBlur = 0; c.shadowOffsetY = 0; };
+function lgPut(c, bm, cx, cy, mw, mh) { const k = Math.min(mw / bm.width, mh / bm.height); c.drawImage(bm, cx - bm.width * k / 2, cy - bm.height * k / 2, bm.width * k, bm.height * k); }
+const lgTint = (hex, t) => mixHex(hex, '#ffffff', t);
+
+async function lgMockups(sp) {
+  await lgFonts(sp); const F = LG_FONTS[sp.font] || LG_FONTS.geo, P = sp.pal, C = lgColors(sp), out = [];
+  const L = await lgBitmap(sp, 'light'), D = await lgBitmap(sp, 'dark'), K = await lgBitmap(sp, 'color'), mk = () => { const cv = document.createElement('canvas'); cv.width = 1200; cv.height = 900; return [cv, cv.getContext('2d')]; };
+  const head = (c, size, col) => { c.font = `${F.hw} ${size}px "${F.head}", sans-serif`; c.fillStyle = col; };
+  const bar = (c, x, y, w, col, h) => { c.fillStyle = col; lgRR(0, c, x, y, w, h || 12, (h || 12) / 2); c.fill(); };
+  /* cartões de visita */
+  { const [cv, c] = mk(); c.fillStyle = '#e9edf3'; c.fillRect(0, 0, 1200, 900); c.fillStyle = '#dde3ec'; c.beginPath(); c.arc(330, 380, 250, 0, 7); c.fill();
+    lgShadow(c, 40, 18); c.fillStyle = P[1]; lgRR(0, c, 140, 150, 640, 380, 10); c.fill(); lgNoShadow(c);
+    head(c, 40, readable(P[1])); c.textBaseline = 'alphabetic'; c.fillText('Seu Nome', 190, 235); bar(c, 190, 430, 300, readable(P[1]) + '99', 8); bar(c, 190, 460, 240, readable(P[1]) + '99', 8); bar(c, 190, 490, 270, readable(P[1]) + '99', 8);
+    lgShadow(c, 44, 22); c.fillStyle = '#ffffff'; lgRR(0, c, 420, 340, 660, 400, 10); c.fill(); lgNoShadow(c); lgPut(c, L, 750, 540, 460, 250);
+    out.push({id: 'cartao', label: 'Cartão de visita', cv}); }
+  /* perfil de rede social */
+  { const [cv, c] = mk(); c.fillStyle = lgTint(P[2], 0.82); c.fillRect(0, 0, 1200, 900);
+    lgShadow(c, 50, 20); c.fillStyle = '#ffffff'; lgRR(0, c, 400, 40, 400, 820, 58); c.fill(); lgNoShadow(c); c.strokeStyle = '#161616'; c.lineWidth = 14; lgRR(0, c, 400, 40, 400, 820, 58); c.stroke();
+    c.fillStyle = '#161616'; lgRR(0, c, 540, 56, 120, 22, 11); c.fill();
+    c.fillStyle = '#ffffff'; c.beginPath(); c.arc(500, 210, 58, 0, 7); c.fill(); c.strokeStyle = '#e4e4e4'; c.lineWidth = 3; c.stroke(); lgPut(c, L, 500, 210, 84, 66);
+    c.fillStyle = '#161616'; c.font = '700 26px Inter, sans-serif'; c.textAlign = 'center'; [['37', 'posts', 610], ['56', 'seguidores', 690], ['35', 'seguindo', 760]].forEach(([n, l, x]) => { c.fillText(n, x, 200); c.font = '400 13px Inter, sans-serif'; c.fillText(l, x, 222); c.font = '700 26px Inter, sans-serif'; });
+    c.textAlign = 'left'; c.font = '700 22px Inter, sans-serif'; c.fillText(sp.name || 'Marca', 445, 312); bar(c, 445, 330, 220, '#c9ced6', 10); bar(c, 445, 352, 260, '#c9ced6', 10);
+    c.fillStyle = P[1]; lgRR(0, c, 445, 385, 150, 44, 8); c.fill(); c.fillStyle = readable(P[1]); c.font = '600 16px Inter, sans-serif'; c.textAlign = 'center'; c.fillText('Seguir', 520, 413); c.fillStyle = '#eceff3'; lgRR(0, c, 610, 385, 150, 44, 8); c.fill(); c.fillStyle = '#161616'; c.fillText('Mensagem', 685, 413);
+    c.save(); lgRR(0, c, 407, 47, 386, 806, 52); c.clip(); const tints = [0.15, 0.45, 0.7, 0.3, 0.6, 0.85, 0.5, 0.2, 0.75, 0.4, 0.65, 0.25]; for (let i = 0; i < 12; i++) { c.fillStyle = lgTint(i % 3 === 0 ? P[1] : i % 3 === 1 ? P[2] : P[3], tints[i]); c.fillRect(420 + (i % 3) * 120, 465 + Math.floor(i / 3) * 120, 118, 118); } c.restore();
+    c.textAlign = 'left'; out.push({id: 'perfil', label: 'Perfil de rede social', cv}); }
+  /* site no notebook */
+  { const [cv, c] = mk(); c.fillStyle = '#eef1f6'; c.fillRect(0, 0, 1200, 900);
+    lgShadow(c, 50, 24); c.fillStyle = '#ffffff'; lgRR(0, c, 140, 100, 920, 580, 34); c.fill(); lgNoShadow(c);
+    c.fillStyle = '#f2f4f8'; lgRR(0, c, 190, 130, 820, 38, 19); c.fill(); c.fillStyle = '#9aa3b2'; c.font = '14px Inter, sans-serif'; c.fillText('https://www.suamarca.com.br', 215, 154);
+    c.save(); lgRR(0, c, 170, 190, 860, 460, 6); c.clip(); c.fillStyle = C.bg === P[4] ? P[4] : '#f4f4f4'; c.fillRect(170, 190, 430, 460); c.fillStyle = P[0]; c.fillRect(600, 190, 430, 460); c.restore();
+    lgPut(c, L, 385, 420, 300, 190); head(c, 40, P[4]); c.fillText('Bem-vindo', 650, 340); bar(c, 650, 375, 300, P[4] + '88', 9); bar(c, 650, 400, 260, P[4] + '88', 9); bar(c, 650, 425, 280, P[4] + '88', 9); c.fillStyle = P[3]; lgRR(0, c, 650, 470, 160, 46, 6); c.fill();
+    c.fillStyle = '#dfe3ea'; lgRR(0, c, 70, 690, 1060, 34, 17); c.fill(); out.push({id: 'site', label: 'Site', cv}); }
+  /* produtos: sacola, camiseta, caneca, adesivos */
+  { const [cv, c] = mk(); c.fillStyle = '#eef1f6'; c.fillRect(0, 0, 1200, 900); c.fillStyle = '#e1e6ef'; c.beginPath(); c.arc(760, 520, 380, 0, 7); c.fill();
+    c.strokeStyle = '#d9dde4'; c.lineWidth = 16; c.lineCap = 'round'; c.beginPath(); c.moveTo(210, 330); c.bezierCurveTo(210, 190, 300, 190, 300, 330); c.moveTo(330, 330); c.bezierCurveTo(330, 190, 420, 190, 420, 330); c.stroke();
+    lgShadow(c, 36, 16); c.fillStyle = '#fbfbfb'; lgRR(0, c, 110, 320, 420, 460, 8); c.fill(); lgNoShadow(c); lgPut(c, L, 320, 560, 250, 200);
+    lgShadow(c, 36, 16); c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(620, 190); c.lineTo(700, 160); c.quadraticCurveTo(760, 215, 820, 160); c.lineTo(900, 190); c.lineTo(1000, 290); c.lineTo(930, 350); c.lineTo(890, 315); c.lineTo(890, 650); c.lineTo(630, 650); c.lineTo(630, 315); c.lineTo(590, 350); c.lineTo(520, 290); c.closePath(); c.fill(); lgNoShadow(c); lgPut(c, L, 760, 430, 170, 140);
+    lgShadow(c, 24, 12); c.fillStyle = '#ffffff'; lgRR(0, c, 880, 560, 190, 210, 26); c.fill(); c.strokeStyle = '#ffffff'; c.lineWidth = 26; c.beginPath(); c.arc(1075, 660, 52, -1.2, 1.2); c.stroke(); lgNoShadow(c); lgPut(c, L, 975, 665, 120, 100);
+    lgShadow(c, 18, 8); c.fillStyle = '#ffffff'; c.beginPath(); c.arc(640, 760, 82, 0, 7); c.fill(); c.fillStyle = P[1]; c.beginPath(); c.arc(840, 800, 62, 0, 7); c.fill(); lgNoShadow(c); lgPut(c, L, 640, 760, 110, 90); lgPut(c, K, 840, 800, 80, 66);
+    out.push({id: 'produtos', label: 'Sacola, camiseta, caneca e adesivos', cv}); }
+  /* aplicação sobre fundo escuro e colorido */
+  { const [cv, c] = mk(); c.fillStyle = P[0]; c.fillRect(0, 0, 600, 900); c.fillStyle = P[1]; c.fillRect(600, 0, 600, 900); lgPut(c, D, 300, 450, 440, 340); lgPut(c, K, 900, 450, 440, 340); out.push({id: 'fundos', label: 'Fundo escuro e colorido', cv}); }
+  return out;
+}
+const lgCanvasPNG = cv => new Promise(res => cv.toBlob(res, 'image/png'));
+
+/* ---------- prancha de marca ---------- */
+function lgDrawSymbol(c, sp, x, y, s, cols) {
+  const def = lgSymDef(sp.sym, sp), vb = def.vb || 100;
+  def.parts.forEach(pt => { const path = new Path2D(pt.d), col = cols[pt.role] || cols.main; c.save(); c.translate(x, y); c.scale(s / vb, s / vb);
+    if (pt.stroke) { c.lineWidth = pt.sw || 2; c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = col; c.stroke(path); } else { c.fillStyle = col; c.fill(path, pt.rule || 'nonzero'); } c.restore(); });
+}
+async function lgBoard(sp, mocks) {
+  await lgFonts(sp); const F = LG_FONTS[sp.font] || LG_FONTS.geo, P = sp.pal, cv = document.createElement('canvas'); cv.width = 1920; cv.height = 1500; const c = cv.getContext('2d');
+  c.fillStyle = '#ffffff'; c.fillRect(0, 0, 1920, 1500); c.textBaseline = 'alphabetic';
+  const lab = (t, x, y) => { c.fillStyle = '#8a8f98'; c.font = '600 18px Inter, sans-serif'; c.letterSpacing = '3px'; c.fillText(t, x, y); c.letterSpacing = '0px'; };
+  c.fillStyle = '#111'; c.font = '700 22px Inter, sans-serif'; c.fillText('MANUAL DE MARCA · ' + String(sp.name || '').toUpperCase(), 80, 70); c.fillStyle = '#e6e8ec'; c.fillRect(80, 92, 1760, 2);
+  const lockup = async (comp, x, y, w, h, mode) => { const s2 = Object.assign({}, sp, {comp, mode}), bm = await lgBitmap(s2, mode), C2 = lgColors(s2); c.fillStyle = mode === 'light' ? '#f3f4f6' : C2.bg; lgRR(0, c, x, y, w, h, 18); c.fill(); lgPut(c, bm, x + w / 2, y + h / 2, w * 0.7, h * 0.66); };
+  lab('LOGO', 80, 140); await lockup('horizontal', 80, 160, 900, 250, 'light'); await lockup(sp.comp === 'horizontal' ? 'stack' : sp.comp, 80, 430, 440, 330, 'light'); await lockup(sp.comp === 'horizontal' ? 'stack' : sp.comp, 540, 430, 440, 330, 'dark');
+  lab('PALETA', 1030, 140); [['Escura', P[0]], ['Principal', P[1]], ['Apoio', P[2]], ['Destaque', P[3]], ['Clara', P[4]]].forEach(([n, h], i) => { const y = 160 + i * 120; c.fillStyle = h; lgRR(0, c, 1030, y, 420, 104, 14); c.fill(); if (lum(h) > 0.9) { c.strokeStyle = '#e1e3e7'; c.lineWidth = 2; lgRR(0, c, 1030, y, 420, 104, 14); c.stroke(); } c.fillStyle = readable(h); c.font = '700 22px Inter, sans-serif'; c.fillText(n, 1054, y + 44); c.font = '500 18px Inter, sans-serif'; c.fillText(h.toUpperCase(), 1054, y + 74); });
+  lab('TIPOGRAFIA', 1500, 140); c.fillStyle = '#111'; c.font = `${F.hw} 150px "${F.head}", sans-serif`; c.fillText('Aa', 1500, 300); c.font = `${F.hw} 30px "${F.head}", sans-serif`; c.fillText(F.head, 1500, 350); c.font = '500 18px Inter, sans-serif'; c.fillStyle = '#6b7280'; c.fillText('Títulos e nome da marca', 1500, 378);
+  c.fillStyle = '#111'; c.font = `${F.tw} 64px "${F.tag}", sans-serif`; c.fillText('Aa', 1500, 500); c.font = `${F.tw} 28px "${F.tag}", sans-serif`; c.fillText(F.tag, 1500, 548); c.font = '500 18px Inter, sans-serif'; c.fillStyle = '#6b7280'; c.fillText('Slogan e textos de apoio', 1500, 576);
+  c.fillStyle = '#111'; c.font = `${F.tw} 22px "${F.tag}", sans-serif`; c.font = `${F.tw} 18px "${F.tag}", sans-serif`; c.fillText('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 1500, 640); c.fillText('abcdefghijklmnopqrstuvwxyz', 1500, 672); c.fillText('0123456789', 1500, 704);
+  lab('ELEMENTOS', 80, 820); const tiles = [[P[4], {main: P[1], acc: P[3], sec: P[2]}], [P[1], {main: P[4], acc: P[3], sec: P[4]}], [P[0], {main: P[2], acc: P[3], sec: P[4]}], [P[3], {main: P[0], acc: P[4], sec: P[0]}]];
+  tiles.forEach(([bg, cols], i) => { const x = 80 + i * 250; c.fillStyle = bg; lgRR(0, c, x, 840, 230, 230, 18); c.fill(); if (lum(bg) > 0.9) { c.strokeStyle = '#e1e3e7'; c.lineWidth = 2; lgRR(0, c, x, 840, 230, 230, 18); c.stroke(); } lgDrawSymbol(c, sp, x + 55, 895, 120, cols); });
+  c.fillStyle = P[4]; lgRR(0, c, 1100, 840, 740, 230, 18); c.fill(); c.strokeStyle = '#e1e3e7'; c.lineWidth = 2; lgRR(0, c, 1100, 840, 740, 230, 18); c.stroke();
+  c.save(); lgRR(0, c, 1100, 840, 740, 230, 18); c.clip(); for (let r = 0; r < 3; r++) for (let k = 0; k < 9; k++) lgDrawSymbol(c, sp, 1120 + k * 84 + (r % 2) * 40, 860 + r * 72, 56, {main: [P[1], P[2], P[3]][(r + k) % 3], acc: P[3], sec: P[2]}); c.restore();
+  lab('APLICAÇÕES', 80, 1130); const want = ['cartao', 'perfil', 'produtos', 'site']; want.forEach((id, i) => { const m = mocks.find(x => x.id === id); if (!m) return; const x = 80 + i * 440; c.save(); lgRR(0, c, x, 1150, 420, 315, 14); c.clip(); c.drawImage(m.cv, 0, 0, 1200, 900, x, 1150, 420, 315); c.restore(); });
+  return cv;
+}
+
+/* ---------- pacote ---------- */
+async function lgPackage(sp) {
+  const mocks = await lgMockups(sp), board = await lgBoard(sp, mocks), files = [], add = async (name, blob) => files.push({name, data: new Uint8Array(await blob.arrayBuffer())}), txt = (name, t) => files.push({name, data: new TextEncoder().encode(t)}), nm = lgFile(sp);
+  for (const m of [['claro', 'light'], ['escuro', 'dark'], ['colorido', 'color']]) await add(`logo/${nm}-${m[0]}.png`, await lgBlob(Object.assign({}, sp, {mode: m[1]}), {tight: true, transparent: true}));
+  txt(`logo/${nm}.svg`, lgSVG(sp, {tight: true, transparent: true})); await add('prancha-de-marca.png', await lgCanvasPNG(board));
+  for (const m of mocks) await add(`mockups/${m.id}.png`, await lgCanvasPNG(m.cv));
+  const F = LG_FONTS[sp.font] || LG_FONTS.geo; txt('paleta-e-fontes.txt', `${sp.name}\n\nPaleta\nEscura: ${sp.pal[0]}\nPrincipal: ${sp.pal[1]}\nApoio: ${sp.pal[2]}\nDestaque: ${sp.pal[3]}\nClara: ${sp.pal[4]}\n\nFontes\nTítulo: ${F.head} (${F.hw})\nApoio: ${F.tag} (${F.tw})\n`);
+  txt('LEIA-ME.txt', 'Pacote gerado pelo Laboratório do Logo.\nPNGs transparentes em três versões (fundo claro, escuro e colorido). No SVG o texto continua como texto: instale as fontes do arquivo paleta-e-fontes.txt para abrir igual.\n');
+  return makeZip(files);
+}
+
+/* ---------- páginas ---------- */
+async function lgMockPage(p, r) {
+  r.innerHTML = `<div class="page-head"><div><h1>Aplicações · ${esc(lg.cur.name)}</h1><p>O logo aplicado em cartão, perfil de rede social, site e produtos. São mockups desenhados no Studio (não são fotos).</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="lg.view='edit';renderDesign()">← Voltar ao logo</button></div></div><div class="vf-grid lg-mocks" id="lgMocks"><small class="muted">Montando…</small></div>`;
+  const tk = ++lg.busy, list = await lgMockups(lg.cur); if (tk !== lg.busy || !$('lgMocks')) return; lg.mocks = list;
+  $('lgMocks').innerHTML = list.map(m => `<article class="vf-card"><canvas data-m="${m.id}" width="600" height="450"></canvas><div class="vf-meta"><b>${esc(m.label)}</b></div><div class="row-gap"><button class="btn sm" onclick="lgMockDown('${m.id}')">PNG</button></div></article>`).join('');
+  document.querySelectorAll('#lgMocks canvas').forEach(cv => cv.getContext('2d').drawImage(list.find(m => m.id === cv.dataset.m).cv, 0, 0, 600, 450));
+}
+async function lgMockDown(id) { const m = lg.mocks.find(x => x.id === id), b = await lgCanvasPNG(m.cv), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `${lgFile(lg.cur)}-${id}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+function lgMockOpen() { lg.view = 'mock'; renderDesign(); }
+async function lgBoardPage(p, r) {
+  r.innerHTML = `<div class="page-head"><div><h1>Prancha de marca · ${esc(lg.cur.name)}</h1><p>Logo, paleta, tipografia, elementos e aplicações em uma página, no estilo de um manual de marca.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="lg.view='edit';renderDesign()">← Voltar ao logo</button><button class="btn" onclick="lgBoardDown('png')">PNG</button><button class="btn" onclick="lgBoardDown('pdf')">PDF</button><button class="btn dark" onclick="lgPackageDown()">Pacote da marca (ZIP)</button></div></div><div class="panel"><canvas id="lgBoard" width="960" height="675" style="width:100%;border:1px solid #e6e6e6;border-radius:12px"></canvas></div>`;
+  const tk = ++lg.busy, mocks = await lgMockups(lg.cur), cv = await lgBoard(lg.cur, mocks); if (tk !== lg.busy || !$('lgBoard')) return; lg.boardCv = cv; $('lgBoard').getContext('2d').drawImage(cv, 0, 0, 960, 675);
+}
+function lgBoardOpen() { lg.view = 'board'; renderDesign(); }
+async function lgBoardDown(kind) {
+  if (!lg.boardCv) return; const cv = lg.boardCv;
+  if (kind === 'png') { const b = await lgCanvasPNG(cv), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `prancha-${lgFile(lg.cur)}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); return; }
+  const jb = await new Promise(res => cv.toBlob(res, 'image/jpeg', 0.93)); download(`prancha-${lgFile(lg.cur)}.pdf`, buildPDF([{jpeg: new Uint8Array(await jb.arrayBuffer()), w: cv.width, h: cv.height}], cv.width * 0.5, cv.height * 0.5), 'application/pdf');
+}
+async function lgPackageDown() { toast('Montando o pacote…'); try { const z = await lgPackage(lg.cur); download(`marca-${lgFile(lg.cur)}.zip`, z, 'application/zip'); toast('Pacote baixado: logos PNG/SVG, prancha, mockups e paleta.'); } catch (e) { toast('Não consegui montar o pacote: ' + e.message); } }
 
 </script>
 <script>

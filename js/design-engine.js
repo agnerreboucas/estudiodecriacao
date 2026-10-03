@@ -221,7 +221,8 @@ function placeholderArt(ctx, L) {
 function drawPathLayer(ctx, L) {
   ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; ctx.translate(L.x, L.y); ctx.scale(L.w / (L.vb || 100), L.h / (L.vb || 100));
   const p = new Path2D(L.d);
-  if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(p, L.rule || 'nonzero'); }
+  if (L.fill && L.grad) { const vb = L.vb || 100, g = ctx.createLinearGradient(0, 0, vb, vb); g.addColorStop(0, L.fill); g.addColorStop(1, L.grad); ctx.fillStyle = g; ctx.fill(p, L.rule || 'nonzero'); }
+  else if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(p, L.rule || 'nonzero'); }
   if (L.stroke && L.strokeW) { ctx.lineWidth = L.strokeW; ctx.strokeStyle = L.stroke; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(p); }
   ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h};
 }
