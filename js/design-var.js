@@ -41,6 +41,7 @@ function renderVariations(p, r) {
       <label class="ins">Composições do cruzamento <b>${v.crossN}</b><input type="range" min="0" max="6" value="${v.crossN}" oninput="dz.vf.crossN=+this.value;this.previousElementSibling.textContent=this.value;vfCount()"></label></div></div></div>
   <div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>4. Gerar</h3><p class="muted" id="vfInfo" style="font-size:11px;margin:0">${H || '1'} headline(s) × ${S || '1'} apoio(s) × ${C || '1'} CTA(s) × ${nStyles} estilo(s)${v.mode === 'build' ? ' × ' + nLay + ' layout(s)' : ''} × 2 destaques = ${fmtNum(combos)} combinações possíveis</p></div>
     <div class="row-gap"><label class="ins inl">Quantas <b>${v.n}</b><input type="range" min="6" max="100" value="${v.n}" oninput="dz.vf.n=+this.value;this.previousElementSibling.textContent=this.value"></label><button class="btn orange" onclick="vfGenerate()">⚡ Gerar variações</button></div></div></div><input type="file" id="vfFile" accept="image/*" hidden>`;
+  r.insertAdjacentHTML('beforeend', startersHTML(p)); startInit();
   vfDrawBase(base);
 }
 async function vfDrawBase(base) { const cv = $('vfBase'); if (!cv || !base) return; await ensureSetResources(base.set); if (cv.isConnected) renderSlide(cv.getContext('2d'), base.slide, base.set.format.w, base.set.format.h, cv.width / base.set.format.w); }

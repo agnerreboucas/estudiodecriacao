@@ -513,6 +513,8 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .nav-btns{display:flex;gap:6px;margin-right:auto}.nav-btns .top-btn:disabled{opacity:.35;cursor:default}
 .cov-wrap{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:16px;align-items:start;margin-top:10px}@media(max-width:1100px){.cov-wrap{grid-template-columns:1fr}}.cov-prev{position:sticky;top:10px}.cov-cv{width:100%;max-height:72vh;object-fit:contain;background:#ddd;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.25)}
 .cov-lays{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px}.cov-lay{border:1.5px solid #e2e2e2;border-radius:10px;padding:8px 10px;text-align:left;background:#fff;cursor:pointer;display:flex;flex-direction:column;gap:2px;font-size:12.5px}.cov-lay.on{border-color:#111;background:#f4f4f1}.cov-sw{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid #8884;vertical-align:-2px}.cov-cons{display:grid;gap:6px;margin:8px 0}
+.acc-bar{display:flex;gap:6px;justify-content:flex-end;margin:4px 0 8px}.start-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.start-card{border:1.5px solid #e2e2e2;border-radius:12px;padding:12px;background:#fff;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px;font-size:13px}.start-card:hover{border-color:#111}.start-lay{margin-top:8px;max-height:520px;overflow:auto}.start-refs{max-height:300px;grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
+#dzInsp .lg-acc-h,#dtpPanel .lg-acc-h,.cov-form .lg-acc-h{padding:8px 10px}#dzInsp .lg-acc-b,#dtpPanel .lg-acc-b,.cov-form .lg-acc-b{padding:8px 10px}
 
 </style>
 </head>
@@ -7151,6 +7153,7 @@ function dzCompose(p, r) {
       <div class="field"><label>Direção de foto</label><input value="${esc(P.brief)}" readonly></div></div>
     <div class="row-gap" style="margin-top:10px"><canvas id="dzPrev" width="240" height="300" class="dz-prev"></canvas><div><div class="okr-label">PALETA (ajustável)</div><div class="row-gap">${[['bg', 'Fundo'], ['fg', 'Texto'], ['accent', 'Destaque'], ['muted', 'Apoio']].map(([k, l]) => `<label class="pal"><input type="color" value="${esc((c.tk || D)[k])}" onchange="dzPal('${k}',this.value)"><span>${l}</span></label>`).join('')}</div></div></div>
     <div class="modal-actions"><button class="btn orange" onclick="dzGenerate()">Gerar peças e abrir o editor</button></div></div>`;
+  r.insertAdjacentHTML('beforeend', startersHTML(p)); startInit();
   dzDrawPrev(); r.querySelectorAll('.dz-res canvas').forEach(cv => dzDrawComp(cv, c.results[+cv.dataset.i]));
 }
 const tog = (arr, k) => { const i = arr.indexOf(k); if (i < 0) arr.push(k); else arr.splice(i, 1); };
@@ -7384,14 +7387,14 @@ function dzInspector() {
     ${rg('size', 'Tamanho', 16, 320, 1)}${rg('lh', 'Entrelinha', 0.8, 2, 0.05)}${rg('ls', 'Espaçamento', -4, 24, 0.5)}
     <div class="row-gap"><button class="btn sm ${L.align === 'left' ? 'dark' : ''}" onclick="dzProp('align','left');dzInspector()">⟸</button><button class="btn sm ${L.align === 'center' ? 'dark' : ''}" onclick="dzProp('align','center');dzInspector()">☰</button><button class="btn sm ${L.align === 'right' ? 'dark' : ''}" onclick="dzProp('align','right');dzInspector()">⟹</button><label class="ins inl"><input type="checkbox" ${L.upper ? 'checked' : ''} onchange="dzProp('upper',this.checked);dzInspector()"> CAIXA ALTA</label></div>
     <h4>Destaque das palavras</h4><label class="ins">Estilo<select onchange="dzProp('emMode',this.value)">${[['color', 'Cor'], ['bg', 'Marca-texto'], ['bold', 'Negrito'], ['scale', 'Maior'], ['underline', 'Sublinhado']].map(([v, l]) => `<option value="${v}" ${v === L.emMode ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-    <div class="ins-row">${col('emColor', 'Cor')}${col('emBg', 'Fundo')}${col('emText', 'Texto')}</div>${rg('emScale', 'Escala (modo maior)', 1, 2, 0.05)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
-  else if (L.type === 'rect') el.innerHTML = `<h3>Forma <small class="muted">${esc(L.role)}</small></h3><div class="ins-row">${col('fill', 'Cor')}${col('stroke', 'Borda')}</div>${rg('radius', 'Cantos', 0, 400, 1)}${rg('strokeW', 'Espessura da borda', 0, 30, 1)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
-  else if (L.type === 'path') el.innerHTML = `<h3>Símbolo <small class="muted">${esc(L.role)}</small></h3><div class="ins-row">${col('fill', 'Cor')}${col('stroke', 'Contorno')}</div>${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
+    <div class="ins-row">${col('emColor', 'Cor')}${col('emBg', 'Fundo')}${col('emText', 'Texto')}</div>${rg('emScale', 'Escala (modo maior)', 1, 2, 0.05)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
+  else if (L.type === 'rect') el.innerHTML = `<h3>Forma <small class="muted">${esc(L.role)}</small></h3><div class="ins-row">${col('fill', 'Cor')}${col('stroke', 'Borda')}</div>${rg('radius', 'Cantos', 0, 400, 1)}${rg('strokeW', 'Espessura da borda', 0, 30, 1)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
+  else if (L.type === 'path') el.innerHTML = `<h3>Símbolo <small class="muted">${esc(L.role)}</small></h3><div class="ins-row">${col('fill', 'Cor')}${col('stroke', 'Contorno')}</div>${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
   else if (L.type === 'video') el.innerHTML = dzVideoInspector(L, geo, acts);
-  else if (L.role === 'logo') el.innerHTML = `<h3>Logo</h3><small class="muted block">Arraste e use as alças para redimensionar. Mantenha a proporção.</small>${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
+  else if (L.role === 'logo') el.innerHTML = `<h3>Logo</h3><small class="muted block">Arraste e use as alças para redimensionar. Mantenha a proporção.</small>${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
   else el.innerHTML = `<h3>Foto</h3><button class="btn sm dark" onclick="dzPickPhoto()">${L.imgId ? 'Trocar foto' : 'Enviar foto'}</button> <button class="btn sm" onclick="dzGenPhoto()" title="${imageReady() ? 'Gerar com IA' : 'Configure OPENAI_API_KEY no servidor'}">✦ Gerar com IA</button> ${L.imgId ? '<button class="btn sm" onclick="dzProp(\'imgId\',\'\')">Remover</button>' : ''}
     <label class="ins">Tratamento (${PHOTO_STYLES.length} estilos)<select onchange="dzPhotoStyle(this.value)"><option value="">Sem tratamento</option>${PHOTO_STYLES.map(x => `<option value="${x.id}" ${L.filter === x.filter && L.ovColor === x.ovColor ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>
-    <small class="muted block">${esc(L.brief || '')}</small>${rg('radius', 'Cantos', 0, 400, 1)}${rg('fx', 'Enquadrar na horizontal', 0, 1, 0.01)}${rg('fy', 'Enquadrar na vertical', 0, 1, 0.01)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
+    <small class="muted block">${esc(L.brief || '')}</small>${rg('radius', 'Cantos', 0, 400, 1)}${rg('fx', 'Enquadrar na horizontal', 0, 1, 0.01)}${rg('fy', 'Enquadrar na vertical', 0, 1, 0.01)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
 }
 function dzModeFmt() { dz.mode = dz.mode === 'fmt' ? 'select' : 'fmt'; renderDesign(); toast(dz.mode === 'fmt' ? 'Clique numa palavra para formatar só ela. Shift+clique estende. Para letras, selecione no campo de texto.' : 'Modo de seleção.'); }
 const hexOr = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v || '')) ? v : d;
@@ -7527,6 +7530,7 @@ function renderVariations(p, r) {
       <label class="ins">Composições do cruzamento <b>${v.crossN}</b><input type="range" min="0" max="6" value="${v.crossN}" oninput="dz.vf.crossN=+this.value;this.previousElementSibling.textContent=this.value;vfCount()"></label></div></div></div>
   <div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>4. Gerar</h3><p class="muted" id="vfInfo" style="font-size:11px;margin:0">${H || '1'} headline(s) × ${S || '1'} apoio(s) × ${C || '1'} CTA(s) × ${nStyles} estilo(s)${v.mode === 'build' ? ' × ' + nLay + ' layout(s)' : ''} × 2 destaques = ${fmtNum(combos)} combinações possíveis</p></div>
     <div class="row-gap"><label class="ins inl">Quantas <b>${v.n}</b><input type="range" min="6" max="100" value="${v.n}" oninput="dz.vf.n=+this.value;this.previousElementSibling.textContent=this.value"></label><button class="btn orange" onclick="vfGenerate()">⚡ Gerar variações</button></div></div></div><input type="file" id="vfFile" accept="image/*" hidden>`;
+  r.insertAdjacentHTML('beforeend', startersHTML(p)); startInit();
   vfDrawBase(base);
 }
 async function vfDrawBase(base) { const cv = $('vfBase'); if (!cv || !base) return; await ensureSetResources(base.set); if (cv.isConnected) renderSlide(cv.getContext('2d'), base.slide, base.set.format.w, base.set.format.h, cv.width / base.set.format.w); }
@@ -8524,6 +8528,57 @@ async function covConcepts() {
   cov.busy = ''; covRender($('editoraRoot'), curProject());
 }
 function covApplyConcept(i) { const k = cov.concepts[i], c = covC(); if (!k) return; Object.assign(c, {layout: k.layout, pal: k.pal, head: k.head, body: k.body}); persist(); covRender($('editoraRoot'), curProject()); toast('Conceito aplicado. Suba a imagem sugerida na foto de fundo.'); }
+
+</script>
+<script>
+/* ===== Menus recolhíveis (acordeão) nos painéis de atributos e bloco "Não comece do zero" ===== */
+const ACC = {}, ACC_ON = {};
+const accOpen = (k, id, def) => { ACC[k] = ACC[k] || {}; if (!(id in ACC[k])) ACC[k][id] = !!def; return ACC[k][id]; };
+function accSec(k, id, title, sum, body, def) {
+  return `<section class="lg-acc ${accOpen(k, id, def) ? 'open' : ''}" id="acc-${k}-${id}"><button class="lg-acc-h" onclick="accTog('${k}','${id}')"><span>${title}</span><small>${sum || ''}</small><i>▸</i></button><div class="lg-acc-b">${body}</div></section>`;
+}
+function accTog(k, id) { ACC[k][id] = !ACC[k][id]; const el = $('acc-' + k + '-' + id); if (el) el.classList.toggle('open', ACC[k][id]); if (ACC[k][id] && ACC_ON[k + '-' + id]) ACC_ON[k + '-' + id](); }
+function accAll(k, on) { document.querySelectorAll(`[id^="acc-${k}-"]`).forEach(el => { const id = el.id.slice(('acc-' + k + '-').length); ACC[k][id] = on; el.classList.toggle('open', on); if (on && ACC_ON[k + '-' + id]) ACC_ON[k + '-' + id](); }); }
+/* transforma um painel já montado: cada título (sel) vira um bloco recolhível; o que vem antes do 1º título fica sempre visível */
+function accAuto(root, sel, key, opt) {
+  if (!root) return; opt = opt || {}; const nodes = Array.from(root.childNodes), groups = []; let cur = null; const lead = [];
+  nodes.forEach(n => { if (n.nodeType === 1 && n.matches(sel)) { cur = {title: n.textContent.trim(), nodes: []}; groups.push(cur); } else if (cur) cur.nodes.push(n); else lead.push(n); });
+  if (groups.length < 2) return;
+  root.innerHTML = ''; lead.forEach(n => root.appendChild(n));
+  const bar = document.createElement('div'); bar.className = 'acc-bar'; bar.innerHTML = `<button class="btn sm" onclick="accAll('${key}',true)">Expandir tudo</button><button class="btn sm" onclick="accAll('${key}',false)">Recolher tudo</button>`; root.appendChild(bar);
+  groups.forEach((g, i) => { const sec = document.createElement('section'), id = 'g' + i, open = accOpen(key, id, opt.open ? opt.open.includes(i) : i === 0); sec.className = 'lg-acc' + (open ? ' open' : ''); sec.id = 'acc-' + key + '-' + id;
+    const h = document.createElement('button'); h.className = 'lg-acc-h'; h.setAttribute('onclick', `accTog('${key}','${id}')`); h.innerHTML = `<span>${esc(g.title.slice(0, 48))}</span><small></small><i>▸</i>`; const b = document.createElement('div'); b.className = 'lg-acc-b'; g.nodes.forEach(n => b.appendChild(n)); sec.append(h, b); root.appendChild(sec); });
+}
+/* painéis de atributos: editor de design, Diagramação e capa */
+(function () {
+  const wrap = (name, after) => { const f = window[name]; if (typeof f !== 'function') return; window[name] = function () { const r = f.apply(this, arguments); try { after(); } catch (e) { console.warn(name, e); } return r; }; };
+  wrap('dzInspector', () => { const L = typeof dzLayer === 'function' ? dzLayer() : null; accAuto($('dzInsp'), 'h4', 'dz-' + (L ? L.type + (L.role === 'logo' ? 'L' : '') : 'none')); });
+  wrap('dtpPanel', () => { const it = dui.tab === 'objeto' && typeof dtpSelItem === 'function' ? dtpSelItem() : null; accAuto($('dtpPanel'), '.okr-label', 'dtp-' + dui.tab + (it ? it.k : '')); });
+  wrap('covRender', () => accAuto(document.querySelector('.cov-form'), '.okr-label', 'cov'));
+})();
+
+/* ---------- "Não comece do zero": tudo o que existe para partir de uma base ---------- */
+const start = {group: 'Todos'};
+function startersHTML(p) {
+  const A = (id, t, s, b, d) => accSec('start', id, t, s, b, d), tpl = typeof tplList === 'function' ? tplList() : [], sets = p.design.sets.slice().reverse().slice(0, 8), refs = (inspo().items || []).filter(i => i.imgId).slice(0, 24);
+  const cards = [['Capa de e-book', 'Engenheiro de capa: 8 layouts, capa KDP, Kindle, celular', "edGo('capa')"], ['E-book completo', 'Motor de texto: ideia → estrutura → capítulos', "edGo('texto')"], ['Livro, revista ou folheto', 'Diagramação com grade, colunas e PDF de gráfica', "edGo('diag')"], ['Publicar na Amazon', 'Lombada, capa completa e checklist KDP', "edGo('amazon')"], ['Logo', 'Laboratório do logo: tipografia, símbolos, vitrine', 'dzLogoOpen()'], ['Variações de um anúncio', 'Fábrica: textos × estilos × layouts', 'dzVarOpen()'], ['Kit de marca', 'Cores, fontes e logo do projeto', 'dzBrandOpen()'], ['Referências', 'Sua coleção de inspiração', "go('inspiration')"]];
+  return `<div class="panel" style="margin-top:14px" id="startBox"><div class="section-row"><div><h3>Não comece do zero</h3><p class="muted" style="font-size:12px;margin:0">Modelos, referências e atalhos de criação. Escolha uma base e adapte.</p></div><div class="row-gap"><button class="btn sm" onclick="accAll('start',true)">Expandir tudo</button><button class="btn sm" onclick="accAll('start',false)">Recolher tudo</button></div></div>
+  ${A('atalhos', 'Atalhos de criação', cards.length + ' caminhos', `<div class="start-cards">${cards.map(([t, s, fn]) => `<button class="start-card" onclick="${fn}"><b>${esc(t)}</b><small class="muted">${esc(s)}</small></button>`).join('')}</div>`, true)}
+  ${A('lay', 'Modelos de layout prontos', LAYOUTS.length + ' composições', startLayBody(), false)}
+  ${A('tpl', 'Modelos salvos (★)', tpl.length + ' salvo(s)', tpl.length ? `<div class="tpl-list">${tpl.map(t => `<div class="tpl-row"><div><strong>${esc(t.name)}</strong><small class="muted block">${t.kind === 'deck' ? 'Apresentação' : 'Peça'} · ${t.slides.length} slide(s) · ${t.format.w}×${t.format.h}</small></div><button class="btn sm dark" onclick="dzTemplateUse('${t.id}')">Usar neste projeto</button></div>`).join('')}</div>` : '<p class="muted" style="font-size:12px">Nenhum modelo salvo ainda. No editor, use <b>★ Modelo</b> (ou crie um a partir de uma referência com “Ler layout”) para guardar o estilo de uma peça.</p>', false)}
+  ${A('sets', 'Suas peças e apresentações', p.design.sets.length + ' no projeto', sets.length ? `<div class="tpl-list">${sets.map(s => `<div class="tpl-row"><div><strong>${esc(s.name)}</strong><small class="muted block">${s.slides.length} slide(s) · ${s.format.w}×${s.format.h}</small></div><div class="row-gap"><button class="btn sm" onclick="dzOpen('${s.id}')">Abrir</button><button class="btn sm" onclick="dzVarOpen('${s.id}')">Variar</button></div></div>`).join('')}</div>` : '<p class="muted" style="font-size:12px">Ainda não há peças neste projeto.</p>', false)}
+  ${A('refs', 'Referências da Inspiração', (inspo().items || []).filter(i => i.imgId).length + ' imagem(ns)', refs.length ? `<div class="bank-grid start-refs">${refs.map(i => `<button class="bank-th" title="${esc(i.title)}" onclick="startRef('${esc(i.id)}')"><img data-bank="${esc(i.imgId)}" alt=""></button>`).join('')}</div><small class="muted block" style="margin-top:6px">Clique numa referência para ler o layout com IA e criar uma peça editável.</small>` : '<p class="muted" style="font-size:12px">Nenhuma referência ainda. Suba imagens na página Inspiração.</p><button class="btn sm" onclick="go(\'inspiration\')">Abrir Inspiração</button>', false)}</div>`;
+}
+const startLayList = () => LAYOUTS.filter(l => start.group === 'Todos' || l.group === start.group);
+function startLayBody() { return `<div class="tchips">${['Todos', ...LAYOUT_GROUPS].map(g => `<button class="tchip ${start.group === g ? 'on' : ''}" onclick="startGroup('${g}')">${g}</button>`).join('')}</div><div class="ly-grid start-lay">${startLayList().map(l => `<article class="ly-card" onclick="lyUseOpen('${l.id}')"><canvas data-lay="${l.id}" width="200" height="250"></canvas><strong>${esc(l.name)}</strong></article>`).join('')}</div>`; }
+function startGroup(g) { start.group = g; const b = document.querySelector('#acc-start-lay .lg-acc-b'); if (b) { b.innerHTML = startLayBody(); startPaint(); } }
+function startPaint() { const box = $('startBox'), p = dzP(); if (box && p && ACC.start && ACC.start.lay && typeof lyPaint === 'function') { if (typeof lyState !== 'undefined' && !lyState.style) { const s = lyStyles(p); lyState.style = s[0].id; } lyPaint(p, box, startLayList()); } }
+ACC_ON['start-lay'] = startPaint;
+function startInit() { bankFill(); startPaint(); }
+function startRef(id) {
+  showModal('Usar esta referência', `<p class="muted" style="font-size:13px;margin-top:0">A IA lê fontes, cores, tamanhos e blocos e monta uma peça editável no Editor de Design. Use ★ Modelo no editor para guardar na galeria.</p><div class="modal-actions" style="flex-wrap:wrap"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn" onclick="closeModal();go('inspiration')">Ver na Inspiração</button><button class="btn dark" onclick="startRefRead('${esc(id)}')">✦ Ler layout (IA)</button></div>`);
+}
+async function startRefRead(id) { closeModal(); await inspoReadLayout(id); }
 
 </script>
 <script>
