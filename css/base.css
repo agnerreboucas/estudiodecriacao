@@ -16,7 +16,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .logo{width:34px;height:34px;border-radius:50%;background:#111;color:#fff;display:grid;place-items:center;font-weight:850;margin-bottom:18px}
 .rail-nav,.rail-bottom{display:flex;flex-direction:column;gap:5px}
 .rail-bottom{margin-top:auto}
-.rail button{width:38px;height:38px;border:0;background:transparent;border-radius:10px;color:#777;font-size:17px;display:grid;place-items:center}
+.rail button{width:38px;height:38px;border:0;background:transparent;border-radius:10px;color:#111;font-size:17px;display:grid;place-items:center}
 .rail button:hover,.rail button.active{background:#f1f1f1;color:#111}
 .rail button.active{box-shadow:inset 2px 0 #111}
 .main{margin-left:var(--sidebar);min-height:100vh}

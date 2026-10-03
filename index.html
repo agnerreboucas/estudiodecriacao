@@ -14,20 +14,20 @@
 <aside class="rail">
   <div class="logo">A</div>
   <nav class="rail-nav">
-    <button class="active" data-page="home" title="Início">⌂</button>
-    <button data-page="projects" title="Projetos">□</button>
-    <button data-page="matrix" title="Matriz de Criação">✦</button>
-    <button data-page="design" title="Estúdio de Design">◧</button>
-    <button data-page="videoLab" title="Video Lab">▷</button>
-    <button data-page="campaigns" title="Campanhas">◉</button>
-    <button data-page="approval" title="Aprovação">✓</button>
-    <button data-page="publishingHub" title="Publicação">↗</button>
-    <button data-page="analyticsHub" title="Performance">⌁</button>
-    <button data-page="library" title="Biblioteca">◈</button>
-    <button data-page="brand" title="Brand Brain">◇</button>
+    <button class="active" data-page="home" title="Início"><span data-ico="home"></span></button>
+    <button data-page="projects" title="Projetos"><span data-ico="folder"></span></button>
+    <button data-page="matrix" title="Matriz de Criação"><span data-ico="sparkles"></span></button>
+    <button data-page="design" title="Estúdio de Design"><span data-ico="palette"></span></button>
+    <button data-page="videoLab" title="Video Lab"><span data-ico="video"></span></button>
+    <button data-page="campaigns" title="Campanhas"><span data-ico="megaphone"></span></button>
+    <button data-page="approval" title="Aprovação"><span data-ico="check"></span></button>
+    <button data-page="publishingHub" title="Publicação"><span data-ico="send"></span></button>
+    <button data-page="analyticsHub" title="Performance"><span data-ico="chart"></span></button>
+    <button data-page="library" title="Biblioteca"><span data-ico="library"></span></button>
+    <button data-page="brand" title="Brand Brain"><span data-ico="brain"></span></button>
   </nav>
   <div class="rail-bottom">
-    <button data-page="settings" title="Configurações">⚙</button>
+    <button data-page="settings" title="Configurações"><span data-ico="settings"></span></button>
   </div>
 </aside>
 
@@ -47,7 +47,7 @@
       <textarea id="prompt" placeholder="Peça ao Ampliação Studio para criar uma campanha, pesquisar referências ou desenvolver uma peça..."></textarea>
       <div class="composer-bottom">
         <div class="composer-tools">
-          <button class="icon" onclick="go('brand')" title="Ver Brand Brain do projeto">▣</button>
+          <button class="icon" onclick="go('brand')" title="Ver Brand Brain do projeto"><span data-ico="brain" data-ico-size="18"></span></button>
         </div>
         <button class="send" onclick="generate()" title="Enviar briefing">↑</button>
       </div>
@@ -136,6 +136,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="js/util.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/store.js"></script>
 <script src="js/integrations.js"></script>
 <script src="js/core.js"></script>

@@ -113,3 +113,9 @@
 
 .ly-bar{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:12px}.ly-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.ly-search{padding:8px 12px;border:1px solid var(--line);border-radius:10px;min-width:320px;font:inherit}
 .ly-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}.ly-card{border:1px solid var(--line);border-radius:14px;padding:10px;background:#fff;cursor:pointer;transition:box-shadow .15s,transform .15s}.ly-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.1);transform:translateY(-2px)}.ly-card canvas{width:100%;height:auto;border-radius:8px;border:1px solid #eee;margin-bottom:8px;background:#fafafa}.ly-card strong{font-size:13px}
+
+/* ícones padronizados em preto (SVG embutido) */
+.rail button{color:#111!important}.rail button .ico{width:20px;height:20px;stroke:#111;display:block}.rail button span{display:grid;place-items:center;pointer-events:none}
+.rail button.active{background:#efefef}.rail button.active .ico{stroke-width:2.1}
+.int-ico{color:#111;display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:#f3f3f3}.int-ico .ico{stroke:#111}
+.composer-tools .icon .ico{stroke:#111}
