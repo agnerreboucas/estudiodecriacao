@@ -11,6 +11,13 @@ return [
     'ANTHROPIC_MODEL'   => 'claude-sonnet-5-5',
     'AI_CALLS_PER_HOUR' => 60,
 
+    /* Geração de imagem (OpenAI). Chave em https://platform.openai.com/api-keys — confira nomes de modelo e preços na documentação da OpenAI */
+    'OPENAI_API_KEY'       => '',
+    'OPENAI_IMAGE_MODEL'   => 'gpt-image-1',
+    'OPENAI_IMAGE_QUALITY' => 'medium',   // low = mais barato, high = mais caro
+    'IMAGE_CALLS_PER_HOUR' => 20,
+    'IMAGE_CALLS_PER_DAY'  => 80,         // trava de custo
+
     /* Webhook de saída (n8n, Make, Zapier) */
     'WEBHOOK_URL'    => '',
     'WEBHOOK_SECRET' => '',

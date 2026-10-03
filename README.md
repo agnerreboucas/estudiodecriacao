@@ -70,4 +70,5 @@ Formulários e landing pages exportadas enviam `POST` JSON para `https://SEUSITE
 - Sincronização é "último a gravar, com checagem de versão": dois dispositivos editando ao mesmo tempo pedem confirmação, sem merge automático.
 - Assets são registrados por link (sem upload ainda).
 - O Estúdio de Design ainda não gera imagem: as áreas de foto são espaços com a direção de arte (você envia a foto, e o tratamento é aplicado). A geração por IA depende de um provedor de imagem.
+- **Imagens (OpenAI):** com `OPENAI_API_KEY` em `api/config.php`, o editor ganha "✦ Gerar com IA" nas áreas de foto; se já houver uma foto (ex.: do produto), ela vai como referência (endpoint de edição) para preservar o item. Há limite por hora/dia (`IMAGE_CALLS_PER_HOUR/DAY`) como trava de custo. Modelo e qualidade configuráveis; confira nomes e preços na documentação da OpenAI. Testado só com um servidor OpenAI simulado, não com a conta real.
 - O Google Meu Negócio exige chave do Google Places (a busca é paga acima da cota gratuita). Instagram e anúncios de terceiros não têm leitura automática permitida.

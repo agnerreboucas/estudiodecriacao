@@ -705,6 +705,14 @@ const needsLogin = () => API.available && API.status.auth.required && !API.statu
 const canUseApi = () => API.available && !needsLogin();
 const aiReady = () => canUseApi() && !!(API.status.ai && API.status.ai.configured);
 
+const imageReady = () => canUseApi() && !!(API.status.image && API.status.image.configured);
+const blobToDataURL = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(b); });
+/* Gera imagem pelo servidor (OpenAI). refs = data URLs de fotos de referência (ex.: foto do produto). Devolve Blob PNG. */
+async function generateImage({prompt, size = 'square', quality = 'medium', refs = []}) {
+  const r = await api('image.php', {method: 'POST', body: {prompt, size, quality, refs}});
+  return (await fetch(r.image)).blob();
+}
+
 /* ---- login ---- */
 function showLogin() {
   showModal('Entrar no Studio', `<p class="muted" style="margin-top:0;font-size:12px">Informe a senha configurada em <span class="mono">api/config.php</span> para liberar sincronização e integrações.</p>
@@ -799,6 +807,7 @@ function integrationsHTML() {
     <div class="card"><div class="int-ico">⟲</div><h3>Sincronização</h3><p>Salva o workspace no servidor para abrir em outros dispositivos.</p>${ok(s.sync.enabled, 'Ativa', 'Desativada')}${s.sync.enabled ? `<button class="btn sm" onclick="syncNow(true)">Sincronizar agora</button>` : ''}</div>
     <div class="card"><div class="int-ico">⇢</div><h3>Webhook de saída</h3><p>Envia eventos (aprovação, publicação) para n8n, Make ou Zapier.</p>${ok(s.webhook.configured, 'Configurado', 'Falta WEBHOOK_URL')}${s.webhook.configured ? `<button class="btn sm" onclick="testWebhook()">Enviar teste</button>` : ''}</div>
     <div class="card"><div class="int-ico">⇠</div><h3>Captura de leads</h3><p>Endpoint para formulários, landing pages e webhook do WhatsApp Cloud.</p>${ok(s.leads.configured, 'Ativo', 'Falta LEADS_TOKEN')}${s.leads.configured ? `<small class="mono break">${esc(leadUrl)}&amp;token=SEU_TOKEN</small>` : ''}</div>
+    <div class="card"><div class="int-ico">✦</div><h3>Imagens · OpenAI</h3><p>Gera fotos dentro do editor e das variações. Aceita foto do produto como referência.</p>${ok(s.image && s.image.configured, 'Configurado' + (s.image && s.image.model ? ' · ' + esc(s.image.model) : ''), 'Falta OPENAI_API_KEY')}</div>
     <div class="card"><div class="int-ico">⌖</div><h3>Google Meu Negócio · Places</h3><p>Radar: endereço, telefone, nota, avaliações e horário dos concorrentes.</p>${ok(s.places && s.places.configured, 'Configurado', 'Falta GOOGLE_PLACES_API_KEY')}</div>
     <div class="card"><div class="int-ico">◈</div><h3>Meta Ads · métricas</h3><p>Importa gasto, cliques e leads para a aba Performance.</p>${ok(s.meta.configured, 'Configurado', 'Falta META_ACCESS_TOKEN')}<small class="muted">Código escrito conforme a documentação da Graph API; ainda não validado com conta real.</small></div>
     <div class="card muted-card"><div class="int-ico">○</div><h3>Instagram · Google Analytics · publicação direta</h3><p>Exigem autorização OAuth por conta. Planejado para a próxima fase; hoje a publicação é preparada aqui e disparada via webhook.</p><span class="int-state">Planejado</span></div>
@@ -2533,7 +2542,7 @@ function dzInspector() {
     <h4>Destaque das palavras</h4><label class="ins">Estilo<select onchange="dzProp('emMode',this.value)">${[['color', 'Cor'], ['bg', 'Marca-texto'], ['bold', 'Negrito'], ['scale', 'Maior'], ['underline', 'Sublinhado']].map(([v, l]) => `<option value="${v}" ${v === L.emMode ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     <div class="ins-row">${col('emColor', 'Cor')}${col('emBg', 'Fundo')}${col('emText', 'Texto')}</div>${rg('emScale', 'Escala (modo maior)', 1, 2, 0.05)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
   else if (L.type === 'rect') el.innerHTML = `<h3>Forma <small class="muted">${esc(L.role)}</small></h3><div class="ins-row">${col('fill', 'Cor')}${col('stroke', 'Borda')}</div>${rg('radius', 'Cantos', 0, 400, 1)}${rg('strokeW', 'Espessura da borda', 0, 30, 1)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
-  else el.innerHTML = `<h3>Foto</h3><button class="btn sm dark" onclick="dzPickPhoto()">${L.imgId ? 'Trocar foto' : 'Enviar foto'}</button> ${L.imgId ? '<button class="btn sm" onclick="dzProp(\'imgId\',\'\')">Remover</button>' : ''}
+  else el.innerHTML = `<h3>Foto</h3><button class="btn sm dark" onclick="dzPickPhoto()">${L.imgId ? 'Trocar foto' : 'Enviar foto'}</button> <button class="btn sm" onclick="dzGenPhoto()" title="${imageReady() ? 'Gerar com IA' : 'Configure OPENAI_API_KEY no servidor'}">✦ Gerar com IA</button> ${L.imgId ? '<button class="btn sm" onclick="dzProp(\'imgId\',\'\')">Remover</button>' : ''}
     <label class="ins">Tratamento (${PHOTO_STYLES.length} estilos)<select onchange="dzPhotoStyle(this.value)"><option value="">Sem tratamento</option>${PHOTO_STYLES.map(x => `<option value="${x.id}" ${L.filter === x.filter && L.ovColor === x.ovColor ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>
     <small class="muted block">${esc(L.brief || '')}</small>${rg('radius', 'Cantos', 0, 400, 1)}${rg('fx', 'Enquadrar na horizontal', 0, 1, 0.01)}${rg('fy', 'Enquadrar na vertical', 0, 1, 0.01)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}${geo}${acts}`;
 }
@@ -2541,6 +2550,29 @@ async function dzFont(f) { await ensureFont(f); dzProp('family', f); }
 function dzEmSel() { const t = $('dzTxt'), L = dzLayer(); if (!t || t.selectionStart === t.selectionEnd) { toast('Selecione palavras no texto.'); return; } const a = t.value.slice(0, t.selectionStart), m = t.value.slice(t.selectionStart, t.selectionEnd), z = t.value.slice(t.selectionEnd); L.content = a + '**' + m.replace(/\*\*/g, '') + '**' + z; t.value = L.content; dzDraw(); dzCommitSoon(); }
 function dzEmClear() { const L = dzLayer(); L.content = L.content.replace(/\*\*/g, ''); dzInspector(); dzDraw(); dzCommitSoon(); }
 function dzPhotoStyle(id) { const L = dzLayer(), x = byId(PHOTO_STYLES, id); Object.assign(L, x ? {filter: x.filter, ovColor: x.ovColor, ovMode: x.ovMode, brief: x.brief} : {filter: '', ovColor: '', ovMode: ''}); dzDraw(); dzCommitSoon(); }
+function dzGenPhoto() {
+  if (!imageReady()) { toast(needsLogin() ? 'Entre no Studio para gerar imagens.' : 'Geração de imagem indisponível: configure OPENAI_API_KEY em api/config.php no servidor.'); return; }
+  const L = dzLayer(), p = dzP(), has = !!L.imgId;
+  const base = [L.brief || 'fotografia profissional de publicidade', p.brand && p.brand.visual ? 'identidade visual: ' + p.brand.visual : '', p.name ? 'marca/negócio: ' + p.name : '', 'sem texto, sem logotipos, sem marcas d’água; espaço limpo para receber título'].filter(Boolean).join('. ');
+  showModal('✦ Gerar foto com IA', `<div class="field"><label>O que a imagem deve mostrar</label><textarea id="gpPrompt" rows="5">${esc(base)}</textarea></div>
+    <div class="ins-row"><label class="ins">Qualidade<select id="gpQ"><option value="low">Rascunho (mais barata)</option><option value="medium" selected>Média</option><option value="high">Alta (mais cara)</option></select></label></div>
+    ${has ? '<label class="ins inl"><input type="checkbox" id="gpRef" checked> Usar a foto atual como referência (preserva o produto/pessoa)</label>' : ''}
+    <small class="muted block">Cada geração consome créditos da sua conta OpenAI (o valor depende da qualidade; veja a tabela de preços deles). O servidor limita imagens por hora e por dia.</small>
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" id="gpGo" onclick="dzGenPhotoRun()">Gerar</button></div>`);
+}
+async function dzGenPhotoRun() {
+  const L = dzLayer(), btn = $('gpGo'), prompt = $('gpPrompt').value.trim(), q = $('gpQ').value, useRef = $('gpRef') && $('gpRef').checked;
+  if (!prompt) { toast('Descreva a imagem.'); return; }
+  btn.disabled = true; btn.textContent = 'Gerando…';
+  try {
+    const refs = []; if (useRef && L.imgId) { const b = await imgGet(L.imgId); if (b) refs.push(await blobToDataURL(b)); }
+    const full = refs.length ? prompt + '. Use a imagem de referência como única fonte da verdade do produto/pessoa: não altere formas, cores, rótulos nem proporções.' : prompt;
+    const ratio = L.w / L.h, size = ratio > 1.2 ? 'landscape' : ratio < 0.83 ? 'portrait' : 'square';
+    const blob = await generateImage({prompt: full, size, quality: q, refs});
+    const bmp = await createImageBitmap(blob), id = uid('img'); await imgPut(id, blob); IMGS.set(id, bmp);
+    L.imgId = id; closeModal(); dzDraw(); dzCommit(); dzInspector(); dzSlidesPanel(); toast('Foto gerada e aplicada.');
+  } catch (e) { btn.disabled = false; btn.textContent = 'Gerar'; toast(e.message); }
+}
 function dzPickPhoto() { const f = $('dzFile'); f.onchange = async () => { const file = f.files[0]; f.value = ''; if (!file) return; let bmp; try { bmp = await createImageBitmap(file); } catch (e) { toast('Não consegui ler essa imagem. Use PNG, JPG ou WebP válidos.'); return; } const id = uid('img'); await imgPut(id, file); IMGS.set(id, bmp); const L = dzLayer(); L.imgId = id; dzDraw(); dzCommit(); dzInspector(); dzSlidesPanel(); }; f.click(); }
 
 /* estilos e exportação */
