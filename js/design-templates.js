@@ -68,8 +68,8 @@ function buildPDF(pages, pw, ph) {
   obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
   obj(2, `<< /Type /Pages /Count ${pages.length} /Kids [${pages.map((_, i) => (3 + 3 * i) + ' 0 R').join(' ')}] >>`);
   pages.forEach((pg, i) => {
-    const po = 3 + 3 * i, co = po + 1, io = po + 2, content = `q ${f(pw)} 0 0 ${f(ph)} 0 0 cm /Im0 Do Q`;
-    obj(po, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${f(pw)} ${f(ph)}] /Resources << /XObject << /Im0 ${io} 0 R >> >> /Contents ${co} 0 R >>`);
+    const po = 3 + 3 * i, co = po + 1, io = po + 2, qw = pg.pw || pw, qh = pg.ph || ph, content = `q ${f(qw)} 0 0 ${f(qh)} 0 0 cm /Im0 Do Q`, tb = pg.tb ? ` /TrimBox [${f(pg.tb.s)} ${f(pg.tb.s)} ${f(pg.tb.s + pg.tb.w)} ${f(pg.tb.s + pg.tb.h)}] /BleedBox [${f(pg.tb.s - pg.tb.bl)} ${f(pg.tb.s - pg.tb.bl)} ${f(pg.tb.s + pg.tb.w + pg.tb.bl)} ${f(pg.tb.s + pg.tb.h + pg.tb.bl)}]` : '';
+    obj(po, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${f(qw)} ${f(qh)}]${tb} /Resources << /XObject << /Im0 ${io} 0 R >> >> /Contents ${co} 0 R >>`);
     obj(co, `<< /Length ${content.length} >>`, content);
     obj(io, `<< /Type /XObject /Subtype /Image /Width ${pg.w} /Height ${pg.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${pg.jpeg.length} >>`, pg.jpeg);
   });

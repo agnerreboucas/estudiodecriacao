@@ -29,7 +29,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -70,6 +70,37 @@ function normalizeMyFonts(x) {
     files: (Array.isArray(f.files) ? f.files : []).filter(a => a && safeId(a.id) && safeId(a.fileId)).slice(0, 40).map(a => ({id: a.id, fileId: a.fileId, name: String(a.name || '').slice(0, 80), weight: Math.min(1000, Math.max(100, Math.round(+a.weight || 400))), italic: !!a.italic, variable: Array.isArray(a.variable) && a.variable.length === 2 ? [Math.max(1, +a.variable[0] || 100), Math.min(1000, +a.variable[1] || 900)] : null}))}))
     .filter(f => f.files.length && !seen.has(f.family) && seen.add(f.family));
 }
+/* Diagramação: valida cada documento (medidas em pt, estilos, matéria, quadros) antes de entrar no estado */
+function normalizeLayouts(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), num = (v, d, lo, hi) => { v = +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; }, hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d;
+  const ALIGN = ['left', 'justify', 'center', 'right'], UNITS = ['mm', 'cm', 'in', 'pt', 'px'], WRAP = ['none', 'around', 'jump'];
+  const style = (s, d) => ({n: str(s && s.n, 40) || d.n, font: str(s && s.font, 60) || d.font, size: num(s && s.size, d.size, 4, 400), lead: num(s && s.lead, d.lead, 4, 500), color: hex(s && s.color, d.color), align: ALIGN.includes(s && s.align) ? s.align : d.align, b: s && s.b ? 1 : 0, i: s && s.i ? 1 : 0, caps: s && s.caps ? 1 : 0, before: num(s && s.before, d.before, 0, 400), after: num(s && s.after, d.after, 0, 400), indent: num(s && s.indent, d.indent, 0, 200), drop: Math.round(num(s && s.drop, 0, 0, 8)), keep: s && s.keep ? 1 : 0});
+  const D = {n: 'Estilo', font: 'Lora', size: 10, lead: 14, color: '#2B2B2B', align: 'left', before: 0, after: 0, indent: 0};
+  return (Array.isArray(x) ? x : []).filter(d => d && safeId(d.id)).slice(0, 100).map(d => {
+    const pg = d.page || {}, m = d.margins || {}, styles = {};
+    const sd = d.styles && typeof d.styles === 'object' ? d.styles : {};
+    Object.keys(sd).filter(k => /^[a-z0-9_-]{1,24}$/i.test(k)).slice(0, 40).forEach(k => { styles[k] = style(sd[k], D); });
+    ['body', 'h1', 'h2', 'h3', 'quote', 'caption'].forEach(k => { if (!styles[k]) styles[k] = style({}, D); });
+    const items = a => (Array.isArray(a) ? a : []).filter(i => i && ['img', 'rect', 'text'].includes(i.k)).slice(0, 80).map(i => ({id: safeId(i.id) ? i.id : uid('fr'), k: i.k, x: num(i.x, 0, -5000, 9000), y: num(i.y, 0, -5000, 9000), w: num(i.w, 50, 2, 9000), h: num(i.h, 50, 2, 9000), wrap: WRAP.includes(i.wrap) ? i.wrap : 'none', off: num(i.off, 6, 0, 200), imgId: safeId(i.imgId) ? i.imgId : '', fill: i.fill ? hex(i.fill, '#CCCCCC') : '', stroke: i.stroke ? hex(i.stroke, '#000000') : '', sw: num(i.sw, 1, 0, 40), op: num(i.op, 1, 0, 1), zoom: num(i.zoom, 1, 0.2, 8), px: num(i.px, 0, -5000, 5000), py: num(i.py, 0, -5000, 5000), text: str(i.text, 6000), st: styles[i.st] ? i.st : 'body', pad: num(i.pad, 4, 0, 100), ar: num(i.ar, 0, 0, 100)}));
+    const story = (Array.isArray(d.story) ? d.story : []).slice(0, 4000).map(s => {
+      if (!s) return null;
+      if (s.k === 'break' || s.k === 'colbreak') return {k: s.k};
+      if (s.k === 'img') return safeId(s.imgId) ? {k: 'img', imgId: s.imgId, ar: num(s.ar, 1.5, 0.05, 20), w: s.w === 'full' ? 'full' : 'col', pct: num(s.pct, 100, 10, 100), al: ['l', 'c', 'r'].includes(s.al) ? s.al : 'l', cap: str(s.cap, 400)} : null;
+      return {k: 'p', st: styles[s.st] ? s.st : 'body', t: str(s.t, 20000)};
+    }).filter(Boolean);
+    const rn = d.run || {};
+    return {
+      id: d.id, name: str(d.name, 120) || 'Documento', created: str(d.created, 40), unit: UNITS.includes(d.unit) ? d.unit : 'mm',
+      page: {w: num(pg.w, 420, 36, 6000), h: num(pg.h, 595, 36, 6000)}, facing: !!d.facing, bleed: num(d.bleed, 8.5, 0, 72),
+      margins: {t: num(m.t, 40, 0, 2000), b: num(m.b, 40, 0, 2000), i: num(m.i, 40, 0, 2000), o: num(m.o, 40, 0, 2000)},
+      cols: Math.round(num(d.cols, 1, 1, 8)), gutter: num(d.gutter, 14, 0, 200), baseline: num(d.baseline, 0, 0, 100), nPages: Math.round(num(d.nPages, 1, 1, 400)), autoflow: d.autoflow !== false, paper: hex(d.paper, '#FFFFFF'),
+      run: {folio: !!rn.folio, pos: ['outer', 'center', 'inner'].includes(rn.pos) ? rn.pos : 'outer', header: str(rn.header, 120), headerR: str(rn.headerR, 120), size: num(rn.size, 8, 4, 40), color: hex(rn.color, '#777777'), font: str(rn.font, 60) || 'Inter'},
+      styles, story,
+      pages: (Array.isArray(d.pages) ? d.pages : []).slice(0, 400).map(p => ({items: items(p && p.items)})).concat([{items: []}]).slice(0, Math.max(1, Math.min(400, (Array.isArray(d.pages) ? d.pages.length : 1) || 1))),
+      guides: {v: (Array.isArray(d.guides && d.guides.v) ? d.guides.v : []).slice(0, 60).map(v => num(v, 0, -5000, 9000)), h: (Array.isArray(d.guides && d.guides.h) ? d.guides.h : []).slice(0, 60).map(v => num(v, 0, -5000, 9000))}
+    };
+  });
+}
 /* Editora: valida cada e-book (ids, textos, tipos de bloco, cores) antes de entrar no estado */
 function normalizeEbooks(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TYPES = ['p', 'h2', 'box', 'cols2', 'list', 'check', 'summary', 'pagebreak'], KINDS = ['case', 'tip', 'warn', 'know', 'care', 'note'], STYPES = ['title', 'toc', 'chapter', 'text'];
@@ -94,7 +125,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
