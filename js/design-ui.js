@@ -13,6 +13,7 @@ function renderDesign() {
   if (dz.view === 'compose') return dzCompose(p, r);
   if (dz.view === 'variations') return renderVariations(p, r);
   if (dz.view === 'brand') return renderBrandKit(p, r);
+  if (dz.view === 'logolab') return renderLogoLab(p, r);
   if (dz.view === 'layouts') return renderLayoutGallery(p, r);
   dzEditorShell(p, r);
 }
@@ -20,7 +21,7 @@ function renderDesign() {
 /* ================= INÍCIO ================= */
 function dzHome(p, r) {
   const {styles, sets} = p.design;
-  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzTemplatesOpen()">★ Modelos salvos</button><button class="btn" onclick="dzLayoutsOpen()">▦ Modelos de layout</button><button class="btn" onclick="dzBrandOpen()">◈ Brand Kit</button><button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn" onclick="dzVarOpen()">⚡ Fábrica de variações</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzTemplatesOpen()">★ Modelos salvos</button><button class="btn" onclick="dzLayoutsOpen()">▦ Modelos de layout</button><button class="btn" onclick="dzBrandOpen()">◈ Brand Kit</button><button class="btn" onclick="dzLogoOpen()">◇ Criar logo</button><button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn" onclick="dzVarOpen()">⚡ Fábrica de variações</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
   <div class="panel"><div class="section-row"><h3>Estilos de campanha salvos</h3><small class="muted">${styles.length} salvo(s)</small></div>
     ${styles.length ? `<div class="dz-styles">${styles.map(s => `<article class="dz-style"><div class="dz-sw">${[s.tk.bg, s.tk.fg, s.tk.accent, s.tk.muted].map(c => `<i style="background:${esc(c)}"></i>`).join('')}</div><strong>${esc(s.name)}</strong><small class="muted block">${esc(s.tk.head.family)} + ${esc(s.tk.body.family)} · ${esc((s.tk.photo || {}).name || 'foto')}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dzNew('${s.id}')">Usar em nova peça</button><button class="btn sm" onclick="dzStyleDel('${s.id}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhum estilo salvo', 'Crie uma peça, refine no editor e use “Salvar como estilo” para reaproveitar em toda a campanha.')}</div>
   <div class="panel" style="margin-top:14px"><div class="section-row"><h3>Peças do projeto</h3><small class="muted">${sets.length} peça(s)</small></div>
