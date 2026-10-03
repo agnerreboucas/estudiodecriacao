@@ -1,7 +1,7 @@
 /* Fábrica de variações: a partir de UM anúncio (ou do zero) gera dezenas de variações combinando
    textos soltos (headlines, apoios, CTAs) × estilos × layouts. O desempenho real volta e reordena as próximas levas. */
 dz.vf = null;
-const VF_DEFAULT = () => ({mode: 'slide', setId: '', slideIdx: 0, fmt: 'square', layouts: ['auto'], h: '', s: '', c: '', keepBase: true, saved: [], aud: [], tone: [], crossN: 3, randomN: 3, n: 30, batchId: '', filter: 'all', imgId: ''});
+const VF_DEFAULT = () => ({mode: 'slide', setId: '', slideIdx: 0, fmt: 'square', layouts: ['auto'].concat(typeof LAYOUTS !== 'undefined' ? LAYOUTS.map(l => 'ly:' + l.id) : []), h: '', s: '', c: '', keepBase: true, saved: [], aud: [], tone: [], crossN: 3, randomN: 3, n: 30, batchId: '', filter: 'all', imgId: ''});
 const lineList = t => [...new Set(String(t || '').split('\n').map(x => x.trim()).filter(Boolean))];
 
 function dzVarOpen(setId) {
