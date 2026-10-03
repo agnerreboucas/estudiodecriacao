@@ -1,5 +1,5 @@
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'projects', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
+const PAGES = ['home', 'projects', 'inspiration', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -9,7 +9,7 @@ function showModal(title, body) {
   $('modalBox').innerHTML = `<div class="modal-head"><h2>${esc(title)}</h2><button class="close" onclick="closeModal()" aria-label="Fechar">×</button></div>${body}`;
   $('modalBack').classList.add('open');
 }
-function closeModal() { $('modalBack').classList.remove('open'); }
+function closeModal() { $('modalBack').classList.remove('open'); $('modalBox').classList.remove('wide'); }
 function askText(title, label, cb) {
   window.__askCb = cb;
   showModal(title, `<div class="field"><label>${esc(label)}</label><textarea id="askInput" rows="3"></textarea></div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="const v=$('askInput').value.trim();if(!v){toast('Escreva uma nota.');return}closeModal();window.__askCb(v)">Confirmar</button></div>`);
@@ -26,7 +26,7 @@ function go(page) {
 function renderPage(page) {
   ({home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
     videoLab: renderVideoLab, campaigns: renderCampaignsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
-    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign}[page] || (() => {}))();
+    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration}[page] || (() => {}))();
 }
 function refreshCurrentView() { renderSyncBadge(); renderHome(); renderPage(ui.page); updateContextUI(); }
 function bootRender() { $('credits').textContent = state.credits; updateContextUI(); renderHome(); renderPage(ui.page); renderSyncBadge(); }

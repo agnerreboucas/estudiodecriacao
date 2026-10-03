@@ -248,6 +248,7 @@ function renderSlide(ctx, slide, W, H, scale) {
 
 /* ---- imagens (IndexedDB 'images') ---- */
 async function imgPut(id, blob) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('images', 'readwrite'); t.objectStore('images').put(blob, id); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+async function imgDel(id) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('images', 'readwrite'); t.objectStore('images').delete(id); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
 async function imgGet(id) { const db = await idb(); return new Promise((res, rej) => { const q = db.transaction('images').objectStore('images').get(id); q.onsuccess = () => res(q.result || null); q.onerror = () => rej(q.error); }); }
 async function loadImage(id) { if (!id || IMGS.has(id)) return; try { const b = await imgGet(id); if (b) IMGS.set(id, await createImageBitmap(b)); } catch (e) { /* sem imagem */ } }
 async function ensureSetResources(set) {

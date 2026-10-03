@@ -44,7 +44,7 @@ function seedState() {
   const cd = newProject('Cartório Descomplicado', 'Conteúdo + geração de demanda', {cover: 'a6', icon: 'CD'});
   const se = newProject('Saber Ensinar', 'Educação criativa', {cover: 'a8', icon: 'SE'});
   return {
-    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [],
+    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], inspo: {items: [], boards: [], cats: []},
     workspace: {name: 'Ampliação Marketing', instruction: 'Criar com clareza estratégica, consistência de marca e foco na jornada de compra.'},
     credits: 30, activeProjectId: mb.id, projects: [mb, cd, se], creatives
   };
@@ -52,6 +52,18 @@ function seedState() {
 
 let state = seedState();
 
+/* Inspiração: valida cada campo (ids, textos, cores, links http/https) para nada perigoso entrar no HTML */
+function normalizeInspo(x) {
+  const out = {items: [], boards: [], cats: []}; if (!x || typeof x !== 'object') return out; const str = (v, n) => String(v == null ? '' : v).slice(0, n), hex = v => /^#[0-9a-f]{6}$/i.test(String(v));
+  const url = u => { try { const q = new URL(String(u || '')); return /^https?:$/.test(q.protocol) ? q.href.slice(0, 500) : ''; } catch (e) { return ''; } };
+  out.cats = (Array.isArray(x.cats) ? x.cats : []).filter(c => c && safeId(c.id)).slice(0, 40).map(c => ({id: c.id, label: str(c.label, 40) || 'Categoria', hint: str(c.hint, 80)}));
+  out.boards = (Array.isArray(x.boards) ? x.boards : []).filter(b => b && safeId(b.id)).slice(0, 100).map(b => ({id: b.id, name: str(b.name, 40) || 'Quadro'}));
+  const bids = new Set(out.boards.map(b => b.id));
+  out.items = (Array.isArray(x.items) ? x.items : []).filter(i => i && safeId(i.id)).slice(0, 5000).map(i => ({id: i.id, kind: ['img', 'link', 'palette'].includes(i.kind) ? i.kind : 'img', cat: safeId(i.cat) ? i.cat : 'posts', title: str(i.title, 80) || 'Referência', note: str(i.note, 600), tags: (Array.isArray(i.tags) ? i.tags : []).map(t => str(t, 24)).filter(Boolean).slice(0, 20),
+    imgId: safeId(i.imgId) ? i.imgId : '', url: url(i.url), imgUrl: url(i.imgUrl), w: Math.min(20000, Math.max(0, +i.w || 0)), h: Math.min(20000, Math.max(0, +i.h || 0)), colors: (Array.isArray(i.colors) ? i.colors : []).filter(hex).slice(0, 8), hues: (Array.isArray(i.hues) ? i.hues : []).map(h => str(h, 10)).slice(0, 4),
+    fav: !!i.fav, boards: (Array.isArray(i.boards) ? i.boards : []).filter(b => bids.has(b)), created: str(i.created, 40)}));
+  return out;
+}
 function normalize(s) {
   const base = seedState();
   if (!s || typeof s !== 'object' || !Array.isArray(s.projects)) return base;
@@ -59,6 +71,7 @@ function normalize(s) {
   s.meta = mergeDefaults(s.meta, base.meta);
   s.workspace = mergeDefaults(s.workspace, base.workspace);
   s.credits = Number.isFinite(+s.credits) ? +s.credits : 30;
+  s.inspo = normalizeInspo(s.inspo);
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
