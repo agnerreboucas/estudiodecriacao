@@ -237,10 +237,7 @@ function publishingHTML(p) {
   return `<div class="two"><div class="panel"><div class="section-row"><h3>Calendário editorial</h3><button class="btn dark sm" onclick="publicationModal()">＋ Preparar</button></div>${list.length ? `<div class="list">${list.map(x => `<div class="list-item"><div><strong>${esc(x.channel)} · ${esc(x.title)}</strong><small>${fmtDate(x.date)} · ${esc(x.status)}</small></div><div class="row-gap">${x.status === 'Agendado' ? `<button class="btn sm" onclick="publicationDone('${x.id}')">Marcar publicado</button>` : ''}${wh ? `<button class="btn sm" onclick="publicationSend('${x.id}')">⇢ Automação</button>` : ''}<button class="btn sm" onclick="publicationDelete('${x.id}')">×</button></div></div>`).join('')}</div>` : emptyState('Nada agendado', 'Só criações aprovadas podem ser preparadas para publicação.')}</div>
   <div class="panel"><h3>Canais</h3>${CHANNELS.slice(0, 4).map(c => `<div class="kv"><span>${c}</span><strong>${wh ? 'Via webhook (n8n/Make)' : 'Manual'}</strong></div>`).join('')}<p class="muted" style="font-size:11px">A publicação direta nas redes exige autorização OAuth (próxima fase). Hoje: prepare aqui e dispare a automação por webhook ou publique manualmente.</p></div></div>`;
 }
-function renderPublishingPage() {
-  const p = curProject(), r = $('publishingRoot'); if (!p) { r.innerHTML = noProject('Publicação'); return; }
-  r.innerHTML = hubHead('Publicação', 'Agendamento e distribuição por canal.', `<button class="btn dark" onclick="publicationModal()">Preparar publicação</button>`) + publishingHTML(p);
-}
+function renderPublishingPage() { renderSocialPage(); }
 
 /* ---- Performance & Learning ---- */
 function metricModal() {
