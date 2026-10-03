@@ -584,11 +584,19 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .lp-list{display:grid;gap:10px}.lp-card{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .lp-types{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.lp-type{display:flex;flex-direction:column;gap:4px;border:1px solid #e3e3e3;border-radius:10px;padding:10px;cursor:pointer}.lp-type:has(input:checked){border-color:#111;background:#fafafa}.lp-type input{position:absolute;opacity:0}.lp-type small.mono{font-size:10.5px}
 .lp-wrap{display:grid;grid-template-columns:420px minmax(0,1fr);gap:16px;align-items:start}.lp-side{max-height:calc(100vh - 220px);overflow:auto;padding-right:6px}.lp-prev{position:sticky;top:12px}
-.lp-frame{border:1px solid #e3e3e3;border-radius:12px;background:#fff;overflow:hidden;margin:0 auto;transition:width .2s}.lp-frame.desktop{width:100%}.lp-frame.mobile{width:390px;max-width:100%}.lp-frame iframe{width:100%;height:calc(100vh - 260px);min-height:480px;border:0;display:block}
+.lp-frame{border:1px solid #e3e3e3;border-radius:12px;background:#fff;overflow:hidden;margin:0 auto;position:relative}.lp-frame iframe{border:0;display:block;background:#fff}
 .lp-it{display:grid;grid-template-columns:1fr;gap:4px;border:1px solid #eee;border-radius:8px;padding:6px;margin:4px 0;position:relative}.lp-it button{position:absolute;right:6px;top:6px}.lp-it input{padding-right:34px}
 @media(max-width:1100px){.lp-wrap{grid-template-columns:1fr}.lp-side{max-height:none}.lp-prev{position:static}.lp-types{grid-template-columns:1fr}}
 .page-head .actions .so-badge{align-self:center;padding:5px 12px;font-size:11px;line-height:1.2;white-space:nowrap}
 .lp-ref{gap:12px;align-items:flex-start}.lp-ref a{color:inherit}
+.lp-group{margin-bottom:12px}.lp-vars{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-top:8px}.lp-var{border:1px solid #e6e6e6;border-radius:12px;padding:10px}.lp-var.win{border-color:#1e8e3e;background:#f3fbf5}
+.lp-stats{display:flex;gap:14px;margin-top:8px}.lp-stats span{display:flex;flex-direction:column}.lp-stats b{font-size:18px}.lp-stats small{font-size:10.5px;color:#888}
+.lp-pk{display:flex;gap:8px;font-size:12.5px;padding:2px 0}
+
+.bx-edit-note{font-size:12px;background:#eef2ff;color:#2b3a8c;border-radius:8px;padding:6px 10px;margin-bottom:8px}.bx-insp{margin-bottom:10px;padding:12px}.bx-insp h4{margin:0 0 8px;font-size:13px}
+.bx-tree{font-size:12.5px;max-height:44vh;overflow:auto;border:1px solid #eee;border-radius:10px;padding:6px}.bx-t-row,.bx-t-w{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:3px 6px;border-radius:6px;cursor:pointer}.bx-t-row:hover,.bx-t-w:hover{background:#f4f4f6}
+.bx-t-sec.on>.bx-t-row,.bx-t-col.on>.bx-t-row,.bx-t-w.on{background:#e4eaff}.bx-t-col{margin-left:12px;border-left:2px solid #eee;padding-left:4px}.bx-t-w{margin-left:10px}.bx-t-act{display:flex;gap:2px}.bx-t-act .btn{padding:0 6px;min-height:22px;font-size:11px}
+.bx-wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.bx-wbtn{display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid #e3e3e3;border-radius:10px;padding:12px 6px;background:#fff;font-size:12px;cursor:pointer}.bx-wbtn span{font-size:20px}.bx-wbtn:hover{border-color:#111}
 
 </style>
 <style>
@@ -684,7 +692,7 @@ textarea,input,select{max-width:100%}
     <button data-page="matrix" title="Matriz de Criação"><span data-ico="sparkles"></span></button>
     <button data-page="editorial" title="Agente Editorial"><span data-ico="target"></span></button>
     <button data-page="carrosseis" title="Carrosséis"><span data-ico="layout"></span></button>
-    <button data-page="landings" title="Landing pages"><span data-ico="globe"></span></button>
+    <button data-page="landings" title="Sites e landing pages"><span data-ico="globe"></span></button>
     <button data-page="design" title="Estúdio de Design"><span data-ico="palette"></span></button>
     <button data-page="biblioteca" title="Biblioteca de imagens"><span data-ico="image"></span></button>
     <button data-page="inspiration" title="Inspiração"><span data-ico="pin"></span></button>
@@ -931,7 +939,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, social: {}, competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -1080,17 +1088,46 @@ function normalizeSocial(x) {
 }
 /* Landing pages: dados do produto, insumos, blocos (tipos fixos, textos limitados), visual e rastreio. Mantém os campos antigos (headline, sub, bullets, cta, whatsapp). */
 const LP_BLOCK_TYPES = ['hero', 'numeros', 'dor', 'solucao', 'beneficios', 'passos', 'conteudo', 'amostra', 'para_quem', 'autoridade', 'prova', 'oferta', 'bonus', 'garantia', 'faq', 'programa', 'palestrantes', 'local', 'ingressos', 'texto', 'cta_final', 'form'];
+/* Produtos do projeto: a fonte dos fatos (benefícios, características, objeções, provas) que alimenta as landing pages e os sites */
+/* Sites: várias páginas com cabeçalho, menu e rodapé compartilhados + BrandScript (StoryBrand). As páginas são landings com siteId. */
+function normalizeSites(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || ''));
+  return (Array.isArray(x) ? x : []).filter(s => s && sid(s.id)).slice(0, 50).map(s => { const b = s.bs || {}, o = (k, n) => str(b[k], n);
+    return {id: s.id, name: str(s.name, 120) || 'Site', tpl: str(s.tpl, 30), productId: sid(s.productId) ? s.productId : '', brief: str(s.brief, 8000), brand: str(s.brand, 80), headerCta: str(s.headerCta, 40), footer: str(s.footer, 400), contact: str(s.contact, 300),
+      bs: {who: o('who', 800), wants: o('wants', 800), external: o('external', 800), internal: o('internal', 800), philosophical: o('philosophical', 800), empathy: o('empathy', 800), authority: o('authority', 1200), step1: o('step1', 400), step2: o('step2', 400), step3: o('step3', 400), agreement: o('agreement', 800), direct: o('direct', 200), transitional: o('transitional', 300), failure: o('failure', 1000), success: o('success', 1000), identity: o('identity', 600)}, created: str(s.created, 40) || new Date().toISOString()}; });
+}
+function normalizeProducts(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), lines = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(t => str(t, n)).filter(Boolean), TY = ['curso', 'ebook', 'servico', 'evento', 'produto', 'cadastro'];
+  return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 200).map(r => ({id: r.id, name: str(r.name, 160) || 'Produto', type: TY.includes(r.type) ? r.type : 'produto', summary: str(r.summary, 2000), price: str(r.price, 80), audience: str(r.audience, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(r.checkout || '') ? r.checkout : '',
+    benefits: lines(r.benefits, 300, 30), features: lines(r.features, 300, 40), objections: lines(r.objections, 300, 20), proofs: lines(r.proofs, 400, 20), images: (Array.isArray(r.images) ? r.images : []).filter(sid).slice(0, 8), created: str(r.created, 40) || new Date().toISOString()}));
+}
+/* Editor visual (estilo Elementor): seções → colunas (grade de 12, com largura por dispositivo) → widgets. Tudo com tipos e limites fixos. */
+const BX_WIDGETS = ['heading', 'text', 'image', 'video', 'button', 'list', 'feature', 'spacer', 'divider', 'form', 'faq', 'quote', 'countdown'];
+function normalizeVis(v) {
+  if (!v || typeof v !== 'object' || !Array.isArray(v.sections)) return null;
+  const str = (x, n) => String(x == null ? '' : x).slice(0, n), sid = x => /^[\w-]{1,60}$/.test(String(x || '')) ? x : uid('bx'), hex = x => /^#[0-9a-f]{6}$/i.test(String(x)) ? String(x) : '', num = (x, lo, hi, d) => { x = +x; return isFinite(x) ? Math.min(hi, Math.max(lo, Math.round(x))) : d; };
+  const bp = (o, f) => { o = o && typeof o === 'object' ? o : {}; const r = {}; ['d', 't', 'l', 'm'].forEach(k => { if (o[k] != null && o[k] !== '') { const y = f(o[k]); if (y != null) r[k] = y; } }); return r; };
+  const hide = o => ({t: !!(o && o.t), l: !!(o && o.l), m: !!(o && o.m)}), al = x => ['left', 'center', 'right'].includes(x) ? x : null;
+  const url = x => (/^https?:\/\/[^\s"'<>]{1,600}$/i.test(String(x || '')) ? String(x) : '');
+  const widget = w => { if (!w || !BX_WIDGETS.includes(w.t)) return null; return {id: sid(w.id), t: w.t, hide: hide(w.hide), al: bp(w.al, al), size: bp(w.size, x => num(x, 10, 120, null)), wpct: bp(w.wpct, x => num(x, 10, 100, null)), h: bp(w.h, x => num(x, 0, 400, null)),
+    text: str(w.text, 4000), title: str(w.title, 300), tag: ['h1', 'h2', 'h3'].includes(w.tag) ? w.tag : 'h2', color: hex(w.color), muted: !!w.muted, imgId: /^[\w-]{1,60}$/.test(w.imgId || '') ? w.imgId : '', src: url(w.src), alt: str(w.alt, 200), rad: num(w.rad, 0, 60, 12),
+    ratio: ['16:9', '9:16', '1:1', '4:5'].includes(w.ratio) ? w.ratio : '16:9', link: ['checkout', 'form', 'whatsapp', 'custom'].includes(w.link) ? w.link : 'checkout', href: /^(https?:\/\/[^\s"'<>]{1,600}|#[\w-]{1,60}|mailto:[^\s"'<>]{1,200}|tel:[+\d]{3,20})$/i.test(w.href || '') ? w.href : '', style: ['solid', 'outline'].includes(w.style) ? w.style : 'solid', full: !!w.full, icon: ['check', 'x', 'dot'].includes(w.icon) ? w.icon : 'check', emoji: str(w.emoji, 4), date: /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/.test(w.date || '') ? w.date : '',
+    items: (Array.isArray(w.items) ? w.items : []).slice(0, 30).map(i => (typeof i === 'string' ? {t: str(i, 400), d: ''} : {t: str(i && i.t, 400), d: str(i && i.d, 1200)}))}; };
+  const sections = v.sections.slice(0, 40).map(s => s && typeof s === 'object' ? ({id: sid(s.id), name: str(s.name, 80), w: s.w === 'full' ? 'full' : 'box', bg: hex(s.bg), alt: !!s.alt, bgImg: /^[\w-]{1,60}$/.test(s.bgImg || '') ? s.bgImg : '', pad: bp(s.pad, x => num(x, 0, 240, null)), padB: bp(s.padB, x => num(x, 0, 240, null)), hide: hide(s.hide), gap: bp(s.gap, x => num(x, 0, 80, null)),
+    cols: (Array.isArray(s.cols) ? s.cols : []).slice(0, 24).map(c => ({id: sid(c && c.id), span: bp(c && c.span, x => num(x, 1, 12, null)), v: ['top', 'center', 'bottom'].includes(c && c.v) ? c.v : 'top', widgets: (Array.isArray(c && c.widgets) ? c.widgets : []).slice(0, 30).map(widget).filter(Boolean)}))}) : null).filter(Boolean);
+  return {sections};
+}
 function normalizeLandings(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TY = ['curso', 'ebook', 'servico', 'evento', 'cadastro', 'generico'];
   return (Array.isArray(x) ? x : []).filter(l => l && typeof l === 'object').slice(0, 200).map(l => {
     const pr = l.product || {}, th = l.theme || {}, tr = l.tracking || {};
     return {id: sid(l.id) ? l.id : uid('lp'), name: str(l.name, 120) || 'Landing page', goal: str(l.goal, 30) || 'Gerar lead', headline: str(l.headline, 300), sub: str(l.sub, 500), bullets: str(l.bullets, 3000), cta: str(l.cta, 80) || 'Enviar', whatsapp: str(l.whatsapp, 20).replace(/\D/g, ''), status: str(l.status, 30) || 'Rascunho',
-      type: TY.includes(l.type) ? l.type : '', product: {nome: str(pr.nome, 160), preco: str(pr.preco, 80), publico: str(pr.publico, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(pr.checkout || '') ? pr.checkout : '', data: str(pr.data, 80), local: str(pr.local, 200)}, input: str(l.input, 60000),
+      type: TY.includes(l.type) ? l.type : '', productId: sid(l.productId) ? l.productId : '', pick: {b: (l.pick && Array.isArray(l.pick.b) ? l.pick.b : []).slice(0, 40).map(n => Math.max(0, Math.round(+n) || 0)), f: (l.pick && Array.isArray(l.pick.f) ? l.pick.f : []).slice(0, 40).map(n => Math.max(0, Math.round(+n) || 0)), all: !l.pick || l.pick.all !== false}, siteId: sid(l.siteId) ? l.siteId : '', siteRole: str(l.siteRole, 20), slug: /^[a-z0-9-]{1,40}$/.test(l.slug || '') ? l.slug : '', navLabel: str(l.navLabel, 40), group: sid(l.group) ? l.group : '', variant: /^[A-Z]$/.test(l.variant || '') ? l.variant : '', angle: str(l.angle, 120), product: {nome: str(pr.nome, 160), preco: str(pr.preco, 80), publico: str(pr.publico, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(pr.checkout || '') ? pr.checkout : '', data: str(pr.data, 80), local: str(pr.local, 200)}, input: str(l.input, 60000),
       theme: {accent: hex(th.accent, '#e4572e'), bg: hex(th.bg, '#ffffff'), fg: hex(th.fg, '#141414'), dark: !!th.dark, head: str(th.head, 60) || 'Poppins', body: str(th.body, 60) || 'Inter'},
       tracking: {metaPixel: /^\d{5,20}$/.test(tr.metaPixel || '') ? tr.metaPixel : '', ga4: /^G-[A-Z0-9]{4,14}$/.test(tr.ga4 || '') ? tr.ga4 : ''}, privacyUrl: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(l.privacyUrl || '') ? l.privacyUrl : '',
       blocks: (Array.isArray(l.blocks) ? l.blocks : []).filter(b => b && LP_BLOCK_TYPES.includes(b.t)).slice(0, 40).map(b => ({id: sid(b.id) ? b.id : uid('bk'), t: b.t, on: b.on !== false, title: str(b.title, 300), text: str(b.text, 3000), kicker: str(b.kicker, 120), cta: str(b.cta, 80), note: str(b.note, 300), name: str(b.name, 160), price: str(b.price, 80), imgId: sid(b.imgId) ? b.imgId : '',
         items: (Array.isArray(b.items) ? b.items : []).slice(0, 30).map(i => ({t: str(i && i.t, 400), d: str(i && i.d, 1200)})), yes: (Array.isArray(b.yes) ? b.yes : []).slice(0, 12).map(t => str(t, 300)), no: (Array.isArray(b.no) ? b.no : []).slice(0, 12).map(t => str(t, 300))})),
-      created: str(l.created, 40) || new Date().toISOString()};
+      vis: normalizeVis(l.vis), created: str(l.created, 40) || new Date().toISOString()};
   });
 }
 function normalizeCarousel(c) {
@@ -1127,7 +1164,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
@@ -16932,6 +16969,10 @@ form{max-width:480px;display:grid;gap:12px;margin-top:18px}.center form{margin-l
 footer{padding:34px 0;border-top:1px solid var(--line);font-size:13px;color:var(--mut)}.bar{display:none;position:fixed;left:0;right:0;bottom:0;padding:10px 14px;background:var(--bg);border-top:1px solid var(--line);z-index:50}.bar .btn{display:block;text-align:center;padding:14px}
 @media(max-width:760px){.hero .g{grid-template-columns:1fr}.bar{display:block}body{padding-bottom:74px}.btn{width:100%;text-align:center}}`;
 }
+function lpFormBox(l, b) {
+  const E = lpE;
+  return `<form id="f" novalidate><input name="name" placeholder="Seu nome" required autocomplete="name"><input name="phone" placeholder="WhatsApp com DDD" required autocomplete="tel" inputmode="tel"><input name="email" type="email" placeholder="E-mail (opcional)" autocomplete="email"><input class="hp" name="website" tabindex="-1" autocomplete="off"><label class="lg"><input type="checkbox" name="consent" required> <span>Concordo em receber contato sobre ${E(l.product.nome || l.name)}${l.privacyUrl ? `. <a href="${E(l.privacyUrl)}" target="_blank" rel="noopener">Política de privacidade</a>` : ''}.</span></label><button class="btn" type="submit">${E(b.cta || 'Enviar')}</button><div id="ok">Recebemos seus dados. Entraremos em contato.</div></form>${l.whatsapp ? `<a class="wa" href="https://wa.me/${E(l.whatsapp)}?text=${encodeURIComponent('Olá! Vim pela página: ' + (l.name || ''))}" target="_blank" rel="noopener">Prefere falar no WhatsApp?</a>` : ''}`;
+}
 function lpBlockHTML(l, b, ctx) {
   const E = lpE, R = lpRich, cta = lpCta(l, b), btn = (txt, id) => `<a class="btn" href="${E(cta.href)}"${cta.ext ? ' target="_blank" rel="noopener"' : ''}${id ? ' id="' + id + '"' : ''}>${E(txt || LP_TYPE_INFO[l.type || 'generico'].cta)}</a>`;
   const head = (extra) => (b.title ? `<h2>${R(b.title)}</h2>` : '') + (extra || ''), items = (cls, fn) => `<div class="grid ${cls || ''}">${b.items.filter(i => i.t || i.d).map(fn).join('')}</div>`;
@@ -16958,8 +16999,21 @@ function lpBlockHTML(l, b, ctx) {
     case 'ingressos': return `<section id="ingressos"><div class="w center">${head()}${items('', i => `<div class="card"><h3>${R(i.t)}</h3><p>${R(i.d)}</p></div>`)}<p style="margin-top:26px">${btn(b.cta)}</p></div></section>`;
     case 'texto': return `<section><div class="w" style="max-width:780px">${head(`<p class="mut">${R(b.text)}</p>`)}</div></section>`;
     case 'cta_final': return `<section class="alt"><div class="w center" style="max-width:760px">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${btn(b.cta)}</div></section>`;
-    case 'form': return `<section id="form"><div class="w center" style="max-width:640px">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}<form id="f" novalidate><input name="name" placeholder="Seu nome" required autocomplete="name"><input name="phone" placeholder="WhatsApp com DDD" required autocomplete="tel" inputmode="tel"><input name="email" type="email" placeholder="E-mail (opcional)" autocomplete="email"><input class="hp" name="website" tabindex="-1" autocomplete="off"><label class="lg"><input type="checkbox" name="consent" required> <span>Concordo em receber contato sobre ${E(l.product.nome || l.name)}${l.privacyUrl ? `. <a href="${E(l.privacyUrl)}" target="_blank" rel="noopener">Política de privacidade</a>` : ''}.</span></label><button class="btn" type="submit">${E(b.cta || 'Enviar')}</button><div id="ok">Recebemos seus dados. Entraremos em contato.</div></form>${l.whatsapp ? `<a class="wa" href="https://wa.me/${E(l.whatsapp)}?text=${encodeURIComponent('Olá! Vim pela página: ' + (l.name || ''))}" target="_blank" rel="noopener">Prefere falar no WhatsApp?</a>` : ''}</div></section>`;
+    case 'form': return `<section id="form"><div class="w center" style="max-width:640px">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${lpFormBox(l, b)}</div></section>`;
   } return '';
+}
+
+/* ---------- cabeçalho, menu e rodapé de sites ---------- */
+const lpFile = l => (l.slug && l.slug !== 'index' ? l.slug : 'index') + '.html';
+function lpChrome(l, p) {
+  const site = (p.sites || []).find(x => x.id === l.siteId); if (!site) return null; const E = lpE, pages = p.landings.filter(x => x.siteId === site.id), me = l.id;
+  const nav = pages.map(x => `<a href="${E(lpFile(x))}"${x.id === me ? ' class="on"' : ''}>${E(x.navLabel || x.name)}</a>`).join(''), brand = site.brand || p.name;
+  const formPage = pages.find(x => (x.blocks || []).some(b => b.t === 'form' && b.on)), cta = site.headerCta ? (l.blocks.some(b => b.t === 'form' && b.on) ? '#form' : formPage ? lpFile(formPage) + '#form' : (l.product.checkout || '#')) : '';
+  return {site, header: `<header class="sh"><div class="w sh-in"><a class="sh-brand" href="index.html">${E(brand)}</a><input type="checkbox" id="mn" class="mn-i" aria-label="Abrir menu"><label for="mn" class="mn-b" aria-hidden="true"><i></i><i></i><i></i></label><nav class="sh-nav">${nav}${cta ? `<a class="btn sh-cta" href="${E(cta)}">${E(site.headerCta)}</a>` : ''}</nav></div></header>`,
+    footer: `<footer class="sf"><div class="w"><div class="sf-g"><div><b>${E(brand)}</b>${site.footer ? `<p>${lpRich(site.footer)}</p>` : ''}</div><div class="sf-n">${nav}</div>${site.contact ? `<div>${lpRich(site.contact)}</div>` : ''}</div><div class="sf-c">${E(brand)} · ${new Date().getFullYear()}${l.privacyUrl ? ` · <a href="${E(l.privacyUrl)}">Privacidade</a>` : ''}</div></div></footer>`,
+    css: `.sh{position:sticky;top:0;z-index:60;background:var(--bg);border-bottom:1px solid var(--line)}.sh-in{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}.sh-brand{font-weight:800;font-size:19px;color:var(--fg);text-decoration:none;font-family:'${l.theme.head}',sans-serif}.sh-nav{display:flex;align-items:center;gap:22px}.sh-nav a{color:var(--fg);text-decoration:none;font-size:15px;font-weight:600}.sh-nav a.on{color:var(--a)}.sh-nav .btn{padding:10px 18px;font-size:14px;color:#fff;box-shadow:none}.mn-i,.mn-b{display:none}
+.sf{background:var(--soft);border-top:1px solid var(--line);padding:40px 0 18px;font-size:14px}.sf-g{display:grid;grid-template-columns:2fr 1fr 1.4fr;gap:28px}.sf-g p{color:var(--mut);margin:6px 0 0}.sf-n{display:flex;flex-direction:column;gap:6px}.sf-n a{color:var(--fg);text-decoration:none}.sf-c{margin-top:26px;color:var(--mut);font-size:12.5px;border-top:1px solid var(--line);padding-top:14px}
+@media(max-width:760px){.mn-b{display:flex;flex-direction:column;gap:4px;cursor:pointer;padding:8px}.mn-b i{width:22px;height:2px;background:var(--fg);display:block}.sh-nav{display:none;position:absolute;left:0;right:0;top:64px;background:var(--bg);flex-direction:column;align-items:stretch;padding:12px 22px 18px;border-bottom:1px solid var(--line);gap:12px}.mn-i:checked~.sh-nav{display:flex}.sf-g{grid-template-columns:1fr}}`};
 }
 async function lpHTML(l, p, opts) {
   opts = opts || {}; const T0 = l.theme || {}, hx = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? v : d, fn = (v, d) => (String(v || '').replace(/[^\w \-]/g, '').trim().slice(0, 60) || d);
@@ -16967,12 +17021,16 @@ async function lpHTML(l, p, opts) {
   const TR = {metaPixel: /^\d{5,20}$/.test(l.tracking && l.tracking.metaPixel || '') ? l.tracking.metaPixel : '', ga4: /^G-[A-Z0-9]{4,14}$/.test(l.tracking && l.tracking.ga4 || '') ? l.tracking.ga4 : ''};
   const blocks = (l.blocks || []).filter(b => b.on), hero = blocks.find(b => b.t === 'hero'), leadsUrl = state.workspace.leadsUrl || '';
   const sections = []; let hasForm = false, countdown = '';
-  if (l.type === 'evento' && /^\d{4}-\d{2}-\d{2}/.test(l.product.data || '')) countdown = `<div class="cd" id="cd" data-t="${lpE(l.product.data)}"><div><b id="cdd">0</b><small>dias</small></div><div><b id="cdh">0</b><small>horas</small></div><div><b id="cdm">0</b><small>min</small></div></div>`;
-  for (const b of blocks) { const img = b.imgId ? await lpImg(b.imgId) : ''; if (b.t === 'form') hasForm = true; sections.push(lpBlockHTML(l, b, {img, countdown: b.t === 'hero' ? countdown : ''})); }
+  if (l.type === 'evento' && /^\d{4}-\d{2}-\d{2}/.test(l.product.data || '')) countdown = `<div class="cd" id="cd" data-t="${lpE(l.product.data)}"><div><b class="cdd">0</b><small>dias</small></div><div><b class="cdh">0</b><small>horas</small></div><div><b class="cdm">0</b><small>min</small></div></div>`;
+  const chrome = lpChrome(l, p);   let bxCssText = '', bxBtn = '';
+  if (l.vis) { const r = await bxRender(l, opts); sections.push(r.html); bxCssText = r.css; bxBtn = r.firstBtn; }
+  else for (const b of blocks) { const img = b.imgId ? await lpImg(b.imgId) : ''; if (b.t === 'form') hasForm = true; sections.push(lpBlockHTML(l, b, {img, countdown: b.t === 'hero' ? countdown : ''})); }
   const title = (hero && hero.title ? hero.title.replace(/\*\*/g, '') : l.name) + (l.product.nome ? ' · ' + l.product.nome : ''), desc = (hero && hero.text || l.sub || '').replace(/\*\*/g, '').slice(0, 160), cta = hero ? lpCta(l, hero) : null;
   const track = opts.preview ? '' : [TR.metaPixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${TR.metaPixel}');fbq('track','PageView');<\/script>` : '', TR.ga4 ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${TR.ga4}"><\/script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${TR.ga4}');<\/script>` : ''].join('');
-  const js = `<script>(function(){var f=document.getElementById('f');if(f)f.addEventListener('submit',function(e){e.preventDefault();var d={source:${JSON.stringify(l.name || 'landing').replace(/</g, '\\u003c')}};new FormData(f).forEach(function(v,k){d[k]=v});if(d.website)return;if(!d.name||!d.phone||!d.consent){alert('Preencha nome, WhatsApp e aceite o contato.');return}delete d.consent;d.consent='sim';var q=location.search.slice(1).split('&');q.forEach(function(x){var s=x.split('=');if(s[0].indexOf('utm_')===0)d[s[0]]=decodeURIComponent(s[1]||'')});${opts.preview ? "document.getElementById('ok').style.display='block';return;" : `var url=${JSON.stringify(leadsUrl).replace(/</g, '\\u003c')};if(!url){alert('Formulário sem destino configurado.');return}`}fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){if(!r.ok)throw 0;f.querySelectorAll('input,button').forEach(function(x){x.disabled=true});document.getElementById('ok').style.display='block';if(window.fbq)fbq('track','Lead');if(window.gtag)gtag('event','generate_lead')}).catch(function(){alert('Não foi possível enviar. Tente pelo WhatsApp.')})});var c=document.getElementById('cd');if(c){var t=new Date(c.dataset.t).getTime();var u=function(){var s=Math.max(0,Math.floor((t-Date.now())/1000));document.getElementById('cdd').textContent=Math.floor(s/86400);document.getElementById('cdh').textContent=Math.floor(s%86400/3600);document.getElementById('cdm').textContent=Math.floor(s%3600/60)};u();setInterval(u,30000)}${opts.preview ? "document.querySelectorAll('a[href^=\"http\"]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault()})});" : ''}})();<\/script>`;
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${lpE(title)}</title><meta name="description" content="${lpE(desc)}"><meta property="og:title" content="${lpE(title)}"><meta property="og:description" content="${lpE(desc)}"><meta name="theme-color" content="${th.accent}">${lpFontsLink(th)}<style>${lpCss(th)}</style>${track}</head><body>${sections.join('\n')}<footer><div class="w">${lpE(p.name)} · ${new Date().getFullYear()}${l.privacyUrl ? ` · <a href="${lpE(l.privacyUrl)}" style="color:inherit">Privacidade</a>` : ''}</div></footer>${cta && hero ? `<div class="bar"><a class="btn" href="${lpE(cta.href)}"${cta.ext ? ' target="_blank" rel="noopener"' : ''}>${lpE(hero.cta || LP_TYPE_INFO[l.type || 'generico'].cta)}</a></div>` : ''}${js}</body></html>`;
+  const trackUrl = !opts.preview && /leads\.php/.test(leadsUrl) ? leadsUrl.replace(/leads\.php.*$/, 'lp.php') : '', lpId = /^[\w-]{1,60}$/.test(l.id || '') ? l.id : '';
+  const beacon = trackUrl && lpId ? `var T=${JSON.stringify(trackUrl).replace(/</g, '\\u003c')},I=${JSON.stringify(lpId)};function tk(e){try{navigator.sendBeacon(T,new Blob([JSON.stringify({e:e,lp:I})],{type:'text/plain'}))}catch(x){}}tk('view');document.addEventListener('click',function(ev){var a=ev.target.closest&&ev.target.closest('a.btn');if(a)tk('cta')});` : 'function tk(){}';
+  const js = `<script>(function(){${beacon}var f=document.getElementById('f');if(f)f.addEventListener('submit',function(e){e.preventDefault();var d={source:${JSON.stringify(l.name || 'landing').replace(/</g, '\\u003c')}};new FormData(f).forEach(function(v,k){d[k]=v});if(d.website)return;if(!d.name||!d.phone||!d.consent){alert('Preencha nome, WhatsApp e aceite o contato.');return}delete d.consent;d.consent='sim';var q=location.search.slice(1).split('&');q.forEach(function(x){var s=x.split('=');if(s[0].indexOf('utm_')===0)d[s[0]]=decodeURIComponent(s[1]||'')});${opts.preview ? "document.getElementById('ok').style.display='block';return;" : `var url=${JSON.stringify(leadsUrl).replace(/</g, '\\u003c')};if(!url){alert('Formulário sem destino configurado.');return}`}fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){if(!r.ok)throw 0;f.querySelectorAll('input,button').forEach(function(x){x.disabled=true});document.getElementById('ok').style.display='block';tk('lead');if(window.fbq)fbq('track','Lead');if(window.gtag)gtag('event','generate_lead')}).catch(function(){alert('Não foi possível enviar. Tente pelo WhatsApp.')})});document.querySelectorAll('.cd[data-t]').forEach(function(c){var t=new Date(c.dataset.t).getTime();var u=function(){var s=Math.max(0,Math.floor((t-Date.now())/1000));c.querySelector('.cdd').textContent=Math.floor(s/86400);c.querySelector('.cdh').textContent=Math.floor(s%86400/3600);c.querySelector('.cdm').textContent=Math.floor(s%3600/60)};u();setInterval(u,30000)});${opts.preview ? "document.querySelectorAll('a[href]').forEach(function(a){if(!/^#/.test(a.getAttribute('href')))a.addEventListener('click',function(e){e.preventDefault()})});" : ''}})();<\/script>`;
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${lpE(title)}</title><meta name="description" content="${lpE(desc)}"><meta property="og:title" content="${lpE(title)}"><meta property="og:description" content="${lpE(desc)}"><meta name="theme-color" content="${th.accent}">${lpFontsLink(th)}<style>${lpCss(th)}${bxCssText}${chrome ? chrome.css : ''}</style>${track}</head><body>${chrome ? chrome.header : ''}${sections.join('\n')}${chrome ? chrome.footer : `<footer><div class="w">${lpE(p.name)} · ${new Date().getFullYear()}${l.privacyUrl ? ` · <a href="${lpE(l.privacyUrl)}" style="color:inherit">Privacidade</a>` : ''}</div></footer>`}${(() => { const c0 = l.vis ? lpCta(l) : cta; const t0 = l.vis ? bxBtn : hero && hero.cta; return c0 && (hero || bxBtn) ? `<div class="bar"><a class="btn" href="${lpE(c0.href)}"${c0.ext ? ' target="_blank" rel="noopener"' : ''}>${lpE(t0 || LP_TYPE_INFO[l.type || 'generico'].cta)}</a></div>` : ''; })()}${js}${opts.preview && l.vis ? bxPreviewJS(opts) : ''}</body></html>`;
 }
 
 </script>
@@ -16983,48 +17041,133 @@ const lpCur = () => { const p = curProject(); return p && p.landings.find(x => x
 const lpA = esc;
 
 function renderLandings() {
-  const r = $('landingsRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Landing pages'); return; }
+  const r = $('landingsRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Sites e landing pages'); return; }
   if (lpUI.id && !lpCur()) lpUI.id = '';
   if (lpUI.id) return lpEditor(r, p, lpCur());
-  eSrc.sink = null; eSrc.render = null;
-  r.innerHTML = `<div class="page-head"><div><h1>Landing pages</h1><p>Escolha o tipo de produto, passe os insumos do projeto (descrição, site, imagem, áudio, atributos) e a página é montada em blocos editáveis, com HTML responsivo pronto para publicar.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="lpNewModal()">＋ Nova landing page</button></div></div>
-  ${p.landings.length ? `<div class="lp-list">${p.landings.map(l => { const t = LP_TYPE_INFO[l.type]; return `<div class="panel lp-card"><div><span class="so-badge" style="margin:0 6px 0 0">${lpA(t ? t.label : 'Simples')}</span><small class="muted">${lpA(l.status)}</small><h3 style="margin:6px 0 2px">${lpA(l.name)}</h3><small class="muted block">${(l.blocks || []).filter(b => b.on).length ? (l.blocks.filter(b => b.on).length + ' blocos') : 'formato simples (será convertido ao abrir)'}${lpPending(l) ? ` · <span class="so-warn">${lpPending(l)} item(ns) a confirmar</span>` : ''}</small></div><div class="row-gap"><button class="btn sm dark" onclick="lpOpen('${l.id}')">Abrir</button><button class="btn sm" onclick="lpExport('${l.id}')">⬇ HTML</button><button class="btn sm" onclick="lpDelete('${l.id}')">Excluir</button></div></div>`; }).join('')}</div>` : `<div class="panel"><h3>Nenhuma landing page ainda</h3><p class="muted">Comece pelo tipo de produto: cada um já vem com a estrutura de blocos que mais costuma converter.</p><button class="btn dark" onclick="lpNewModal()">＋ Nova landing page</button></div>`}${lpRefsHTML()}`;
+  eSrc.sink = null; eSrc.render = null; const T = lpUI.main || 'paginas';
+  r.innerHTML = `<div class="page-head"><div><h1>Sites e landing pages</h1><p>Escolha o produto do projeto e o tipo de página; a página nasce dos benefícios e características dele, com variações A/B para ver qual converte mais.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="lpNewModal()">＋ Nova página</button></div></div>
+  <div class="edh-tabs">${[['paginas', 'Páginas'], ['sites', 'Sites'], ['produtos', 'Produtos do projeto'], ['refs', 'Referências']].map(([k, t]) => `<button class="edh-tab ${T === k ? 'on' : ''}" onclick="lpUI.main='${k}';renderLandings()">${t}</button>`).join('')}</div><div id="lpMain"></div>`;
+  ({paginas: lpMainPaginas, sites: lpMainSites, produtos: lpMainProdutos, refs: lpMainRefs})[T]($('lpMain'), p);
 }
-function lpNewModal() {
-  showModal('Nova landing page', `<div class="field"><label>Nome interno</label><input id="lpnName" placeholder="Ex.: Curso Finanças sem medo — lançamento"></div><div class="okr-label">TIPO DE PRODUTO</div><div class="lp-types">${Object.entries(LP_TYPE_INFO).map(([k, t], i) => `<label class="lp-type"><input type="radio" name="lpnT" value="${k}" ${i === 0 ? 'checked' : ''}><b>${lpA(t.label)}</b><small class="muted">${lpA(t.why)}</small><small class="mono muted">${t.blocks.map(b => LP_BLOCK[b].label).join(' → ')}</small></label>`).join('')}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="lpCreate()">Criar e abrir</button></div>`);
+const lpMainRefs = b => { b.innerHTML = lpRefsHTML().replace('style="margin-top:14px"', ''); };
+
+/* ---------- lista de páginas, agrupadas por variação (A/B) + medição ---------- */
+async function lpLoadStats(p) {
+  if (!canUseApi() || lpUI.statsAt === p.id + p.landings.length) return; lpUI.statsAt = p.id + p.landings.length;
+  try { const j = await api('lp.php?action=stats&ids=' + encodeURIComponent(p.landings.map(l => l.id).join(','))); lpUI.stats = j.stats || {}; if (lpUI.main === 'paginas' && ui.page === 'landings' && !lpUI.id) renderLandings(); } catch (e) { lpUI.stats = lpUI.stats || {}; }
+}
+function lpGroups(p) { const g = new Map(); p.landings.filter(l => !l.siteId).forEach(l => { const k = l.group || l.id; if (!g.has(k)) g.set(k, []); g.get(k).push(l); }); return [...g.values()].map(a => a.sort((x, y) => (x.variant || 'A').localeCompare(y.variant || 'A'))); }
+/* duas proporções: só declara vencedor com amostra mínima e diferença estatisticamente clara (z ≥ 1,96) */
+function lpAB(a, b) {
+  const MIN = 100; if (a.view < MIN || b.view < MIN) return {ok: false, msg: `sem amostra suficiente (mínimo de ${MIN} visitas por versão)`};
+  const pa = a.lead / a.view, pb = b.lead / b.view, pp = (a.lead + b.lead) / (a.view + b.view), se = Math.sqrt(pp * (1 - pp) * (1 / a.view + 1 / b.view)); if (!se) return {ok: false, msg: 'sem leads suficientes para comparar'};
+  const z = (pa - pb) / se; return Math.abs(z) >= 1.96 ? {ok: true, win: z > 0 ? 'a' : 'b', msg: 'diferença estatisticamente clara (95%)'} : {ok: false, msg: 'diferença ainda dentro do acaso: continue o teste'};
+}
+function lpMainPaginas(b, p) {
+  lpLoadStats(p); const S = lpUI.stats || {}, groups = lpGroups(p), st = l => S[l.id] || {view: 0, cta: 0, lead: 0};
+  b.innerHTML = groups.length ? groups.map(g => { const win = g.length > 1 ? (() => { const best = g.slice().sort((x, y) => (st(y).lead / Math.max(1, st(y).view)) - (st(x).lead / Math.max(1, st(x).view))); const r = lpAB(st(best[0]), st(best[1])); return r.ok ? {id: best[0].id, msg: r.msg} : {id: '', msg: r.msg}; })() : null;
+    return `<div class="panel lp-group"><div class="section-row"><div><h3 style="margin:0">${lpA(g[0].name.replace(/ · [A-Z]$/, ''))}</h3><small class="muted">${lpA((LP_TYPE_INFO[g[0].type] || {label: 'Simples'}).label)}${g[0].productId ? ' · ' + lpA(((p.products || []).find(x => x.id === g[0].productId) || {}).name || '') : ''}</small></div><div class="row-gap"><button class="btn sm" onclick="lpVariantModal('${g[0].id}')">＋ Variação</button></div></div>
+    <div class="lp-vars">${g.map(l => { const s = st(l), cv = s.view ? s.lead / s.view * 100 : 0; return `<div class="lp-var ${win && win.id === l.id ? 'win' : ''}"><div class="row-gap" style="justify-content:space-between"><b>${g.length > 1 || l.variant ? 'Versão ' + (l.variant || 'A') : lpA(l.name)}</b>${win && win.id === l.id ? '<span class="so-badge ok" style="margin:0">vencedora</span>' : `<small class="muted">${lpA(l.status)}</small>`}</div>${l.angle ? `<small class="muted block">Abordagem: ${lpA(l.angle)}</small>` : ''}<small class="muted block">${(l.blocks || []).filter(x => x.on).length ? l.blocks.filter(x => x.on).length + ' blocos' : 'formato simples'}${lpPending(l) ? ` · <span class="so-warn">${lpPending(l)} a confirmar</span>` : ''}</small>
+      <div class="lp-stats"><span><b>${s.view}</b><small>visitas</small></span><span><b>${s.lead}</b><small>leads</small></span><span><b>${s.view ? cv.toFixed(1).replace('.', ',') + '%' : '—'}</b><small>conversão</small></span></div>
+      <div class="row-gap" style="margin-top:6px;flex-wrap:wrap"><button class="btn sm dark" onclick="lpOpen('${l.id}')">Abrir</button><button class="btn sm" onclick="lpExport('${l.id}')">⬇ HTML</button><button class="btn sm" onclick="lpDelete('${l.id}')">×</button></div></div>`; }).join('')}</div>
+    ${win ? `<small class="muted block" style="margin-top:6px">${lpA(win.msg)}${!canUseApi() ? ' · a medição precisa do servidor (Hostinger) e da URL de leads configurada' : ''}</small>` : ''}</div>`; }).join('') : `<div class="panel"><h3>Nenhuma página ainda</h3><p class="muted">Comece pelo produto e pelo tipo de página: cada tipo já vem com a estrutura de blocos que mais costuma converter.</p><button class="btn dark" onclick="lpNewModal()">＋ Nova página</button></div>`;
+}
+function lpVariantModal(id) {
+  const l = curProject().landings.find(x => x.id === id), ang = ['Dor e urgência', 'Benefício principal', 'Prova e resultado', 'Curiosidade', 'Simplicidade e facilidade', 'Garantia e segurança'];
+  showModal('Nova variação (teste A/B)', `<p style="margin-top:0;font-size:13px">Cria uma cópia da página para testar contra a original. Mude <b>uma coisa de cada vez</b> (a abordagem do topo) para o resultado ser claro.</p><div class="field"><label>Abordagem desta variação</label><select id="lvA">${ang.map(a => `<option>${a}</option>`).join('')}</select></div><label class="ins inl"><input type="checkbox" id="lvG" checked> reescrever o topo e o botão com essa abordagem (IA)</label><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="lpVariantMake('${id}')">Criar variação</button></div>`);
+}
+async function lpVariantMake(id) {
+  const p = curProject(), src = p.landings.find(x => x.id === id), ang = $('lvA').value, gen = $('lvG').checked; closeModal();
+  if (!src.group) { src.group = uid('lg'); src.variant = 'A'; src.name = src.name.replace(/ · [A-Z]$/, ''); }
+  const used = p.landings.filter(x => x.group === src.group).map(x => x.variant), v = 'ABCDEFGH'.split('').find(c => !used.includes(c)) || 'Z', c = JSON.parse(JSON.stringify(src));
+  c.id = uid('lp'); c.variant = v; c.angle = ang; c.status = 'Rascunho'; c.name = src.name.replace(/ · [A-Z]$/, '') + ' · ' + v; c.blocks.forEach(b => { b.id = uid('bk'); }); p.landings.push(c); persist();
+  lpUI.id = c.id; lpUI.tab = 'blocos'; renderLandings();
+  if (gen && aiReady()) { lpUI.busy = 'gen'; renderLandings(); try { await lpRewriteTop(c); toast('Variação criada com a abordagem “' + ang + '”.'); } catch (e) { toast(eErr(e)); } lpUI.busy = ''; renderLandings(); } else toast('Variação ' + v + ' criada. Edite o topo para testar a abordagem.');
+}
+async function lpRewriteTop(l) {
+  const h = l.blocks.find(b => b.t === 'hero'); if (!h) return;
+  const j = await motJSON('Você é um redator de resposta direta. Reescreva só o topo de uma landing page com a ABORDAGEM pedida, mantendo os fatos. Nunca invente dados, números, depoimentos ou garantias: use [CONFIRMAR: …] quando faltar. ' + (eBrandTxt() ? '\n' + eBrandTxt().slice(0, 4000) : ''), `ABORDAGEM: ${l.angle}\nPRODUTO: ${l.product.nome || l.name}\n${lpProductFacts(l)}INSUMOS:\n${(l.input || '').slice(0, 6000)}\nTOPO ATUAL: título="${h.title}" subtítulo="${h.text}" botão="${h.cta}"\nJSON: {"kicker":"","title":"até 80 caracteres; **negrito** em 1-2 palavras","text":"até 180","cta":"","note":""}`, 1200);
+  ['kicker', 'title', 'text', 'cta', 'note'].forEach(k => { if (j[k] != null) h[k] = String(j[k]).slice(0, k === 'text' ? 400 : 300); }); l.headline = h.title; l.sub = h.text; persist();
+}
+
+/* ---------- produtos do projeto ---------- */
+function lpMainProdutos(b, p) {
+  b.innerHTML = `<div class="panel"><div class="section-row"><div><h3>Produtos do projeto</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">A fonte dos fatos: benefícios, características, objeções e provas reais. As páginas e os sites são gerados a partir da seleção que você fizer aqui, sem inventar o que não estiver cadastrado.</p></div><button class="btn dark sm" onclick="prodModal('')">＋ Novo produto</button></div>
+  ${(p.products || []).length ? p.products.map(x => `<div class="list-item"><div><strong>${lpA(x.name)}</strong><small>${lpA((LP_TYPE_INFO[x.type] || {label: 'Produto'}).label)} · ${x.benefits.length} benefício(s) · ${x.features.length} característica(s)${x.price ? ' · ' + lpA(x.price) : ''}</small></div><div class="row-gap"><button class="btn sm dark" onclick="lpNewFromProduct('${x.id}')">Criar página</button><button class="btn sm" onclick="prodModal('${x.id}')">Editar</button><button class="btn sm" onclick="prodDel('${x.id}')">×</button></div></div>`).join('') : '<p class="muted" style="margin-top:10px">Nenhum produto ainda. Cadastre o primeiro: nome, para quem é, benefícios e características.</p>'}</div>`;
+}
+function prodModal(id) {
+  const x = id ? curProject().products.find(y => y.id === id) : {name: '', type: 'produto', summary: '', price: '', audience: '', checkout: '', benefits: [], features: [], objections: [], proofs: []}, ta = (k, l, ph) => `<div class="field full"><label>${l} (um por linha)</label><textarea id="pd_${k}" rows="4" placeholder="${lpA(ph || '')}">${lpA((x[k] || []).join('\n'))}</textarea></div>`;
+  showModal(id ? 'Editar produto' : 'Novo produto', `<div class="form-grid"><div class="field"><label>Nome</label><input id="pd_name" value="${lpA(x.name)}"></div><div class="field"><label>Tipo</label><select id="pd_type">${['produto', 'curso', 'ebook', 'servico', 'evento', 'cadastro'].map(t => `<option value="${t}" ${x.type === t ? 'selected' : ''}>${lpA((LP_TYPE_INFO[t] || {label: 'Produto físico / catálogo'}).label)}</option>`).join('')}</select></div>
+    <div class="field full"><label>Descrição</label><textarea id="pd_summary" rows="3">${lpA(x.summary)}</textarea></div><div class="field"><label>Preço e condição</label><input id="pd_price" value="${lpA(x.price)}"></div><div class="field"><label>Link de compra / inscrição</label><input id="pd_checkout" value="${lpA(x.checkout)}" placeholder="https://…"></div><div class="field full"><label>Público</label><input id="pd_audience" value="${lpA(x.audience)}"></div>
+    ${ta('benefits', 'Benefícios (o que a pessoa ganha)', 'Ex.: Entende a parcela antes de assinar')}${ta('features', 'Características (o que o produto é ou tem)', 'Ex.: 6 módulos em vídeo; planilha de comparação')}${ta('objections', 'Objeções comuns', 'Ex.: Não tenho tempo')}${ta('proofs', 'Provas reais (números, depoimentos autorizados, casos)', 'Só o que existe de verdade')}</div>
+  <div class="modal-actions"><button class="btn" onclick="prodSuggest()" ${aiReady() ? '' : 'disabled'} title="Sugere benefícios e características a partir da descrição">✦ Sugerir da descrição</button><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="prodSave('${id}')">Salvar</button></div>`);
   document.getElementById('modalBox').classList.add('wide');
 }
+const prodLines = id => $(id).value.split('\n').map(t => t.trim()).filter(Boolean);
+function prodSave(id) {
+  const p = curProject(), name = $('pd_name').value.trim(); if (!name) { toast('Dê um nome ao produto.'); return; }
+  const o = normalizeProducts([{id: id || uid('pr'), name, type: $('pd_type').value, summary: $('pd_summary').value, price: $('pd_price').value, audience: $('pd_audience').value, checkout: $('pd_checkout').value.trim(), benefits: prodLines('pd_benefits'), features: prodLines('pd_features'), objections: prodLines('pd_objections'), proofs: prodLines('pd_proofs'), images: id ? (p.products.find(y => y.id === id) || {}).images : []}])[0];
+  if (id) p.products[p.products.findIndex(y => y.id === id)] = o; else p.products.push(o); persist(); closeModal(); renderLandings();
+}
+function prodDel(id) { if (!confirm('Excluir este produto? As páginas já criadas continuam.')) return; const p = curProject(); p.products = p.products.filter(x => x.id !== id); persist(); renderLandings(); }
+async function prodSuggest() {
+  const d = $('pd_summary').value.trim(); if (!d) { toast('Escreva a descrição primeiro.'); return; } const btn = event && event.target; if (btn) { btn.disabled = true; btn.textContent = 'Pensando…'; }
+  try { const j = await aiJSON('Você ajuda a organizar fatos de um produto. Com base SÓ na descrição, sugira benefícios (o que a pessoa ganha) e características (o que o produto é/tem). Não invente números, prazos, garantias nem resultados. Se algo for suposição, termine o item com " [CONFIRMAR]". JSON: {"benefits":[""],"features":[""],"objections":[""]}', d);
+    ['benefits', 'features', 'objections'].forEach(k => { const t = $('pd_' + k); const add = (Array.isArray(j[k]) ? j[k] : []).slice(0, 8).map(x => String(x).slice(0, 300)); t.value = [t.value.trim(), ...add].filter(Boolean).join('\n'); }); toast('Sugestões adicionadas. Revise antes de salvar.'); } catch (e) { toast(e.message); }
+  if (btn) { btn.disabled = false; btn.textContent = '✦ Sugerir da descrição'; }
+}
+function lpNewFromProduct(id) { lpNewModal(id); }
+/* fatos do produto selecionado, para o prompt */
+function lpProductFacts(l) {
+  const p = curProject(), x = (p.products || []).find(y => y.id === l.productId); if (!x) return '';
+  const pick = (arr, sel) => (l.pick && l.pick.all !== false) ? arr : arr.filter((_, i) => (sel || []).includes(i));
+  return `PRODUTO DO PROJETO (fatos cadastrados; use SÓ estes):\nBenefícios: ${pick(x.benefits, l.pick && l.pick.b).join(' | ') || '(nenhum)'}\nCaracterísticas: ${pick(x.features, l.pick && l.pick.f).join(' | ') || '(nenhuma)'}\nObjeções: ${x.objections.join(' | ') || '(nenhuma)'}\nProvas reais: ${x.proofs.join(' | ') || '(nenhuma: use [CONFIRMAR])'}\n\n`;
+}
+function lpNewModal(productId) {
+  const p = curProject(), prods = p.products || [], pr = prods.find(x => x.id === productId), def = pr ? (LP_TYPE_INFO[pr.type] ? pr.type : 'generico') : 'curso';
+  showModal('Nova página', `<div class="field"><label>Produto do projeto</label><select id="lpnP" onchange="lpnPick(this.value)"><option value="">— sem produto (preencho depois) —</option>${prods.map(x => `<option value="${x.id}" ${x.id === productId ? 'selected' : ''}>${lpA(x.name)}</option>`).join('')}</select>${prods.length ? '' : '<small class="muted block">Cadastre produtos na aba “Produtos do projeto” para gerar a página a partir dos benefícios e características.</small>'}</div>
+  <div class="field"><label>Nome interno</label><input id="lpnName" value="${lpA(pr ? 'LP — ' + pr.name : '')}" placeholder="Ex.: Curso Finanças — lançamento"></div><div class="okr-label">TIPO DE PÁGINA</div><div class="lp-types">${Object.entries(LP_TYPE_INFO).map(([k, t]) => `<label class="lp-type"><input type="radio" name="lpnT" value="${k}" ${k === def ? 'checked' : ''}><b>${lpA(t.label)}</b><small class="muted">${lpA(t.why)}</small><small class="mono muted">${t.blocks.map(b => LP_BLOCK[b].label).join(' → ')}</small></label>`).join('')}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="lpCreate()">Criar e abrir</button></div>`);
+  document.getElementById('modalBox').classList.add('wide');
+}
+function lpnPick(id) { const x = curProject().products.find(y => y.id === id); if (!x) return; const n = $('lpnName'); if (!n.value.trim() || /^LP — /.test(n.value)) n.value = 'LP — ' + x.name; const t = document.querySelector(`input[name=lpnT][value="${LP_TYPE_INFO[x.type] ? x.type : 'generico'}"]`); if (t) t.checked = true; }
 function lpTheme(p) { try { const tk = lyStyles(p)[0].tk; return {accent: tk.accent, bg: tk.bg, fg: tk.fg, dark: false, head: tk.head.family, body: tk.body.family}; } catch (e) { return {}; } }
 function lpCreate(init) {
   const p = curProject(), t = init && init.type || (document.querySelector('input[name=lpnT]:checked') || {}).value || 'generico', name = init && init.name || ($('lpnName') && $('lpnName').value.trim()) || 'LP — ' + LP_TYPE_INFO[t].label;
-  const l = normalizeLandings([Object.assign({id: uid('lp'), name, type: t, goal: LP_TYPE_INFO[t].goal === 'lead' ? 'Gerar lead' : 'Conteúdo', cta: LP_TYPE_INFO[t].cta, theme: lpTheme(p), blocks: lpStructure(t), whatsapp: '', status: 'Rascunho'}, init || {})])[0];
+  const pid = init && init.productId || ($('lpnP') && $('lpnP').value) || '', pr = pid && (p.products || []).find(x => x.id === pid), prod = pr ? {nome: pr.name, preco: pr.price, publico: pr.audience, checkout: pr.checkout, data: '', local: ''} : undefined;
+  const l = normalizeLandings([Object.assign({id: uid('lp'), name, type: t, productId: pr ? pr.id : '', product: prod, input: pr ? [pr.summary && 'Descrição: ' + pr.summary].filter(Boolean).join('\n') : '', goal: LP_TYPE_INFO[t].goal === 'lead' ? 'Gerar lead' : 'Conteúdo', cta: LP_TYPE_INFO[t].cta, theme: lpTheme(p), blocks: lpStructure(t), whatsapp: '', status: 'Rascunho'}, init || {})])[0];
   p.landings.push(l); persist(); closeModal(); lpUI.id = l.id; lpUI.tab = 'produto'; if (ui.page !== 'landings') go('landings'); else renderLandings(); return l;
 }
 function lpOpen(id) {
   const l = curProject().landings.find(x => x.id === id); if (!l) return;
   if (!l.type) l.type = 'generico'; if (!(l.blocks || []).length) l.blocks = lpSeedBlocks(l);
-  lpUI.id = id; lpUI.tab = 'blocos'; persist(); renderLandings();
+  lpUI.id = id; lpUI.tab = 'blocos'; if (!lpUI.back) lpUI.back = ''; persist(); renderLandings();
 }
 function lpDelete(id) { if (!confirm('Excluir esta landing page?')) return; const p = curProject(); p.landings = p.landings.filter(x => x.id !== id); persist(); renderLandings(); }
 async function lpExport(id) { const p = curProject(), l = p.landings.find(x => x.id === id); if (!l.blocks.length) { lpOpen(id); return; } if (!state.workspace.leadsUrl && l.blocks.some(b => b.t === 'form' && b.on)) toast('Dica: defina a URL de captura de leads em Configurações antes de publicar.'); if (lpPending(l)) toast(`Atenção: ${lpPending(l)} item(ns) ainda marcado(s) como [CONFIRMAR].`); download(slug(l.name) + '.html', await lpHTML(l, p), 'text/html'); l.status = 'Exportada'; persist(); renderLandings(); }
 
 /* ---------- editor ---------- */
 function lpEditor(r, p, l) {
-  const tabs = [['produto', 'Produto e insumos'], ['blocos', 'Blocos'], ['visual', 'Visual'], ['publicar', 'Publicar']];
-  r.innerHTML = `<div class="page-head"><div><button class="btn sm" onclick="lpUI.id='';renderLandings()">← Todas as landing pages</button><h1 style="margin-top:8px">${lpA(l.name)}</h1></div><div class="actions"><span class="so-badge" style="margin:0">${lpA((LP_TYPE_INFO[l.type] || {}).label || '')}</span><button class="btn dark" onclick="lpExport('${l.id}')">⬇ Exportar HTML</button></div></div>
+  const tabs = [['produto', 'Produto e insumos'], ['blocos', 'Blocos'], ['editor', 'Editor visual'], ['visual', 'Estilo'], ['publicar', 'Publicar']];
+  r.innerHTML = `<div class="page-head"><div><button class="btn sm" onclick="lpBack()">${lpUI.back === 'site' ? '← Voltar ao site' : '← Todas as páginas'}</button><h1 style="margin-top:8px">${lpA(l.name)}</h1></div><div class="actions"><span class="so-badge" style="margin:0">${lpA((LP_TYPE_INFO[l.type] || {}).label || '')}</span><button class="btn dark" onclick="lpExport('${l.id}')">⬇ Exportar HTML</button></div></div>
   <div class="edh-tabs">${tabs.map(([k, t]) => `<button class="edh-tab ${lpUI.tab === k ? 'on' : ''}" onclick="lpUI.tab='${k}';renderLandings()">${t}</button>`).join('')}</div>
-  <div class="lp-wrap"><div class="lp-side" id="lpSide"></div><div class="lp-prev"><div class="row-gap" style="margin-bottom:8px"><button class="tchip ${lpUI.device === 'desktop' ? 'on' : ''}" onclick="lpUI.device='desktop';lpDevice()">Computador</button><button class="tchip ${lpUI.device === 'mobile' ? 'on' : ''}" onclick="lpUI.device='mobile';lpDevice()">Celular</button><button class="btn sm" onclick="lpPaint()">↻ Atualizar prévia</button></div><div class="lp-frame ${lpUI.device}" id="lpFrameBox"><iframe id="lpFrame" title="Prévia da landing page"></iframe></div></div></div>`;
-  ({produto: lpTabProduto, blocos: lpTabBlocos, visual: lpTabVisual, publicar: lpTabPublicar})[lpUI.tab]($('lpSide'), l, p); lpPaint();
+  <div class="lp-wrap"><div class="lp-side" id="lpSide"></div><div class="lp-prev"><div class="row-gap" style="margin-bottom:8px;flex-wrap:wrap">${Object.entries(BX_DEV).map(([k, d]) => `<button class="tchip ${lpUI.device === k ? 'on' : ''}" onclick="lpUI.device='${k}';lpDevice();renderLandings()" title="${d[1]}×${d[2]} px">${d[0]}</button>`).join('')}<button class="btn sm" onclick="lpPaint()">↻</button></div><div class="lp-frame" id="lpFrameBox"><iframe id="lpFrame" title="Prévia da landing page"></iframe></div></div></div>`;
+  ({produto: lpTabProduto, blocos: lpTabBlocos, editor: bxTab, visual: lpTabVisual, publicar: lpTabPublicar})[lpUI.tab]($('lpSide'), l, p); lpDevice(); lpPaint();
 }
-function lpDevice() { document.querySelectorAll('.lp-prev .tchip').forEach((b, i) => b.classList.toggle('on', (i === 0) === (lpUI.device === 'desktop'))); const f = $('lpFrameBox'); if (f) f.className = 'lp-frame ' + lpUI.device; }
-async function lpPaint() { const l = lpCur(), f = $('lpFrame'); if (!l || !f) return; try { f.srcdoc = await lpHTML(l, curProject(), {preview: true}); } catch (e) { f.srcdoc = '<p style="font:14px sans-serif;padding:20px">Não consegui montar a prévia: ' + lpA(e.message) + '</p>'; } }
+function lpDevice() {
+  const box = $('lpFrameBox'), f = $('lpFrame'); if (!box || !f) return; const d = BX_DEV[lpUI.device] || BX_DEV.desktop, W = d[1], H = d[2], avail = Math.max(280, (box.parentElement.clientWidth || 800) - 4), sc = Math.min(1, avail / W);
+  box.style.width = Math.round(W * sc) + 'px'; box.style.height = Math.min(Math.round(H * sc), Math.round(window.innerHeight - 250)) + 'px'; f.style.width = W + 'px'; f.style.height = Math.round(Math.min(H, (window.innerHeight - 250) / sc)) + 'px'; f.style.transform = `scale(${sc})`; f.style.transformOrigin = '0 0';
+}
+async function lpPaint() { const l = lpCur(), f = $('lpFrame'); if (!l || !f) return; try { f.srcdoc = await lpHTML(l, curProject(), {preview: true, sel: lpUI.tab === 'editor' ? bxUI.sel : '', scroll: bxUI.scroll}); } catch (e) { f.srcdoc = '<p style="font:14px sans-serif;padding:20px">Não consegui montar a prévia: ' + lpA(e.message) + '</p>'; } }
 const lpPaintSoon = debounce(() => lpPaint(), 450);
 const lpIn = (label, val, oninput, rows, ph) => `<div class="field"><label>${label}</label>${rows ? `<textarea rows="${rows}" oninput="${oninput}" placeholder="${lpA(ph || '')}">${lpA(val)}</textarea>` : `<input value="${lpA(val)}" oninput="${oninput}" placeholder="${lpA(ph || '')}">`}</div>`;
 function lpSet(path, v) { const l = lpCur(), a = path.split('.'); let o = l; for (let i = 0; i < a.length - 1; i++) o = o[a[i]]; o[a[a.length - 1]] = v; persist(); lpPaintSoon(); }
 
 function lpTabProduto(b, l, p) {
   const t = LP_TYPE_INFO[l.type] || LP_TYPE_INFO.generico, ev = l.type === 'evento', ready = aiReady(), agentOK = !!(EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief);
+  const prods = p.products || [], pr = prods.find(x => x.id === l.productId), pk = (arr, key) => arr.map((t, i) => `<label class="lp-pk"><input type="checkbox" ${l.pick.all !== false || l.pick[key].includes(i) ? 'checked' : ''} onchange="lpPick('${key}',${i},this.checked)"> ${lpA(t)}</label>`).join('') || '<small class="muted">nenhum cadastrado</small>';
   b.innerHTML = `${lpIn('Nome interno', l.name, `lpSet('name',this.value)`)}
+  <div class="field"><label>Produto do projeto</label><select onchange="lpUseProduct(this.value)"><option value="">— nenhum —</option>${prods.map(x => `<option value="${x.id}" ${x.id === l.productId ? 'selected' : ''}>${lpA(x.name)}</option>`).join('')}</select>${l.variant ? `<small class="muted block">Versão ${l.variant}${l.angle ? ' · abordagem: ' + lpA(l.angle) : ''} (teste A/B)</small>` : ''}</div>
+  ${pr ? accSec('lp', 'pick', 'Benefícios e características usados', `${pr.benefits.length + pr.features.length} cadastrados`, `<div class="okr-label">BENEFÍCIOS</div>${pk(pr.benefits, 'b')}<div class="okr-label" style="margin-top:8px">CARACTERÍSTICAS</div>${pk(pr.features, 'f')}<small class="muted block" style="margin-top:6px">Desmarque o que não deve entrar nesta página. Dá para editar os fatos na aba “Produtos do projeto”.</small>`, false) : ''}
   <div class="field"><label>Tipo de produto</label><select onchange="lpChangeType(this.value)">${Object.entries(LP_TYPE_INFO).map(([k, x]) => `<option value="${k}" ${l.type === k ? 'selected' : ''}>${lpA(x.label)}</option>`).join('')}</select><small class="muted block">${lpA(t.why)}</small></div>
   ${accSec('lp', 'prod', 'Dados do produto', lpA(l.product.nome || ''), lpIn('Nome do produto', l.product.nome, `lpSet('product.nome',this.value)`) + lpIn('Preço e condição', l.product.preco, `lpSet('product.preco',this.value)`, 0, 'Ex.: 12x de R$ 49,90 ou R$ 497 à vista') + lpIn('Público', l.product.publico, `lpSet('product.publico',this.value)`, 2) + lpIn('Link de compra / inscrição (checkout)', l.product.checkout, `lpSet('product.checkout',this.value)`, 0, 'https://…') + (ev ? lpIn('Data e hora (AAAA-MM-DDTHH:MM)', l.product.data, `lpSet('product.data',this.value)`, 0, '2026-11-20T19:00') + lpIn('Local ou link online', l.product.local, `lpSet('product.local',this.value)`) : '') + lpIn('WhatsApp (só números, com DDI)', l.whatsapp, `lpSet('whatsapp',this.value.replace(/\\D/g,''))`, 0, '5511999999999'), true)}
   <div class="field"><label>Insumos <small class="muted">${l.input.length.toLocaleString('pt-BR')} caracteres</small></label><textarea rows="9" oninput="lpCur().input=this.value;persist()" placeholder="Cole a descrição do produto, a ementa, o roteiro do evento, o que o cliente recebe, garantia, depoimentos reais… Quanto mais concreto, menos [CONFIRMAR] na página.">${lpA(l.input)}</textarea></div>
@@ -17041,26 +17184,33 @@ function lpChangeType(t) {
 }
 function lpPrompt(l) {
   const t = LP_TYPE_INFO[l.type], P = l.product, blocks = l.blocks.filter(b => b.on);
-  return `${lpRefPrompt(l)}PRODUTO: ${t.label}\nNome: ${P.nome || '(não informado)'}\nPreço/condição: ${P.preco || '(não informado)'}\nPúblico: ${P.publico || '(não informado)'}\nLink de compra: ${P.checkout ? 'informado' : 'não informado'}${l.type === 'evento' ? `\nData/hora: ${P.data || '(não informada)'}\nLocal: ${P.local || '(não informado)'}` : ''}\nWhatsApp de contato: ${l.whatsapp ? 'sim' : 'não'}\n\nINSUMOS (única fonte de fatos):\n${l.input || '(vazio)'}\n\n${lpUI.useAgent && EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief ? 'IDEIA E BRIEFING DO AGENTE EDITORIAL:\n' + eCtx() + '\n' : ''}ESTRUTURA DA PÁGINA (na ordem; devolva um objeto por bloco):\n${blocks.map((b, i) => `${i + 1}. t="${b.t}" — ${LP_BLOCK[b.t].ai}`).join('\n')}\n\nFormato: JSON {"blocks":[{"t":"hero","kicker":"","title":"","text":"","cta":"","note":"","name":"","price":"","items":[{"t":"","d":""}],"yes":[],"no":[]}]} usando só os campos pedidos em cada bloco.\nRegras: português do Brasil, frases curtas e específicas; use **negrito** para 1 ou 2 palavras-chave do título; NUNCA invente números, depoimentos, nomes, prazos, garantias, preços, credenciais ou resultados: onde o insumo não trouxer o dado, escreva [CONFIRMAR: o que falta]; não prometa resultado garantido; conteúdo de saúde, finanças ou jurídico sem promessa de cura, ganho ou aprovação.`;
+  return `${lpRefPrompt(l)}${lpProductFacts(l)}${l.angle ? 'ABORDAGEM DESTA VARIAÇÃO (A/B): ' + l.angle + ' — o topo e o botão devem seguir essa abordagem.\n\n' : ''}PRODUTO: ${t.label}\nNome: ${P.nome || '(não informado)'}\nPreço/condição: ${P.preco || '(não informado)'}\nPúblico: ${P.publico || '(não informado)'}\nLink de compra: ${P.checkout ? 'informado' : 'não informado'}${l.type === 'evento' ? `\nData/hora: ${P.data || '(não informada)'}\nLocal: ${P.local || '(não informado)'}` : ''}\nWhatsApp de contato: ${l.whatsapp ? 'sim' : 'não'}\n\nINSUMOS (única fonte de fatos):\n${l.input || '(vazio)'}\n\n${lpUI.useAgent && EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief ? 'IDEIA E BRIEFING DO AGENTE EDITORIAL:\n' + eCtx() + '\n' : ''}ESTRUTURA DA PÁGINA (na ordem; devolva um objeto por bloco):\n${blocks.map((b, i) => `${i + 1}. t="${b.t}" — ${LP_BLOCK[b.t].ai}`).join('\n')}\n\nFormato: JSON {"blocks":[{"t":"hero","kicker":"","title":"","text":"","cta":"","note":"","name":"","price":"","items":[{"t":"","d":""}],"yes":[],"no":[]}]} usando só os campos pedidos em cada bloco.\nRegras: português do Brasil, frases curtas e específicas; use **negrito** para 1 ou 2 palavras-chave do título; NUNCA invente números, depoimentos, nomes, prazos, garantias, preços, credenciais ou resultados: onde o insumo não trouxer o dado, escreva [CONFIRMAR: o que falta]; não prometa resultado garantido; conteúdo de saúde, finanças ou jurídico sem promessa de cura, ganho ou aprovação.`;
+}
+/* aplica no(s) bloco(s) o que a IA devolveu; só os campos de cada tipo de bloco */
+function lpMerge(l, got) {
+  const used = new Set(), s = (v, n) => String(v == null ? '' : v).slice(0, n);
+  l.blocks.filter(b => b.on).forEach(b => {
+    const i = got.findIndex((x, k) => !used.has(k) && x && x.t === b.t); if (i < 0) return; used.add(i); const g = got[i];
+    LP_BLOCK[b.t].fields.forEach(([f, , kind]) => { if (kind === 'img') return; if (f === 'items') b.items = (Array.isArray(g.items) ? g.items : []).slice(0, 20).map(x => ({t: s(x && x.t, 400), d: s(x && x.d, 1200)})); else if (f === 'yes' || f === 'no') b[f] = (Array.isArray(g[f]) ? g[f] : []).slice(0, 10).map(x => s(x, 300)); else if (g[f] != null) b[f] = s(g[f], f === 'text' ? 3000 : 400); });
+  });
+  const h = l.blocks.find(b => b.t === 'hero'); if (h) { l.headline = h.title; l.sub = h.text; l.cta = h.cta || l.cta; }
 }
 async function lpGenerate() {
   const l = lpCur(); if (lpUI.busy) return; if (!l.input.trim() && !l.product.nome) { toast('Escreva os insumos ou ao menos o nome do produto.'); return; }
   lpUI.busy = 'gen'; renderLandings();
   try {
-    const j = await motJSON('Você é um redator de resposta direta que monta landing pages que convertem sem enganar. ' + (eBrandTxt() ? '\n' + eBrandTxt().slice(0, 6000) : ''), lpPrompt(l), 7000), got = Array.isArray(j.blocks) ? j.blocks : [], used = new Set(), s = (v, n) => String(v == null ? '' : v).slice(0, n);
+    const j = await motJSON('Você é um redator de resposta direta que monta landing pages que convertem sem enganar. ' + (eBrandTxt() ? '\n' + eBrandTxt().slice(0, 6000) : ''), lpPrompt(l), 7000), got = Array.isArray(j.blocks) ? j.blocks : [];
     if (!got.length) throw new Error('a IA não devolveu a página.');
-    l.blocks.filter(b => b.on).forEach(b => {
-      const i = got.findIndex((x, k) => !used.has(k) && x && x.t === b.t); if (i < 0) return; used.add(i); const g = got[i];
-      LP_BLOCK[b.t].fields.forEach(([f, , kind]) => { if (kind === 'img') return; if (f === 'items') b.items = (Array.isArray(g.items) ? g.items : []).slice(0, 20).map(x => ({t: s(x && x.t, 400), d: s(x && x.d, 1200)})); else if (f === 'yes' || f === 'no') b[f] = (Array.isArray(g[f]) ? g[f] : []).slice(0, 10).map(x => s(x, 300)); else if (g[f] != null) b[f] = s(g[f], f === 'text' ? 3000 : 400); });
-    });
-    const h = l.blocks.find(b => b.t === 'hero'); if (h) { l.headline = h.title; l.sub = h.text; l.cta = h.cta || l.cta; }
-    persist(); toast('Página escrita. Revise os blocos e complete o que estiver em [CONFIRMAR].'); lpUI.tab = 'blocos';
+    lpMerge(l, got);
+    if (l.vis && confirm('Substituir o layout do editor visual pelo novo texto?')) l.vis = bxFromBlocks(l);
+    persist(); toast('Página escrita. Revise os blocos e complete o que estiver em [CONFIRMAR].'); lpUI.tab = l.vis ? 'editor' : 'blocos';
   } catch (e) { toast(eErr(e)); }
   lpUI.busy = ''; renderLandings();
 }
 
 function lpTabBlocos(b, l) {
-  b.innerHTML = `<small class="muted block" style="margin-bottom:8px">Ligue/desligue, reordene e edite cada bloco. A prévia ao lado atualiza sozinha. Itens com <b>[CONFIRMAR]</b> precisam de um dado real antes de publicar.</small>
+  if (l.vis) { b.innerHTML = `<div class="panel"><h3>Esta página usa o editor visual</h3><p class="muted" style="font-size:12.5px">Os blocos ficam guardados, mas o que aparece na página é o layout do editor visual. Para editar textos e posições, use a aba <b>Editor visual</b>.</p><div class="row-gap"><button class="btn dark" onclick="lpUI.tab='editor';renderLandings()">Ir ao editor visual</button><button class="btn" onclick="lpToVisual()">Refazer o layout a partir dos blocos</button></div></div>`; return; }
+  b.innerHTML = `<div class="row-gap" style="margin-bottom:8px"><button class="btn sm dark" onclick="lpToVisual()">Abrir no editor visual →</button><small class="muted">arrastar, colunas, vídeo, tablet e celular</small></div><small class="muted block" style="margin-bottom:8px">Ligue/desligue, reordene e edite cada bloco. A prévia ao lado atualiza sozinha. Itens com <b>[CONFIRMAR]</b> precisam de um dado real antes de publicar.</small>
   ${l.blocks.map((k, i) => { const def = LP_BLOCK[k.t], pend = (JSON.stringify([k.title, k.text, k.note, k.price, k.items, k.yes, k.no]).match(/\[CONFIRMAR/g) || []).length; return accSec('lp', k.id, `<label onclick="event.stopPropagation()" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" ${k.on ? 'checked' : ''} onchange="lpBlk('${k.id}','on',this.checked,true)"> ${i + 1}. ${lpA(def.label)}</label>`, `${pend ? `<span class="so-warn">${pend} a confirmar</span> ` : ''}${lpA((k.title || k.items[0] && k.items[0].t || '').replace(/\*\*/g, '').slice(0, 28))}`, `<div class="row-gap" style="margin-bottom:8px"><button class="btn sm" onclick="lpMove('${k.id}',-1)" ${i === 0 ? 'disabled' : ''}>▲</button><button class="btn sm" onclick="lpMove('${k.id}',1)" ${i === l.blocks.length - 1 ? 'disabled' : ''}>▼</button><button class="btn sm" onclick="lpDup('${k.id}')">Duplicar</button><button class="btn sm" onclick="lpBlkDel('${k.id}')">Remover</button></div>${def.fields.map(f => lpField(k, f)).join('')}`, i === 0); }).join('')}
   <div class="row-gap" style="margin-top:10px"><select id="lpAdd">${Object.entries(LP_BLOCK).map(([t, d]) => `<option value="${t}">${lpA(d.label)}</option>`).join('')}</select><button class="btn sm dark" onclick="lpAddBlock()">＋ Adicionar bloco</button></div>`;
 }
@@ -17145,6 +17295,316 @@ async function lpRefScan(id) {
 function lpRefPrompt(l) {
   const R = lpRefs().items.filter(r => r.use && r.scan && (r.type === l.type || r.type === 'cadastro' && l.type === 'cadastro')).slice(0, 3);
   return R.length ? 'REFERÊNCIAS DE ESTRUTURA (use só como inspiração de ordem, tom e tamanho dos blocos; NÃO copie frases nem marcas):\n' + R.map(r => `- ${r.title}: títulos [${r.scan.headings.slice(0, 10).join(' | ')}]; botões [${r.scan.ctas.slice(0, 6).join(' | ')}]`).join('\n') + '\n\n' : '';
+}
+
+function lpUseProduct(id) {
+  const l = lpCur(), x = curProject().products.find(y => y.id === id); l.productId = id || ''; l.pick = {b: [], f: [], all: true};
+  if (x) { Object.assign(l.product, {nome: x.name, preco: x.price || l.product.preco, publico: x.audience || l.product.publico, checkout: x.checkout || l.product.checkout}); if (x.summary && !/Descrição:/.test(l.input)) l.input = ((l.input ? l.input + '\n\n' : '') + 'Descrição: ' + x.summary).slice(0, 60000); }
+  persist(); renderLandings();
+}
+function lpPick(key, i, on) {
+  const l = lpCur(), x = curProject().products.find(y => y.id === l.productId); if (!x) return;
+  if (l.pick.all !== false) { l.pick = {b: x.benefits.map((_, n) => n), f: x.features.map((_, n) => n), all: false}; }
+  const a = l.pick[key], at = a.indexOf(i); if (on && at < 0) a.push(i); if (!on && at >= 0) a.splice(at, 1); persist();
+}
+
+function lpBack() { lpUI.id = ''; if (lpUI.back === 'site') { lpUI.main = 'sites'; } lpUI.back = ''; renderLandings(); }
+
+</script>
+<script>
+/* ===== Editor visual (estilo Elementor): modelo, conversão a partir dos blocos e renderização responsiva =====
+   Seção → colunas (grade de 12; largura por dispositivo: computador / tablet / celular) → widgets (título, texto, imagem, vídeo, botão, lista,
+   destaque, espaçador, divisor, formulário, perguntas, depoimentos, contagem). Cada propriedade pode ter valor por dispositivo: o de computador
+   vale para todos até que tablet ou celular definam o seu (cascata, como nos construtores de página). */
+const BX_BP = {d: 'Computador', t: 'Tablet', l: 'Celular horizontal', m: 'Celular vertical'};
+const BX_W = {heading: ['Título', 'H'], text: ['Texto', '¶'], image: ['Imagem', '🖼'], video: ['Vídeo', '▶'], button: ['Botão', '⬭'], list: ['Lista', '☰'], feature: ['Destaque (cartão)', '◫'], spacer: ['Espaço', '↕'], divider: ['Divisor', '―'], form: ['Formulário', '✎'], faq: ['Perguntas (sanfona)', '?'], quote: ['Depoimentos', '❝'], countdown: ['Contagem regressiva', '⏱']};
+const BX_LAYOUTS = {'1': [12], '2': [6, 6], '3': [4, 4, 4], '4': [3, 3, 3, 3], '1-2': [4, 8], '2-1': [8, 4]};
+const BX_LAYOUT_NAME = {'1': '1 coluna', '2': '2 colunas', '3': '3 colunas', '4': '4 colunas', '1-2': '⅓ + ⅔', '2-1': '⅔ + ⅓'};
+const bxId = () => uid('bx');
+function bxW(t, o) { return Object.assign({id: bxId(), t, hide: {t: false, l: false, m: false}, al: {}, size: {}, wpct: {}, h: {}, text: '', title: '', tag: 'h2', color: '', muted: false, imgId: '', src: '', alt: '', rad: 12, ratio: '16:9', link: 'checkout', href: '', style: 'solid', full: false, icon: 'check', emoji: '', date: '', items: []}, ({heading: {text: 'Seu título aqui'}, text: {text: 'Escreva o texto aqui.'}, button: {text: 'Quero agora'}, feature: {title: 'Título', text: 'Descrição'}, list: {items: [{t: 'Primeiro item', d: ''}]}, spacer: {h: {d: 32}}, faq: {items: [{t: 'Pergunta?', d: 'Resposta.'}]}, quote: {items: [{t: '[CONFIRMAR: depoimento real]', d: '[CONFIRMAR: nome]'}]}, form: {title: 'Receba contato', text: '', text2: ''}, video: {src: ''}, image: {}, divider: {}, countdown: {}})[t] || {}, o || {}); }
+const bxCol = (span, widgets, o) => Object.assign({id: bxId(), span: {d: span, t: span <= 4 ? 6 : 12, m: 12}, v: 'top', widgets: widgets || []}, o || {});
+function bxSec(layout, o) { return Object.assign({id: bxId(), name: '', w: 'box', bg: '', alt: false, bgImg: '', pad: {}, padB: {}, hide: {t: false, l: false, m: false}, gap: {}, cols: (BX_LAYOUTS[layout] || [12]).map(n => bxCol(n))}, o || {}); }
+
+/* valor efetivo de uma propriedade por dispositivo (cascata d → t → m) */
+const bxGet = (o, bp) => (o && o[bp] != null ? o[bp] : (bp === 'm' || bp === 'l') && o && o.t != null ? o.t : o && o.d != null ? o.d : undefined);
+const bxOwn = (o, bp) => o && o[bp] != null;
+
+/* ---------- blocos → editor visual ---------- */
+function bxFromBlocks(l) {
+  const S = [], H = (text, tag, al) => bxW('heading', {text, tag: tag || 'h2', al: al ? {d: al} : {}}), T = (text, o) => bxW('text', Object.assign({text, muted: true}, o || {})), BTN = (text, o) => bxW('button', Object.assign({text: text || LP_TYPE_INFO[l.type || 'generico'].cta}, o || {}));
+  const row = (items, mk, per) => { const n = Math.min(items.length, 12), span = per || (n <= 2 ? 6 : n === 4 ? 3 : 4); return items.map(i => bxCol(span, [mk(i)])); };
+  const feat = i => bxW('feature', {title: i.t, text: i.d});
+  (l.blocks || []).filter(b => b.on).forEach(b => {
+    const ci = b.items.filter(i => i.t || i.d), mid = {al: {d: 'center'}};
+    switch (b.t) {
+      case 'hero': { const left = [b.kicker && bxW('text', {text: '**' + b.kicker.toUpperCase() + '**', size: {d: 13}}), bxW('heading', {text: b.title, tag: 'h1'}), b.text && T(b.text, {size: {d: 20, m: 18}}), BTN(b.cta), b.note && T(b.note, {size: {d: 13}})].filter(Boolean); S.push(bxSec('1', {name: 'Topo', cols: b.imgId ? [bxCol(7, left, {v: 'center', span: {d: 7, t: 12, m: 12}}), bxCol(5, [bxW('image', {imgId: b.imgId, alt: b.title})], {span: {d: 5, t: 12, m: 12}, v: 'center'})] : [bxCol(12, left)], pad: {d: 80, m: 40}, padB: {d: 80, m: 40}})); break; }
+      case 'numeros': S.push(bxSec('1', {name: 'Números', alt: true, cols: row(ci, i => bxW('heading', {text: i.t, tag: 'h2', al: {d: 'center'}, color: l.theme.accent}).constructor === Object ? bxW('feature', {title: i.t, text: i.d, emoji: ''}) : null)})); break;
+      case 'dor': S.push(bxSec('1', {name: 'Dor', cols: [bxCol(12, [b.title && H(b.title), b.text && T(b.text), ci.length && bxW('list', {icon: 'x', items: ci.map(i => ({t: i.t + (i.d ? ' ' + i.d : ''), d: ''}))})].filter(Boolean))]})); break;
+      case 'solucao': case 'beneficios': case 'conteudo': case 'passos': case 'bonus': case 'palestrantes': case 'programa': case 'ingressos':
+        S.push(bxSec('1', {name: LP_BLOCK[b.t].label, alt: ['solucao', 'passos', 'bonus', 'programa'].includes(b.t), cols: [bxCol(12, [b.title && H(b.title, 'h2', 'center'), b.text && T(b.text, {al: {d: 'center'}})].filter(Boolean))]})); if (ci.length) S.push(bxSec('1', {name: LP_BLOCK[b.t].label + ' — itens', alt: ['solucao', 'passos', 'bonus', 'programa'].includes(b.t), pad: {d: 8}, cols: row(ci, feat)})); if (b.t === 'ingressos' && b.cta) S.push(bxSec('1', {name: 'Botão', pad: {d: 16}, cols: [bxCol(12, [BTN(b.cta, {al: {d: 'center'}})])]})); break;
+      case 'para_quem': S.push(bxSec('2', {name: 'Para quem é', alt: true, cols: [bxCol(6, [bxW('heading', {text: 'É para você se…', tag: 'h3'}), bxW('list', {items: b.yes.map(t => ({t, d: ''}))})]), bxCol(6, [bxW('heading', {text: 'Não é para você se…', tag: 'h3'}), bxW('list', {icon: 'x', items: b.no.map(t => ({t, d: ''}))})])].map(c => Object.assign(c, {span: {d: 6, t: 12, m: 12}}))})); break;
+      case 'autoridade': S.push(bxSec('1', {name: 'Quem está por trás', cols: b.imgId ? [bxCol(3, [bxW('image', {imgId: b.imgId, rad: 999, alt: b.name})], {span: {d: 3, t: 4, m: 12}}), bxCol(9, [b.title && H(b.title), b.name && bxW('text', {text: '**' + b.name + '**', muted: false}), T(b.text)].filter(Boolean), {span: {d: 9, t: 8, m: 12}, v: 'center'})] : [bxCol(12, [b.title && H(b.title), b.name && bxW('text', {text: '**' + b.name + '**', muted: false}), T(b.text)].filter(Boolean))]})); break;
+      case 'prova': S.push(bxSec('1', {name: 'Prova', alt: true, cols: [bxCol(12, [b.title && H(b.title, 'h2', 'center'), bxW('quote', {items: ci})].filter(Boolean))]})); break;
+      case 'oferta': S.push(bxSec('1', {name: 'Oferta', cols: [bxCol(12, [b.title && H(b.title, 'h2', 'center'), b.text && T(b.text, {al: {d: 'center'}}), ci.length && bxW('list', {items: ci.map(i => ({t: i.t + (i.d ? ' ' + i.d : ''), d: ''}))}), b.price && bxW('heading', {text: b.price, tag: 'h2', al: {d: 'center'}, color: l.theme.accent}), b.note && T(b.note, {al: {d: 'center'}, size: {d: 13}}), BTN(b.cta, {al: {d: 'center'}})].filter(Boolean))]})); break;
+      case 'garantia': case 'texto': case 'local': case 'cta_final': S.push(bxSec('1', {name: LP_BLOCK[b.t].label, alt: b.t === 'cta_final' || b.t === 'local', cols: [bxCol(12, [b.title && H(b.title, 'h2', 'center'), b.note && b.t === 'local' && bxW('text', {text: '**' + b.note + '**', muted: false, al: {d: 'center'}}), b.text && T(b.text, {al: {d: 'center'}}), b.t === 'cta_final' && BTN(b.cta, {al: {d: 'center'}})].filter(Boolean))]})); break;
+      case 'faq': S.push(bxSec('1', {name: 'Perguntas frequentes', cols: [bxCol(12, [b.title && H(b.title, 'h2', 'center'), bxW('faq', {items: ci})].filter(Boolean))]})); break;
+      case 'amostra': S.push(bxSec('1', {name: 'Amostra', alt: true, cols: b.imgId ? [bxCol(6, [bxW('image', {imgId: b.imgId, alt: b.title})]), bxCol(6, [b.title && H(b.title), b.text && T(b.text), BTN(b.cta || 'Ler uma amostra grátis')].filter(Boolean), {v: 'center'})].map(c => Object.assign(c, {span: {d: 6, t: 12, m: 12}})) : [bxCol(12, [b.title && H(b.title, 'h2', 'center'), b.text && T(b.text, {al: {d: 'center'}}), BTN(b.cta || 'Ler uma amostra grátis', {al: {d: 'center'}})].filter(Boolean))]})); break;
+      case 'form': S.push(bxSec('1', {name: 'Formulário', cols: [bxCol(12, [bxW('form', {title: b.title, text: b.text, text2: b.cta, al: {d: 'center'}})])]})); break;
+    }
+  });
+  return normalizeVis({sections: S.map(sec => { sec.cols.forEach(c => { c.widgets = c.widgets.filter(Boolean); }); return sec; })});
+}
+
+/* ---------- renderização ---------- */
+const bxLum = h => { const n = parseInt(h.slice(1), 16), c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; };
+const bxSafe = id => String(id).replace(/[^\w-]/g, '');
+function bxVideoEmbed(src) {
+  let m; if ((m = src.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/))([\w-]{11})/))) return {iframe: 'https://www.youtube-nocookie.com/embed/' + m[1] + '?rel=0'};
+  if ((m = src.match(/vimeo\.com\/(?:video\/)?(\d{5,12})/))) return {iframe: 'https://player.vimeo.com/video/' + m[1]};
+  if (/\.(mp4|webm|ogg)(\?|$)/i.test(src)) return {file: src}; return null;
+}
+async function bxRender(l, opts) {
+  const V = l.vis, P = !!opts.preview, css = {d: [], t: [], l: [], m: []}, rule = (bp, sel, decl) => { if (decl) css[bp].push(`${sel}{${decl}}`); };
+  const cta = lpCta(l), hasForm = [].concat(...V.sections.map(s => [].concat(...s.cols.map(c => c.widgets)))).some(w => w.t === 'form'); let formDone = false, firstBtn = '', E = lpE, R = lpRich;
+  const bpEach = (id, o, f) => ['d', 't', 'l', 'm'].forEach(bp => { if (o && o[bp] != null) rule(bp, '#' + bxSafe(id), f(o[bp])); });
+  const attr = (id) => P ? ` data-bx="${bxSafe(id)}"` : '';
+  const wHTML = async w => {
+    const id = bxSafe(w.id), a = attr(id); let h = '';
+    bpEach(id, w.al, v => `text-align:${v}`); bpEach(id, w.size, v => `font-size:${v}px`);
+    ['t', 'l', 'm'].forEach(bp => { if (w.hide[bp]) rule(bp, '#' + id, 'display:none'); });
+    switch (w.t) {
+      case 'heading': h = `<${w.tag} id="${id}"${a}${w.color ? ` style="color:${w.color}"` : ''}>${R(w.text)}</${w.tag}>`; break;
+      case 'text': h = `<p id="${id}"${a} class="${w.muted ? 'mut' : ''}"${w.color ? ` style="color:${w.color}"` : ''}>${R(w.text)}</p>`; break;
+      case 'image': { const src = w.imgId ? await lpImg(w.imgId) : (/^https?:\/\/[^\s"'<>]{1,600}$/i.test(w.src || '') ? w.src : ''); bpEach(id, w.wpct, v => `--wp:${v}%`); h = src ? `<div id="${id}"${a} class="bx-img"><img src="${E(src)}" alt="${E(w.alt)}" style="border-radius:${w.rad}px"></div>` : `<div id="${id}"${a} class="bx-ph">Imagem</div>`; break; }
+      case 'video': { const v = w.src && bxVideoEmbed(w.src), ar = w.ratio.replace(':', '/'); h = `<div id="${id}"${a} class="bx-vid" style="aspect-ratio:${ar}">${v ? (v.iframe ? `<iframe src="${E(v.iframe)}" title="Vídeo" loading="lazy" allow="accelerometer;encrypted-media;picture-in-picture;fullscreen" allowfullscreen></iframe>` : `<video controls playsinline preload="metadata" src="${E(v.file)}"></video>`) : '<div class="bx-ph">Cole o link do YouTube, Vimeo ou arquivo .mp4</div>'}</div>`; break; }
+      case 'button': { let href = '#', ext = false; if (w.link === 'checkout') ({href, ext} = cta.href === '#form' ? {href: l.product.checkout || '#', ext: !!l.product.checkout} : cta); else if (w.link === 'form') href = '#form'; else if (w.link === 'whatsapp') { href = l.whatsapp ? 'https://wa.me/' + l.whatsapp : '#'; ext = !!l.whatsapp; } else { href = /^(https?:\/\/[^\s"'<>]{1,600}|#[\w-]{1,60}|mailto:[^\s"'<>]{1,200}|tel:[+\d]{3,20})$/i.test(w.href || '') ? w.href : '#'; ext = /^https?:/.test(href); } if (!firstBtn) firstBtn = w.text; h = `<div id="${id}"${a}><a class="btn${w.style === 'outline' ? ' out' : ''}${w.full ? ' fw' : ''}" href="${E(href)}"${ext ? ' target="_blank" rel="noopener"' : ''}>${E(w.text)}</a></div>`; break; }
+      case 'list': h = `<ul id="${id}"${a} class="ck${w.icon === 'x' ? ' no' : w.icon === 'dot' ? ' dot' : ''}">${w.items.filter(i => i.t).map(i => `<li>${R(i.t)}</li>`).join('')}</ul>`; break;
+      case 'feature': h = `<div id="${id}"${a} class="card">${w.emoji ? `<div class="bx-em">${E(w.emoji)}</div>` : ''}${w.title ? `<h3>${R(w.title)}</h3>` : ''}${w.text ? `<p>${R(w.text)}</p>` : ''}</div>`; break;
+      case 'spacer': bpEach(id, w.h, v => `height:${v}px`); h = `<div id="${id}"${a} class="bx-sp"></div>`; break;
+      case 'divider': h = `<hr id="${id}"${a} class="bx-hr">`; break;
+      case 'form': { const first = !formDone; formDone = true; h = `<div id="${first ? 'form' : id}"${a} class="bx-form">${w.title ? `<h2>${R(w.title)}</h2>` : ''}${w.text ? `<p class="mut">${R(w.text)}</p>` : ''}${lpFormBox(l, {cta: w.text2 || 'Enviar'})}</div>`; break; }
+      case 'faq': h = `<div id="${id}"${a}>${w.items.filter(i => i.t).map(i => `<details><summary>${R(i.t)}</summary><p>${R(i.d)}</p></details>`).join('')}</div>`; break;
+      case 'quote': h = `<div id="${id}"${a} class="grid">${w.items.filter(i => i.t).map(i => `<div class="card"><p class="q">“${R(i.t)}”</p><p><strong>${R(i.d)}</strong></p></div>`).join('')}</div>`; break;
+      case 'countdown': h = w.date ? `<div id="${id}"${a} class="cd" data-t="${E(w.date)}"><div><b class="cdd">0</b><small>dias</small></div><div><b class="cdh">0</b><small>horas</small></div><div><b class="cdm">0</b><small>min</small></div></div>` : `<div id="${id}"${a} class="bx-ph">Defina a data</div>`; break;
+    }
+    return h;
+  };
+  let html = '';
+  for (const s of V.sections) {
+    const sid = bxSafe(s.id), pt = {d: 64, t: 48, m: 36}, d = s.pad, db = s.padB;
+    ['d', 't', 'l', 'm'].forEach(bp => { const t = d[bp], b = db[bp] != null ? db[bp] : d[bp]; if (t != null || b != null || bp === 'd') rule(bp, '#' + sid, `padding-top:${t != null ? t : bp === 'd' ? 64 : ''}px;padding-bottom:${b != null ? b : bp === 'd' ? 64 : ''}px`.replace(/padding-(top|bottom):px;?/g, '')); });
+    bpEach(sid + ' .bx-row', s.gap, v => `gap:${v}px`); ['t', 'l', 'm'].forEach(bp => { if (s.hide[bp]) rule(bp, '#' + sid, 'display:none'); });
+    let st = ''; if (s.bg) st += `background:${s.bg};color:${bxLum(s.bg) < .4 ? '#fff' : '#141414'};--mut:${bxLum(s.bg) < .4 ? '#d4d4d8' : '#555'};`; if (s.bgImg) { const u = await lpImg(s.bgImg); if (u) st += `background:url('${u}') center/cover;`; }
+    let cols = '';
+    for (const c of s.cols) {
+      const cid = bxSafe(c.id); ['d', 't', 'l', 'm'].forEach(bp => { if (c.span[bp] != null) rule(bp, '#' + cid, `--sp:${c.span[bp]}`); });
+      let ws = ''; for (const w of c.widgets) ws += await wHTML(w); cols += `<div id="${cid}"${attr(cid)} class="bx-col v-${c.v}" style="--sp:${c.span.d || 12}">${ws || (P ? '<div class="bx-ph bx-empty">+ Arraste ou adicione um widget</div>' : '')}</div>`;
+    }
+    html += `<section id="${sid}"${attr(sid)} class="bx-sec${s.alt ? ' alt' : ''}"${st ? ` style="${st}"` : ''}><div class="${s.w === 'full' ? 'wf' : 'w'}"><div class="bx-row">${cols}</div></div></section>\n`;
+  }
+  const extra = `.bx-row{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:28px}.bx-col{grid-column:span var(--sp,12);min-width:0}.bx-col.v-center{align-self:center}.bx-col.v-bottom{align-self:end}.bx-sec{padding:64px 0}.wf{padding:0}.bx-col>*+*{margin-top:16px}.bx-col h1,.bx-col h2,.bx-col h3,.bx-col p{margin-bottom:0}.bx-img{--wp:100%}.bx-img img{width:var(--wp);max-width:100%;display:inline-block;vertical-align:top}.bx-vid{width:100%;border-radius:14px;overflow:hidden;background:#000}.bx-vid iframe,.bx-vid video{width:100%;height:100%;border:0;display:block}.bx-ph{background:var(--soft);border:2px dashed var(--line);border-radius:12px;padding:28px;text-align:center;color:var(--mut);font-size:14px}.bx-hr{border:0;border-top:1px solid var(--line);width:100%}.bx-em{font-size:30px;margin-bottom:8px}.btn.out{background:transparent;color:var(--a);border:2px solid var(--a);box-shadow:none}.btn.fw{display:block;text-align:center}ul.ck.dot li::before{content:'•'}.bx-form{max-width:560px}.bx-form h2{margin-bottom:.3em}.bx-sec.alt{background:var(--soft)}`;
+  const css2 = extra + css.d.join('') + `@media(max-width:1024px){${css.t.join('')}}@media(max-width:880px) and (orientation:landscape){${css.l.join('')}}@media(max-width:640px){${css.m.join('')}}`;
+  return {html, css: css2, hasForm, firstBtn};
+}
+function bxPreviewJS(opts) {
+  return `<style>[data-bx]{cursor:pointer}[data-bx]:hover{outline:2px dashed #4c6ef5;outline-offset:-2px}.bx-sel{outline:3px solid #4c6ef5!important;outline-offset:-3px}.bx-empty{cursor:pointer}</style><script>(function(){var sel=${JSON.stringify(opts.sel || '')},y=${+opts.scroll || 0};function mark(id){document.querySelectorAll('.bx-sel').forEach(function(e){e.classList.remove('bx-sel')});var e=id&&document.getElementById(id);if(e)e.classList.add('bx-sel')}mark(sel);window.scrollTo(0,y);document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-bx]');if(el){e.preventDefault();e.stopPropagation();parent.postMessage({bx:el.id},'*')}},true);var t;window.addEventListener('scroll',function(){clearTimeout(t);t=setTimeout(function(){parent.postMessage({bxScroll:window.scrollY},'*')},120)});window.addEventListener('message',function(e){if(e.data&&e.data.bxSel!==undefined)mark(e.data.bxSel)})})();<\/script>`;
+}
+
+</script>
+<script>
+/* ===== Editor visual: estrutura (árvore), inspetor por dispositivo, prévia clicável com 5 dispositivos e desfazer ===== */
+const BX_DEV = {desktop: ['Computador', 1280, 800, 'd'], 'tablet-p': ['Tablet vertical', 768, 1024, 't'], 'tablet-l': ['Tablet horizontal', 1024, 768, 't'], 'mobile-p': ['Celular vertical', 390, 844, 'm'], 'mobile-l': ['Celular horizontal', 844, 390, 'l']};
+const bxUI = {sel: '', undo: [], redo: [], scroll: 0, drag: ''};
+const bxA = esc, bxBp = () => (BX_DEV[lpUI.device] || BX_DEV.desktop)[3];
+const bxV = () => lpCur() && lpCur().vis;
+
+function bxFind(id) {
+  const V = bxV(); if (!V) return null;
+  for (let i = 0; i < V.sections.length; i++) { const s = V.sections[i]; if (s.id === id) return {kind: 'sec', o: s, sec: s, arr: V.sections, i};
+    for (let j = 0; j < s.cols.length; j++) { const c = s.cols[j]; if (c.id === id) return {kind: 'col', o: c, sec: s, col: c, arr: s.cols, i: j};
+      for (let k = 0; k < c.widgets.length; k++) if (c.widgets[k].id === id) return {kind: 'w', o: c.widgets[k], sec: s, col: c, arr: c.widgets, i: k}; } }
+  return null;
+}
+/* alteração com desfazer */
+function bxMut(fn, rerender) {
+  const l = lpCur(); bxUI.undo.push(JSON.stringify(l.vis)); if (bxUI.undo.length > 40) bxUI.undo.shift(); bxUI.redo = [];
+  fn(); persist(); if (rerender === false) lpPaintSoon(); else renderLandings();
+}
+function bxUndo() { const l = lpCur(); if (!bxUI.undo.length) return; bxUI.redo.push(JSON.stringify(l.vis)); l.vis = JSON.parse(bxUI.undo.pop()); persist(); renderLandings(); }
+function bxRedo() { const l = lpCur(); if (!bxUI.redo.length) return; bxUI.undo.push(JSON.stringify(l.vis)); l.vis = JSON.parse(bxUI.redo.pop()); persist(); renderLandings(); }
+document.addEventListener('keydown', e => { if (ui.page === 'landings' && lpUI.tab === 'editor' && (e.ctrlKey || e.metaKey) && !/INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '')) { if (e.key === 'z') { e.preventDefault(); e.shiftKey ? bxRedo() : bxUndo(); } else if (e.key === 'y') { e.preventDefault(); bxRedo(); } } });
+window.addEventListener('message', e => { const d = e.data || {}; if (d.bxScroll != null) bxUI.scroll = d.bxScroll; if (d.bx && lpUI.tab === 'editor' && bxFind(d.bx)) { bxUI.sel = d.bx; renderLandings(); } });
+
+function lpToVisual() {
+  const l = lpCur(); if (l.vis && !confirm('Refazer o layout a partir dos blocos? Os ajustes do editor visual serão substituídos.')) return;
+  l.vis = bxFromBlocks(l); bxUI.undo = []; bxUI.redo = []; bxUI.sel = ''; lpUI.tab = 'editor'; persist(); renderLandings();
+}
+function lpToBlocks() { if (!confirm('Voltar ao modo de blocos? O layout do editor visual será descartado.')) return; lpCur().vis = null; lpUI.tab = 'blocos'; persist(); renderLandings(); }
+
+/* ---------- aba Editor visual ---------- */
+function bxTab(b, l, p) {
+  if (!l.vis) { b.innerHTML = `<div class="panel"><h3>Editor visual</h3><p style="font-size:13px">Monte a página como num construtor (Elementor): seções, colunas e widgets de <b>texto, imagem, vídeo, botão, lista, formulário</b> e mais, com a largura e o alinhamento ajustáveis para <b>computador, tablet e celular (vertical e horizontal)</b>.</p><p class="muted" style="font-size:12.5px">Começa a partir dos blocos que você já tem (texto da IA, produto, imagens). Dá para voltar aos blocos depois.</p><button class="btn dark" onclick="lpToVisual()">Abrir no editor visual</button></div>`; return; }
+  const V = l.vis, bp = bxBp(), sel = bxFind(bxUI.sel) || null;
+  const tr = V.sections.map((s, si) => `<div class="bx-t-sec ${bxUI.sel === s.id ? 'on' : ''}"><div class="bx-t-row" onclick="bxPick('${s.id}')"><b>▾ ${bxA(s.name || 'Seção ' + (si + 1))}</b><span class="bx-t-act">${bxActs(s.id, si === 0, si === V.sections.length - 1)}</span></div>${s.cols.map((c, ci) => `<div class="bx-t-col ${bxUI.sel === c.id ? 'on' : ''}" ondragover="event.preventDefault()" ondrop="bxDrop('${c.id}','')"><div class="bx-t-row" onclick="bxPick('${c.id}')"><span>Coluna ${ci + 1} <small class="muted">${bxGet(c.span, bp) || 12}/12</small></span><span class="bx-t-act"><button class="btn sm" onclick="event.stopPropagation();bxAddWidget('${c.id}')" title="Adicionar widget nesta coluna">＋</button></span></div>${c.widgets.map((w, wi) => `<div class="bx-t-w ${bxUI.sel === w.id ? 'on' : ''}" draggable="true" ondragstart="bxUI.drag='${w.id}'" ondragover="event.preventDefault()" ondrop="event.stopPropagation();bxDrop('${c.id}','${w.id}')" onclick="bxPick('${w.id}')"><span>${BX_W[w.t][1]} ${bxA((w.text || w.title || (w.items[0] && w.items[0].t) || BX_W[w.t][0]).replace(/\*\*/g, '').slice(0, 26))}</span><span class="bx-t-act">${bxActs(w.id, wi === 0, wi === c.widgets.length - 1)}</span></div>`).join('')}</div>`).join('')}</div>`).join('');
+  b.innerHTML = `<div class="row-gap" style="margin-bottom:8px;flex-wrap:wrap"><button class="btn sm" onclick="bxUndo()" ${bxUI.undo.length ? '' : 'disabled'}>↶ Desfazer</button><button class="btn sm" onclick="bxRedo()" ${bxUI.redo.length ? '' : 'disabled'}>↷ Refazer</button><select id="bxLay" class="an-sel">${Object.entries(BX_LAYOUT_NAME).map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select><button class="btn sm dark" onclick="bxAddSection()">＋ Seção</button><button class="btn sm" onclick="lpToBlocks()" title="Descarta o layout do editor visual">Voltar aos blocos</button></div>
+  <div class="bx-edit-note">Editando para: <b>${BX_BP[bp]}</b>${bp !== 'd' ? ' — o que você mudar aqui vale só deste dispositivo' : ' — vale para todos, até que tablet ou celular tenham ajuste próprio'}</div>
+  ${sel ? `<div class="panel bx-insp">${bxInspector(sel, bp)}</div>` : '<small class="muted block" style="margin:6px 0">Clique em qualquer parte da página (ao lado) ou na estrutura abaixo para editar.</small>'}
+  <div class="bx-tree">${tr || '<p class="muted">Página vazia. Adicione uma seção.</p>'}</div>`;
+}
+const bxActs = (id, first, last) => `<button class="btn sm" onclick="event.stopPropagation();bxMove('${id}',-1)" ${first ? 'disabled' : ''}>▲</button><button class="btn sm" onclick="event.stopPropagation();bxMove('${id}',1)" ${last ? 'disabled' : ''}>▼</button><button class="btn sm" onclick="event.stopPropagation();bxDup('${id}')">⧉</button><button class="btn sm" onclick="event.stopPropagation();bxDel('${id}')">×</button>`;
+function bxPick(id) { bxUI.sel = id; renderLandings(); }
+function bxAddSection() { const k = $('bxLay').value; bxMut(() => { const V = bxV(), s = bxSec(k), f = bxFind(bxUI.sel), at = f ? V.sections.indexOf(f.sec) + 1 : V.sections.length; V.sections.splice(at, 0, s); bxUI.sel = s.id; }); }
+function bxAddWidget(colId) {
+  showModal('Adicionar widget', `<div class="bx-wgrid">${Object.entries(BX_W).map(([t, [n, ic]]) => `<button class="bx-wbtn" onclick="bxDoAdd('${colId}','${t}')"><span>${ic}</span>${bxA(n)}</button>`).join('')}</div>`);
+}
+function bxDoAdd(colId, t) { closeModal(); bxMut(() => { const f = bxFind(colId), w = bxW(t); f.o.widgets.push(w); bxUI.sel = w.id; }); }
+function bxMove(id, d) { bxMut(() => { const f = bxFind(id), j = f.i + d; if (j < 0 || j >= f.arr.length) return; [f.arr[f.i], f.arr[j]] = [f.arr[j], f.arr[f.i]]; }); }
+function bxDup(id) { bxMut(() => { const f = bxFind(id), c = JSON.parse(JSON.stringify(f.o)), re = o => { o.id = bxId(); (o.cols || []).forEach(re); (o.widgets || []).forEach(re); }; re(c); f.arr.splice(f.i + 1, 0, c); bxUI.sel = c.id; }); }
+function bxDel(id) { if (!confirm('Remover este item?')) return; bxMut(() => { const f = bxFind(id); f.arr.splice(f.i, 1); bxUI.sel = ''; }); }
+function bxDrop(colId, beforeId) { const id = bxUI.drag; bxUI.drag = ''; if (!id || id === beforeId) return; const src = bxFind(id); if (!src || src.kind !== 'w') return; bxMut(() => { const f = bxFind(id); f.arr.splice(f.i, 1); const dst = bxFind(colId).o.widgets, at = beforeId ? dst.findIndex(w => w.id === beforeId) : dst.length; dst.splice(at < 0 ? dst.length : at, 0, f.o); }); }
+
+/* ---------- inspetor ---------- */
+const bxSet = (id, path, v, rerender) => { bxMut(() => { const f = bxFind(id); let o = f.o; const a = path.split('.'); for (let i = 0; i < a.length - 1; i++) o = o[a[i]]; o[a[a.length - 1]] = v; }, rerender === true); };
+const bxLine = (id, label, path, val, ta) => `<div class="field"><label>${label}</label>${ta ? `<textarea rows="${ta}" oninput="bxSet('${id}','${path}',this.value)">${bxA(val)}</textarea>` : `<input value="${bxA(val)}" oninput="bxSet('${id}','${path}',this.value)">`}</div>`;
+function bxBpField(id, label, obj, key, kind, opts) {
+  const bp = bxBp(), own = bxOwn(obj, bp), eff = bxGet(obj, bp), tag = own ? '' : (eff != null ? ` <small class="muted">(herdado: ${kind === 'sel' ? eff : eff})</small>` : ' <small class="muted">(automático)</small>');
+  if (kind === 'sel') return `<div class="field"><label>${label} — ${BX_BP[bp]}${tag}</label><select onchange="bxBpSet('${id}','${key}','${bp}',this.value)"><option value="">${own ? '↺ voltar a herdar' : 'automático / herdado'}</option>${opts.map(([v, t]) => `<option value="${v}" ${own && obj[bp] == v ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`;
+  return `<div class="field"><label>${label} — ${BX_BP[bp]}${tag}</label><div class="row-gap"><input type="number" min="${opts[0]}" max="${opts[1]}" value="${own ? obj[bp] : ''}" placeholder="${eff != null ? eff : 'auto'}" onchange="bxBpSet('${id}','${key}','${bp}',this.value)" style="width:90px"><small class="muted">${opts[2] || ''}</small></div></div>`;
+}
+function bxBpSet(id, key, bp, v) { bxMut(() => { const f = bxFind(id); if (!f.o[key] || typeof f.o[key] !== 'object') f.o[key] = {}; if (v === '' || v == null) delete f.o[key][bp]; else f.o[key][bp] = isNaN(+v) ? v : +v; }); }
+function bxHideField(id, o) { const bp = bxBp(); if (bp === 'd') return ''; return `<label class="ins inl"><input type="checkbox" ${o.hide[bp] ? 'checked' : ''} onchange="bxSet('${id}','hide.${bp}',this.checked,true)"> ocultar neste dispositivo (${BX_BP[bp]})</label>`; }
+function bxInspector(f, bp) {
+  const o = f.o, id = o.id, A = [['left', 'Esquerda'], ['center', 'Centro'], ['right', 'Direita']];
+  if (f.kind === 'sec') return `<h4>Seção</h4>${bxLine(id, 'Nome (só para você)', 'name', o.name)}<div class="ins-row"><label class="ins">Largura<select onchange="bxSet('${id}','w',this.value,true)"><option value="box" ${o.w === 'box' ? 'selected' : ''}>Centralizada</option><option value="full" ${o.w === 'full' ? 'selected' : ''}>Tela cheia</option></select></label><label class="ins">Fundo<input type="color" value="${o.bg || '#ffffff'}" oninput="bxSet('${id}','bg',this.value,false)"></label><button class="btn sm" onclick="bxSet('${id}','bg','',true)">sem cor</button><label class="ins inl"><input type="checkbox" ${o.alt ? 'checked' : ''} onchange="bxSet('${id}','alt',this.checked,true)"> fundo suave</label></div>
+    ${bxBpField(id, 'Espaço acima', o.pad, 'pad', 'num', [0, 240, 'px'])}${bxBpField(id, 'Espaço abaixo', o.padB, 'padB', 'num', [0, 240, 'px'])}${bxBpField(id, 'Espaço entre colunas', o.gap, 'gap', 'num', [0, 80, 'px'])}
+    <div class="row-gap"><button class="btn sm" onclick="bxSecBg('${id}')">${o.bgImg ? 'Trocar' : '📚 Imagem'} de fundo</button>${o.bgImg ? `<button class="btn sm" onclick="bxSet('${id}','bgImg','',true)">Tirar</button>` : ''}</div>
+    <div class="field"><label>Trocar o número de colunas</label><select onchange="bxRelayout('${id}',this.value)"><option value="">— escolher —</option>${Object.entries(BX_LAYOUT_NAME).map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select></div>${bxHideField(id, o)}`;
+  if (f.kind === 'col') return `<h4>Coluna</h4>${bxBpField(id, 'Largura (de 12)', o.span, 'span', 'sel', Array.from({length: 12}, (_, i) => [i + 1, (i + 1) + '/12' + (i + 1 === 12 ? ' (inteira)' : i + 1 === 6 ? ' (metade)' : '')]))}<div class="field"><label>Alinhamento vertical</label><select onchange="bxSet('${id}','v',this.value,true)">${[['top', 'Topo'], ['center', 'Meio'], ['bottom', 'Base']].map(([v, t]) => `<option value="${v}" ${o.v === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div><small class="muted block">Ex.: 6/12 no computador e 12/12 no celular = duas colunas lado a lado que empilham no celular.</small>`;
+  const t = o.t, L = (k, lab, ta) => bxLine(id, lab, k, o[k], ta), common = bxBpField(id, 'Alinhamento', o.al, 'al', 'sel', A) + (['heading', 'text', 'feature'].includes(t) ? bxBpField(id, 'Tamanho da fonte', o.size, 'size', 'num', [10, 120, 'px']) : '') + bxHideField(id, o);
+  let body = '';
+  if (t === 'heading') body = L('text', 'Texto (use **negrito**)', 3) + `<div class="ins-row"><label class="ins">Nível<select onchange="bxSet('${id}','tag',this.value,false)">${['h1', 'h2', 'h3'].map(x => `<option ${o.tag === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label><label class="ins">Cor<input type="color" value="${o.color || '#141414'}" oninput="bxSet('${id}','color',this.value,false)"></label><button class="btn sm" onclick="bxSet('${id}','color','',true)">padrão</button></div>`;
+  else if (t === 'text') body = L('text', 'Texto (use **negrito**)', 5) + `<label class="ins inl"><input type="checkbox" ${o.muted ? 'checked' : ''} onchange="bxSet('${id}','muted',this.checked,false)"> cor suave</label>`;
+  else if (t === 'image') body = `<div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="bxImgPick('${id}')">📚 Biblioteca</button><button class="btn sm" onclick="bxImgUpload('${id}')">⬆ Enviar imagem</button>${o.imgId || o.src ? `<button class="btn sm" onclick="bxImgClear('${id}')">Remover</button>` : ''}</div>${bxLine(id, 'ou endereço da imagem (https://…)', 'src', o.src)}${bxLine(id, 'Texto alternativo (acessibilidade)', 'alt', o.alt)}<div class="ins-row"><label class="ins">Cantos (px)<input type="number" min="0" max="999" value="${o.rad}" onchange="bxSet('${id}','rad',+this.value,false)" style="width:70px"></label></div>${bxBpField(id, 'Largura da imagem', o.wpct, 'wpct', 'num', [10, 100, '% da coluna'])}`;
+  else if (t === 'video') body = bxLine(id, 'Link do vídeo (YouTube, Vimeo ou .mp4)', 'src', o.src) + `<div class="field"><label>Proporção</label><select onchange="bxSet('${id}','ratio',this.value,false)">${['16:9', '9:16', '1:1', '4:5'].map(x => `<option ${o.ratio === x ? 'selected' : ''}>${x}</option>`).join('')}</select></div><small class="muted block">Para vídeos grandes, hospede no YouTube/Vimeo e cole o link: o arquivo da página fica leve.</small>`;
+  else if (t === 'button') body = L('text', 'Texto do botão') + `<div class="field"><label>Para onde leva</label><select onchange="bxSet('${id}','link',this.value,true)">${[['checkout', 'Link de compra do produto'], ['form', 'Formulário da página'], ['whatsapp', 'WhatsApp'], ['custom', 'Outro endereço']].map(([v, n]) => `<option value="${v}" ${o.link === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>${o.link === 'custom' ? bxLine(id, 'Endereço (https://… ou #âncora)', 'href', o.href) : ''}<div class="ins-row"><label class="ins">Estilo<select onchange="bxSet('${id}','style',this.value,false)"><option value="solid" ${o.style === 'solid' ? 'selected' : ''}>Cheio</option><option value="outline" ${o.style === 'outline' ? 'selected' : ''}>Contorno</option></select></label><label class="ins inl"><input type="checkbox" ${o.full ? 'checked' : ''} onchange="bxSet('${id}','full',this.checked,false)"> largura total</label></div>`;
+  else if (t === 'list') body = `<div class="field"><label>Itens (um por linha)</label><textarea rows="5" oninput="bxSetItems('${id}',this.value)">${bxA(o.items.map(i => i.t).join('\n'))}</textarea></div><div class="field"><label>Marcador</label><select onchange="bxSet('${id}','icon',this.value,false)">${[['check', '✓'], ['x', '✕'], ['dot', '•']].map(([v, n]) => `<option value="${v}" ${o.icon === v ? 'selected' : ''}>${n}</option>`).join('')}</select></div>`;
+  else if (t === 'feature') body = L('emoji', 'Ícone (emoji, opcional)') + L('title', 'Título') + L('text', 'Descrição', 3);
+  else if (t === 'spacer') body = bxBpField(id, 'Altura', o.h, 'h', 'num', [0, 400, 'px']);
+  else if (t === 'form') body = L('title', 'Título') + L('text', 'Texto abaixo do título', 2) + L('text2', 'Texto do botão');
+  else if (t === 'countdown') body = bxLine(id, 'Data e hora (AAAA-MM-DDTHH:MM)', 'date', o.date);
+  else if (t === 'faq' || t === 'quote') body = o.items.map((it, n) => `<div class="lp-it"><input value="${bxA(it.t)}" placeholder="${t === 'faq' ? 'Pergunta' : 'Depoimento'}" oninput="bxItem('${id}',${n},'t',this.value)"><textarea rows="2" placeholder="${t === 'faq' ? 'Resposta' : 'Quem disse'}" oninput="bxItem('${id}',${n},'d',this.value)">${bxA(it.d)}</textarea><button class="btn sm" onclick="bxItemDel('${id}',${n})">×</button></div>`).join('') + `<button class="btn sm" onclick="bxItemAdd('${id}')">＋ Item</button>`;
+  return `<h4>${BX_W[t][0]}</h4>${body}${common}`;
+}
+function bxSetItems(id, v) { bxMut(() => { bxFind(id).o.items = v.split('\n').filter(x => x.trim()).map(x => ({t: x, d: ''})); }, false); }
+function bxItem(id, n, k, v) { bxMut(() => { bxFind(id).o.items[n][k] = v; }, false); }
+function bxItemAdd(id) { bxMut(() => { bxFind(id).o.items.push({t: '', d: ''}); }); }
+function bxItemDel(id, n) { bxMut(() => { bxFind(id).o.items.splice(n, 1); }); }
+function bxImgPick(id) { libPick(r => bxMut(() => { const o = bxFind(id).o; o.imgId = r.id; o.src = ''; })); }
+function bxImgUpload(id) { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/png,image/jpeg,image/webp'; i.onchange = async () => { if (!i.files[0]) return; try { const it = await libAddBlob(i.files[0], {name: i.files[0].name.replace(/\.[^.]+$/, ''), tags: ['site']}); bxMut(() => { const o = bxFind(id).o; o.imgId = it.imgId; o.src = ''; }); } catch (e) { toast(e.message); } }; i.click(); }
+function bxImgClear(id) { bxMut(() => { const o = bxFind(id).o; o.imgId = ''; o.src = ''; }); }
+function bxSecBg(id) { libPick(r => bxMut(() => { bxFind(id).o.bgImg = r.id; })); }
+function bxRelayout(id, k) { if (!k) return; bxMut(() => { const s = bxFind(id).o, spans = BX_LAYOUTS[k], old = s.cols, nc = spans.map((n, i) => old[i] ? Object.assign(old[i], {span: {d: n, t: n <= 4 ? 6 : 12, m: 12}}) : bxCol(n)); old.slice(spans.length).forEach(c => nc[nc.length - 1].widgets.push(...c.widgets)); s.cols = nc; }); }
+
+</script>
+<script>
+/* ===== Sites (várias páginas) com a lógica StoryBrand: BrandScript → páginas geradas, cabeçalho/menu/rodapé compartilhados, exportação em ZIP.
+   Os modelos abaixo seguem o roteiro público do StoryBrand (personagem, problema, guia, plano, chamada para ação, falha, sucesso); montados a partir do
+   método, não de uma leitura de site específico. ===== */
+const SITE_TPL = {
+  storybrand: {label: 'StoryBrand · página única', why: 'O wireframe clássico do StoryBrand numa página só: promessa → problema e consequências → proposta de valor → guia (empatia e autoridade) → plano em 3 passos → chamada para ação → sucesso → isca (lead magnet) → perguntas.',
+    pages: [{slug: 'index', label: 'Início', role: 'home', blocks: ['hero', 'dor', 'beneficios', 'autoridade', 'prova', 'passos', 'cta_final', 'texto', 'form', 'faq']}]},
+  servicos: {label: 'StoryBrand · site de serviços', why: 'Empresa ou profissional que presta serviço: Início (StoryBrand), Serviços, Sobre e Contato.',
+    pages: [{slug: 'index', label: 'Início', role: 'home', blocks: ['hero', 'dor', 'beneficios', 'passos', 'prova', 'cta_final']}, {slug: 'servicos', label: 'Serviços', role: 'oferta', blocks: ['hero', 'solucao', 'beneficios', 'passos', 'faq', 'cta_final']}, {slug: 'sobre', label: 'Sobre', role: 'sobre', blocks: ['hero', 'autoridade', 'texto', 'prova', 'cta_final']}, {slug: 'contato', label: 'Contato', role: 'contato', blocks: ['hero', 'form', 'local']}]},
+  produtos: {label: 'StoryBrand · site de produtos', why: 'Marca com produtos: Início (StoryBrand), Produtos, Sobre e Contato.',
+    pages: [{slug: 'index', label: 'Início', role: 'home', blocks: ['hero', 'dor', 'beneficios', 'prova', 'passos', 'cta_final']}, {slug: 'produtos', label: 'Produtos', role: 'oferta', blocks: ['hero', 'conteudo', 'beneficios', 'oferta', 'faq']}, {slug: 'sobre', label: 'Sobre', role: 'sobre', blocks: ['hero', 'autoridade', 'texto', 'prova']}, {slug: 'contato', label: 'Contato', role: 'contato', blocks: ['hero', 'form', 'local']}]},
+  autoridade: {label: 'StoryBrand · mentoria / autoridade', why: 'Especialista que vende método, mentoria ou consultoria: Início, Método, Sobre e Contato.',
+    pages: [{slug: 'index', label: 'Início', role: 'home', blocks: ['hero', 'dor', 'beneficios', 'autoridade', 'prova', 'cta_final']}, {slug: 'metodo', label: 'Método', role: 'oferta', blocks: ['hero', 'solucao', 'passos', 'para_quem', 'prova', 'faq']}, {slug: 'sobre', label: 'Sobre', role: 'sobre', blocks: ['hero', 'autoridade', 'texto', 'prova']}, {slug: 'contato', label: 'Contato', role: 'contato', blocks: ['hero', 'form', 'local']}]}
+};
+const SITE_ROLE = {home: 'Página inicial, no formato do StoryBrand: abre com a promessa e o botão; mostra o problema e o custo de não agir; a proposta de valor; o guia; o plano; a chamada final.', oferta: 'Página que detalha o que é oferecido e como funciona.', sobre: 'Página sobre quem está por trás: empatia (entende o problema do cliente) e autoridade (credenciais reais), sem falar só de si.', contato: 'Página de contato: facilitar o primeiro passo, com formulário curto.'};
+const BS_FIELDS = [
+  ['Personagem (o cliente)', [['who', 'Quem é o cliente?', 'Ex.: autônomo que usa consignado para fechar o mês'], ['wants', 'O que ele quer? (uma coisa só)', 'Ex.: pagar menos juros e dormir tranquilo']]],
+  ['Problema', [['external', 'Problema externo (o que acontece)', ''], ['internal', 'Problema interno (como ele se sente)', ''], ['philosophical', 'Problema filosófico (por que é errado alguém passar por isso)', '']]],
+  ['Guia', [['empathy', 'Empatia (mostre que entende)', ''], ['authority', 'Autoridade (credenciais REAIS: casos, tempo, números, prêmios)', 'Só o que existe de verdade']]],
+  ['Plano', [['step1', 'Passo 1', ''], ['step2', 'Passo 2', ''], ['step3', 'Passo 3', ''], ['agreement', 'Plano de acordo (garantias, compromissos)', '']]],
+  ['Chamada para ação', [['direct', 'Chamada direta (comprar, agendar, ligar)', 'Ex.: Agende uma conversa'], ['transitional', 'Chamada transitória / isca (e-book, checklist, vídeo)', 'Ex.: Baixe o checklist grátis']]],
+  ['Falha e sucesso', [['failure', 'O que ele evita? (falha / custo de não agir)', ''], ['success', 'Como fica a vida dele depois? (sucesso)', ''], ['identity', 'Quem ele se torna? (transformação de identidade)', '']]]
+];
+const siteCur = () => { const p = curProject(); return p && p.sites.find(x => x.id === lpUI.site); };
+const siteA = esc;
+
+/* ---------- lista ---------- */
+function lpMainSites(b, p) {
+  if (lpUI.site && siteCur()) return siteEditor(b, p, siteCur());
+  b.innerHTML = `<div class="panel"><div class="section-row"><div><h3>Sites</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">Vários páginas com o mesmo cabeçalho, menu e rodapé, escritas a partir do BrandScript do StoryBrand. Escolha um modelo, preencha (ou peça para a IA preencher) o BrandScript e gere as páginas; cada página abre no editor visual.</p></div><button class="btn dark sm" onclick="siteNewModal()">＋ Novo site</button></div>
+  ${p.sites.length ? p.sites.map(s => { const pg = p.landings.filter(l => l.siteId === s.id); return `<div class="list-item"><div><strong>${siteA(s.name)}</strong><small>${siteA((SITE_TPL[s.tpl] || {label: 'Site'}).label)} · ${pg.length} página(s): ${siteA(pg.map(l => l.navLabel || l.name).join(', '))}</small></div><div class="row-gap"><button class="btn sm dark" onclick="lpUI.site='${s.id}';renderLandings()">Abrir</button><button class="btn sm" onclick="siteExport('${s.id}')">⬇ ZIP</button><button class="btn sm" onclick="siteDel('${s.id}')">×</button></div></div>`; }).join('') : '<p class="muted" style="margin-top:10px">Nenhum site ainda.</p>'}</div>`;
+}
+function siteNewModal() {
+  const p = curProject();
+  showModal('Novo site', `<div class="field"><label>Nome do site</label><input id="snName" placeholder="Ex.: Studio Aurora"></div><div class="field"><label>Produto ou serviço principal (opcional)</label><select id="snP"><option value="">— nenhum —</option>${p.products.map(x => `<option value="${x.id}">${siteA(x.name)}</option>`).join('')}</select></div><div class="okr-label">MODELO</div><div class="lp-types">${Object.entries(SITE_TPL).map(([k, t], i) => `<label class="lp-type"><input type="radio" name="snT" value="${k}" ${i === 1 ? 'checked' : ''}><b>${siteA(t.label)}</b><small class="muted">${siteA(t.why)}</small><small class="mono muted">${t.pages.map(x => x.label).join(' · ')}</small></label>`).join('')}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="siteCreate()">Criar site</button></div>`);
+  document.getElementById('modalBox').classList.add('wide');
+}
+function siteCreate() {
+  const p = curProject(), name = $('snName').value.trim() || 'Meu site', tpl = (document.querySelector('input[name=snT]:checked') || {}).value || 'servicos', T = SITE_TPL[tpl], pr = p.products.find(x => x.id === $('snP').value);
+  const site = normalizeSites([{id: uid('st'), name, tpl, productId: pr ? pr.id : '', brand: name, headerCta: 'Fale com a gente', brief: pr ? [pr.summary && 'Descrição: ' + pr.summary].filter(Boolean).join('\n') : ''}])[0];
+  p.sites.push(site); const theme = lpTheme(p);
+  T.pages.forEach(pg => { const l = normalizeLandings([{id: uid('lp'), name: name + ' — ' + pg.label, siteId: site.id, slug: pg.slug, navLabel: pg.label, type: 'generico', productId: pr ? pr.id : '', product: pr ? {nome: pr.name, preco: pr.price, publico: pr.audience, checkout: pr.checkout} : {}, theme, cta: 'Fale com a gente', blocks: pg.blocks.map(lpBlockNew), status: 'Rascunho'}])[0]; l.siteRole = pg.role; p.landings.push(l); });
+  persist(); closeModal(); lpUI.main = 'sites'; lpUI.site = site.id; renderLandings();
+}
+function siteDel(id) { if (!confirm('Excluir o site e todas as suas páginas?')) return; const p = curProject(); p.sites = p.sites.filter(s => s.id !== id); p.landings = p.landings.filter(l => l.siteId !== id); lpUI.site = ''; persist(); renderLandings(); }
+
+/* ---------- editor do site ---------- */
+function siteEditor(b, p, s) {
+  const pages = p.landings.filter(l => l.siteId === s.id), prods = p.products;
+  b.innerHTML = `<div class="row-gap" style="margin-bottom:10px"><button class="btn sm" onclick="lpUI.site='';renderLandings()">← Todos os sites</button><h2 style="margin:0">${siteA(s.name)}</h2><span class="so-badge" style="margin:0">${siteA((SITE_TPL[s.tpl] || {}).label || '')}</span><span style="flex:1"></span><button class="btn dark" onclick="siteExport('${s.id}')">⬇ Exportar site (ZIP)</button></div>
+  <div class="lp-wrap" style="grid-template-columns:minmax(0,1fr) 420px"><div>
+  ${accSec('st', 'bs', '1 · BrandScript (StoryBrand)', 'a história que o site conta', `<div class="row-gap" style="margin-bottom:8px;flex-wrap:wrap"><button class="btn sm dark" onclick="siteFillBS()" ${aiReady() && !lpUI.busy ? '' : 'disabled'}>${lpUI.busy === 'bs' ? 'Pensando…' : '✦ Preencher com IA a partir do resumo'}</button></div><div class="field"><label>Resumo do negócio (o que vende, para quem, diferenciais reais)</label><textarea rows="5" oninput="siteCur().brief=this.value;persist()" placeholder="Cole aqui o que você sabe: produto, público, dores, números reais, garantias…">${siteA(s.brief)}</textarea></div>${BS_FIELDS.map(([t, fs]) => `<div class="okr-label" style="margin-top:10px">${t.toUpperCase()}</div>${fs.map(([k, l, ph]) => `<div class="field"><label>${l}</label><textarea rows="2" oninput="siteCur().bs.${k}=this.value;persist()" placeholder="${siteA(ph)}">${siteA(s.bs[k])}</textarea></div>`).join('')}`).join('')}`, true)}
+  ${accSec('st', 'pg', '2 · Páginas do site', pages.length + ' páginas', `<small class="muted block" style="margin-bottom:6px">Cada página abre no editor (blocos, editor visual, estilo). O menu segue esta ordem.</small>${pages.map((l, i) => `<div class="list-item"><div><strong>${siteA(l.navLabel || l.name)}</strong><small>/${siteA(l.slug === 'index' ? '' : l.slug + '.html')} · ${(l.blocks || []).filter(x => x.on).length} blocos${lpPending(l) ? ` · <span class="so-warn">${lpPending(l)} a confirmar</span>` : ''}${l.vis ? ' · editor visual' : ''}</small></div><div class="row-gap"><button class="btn sm" onclick="siteMovePage('${l.id}',-1)" ${i === 0 ? 'disabled' : ''}>▲</button><button class="btn sm" onclick="siteMovePage('${l.id}',1)" ${i === pages.length - 1 ? 'disabled' : ''}>▼</button><button class="btn sm dark" onclick="lpUI.back='site';lpOpen('${l.id}')">Abrir</button><button class="btn sm" onclick="siteGenOne('${l.id}')" ${aiReady() && !lpUI.busy ? '' : 'disabled'} title="Reescreve esta página com o BrandScript">✦</button><button class="btn sm" onclick="sitePageDel('${l.id}')">×</button></div></div>`).join('')}<div class="row-gap" style="margin-top:8px"><button class="btn dark" onclick="siteGenAll()" ${aiReady() && !lpUI.busy ? '' : 'disabled'}>${lpUI.busy === 'all' ? 'Escrevendo as páginas…' : '✦ Gerar todas as páginas com o BrandScript'}</button><button class="btn" onclick="siteAddPage()">＋ Página</button></div><small class="muted block" style="margin-top:6px">A IA escreve só com o BrandScript e os fatos do produto. O que faltar fica como <b>[CONFIRMAR]</b>.</small>`, true)}</div>
+  <div>${accSec('st', 'ch', 'Cabeçalho, menu e rodapé', '', `<div class="field"><label>Nome da marca (no cabeçalho)</label><input value="${siteA(s.brand)}" oninput="siteCur().brand=this.value;persist()"></div><div class="field"><label>Botão do cabeçalho (vazio = sem botão)</label><input value="${siteA(s.headerCta)}" oninput="siteCur().headerCta=this.value;persist()"></div><div class="field"><label>Texto do rodapé</label><textarea rows="2" oninput="siteCur().footer=this.value;persist()">${siteA(s.footer)}</textarea></div><div class="field"><label>Contato no rodapé (endereço, telefone, e-mail)</label><textarea rows="3" oninput="siteCur().contact=this.value;persist()">${siteA(s.contact)}</textarea></div>${p.products.length ? `<div class="field"><label>Produto principal</label><select onchange="siteSetProduct(this.value)"><option value="">— nenhum —</option>${p.products.map(x => `<option value="${x.id}" ${x.id === s.productId ? 'selected' : ''}>${siteA(x.name)}</option>`).join('')}</select></div>` : ''}`, true)}
+  <div class="panel" style="margin-top:10px"><h3>Publicar</h3><p class="muted" style="font-size:12.5px;margin:0">O ZIP traz uma página por arquivo (<span class="mono">index.html</span>, <span class="mono">servicos.html</span>…), com o menu ligando uma à outra e funcionando no celular. Suba tudo na raiz da hospedagem. O formulário usa a URL de leads de Configurações.</p></div></div></div>`;
+}
+function siteSetProduct(id) { const p = curProject(), s = siteCur(); s.productId = id; const x = p.products.find(y => y.id === id); p.landings.filter(l => l.siteId === s.id).forEach(l => { l.productId = id; if (x) Object.assign(l.product, {nome: x.name, preco: x.price, publico: x.audience, checkout: x.checkout}); }); persist(); renderLandings(); }
+function siteMovePage(id, d) { const p = curProject(), a = p.landings, i = a.findIndex(l => l.id === id), s = a[i].siteId; let j = i + d; while (j >= 0 && j < a.length && a[j].siteId !== s) j += d; if (j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; persist(); renderLandings(); }
+function sitePageDel(id) { if (!confirm('Remover esta página do site?')) return; const p = curProject(); p.landings = p.landings.filter(l => l.id !== id); persist(); renderLandings(); }
+function siteAddPage() {
+  showModal('Nova página do site', `<div class="field"><label>Nome no menu</label><input id="spN" placeholder="Ex.: Blog, Depoimentos"></div><div class="field"><label>Estrutura</label><select id="spT"><option value="home">Início (StoryBrand)</option><option value="oferta">Serviços / produtos</option><option value="sobre">Sobre</option><option value="contato">Contato</option></select></div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="siteAddPageSave()">Criar</button></div>`);
+}
+function siteAddPageSave() {
+  const p = curProject(), s = siteCur(), n = $('spN').value.trim() || 'Nova página', role = $('spT').value, pg = Object.values(SITE_TPL).flatMap(t => t.pages).find(x => x.role === role), base = slug(n) || 'pagina', ex = p.landings.filter(l => l.siteId === s.id).map(l => l.slug);
+  let sl = base; for (let i = 2; ex.includes(sl); i++) sl = base + '-' + i;
+  const l = normalizeLandings([{id: uid('lp'), name: s.name + ' — ' + n, siteId: s.id, slug: sl.slice(0, 40), navLabel: n, type: 'generico', productId: s.productId, theme: ((p.landings.find(x => x.siteId === s.id) || {}).theme) || lpTheme(p), blocks: pg.blocks.map(lpBlockNew)}])[0]; l.siteRole = role; p.landings.push(l); persist(); closeModal(); renderLandings();
+}
+/* ---------- IA: BrandScript e páginas ---------- */
+async function siteFillBS() {
+  const s = siteCur(); if (!s.brief.trim()) { toast('Escreva o resumo do negócio primeiro.'); return; } lpUI.busy = 'bs'; renderLandings();
+  try {
+    const x = curProject().products.find(y => y.id === s.productId), facts = x ? `PRODUTO: ${x.name}. Benefícios: ${x.benefits.join(' | ')}. Características: ${x.features.join(' | ')}. Provas reais: ${x.proofs.join(' | ') || '(nenhuma)'}.\n` : '';
+    const j = await aiJSON('Você é consultor de marca pelo método StoryBrand. Monte o BrandScript do negócio com base SÓ no resumo (e nos fatos do produto). Frases curtas, na voz do cliente. NUNCA invente credenciais, números, prêmios, garantias ou clientes: onde faltar, escreva "[CONFIRMAR: o que falta]". JSON: {"who":"","wants":"","external":"","internal":"","philosophical":"","empathy":"","authority":"","step1":"","step2":"","step3":"","agreement":"","direct":"","transitional":"","failure":"","success":"","identity":""}', facts + s.brief);
+    Object.keys(s.bs).forEach(k => { if (j[k] != null && !s.bs[k].trim()) s.bs[k] = String(j[k]).slice(0, 800); }); persist(); toast('BrandScript preenchido (só os campos vazios). Revise e ajuste.');
+  } catch (e) { toast(eErr(e)); }
+  lpUI.busy = ''; renderLandings();
+}
+const SB_ROLE = {hero: 'promessa do que a pessoa conquista (título aspiracional, subtítulo com para quem/como) + botão direto', dor: 'problema externo, interno e filosófico + o custo de não agir (falha)', beneficios: 'proposta de valor: 3 benefícios do sucesso', autoridade: 'o guia: empatia (entendo você) + autoridade (credenciais REAIS)', prova: 'depoimentos/casos REAIS (senão [CONFIRMAR])', passos: 'o plano em 3 passos simples + plano de acordo', cta_final: 'chamada direta para ação, lembrando o que ele evita e conquista', texto: 'o sucesso: como a vida do cliente fica depois + quem ele se torna', form: 'chamada transitória (isca) ou contato: o que ele recebe ao enviar', faq: 'objeções que travam a decisão', solucao: 'como o serviço resolve, passo a passo', local: 'onde estamos / como falar com a gente', conteudo: 'o que está incluso em cada produto/serviço', oferta: 'o que está incluso, condição e botão', para_quem: 'para quem é e para quem não é'};
+function siteBSText(s) { const b = s.bs, L = [['Cliente', b.who], ['Quer', b.wants], ['Problema externo', b.external], ['Problema interno', b.internal], ['Problema filosófico', b.philosophical], ['Empatia', b.empathy], ['Autoridade', b.authority], ['Plano', [b.step1, b.step2, b.step3].filter(Boolean).join(' → ')], ['Plano de acordo', b.agreement], ['Chamada direta', b.direct], ['Chamada transitória (isca)', b.transitional], ['Falha (custo de não agir)', b.failure], ['Sucesso', b.success], ['Identidade', b.identity]]; return L.filter(x => x[1]).map(x => `${x[0]}: ${x[1]}`).join('\n'); }
+async function siteGenPage(s, l) {
+  const blocks = l.blocks.filter(b => b.on), role = SITE_ROLE[l.siteRole] || '';
+  const j = await motJSON('Você escreve sites pelo método StoryBrand: o cliente é o herói, a marca é o guia. Português do Brasil, frases curtas e específicas, sem clichês. ' + (eBrandTxt() ? '\n' + eBrandTxt().slice(0, 4000) : ''),
+    `PÁGINA: ${l.navLabel} — ${role}\n\nBRANDSCRIPT:\n${siteBSText(s) || '(vazio)'}\n\n${lpProductFacts(l)}RESUMO:\n${s.brief.slice(0, 5000)}\n\nESTRUTURA (na ordem; um objeto por bloco):\n${blocks.map((b, i) => `${i + 1}. t="${b.t}" — ${LP_BLOCK[b.t].ai}. Papel no StoryBrand: ${SB_ROLE[b.t] || ''}`).join('\n')}\n\nFormato: JSON {"blocks":[{"t":"hero","kicker":"","title":"","text":"","cta":"","note":"","name":"","price":"","items":[{"t":"","d":""}],"yes":[],"no":[]}]}. Regras: NUNCA invente números, depoimentos, nomes, prazos, garantias ou credenciais: onde faltar, [CONFIRMAR: o que falta]; sem promessa de resultado garantido.`, 6500);
+  const got = Array.isArray(j.blocks) ? j.blocks : []; if (!got.length) throw new Error('a IA não devolveu a página ' + l.navLabel + '.'); lpMerge(l, got); if (l.vis) l.vis = bxFromBlocks(l);
+}
+async function siteGenAll() {
+  const p = curProject(), s = siteCur(); if (!siteBSText(s)) { toast('Preencha o BrandScript (ou use “Preencher com IA”) antes de gerar.'); return; } lpUI.busy = 'all'; renderLandings();
+  try { for (const l of p.landings.filter(x => x.siteId === s.id)) { await siteGenPage(s, l); persist(); } toast('Páginas escritas. Abra cada uma para revisar o que estiver em [CONFIRMAR].'); } catch (e) { toast(eErr(e)); }
+  lpUI.busy = ''; renderLandings();
+}
+async function siteGenOne(id) { const p = curProject(), s = siteCur(), l = p.landings.find(x => x.id === id); if (!siteBSText(s)) { toast('Preencha o BrandScript antes.'); return; } lpUI.busy = 'one'; renderLandings(); try { await siteGenPage(s, l); persist(); toast('Página reescrita.'); } catch (e) { toast(eErr(e)); } lpUI.busy = ''; renderLandings(); }
+
+/* ---------- exportação ---------- */
+async function siteExport(id) {
+  const p = curProject(), s = p.sites.find(x => x.id === id), pages = p.landings.filter(l => l.siteId === id); if (!pages.length) { toast('O site não tem páginas.'); return; }
+  const pend = pages.reduce((n, l) => n + lpPending(l), 0); if (pend) toast(`Atenção: ${pend} item(ns) ainda como [CONFIRMAR].`); toast('Montando o ZIP…');
+  const enc = new TextEncoder(), files = []; for (const l of pages) files.push({name: lpFile(l), data: enc.encode(await lpHTML(l, p))});
+  if (!files.some(f => f.name === 'index.html')) files[0] = {name: 'index.html', data: files[0].data};
+  download(slug(s.name) + '-site.zip', makeZip(files), 'application/zip'); pages.forEach(l => { l.status = 'Exportada'; }); persist();
 }
 
 </script>

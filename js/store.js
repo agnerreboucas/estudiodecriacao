@@ -29,7 +29,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, social: {}, products: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -179,22 +179,45 @@ function normalizeSocial(x) {
 /* Landing pages: dados do produto, insumos, blocos (tipos fixos, textos limitados), visual e rastreio. Mantém os campos antigos (headline, sub, bullets, cta, whatsapp). */
 const LP_BLOCK_TYPES = ['hero', 'numeros', 'dor', 'solucao', 'beneficios', 'passos', 'conteudo', 'amostra', 'para_quem', 'autoridade', 'prova', 'oferta', 'bonus', 'garantia', 'faq', 'programa', 'palestrantes', 'local', 'ingressos', 'texto', 'cta_final', 'form'];
 /* Produtos do projeto: a fonte dos fatos (benefícios, características, objeções, provas) que alimenta as landing pages e os sites */
+/* Sites: várias páginas com cabeçalho, menu e rodapé compartilhados + BrandScript (StoryBrand). As páginas são landings com siteId. */
+function normalizeSites(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || ''));
+  return (Array.isArray(x) ? x : []).filter(s => s && sid(s.id)).slice(0, 50).map(s => { const b = s.bs || {}, o = (k, n) => str(b[k], n);
+    return {id: s.id, name: str(s.name, 120) || 'Site', tpl: str(s.tpl, 30), productId: sid(s.productId) ? s.productId : '', brief: str(s.brief, 8000), brand: str(s.brand, 80), headerCta: str(s.headerCta, 40), footer: str(s.footer, 400), contact: str(s.contact, 300),
+      bs: {who: o('who', 800), wants: o('wants', 800), external: o('external', 800), internal: o('internal', 800), philosophical: o('philosophical', 800), empathy: o('empathy', 800), authority: o('authority', 1200), step1: o('step1', 400), step2: o('step2', 400), step3: o('step3', 400), agreement: o('agreement', 800), direct: o('direct', 200), transitional: o('transitional', 300), failure: o('failure', 1000), success: o('success', 1000), identity: o('identity', 600)}, created: str(s.created, 40) || new Date().toISOString()}; });
+}
 function normalizeProducts(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), lines = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(t => str(t, n)).filter(Boolean), TY = ['curso', 'ebook', 'servico', 'evento', 'produto', 'cadastro'];
   return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 200).map(r => ({id: r.id, name: str(r.name, 160) || 'Produto', type: TY.includes(r.type) ? r.type : 'produto', summary: str(r.summary, 2000), price: str(r.price, 80), audience: str(r.audience, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(r.checkout || '') ? r.checkout : '',
     benefits: lines(r.benefits, 300, 30), features: lines(r.features, 300, 40), objections: lines(r.objections, 300, 20), proofs: lines(r.proofs, 400, 20), images: (Array.isArray(r.images) ? r.images : []).filter(sid).slice(0, 8), created: str(r.created, 40) || new Date().toISOString()}));
+}
+/* Editor visual (estilo Elementor): seções → colunas (grade de 12, com largura por dispositivo) → widgets. Tudo com tipos e limites fixos. */
+const BX_WIDGETS = ['heading', 'text', 'image', 'video', 'button', 'list', 'feature', 'spacer', 'divider', 'form', 'faq', 'quote', 'countdown'];
+function normalizeVis(v) {
+  if (!v || typeof v !== 'object' || !Array.isArray(v.sections)) return null;
+  const str = (x, n) => String(x == null ? '' : x).slice(0, n), sid = x => /^[\w-]{1,60}$/.test(String(x || '')) ? x : uid('bx'), hex = x => /^#[0-9a-f]{6}$/i.test(String(x)) ? String(x) : '', num = (x, lo, hi, d) => { x = +x; return isFinite(x) ? Math.min(hi, Math.max(lo, Math.round(x))) : d; };
+  const bp = (o, f) => { o = o && typeof o === 'object' ? o : {}; const r = {}; ['d', 't', 'l', 'm'].forEach(k => { if (o[k] != null && o[k] !== '') { const y = f(o[k]); if (y != null) r[k] = y; } }); return r; };
+  const hide = o => ({t: !!(o && o.t), l: !!(o && o.l), m: !!(o && o.m)}), al = x => ['left', 'center', 'right'].includes(x) ? x : null;
+  const url = x => (/^https?:\/\/[^\s"'<>]{1,600}$/i.test(String(x || '')) ? String(x) : '');
+  const widget = w => { if (!w || !BX_WIDGETS.includes(w.t)) return null; return {id: sid(w.id), t: w.t, hide: hide(w.hide), al: bp(w.al, al), size: bp(w.size, x => num(x, 10, 120, null)), wpct: bp(w.wpct, x => num(x, 10, 100, null)), h: bp(w.h, x => num(x, 0, 400, null)),
+    text: str(w.text, 4000), title: str(w.title, 300), tag: ['h1', 'h2', 'h3'].includes(w.tag) ? w.tag : 'h2', color: hex(w.color), muted: !!w.muted, imgId: /^[\w-]{1,60}$/.test(w.imgId || '') ? w.imgId : '', src: url(w.src), alt: str(w.alt, 200), rad: num(w.rad, 0, 60, 12),
+    ratio: ['16:9', '9:16', '1:1', '4:5'].includes(w.ratio) ? w.ratio : '16:9', link: ['checkout', 'form', 'whatsapp', 'custom'].includes(w.link) ? w.link : 'checkout', href: /^(https?:\/\/[^\s"'<>]{1,600}|#[\w-]{1,60}|mailto:[^\s"'<>]{1,200}|tel:[+\d]{3,20})$/i.test(w.href || '') ? w.href : '', style: ['solid', 'outline'].includes(w.style) ? w.style : 'solid', full: !!w.full, icon: ['check', 'x', 'dot'].includes(w.icon) ? w.icon : 'check', emoji: str(w.emoji, 4), date: /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/.test(w.date || '') ? w.date : '',
+    items: (Array.isArray(w.items) ? w.items : []).slice(0, 30).map(i => (typeof i === 'string' ? {t: str(i, 400), d: ''} : {t: str(i && i.t, 400), d: str(i && i.d, 1200)}))}; };
+  const sections = v.sections.slice(0, 40).map(s => s && typeof s === 'object' ? ({id: sid(s.id), name: str(s.name, 80), w: s.w === 'full' ? 'full' : 'box', bg: hex(s.bg), alt: !!s.alt, bgImg: /^[\w-]{1,60}$/.test(s.bgImg || '') ? s.bgImg : '', pad: bp(s.pad, x => num(x, 0, 240, null)), padB: bp(s.padB, x => num(x, 0, 240, null)), hide: hide(s.hide), gap: bp(s.gap, x => num(x, 0, 80, null)),
+    cols: (Array.isArray(s.cols) ? s.cols : []).slice(0, 24).map(c => ({id: sid(c && c.id), span: bp(c && c.span, x => num(x, 1, 12, null)), v: ['top', 'center', 'bottom'].includes(c && c.v) ? c.v : 'top', widgets: (Array.isArray(c && c.widgets) ? c.widgets : []).slice(0, 30).map(widget).filter(Boolean)}))}) : null).filter(Boolean);
+  return {sections};
 }
 function normalizeLandings(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TY = ['curso', 'ebook', 'servico', 'evento', 'cadastro', 'generico'];
   return (Array.isArray(x) ? x : []).filter(l => l && typeof l === 'object').slice(0, 200).map(l => {
     const pr = l.product || {}, th = l.theme || {}, tr = l.tracking || {};
     return {id: sid(l.id) ? l.id : uid('lp'), name: str(l.name, 120) || 'Landing page', goal: str(l.goal, 30) || 'Gerar lead', headline: str(l.headline, 300), sub: str(l.sub, 500), bullets: str(l.bullets, 3000), cta: str(l.cta, 80) || 'Enviar', whatsapp: str(l.whatsapp, 20).replace(/\D/g, ''), status: str(l.status, 30) || 'Rascunho',
-      type: TY.includes(l.type) ? l.type : '', productId: sid(l.productId) ? l.productId : '', pick: {b: (l.pick && Array.isArray(l.pick.b) ? l.pick.b : []).slice(0, 40).map(n => Math.max(0, Math.round(+n) || 0)), f: (l.pick && Array.isArray(l.pick.f) ? l.pick.f : []).slice(0, 40).map(n => Math.max(0, Math.round(+n) || 0)), all: !l.pick || l.pick.all !== false}, group: sid(l.group) ? l.group : '', variant: /^[A-Z]$/.test(l.variant || '') ? l.variant : '', angle: str(l.angle, 120), product: {nome: str(pr.nome, 160), preco: str(pr.preco, 80), publico: str(pr.publico, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(pr.checkout || '') ? pr.checkout : '', data: str(pr.data, 80), local: str(pr.local, 200)}, input: str(l.input, 60000),
+      type: TY.includes(l.type) ? l.type : '', productId: sid(l.productId) ? l.productId : '', pick: {b: (l.pick && Array.isArray(l.pick.b) ? l.pick.b : []).slice(0, 40).map(n => Math.max(0, Math.round(+n) || 0)), f: (l.pick && Array.isArray(l.pick.f) ? l.pick.f : []).slice(0, 40).map(n => Math.max(0, Math.round(+n) || 0)), all: !l.pick || l.pick.all !== false}, siteId: sid(l.siteId) ? l.siteId : '', siteRole: str(l.siteRole, 20), slug: /^[a-z0-9-]{1,40}$/.test(l.slug || '') ? l.slug : '', navLabel: str(l.navLabel, 40), group: sid(l.group) ? l.group : '', variant: /^[A-Z]$/.test(l.variant || '') ? l.variant : '', angle: str(l.angle, 120), product: {nome: str(pr.nome, 160), preco: str(pr.preco, 80), publico: str(pr.publico, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(pr.checkout || '') ? pr.checkout : '', data: str(pr.data, 80), local: str(pr.local, 200)}, input: str(l.input, 60000),
       theme: {accent: hex(th.accent, '#e4572e'), bg: hex(th.bg, '#ffffff'), fg: hex(th.fg, '#141414'), dark: !!th.dark, head: str(th.head, 60) || 'Poppins', body: str(th.body, 60) || 'Inter'},
       tracking: {metaPixel: /^\d{5,20}$/.test(tr.metaPixel || '') ? tr.metaPixel : '', ga4: /^G-[A-Z0-9]{4,14}$/.test(tr.ga4 || '') ? tr.ga4 : ''}, privacyUrl: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(l.privacyUrl || '') ? l.privacyUrl : '',
       blocks: (Array.isArray(l.blocks) ? l.blocks : []).filter(b => b && LP_BLOCK_TYPES.includes(b.t)).slice(0, 40).map(b => ({id: sid(b.id) ? b.id : uid('bk'), t: b.t, on: b.on !== false, title: str(b.title, 300), text: str(b.text, 3000), kicker: str(b.kicker, 120), cta: str(b.cta, 80), note: str(b.note, 300), name: str(b.name, 160), price: str(b.price, 80), imgId: sid(b.imgId) ? b.imgId : '',
         items: (Array.isArray(b.items) ? b.items : []).slice(0, 30).map(i => ({t: str(i && i.t, 400), d: str(i && i.d, 1200)})), yes: (Array.isArray(b.yes) ? b.yes : []).slice(0, 12).map(t => str(t, 300)), no: (Array.isArray(b.no) ? b.no : []).slice(0, 12).map(t => str(t, 300))})),
-      created: str(l.created, 40) || new Date().toISOString()};
+      vis: normalizeVis(l.vis), created: str(l.created, 40) || new Date().toISOString()};
   });
 }
 function normalizeCarousel(c) {
@@ -231,7 +254,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');

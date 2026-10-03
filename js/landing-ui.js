@@ -9,8 +9,8 @@ function renderLandings() {
   if (lpUI.id) return lpEditor(r, p, lpCur());
   eSrc.sink = null; eSrc.render = null; const T = lpUI.main || 'paginas';
   r.innerHTML = `<div class="page-head"><div><h1>Sites e landing pages</h1><p>Escolha o produto do projeto e o tipo de página; a página nasce dos benefícios e características dele, com variações A/B para ver qual converte mais.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="lpNewModal()">＋ Nova página</button></div></div>
-  <div class="edh-tabs">${[['paginas', 'Páginas'], ['produtos', 'Produtos do projeto'], ['refs', 'Referências']].map(([k, t]) => `<button class="edh-tab ${T === k ? 'on' : ''}" onclick="lpUI.main='${k}';renderLandings()">${t}</button>`).join('')}</div><div id="lpMain"></div>`;
-  ({paginas: lpMainPaginas, produtos: lpMainProdutos, refs: lpMainRefs})[T]($('lpMain'), p);
+  <div class="edh-tabs">${[['paginas', 'Páginas'], ['sites', 'Sites'], ['produtos', 'Produtos do projeto'], ['refs', 'Referências']].map(([k, t]) => `<button class="edh-tab ${T === k ? 'on' : ''}" onclick="lpUI.main='${k}';renderLandings()">${t}</button>`).join('')}</div><div id="lpMain"></div>`;
+  ({paginas: lpMainPaginas, sites: lpMainSites, produtos: lpMainProdutos, refs: lpMainRefs})[T]($('lpMain'), p);
 }
 const lpMainRefs = b => { b.innerHTML = lpRefsHTML().replace('style="margin-top:14px"', ''); };
 
@@ -19,7 +19,7 @@ async function lpLoadStats(p) {
   if (!canUseApi() || lpUI.statsAt === p.id + p.landings.length) return; lpUI.statsAt = p.id + p.landings.length;
   try { const j = await api('lp.php?action=stats&ids=' + encodeURIComponent(p.landings.map(l => l.id).join(','))); lpUI.stats = j.stats || {}; if (lpUI.main === 'paginas' && ui.page === 'landings' && !lpUI.id) renderLandings(); } catch (e) { lpUI.stats = lpUI.stats || {}; }
 }
-function lpGroups(p) { const g = new Map(); p.landings.forEach(l => { const k = l.group || l.id; if (!g.has(k)) g.set(k, []); g.get(k).push(l); }); return [...g.values()].map(a => a.sort((x, y) => (x.variant || 'A').localeCompare(y.variant || 'A'))); }
+function lpGroups(p) { const g = new Map(); p.landings.filter(l => !l.siteId).forEach(l => { const k = l.group || l.id; if (!g.has(k)) g.set(k, []); g.get(k).push(l); }); return [...g.values()].map(a => a.sort((x, y) => (x.variant || 'A').localeCompare(y.variant || 'A'))); }
 /* duas proporções: só declara vencedor com amostra mínima e diferença estatisticamente clara (z ≥ 1,96) */
 function lpAB(a, b) {
   const MIN = 100; if (a.view < MIN || b.view < MIN) return {ok: false, msg: `sem amostra suficiente (mínimo de ${MIN} visitas por versão)`};
@@ -103,21 +103,24 @@ function lpCreate(init) {
 function lpOpen(id) {
   const l = curProject().landings.find(x => x.id === id); if (!l) return;
   if (!l.type) l.type = 'generico'; if (!(l.blocks || []).length) l.blocks = lpSeedBlocks(l);
-  lpUI.id = id; lpUI.tab = 'blocos'; persist(); renderLandings();
+  lpUI.id = id; lpUI.tab = 'blocos'; if (!lpUI.back) lpUI.back = ''; persist(); renderLandings();
 }
 function lpDelete(id) { if (!confirm('Excluir esta landing page?')) return; const p = curProject(); p.landings = p.landings.filter(x => x.id !== id); persist(); renderLandings(); }
 async function lpExport(id) { const p = curProject(), l = p.landings.find(x => x.id === id); if (!l.blocks.length) { lpOpen(id); return; } if (!state.workspace.leadsUrl && l.blocks.some(b => b.t === 'form' && b.on)) toast('Dica: defina a URL de captura de leads em Configurações antes de publicar.'); if (lpPending(l)) toast(`Atenção: ${lpPending(l)} item(ns) ainda marcado(s) como [CONFIRMAR].`); download(slug(l.name) + '.html', await lpHTML(l, p), 'text/html'); l.status = 'Exportada'; persist(); renderLandings(); }
 
 /* ---------- editor ---------- */
 function lpEditor(r, p, l) {
-  const tabs = [['produto', 'Produto e insumos'], ['blocos', 'Blocos'], ['visual', 'Visual'], ['publicar', 'Publicar']];
-  r.innerHTML = `<div class="page-head"><div><button class="btn sm" onclick="lpUI.id='';renderLandings()">← Todas as landing pages</button><h1 style="margin-top:8px">${lpA(l.name)}</h1></div><div class="actions"><span class="so-badge" style="margin:0">${lpA((LP_TYPE_INFO[l.type] || {}).label || '')}</span><button class="btn dark" onclick="lpExport('${l.id}')">⬇ Exportar HTML</button></div></div>
+  const tabs = [['produto', 'Produto e insumos'], ['blocos', 'Blocos'], ['editor', 'Editor visual'], ['visual', 'Estilo'], ['publicar', 'Publicar']];
+  r.innerHTML = `<div class="page-head"><div><button class="btn sm" onclick="lpBack()">${lpUI.back === 'site' ? '← Voltar ao site' : '← Todas as páginas'}</button><h1 style="margin-top:8px">${lpA(l.name)}</h1></div><div class="actions"><span class="so-badge" style="margin:0">${lpA((LP_TYPE_INFO[l.type] || {}).label || '')}</span><button class="btn dark" onclick="lpExport('${l.id}')">⬇ Exportar HTML</button></div></div>
   <div class="edh-tabs">${tabs.map(([k, t]) => `<button class="edh-tab ${lpUI.tab === k ? 'on' : ''}" onclick="lpUI.tab='${k}';renderLandings()">${t}</button>`).join('')}</div>
-  <div class="lp-wrap"><div class="lp-side" id="lpSide"></div><div class="lp-prev"><div class="row-gap" style="margin-bottom:8px"><button class="tchip ${lpUI.device === 'desktop' ? 'on' : ''}" onclick="lpUI.device='desktop';lpDevice()">Computador</button><button class="tchip ${lpUI.device === 'mobile' ? 'on' : ''}" onclick="lpUI.device='mobile';lpDevice()">Celular</button><button class="btn sm" onclick="lpPaint()">↻ Atualizar prévia</button></div><div class="lp-frame ${lpUI.device}" id="lpFrameBox"><iframe id="lpFrame" title="Prévia da landing page"></iframe></div></div></div>`;
-  ({produto: lpTabProduto, blocos: lpTabBlocos, visual: lpTabVisual, publicar: lpTabPublicar})[lpUI.tab]($('lpSide'), l, p); lpPaint();
+  <div class="lp-wrap"><div class="lp-side" id="lpSide"></div><div class="lp-prev"><div class="row-gap" style="margin-bottom:8px;flex-wrap:wrap">${Object.entries(BX_DEV).map(([k, d]) => `<button class="tchip ${lpUI.device === k ? 'on' : ''}" onclick="lpUI.device='${k}';lpDevice();renderLandings()" title="${d[1]}×${d[2]} px">${d[0]}</button>`).join('')}<button class="btn sm" onclick="lpPaint()">↻</button></div><div class="lp-frame" id="lpFrameBox"><iframe id="lpFrame" title="Prévia da landing page"></iframe></div></div></div>`;
+  ({produto: lpTabProduto, blocos: lpTabBlocos, editor: bxTab, visual: lpTabVisual, publicar: lpTabPublicar})[lpUI.tab]($('lpSide'), l, p); lpDevice(); lpPaint();
 }
-function lpDevice() { document.querySelectorAll('.lp-prev .tchip').forEach((b, i) => b.classList.toggle('on', (i === 0) === (lpUI.device === 'desktop'))); const f = $('lpFrameBox'); if (f) f.className = 'lp-frame ' + lpUI.device; }
-async function lpPaint() { const l = lpCur(), f = $('lpFrame'); if (!l || !f) return; try { f.srcdoc = await lpHTML(l, curProject(), {preview: true}); } catch (e) { f.srcdoc = '<p style="font:14px sans-serif;padding:20px">Não consegui montar a prévia: ' + lpA(e.message) + '</p>'; } }
+function lpDevice() {
+  const box = $('lpFrameBox'), f = $('lpFrame'); if (!box || !f) return; const d = BX_DEV[lpUI.device] || BX_DEV.desktop, W = d[1], H = d[2], avail = Math.max(280, (box.parentElement.clientWidth || 800) - 4), sc = Math.min(1, avail / W);
+  box.style.width = Math.round(W * sc) + 'px'; box.style.height = Math.min(Math.round(H * sc), Math.round(window.innerHeight - 250)) + 'px'; f.style.width = W + 'px'; f.style.height = Math.round(Math.min(H, (window.innerHeight - 250) / sc)) + 'px'; f.style.transform = `scale(${sc})`; f.style.transformOrigin = '0 0';
+}
+async function lpPaint() { const l = lpCur(), f = $('lpFrame'); if (!l || !f) return; try { f.srcdoc = await lpHTML(l, curProject(), {preview: true, sel: lpUI.tab === 'editor' ? bxUI.sel : '', scroll: bxUI.scroll}); } catch (e) { f.srcdoc = '<p style="font:14px sans-serif;padding:20px">Não consegui montar a prévia: ' + lpA(e.message) + '</p>'; } }
 const lpPaintSoon = debounce(() => lpPaint(), 450);
 const lpIn = (label, val, oninput, rows, ph) => `<div class="field"><label>${label}</label>${rows ? `<textarea rows="${rows}" oninput="${oninput}" placeholder="${lpA(ph || '')}">${lpA(val)}</textarea>` : `<input value="${lpA(val)}" oninput="${oninput}" placeholder="${lpA(ph || '')}">`}</div>`;
 function lpSet(path, v) { const l = lpCur(), a = path.split('.'); let o = l; for (let i = 0; i < a.length - 1; i++) o = o[a[i]]; o[a[a.length - 1]] = v; persist(); lpPaintSoon(); }
@@ -146,24 +149,31 @@ function lpPrompt(l) {
   const t = LP_TYPE_INFO[l.type], P = l.product, blocks = l.blocks.filter(b => b.on);
   return `${lpRefPrompt(l)}${lpProductFacts(l)}${l.angle ? 'ABORDAGEM DESTA VARIAÇÃO (A/B): ' + l.angle + ' — o topo e o botão devem seguir essa abordagem.\n\n' : ''}PRODUTO: ${t.label}\nNome: ${P.nome || '(não informado)'}\nPreço/condição: ${P.preco || '(não informado)'}\nPúblico: ${P.publico || '(não informado)'}\nLink de compra: ${P.checkout ? 'informado' : 'não informado'}${l.type === 'evento' ? `\nData/hora: ${P.data || '(não informada)'}\nLocal: ${P.local || '(não informado)'}` : ''}\nWhatsApp de contato: ${l.whatsapp ? 'sim' : 'não'}\n\nINSUMOS (única fonte de fatos):\n${l.input || '(vazio)'}\n\n${lpUI.useAgent && EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief ? 'IDEIA E BRIEFING DO AGENTE EDITORIAL:\n' + eCtx() + '\n' : ''}ESTRUTURA DA PÁGINA (na ordem; devolva um objeto por bloco):\n${blocks.map((b, i) => `${i + 1}. t="${b.t}" — ${LP_BLOCK[b.t].ai}`).join('\n')}\n\nFormato: JSON {"blocks":[{"t":"hero","kicker":"","title":"","text":"","cta":"","note":"","name":"","price":"","items":[{"t":"","d":""}],"yes":[],"no":[]}]} usando só os campos pedidos em cada bloco.\nRegras: português do Brasil, frases curtas e específicas; use **negrito** para 1 ou 2 palavras-chave do título; NUNCA invente números, depoimentos, nomes, prazos, garantias, preços, credenciais ou resultados: onde o insumo não trouxer o dado, escreva [CONFIRMAR: o que falta]; não prometa resultado garantido; conteúdo de saúde, finanças ou jurídico sem promessa de cura, ganho ou aprovação.`;
 }
+/* aplica no(s) bloco(s) o que a IA devolveu; só os campos de cada tipo de bloco */
+function lpMerge(l, got) {
+  const used = new Set(), s = (v, n) => String(v == null ? '' : v).slice(0, n);
+  l.blocks.filter(b => b.on).forEach(b => {
+    const i = got.findIndex((x, k) => !used.has(k) && x && x.t === b.t); if (i < 0) return; used.add(i); const g = got[i];
+    LP_BLOCK[b.t].fields.forEach(([f, , kind]) => { if (kind === 'img') return; if (f === 'items') b.items = (Array.isArray(g.items) ? g.items : []).slice(0, 20).map(x => ({t: s(x && x.t, 400), d: s(x && x.d, 1200)})); else if (f === 'yes' || f === 'no') b[f] = (Array.isArray(g[f]) ? g[f] : []).slice(0, 10).map(x => s(x, 300)); else if (g[f] != null) b[f] = s(g[f], f === 'text' ? 3000 : 400); });
+  });
+  const h = l.blocks.find(b => b.t === 'hero'); if (h) { l.headline = h.title; l.sub = h.text; l.cta = h.cta || l.cta; }
+}
 async function lpGenerate() {
   const l = lpCur(); if (lpUI.busy) return; if (!l.input.trim() && !l.product.nome) { toast('Escreva os insumos ou ao menos o nome do produto.'); return; }
   lpUI.busy = 'gen'; renderLandings();
   try {
-    const j = await motJSON('Você é um redator de resposta direta que monta landing pages que convertem sem enganar. ' + (eBrandTxt() ? '\n' + eBrandTxt().slice(0, 6000) : ''), lpPrompt(l), 7000), got = Array.isArray(j.blocks) ? j.blocks : [], used = new Set(), s = (v, n) => String(v == null ? '' : v).slice(0, n);
+    const j = await motJSON('Você é um redator de resposta direta que monta landing pages que convertem sem enganar. ' + (eBrandTxt() ? '\n' + eBrandTxt().slice(0, 6000) : ''), lpPrompt(l), 7000), got = Array.isArray(j.blocks) ? j.blocks : [];
     if (!got.length) throw new Error('a IA não devolveu a página.');
-    l.blocks.filter(b => b.on).forEach(b => {
-      const i = got.findIndex((x, k) => !used.has(k) && x && x.t === b.t); if (i < 0) return; used.add(i); const g = got[i];
-      LP_BLOCK[b.t].fields.forEach(([f, , kind]) => { if (kind === 'img') return; if (f === 'items') b.items = (Array.isArray(g.items) ? g.items : []).slice(0, 20).map(x => ({t: s(x && x.t, 400), d: s(x && x.d, 1200)})); else if (f === 'yes' || f === 'no') b[f] = (Array.isArray(g[f]) ? g[f] : []).slice(0, 10).map(x => s(x, 300)); else if (g[f] != null) b[f] = s(g[f], f === 'text' ? 3000 : 400); });
-    });
-    const h = l.blocks.find(b => b.t === 'hero'); if (h) { l.headline = h.title; l.sub = h.text; l.cta = h.cta || l.cta; }
-    persist(); toast('Página escrita. Revise os blocos e complete o que estiver em [CONFIRMAR].'); lpUI.tab = 'blocos';
+    lpMerge(l, got);
+    if (l.vis && confirm('Substituir o layout do editor visual pelo novo texto?')) l.vis = bxFromBlocks(l);
+    persist(); toast('Página escrita. Revise os blocos e complete o que estiver em [CONFIRMAR].'); lpUI.tab = l.vis ? 'editor' : 'blocos';
   } catch (e) { toast(eErr(e)); }
   lpUI.busy = ''; renderLandings();
 }
 
 function lpTabBlocos(b, l) {
-  b.innerHTML = `<small class="muted block" style="margin-bottom:8px">Ligue/desligue, reordene e edite cada bloco. A prévia ao lado atualiza sozinha. Itens com <b>[CONFIRMAR]</b> precisam de um dado real antes de publicar.</small>
+  if (l.vis) { b.innerHTML = `<div class="panel"><h3>Esta página usa o editor visual</h3><p class="muted" style="font-size:12.5px">Os blocos ficam guardados, mas o que aparece na página é o layout do editor visual. Para editar textos e posições, use a aba <b>Editor visual</b>.</p><div class="row-gap"><button class="btn dark" onclick="lpUI.tab='editor';renderLandings()">Ir ao editor visual</button><button class="btn" onclick="lpToVisual()">Refazer o layout a partir dos blocos</button></div></div>`; return; }
+  b.innerHTML = `<div class="row-gap" style="margin-bottom:8px"><button class="btn sm dark" onclick="lpToVisual()">Abrir no editor visual →</button><small class="muted">arrastar, colunas, vídeo, tablet e celular</small></div><small class="muted block" style="margin-bottom:8px">Ligue/desligue, reordene e edite cada bloco. A prévia ao lado atualiza sozinha. Itens com <b>[CONFIRMAR]</b> precisam de um dado real antes de publicar.</small>
   ${l.blocks.map((k, i) => { const def = LP_BLOCK[k.t], pend = (JSON.stringify([k.title, k.text, k.note, k.price, k.items, k.yes, k.no]).match(/\[CONFIRMAR/g) || []).length; return accSec('lp', k.id, `<label onclick="event.stopPropagation()" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" ${k.on ? 'checked' : ''} onchange="lpBlk('${k.id}','on',this.checked,true)"> ${i + 1}. ${lpA(def.label)}</label>`, `${pend ? `<span class="so-warn">${pend} a confirmar</span> ` : ''}${lpA((k.title || k.items[0] && k.items[0].t || '').replace(/\*\*/g, '').slice(0, 28))}`, `<div class="row-gap" style="margin-bottom:8px"><button class="btn sm" onclick="lpMove('${k.id}',-1)" ${i === 0 ? 'disabled' : ''}>▲</button><button class="btn sm" onclick="lpMove('${k.id}',1)" ${i === l.blocks.length - 1 ? 'disabled' : ''}>▼</button><button class="btn sm" onclick="lpDup('${k.id}')">Duplicar</button><button class="btn sm" onclick="lpBlkDel('${k.id}')">Remover</button></div>${def.fields.map(f => lpField(k, f)).join('')}`, i === 0); }).join('')}
   <div class="row-gap" style="margin-top:10px"><select id="lpAdd">${Object.entries(LP_BLOCK).map(([t, d]) => `<option value="${t}">${lpA(d.label)}</option>`).join('')}</select><button class="btn sm dark" onclick="lpAddBlock()">＋ Adicionar bloco</button></div>`;
 }
@@ -260,3 +270,5 @@ function lpPick(key, i, on) {
   if (l.pick.all !== false) { l.pick = {b: x.benefits.map((_, n) => n), f: x.features.map((_, n) => n), all: false}; }
   const a = l.pick[key], at = a.indexOf(i); if (on && at < 0) a.push(i); if (!on && at >= 0) a.splice(at, 1); persist();
 }
+
+function lpBack() { lpUI.id = ''; if (lpUI.back === 'site') { lpUI.main = 'sites'; } lpUI.back = ''; renderLandings(); }
