@@ -21,7 +21,7 @@ function renderLayoutGallery(p, r) {
   r.innerHTML = `<div class="page-head"><div><h1>Modelos de layout</h1><p>${LAYOUTS.length} composições prontas. Escolha um modelo, preencha os textos e o Studio monta a peça com as cores e fontes do seu estilo ou Brand Kit. As áreas cinza são fotos ou sujeitos recortados: envie a sua imagem ou gere com IA.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzBack()">← Estúdio</button></div></div>
   <div class="panel"><div class="ly-bar"><div class="tchips">${['Todos', ...LAYOUT_GROUPS].map(g => `<button class="tchip ${lyState.group === g ? 'on' : ''}" onclick="lyState.group='${g}';renderDesign()">${g} <small>${cnt(g)}</small></button>`).join('')}</div>
     <div class="ly-tools"><input class="ly-search" placeholder="Buscar (ex.: oferta, depoimento, evento)" value="${esc(lyState.q)}" oninput="lyState.q=this.value;lySearchSoon()"><label class="ins inl">Estilo da prévia <select onchange="lyState.style=this.value;renderDesign()">${styles.map(s => `<option value="${esc(s.id)}" ${s.id === lyState.style ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label></div></div>
-    ${list.length ? `<div class="ly-grid">${list.map(l => `<article class="ly-card" onclick="lyUseOpen('${l.id}')"><canvas data-lay="${l.id}" width="240" height="300"></canvas><strong>${esc(l.name)}</strong><small class="muted block">${esc(l.group)}</small></article>`).join('')}</div>` : emptyState('Nenhum modelo encontrado', 'Tente outra palavra ou escolha outro grupo.', '')}
+    ${list.length ? `<div class="ly-grid">${list.map(l => `<article class="ly-card" onclick="lyQuick('${l.id}')" title="Clique para abrir no editor já com o texto de exemplo"><canvas data-lay="${l.id}" width="240" height="300"></canvas><strong>${esc(l.name)}</strong><small class="muted block">${esc(l.group)}</small><button class="btn sm ly-cfg" onclick="event.stopPropagation();lyUseOpen('${l.id}')" title="Escolher formato e editar os textos antes de criar">⚙ Personalizar</button></article>`).join('')}</div>` : emptyState('Nenhum modelo encontrado', 'Tente outra palavra ou escolha outro grupo.', '')}
     <p class="muted" style="font-size:11.5px;margin-top:12px">Layouts recriados como estrutura (posição, proporção e hierarquia). Nenhum texto, logo ou imagem dos posts de referência é usado. Fontes condensadas, serifadas e manuscritas dependem da internet para carregar.</p></div>`;
   lyPaint(p, r, list);
 }
@@ -61,4 +61,17 @@ async function lyUseRun() {
     await ensureSetResources(set);
     p.design.sets.push(set); persist(); closeModal(); dzOpen(set.id); toast('Peça criada. Troque textos, fotos e cores no editor.');
   } catch (e) { btn.disabled = false; btn.textContent = 'Criar peça e abrir o editor'; toast('Não consegui montar: ' + e.message); }
+}
+
+/* um clique: cria a peça com o texto de exemplo, no formato Feed 4:5, e abre no editor para arrastar e editar */
+async function lyQuick(id) {
+  const p = dzP(), lay = layoutById(id); if (!p || !lay) return; toast('Abrindo o layout no editor…');
+  const styles = lyStyles(p); if (!styles.some(s => s.id === lyState.style)) lyState.style = styles[0].id;
+  const copy = {}; lay.fields.forEach(k => { const v = lay.sample[k]; copy[k] = Array.isArray(v) ? v.join('\n') : (v || ''); });
+  const tk = JSON.parse(JSON.stringify(lyTokens(p, lyState.style))), fmt = resolveFmt({fmt: 'feed45', cw: 1080, ch: 1080});
+  try {
+    await ensureFonts(lyFamilies(tk)); await brandFontsLoad(p);
+    const set = layoutSetFrom(lay, tk, copy, fmt, p.name, lay.name + ' · ' + p.name); set.slides[0] = buildLayoutSlide(lay, tk, copy, fmt, p.name); await ensureSetResources(set);
+    p.design.sets.push(set); persist(); closeModal(); dzOpen(set.id); toast('Layout aberto. Clique nos textos para editar e arraste para mover.');
+  } catch (e) { toast('Não consegui abrir o layout: ' + e.message); }
 }
