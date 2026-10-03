@@ -28,7 +28,7 @@ function flipHTML(title, pages, ar) {
 /* abre no próprio Studio, em tela cheia */
 function flipOpen(title, pages, ar) {
   const ov = document.createElement('div'); ov.className = 'flip-ov'; ov.id = 'flipOv';
-  ov.innerHTML = `<iframe allow="fullscreen" allowfullscreen title="${esc(title)}"></iframe>`; document.body.appendChild(ov); const fr = ov.querySelector('iframe'); fr.srcdoc = flipHTML(title, pages, ar);
+  ov.innerHTML = `<iframe allow="fullscreen" title="${esc(title)}"></iframe>`; document.body.appendChild(ov); const fr = ov.querySelector('iframe'); fr.srcdoc = flipHTML(title, pages, ar);
   const onMsg = e => { if (e.data === 'flip-close') close(); else if (e.data === 'flip-fs') { (ov.requestFullscreen ? ov.requestFullscreen() : Promise.reject()).catch(() => { ov.classList.add('full'); }); } };
   const close = () => { window.removeEventListener('message', onMsg); if (document.fullscreenElement) document.exitFullscreen().catch(() => 0); ov.remove(); };
   window.addEventListener('message', onMsg); setTimeout(() => fr.focus(), 100); return ov;

@@ -539,6 +539,17 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .aud-it audio{height:34px}
 @media(max-width:760px){.stock-grid{grid-template-columns:repeat(2,1fr)}.int-map{grid-template-columns:1fr}}
 
+.lib-wrap{display:grid;grid-template-columns:1fr;gap:16px}.lib-wrap.has-sel{grid-template-columns:minmax(0,1fr) 420px}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;align-content:start}
+.lib-it{position:relative;border:2px solid transparent;border-radius:10px;background:#fff;padding:0;cursor:pointer;overflow:hidden;text-align:left;box-shadow:0 0 0 1px #e6e6e6}
+.lib-it img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#f1f1f1}.lib-it span{display:block;font-size:11px;padding:4px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lib-it.on{border-color:#111}.lib-it em{position:absolute;top:6px;left:6px;background:#111;color:#fff;font-size:9px;font-style:normal;border-radius:999px;padding:2px 6px}
+.lib-bench{border:1px solid #e6e6e6;border-radius:12px;padding:14px;background:#fff;align-self:start;position:sticky;top:12px;max-height:calc(100vh - 30px);overflow:auto}
+.lib-bench h3{margin:14px 0 6px;font-size:13px}.lib-bench textarea{width:100%;margin:4px 0}.lib-bench .chips{justify-content:flex-start;margin-top:0;gap:6px}.lib-bench .chip{padding:5px 10px;font-size:11px}.lib-bench .chip.on{background:#111;color:#fff;border-color:#111}
+.lib-pv img{width:100%;border-radius:8px;display:block;max-height:340px;object-fit:contain;background:#f1f1f1}.lib-sw{width:22px;height:22px;border-radius:5px;border:1px solid #ddd;display:inline-block}
+.lib-res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:1050px){.lib-wrap.has-sel{grid-template-columns:1fr}.lib-bench{position:static;max-height:none}}
+
 </style>
 </head>
 <body>
@@ -549,9 +560,9 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
     <button class="active" data-page="home" title="Início"><span data-ico="home"></span></button>
     <button data-page="projects" title="Projetos"><span data-ico="folder"></span></button>
     <button data-page="matrix" title="Matriz de Criação"><span data-ico="sparkles"></span></button>
-    <button data-page="integracoes" title="Integrações (APIs)"><span data-ico="plug"></span></button>
     <button data-page="editorial" title="Agente Editorial"><span data-ico="target"></span></button>
     <button data-page="design" title="Estúdio de Design"><span data-ico="palette"></span></button>
+    <button data-page="biblioteca" title="Biblioteca de imagens"><span data-ico="image"></span></button>
     <button data-page="inspiration" title="Inspiração"><span data-ico="pin"></span></button>
     <button data-page="editora" title="Editora (e-books)"><span data-ico="book"></span></button>
     <button data-page="videoLab" title="Video Lab"><span data-ico="video"></span></button>
@@ -634,7 +645,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 <section id="page-inspiration" class="page"><div class="subpage dz-wide" id="inspoRoot"></div></section>
 <section id="page-editora" class="page"><div class="subpage dz-wide" id="editoraRoot"></div></section>
 <section id="page-editorial" class="page"><div class="subpage dz-wide" id="editorialRoot"></div></section>
-<section id="page-integracoes" class="page"><div class="subpage" id="integracoesRoot"></div></section>
+<section id="page-biblioteca" class="page"><div class="subpage dz-wide" id="bibliotecaRoot"></div></section>
 <section id="page-diagram" class="page"><div class="subpage dz-wide" id="diagramRoot"></div></section>
 <section id="page-videoLab" class="page"><div class="subpage" id="videoRoot"></div></section>
 <section id="page-campaigns" class="page"><div class="subpage" id="campaignsRoot"></div></section>
@@ -673,7 +684,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 </div>
 
 <div class="modal-back" id="modalBack" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalBox"></div></div>
-<div class="overlay" id="overlay"><div class="overlay-bar"><strong id="overlayTitle"></strong><div class="row-gap"><button class="btn sm" onclick="overlayDownload()">⬇ Baixar HTML</button><button class="btn sm" onclick="overlayPrint()">Imprimir / PDF</button><button class="btn sm dark" onclick="closeOverlay()">Fechar</button></div></div><iframe id="overlayFrame" title="Pré-visualização" allow="fullscreen" allowfullscreen></iframe></div>
+<div class="overlay" id="overlay"><div class="overlay-bar"><strong id="overlayTitle"></strong><div class="row-gap"><button class="btn sm" onclick="overlayDownload()">⬇ Baixar HTML</button><button class="btn sm" onclick="overlayPrint()">Imprimir / PDF</button><button class="btn sm dark" onclick="closeOverlay()">Fechar</button></div></div><iframe id="overlayFrame" title="Pré-visualização" allow="fullscreen"></iframe></div>
 <input type="file" id="importFile" accept="application/json,.json" hidden onchange="if(this.files[0])importFile(this.files[0]);this.value=''">
 <div class="toast" id="toast"></div>
 
@@ -806,7 +817,7 @@ function seedState() {
   const cd = newProject('Cartório Descomplicado', 'Conteúdo + geração de demanda', {cover: 'a6', icon: 'CD'});
   const se = newProject('Saber Ensinar', 'Educação criativa', {cover: 'a8', icon: 'SE'});
   return {
-    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], inspo: {items: [], boards: [], cats: []}, myFonts: [],
+    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], imglib: {items: []}, inspo: {items: [], boards: [], cats: []}, myFonts: [],
     workspace: {name: 'Ampliação Marketing', instruction: 'Criar com clareza estratégica, consistência de marca e foco na jornada de compra.'},
     credits: 30, activeProjectId: mb.id, projects: [mb, cd, se], creatives
   };
@@ -825,6 +836,12 @@ function normalizeInspo(x) {
     imgId: safeId(i.imgId) ? i.imgId : '', url: url(i.url), imgUrl: url(i.imgUrl), w: Math.min(20000, Math.max(0, +i.w || 0)), h: Math.min(20000, Math.max(0, +i.h || 0)), colors: (Array.isArray(i.colors) ? i.colors : []).filter(hex).slice(0, 8), hues: (Array.isArray(i.hues) ? i.hues : []).map(h => str(h, 10)).slice(0, 4),
     fav: !!i.fav, boards: (Array.isArray(i.boards) ? i.boards : []).filter(b => bids.has(b)), created: str(i.created, 40)}));
   return out;
+}
+function normalizeImglib(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), items = x && Array.isArray(x.items) ? x.items : [];
+  return {items: items.filter(i => i && safeId(i.id) && safeId(i.imgId)).slice(0, 1500).map(i => { const m = i.meta && typeof i.meta === 'object' ? i.meta : {};
+    return {id: i.id, imgId: i.imgId, name: str(i.name, 120) || 'Imagem', prompt: str(i.prompt, 4000), promptEn: str(i.promptEn, 4000), style: str(i.style, 80), tags: (Array.isArray(i.tags) ? i.tags : []).slice(0, 10).map(t => str(t, 40)), parent: safeId(i.parent) ? i.parent : '', kind: ['upload', 'gen', 'banco'].includes(i.kind) ? i.kind : 'upload', w: Math.max(0, +i.w || 0), h: Math.max(0, +i.h || 0), created: str(i.created, 40),
+      meta: {composition: str(m.composition, 200), light: str(m.light, 200), negative: str(m.negative, 300), palette: (Array.isArray(m.palette) ? m.palette : []).filter(c => /^#[0-9a-f]{6}$/i.test(String(c))).slice(0, 8), elements: (Array.isArray(m.elements) ? m.elements : []).slice(0, 12).map(e => str(e, 60))}}; })};
 }
 function normalizeMyFonts(x) {
   const CATS = ['sans', 'geo', 'serif', 'slab', 'cond', 'display', 'script', 'round', 'mono'], seen = new Set();
@@ -927,7 +944,7 @@ function normalize(s) {
   s.workspace = mergeDefaults(s.workspace, base.workspace);
   s.credits = Number.isFinite(+s.credits) ? +s.credits : 30;
   s.inspo = normalizeInspo(s.inspo);
-  s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills);
+  s.imglib = normalizeImglib(s.imglib); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills);
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
@@ -1142,7 +1159,7 @@ async function testWebhook() { try { await sendWebhook('teste', {from: 'Ampliaç
 </script>
 <script>
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'integracoes', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
+const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -1169,7 +1186,7 @@ function go(page) {
 function renderPage(page) {
   ({home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
     videoLab: renderVideoLab, campaigns: renderCampaignsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
-    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, editorial: renderEditorial, integracoes: renderIntegracoes}[page] || (() => {}))();
+    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, editorial: renderEditorial, biblioteca: renderBiblioteca}[page] || (() => {}))();
 }
 function refreshCurrentView() { renderSyncBadge(); renderHome(); renderPage(ui.page); updateContextUI(); }
 function bootRender() { $('credits').textContent = state.credits; updateContextUI(); renderHome(); renderPage(ui.page); renderSyncBadge(); }
@@ -1322,7 +1339,7 @@ function renderSettings() {
     <div class="field full"><label>URL de captura de leads (usada nas landing pages exportadas)</label><input id="leadsUrl" placeholder="https://seusite.com/api/leads.php?token=...&project=ID" value="${esc(state.workspace.leadsUrl || '')}"></div></div>
     <div style="margin-top:15px"><button class="btn dark" onclick="saveSettings()">Salvar configurações</button></div></div>
   <div class="panel" style="margin-top:14px"><h3>Seus dados</h3><p class="muted">Tudo é salvo neste navegador. Exporte regularmente ou ative a sincronização com o servidor.</p><div class="actions" style="flex-wrap:wrap"><button class="btn" onclick="exportWorkspace()">⬇ Exportar workspace</button><button class="btn" onclick="exportProject()">⬇ Exportar projeto atual</button><button class="btn" onclick="$('importFile').click()">⬆ Importar JSON</button><button class="btn" onclick="resetWorkspace()">Reiniciar exemplo</button></div></div>
-  <h2 style="margin:22px 0 10px;font-size:18px">Integrações</h2>${integrationsHTML()}`;
+  <div id="integracoesRoot" style="margin-top:22px"></div>`; renderIntegracoes();
 }
 function saveSettings() { state.workspace.name = $('workspaceName').value; state.workspace.instruction = $('globalInstruction').value; state.workspace.leadsUrl = $('leadsUrl').value.trim(); persist(); toast('Configurações salvas.'); }
 
@@ -5165,6 +5182,7 @@ document.addEventListener('drop', async e => { const d = e.target.closest && e.t
 /* ===== Fontes do projeto: a pasta fonts/ na raiz do site (gerada por tools/build_fonts.js → fonts/manifest.json). Vale para todos os computadores e não ocupa o navegador ===== */
 const PROJFONTS = [];
 async function pfLoadManifest() {
+  if (location.protocol === 'file:') return;   // aberto como arquivo: o navegador bloqueia fetch local; as fontes do projeto só valem no servidor
   try { const r = await fetch('fonts/manifest.json', {cache: 'no-cache'}); if (!r.ok) return; const j = await r.json(); if (!Array.isArray(j.families)) return;
     PROJFONTS.length = 0; j.families.slice(0, 5000).forEach(f => { const fam = mySafeFamily(f.family); if (!fam || !Array.isArray(f.files)) return; PROJFONTS.push({id: 'pf-' + fam, family: fam, cat: MY_CATS.some(c => c[0] === f.cat) ? f.cat : myGuessCat(fam), project: true, files: f.files.filter(x => /^[\w\-. \/]+\.(ttf|otf|woff2?)$/i.test(x.path) && !x.path.includes('..')).map(x => ({path: 'fonts/' + x.path.replace(/^\/+/, ''), weight: Math.min(1000, Math.max(100, +x.weight || 400)), italic: !!x.italic, variable: Array.isArray(x.variable) ? [+x.variable[0] || 100, +x.variable[1] || 900] : null}))}); });
     mySync(); if (typeof renderDesign === 'function' && ui.page === 'design') renderDesign();
@@ -6500,7 +6518,7 @@ function dtpObjetoHTML(d, N) {
   return add + `<div class="okr-label">${it.k === 'img' ? 'IMAGEM' : it.k === 'text' ? 'QUADRO DE TEXTO' : 'RETÂNGULO'} · medidas em ${DTP_UL[u]}</div><div class="grid-2">${fld('x', 'X')}${fld('y', 'Y')}${fld('w', 'Largura')}${fld('h', 'Altura')}</div>
   <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpItemAlign('h')">Centralizar na largura</button><button class="btn sm" onclick="dtpItemAlign('m')">Ajustar às margens</button><button class="btn sm" onclick="dtpItemAlign('col')">Largura da coluna</button></div>
   <div class="grid-2" style="margin-top:8px"><div class="field"><label>Texto ao redor</label><select onchange="dtpItemSet('wrap',this.value)">${[['none', 'Nenhum (por cima)'], ['around', 'Contornar o quadro'], ['jump', 'Pular (texto continua abaixo)']].map(([k, l]) => `<option value="${k}" ${it.wrap === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>${fld('off', 'Afastamento do texto')}</div>
-  ${it.k === 'img' ? `<div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpPickImg()">${it.imgId ? 'Trocar imagem' : 'Escolher imagem'}</button><button class="btn sm" onclick="dtpStockImg()">🔎 Banco</button></div><label class="muted" style="font-size:11px">Zoom do enquadramento: ${(it.zoom || 1).toFixed(2)}×</label><input type="range" min="1" max="4" step="0.05" value="${it.zoom || 1}" oninput="dtpItemSet('zoom',+this.value,true)">` : ''}
+  ${it.k === 'img' ? `<div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpPickImg()">${it.imgId ? 'Trocar imagem' : 'Escolher imagem'}</button><button class="btn sm" onclick="dtpLibImg()">📚 Biblioteca</button><button class="btn sm" onclick="dtpStockImg()">🔎 Banco</button></div><label class="muted" style="font-size:11px">Zoom do enquadramento: ${(it.zoom || 1).toFixed(2)}×</label><input type="range" min="1" max="4" step="0.05" value="${it.zoom || 1}" oninput="dtpItemSet('zoom',+this.value,true)">` : ''}
   ${it.k === 'rect' ? `<div class="grid-2"><div class="field"><label>Cor</label><input type="color" value="${it.fill || '#E7DCC8'}" onchange="dtpItemSet('fill',this.value)"></div><div class="field"><label>Opacidade</label><input type="range" min="0" max="1" step="0.05" value="${it.op != null ? it.op : 1}" oninput="dtpItemSet('op',+this.value,true)"></div></div>` : ''}
   ${it.k === 'text' ? `<div class="field"><label>Texto</label><textarea rows="5" oninput="dtpItemSet('text',this.value,true)">${esc(it.text)}</textarea></div><div class="grid-2"><div class="field"><label>Estilo</label><select onchange="dtpItemSet('st',this.value)">${Object.keys(d.styles).map(k => `<option value="${k}" ${it.st === k ? 'selected' : ''}>${esc(d.styles[k].n)}</option>`).join('')}</select></div><div class="field"><label>Cor de fundo</label><input type="color" value="${it.fill || '#FFFFFF'}" onchange="dtpItemSet('fill',this.value)"><label class="dtp-chk"><input type="checkbox" ${it.fill ? 'checked' : ''} onchange="dtpItemSet('fill',this.checked?'#FFFFFF':'')"> usar fundo</label></div></div>` : ''}
   ${it.k === 'text' || it.k === 'img' ? `<div class="row-gap" style="margin-top:8px;flex-wrap:wrap">${it.k === 'text' ? '<button class="btn sm" onclick="dtpItemFitH()">Ajustar altura ao texto</button>' : ''}<button class="btn sm" onclick="dtpItemToFlow()" title="Devolve ao fluxo do texto (após o parágrafo selecionado ou no fim)">↩ Devolver ao fluxo</button></div>` : ''}
@@ -6991,7 +7009,7 @@ function flipHTML(title, pages, ar) {
 /* abre no próprio Studio, em tela cheia */
 function flipOpen(title, pages, ar) {
   const ov = document.createElement('div'); ov.className = 'flip-ov'; ov.id = 'flipOv';
-  ov.innerHTML = `<iframe allow="fullscreen" allowfullscreen title="${esc(title)}"></iframe>`; document.body.appendChild(ov); const fr = ov.querySelector('iframe'); fr.srcdoc = flipHTML(title, pages, ar);
+  ov.innerHTML = `<iframe allow="fullscreen" title="${esc(title)}"></iframe>`; document.body.appendChild(ov); const fr = ov.querySelector('iframe'); fr.srcdoc = flipHTML(title, pages, ar);
   const onMsg = e => { if (e.data === 'flip-close') close(); else if (e.data === 'flip-fs') { (ov.requestFullscreen ? ov.requestFullscreen() : Promise.reject()).catch(() => { ov.classList.add('full'); }); } };
   const close = () => { window.removeEventListener('message', onMsg); if (document.fullscreenElement) document.exitFullscreen().catch(() => 0); ov.remove(); };
   window.addEventListener('message', onMsg); setTimeout(() => fr.focus(), 100); return ov;
@@ -7715,7 +7733,7 @@ function dzInspector() {
   else if (L.type === 'path') el.innerHTML = `<h3>Símbolo <small class="muted">${esc(L.role)}</small></h3><div class="ins-row">${col('fill', 'Cor')}${col('stroke', 'Contorno')}</div>${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
   else if (L.type === 'video') el.innerHTML = dzVideoInspector(L, geo, acts);
   else if (L.role === 'logo') el.innerHTML = `<h3>Logo</h3><small class="muted block">Arraste e use as alças para redimensionar. Mantenha a proporção.</small>${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
-  else el.innerHTML = `<h3>Foto</h3><button class="btn sm dark" onclick="dzPickPhoto()">${L.imgId ? 'Trocar foto' : 'Enviar foto'}</button> <button class="btn sm" onclick="dzStockPhoto()" title="Banco de imagens (Magnific)">🔎 Banco</button> ${L.imgId && stockReady() ? '<button class="btn sm" onclick="dzUpscalePhoto()" title="Aumentar a resolução (Magnific)">⤴ Melhorar</button>' : ''}<button class="btn sm" onclick="dzGenPhoto()" title="${imageReady() ? 'Gerar com IA' : 'Configure OPENAI_API_KEY no servidor'}">✦ Gerar com IA</button> ${L.imgId ? '<button class="btn sm" onclick="dzProp(\'imgId\',\'\')">Remover</button>' : ''}
+  else el.innerHTML = `<h3>Foto</h3><button class="btn sm dark" onclick="dzPickPhoto()">${L.imgId ? 'Trocar foto' : 'Enviar foto'}</button> <button class="btn sm" onclick="dzLibPhoto()">📚 Biblioteca</button> <button class="btn sm" onclick="dzStockPhoto()" title="Banco de imagens (Magnific)">🔎 Banco</button> ${L.imgId && stockReady() ? '<button class="btn sm" onclick="dzUpscalePhoto()" title="Aumentar a resolução (Magnific)">⤴ Melhorar</button>' : ''}<button class="btn sm" onclick="dzGenPhoto()" title="${imageReady() ? 'Gerar com IA' : 'Configure OPENAI_API_KEY no servidor'}">✦ Gerar com IA</button> ${L.imgId ? '<button class="btn sm" onclick="dzProp(\'imgId\',\'\')">Remover</button>' : ''}
     <label class="ins">Tratamento (${PHOTO_STYLES.length} estilos)<select onchange="dzPhotoStyle(this.value)"><option value="">Sem tratamento</option>${PHOTO_STYLES.map(x => `<option value="${x.id}" ${L.filter === x.filter && L.ovColor === x.ovColor ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>
     <small class="muted block">${esc(L.brief || '')}</small>${rg('radius', 'Cantos', 0, 400, 1)}${rg('fx', 'Enquadrar na horizontal', 0, 1, 0.01)}${rg('fy', 'Enquadrar na vertical', 0, 1, 0.01)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
 }
@@ -8451,9 +8469,9 @@ const INT_CARDS = [
 function renderIntegracoes() {
   const r = $('integracoesRoot'); if (!r) return;
   const s = intSt(), ok = k => !!(s[k] && s[k].configured);
-  if (!API.available) { r.innerHTML = `<div class="page-head"><div><h1>Integrações</h1><p>Conecte as APIs que o Studio usa.</p></div></div>${integrationsHTML()}`; return; }
+  if (!API.available) { r.innerHTML = `<h2 style="margin:0 0 10px;font-size:18px">Integrações</h2>${integrationsHTML()}`; return; }
   const aiProv = s.ai && s.ai.provider === 'openai' ? 'GPT (OpenAI)' : 'Claude (Anthropic)';
-  r.innerHTML = `<div class="page-head"><div><h1>Integrações</h1><p>Onde você liga as APIs. Cada chave fica só no servidor, no arquivo <span class="mono">api/config.php</span>; aqui você vê o que está ligado e testa a conexão.</p></div><div class="actions"><button class="btn" onclick="loadStatus().then(renderIntegracoes)">↻ Atualizar status</button></div></div>
+  r.innerHTML = `<div class="section-row" style="margin-bottom:10px"><div><h2 style="margin:0;font-size:18px">Integrações (APIs)</h2><p class="muted" style="margin:2px 0 0">Onde você liga as APIs. Cada chave fica só no servidor, no arquivo <span class="mono">api/config.php</span>; aqui você vê o que está ligado e testa a conexão.</p></div><button class="btn" onclick="loadStatus().then(renderIntegracoes)">↻ Atualizar status</button></div>
   ${needsLogin() ? `<div class="panel" style="margin-bottom:12px"><div class="section-row"><div><h3>Entre no Studio</h3><p class="muted">Sem login o servidor não mostra o status das chaves.</p></div><button class="btn dark" onclick="showLogin()">Entrar</button></div></div>` : ''}
   <div class="integration-grid int-big">${INT_CARDS.map(c => {
     const on = ok(c.k), extra = c.k === 'ai' && on ? ` · ${aiProv}${s.ai.model ? ' · ' + esc(s.ai.model) : ''}` : '';
@@ -8495,7 +8513,7 @@ async function stockBlobToImg(blob) {
 function stockPick(cb) {
   if (!stockReady()) { toast(needsLogin() ? 'Entre no Studio para usar o banco de imagens.' : 'Banco de imagens não configurado: defina MAGNIFIC_API_KEY (página Integrações).'); return; }
   INT.stock = Object.assign(INT.stock, {cb, res: [], page: 1, busy: false});
-  showModal('🔎 Banco de imagens · Magnific', `<div class="row-gap"><input id="stQ" placeholder="Ex.: consultório moderno, folhas verdes, mulher sorrindo" style="flex:1" value="${esc(INT.stock.q)}" onkeydown="if(event.key==='Enter')stockSearch(1)"><select id="stOr" onchange="INT.stock.or=this.value"><option value="">Qualquer formato</option><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option><option value="square">Quadrada</option></select><button class="btn dark" onclick="stockSearch(1)">Buscar</button></div>
+  showModal('🔎 Banco de imagens · Magnific', `<div class="row-gap"><input id="stQ" placeholder="Ex.: consultório moderno, folhas verdes, mulher sorrindo" style="flex:1" value="${esc(INT.stock.q)}" onkeydown="if(event.key==='Enter')stockSearch(1)"><label class="ins inl" style="white-space:nowrap"><input type="checkbox" checked onchange="INT.stock.save=this.checked"> guardar na biblioteca</label><select id="stOr" onchange="INT.stock.or=this.value"><option value="">Qualquer formato</option><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option><option value="square">Quadrada</option></select><button class="btn dark" onclick="stockSearch(1)">Buscar</button></div>
     <div id="stRes" class="stock-grid"><p class="muted" style="grid-column:1/-1">Digite o que procura. Confira a licença de cada imagem no site do banco antes de publicar.</p></div><div id="stMore"></div>`);
   document.getElementById('modalBox').classList.add('wide'); setTimeout(() => $('stQ') && $('stQ').focus(), 60);
 }
@@ -8513,7 +8531,7 @@ async function stockUse(i) {
   const x = INT.stock.res[i], cb = INT.stock.cb; if (!x || !cb) return; toast('Baixando imagem…');
   try {
     const r = await api('magnific.php?action=fetch&url=' + encodeURIComponent(x.url)), blob = await (await fetch(r.image)).blob();
-    const img = await stockBlobToImg(blob); closeModal(); cb(img); toast('Imagem aplicada. Lembre de conferir a licença.');
+    if (INT.stock.save !== false && typeof libAddBlob === 'function') libAddBlob(blob, {name: x.title || 'Banco de imagens', kind: 'banco', tags: ['banco']}).catch(() => { }); const img = await stockBlobToImg(blob); closeModal(); cb(img); toast('Imagem aplicada. Lembre de conferir a licença.');
   } catch (e) { toast(e.message); }
 }
 /* amplia a resolução (Magnific). Devolve Blob. */
@@ -8565,7 +8583,7 @@ const aud = {busy: '', cache: {}, msg: ''};
 const audE = eb => eb.audio || (eb.audio = {voiceId: '', voiceName: '', items: {}});
 function audRender(b, eb) {
   const A = audE(eb), secs = eb.sections.filter(s => ['title', 'chapter', 'text'].includes(s.type) && audText(s).replace(/\s/g, '').length > 3), total = secs.reduce((n, s) => n + audText(s).length, 0);
-  if (!ttsReady()) { b.innerHTML = `<div class="mot-wrap"><div><div class="mot-ch"><b>Áudio · ler o livro em voz alta</b><p class="muted" style="font-size:12.5px">Gera a narração de cada capítulo com a ElevenLabs, com player e download em MP3 (audiolivro, prévia para redes, acessibilidade).</p><p style="font-size:12.5px">${needsLogin() ? 'Entre no Studio para usar.' : 'Falta ligar a ElevenLabs: coloque <span class="mono">ELEVENLABS_API_KEY</span> em <span class="mono">api/config.php</span>.'}</p><button class="btn dark" onclick="go('integracoes')">Abrir Integrações</button></div></div></div>`; return; }
+  if (!ttsReady()) { b.innerHTML = `<div class="mot-wrap"><div><div class="mot-ch"><b>Áudio · ler o livro em voz alta</b><p class="muted" style="font-size:12.5px">Gera a narração de cada capítulo com a ElevenLabs, com player e download em MP3 (audiolivro, prévia para redes, acessibilidade).</p><p style="font-size:12.5px">${needsLogin() ? 'Entre no Studio para usar.' : 'Falta ligar a ElevenLabs: coloque <span class="mono">ELEVENLABS_API_KEY</span> em <span class="mono">api/config.php</span>.'}</p><button class="btn dark" onclick="go('settings')">Abrir Configurações → Integrações</button></div></div></div>`; return; }
   const vs = INT.voices;
   if (!vs && !aud.loading) { aud.loading = true; ttsVoices().then(() => { aud.loading = false; if (eui.bt === 'audio') audRender(b, eb); }, e => { aud.loading = false; INT.voices = []; INT.voicesErr = e.message; if (eui.bt === 'audio') audRender(b, eb); }); }
   const done = secs.filter(s => A.items[s.id] && A.items[s.id].ids.length).length;
@@ -8610,6 +8628,160 @@ async function audZip() {
   for (const s of eb.sections) { const it = A.items[s.id]; if (!it || !it.ids.length) continue; n++; files.push({name: String(n).padStart(2, '0') + '-' + slug(s.title || 'secao') + '.mp3', data: new Uint8Array(await (await audBlob(it)).arrayBuffer())}); }
   if (!files.length) return; download(slug(eb.title || eb.name) + '-audio.zip', makeZip(files), 'application/zip');
 }
+
+</script>
+<script>
+/* ===== Biblioteca de imagens: sobe uma imagem, a IA lê e devolve o PROMPT dela; você altera (pose, cena, ângulo, estilo,
+   referência de estilo) e gera a nova versão. Tudo fica guardado e pode ser usado em posts, capas, miolo e vídeo. ===== */
+const lib = {sel: '', q: '', busy: '', work: '', change: '', style: '', angle: '', size: 'square', quality: 'medium', useSrc: true, styleRef: '', styleRefName: '', last: [], thumbs: new Map(), msg: ''};
+const LIB_STYLES = [
+  ['Colagem de papel recortado', 'ilustração em colagem de papel recortado, camadas sobrepostas, bordas rasgadas, textura de papel, sombras suaves entre as camadas'],
+  ['Pontilhismo', 'pintura pontilhista, pequenos pontos de cor justapostos, textura de tela, luz vibrante'],
+  ['Aquarela', 'aquarela delicada, manchas de cor transparentes, papel texturizado, bordas suaves'],
+  ['Ilustração flat vetorial', 'ilustração vetorial flat, formas simples, cores chapadas, sem gradientes, contornos limpos'],
+  ['Linogravura', 'linogravura em duas ou três cores, traços de entalhe, textura de tinta impressa'],
+  ['Pintura a óleo', 'pintura a óleo, pinceladas visíveis, textura de tinta espessa, luz de ateliê'],
+  ['Lápis / grafite', 'desenho a lápis grafite, hachuras, traço de esboço, fundo de papel'],
+  ['3D clay', 'render 3D estilo massinha (clay), formas arredondadas, luz suave de estúdio'],
+  ['Quadrinhos / pop art', 'estilo quadrinhos pop art, contornos pretos grossos, retícula de pontos, cores saturadas'],
+  ['Foto realista de estúdio', 'fotografia realista de estúdio, iluminação suave, alta nitidez, fundo limpo'],
+  ['Risografia', 'impressão risográfica em duas cores, grão, leve desalinhamento de camadas'],
+  ['Bordado', 'bordado em linha sobre tecido, pontos visíveis, textura têxtil']
+];
+const LIB_ANGLES = [['Close-up', 'enquadramento em close-up'], ['Plano aberto', 'plano aberto mostrando o corpo inteiro e o ambiente'], ['Visto de cima', 'visto de cima (câmera alta, vista zenital)'], ['Visto de lado', 'visto de perfil, de lado'], ['De baixo para cima', 'câmera baixa, olhando de baixo para cima'], ['Por cima do ombro', 'por cima do ombro, em segundo plano']];
+const LIB_READ = `Você é um engenheiro de prompts de imagem. Olhe a imagem e escreva o prompt que a recriaria com fidelidade num gerador de imagens. Devolva SÓ um JSON:
+{"prompt_pt":"prompt detalhado em português: sujeito(s), pose, expressão, roupas, objetos, cenário, composição/enquadramento, ângulo de câmera, iluminação, paleta, estilo/técnica (foto, ilustração, colagem…), clima","prompt_en":"o mesmo prompt em inglês","style":"estilo/técnica em poucas palavras","composition":"enquadramento e ângulo","light":"iluminação","palette":["#RRGGBB"],"elements":["itens principais"],"negative":"o que evitar"}
+Descreva só o que se vê; não invente marcas nem texto que não esteja na imagem. Se houver texto legível, cite-o entre aspas.`;
+
+function libList() { return state.imglib.items; }
+function libItem(id) { return libList().find(i => i.id === id); }
+async function libThumb(imgId) {
+  if (lib.thumbs.has(imgId)) return lib.thumbs.get(imgId);
+  try { const b = await imgGet(imgId); if (b) { const u = URL.createObjectURL(b); lib.thumbs.set(imgId, u); return u; } } catch (e) { /* sem imagem */ } return '';
+}
+async function libFill(root) { for (const im of [...(root || document).querySelectorAll('img[data-lib]')]) { const u = await libThumb(im.dataset.lib); if (u && im.isConnected) im.src = u; } }
+async function libAddBlob(blob, o) {
+  o = o || {}; let w = 0, h = 0; try { const bm = await createImageBitmap(blob); w = bm.width; h = bm.height; } catch (e) { throw new Error('Não consegui ler essa imagem. Use PNG, JPG ou WebP.'); }
+  const imgId = uid('img'); await imgPut(imgId, blob);
+  const it = {id: uid('lb'), imgId, name: String(o.name || 'Imagem').slice(0, 120), prompt: o.prompt || '', promptEn: o.promptEn || '', style: o.style || '', tags: o.tags || [], parent: o.parent || '', kind: o.kind || 'upload', w, h, meta: o.meta || {}, created: new Date().toISOString()};
+  libList().unshift(it); persist(); return it;
+}
+function libUpload() {
+  const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/png,image/jpeg,image/webp'; i.multiple = true;
+  i.onchange = async () => { let last; for (const f of [...i.files].slice(0, 30)) { try { last = await libAddBlob(f, {name: f.name.replace(/\.[^.]+$/, '')}); } catch (e) { toast(e.message); } } if (last) { lib.sel = last.id; libResetWork(last); renderBiblioteca(); toast('Imagem adicionada. Clique em “Ler o prompt”.'); } };
+  i.click();
+}
+function libResetWork(it) { lib.work = it ? it.prompt : ''; lib.change = ''; lib.style = ''; lib.angle = ''; lib.styleRef = ''; lib.styleRefName = ''; lib.last = []; lib.msg = ''; }
+function libSelect(id) { lib.sel = id; libResetWork(libItem(id)); renderBiblioteca(); }
+
+function renderBiblioteca() {
+  const r = $('bibliotecaRoot'); if (!r) return;
+  const it = libItem(lib.sel), q = lib.q.toLowerCase(), list = libList().filter(i => !q || (i.name + ' ' + i.prompt + ' ' + i.style + ' ' + i.tags.join(' ')).toLowerCase().includes(q));
+  r.innerHTML = `<div class="page-head"><div><h1>Biblioteca de imagens</h1><p>Suba uma imagem, peça o prompt dela, altere pose, cena, ângulo ou estilo e gere a nova versão. O que ficar guardado aqui é usado em posts, capas, miolo e vídeo.</p></div><div class="actions"><input placeholder="Buscar" value="${esc(lib.q)}" oninput="lib.q=this.value;renderBiblioteca()" style="width:160px"><button class="btn" onclick="libNewFromPrompt()">✦ Criar do zero por prompt</button><button class="btn dark" onclick="libUpload()">＋ Subir imagens</button></div></div>
+  <div class="lib-wrap ${it ? 'has-sel' : ''}"><div class="lib-grid">${list.map(i => `<button class="lib-it ${i.id === lib.sel ? 'on' : ''}" onclick="libSelect('${i.id}')" title="${esc(i.name)}"><img data-lib="${i.imgId}" alt=""><span>${esc(i.name)}</span>${i.kind === 'gen' ? '<em>IA</em>' : ''}</button>`).join('') || '<p class="muted" style="grid-column:1/-1;padding:30px 0">A biblioteca está vazia. Suba uma imagem para começar.</p>'}</div>${it ? libBench(it) : ''}</div>`;
+  libFill(r);
+}
+function libBench(it) {
+  const ready = imageReady(), ai = aiReady(), chip = (arr, key, cur) => arr.map(([n]) => `<button class="chip ${cur === n ? 'on' : ''}" onclick="lib.${key}=lib.${key}==='${n.replace(/'/g, "\\'")}'?'':'${n.replace(/'/g, "\\'")}';libBenchRefresh()">${esc(n)}</button>`).join('');
+  return `<div class="lib-bench"><div class="lib-pv"><img data-lib="${it.imgId}" alt=""></div>
+  <div class="row-gap" style="flex-wrap:wrap;margin:6px 0"><input value="${esc(it.name)}" onchange="libSet('name',this.value)" style="flex:1;min-width:140px"><button class="btn sm" onclick="libDownload()">⬇ PNG</button><button class="btn sm" onclick="libDelete()">Excluir</button></div>
+  <h3>1 · Prompt da imagem</h3><div class="row-gap"><button class="btn sm dark" onclick="libRead()" ${lib.busy || !ai ? 'disabled' : ''} title="${ai ? '' : 'IA de texto não configurada (Configurações → Integrações)'}">${lib.busy === 'read' ? 'Lendo…' : '✦ Ler o prompt desta imagem'}</button>${it.promptEn ? '<button class="btn sm" onclick="libCopy(\'en\')">Copiar em inglês</button><button class="btn sm" onclick="libUseEn()">Usar a versão em inglês</button>' : ''}</div>
+  ${it.meta && (it.style || it.meta.composition) ? `<small class="muted block">${[it.style && 'Estilo: ' + esc(it.style), it.meta.composition && 'Enquadramento: ' + esc(it.meta.composition), it.meta.light && 'Luz: ' + esc(it.meta.light)].filter(Boolean).join(' · ')}</small>` : ''}
+  ${(it.meta.palette || []).length ? `<div class="row-gap" style="margin:4px 0">${it.meta.palette.map(c => `<span class="lib-sw" style="background:${c}" title="${c}"></span>`).join('')}</div>` : ''}
+  <textarea id="libWork" rows="6" oninput="lib.work=this.value" placeholder="O prompt aparece aqui. Você pode editar à vontade.">${esc(lib.work)}</textarea>
+  <div class="row-gap"><button class="btn sm" onclick="libSavePrompt()">Guardar como prompt desta imagem</button><button class="btn sm" onclick="libCopy('pt')">Copiar prompt</button></div>
+  <h3>2 · O que você quer mudar?</h3><textarea id="libChange" rows="3" oninput="lib.change=this.value;libRwState()" placeholder="Ex.: a mulher fica em pé, olhando para o cachorro e fazendo carinho nele">${esc(lib.change)}</textarea>
+  <div class="row-gap"><button class="btn sm" id="libRw" onclick="libRewrite()" ${lib.busy || !ai || !lib.change.trim() ? 'disabled' : ''}>${lib.busy === 'rw' ? 'Reescrevendo…' : '✦ Aplicar a mudança no prompt'}</button></div>
+  <h3>3 · Estilo</h3><div class="chips">${chip(LIB_STYLES, 'style', lib.style)}</div>
+  <div class="row-gap" style="margin-top:6px;flex-wrap:wrap"><button class="btn sm" onclick="libPickStyleRef()">${lib.styleRef ? '↺ Trocar referência de estilo' : '＋ Referência de estilo (outra imagem)'}</button>${lib.styleRef ? `<small class="muted">${esc(lib.styleRefName)}</small><button class="btn sm" onclick="lib.styleRef='';libBenchRefresh()">Tirar</button>` : ''}</div>
+  <h3>4 · Ângulo</h3><div class="chips">${chip(LIB_ANGLES, 'angle', lib.angle)}</div>
+  <h3>5 · Gerar</h3><div class="ins-row"><label class="ins">Formato<select onchange="lib.size=this.value"><option value="square" ${lib.size === 'square' ? 'selected' : ''}>Quadrado</option><option value="portrait" ${lib.size === 'portrait' ? 'selected' : ''}>Vertical</option><option value="landscape" ${lib.size === 'landscape' ? 'selected' : ''}>Horizontal</option></select></label><label class="ins">Qualidade<select onchange="lib.quality=this.value"><option value="low" ${lib.quality === 'low' ? 'selected' : ''}>Rascunho (barata)</option><option value="medium" ${lib.quality === 'medium' ? 'selected' : ''}>Média</option><option value="high" ${lib.quality === 'high' ? 'selected' : ''}>Alta (cara)</option></select></label></div>
+  <label class="ins inl"><input type="checkbox" ${lib.useSrc ? 'checked' : ''} onchange="lib.useSrc=this.checked"> Usar esta imagem como referência (mantém a pessoa/objeto)</label>
+  <div class="row-gap"><button class="btn dark" onclick="libGenerate()" ${lib.busy || !ready ? 'disabled' : ''}>${lib.busy === 'gen' ? 'Gerando…' : '✦ Gerar nova imagem'}</button></div>
+  ${ready ? '' : `<small class="muted block">${needsLogin() ? 'Entre no Studio para gerar.' : 'Geração de imagem não configurada: Configurações → Integrações (OPENAI_API_KEY). Você ainda pode ler e copiar o prompt.'}</small>`}
+  <small class="muted block">Cada geração consome créditos da sua conta OpenAI. A IA tenta manter a pessoa/objeto, mas rostos e detalhes podem variar: gere algumas versões e escolha. ${esc(lib.msg)}</small>
+  ${lib.last.length ? `<h3>Resultado</h3><div class="lib-res">${lib.last.map(id => { const x = libItem(id); return x ? `<button class="lib-it" onclick="libSelect('${id}')"><img data-lib="${x.imgId}" alt=""><span>${esc(x.name)}</span></button>` : ''; }).join('')}</div><small class="muted block">Guardado na biblioteca. Clique para abrir e continuar alterando.</small>` : ''}</div>`;
+}
+function libRwState() { const b = $('libRw'); if (b) b.disabled = !!lib.busy || !aiReady() || !lib.change.trim(); }
+function libBenchRefresh() { const w = $('libWork'), c = $('libChange'); if (w) lib.work = w.value; if (c) lib.change = c.value; renderBiblioteca(); }
+function libSet(k, v) { const it = libItem(lib.sel); if (it) { it[k] = String(v).slice(0, 120); persist(); } }
+function libSavePrompt() { const it = libItem(lib.sel); if (!it) return; it.prompt = ($('libWork').value || '').slice(0, 4000); persist(); toast('Prompt guardado.'); }
+function libCopy(l) { const it = libItem(lib.sel), t = l === 'en' ? it.promptEn : ($('libWork') ? $('libWork').value : it.prompt); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Copiado.'), () => showModal('Prompt', `<textarea rows="8" style="width:100%">${esc(t)}</textarea><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`)); }
+function libUseEn() { const it = libItem(lib.sel); lib.work = it.promptEn; libBenchRefresh(); }
+async function libRead() {
+  const it = libItem(lib.sel); if (!it || lib.busy) return; lib.busy = 'read'; libBenchRefresh();
+  try {
+    const b = await imgGet(it.imgId), r = await aiVisionJSON(LIB_READ, 'Leia a imagem e devolva o JSON.', b, 2500), j = r.json || {}, s = (v, n) => String(v == null ? '' : v).slice(0, n);
+    it.prompt = s(j.prompt_pt, 4000); it.promptEn = s(j.prompt_en, 4000); it.style = s(j.style, 80);
+    it.meta = {composition: s(j.composition, 200), light: s(j.light, 200), negative: s(j.negative, 300), palette: (Array.isArray(j.palette) ? j.palette : []).filter(c => /^#[0-9a-f]{6}$/i.test(String(c))).slice(0, 8), elements: (Array.isArray(j.elements) ? j.elements : []).slice(0, 12).map(x => s(x, 60))};
+    persist(); lib.work = it.prompt; toast('Prompt lido. Edite e gere.');
+  } catch (e) { toast(e.message); }
+  lib.busy = ''; renderBiblioteca();
+}
+async function libRewrite() {
+  const it = libItem(lib.sel); lib.work = $('libWork').value; lib.change = $('libChange').value; if (!lib.change.trim()) return; lib.busy = 'rw'; libBenchRefresh();
+  try {
+    const t = await aiText('Você reescreve prompts de geração de imagem. Receba o PROMPT ATUAL e a MUDANÇA pedida e devolva SÓ o prompt novo, no mesmo idioma do atual, mantendo tudo o que não foi mudado (sujeito, cenário, luz, estilo) e aplicando a mudança de forma explícita. Sem comentários, sem aspas.', `PROMPT ATUAL:\n${lib.work || it.prompt}\n\nMUDANÇA:\n${lib.change}`, 900);
+    if (t.trim()) { lib.work = t.trim(); toast('Prompt atualizado com a mudança.'); }
+  } catch (e) { toast(e.message); }
+  lib.busy = ''; renderBiblioteca();
+}
+function libPickStyleRef() {
+  libPick(async id => { const x = libItem(id); lib.styleRef = x.imgId; lib.styleRefName = x.name; renderBiblioteca(); }, {raw: true, title: 'Escolha a imagem de referência de estilo', upload: true});
+}
+function libFinalPrompt() {
+  const st = LIB_STYLES.find(s => s[0] === lib.style), an = LIB_ANGLES.find(s => s[0] === lib.angle), base = (lib.work || '').trim(); let p = base;
+  if (lib.change.trim() && base === libItem(lib.sel).prompt.trim()) p += '\n\nMudança: ' + lib.change.trim();
+  if (st) p += '\n\nEstilo visual: ' + st[1] + '.';
+  if (an) p += '\nÂngulo/enquadramento: ' + an[1] + '.';
+  if (lib.styleRef) p += '\nUse a ÚLTIMA imagem de referência apenas como referência de estilo visual (técnica, textura, paleta, traço), sem copiar o seu conteúdo.';
+  if (lib.useSrc) p += '\nUse a PRIMEIRA imagem de referência como fonte da verdade do sujeito: mantenha a mesma pessoa/objeto (rosto, cabelo, roupas, cores), alterando apenas o que foi pedido.';
+  return p.trim();
+}
+async function libRefDataURL(imgId) { const b = await imgGet(imgId); return (await ailBlob(b, 1536)).url; }
+async function libGenerate() {
+  const it = libItem(lib.sel); if (!it || lib.busy) return; lib.work = $('libWork').value; lib.change = $('libChange').value;
+  const prompt = libFinalPrompt(); if (prompt.length < 5) { toast('Escreva ou leia o prompt primeiro.'); return; } if (prompt.length > 3900) { toast('Prompt muito longo (máx. ~3.900 caracteres). Encurte.'); return; }
+  lib.busy = 'gen'; libBenchRefresh();
+  try {
+    const refs = []; if (lib.useSrc) refs.push(await libRefDataURL(it.imgId)); if (lib.styleRef) refs.push(await libRefDataURL(lib.styleRef));
+    const blob = await generateImage({prompt, size: lib.size, quality: lib.quality, refs}), tag = [lib.style, lib.angle].filter(Boolean);
+    const n = await libAddBlob(blob, {name: it.name.replace(/ · v\d+$/, '') + ' · v' + (libList().filter(x => x.parent === it.id).length + 1), kind: 'gen', parent: it.id, prompt: lib.work, promptEn: '', style: lib.style || it.style, tags: tag, meta: {composition: lib.angle, light: '', palette: [], elements: []}});
+    lib.last.unshift(n.id); toast('Imagem gerada e guardada na biblioteca.');
+  } catch (e) { toast(e.message); }
+  lib.busy = ''; renderBiblioteca();
+}
+function libNewFromPrompt() {
+  if (!imageReady()) { toast(needsLogin() ? 'Entre no Studio para gerar.' : 'Geração de imagem não configurada (Configurações → Integrações).'); return; }
+  showModal('✦ Criar imagem por prompt', `<div class="field"><label>Descreva a imagem</label><textarea id="lbNew" rows="5" placeholder="Ex.: mulher de 60 anos sorrindo, sentada numa poltrona de linho, luz de janela, estilo fotográfico natural"></textarea></div><div class="ins-row"><label class="ins">Formato<select id="lbNewS"><option value="square">Quadrado</option><option value="portrait">Vertical</option><option value="landscape">Horizontal</option></select></label><label class="ins">Qualidade<select id="lbNewQ"><option value="low">Rascunho</option><option value="medium" selected>Média</option><option value="high">Alta</option></select></label></div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" id="lbNewGo" onclick="libNewRun()">Gerar</button></div>`);
+}
+async function libNewRun() {
+  const p = $('lbNew').value.trim(); if (p.length < 5) { toast('Descreva a imagem.'); return; } const b = $('lbNewGo'); b.disabled = true; b.textContent = 'Gerando…';
+  try { const blob = await generateImage({prompt: p, size: $('lbNewS').value, quality: $('lbNewQ').value, refs: []}), it = await libAddBlob(blob, {name: p.slice(0, 40), kind: 'gen', prompt: p}); closeModal(); lib.sel = it.id; libResetWork(it); renderBiblioteca(); }
+  catch (e) { b.disabled = false; b.textContent = 'Gerar'; toast(e.message); }
+}
+async function libDownload() { const it = libItem(lib.sel); if (!it) return; download(slug(it.name || 'imagem') + '.png', await imgGet(it.imgId), 'image/png'); }
+function libDelete() { const it = libItem(lib.sel); if (!it || !confirm('Excluir esta imagem da biblioteca?')) return; state.imglib.items = libList().filter(x => x.id !== it.id); imgDel(it.imgId).catch(() => { }); lib.sel = ''; persist(); renderBiblioteca(); }
+
+/* seletor usado pelos editores: devolve {id, ar} de uma cópia da imagem (ou, com raw, o id do item da biblioteca) */
+function libPick(cb, o) {
+  o = o || {}; lib.pickCb = cb; lib.pickRaw = !!o.raw; const list = libList();
+  showModal(o.title || '📚 Biblioteca de imagens', `<div class="row-gap" style="margin-bottom:8px"><input id="lpQ" placeholder="Buscar" oninput="libPickFilter()" style="flex:1"><button class="btn sm" onclick="libPickUpload()">＋ Subir</button><button class="btn sm" onclick="closeModal();go('biblioteca')">Abrir a biblioteca</button></div><div class="stock-grid" id="lpGrid">${libPickCells(list)}</div>`);
+  document.getElementById('modalBox').classList.add('wide'); libFill($('lpGrid'));
+}
+const libPickCells = list => list.map(i => `<button class="stock-it" onclick="libPickUse('${i.id}')" title="${esc(i.name)}"><img data-lib="${i.imgId}" alt=""><span>${esc(i.name.slice(0, 26))}</span></button>`).join('') || '<p class="muted" style="grid-column:1/-1">A biblioteca está vazia. Suba uma imagem.</p>';
+function libPickFilter() { const q = $('lpQ').value.toLowerCase(); $('lpGrid').innerHTML = libPickCells(libList().filter(i => !q || (i.name + ' ' + i.prompt + ' ' + i.tags.join(' ')).toLowerCase().includes(q))); libFill($('lpGrid')); }
+async function libPickUpload() {
+  const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/png,image/jpeg,image/webp';
+  i.onchange = async () => { if (!i.files[0]) return; try { const it = await libAddBlob(i.files[0], {name: i.files[0].name.replace(/\.[^.]+$/, '')}); await libPickUse(it.id); } catch (e) { toast(e.message); } }; i.click();
+}
+async function libPickUse(id) {
+  const it = libItem(id), cb = lib.pickCb; if (!it || !cb) return;
+  try { if (lib.pickRaw) { closeModal(); cb(id); return; } const b = await imgGet(it.imgId), r = await stockBlobToImg(b); closeModal(); cb(r); } catch (e) { toast(e.message); }
+}
+function dzLibPhoto() { libPick(r => { const L = dzLayer(); L.imgId = r.id; dzDraw(); dzCommit(); dzInspector(); dzSlidesPanel(); }); }
+function dtpLibImg() { const it = dtpSelItem(); if (!it) return; libPick(r => { const q = dtpSelItem(); if (!q) return; q.imgId = r.id; q.ar = r.ar; dtpTouch(true); dtpPanel(); }); }
+function covLibImg() { libPick(r => { covC().imgId = r.id; persist(); renderEditora(); }); }
 
 </script>
 <script>
@@ -9564,7 +9736,7 @@ function covRender(r, p) {
   <div class="okr-label" style="margin-top:10px">PALETA</div><div class="tchips">${COV_PALS.map(([n, pl], i) => `<button class="tchip" onclick="covPal(${i})" title="${esc(n)}"><span class="cov-sw" style="background:${pl.bg}"></span><span class="cov-sw" style="background:${pl.fg}"></span><span class="cov-sw" style="background:${pl.accent}"></span> ${esc(n)}</button>`).join('')}</div>
   <div class="row-gap" style="margin:6px 0;flex-wrap:wrap">${[['bg', 'Fundo'], ['fg', 'Texto'], ['accent', 'Destaque'], ['second', 'Apoio']].map(([k, l]) => `<label class="dtp-chk">${l} <input type="color" value="${c.pal[k]}" onchange="covPalSet('${k}',this.value)"></label>`).join('')}</div>
   <div class="row-gap" style="margin-bottom:4px"><button class="btn sm" onclick="fbOpen(f => covSet('head', f), covC().head)">Aa Ver fontes do título</button><button class="btn sm" onclick="fbOpen(f => covSet('body', f), covC().body)">Aa Ver fontes do texto</button></div><div class="form-grid"><div class="field"><label>Fonte dos títulos</label><select onchange="covSet('head',this.value)">${dtpFontOpts(c.head)}</select></div><div class="field"><label>Fonte do texto</label><select onchange="covSet('body',this.value)">${dtpFontOpts(c.body)}</select></div></div>
-  <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="covPickImg()">${c.imgId ? 'Trocar a foto/ilustração' : 'Subir foto/ilustração de fundo'}</button><button class="btn sm" onclick="covStockImg()">🔎 Banco de imagens</button>${c.imgId ? '<button class="btn sm" onclick="covSet(\'imgId\',\'\')">Tirar a foto</button>' : ''}<button class="btn sm" onclick="covConcepts()" ${cov.busy ? 'disabled' : ''}>${cov.busy === 'con' ? 'Pensando…' : '✦ Sugestões da IA'}</button></div>
+  <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="covPickImg()">${c.imgId ? 'Trocar a foto/ilustração' : 'Subir foto/ilustração de fundo'}</button><button class="btn sm" onclick="covLibImg()">📚 Biblioteca</button><button class="btn sm" onclick="covStockImg()">🔎 Banco de imagens</button>${c.imgId ? '<button class="btn sm" onclick="covSet(\'imgId\',\'\')">Tirar a foto</button>' : ''}<button class="btn sm" onclick="covConcepts()" ${cov.busy ? 'disabled' : ''}>${cov.busy === 'con' ? 'Pensando…' : '✦ Sugestões da IA'}</button></div>
   ${cov.concepts ? `<div class="cov-cons">${cov.concepts.map((k, i) => `<div class="mot-ch"><b>${esc(k.name)}</b><p class="muted" style="font-size:12px;margin:3px 0">${esc(k.why)}</p><p style="font-size:12px;margin:3px 0"><b>Imagem:</b> ${esc(k.imageBrief)}</p><button class="btn sm" onclick="covApplyConcept(${i})">Aplicar</button></div>`).join('')}</div>` : ''}
   ${refBankHTML('cov', ['capas', 'cartaz', 'posts'])}
   ${cov.ref ? `<div class="row-gap" style="flex-wrap:wrap;margin-bottom:8px"><span class="muted" style="font-size:12px">Referência escolhida.</span><button class="btn sm dark" onclick="ailStart(cov.ref,'cov')">✦ Ler layout com IA → peça editável</button><button class="btn sm" onclick="cov.ref=null;covRender()">Tirar</button></div>` : ''}

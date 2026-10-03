@@ -17,9 +17,9 @@ const INT_CARDS = [
 function renderIntegracoes() {
   const r = $('integracoesRoot'); if (!r) return;
   const s = intSt(), ok = k => !!(s[k] && s[k].configured);
-  if (!API.available) { r.innerHTML = `<div class="page-head"><div><h1>Integrações</h1><p>Conecte as APIs que o Studio usa.</p></div></div>${integrationsHTML()}`; return; }
+  if (!API.available) { r.innerHTML = `<h2 style="margin:0 0 10px;font-size:18px">Integrações</h2>${integrationsHTML()}`; return; }
   const aiProv = s.ai && s.ai.provider === 'openai' ? 'GPT (OpenAI)' : 'Claude (Anthropic)';
-  r.innerHTML = `<div class="page-head"><div><h1>Integrações</h1><p>Onde você liga as APIs. Cada chave fica só no servidor, no arquivo <span class="mono">api/config.php</span>; aqui você vê o que está ligado e testa a conexão.</p></div><div class="actions"><button class="btn" onclick="loadStatus().then(renderIntegracoes)">↻ Atualizar status</button></div></div>
+  r.innerHTML = `<div class="section-row" style="margin-bottom:10px"><div><h2 style="margin:0;font-size:18px">Integrações (APIs)</h2><p class="muted" style="margin:2px 0 0">Onde você liga as APIs. Cada chave fica só no servidor, no arquivo <span class="mono">api/config.php</span>; aqui você vê o que está ligado e testa a conexão.</p></div><button class="btn" onclick="loadStatus().then(renderIntegracoes)">↻ Atualizar status</button></div>
   ${needsLogin() ? `<div class="panel" style="margin-bottom:12px"><div class="section-row"><div><h3>Entre no Studio</h3><p class="muted">Sem login o servidor não mostra o status das chaves.</p></div><button class="btn dark" onclick="showLogin()">Entrar</button></div></div>` : ''}
   <div class="integration-grid int-big">${INT_CARDS.map(c => {
     const on = ok(c.k), extra = c.k === 'ai' && on ? ` · ${aiProv}${s.ai.model ? ' · ' + esc(s.ai.model) : ''}` : '';
@@ -61,7 +61,7 @@ async function stockBlobToImg(blob) {
 function stockPick(cb) {
   if (!stockReady()) { toast(needsLogin() ? 'Entre no Studio para usar o banco de imagens.' : 'Banco de imagens não configurado: defina MAGNIFIC_API_KEY (página Integrações).'); return; }
   INT.stock = Object.assign(INT.stock, {cb, res: [], page: 1, busy: false});
-  showModal('🔎 Banco de imagens · Magnific', `<div class="row-gap"><input id="stQ" placeholder="Ex.: consultório moderno, folhas verdes, mulher sorrindo" style="flex:1" value="${esc(INT.stock.q)}" onkeydown="if(event.key==='Enter')stockSearch(1)"><select id="stOr" onchange="INT.stock.or=this.value"><option value="">Qualquer formato</option><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option><option value="square">Quadrada</option></select><button class="btn dark" onclick="stockSearch(1)">Buscar</button></div>
+  showModal('🔎 Banco de imagens · Magnific', `<div class="row-gap"><input id="stQ" placeholder="Ex.: consultório moderno, folhas verdes, mulher sorrindo" style="flex:1" value="${esc(INT.stock.q)}" onkeydown="if(event.key==='Enter')stockSearch(1)"><label class="ins inl" style="white-space:nowrap"><input type="checkbox" checked onchange="INT.stock.save=this.checked"> guardar na biblioteca</label><select id="stOr" onchange="INT.stock.or=this.value"><option value="">Qualquer formato</option><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option><option value="square">Quadrada</option></select><button class="btn dark" onclick="stockSearch(1)">Buscar</button></div>
     <div id="stRes" class="stock-grid"><p class="muted" style="grid-column:1/-1">Digite o que procura. Confira a licença de cada imagem no site do banco antes de publicar.</p></div><div id="stMore"></div>`);
   document.getElementById('modalBox').classList.add('wide'); setTimeout(() => $('stQ') && $('stQ').focus(), 60);
 }
@@ -79,7 +79,7 @@ async function stockUse(i) {
   const x = INT.stock.res[i], cb = INT.stock.cb; if (!x || !cb) return; toast('Baixando imagem…');
   try {
     const r = await api('magnific.php?action=fetch&url=' + encodeURIComponent(x.url)), blob = await (await fetch(r.image)).blob();
-    const img = await stockBlobToImg(blob); closeModal(); cb(img); toast('Imagem aplicada. Lembre de conferir a licença.');
+    if (INT.stock.save !== false && typeof libAddBlob === 'function') libAddBlob(blob, {name: x.title || 'Banco de imagens', kind: 'banco', tags: ['banco']}).catch(() => { }); const img = await stockBlobToImg(blob); closeModal(); cb(img); toast('Imagem aplicada. Lembre de conferir a licença.');
   } catch (e) { toast(e.message); }
 }
 /* amplia a resolução (Magnific). Devolve Blob. */
@@ -131,7 +131,7 @@ const aud = {busy: '', cache: {}, msg: ''};
 const audE = eb => eb.audio || (eb.audio = {voiceId: '', voiceName: '', items: {}});
 function audRender(b, eb) {
   const A = audE(eb), secs = eb.sections.filter(s => ['title', 'chapter', 'text'].includes(s.type) && audText(s).replace(/\s/g, '').length > 3), total = secs.reduce((n, s) => n + audText(s).length, 0);
-  if (!ttsReady()) { b.innerHTML = `<div class="mot-wrap"><div><div class="mot-ch"><b>Áudio · ler o livro em voz alta</b><p class="muted" style="font-size:12.5px">Gera a narração de cada capítulo com a ElevenLabs, com player e download em MP3 (audiolivro, prévia para redes, acessibilidade).</p><p style="font-size:12.5px">${needsLogin() ? 'Entre no Studio para usar.' : 'Falta ligar a ElevenLabs: coloque <span class="mono">ELEVENLABS_API_KEY</span> em <span class="mono">api/config.php</span>.'}</p><button class="btn dark" onclick="go('integracoes')">Abrir Integrações</button></div></div></div>`; return; }
+  if (!ttsReady()) { b.innerHTML = `<div class="mot-wrap"><div><div class="mot-ch"><b>Áudio · ler o livro em voz alta</b><p class="muted" style="font-size:12.5px">Gera a narração de cada capítulo com a ElevenLabs, com player e download em MP3 (audiolivro, prévia para redes, acessibilidade).</p><p style="font-size:12.5px">${needsLogin() ? 'Entre no Studio para usar.' : 'Falta ligar a ElevenLabs: coloque <span class="mono">ELEVENLABS_API_KEY</span> em <span class="mono">api/config.php</span>.'}</p><button class="btn dark" onclick="go('settings')">Abrir Configurações → Integrações</button></div></div></div>`; return; }
   const vs = INT.voices;
   if (!vs && !aud.loading) { aud.loading = true; ttsVoices().then(() => { aud.loading = false; if (eui.bt === 'audio') audRender(b, eb); }, e => { aud.loading = false; INT.voices = []; INT.voicesErr = e.message; if (eui.bt === 'audio') audRender(b, eb); }); }
   const done = secs.filter(s => A.items[s.id] && A.items[s.id].ids.length).length;

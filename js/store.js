@@ -44,7 +44,7 @@ function seedState() {
   const cd = newProject('Cartório Descomplicado', 'Conteúdo + geração de demanda', {cover: 'a6', icon: 'CD'});
   const se = newProject('Saber Ensinar', 'Educação criativa', {cover: 'a8', icon: 'SE'});
   return {
-    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], inspo: {items: [], boards: [], cats: []}, myFonts: [],
+    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], imglib: {items: []}, inspo: {items: [], boards: [], cats: []}, myFonts: [],
     workspace: {name: 'Ampliação Marketing', instruction: 'Criar com clareza estratégica, consistência de marca e foco na jornada de compra.'},
     credits: 30, activeProjectId: mb.id, projects: [mb, cd, se], creatives
   };
@@ -63,6 +63,12 @@ function normalizeInspo(x) {
     imgId: safeId(i.imgId) ? i.imgId : '', url: url(i.url), imgUrl: url(i.imgUrl), w: Math.min(20000, Math.max(0, +i.w || 0)), h: Math.min(20000, Math.max(0, +i.h || 0)), colors: (Array.isArray(i.colors) ? i.colors : []).filter(hex).slice(0, 8), hues: (Array.isArray(i.hues) ? i.hues : []).map(h => str(h, 10)).slice(0, 4),
     fav: !!i.fav, boards: (Array.isArray(i.boards) ? i.boards : []).filter(b => bids.has(b)), created: str(i.created, 40)}));
   return out;
+}
+function normalizeImglib(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), items = x && Array.isArray(x.items) ? x.items : [];
+  return {items: items.filter(i => i && safeId(i.id) && safeId(i.imgId)).slice(0, 1500).map(i => { const m = i.meta && typeof i.meta === 'object' ? i.meta : {};
+    return {id: i.id, imgId: i.imgId, name: str(i.name, 120) || 'Imagem', prompt: str(i.prompt, 4000), promptEn: str(i.promptEn, 4000), style: str(i.style, 80), tags: (Array.isArray(i.tags) ? i.tags : []).slice(0, 10).map(t => str(t, 40)), parent: safeId(i.parent) ? i.parent : '', kind: ['upload', 'gen', 'banco'].includes(i.kind) ? i.kind : 'upload', w: Math.max(0, +i.w || 0), h: Math.max(0, +i.h || 0), created: str(i.created, 40),
+      meta: {composition: str(m.composition, 200), light: str(m.light, 200), negative: str(m.negative, 300), palette: (Array.isArray(m.palette) ? m.palette : []).filter(c => /^#[0-9a-f]{6}$/i.test(String(c))).slice(0, 8), elements: (Array.isArray(m.elements) ? m.elements : []).slice(0, 12).map(e => str(e, 60))}}; })};
 }
 function normalizeMyFonts(x) {
   const CATS = ['sans', 'geo', 'serif', 'slab', 'cond', 'display', 'script', 'round', 'mono'], seen = new Set();
@@ -165,7 +171,7 @@ function normalize(s) {
   s.workspace = mergeDefaults(s.workspace, base.workspace);
   s.credits = Number.isFinite(+s.credits) ? +s.credits : 30;
   s.inspo = normalizeInspo(s.inspo);
-  s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills);
+  s.imglib = normalizeImglib(s.imglib); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills);
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');

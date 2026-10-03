@@ -94,6 +94,7 @@ document.addEventListener('drop', async e => { const d = e.target.closest && e.t
 /* ===== Fontes do projeto: a pasta fonts/ na raiz do site (gerada por tools/build_fonts.js → fonts/manifest.json). Vale para todos os computadores e não ocupa o navegador ===== */
 const PROJFONTS = [];
 async function pfLoadManifest() {
+  if (location.protocol === 'file:') return;   // aberto como arquivo: o navegador bloqueia fetch local; as fontes do projeto só valem no servidor
   try { const r = await fetch('fonts/manifest.json', {cache: 'no-cache'}); if (!r.ok) return; const j = await r.json(); if (!Array.isArray(j.families)) return;
     PROJFONTS.length = 0; j.families.slice(0, 5000).forEach(f => { const fam = mySafeFamily(f.family); if (!fam || !Array.isArray(f.files)) return; PROJFONTS.push({id: 'pf-' + fam, family: fam, cat: MY_CATS.some(c => c[0] === f.cat) ? f.cat : myGuessCat(fam), project: true, files: f.files.filter(x => /^[\w\-. \/]+\.(ttf|otf|woff2?)$/i.test(x.path) && !x.path.includes('..')).map(x => ({path: 'fonts/' + x.path.replace(/^\/+/, ''), weight: Math.min(1000, Math.max(100, +x.weight || 400)), italic: !!x.italic, variable: Array.isArray(x.variable) ? [+x.variable[0] || 100, +x.variable[1] || 900] : null}))}); });
     mySync(); if (typeof renderDesign === 'function' && ui.page === 'design') renderDesign();

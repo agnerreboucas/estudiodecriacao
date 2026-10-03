@@ -270,3 +270,14 @@
 .stock-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;max-height:56vh;overflow:auto}.stock-it{border:1px solid #e3e3e3;border-radius:8px;background:#fff;padding:0;cursor:pointer;overflow:hidden;text-align:left}.stock-it img{width:100%;aspect-ratio:1;object-fit:cover;display:block}.stock-it span{display:block;font-size:10px;color:#777;padding:3px 6px}.stock-it:hover{border-color:#111}
 .aud-it audio{height:34px}
 @media(max-width:760px){.stock-grid{grid-template-columns:repeat(2,1fr)}.int-map{grid-template-columns:1fr}}
+
+.lib-wrap{display:grid;grid-template-columns:1fr;gap:16px}.lib-wrap.has-sel{grid-template-columns:minmax(0,1fr) 420px}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;align-content:start}
+.lib-it{position:relative;border:2px solid transparent;border-radius:10px;background:#fff;padding:0;cursor:pointer;overflow:hidden;text-align:left;box-shadow:0 0 0 1px #e6e6e6}
+.lib-it img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#f1f1f1}.lib-it span{display:block;font-size:11px;padding:4px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lib-it.on{border-color:#111}.lib-it em{position:absolute;top:6px;left:6px;background:#111;color:#fff;font-size:9px;font-style:normal;border-radius:999px;padding:2px 6px}
+.lib-bench{border:1px solid #e6e6e6;border-radius:12px;padding:14px;background:#fff;align-self:start;position:sticky;top:12px;max-height:calc(100vh - 30px);overflow:auto}
+.lib-bench h3{margin:14px 0 6px;font-size:13px}.lib-bench textarea{width:100%;margin:4px 0}.lib-bench .chips{justify-content:flex-start;margin-top:0;gap:6px}.lib-bench .chip{padding:5px 10px;font-size:11px}.lib-bench .chip.on{background:#111;color:#fff;border-color:#111}
+.lib-pv img{width:100%;border-radius:8px;display:block;max-height:340px;object-fit:contain;background:#f1f1f1}.lib-sw{width:22px;height:22px;border-radius:5px;border:1px solid #ddd;display:inline-block}
+.lib-res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:1050px){.lib-wrap.has-sel{grid-template-columns:1fr}.lib-bench{position:static;max-height:none}}

@@ -1,5 +1,5 @@
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'integracoes', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
+const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -26,7 +26,7 @@ function go(page) {
 function renderPage(page) {
   ({home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
     videoLab: renderVideoLab, campaigns: renderCampaignsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
-    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, editorial: renderEditorial, integracoes: renderIntegracoes}[page] || (() => {}))();
+    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, editorial: renderEditorial, biblioteca: renderBiblioteca}[page] || (() => {}))();
 }
 function refreshCurrentView() { renderSyncBadge(); renderHome(); renderPage(ui.page); updateContextUI(); }
 function bootRender() { $('credits').textContent = state.credits; updateContextUI(); renderHome(); renderPage(ui.page); renderSyncBadge(); }
@@ -179,6 +179,6 @@ function renderSettings() {
     <div class="field full"><label>URL de captura de leads (usada nas landing pages exportadas)</label><input id="leadsUrl" placeholder="https://seusite.com/api/leads.php?token=...&project=ID" value="${esc(state.workspace.leadsUrl || '')}"></div></div>
     <div style="margin-top:15px"><button class="btn dark" onclick="saveSettings()">Salvar configurações</button></div></div>
   <div class="panel" style="margin-top:14px"><h3>Seus dados</h3><p class="muted">Tudo é salvo neste navegador. Exporte regularmente ou ative a sincronização com o servidor.</p><div class="actions" style="flex-wrap:wrap"><button class="btn" onclick="exportWorkspace()">⬇ Exportar workspace</button><button class="btn" onclick="exportProject()">⬇ Exportar projeto atual</button><button class="btn" onclick="$('importFile').click()">⬆ Importar JSON</button><button class="btn" onclick="resetWorkspace()">Reiniciar exemplo</button></div></div>
-  <h2 style="margin:22px 0 10px;font-size:18px">Integrações</h2>${integrationsHTML()}`;
+  <div id="integracoesRoot" style="margin-top:22px"></div>`; renderIntegracoes();
 }
 function saveSettings() { state.workspace.name = $('workspaceName').value; state.workspace.instruction = $('globalInstruction').value; state.workspace.leadsUrl = $('leadsUrl').value.trim(); persist(); toast('Configurações salvas.'); }
