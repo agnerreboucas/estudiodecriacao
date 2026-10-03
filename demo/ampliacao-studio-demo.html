@@ -528,6 +528,16 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .flip-ov{position:fixed;inset:0;z-index:9999;background:#000}.flip-ov iframe{width:100%;height:100%;border:0;display:block}
 .bk-shelf{margin:14px 0 26px}.bk-row{display:flex;flex-wrap:wrap;gap:22px;padding:18px 14px 6px;background:linear-gradient(180deg,#f4efe6,#ebe4d6)}.bk-item{width:160px;display:flex;flex-direction:column;gap:4px;font-size:12.5px}.bk-book{position:relative;border:0;padding:0;background:none;cursor:pointer;transform:perspective(600px) rotateY(-12deg);transition:transform .25s;box-shadow:8px 10px 18px rgba(0,0,0,.35);border-radius:2px 5px 5px 2px;overflow:hidden;width:150px;height:210px}.bk-book:hover{transform:perspective(600px) rotateY(0deg) translateY(-6px)}.bk-book canvas{width:150px;height:210px;display:block;background:#ddd}.bk-spine{position:absolute;left:0;top:0;bottom:0;width:10px;background:linear-gradient(90deg,rgba(0,0,0,.35),rgba(255,255,255,.18) 60%,rgba(0,0,0,0))}.bk-board{height:14px;background:linear-gradient(180deg,#a27b4c,#7d5a33);border-radius:0 0 8px 8px;box-shadow:0 6px 10px rgba(0,0,0,.25)}
 .cov-lays{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))!important}.cov-lay canvas{width:100%;height:auto;border-radius:6px;background:#eee}
+.bk-head{margin-bottom:10px}.bk-chip{font-size:11.5px;border:1.5px solid #e2e2e2;border-radius:999px;padding:3px 10px;background:#fff;color:#888;font-weight:600}.bk-chip.ok{border-color:#86efac;background:#ecfdf3;color:#15803d}
+.dtp-sty{display:grid;gap:6px}.dtp-sty-b{display:grid;grid-template-columns:36px 1fr;gap:2px 10px;align-items:center;text-align:left;border:1.5px solid #e2e2e2;border-radius:10px;padding:7px 9px;background:#fff;cursor:pointer}.dtp-sty-b.on{border-color:#111;background:#f6f6f2}.dtp-sty-b span{grid-row:1/3;width:36px;height:46px;border:2px solid;border-radius:3px;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;padding:4px}.dtp-sty-b span i{display:block;height:6px;border-radius:1px}.dtp-sty-b b{font-size:13px}.dtp-sty-b small{font-size:10.5px;color:#777}
+.dtp-tpl{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.dtp-tpl-c{border:1.5px solid #e6e6e6;border-radius:10px;padding:8px;background:#fff;display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center}.dtp-tpl-c canvas{width:96px;height:auto;box-shadow:0 1px 4px rgba(0,0,0,.3);background:#fff}.dtp-tpl-c b{font-size:11.5px;line-height:1.25}
+
+.int-keys{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 8px}.int-keys code{font-size:10px;background:#f4f4f4;border-radius:5px;padding:2px 6px;color:#555}
+.int-out{display:block;margin-top:6px;font-size:11px}.int-out.ok{color:#1d6b3a}.int-out.bad{color:#b3261e}
+.int-map{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 18px}.int-map div{display:flex;flex-direction:column;font-size:12px}.int-map span{color:#777}
+.stock-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;max-height:56vh;overflow:auto}.stock-it{border:1px solid #e3e3e3;border-radius:8px;background:#fff;padding:0;cursor:pointer;overflow:hidden;text-align:left}.stock-it img{width:100%;aspect-ratio:1;object-fit:cover;display:block}.stock-it span{display:block;font-size:10px;color:#777;padding:3px 6px}.stock-it:hover{border-color:#111}
+.aud-it audio{height:34px}
+@media(max-width:760px){.stock-grid{grid-template-columns:repeat(2,1fr)}.int-map{grid-template-columns:1fr}}
 
 </style>
 </head>
@@ -539,6 +549,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
     <button class="active" data-page="home" title="Início"><span data-ico="home"></span></button>
     <button data-page="projects" title="Projetos"><span data-ico="folder"></span></button>
     <button data-page="matrix" title="Matriz de Criação"><span data-ico="sparkles"></span></button>
+    <button data-page="integracoes" title="Integrações (APIs)"><span data-ico="plug"></span></button>
     <button data-page="editorial" title="Agente Editorial"><span data-ico="target"></span></button>
     <button data-page="design" title="Estúdio de Design"><span data-ico="palette"></span></button>
     <button data-page="inspiration" title="Inspiração"><span data-ico="pin"></span></button>
@@ -623,6 +634,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 <section id="page-inspiration" class="page"><div class="subpage dz-wide" id="inspoRoot"></div></section>
 <section id="page-editora" class="page"><div class="subpage dz-wide" id="editoraRoot"></div></section>
 <section id="page-editorial" class="page"><div class="subpage dz-wide" id="editorialRoot"></div></section>
+<section id="page-integracoes" class="page"><div class="subpage" id="integracoesRoot"></div></section>
 <section id="page-diagram" class="page"><div class="subpage dz-wide" id="diagramRoot"></div></section>
 <section id="page-videoLab" class="page"><div class="subpage" id="videoRoot"></div></section>
 <section id="page-campaigns" class="page"><div class="subpage" id="campaignsRoot"></div></section>
@@ -831,7 +843,8 @@ function normalizeLayouts(x) {
     const sd = d.styles && typeof d.styles === 'object' ? d.styles : {};
     Object.keys(sd).filter(k => /^[a-z0-9_-]{1,24}$/i.test(k)).slice(0, 40).forEach(k => { styles[k] = style(sd[k], D); });
     ['body', 'h1', 'h2', 'h3', 'quote', 'caption'].forEach(k => { if (!styles[k]) styles[k] = style({}, D); });
-    const items = a => (Array.isArray(a) ? a : []).filter(i => i && ['img', 'rect', 'text'].includes(i.k)).slice(0, 80).map(i => ({id: safeId(i.id) ? i.id : uid('fr'), k: i.k, x: num(i.x, 0, -5000, 9000), y: num(i.y, 0, -5000, 9000), w: num(i.w, 50, 2, 9000), h: num(i.h, 50, 2, 9000), wrap: WRAP.includes(i.wrap) ? i.wrap : 'none', off: num(i.off, 6, 0, 200), imgId: safeId(i.imgId) ? i.imgId : '', fill: i.fill ? hex(i.fill, '#CCCCCC') : '', stroke: i.stroke ? hex(i.stroke, '#000000') : '', sw: num(i.sw, 1, 0, 40), op: num(i.op, 1, 0, 1), zoom: num(i.zoom, 1, 0.2, 8), px: num(i.px, 0, -5000, 5000), py: num(i.py, 0, -5000, 5000), text: str(i.text, 6000), st: styles[i.st] ? i.st : 'body', pad: num(i.pad, 4, 0, 100), ar: num(i.ar, 0, 0, 100)}));
+    const ov = o => { if (!o || typeof o !== 'object') return undefined; const r = {}; ['size', 'lead', 'indent', 'after', 'before'].forEach(k => { if (o[k] != null && isFinite(+o[k])) r[k] = num(o[k], 0, 0, 600); }); ['b', 'i', 'caps'].forEach(k => { if (o[k] != null) r[k] = o[k] ? 1 : 0; }); if (/^#[0-9a-f]{6}$/i.test(String(o.color))) r.color = o.color; if (ALIGN.includes(o.align)) r.align = o.align; return Object.keys(r).length ? r : undefined; };
+    const items = a => (Array.isArray(a) ? a : []).filter(i => i && ['img', 'rect', 'text'].includes(i.k)).slice(0, 80).map(i => ({id: safeId(i.id) ? i.id : uid('fr'), k: i.k, x: num(i.x, 0, -5000, 9000), y: num(i.y, 0, -5000, 9000), w: num(i.w, 50, 2, 9000), h: num(i.h, 50, 2, 9000), wrap: WRAP.includes(i.wrap) ? i.wrap : 'none', off: num(i.off, 6, 0, 200), imgId: safeId(i.imgId) ? i.imgId : '', fill: i.fill ? hex(i.fill, '#CCCCCC') : '', stroke: i.stroke ? hex(i.stroke, '#000000') : '', sw: num(i.sw, 1, 0, 40), op: num(i.op, 1, 0, 1), zoom: num(i.zoom, 1, 0.2, 8), px: num(i.px, 0, -5000, 5000), py: num(i.py, 0, -5000, 5000), text: str(i.text, 6000), st: styles[i.st] ? i.st : 'body', pad: num(i.pad, 4, 0, 100), ar: num(i.ar, 0, 0, 100), ov: ov(i.ov)}));
     const story = (Array.isArray(d.story) ? d.story : []).slice(0, 4000).map(s => {
       if (!s) return null;
       if (s.k === 'break' || s.k === 'colbreak') return {k: s.k};
@@ -840,7 +853,7 @@ function normalizeLayouts(x) {
     }).filter(Boolean);
     const rn = d.run || {};
     return {
-      id: d.id, name: str(d.name, 120) || 'Documento', created: str(d.created, 40), unit: UNITS.includes(d.unit) ? d.unit : 'mm',
+      id: d.id, styleId: /^[a-z0-9_-]{1,24}$/i.test(d.styleId || '') ? d.styleId : '', name: str(d.name, 120) || 'Documento', created: str(d.created, 40), unit: UNITS.includes(d.unit) ? d.unit : 'mm',
       page: {w: num(pg.w, 420, 36, 6000), h: num(pg.h, 595, 36, 6000)}, facing: !!d.facing, bleed: num(d.bleed, 8.5, 0, 72),
       margins: {t: num(m.t, 40, 0, 2000), b: num(m.b, 40, 0, 2000), i: num(m.i, 40, 0, 2000), o: num(m.o, 40, 0, 2000)},
       cols: Math.round(num(d.cols, 1, 1, 8)), colw: (Array.isArray(d.colw) ? d.colw : []).slice(0, 8).map(v => num(v, 1, 0.1, 20)), mod: {cols: Math.round(num(d.mod && d.mod.cols, 6, 0, 24)), rows: Math.round(num(d.mod && d.mod.rows, 8, 0, 24))}, front: Math.round(num(d.front, 0, 0, 20)), gutter: num(d.gutter, 14, 0, 200), baseline: num(d.baseline, 0, 0, 100), nPages: Math.round(num(d.nPages, 1, 1, 400)), autoflow: d.autoflow !== false, paper: hex(d.paper, '#FFFFFF'),
@@ -889,12 +902,18 @@ function normalizeMotor(m) {
   return {skillId: safeId(m.skillId) ? m.skillId : '', idea: str(m.idea, 4000), source: str(m.source, 60000), audience: str(m.audience, 300), tone: str(m.tone, 300), nch: Math.max(3, Math.min(14, Math.round(+m.nch || 7))), title: str(m.title, 200), subtitle: str(m.subtitle, 300), author: str(m.author, 200), outline: out, chapters, full: str(m.full, 200000), stage: ['material', 'estrutura', 'texto', 'enviar'].includes(m.stage) ? m.stage : 'material', approved: !!m.approved};
 }
 /* Editora: valida cada e-book (ids, textos, tipos de bloco, cores) antes de entrar no estado */
+function normalizeAudio(a) {
+  const o = {voiceId: '', voiceName: '', items: {}}; if (!a || typeof a !== 'object') return o;
+  o.voiceId = /^[A-Za-z0-9]{0,40}$/.test(String(a.voiceId)) ? String(a.voiceId || '') : ''; o.voiceName = String(a.voiceName || '').slice(0, 80);
+  Object.keys(a.items && typeof a.items === 'object' ? a.items : {}).slice(0, 300).forEach(k => { const it = a.items[k]; if (!safeId(k) || !it || !Array.isArray(it.ids)) return; const ids = it.ids.filter(safeId).slice(0, 60); if (ids.length) o.items[k] = {ids, chars: Math.max(0, +it.chars || 0), at: String(it.at || '').slice(0, 40)}; });
+  return o;
+}
 function normalizeEbooks(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TYPES = ['p', 'h2', 'box', 'cols2', 'list', 'check', 'summary', 'pagebreak'], KINDS = ['case', 'tip', 'warn', 'know', 'care', 'note'], STYPES = ['title', 'toc', 'chapter', 'text'];
   const lines = a => (Array.isArray(a) ? a : []).slice(0, 80).map(t => str(t, 1200));
   const D = {primary: '#4F8A55', light: '#6AA170', terra: '#B99B78', gold: '#C9A876', bg: '#F4F1EC', box: '#F7F4EE', text: '#3A3733', soft: '#4A4741'};
   return (Array.isArray(x) ? x : []).filter(e => e && safeId(e.id)).slice(0, 200).map(e => ({
-    id: e.id, name: str(e.name, 120) || 'E-book', title: str(e.title, 200), subtitle: str(e.subtitle, 300), author: str(e.author, 200), collection: str(e.collection, 200), footer: str(e.footer, 80), coverSetId: safeId(e.coverSetId) ? e.coverSetId : '', created: str(e.created, 40),
+    id: e.id, dtpId: safeId(e.dtpId) ? e.dtpId : '', motor: normalizeMotor(e.motor), cover: normalizeCover(e.cover), kdp: normalizeKdp(e.kdp), audio: normalizeAudio(e.audio), name: str(e.name, 120) || 'E-book', title: str(e.title, 200), subtitle: str(e.subtitle, 300), author: str(e.author, 200), collection: str(e.collection, 200), footer: str(e.footer, 80), coverSetId: safeId(e.coverSetId) ? e.coverSetId : '', created: str(e.created, 40),
     brand: {h: str(e.brand && e.brand.h, 60) || 'Playfair Display', b: str(e.brand && e.brand.b, 60) || 'Montserrat', c: Object.fromEntries(Object.keys(D).map(k => [k, hex(e.brand && e.brand.c && e.brand.c[k], D[k])]))},
     terms: {keep: str(e.terms && e.terms.keep, 80), avoid: (e.terms && Array.isArray(e.terms.avoid) ? e.terms.avoid : []).slice(0, 50).map(t => str(t, 80))},
     sections: (Array.isArray(e.sections) ? e.sections : []).filter(s => s && safeId(s.id)).slice(0, 300).map(s => ({id: s.id, type: STYPES.includes(s.type) ? s.type : 'text', label: str(s.label, 80), title: str(s.title, 300), subtitle: str(s.subtitle, 400), opener: !!s.opener, inToc: s.inToc !== false,
@@ -1108,7 +1127,7 @@ function integrationsHTML() {
   const loginBox = needsLogin() ? `<div class="panel" style="margin-bottom:12px"><div class="section-row"><div><h3>Sessão</h3><p class="muted">Entre para liberar as integrações.</p></div><button class="btn dark" onclick="showLogin()">Entrar</button></div></div>` : (s.auth.required ? `<div class="panel" style="margin-bottom:12px"><div class="section-row"><div><h3>Sessão ativa</h3></div><button class="btn" onclick="doLogout()">Sair</button></div></div>` : '');
   const leadUrl = location.origin + location.pathname.replace(/[^/]*$/, '') + 'api/leads.php?project=' + (curProject() ? curProject().id : '');
   return loginBox + `<div class="integration-grid">
-    <div class="card"><div class="int-ico">${ico('sparkles', 24)}</div><h3>IA · Claude</h3><p>Hipóteses, diagnóstico, ICPs, jornada, roteiros e copy.</p>${ok(s.ai.configured, 'Configurada · ' + esc(s.ai.model || ''), 'Falta ANTHROPIC_API_KEY')}</div>
+    <div class="card"><div class="int-ico">${ico('sparkles', 24)}</div><h3>IA de texto · ${s.ai.provider === 'openai' ? 'GPT' : 'Claude'}</h3><p>Hipóteses, diagnóstico, ICPs, jornada, roteiros e copy.</p>${ok(s.ai.configured, 'Configurada · ' + esc(s.ai.model || ''), 'Falta ANTHROPIC_API_KEY')}</div>
     <div class="card"><div class="int-ico">${ico('refresh', 24)}</div><h3>Sincronização</h3><p>Salva o workspace no servidor para abrir em outros dispositivos.</p>${ok(s.sync.enabled, 'Ativa', 'Desativada')}${s.sync.enabled ? `<button class="btn sm" onclick="syncNow(true)">Sincronizar agora</button>` : ''}</div>
     <div class="card"><div class="int-ico">${ico('webhook', 24)}</div><h3>Webhook de saída</h3><p>Envia eventos (aprovação, publicação) para n8n, Make ou Zapier.</p>${ok(s.webhook.configured, 'Configurado', 'Falta WEBHOOK_URL')}${s.webhook.configured ? `<button class="btn sm" onclick="testWebhook()">Enviar teste</button>` : ''}</div>
     <div class="card"><div class="int-ico">${ico('inbox', 24)}</div><h3>Captura de leads</h3><p>Endpoint para formulários, landing pages e webhook do WhatsApp Cloud.</p>${ok(s.leads.configured, 'Ativo', 'Falta LEADS_TOKEN')}${s.leads.configured ? `<small class="mono break">${esc(leadUrl)}&amp;token=SEU_TOKEN</small>` : ''}</div>
@@ -1123,7 +1142,7 @@ async function testWebhook() { try { await sendWebhook('teste', {from: 'Ampliaç
 </script>
 <script>
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
+const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'integracoes', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -1150,7 +1169,7 @@ function go(page) {
 function renderPage(page) {
   ({home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
     videoLab: renderVideoLab, campaigns: renderCampaignsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
-    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, editorial: renderEditorial}[page] || (() => {}))();
+    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, editorial: renderEditorial, integracoes: renderIntegracoes}[page] || (() => {}))();
 }
 function refreshCurrentView() { renderSyncBadge(); renderHome(); renderPage(ui.page); updateContextUI(); }
 function bootRender() { $('credits').textContent = state.credits; updateContextUI(); renderHome(); renderPage(ui.page); renderSyncBadge(); }
@@ -5717,11 +5736,8 @@ const ebTypeLabel = {title: 'Página de título', toc: 'Sumário', chapter: 'Cap
 /* ---------- biblioteca ---------- */
 function renderEditora() {
   const r = $('editoraRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Editora'); return; }
-  if (typeof mot !== 'undefined' && mot.open) return motRender(r, p);
-  if (edh.area === 'capa') return covRender(r, p);
-  if (edh.area === 'amazon') return kdpRender(r, p);
+  if (eui.id && ebCur()) return bookRender(p, r);
   if (edh.area === 'banca') return bancaRender(r, p);
-  if (eui.id && ebCur()) return ebEditor(p, r);
   const list = ebList();
   r.innerHTML = `<div class="page-head"><div><h1>Editora</h1><p>Produza e-books completos: capítulos, caixas e checklists diagramados em 4 versões (celular, tablet 6×9, A4 preto e branco e A4 econômico), capa criada no Editor de Design, documento de revisão e EPUB.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button></div></div>
   ${list.length ? `<div class="dz-sets">${list.map(e => `<article class="dz-set eb-card"><div class="eb-cover" style="background:${esc(e.brand.c.primary)}"><small style="color:${esc(e.brand.c.gold)}">${esc((e.sections.find(s => s.type === 'title') || {}).label || 'GUIA PRÁTICO')}</small><b style="font-family:'${esc(e.brand.h)}',serif">${esc(e.title)}</b></div><strong>${esc(e.name)}</strong><small class="muted block">${esc(e.author || 'sem autor')} · ${e.sections.length} seções${e.coverSetId ? ' · com capa' : ''}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="ebOpen('${esc(e.id)}')">Abrir editor</button><button class="btn sm" onclick="ebDup('${esc(e.id)}')">Duplicar</button><button class="btn sm" onclick="ebDel('${esc(e.id)}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhum e-book ainda', 'Comece pelo modelo da coleção Método Cuidado Seguro (36 páginas, 7 capítulos) ou por um e-book em branco.', '<button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button>')}`;
@@ -5732,7 +5748,7 @@ function ebNewOpen() {
   <small class="muted block">O modelo traz só a estrutura e textos de exemplo entre [colchetes]. O Studio não inventa conteúdo técnico: o texto vem do manuscrito da autora.</small><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="ebCreate()">Criar</button></div>`);
 }
 function ebCreate() { const pre = $('ebPreset').value, t = $('ebTitle').value.trim(), a = $('ebAuthor').value.trim(), eb = ebNew(pre, t, a); if (t) { const ts = eb.sections.find(s => s.type === 'title'); if (ts) ts.title = t; } ebList().push(eb); persist(); closeModal(); ebOpen(eb.id); }
-function ebOpen(id) { eui.id = id; eui.sec = ''; eui.page = 0; eui.cache = {}; eui.hist = []; eui.hi = -1; eui.checks = null; ebSnap(); renderEditora(); }
+function ebOpen(id) { eui.id = id; eui.bt = 'conteudo'; eui.sec = ''; eui.page = 0; eui.cache = {}; eui.hist = []; eui.hi = -1; eui.checks = null; ebSnap(); renderEditora(); }
 function ebDup(id) { const e = ebList().find(x => x.id === id); if (!e) return; const c = JSON.parse(JSON.stringify(e)); c.id = uid('ebk'); c.name = e.name + ' (cópia)'; c.sections.forEach(s => { s.id = uid('sc'); s.blocks.forEach(b => { b.id = uid('bk'); }); }); ebList().push(c); persist(); renderEditora(); }
 function ebDel(id) { const e = ebList().find(x => x.id === id); if (!e || !confirm('Excluir o e-book “' + e.name + '”? Não dá para desfazer (a capa no Editor de Design não é apagada).')) return; const p = curProject(); p.ebooks = ebList().filter(x => x.id !== id); persist(); renderEditora(); }
 function ebBack() { eui.id = ''; renderEditora(); }
@@ -5750,7 +5766,7 @@ function ebStatus() { const el = $('ebAuto'); if (el) el.innerHTML = `✓ Salvo 
 /* ---------- editor ---------- */
 function ebEditor(p, r) {
   const eb = ebCur(), sec = ebSecCur(); if (!eui.sec && sec) eui.sec = sec.id;
-  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="ebBack()">← Editora</button><button class="btn sm" onclick="flipRead('eb',eui.id)" title="Folhear em tela cheia">📖 Folhear</button><input class="dz-name" value="${esc(eb.name)}" onchange="ebCur().name=this.value;ebTouch()"><div class="row-gap"><button class="btn sm" onclick="ebUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="ebRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="ebAuto"></span></div></div>
+  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="bookTab('conteudo')">← Conteúdo</button><input class="dz-name" value="${esc(eb.name)}" onchange="ebCur().name=this.value;ebTouch()"><div class="row-gap"><button class="btn sm" onclick="ebUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="ebRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="ebAuto"></span></div></div>
   <div class="eb-wrap"><div class="eb-left" id="ebLeft">${ebStructHTML(eb)}</div><div class="eb-mid"><div class="eb-vers">${Object.values(EB_FORMATS).map(f => `<button class="tchip ${eui.ver === f.id ? 'on' : ''}" onclick="ebVer('${f.id}')">${esc(f.short)}</button>`).join('')}<button class="btn sm" onclick="ebOverview()">▦ Todas as páginas</button></div>
     <div class="eb-stage" id="ebStage"><canvas id="ebCanvas"></canvas></div><div class="eb-pager"><button class="btn sm" onclick="ebGo(eui.page-1)">‹</button><span id="ebPageInfo">…</span><button class="btn sm" onclick="ebGo(eui.page+1)">›</button><span class="muted" id="ebIssues"></span></div></div>
   <div class="eb-right"><div class="matrix-tabs">${[['conteudo', 'Conteúdo'], ['identidade', 'Identidade'], ['verificar', 'Verificar'], ['exportar', 'Capa e exportar']].map(([k, l]) => `<button class="${eui.tab === k ? 'active' : ''}" onclick="eui.tab='${k}';ebRenderRight()">${l}</button>`).join('')}</div><div id="ebRight"></div></div></div>`;
@@ -6179,7 +6195,7 @@ function dtpDrawPage(ctx, doc, flow, pi, z, o) {
 </script>
 <script>
 /* ===== Diagramação · telas: biblioteca, mesa de trabalho com réguas/guias, matéria, estilos, página e objetos ===== */
-const dui = {id: '', view: 'layout', pi: 0, z: 1, vx: 30, vy: 30, tool: 'v', sel: null, tab: 'texto', show: {margins: true, cols: true, grid: true, mod: true, guides: true, bleed: true, rulers: true}, hist: [], hi: -1, flow: null, imgs: {}, thumbs: {}, drag: null, mouse: null, sw: 0, ref: null, refOn: false, refOp: 0.45, space: false, refRes: null};
+const dui = {fromBook: '', id: '', view: 'layout', pi: 0, z: 1, vx: 30, vy: 30, tool: 'v', sel: null, tab: 'texto', show: {margins: true, cols: true, grid: true, mod: true, guides: true, bleed: true, rulers: true}, hist: [], hi: -1, flow: null, imgs: {}, thumbs: {}, drag: null, mouse: null, sw: 0, ref: null, refOn: false, refOp: 0.45, space: false, refRes: null};
 const DTP_RULER = 22;
 const dtpList = () => { const p = curProject(); if (!p) return []; p.layouts = Array.isArray(p.layouts) ? p.layouts : []; return p.layouts; };
 const dtpDoc = () => dtpList().find(d => d.id === dui.id);
@@ -6206,7 +6222,7 @@ function dtpCreate() { const d = dtpNew($('dtpPre').value, $('dtpNm').value.trim
 function dtpOpen(id) { dui.id = id; dui.pi = 0; dui.sel = null; dui.hist = []; dui.hi = -1; dui.sw = 0; dui.tab = 'texto'; dui.view = 'layout'; dui.refOn = false; dui.ref = null; dui.refRes = null; dtpSnap(); renderDiagram(); }
 function dtpDup(id) { const d = dtpList().find(x => x.id === id); if (!d) return; const c = JSON.parse(JSON.stringify(d)); c.id = uid('dtp'); c.name += ' (cópia)'; dtpList().push(c); persist(); renderDiagram(); }
 function dtpDel(id) { const d = dtpList().find(x => x.id === id); if (!d || !confirm('Excluir o documento “' + d.name + '”? Não dá para desfazer.')) return; const p = curProject(); p.layouts = p.layouts.filter(x => x.id !== id); persist(); renderDiagram(); }
-function dtpBack() { dui.id = ''; renderDiagram(); }
+function dtpBack() { if (dui.fromBook && ebList().some(e => e.id === dui.fromBook)) { const id = dui.fromBook; dui.fromBook = ''; dui.id = ''; eui.id = id; eui.bt = 'miolo'; edh.area = 'livros'; go('editora'); return; } dui.id = ''; renderDiagram(); }
 
 /* ---------- histórico e salvamento automático ---------- */
 function dtpSnap() { const d = dtpDoc(); if (!d) return; const s = JSON.stringify(d); if (dui.hist[dui.hi] === s) return; dui.hist = dui.hist.slice(0, dui.hi + 1); dui.hist.push(s); while (dui.hist.length > histLimit() + 1) dui.hist.shift(); dui.hi = dui.hist.length - 1; }
@@ -6220,7 +6236,7 @@ function dtpStatus() { const el = $('dtpAuto'); if (el) el.innerHTML = `✓ Salv
 /* ---------- editor ---------- */
 function dtpEditor(p, r) {
   const d = dtpDoc(), u = d.unit;
-  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dtpBack()">← Diagramação</button><input class="dz-name" value="${esc(d.name)}" onchange="dtpDoc().name=this.value;dtpTouch()">
+  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dtpBack()">${dui.fromBook ? '← Voltar ao e-book' : '← Diagramação'}</button><input class="dz-name" value="${esc(d.name)}" onchange="dtpDoc().name=this.value;dtpTouch()">
     <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dtpRedo()" title="Refazer (Ctrl+Y)">↷</button>
     <select class="sm" onchange="histSetLimit(this.value);dtpStatus()" title="Passos de histórico">${HIST_OPTS.map(n => `<option value="${n}" ${n === histLimit() ? 'selected' : ''}>${n} passos</option>`).join('')}</select>
     <button class="btn sm" onclick="flipRead('dtp',dui.id)" title="Folhear em tela cheia">📖 Folhear</button><button class="btn sm dark" onclick="dtpTabSet('exportar')">Exportar PDF</button></div></div>
@@ -6229,10 +6245,10 @@ function dtpEditor(p, r) {
     <div class="row-gap"><select class="sm" onchange="dtpDoc().unit=this.value;dtpTouch();dtpPanel();dtpDraw()" title="Unidade de medida">${Object.keys(DTP_U).map(k => `<option value="${k}" ${k === u ? 'selected' : ''}>${DTP_UL[k]}</option>`).join('')}</select><button class="btn sm" onclick="dtpZoom(0.8)">−</button><span id="dtpZ" class="muted" style="min-width:44px;text-align:center;font-size:12px"></span><button class="btn sm" onclick="dtpZoom(1.25)">＋</button><button class="btn sm" onclick="dtpFit()">Ajustar</button>
     <button class="tchip ${dui.view === 'story' ? 'on' : ''}" onclick="dtpView(dui.view==='story'?'layout':'story')" title="Edição só do texto, com a marca do estouro">Editar texto (matéria)</button></div></div>
   <div class="dtp-wrap"><div class="dtp-left" id="dtpLeft"></div><div class="dtp-mid"><div class="dtp-stage" id="dtpStage"><canvas id="dtpCv"></canvas></div><div id="dtpStory" class="dtp-story" style="display:none"></div><div class="dtp-foot"><span id="dtpInfo"></span><span id="dtpAuto" class="muted"></span></div></div>
-  <div class="dtp-right"><div class="matrix-tabs">${[['texto', 'Texto'], ['estilos', 'Estilos'], ['pagina', 'Página'], ['objeto', 'Objeto'], ['ref', 'Referência'], ['exportar', 'Exportar']].map(([k, l]) => `<button class="${dui.tab === k ? 'active' : ''}" onclick="dtpTabSet('${k}')">${l}</button>`).join('')}</div><div id="dtpPanel"></div></div></div>`;
+  <div class="dtp-right"><div class="matrix-tabs">${[['texto', 'Texto'], ['estilos', 'Estilos'], ['modelos', 'Modelos'], ['pagina', 'Página'], ['objeto', 'Objeto'], ['ref', 'Referência'], ['exportar', 'Exportar']].map(([k, l]) => `<button class="${dui.tab === k ? 'active' : ''}" onclick="dtpTabSet('${k}')">${l}</button>`).join('')}</div><div id="dtpPanel"></div></div></div>`;
   dtpBindStage(); dtpStatus(); dtpRefresh(true); setTimeout(dtpFit, 50);
 }
-function dtpTabSet(t) { dui.tab = t; document.querySelectorAll('.dtp-right .matrix-tabs button').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().startsWith(({texto: 'texto', estilos: 'estilos', pagina: 'página', objeto: 'objeto', ref: 'referência', exportar: 'exportar'})[t]))); dtpPanel(); }
+function dtpTabSet(t) { dui.tab = t; document.querySelectorAll('.dtp-right .matrix-tabs button').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().startsWith(({texto: 'texto', estilos: 'estilos', modelos: 'modelos', pagina: 'página', objeto: 'objeto', ref: 'referência', exportar: 'exportar'})[t]))); dtpPanel(); }
 function dtpTool(k) { dui.tool = k; document.querySelectorAll('.dtp-bar [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === k)); const c = $('dtpCv'); if (c) c.style.cursor = k === 'v' ? 'default' : 'crosshair'; }
 function dtpView(v) { dui.view = v; const s = $('dtpStage'), st = $('dtpStory'); if (!s) return; s.style.display = v === 'layout' ? '' : 'none'; st.style.display = v === 'story' ? '' : 'none'; document.querySelectorAll('.dtp-bar .tchip').forEach(b => { if (/matéria/.test(b.textContent)) b.classList.toggle('on', v === 'story'); }); if (v === 'story') dtpStoryRender(); else { dtpFit(); } }
 
@@ -6392,6 +6408,7 @@ function dtpPanel() {
   const N = (label, path, extra) => { const v = path.split('.').reduce((o, k) => o[k], d); return `<div class="field"><label>${label}</label><input type="number" step="any" value="${dtpFmt(v, u)}" onchange="dtpSetPt('${path}',this.value)" ${extra || ''}></div>`; };
   if (dui.tab === 'texto') { P.innerHTML = dtpTextoHTML(d); return; }
   if (dui.tab === 'estilos') { P.innerHTML = dtpEstilosHTML(d); return; }
+  if (dui.tab === 'modelos') { P.innerHTML = dtpModelosHTML(d); return; }
   if (dui.tab === 'objeto') { P.innerHTML = dtpObjetoHTML(d, N); return; }
   if (dui.tab === 'ref') { P.innerHTML = dtpRefHTML(d); return; }
   if (dui.tab === 'exportar') { P.innerHTML = dtpExportHTML(d); return; }
@@ -6483,7 +6500,7 @@ function dtpObjetoHTML(d, N) {
   return add + `<div class="okr-label">${it.k === 'img' ? 'IMAGEM' : it.k === 'text' ? 'QUADRO DE TEXTO' : 'RETÂNGULO'} · medidas em ${DTP_UL[u]}</div><div class="grid-2">${fld('x', 'X')}${fld('y', 'Y')}${fld('w', 'Largura')}${fld('h', 'Altura')}</div>
   <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpItemAlign('h')">Centralizar na largura</button><button class="btn sm" onclick="dtpItemAlign('m')">Ajustar às margens</button><button class="btn sm" onclick="dtpItemAlign('col')">Largura da coluna</button></div>
   <div class="grid-2" style="margin-top:8px"><div class="field"><label>Texto ao redor</label><select onchange="dtpItemSet('wrap',this.value)">${[['none', 'Nenhum (por cima)'], ['around', 'Contornar o quadro'], ['jump', 'Pular (texto continua abaixo)']].map(([k, l]) => `<option value="${k}" ${it.wrap === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>${fld('off', 'Afastamento do texto')}</div>
-  ${it.k === 'img' ? `<div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpPickImg()">${it.imgId ? 'Trocar imagem' : 'Escolher imagem'}</button></div><label class="muted" style="font-size:11px">Zoom do enquadramento: ${(it.zoom || 1).toFixed(2)}×</label><input type="range" min="1" max="4" step="0.05" value="${it.zoom || 1}" oninput="dtpItemSet('zoom',+this.value,true)">` : ''}
+  ${it.k === 'img' ? `<div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpPickImg()">${it.imgId ? 'Trocar imagem' : 'Escolher imagem'}</button><button class="btn sm" onclick="dtpStockImg()">🔎 Banco</button></div><label class="muted" style="font-size:11px">Zoom do enquadramento: ${(it.zoom || 1).toFixed(2)}×</label><input type="range" min="1" max="4" step="0.05" value="${it.zoom || 1}" oninput="dtpItemSet('zoom',+this.value,true)">` : ''}
   ${it.k === 'rect' ? `<div class="grid-2"><div class="field"><label>Cor</label><input type="color" value="${it.fill || '#E7DCC8'}" onchange="dtpItemSet('fill',this.value)"></div><div class="field"><label>Opacidade</label><input type="range" min="0" max="1" step="0.05" value="${it.op != null ? it.op : 1}" oninput="dtpItemSet('op',+this.value,true)"></div></div>` : ''}
   ${it.k === 'text' ? `<div class="field"><label>Texto</label><textarea rows="5" oninput="dtpItemSet('text',this.value,true)">${esc(it.text)}</textarea></div><div class="grid-2"><div class="field"><label>Estilo</label><select onchange="dtpItemSet('st',this.value)">${Object.keys(d.styles).map(k => `<option value="${k}" ${it.st === k ? 'selected' : ''}>${esc(d.styles[k].n)}</option>`).join('')}</select></div><div class="field"><label>Cor de fundo</label><input type="color" value="${it.fill || '#FFFFFF'}" onchange="dtpItemSet('fill',this.value)"><label class="dtp-chk"><input type="checkbox" ${it.fill ? 'checked' : ''} onchange="dtpItemSet('fill',this.checked?'#FFFFFF':'')"> usar fundo</label></div></div>` : ''}
   ${it.k === 'text' || it.k === 'img' ? `<div class="row-gap" style="margin-top:8px;flex-wrap:wrap">${it.k === 'text' ? '<button class="btn sm" onclick="dtpItemFitH()">Ajustar altura ao texto</button>' : ''}<button class="btn sm" onclick="dtpItemToFlow()" title="Devolve ao fluxo do texto (após o parágrafo selecionado ou no fim)">↩ Devolver ao fluxo</button></div>` : ''}
@@ -6659,6 +6676,72 @@ function dtpJsonDown() { const d = dtpDoc(); download(`${dtpFileName(d)}.json`, 
 
 </script>
 <script>
+/* ===== Diagramação · estilos de miolo e modelos de página (a estrutura das referências: revistas, livros e jornais) ===== */
+const DTP_STYLES = [
+  {id: 'classico', n: 'Clássico de livro', head: 'Playfair Display', body: 'Lora', ink: '#2B2B2B', accent: '#8A5A2B', paper: '#FFFFFF', size: 10.5, lead: 15, align: 'justify', drop: 3, caps: 0, cols: 1},
+  {id: 'botanico', n: 'Revista botânica (verde e terracota)', head: 'Montserrat', body: 'Libre Baskerville', ink: '#24332D', accent: '#1F3D36', paper: '#FFFFFF', size: 9.5, lead: 14, align: 'left', drop: 0, caps: 1, cols: 2, second: '#C47B4A', sage: '#6F8F68'},
+  {id: 'petroleo', n: 'Editorial azul-petróleo', head: 'Playfair Display', body: 'Source Serif 4', ink: '#1A1A1A', accent: '#16A2B3', paper: '#FFFFFF', size: 9.5, lead: 13.5, align: 'justify', drop: 4, caps: 0, cols: 2, second: '#CDE9EE'},
+  {id: 'minimal', n: 'Livro minimalista (vermelho e preto)', head: 'Montserrat', body: 'Inter', ink: '#222222', accent: '#E3262D', paper: '#FFFFFF', size: 9.5, lead: 14.5, align: 'left', drop: 0, caps: 1, cols: 1, second: '#EDEDED'},
+  {id: 'blocos', n: 'Revista em blocos (vermelho e cinza)', head: 'Archivo Black', body: 'Inter', ink: '#1E1E1E', accent: '#E5402D', paper: '#F7F7F5', size: 8.5, lead: 12, align: 'left', drop: 0, caps: 1, cols: 3, second: '#C9C9C9'},
+  {id: 'jornal', n: 'Jornal (colunas estreitas)', head: 'Playfair Display', body: 'Libre Baskerville', ink: '#111111', accent: '#111111', paper: '#FFFFFF', size: 8, lead: 10.5, align: 'justify', drop: 0, caps: 0, cols: 4, second: '#E7E7E7'},
+  {id: 'outdoor', n: 'Magazine outdoor (mostarda)', head: 'Bebas Neue', body: 'Source Serif 4', ink: '#1C1C1C', accent: '#E0A31B', paper: '#FFFFFF', size: 9, lead: 13, align: 'left', drop: 3, caps: 1, cols: 2, second: '#F4E3B3'}
+];
+function dtpApplyStyle(d, id, brand, withCols) {
+  const S = DTP_STYLES.find(x => x.id === id) || DTP_STYLES[0], st = d.styles, fs = Math.max(0.7, Math.min(1.8, d.page.w / dtpMM(140))) * 0 + 1, ink = S.ink, ac = S.accent;
+  const set = (k, o) => Object.assign(st[k], o); d.paper = S.paper;
+  set('body', {font: S.body, size: S.size, lead: S.lead, color: ink, align: S.align, drop: S.drop, indent: S.align === 'justify' ? 12 : 0});
+  set('h1', {font: S.head, size: Math.round(S.size * 3), lead: Math.round(S.size * 3.3), color: ac, b: 1, caps: S.caps, after: 16});
+  set('h2', {font: S.head, size: Math.round(S.size * 1.8), lead: Math.round(S.size * 2.2), color: ink, b: 1, caps: S.caps, before: 14, after: 6});
+  set('h3', {font: S.body, size: S.size, lead: S.lead, color: ac, b: 1, caps: 1});
+  set('quote', {font: S.head, size: Math.round(S.size * 1.35), lead: Math.round(S.size * 1.9), color: ac, i: S.head === 'Bebas Neue' ? 0 : 1});
+  set('caption', {font: S.body, size: Math.max(6, S.size - 2), lead: Math.max(8, S.lead - 3), color: ink});
+  if (st.list) Object.assign(st.list, {font: S.body, size: S.size, lead: S.lead, color: ink});
+  d.run.font = S.body; d.run.color = ac; if (withCols !== false) { d.cols = S.cols; d.colw = []; d.gutter = dtpMM(S.cols >= 4 ? 4 : 5.5); }
+  d.styleId = S.id; return S;
+}
+const dtpStyleOf = d => DTP_STYLES.find(x => x.id === d.styleId) || DTP_STYLES[0];
+
+/* ---------- modelos de página: quadros prontos em cima da grade do documento ---------- */
+const dtpFr = o => Object.assign({id: uid('fr'), k: 'rect', x: 0, y: 0, w: 50, h: 50, wrap: 'none', off: 8, imgId: '', fill: '', stroke: '', sw: 1, op: 1, zoom: 1, px: 0, py: 0, text: '', st: 'body', pad: 4, ar: 0}, o);
+const dtpBlock = g => dtpFr({k: 'rect', x: g.x0, y: g.y0, w: g.x1 - g.x0, h: g.y1 - g.y0, op: 0, wrap: 'jump', off: 0, fill: '#FFFFFF'});
+const dtpTx = (g, o) => dtpFr(Object.assign({k: 'text', wrap: 'none'}, o));
+const dtpImg = o => dtpFr(Object.assign({k: 'img', wrap: 'jump', off: 10}, o));
+const DTP_TEMPLATES = [
+  {id: 'abertura', n: 'Abertura de capítulo (número grande + foto)', build(d, g, S) { const mid = g.x0 + (g.x1 - g.x0) * 0.46; return [dtpBlock(g), dtpImg({x: mid, y: -d.bleed, w: g.W - mid + d.bleed, h: g.H + 2 * d.bleed, wrap: 'none'}), dtpTx(g, {x: g.x0, y: g.y0 + 30, w: mid - g.x0 - 20, h: 110, text: '01', st: 'h1', ov: {size: 96, lead: 100, color: S.accent}, pad: 0}), dtpTx(g, {x: g.x0, y: g.y0 + 150, w: mid - g.x0 - 20, h: 150, text: 'Título do capítulo', st: 'h1', ov: {size: 22, lead: 26, color: S.ink}, pad: 0}), dtpTx(g, {x: g.x0, y: g.y0 + 310, w: mid - g.x0 - 20, h: 90, text: 'Uma frase curta que abre o capítulo e diz o que o leitor vai encontrar.', st: 'body', ov: {italic: 1, i: 1, align: 'left', indent: 0}, pad: 0})]; }},
+  {id: 'foto-texto', n: 'Foto grande no topo + texto em colunas', build(d, g) { const h = (g.y1 - g.y0) * 0.5; return [dtpImg({x: g.x0, y: g.y0, w: g.x1 - g.x0, h}), dtpTx(g, {x: g.x0, y: g.y0 + h + 4, w: g.x1 - g.x0, h: 26, text: 'Legenda da foto, com crédito.', st: 'caption', pad: 0})]; }},
+  {id: 'barra', n: 'Texto com barra lateral colorida', build(d, g, S) { const bw = (g.x1 - g.x0) * 0.3, x = g.x1 - bw; return [dtpFr({k: 'rect', x, y: g.y0, w: bw + (g.W - g.x1), h: g.y1 - g.y0, fill: S.second || S.accent, op: 0.35, wrap: 'around', off: 14}), dtpTx(g, {x: x + 10, y: g.y0 + 16, w: bw - 14, h: 120, text: 'Nota lateral', st: 'h3', pad: 0}), dtpTx(g, {x: x + 10, y: g.y0 + 46, w: bw - 14, h: 200, text: 'Use este espaço para um conceito, uma dica rápida ou um dado de apoio.', st: 'caption', pad: 0})]; }},
+  {id: 'citacao', n: 'Citação em destaque (página de cor)', build(d, g, S) { return [dtpFr({k: 'rect', x: -d.bleed, y: -d.bleed, w: g.W + 2 * d.bleed, h: g.H + 2 * d.bleed, fill: S.accent, wrap: 'jump', off: 0}), dtpTx(g, {x: g.x0 + 10, y: g.H * 0.3, w: g.x1 - g.x0 - 20, h: g.H * 0.34, text: '“Uma frase marcante do livro, em letras grandes.”', st: 'quote', ov: {size: 26, lead: 32, color: '#FFFFFF', i: 1, align: 'left'}, pad: 0}), dtpTx(g, {x: g.x0 + 10, y: g.H * 0.66, w: g.x1 - g.x0 - 20, h: 30, text: 'Nome do autor ou da fonte', st: 'caption', ov: {color: '#FFFFFF'}, pad: 0})]; }},
+  {id: 'duas-fotos', n: 'Duas fotos lado a lado + legendas', build(d, g) { const w = (g.x1 - g.x0 - 12) / 2, h = (g.y1 - g.y0) * 0.38; return [dtpImg({x: g.x0, y: g.y0, w, h}), dtpImg({x: g.x0 + w + 12, y: g.y0, w, h}), dtpTx(g, {x: g.x0, y: g.y0 + h + 3, w, h: 26, text: 'Legenda 1', st: 'caption', pad: 0}), dtpTx(g, {x: g.x0 + w + 12, y: g.y0 + h + 3, w, h: 26, text: 'Legenda 2', st: 'caption', pad: 0})]; }},
+  {id: 'imagem-total', n: 'Imagem de página inteira (sangrada)', build(d, g) { return [dtpImg({x: -d.bleed, y: -d.bleed, w: g.W + 2 * d.bleed, h: g.H + 2 * d.bleed, wrap: 'jump', off: 0}), dtpTx(g, {x: g.x0, y: g.y1 - 30, w: g.x1 - g.x0, h: 26, text: 'Legenda ou crédito da imagem', st: 'caption', ov: {color: '#FFFFFF'}, pad: 0})]; }},
+  {id: 'faixa', n: 'Faixa de cor com título', build(d, g, S) { const h = g.H * 0.24; return [dtpFr({k: 'rect', x: -d.bleed, y: -d.bleed, w: g.W + 2 * d.bleed, h: h + d.bleed, fill: S.accent, wrap: 'jump', off: 10}), dtpTx(g, {x: g.x0, y: h * 0.28, w: g.x1 - g.x0, h: h * 0.6, text: 'Título da seção', st: 'h1', ov: {color: '#FFFFFF', size: 28, lead: 32}, pad: 0})]; }},
+  {id: 'grade4', n: 'Grade de 4 imagens + legendas', build(d, g) { const w = (g.x1 - g.x0 - 12) / 2, h = (g.y1 - g.y0 - 70) / 2, o = []; for (let i = 0; i < 4; i++) { const x = g.x0 + (i % 2) * (w + 12), y = g.y0 + Math.floor(i / 2) * (h + 36); o.push(dtpImg({x, y, w, h}), dtpTx(g, {x, y: y + h + 3, w, h: 22, text: 'Legenda ' + (i + 1), st: 'caption', pad: 0})); } return o; }},
+  {id: 'rosto', n: 'Folha de rosto', build(d, g, S) { const W = g.x1 - g.x0; return [dtpBlock(g), dtpTx(g, {x: g.x0, y: g.H * 0.28, w: W, h: 120, text: d.name.replace(/^Miolo · /, ''), st: 'h1', ov: {align: 'center', size: 30, lead: 34, color: S.ink}, pad: 0}), dtpFr({k: 'rect', x: g.x0 + W / 2 - 24, y: g.H * 0.28 + 128, w: 48, h: 3, fill: S.accent}), dtpTx(g, {x: g.x0, y: g.H * 0.28 + 146, w: W, h: 60, text: 'Subtítulo do livro', st: 'body', ov: {align: 'center', i: 1, indent: 0}, pad: 0}), dtpTx(g, {x: g.x0, y: g.y1 - 60, w: W, h: 40, text: 'Nome do autor', st: 'h3', ov: {align: 'center', color: S.ink}, pad: 0})]; }},
+  {id: 'creditos', n: 'Créditos e direitos autorais', build(d, g) { return [dtpBlock(g), dtpTx(g, {x: g.x0, y: g.y1 - 190, w: Math.min(g.x1 - g.x0, 260), h: 190, text: 'Título do livro\nTexto © Autor, ano\nTodos os direitos reservados.\nRevisão: nome\nProjeto gráfico: nome\nISBN: [CONFIRMAR]', st: 'caption', pad: 0})]; }},
+  {id: 'sumario', n: 'Sumário', build(d, g, S) { return [dtpBlock(g), dtpTx(g, {x: g.x0, y: g.y0 + 10, w: g.x1 - g.x0, h: 50, text: 'Sumário', st: 'h1', ov: {size: 26, lead: 30, color: S.ink}, pad: 0}), dtpTx(g, {x: g.x0, y: g.y0 + 70, w: g.x1 - g.x0, h: g.y1 - g.y0 - 80, text: '01   Capítulo um\n02   Capítulo dois\n03   Capítulo três\n04   Capítulo quatro\n05   Capítulo cinco', st: 'list', ov: {lead: 26, size: 12}, pad: 0})]; }},
+  {id: 'branca', n: 'Página em branco (sem quadros)', build() { return []; }}
+];
+function dtpTplItems(d, id, pi) { const T = DTP_TEMPLATES.find(x => x.id === id); if (!T) return []; const g = dtpGeom(d, pi), S = Object.assign({}, dtpStyleOf(d), {accent: d.styles.h1.color || dtpStyleOf(d).accent, ink: d.styles.body.color}); return T.build(d, g, S); }
+function dtpTplApply(id, mode) {
+  const d = dtpDoc(); if (!d) return; const T = DTP_TEMPLATES.find(x => x.id === id); if (!T) return;
+  if (mode === 'insert') { const at = dui.pi + 1; while (d.pages.length < at) d.pages.push({items: []}); d.pages.splice(at, 0, {items: []}); d.nPages = Math.max(d.nPages, d.pages.length); dui.pi = at; }
+  const items = dtpTplItems(d, id, dui.pi); d.pages[dui.pi] = d.pages[dui.pi] || {items: []}; d.pages[dui.pi].items = items; dui.sel = null; dtpTouch(true); dtpSnap(); dtpFit(); dtpThumbs(); dtpPanel(); toast(mode === 'insert' ? 'Página inserida: ' + T.n : 'Modelo aplicado à página ' + (dui.pi + 1) + '. Arraste os quadros, troque as imagens e edite os textos.');
+}
+function dtpStyleApply(id) { const d = dtpDoc(), S = DTP_STYLES.find(x => x.id === id); if (!S) return; const cols = $('dtpStCols') ? $('dtpStCols').checked : true; dtpApplyStyle(d, id, null, cols); dtpTouch(true); dtpSnap(); dtpRefresh(true); toast('Estilo do miolo aplicado: ' + S.n); }
+function dtpModelosHTML(d) {
+  setTimeout(dtpModelosPaint, 40);
+  return `<div class="okr-label">ESTILO DO MIOLO</div><small class="muted block">Fontes, cores, tamanhos de texto e colunas de uma vez, baseados nas referências de revistas e livros.</small><label class="dtp-chk" style="margin:6px 0"><input type="checkbox" id="dtpStCols" checked> Aplicar também o número de colunas</label>
+  <div class="dtp-sty">${DTP_STYLES.map(s => `<button class="dtp-sty-b ${d.styleId === s.id ? 'on' : ''}" onclick="dtpStyleApply('${s.id}')"><span style="background:${s.paper};border-color:${s.accent}"><i style="background:${s.accent}"></i><i style="background:${s.second || s.ink}"></i></span><b style="font-family:'${esc(s.head)}'">${esc(s.n)}</b><small>${esc(s.head)} + ${esc(s.body)} · ${s.cols} col.</small></button>`).join('')}</div>
+  <div class="okr-label" style="margin-top:12px">MODELOS DE PÁGINA</div><small class="muted block">Quadros prontos sobre a grade. <b>Aplicar</b> troca os quadros da página atual; <b>＋ Inserir</b> cria uma página nova depois dela. O texto corrido desvia dos quadros sozinho.</small>
+  <div class="dtp-tpl">${DTP_TEMPLATES.map(t => `<div class="dtp-tpl-c"><canvas data-tpl="${t.id}" width="96" height="${Math.round(96 * d.page.h / d.page.w)}"></canvas><b>${esc(t.n)}</b><div class="row-gap"><button class="btn sm" onclick="dtpTplApply('${t.id}')">Aplicar</button><button class="btn sm" onclick="dtpTplApply('${t.id}','insert')">＋ Inserir</button></div></div>`).join('')}</div>`;
+}
+async function dtpModelosPaint() {
+  const d = dtpDoc(); if (!d) return; const cvs = [...document.querySelectorAll('canvas[data-tpl]')]; if (!cvs.length) return; await dtpFonts(d);
+  for (const cv of cvs) { if (!cv.isConnected) return; const tmp = JSON.parse(JSON.stringify(d)); tmp.story = []; tmp.front = 0; tmp.autoflow = false; tmp.nPages = 1; tmp.facing = false; tmp.pages = [{items: dtpTplItems(tmp, cv.dataset.tpl, 0)}, {items: []}]; tmp.run.folio = false; tmp.run.header = ''; tmp.run.headerR = '';
+    try { const f = dtpFlow(tmp), x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); x.save(); x.beginPath(); x.rect(0, 0, cv.width, cv.height); x.clip(); dtpDrawPage(x, tmp, f, 0, cv.width / d.page.w, {imgs: dui.imgs}); x.restore(); } catch (e) { console.warn('tpl', e); } await new Promise(r => setTimeout(r, 0)); }
+}
+
+</script>
+<script>
 /* ===== Leitura de layout por IA (visão): lê uma referência e devolve fontes, tamanhos, cores e blocos =====
    A imagem vai ao servidor (api/ai.php), que chama o modelo com a chave guardada só lá. */
 const AIL_PROMPT = `Você é um diretor de arte lendo o layout de uma peça (capa, página de livro/revista, folheto, post). Devolva SÓ um JSON com este formato:
@@ -6728,7 +6811,7 @@ async function ailToSlide() {
   });
   const tk = brandTokens(p); Object.assign(tk, {name: 'Layout lido', bg: r.bg, fg: r.blocks.find(b => b.role === 'title') ? r.blocks.find(b => b.role === 'title').color : '#111111'});
   const set = {id: uid('ds'), name: 'Layout lido · ' + new Date().toLocaleDateString('pt-BR'), format: {id: 'custom', w: W, h: H}, tk, slides: [{id: sid(), name: 'Layout', bg: r.bg, layers: L}], created: new Date().toISOString(), updated: new Date().toISOString()};
-  await ensureSetResources(set); p.design.sets.push(set); persist(); closeModal(); go('design'); dzOpen(set.id);
+  await ensureSetResources(set); p.design.sets.push(set); if (ail.from === 'cov' && ebCur()) { const eb = ebCur(); eb.coverSetId = set.id; covC().setId = set.id; dz.pendingFrom = eb.id; } persist(); closeModal(); go('design'); dzOpen(set.id);
   toast('Peça criada. Troque os textos e imagens; use ★ Modelo no editor para guardar na galeria de layouts.');
 }
 
@@ -6848,14 +6931,13 @@ function renderFontsPage(p, r) {
 </script>
 <script>
 /* ===== Editora · hub: abas (e-books, motor de texto, engenheiro de capa, diagramação, Amazon) e banco de referências compartilhado ===== */
-const EDH_TABS = [['livros', 'E-books', 'book'], ['texto', 'Motor de texto', 'sparkles'], ['capa', 'Engenheiro de capa', 'palette'], ['diag', 'Diagramação', 'layout'], ['amazon', 'Amazon KDP', 'send'], ['banca', 'Banca', 'library']];
+const EDH_TABS = [['livros', 'E-books', 'book'], ['diag', 'Diagramação avulsa', 'layout'], ['banca', 'Banca', 'library']];
 const edh = {area: 'livros'};
 function edTabs(active) {
   return `<div class="edh-tabs">${EDH_TABS.map(([k, l, ic]) => `<button class="edh-tab ${active === k ? 'on' : ''}" onclick="edGo('${k}')">${ico(ic, 15)} ${l}</button>`).join('')}</div>`;
 }
 function edGo(k) {
-  edh.area = k; if (typeof mot !== 'undefined') mot.open = k === 'texto';
-  if (k === 'texto') { if (typeof motM === 'function') motM().stage = motM().stage || 'material'; }
+  edh.area = k;
   if (k === 'diag') { dui.id = ''; go('diagram'); return; }
   if (k === 'livros') eui.id = '';
   go('editora');
@@ -6869,12 +6951,12 @@ function refBankHTML(ctx, cats) {
   ${list.length ? `<div class="bank-grid">${list.map(i => `<button class="bank-th" title="${esc(i.title)}" onclick="bankPick('${ctx}','${esc(i.id)}')"><img data-bank="${esc(i.imgId)}" alt=""></button>`).join('')}</div>` : '<p class="muted" style="font-size:12px;margin:4px 0">Nenhuma imagem nesta categoria ainda.</p>'}
   <div class="row-gap" style="margin:6px 0 10px"><button class="btn sm" onclick="go('inspiration')">＋ Subir referências (Inspiração)</button><button class="btn sm" onclick="edhRefresh('${ctx}')">↻ Atualizar</button></div>`;
 }
-function edhRefresh(ctx) { if (ctx === 'dtp') dtpPanel(); else if (ctx === 'cov' && typeof covRender === 'function') covRender(); }
+function edhRefresh(ctx) { if (ctx === 'dtp') dtpPanel(); else if (ctx === 'cov') renderEditora(); }
 async function bankFill() { for (const im of document.querySelectorAll('img[data-bank]')) { const u = await inspoURL(im.dataset.bank); if (u) im.src = u; } }
 async function bankPick(ctx, id) {
   const it = inspo().items.find(i => i.id === id), b = it && await imgGet(it.imgId); if (!b) { toast('Imagem não encontrada.'); return; } const bm = await createImageBitmap(b);
   if (ctx === 'dtp') { dui.ref = bm; dui.refOn = true; dui.refRes = null; dtpPanel(); dtpDraw(); toast('Referência carregada sobre a página.'); }
-  else if (ctx === 'cov') { cov.ref = bm; cov.refBlob = b; covRender(); toast('Referência escolhida para a capa.'); }
+  else if (ctx === 'cov') { cov.ref = bm; cov.refBlob = b; renderEditora(); toast('Referência escolhida para a capa.'); }
 }
 
 </script>
@@ -6972,13 +7054,13 @@ Tom: acolhedor, prático, sem jargão, nunca alarmista. Identidade: Playfair Dis
 Cada capítulo: abertura, caso prático fictício (nome + situação + resolução), 3 parágrafos de corpo, 1 caixa de apoio, colunas "Situações comuns" × "Faça assim" (4 itens), checklist de 4 perguntas e resumo de 3 frases. Fechamento com plano final, conclusão, bônus, caixa de contato e referências.
 REGRA CLÍNICA: nunca invente dados, doses, protocolos ou estatísticas; use [CONFIRMAR: ...] onde precisar da validação da autora.`};
 const motSkills = () => [MOT_SKILL_GENERIC, MOT_SKILL_MCS, ...(state.skills = Array.isArray(state.skills) ? state.skills : [])];
-const motM = () => { const p = curProject(); if (!p) return null; if (!p.motor || typeof p.motor !== 'object' || !p.motor.stage || !Array.isArray(p.motor.outline)) p.motor = normalizeMotor(p.motor); return p.motor; };
+const motM = () => { const eb = typeof ebCur === 'function' && eui.id ? ebCur() : null, h = eb || curProject(); if (!h) return null; if (!h.motor || typeof h.motor !== 'object' || !h.motor.stage || !Array.isArray(h.motor.outline)) h.motor = normalizeMotor(h.motor); return h.motor; };
 const motSkillCur = () => { const M = motM(); return motSkills().find(s => s.id === M.skillId) || MOT_SKILL_GENERIC; };
 const motSave = () => { persist(); AUTO_AT = Date.now(); };
 
 /* ---------- entrada ---------- */
-function motOpen(stage) { mot.open = true; edh.area = 'texto'; const M = motM(); if (stage) M.stage = stage; renderEditora(); }
-function motClose() { mot.open = false; edh.area = 'livros'; renderEditora(); }
+function motOpen(stage) { bookGoTab('conteudo'); const M = motM(); if (stage && M) { M.stage = stage; renderEditora(); } }
+function motClose() { bookTab('conteudo'); }
 function motStage(s) { const M = motM(); if (s === 'texto' && !M.approved) { toast('Aprove a estrutura primeiro.'); return; } M.stage = s; motSave(); renderEditora(); }
 
 /* ---------- tela ---------- */
@@ -6987,6 +7069,7 @@ function motRender(r, p) {
   r.innerHTML = edTabs('texto') + `<div class="page-head"><div><h1>Motor de texto</h1><p>Entre com uma ideia ou com o conteúdo bruto, escolha uma skill (o padrão de escrita), aprove a estrutura, deixe a IA escrever capítulo por capítulo, revise e mande para a Editora (4 versões) ou para a Diagramação (livro/revista). Se você já tem o texto pronto, vá direto ao passo 4.</p></div></div>
   <div class="mot-steps">${steps.map(([k, l]) => `<button class="tchip ${M.stage === k ? 'on' : ''}" onclick="motStage('${k}')">${l}</button>`).join('')}</div>
   <div id="motBody">${({material: motMaterial, estrutura: motEstrutura, texto: motTexto, enviar: motEnviar})[M.stage](M)}</div>`;
+  if (eui.id) { const t = r.querySelector(':scope > .edh-tabs'), h = r.querySelector(':scope > .page-head'); if (t) t.remove(); if (h) h.remove(); }
 }
 const motIn = (id, lab, val, ph, rows) => `<div class="field"><label>${lab}</label>${rows ? `<textarea id="${id}" rows="${rows}" placeholder="${esc(ph || '')}" oninput="motSet('${id}',this.value)">${esc(val)}</textarea>` : `<input id="${id}" value="${esc(val)}" placeholder="${esc(ph || '')}" oninput="motSet('${id}',this.value)">`}</div>`;
 function motSet(k, v) { const M = motM(); const map = {mIdea: 'idea', mSource: 'source', mAud: 'audience', mTone: 'tone', mTitle: 'title', mSub: 'subtitle', mAuthor: 'author', mFull: 'full'}; if (map[k]) M[map[k]] = v; if (k === 'mN') M.nch = Math.max(3, Math.min(14, Math.round(+v || 7))); motSave(); }
@@ -7090,21 +7173,19 @@ function motEnviar(M) {
   return `<p class="muted" style="font-size:13px;margin-top:0">Este é o texto completo. ${asm ? 'Veio dos capítulos aprovados; você ainda pode editar aqui.' : 'Cole o seu texto pronto aqui (com # para capítulos, ## para subtítulos, > dica: para caixas…).'} Depois escolha o destino.</p>
   ${asm ? `<div class="row-gap" style="margin-bottom:6px"><button class="btn sm" onclick="motReassemble()">Recompor a partir dos capítulos</button></div>` : ''}
   <textarea id="mFull" rows="18" style="width:100%;font-size:13px" oninput="motSet('mFull',this.value);motCountUpd()">${esc(txt)}</textarea><small class="muted" id="motCnt">${motCountTxt(txt)}</small>
-  <div class="mot-wrap" style="margin-top:12px"><div class="mot-ch"><b>→ Editora (e-book em 4 versões)</b><p class="muted" style="font-size:12px">Capítulos com caixas, checklists e resumo, versões celular, tablet, A4 P&B e A4 econômico, capa e EPUB.</p><div class="form-grid">${motIn('mTitle', 'Título', M.title, '')}${motIn('mAuthor', 'Autor(a)', M.author, '')}</div><button class="btn dark" onclick="motToEditora()">Criar e-book na Editora</button></div>
-  <div class="mot-ch"><b>→ Diagramação (livro/revista)</b><p class="muted" style="font-size:12px">Documento com colunas, margens, sangria e PDF de gráfica. Cada capítulo começa em página nova.</p><div class="field"><label>Formato</label><select id="mPre">${DTP_PRESETS.filter(x => x.id !== 'custom' && x.id !== 'flyer').map(x => `<option value="${x.id}">${esc(x.n)}</option>`).join('')}</select></div><button class="btn dark" onclick="motToDtp()">Criar documento na Diagramação</button></div></div>
+  <div class="mot-wrap" style="margin-top:12px"><div class="mot-ch"><b>Aplicar no e-book</b><p class="muted" style="font-size:12.5px">O texto entra na estrutura do e-book (capítulos, caixas, checklists e resumo, nas versões celular, tablet, A4 P&B e A4 econômico) e já vai diagramado para o miolo.</p><div class="form-grid">${motIn('mTitle', 'Título', M.title, '')}${motIn('mAuthor', 'Autor(a)', M.author, '')}</div><div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" onclick="motApplyBook(true)">Aplicar na estrutura e no miolo</button><button class="btn" onclick="motApplyBook(false)">Só na estrutura do e-book</button></div></div>
+  <div class="mot-ch"><b>Próximos passos</b><ol style="margin:6px 0 0 18px;padding:0;font-size:12.5px;line-height:1.7"><li>Aba <b>2 · Capa</b>: escolha um layout, uma referência ou crie do zero.</li><li>Aba <b>3 · Miolo</b>: a diagramação do livro, com grade, colunas e modelos de página.</li><li>Aba <b>Áudio</b>: narração do livro com voz de IA.</li><li>Aba <b>Publicar</b>: Amazon KDP, EPUB e flipbook.</li></ol></div></div>
   <div class="row-gap" style="margin-top:8px"><button class="btn sm" onclick="motDownMd()">Baixar .md</button></div>`;
 }
 const motCountTxt = t => `${String(t || '').split(/\s+/).filter(Boolean).length.toLocaleString('pt-BR')} palavras · ${(String(t || '').match(/^# /gm) || []).length} capítulo(s) · ${motConf(t)} marca(s) [CONFIRMAR]`;
 function motCountUpd() { const e = $('motCnt'); if (e) e.textContent = motCountTxt(motM().full); }
 function motReassemble() { const M = motM(); M.full = motAssemble(M); motSave(); renderEditora(); }
 function motDownMd() { const M = motM(); download((M.title || 'ebook').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.md', M.full || motAssemble(M), 'text/markdown'); }
-function motToEditora() {
-  const M = motM(), t = (M.full || '').trim(); if (!t) { toast('Não há texto para enviar.'); return; }
-  const eb = ebNew('blank', M.title || 'E-book', M.author || ''); if (M.subtitle) eb.subtitle = M.subtitle;
-  eb.sections = eb.sections.filter(s => s.type !== 'chapter'); const secs = ebImport(t, eb); if (!secs.length) { toast('Não encontrei capítulos. Use # no título de cada capítulo.'); return; }
-  let n = eb.sections.filter(s => s.type === 'chapter').length; secs.forEach(s => { n++; s.label = 'CAPÍTULO ' + ebPad2(n); });
-  const at = eb.sections.findIndex(x => x.type === 'text' && /plano|conclus/i.test(x.title)); if (at >= 0) eb.sections.splice(at, 0, ...secs); else eb.sections.push(...secs);
-  ebList().push(eb); persist(); mot.open = false; edh.area = 'livros'; toast(secs.length + ' capítulo(s) enviados à Editora.'); ebOpen(eb.id);
+function motApplyBook(withMiolo) {
+  const M = motM(), eb = ebCur(), t = (M.full || '').trim(); if (!eb) return; if (!t) { toast('Não há texto para aplicar.'); return; }
+  if (eb.sections.some(s => s.type === 'chapter' && (s.blocks || []).some(b => b.text && !/^\[/.test(b.text))) && !confirm('O e-book já tem capítulos escritos. Substituir os capítulos pelo texto do motor?')) return;
+  const n = bookApplyText(eb, t); if (!n) return; if (withMiolo) { const d = bookEnsureMiolo(eb, (eb.kdp && eb.kdp.trim) || 'kdp6x9'); bookSyncMiolo(eb, true); if (eb.coverSetId && !d.front) bookCoverToMiolo(true); }
+  toast(n + ' capítulo(s) aplicados' + (withMiolo ? ' na estrutura e no miolo.' : ' na estrutura do e-book.')); eui.bt = withMiolo ? 'miolo' : 'versoes'; renderEditora();
 }
 /* texto com marcações da Editora → matéria da Diagramação */
 function motToStory(text) {
@@ -7126,12 +7207,6 @@ function motToStory(text) {
     para.push(ln);
   }
   flush(); return out;
-}
-function motToDtp() {
-  const M = motM(), t = (M.full || '').trim(); if (!t) { toast('Não há texto para enviar.'); return; }
-  const d = dtpNew($('mPre').value, M.title || 'Documento'), story = motToStory(t); if (!story.length) { toast('Não encontrei texto.'); return; }
-  d.styles.list = Object.assign({}, d.styles.body, {n: 'Lista', indent: 0, align: 'left', after: 3}); d.story = story;
-  dtpList().push(d); persist(); mot.open = false; edh.area = 'diag'; toast('Documento criado na Diagramação.'); go('diagram'); dtpOpen(d.id);
 }
 
 </script>
@@ -7360,8 +7435,8 @@ function dzNew(styleId) {
   if (st) { dz.cmp.pick = {design: st.tk.designId, font: st.tk.fontId, photo: st.tk.photoId}; }
   go('design');
 }
-function dzOpen(id) { dz.setId = id; dz.slide = 0; dz.sel = ''; dz.view = 'editor'; dz.hist = []; dz.hi = -1; dz.mode = 'select'; renderDesign(); }
-function dzBack() { dz.view = 'home'; renderDesign(); }
+function dzOpen(id) { dz.fromBook = dz.pendingFrom || ''; dz.pendingFrom = ''; dz.setId = id; dz.slide = 0; dz.sel = ''; dz.view = 'editor'; dz.hist = []; dz.hi = -1; dz.mode = 'select'; renderDesign(); }
+function dzBack() { if (dz.fromBook && ebList().some(e => e.id === dz.fromBook)) { const id = dz.fromBook; dz.fromBook = ''; eui.id = id; eui.bt = 'capa'; edh.area = 'livros'; go('editora'); return; } dz.view = 'home'; renderDesign(); }
 function dzDup(id) { const p = dzP(), s = JSON.parse(JSON.stringify(p.design.sets.find(x => x.id === id))); s.id = uid('ds'); s.name += ' (cópia)'; p.design.sets.push(s); persist(); renderDesign(); }
 function dzSetDel(id) { if (!confirm('Excluir esta peça?')) return; const p = dzP(); p.design.sets = p.design.sets.filter(s => s.id !== id); persist(); renderDesign(); }
 function dzStyleDel(id) { if (!confirm('Excluir este estilo salvo?')) return; const p = dzP(); p.design.styles = p.design.styles.filter(s => s.id !== id); persist(); renderDesign(); }
@@ -7464,7 +7539,7 @@ async function dzGenerate() {
 /* ================= EDITOR ================= */
 function dzEditorShell(p, r) {
   const s = dzSet();
-  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">← Estúdio</button><input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="dzAuto"></span>
+  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">${dz.fromBook ? '← Voltar ao e-book' : '← Estúdio'}</button><input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="dzAuto"></span>
     <button class="btn sm ${dz.mode === 'emphasis' ? 'dark' : ''}" onclick="dzModeEm()" title="Clique em palavras do texto para destacar">✦ Destacar por clique</button><button class="btn sm ${dz.mode === 'fmt' ? 'dark' : ''}" onclick="dzModeFmt()" title="Clique numa palavra do slide para formatar só ela (Shift estende)">✎ Formatar palavra</button>
     ${dzSet().deck ? '<button class="btn sm dark" onclick="dzPresentDeck()" title="Apresentar e baixar em HTML">▶ Apresentar</button>' : ''}<button class="btn sm" onclick="dzResizeOpen(dz.setId)" title="Adaptar esta arte para outras medidas">⤢ Tamanhos</button>
     <button class="btn sm" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta peça">⚡ Variações</button><button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddLogo()">＋ Logo</button><button class="btn sm" onclick="dzAddImage()" title="Inserir imagem do seu computador">＋ Imagem</button><button class="btn sm" onclick="dzAddVideo()" title="Inserir vídeo: link do YouTube/Vimeo/mp4 ou arquivo">＋ Vídeo</button><button class="btn sm" onclick="dzAddPhoto()" title="Quadro de foto para enviar ou gerar com IA">＋ Foto</button><button class="btn sm" onclick="dzLayerDup()" title="Duplicar o elemento selecionado: texto, imagem, forma ou logo (Ctrl+D)">⧉ Duplicar</button>
@@ -7640,7 +7715,7 @@ function dzInspector() {
   else if (L.type === 'path') el.innerHTML = `<h3>Símbolo <small class="muted">${esc(L.role)}</small></h3><div class="ins-row">${col('fill', 'Cor')}${col('stroke', 'Contorno')}</div>${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
   else if (L.type === 'video') el.innerHTML = dzVideoInspector(L, geo, acts);
   else if (L.role === 'logo') el.innerHTML = `<h3>Logo</h3><small class="muted block">Arraste e use as alças para redimensionar. Mantenha a proporção.</small>${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
-  else el.innerHTML = `<h3>Foto</h3><button class="btn sm dark" onclick="dzPickPhoto()">${L.imgId ? 'Trocar foto' : 'Enviar foto'}</button> <button class="btn sm" onclick="dzGenPhoto()" title="${imageReady() ? 'Gerar com IA' : 'Configure OPENAI_API_KEY no servidor'}">✦ Gerar com IA</button> ${L.imgId ? '<button class="btn sm" onclick="dzProp(\'imgId\',\'\')">Remover</button>' : ''}
+  else el.innerHTML = `<h3>Foto</h3><button class="btn sm dark" onclick="dzPickPhoto()">${L.imgId ? 'Trocar foto' : 'Enviar foto'}</button> <button class="btn sm" onclick="dzStockPhoto()" title="Banco de imagens (Magnific)">🔎 Banco</button> ${L.imgId && stockReady() ? '<button class="btn sm" onclick="dzUpscalePhoto()" title="Aumentar a resolução (Magnific)">⤴ Melhorar</button>' : ''}<button class="btn sm" onclick="dzGenPhoto()" title="${imageReady() ? 'Gerar com IA' : 'Configure OPENAI_API_KEY no servidor'}">✦ Gerar com IA</button> ${L.imgId ? '<button class="btn sm" onclick="dzProp(\'imgId\',\'\')">Remover</button>' : ''}
     <label class="ins">Tratamento (${PHOTO_STYLES.length} estilos)<select onchange="dzPhotoStyle(this.value)"><option value="">Sem tratamento</option>${PHOTO_STYLES.map(x => `<option value="${x.id}" ${L.filter === x.filter && L.ovColor === x.ovColor ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>
     <small class="muted block">${esc(L.brief || '')}</small>${rg('radius', 'Cantos', 0, 400, 1)}${rg('fx', 'Enquadrar na horizontal', 0, 1, 0.01)}${rg('fy', 'Enquadrar na vertical', 0, 1, 0.01)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
 }
@@ -8357,6 +8432,187 @@ function renderAnalyticsPage() {
 
 </script>
 <script>
+/* Modo Integração: página única para ver o que está ligado (IA texto/imagem, narração, banco de imagens, upscale, vídeo),
+   testar cada conexão, e os recursos que dependem delas: banco de imagens (Magnific) e narração do e-book (ElevenLabs).
+   As chaves ficam só no servidor (api/config.php); aqui o navegador só vê "configurado / não configurado". */
+const INT = {voices: null, voicesErr: '', testing: '', out: {}, stock: {q: '', page: 1, res: [], busy: false, cb: null, or: ''}};
+const intSt = () => (API.status || {});
+const intOn = k => canUseApi() && !!(intSt()[k] && intSt()[k].configured);
+const ttsReady = () => intOn('tts');
+const stockReady = () => intOn('magnific');
+
+const INT_CARDS = [
+  {k: 'ai', ico: 'sparkles', t: 'IA de texto · Claude ou GPT', d: 'Motor de conteúdo, diagnóstico, copy, leitura de layout. Escolha o provedor com AI_PROVIDER.', keys: ['AI_PROVIDER = anthropic | openai', 'ANTHROPIC_API_KEY ou OPENAI_API_KEY', 'OPENAI_TEXT_MODEL (se usar GPT)'], test: 'text'},
+  {k: 'image', ico: 'image', t: 'Imagens com IA · OpenAI', d: 'Gera fotos e ilustrações no Editor de Design, capas e variações. Aceita foto de referência.', keys: ['OPENAI_API_KEY', 'OPENAI_IMAGE_MODEL (gpt-image-1)'], test: ''},
+  {k: 'magnific', ico: 'pin', t: 'Magnific · banco de imagens e upscale', d: 'Busca imagens de banco para capa, design e miolo, e amplia a resolução para impressão.', keys: ['MAGNIFIC_API_KEY'], test: 'stock'},
+  {k: 'tts', ico: 'video', t: 'ElevenLabs · narração', d: 'Lê o e-book em voz alta, capítulo por capítulo, e baixa em MP3 (aba Áudio do e-book).', keys: ['ELEVENLABS_API_KEY', 'ELEVENLABS_MODEL (eleven_multilingual_v2)'], test: 'voices'},
+  {k: 'higgsfield', ico: 'video', t: 'Higgsfield · vídeo e imagem', d: 'Espaço reservado. Depois de contratar, envie a documentação da API e eu escrevo a integração (anúncios em vídeo).', keys: ['HIGGSFIELD_API_KEY'], test: '', soon: true}
+];
+function renderIntegracoes() {
+  const r = $('integracoesRoot'); if (!r) return;
+  const s = intSt(), ok = k => !!(s[k] && s[k].configured);
+  if (!API.available) { r.innerHTML = `<div class="page-head"><div><h1>Integrações</h1><p>Conecte as APIs que o Studio usa.</p></div></div>${integrationsHTML()}`; return; }
+  const aiProv = s.ai && s.ai.provider === 'openai' ? 'GPT (OpenAI)' : 'Claude (Anthropic)';
+  r.innerHTML = `<div class="page-head"><div><h1>Integrações</h1><p>Onde você liga as APIs. Cada chave fica só no servidor, no arquivo <span class="mono">api/config.php</span>; aqui você vê o que está ligado e testa a conexão.</p></div><div class="actions"><button class="btn" onclick="loadStatus().then(renderIntegracoes)">↻ Atualizar status</button></div></div>
+  ${needsLogin() ? `<div class="panel" style="margin-bottom:12px"><div class="section-row"><div><h3>Entre no Studio</h3><p class="muted">Sem login o servidor não mostra o status das chaves.</p></div><button class="btn dark" onclick="showLogin()">Entrar</button></div></div>` : ''}
+  <div class="integration-grid int-big">${INT_CARDS.map(c => {
+    const on = ok(c.k), extra = c.k === 'ai' && on ? ` · ${aiProv}${s.ai.model ? ' · ' + esc(s.ai.model) : ''}` : '';
+    return `<div class="card"><div class="int-ico">${ico(c.ico, 24)}</div><h3>${esc(c.t)}</h3><p>${esc(c.d)}</p>
+      ${c.soon ? '<span class="int-state">Aguardando documentação</span>' : `<span class="int-state ${on ? 'on' : ''}">${on ? 'Configurado' + extra : 'Não configurado'}</span>`}
+      <div class="int-keys">${c.keys.map(k => `<code>${esc(k)}</code>`).join('')}</div>
+      ${c.test && on ? `<button class="btn sm" onclick="intTest('${c.test}')" ${INT.testing ? 'disabled' : ''}>${INT.testing === c.test ? 'Testando…' : 'Testar conexão'}</button>` : ''}
+      ${INT.out[c.test] && c.test ? `<small class="int-out ${INT.out[c.test].ok ? 'ok' : 'bad'}">${esc(INT.out[c.test].msg)}</small>` : ''}</div>`;
+  }).join('')}</div>
+  <div class="panel" style="margin-top:14px"><h3>Onde cada integração aparece</h3><div class="int-map">
+    <div><b>IA de texto</b><span>Conteúdo do e-book, Agente Editorial, leitura de layout, copy.</span></div>
+    <div><b>Imagens com IA</b><span>Editor de Design (✦ Gerar com IA), capa, Laboratório de logos.</span></div>
+    <div><b>Magnific</b><span>🔎 Banco de imagens na capa, no Editor de Design e nos quadros de imagem do miolo · ⤴ Melhorar resolução.</span></div>
+    <div><b>ElevenLabs</b><span>Aba <b>Áudio</b> dentro de cada e-book.</span></div>
+    <div><b>Higgsfield</b><span>Anúncios em vídeo (próxima etapa).</span></div></div></div>
+  <div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>Como ligar</h3><p class="muted" style="margin:2px 0 0">No servidor (Hostinger), copie <span class="mono">api/config.sample.php</span> para <span class="mono">api/config.php</span> e preencha as chaves. Nunca suba <span class="mono">config.php</span> para o GitHub.</p></div><button class="btn sm" onclick="intCopyCfg()">Copiar trecho do config</button></div>
+  <small class="muted block" style="margin-top:8px">Os endereços da Magnific e os campos de upscale seguem a API pública como eu a conheço e ainda não foram validados com chave real: use “Testar conexão” e me mande o erro, se aparecer. A conta do GPT e a de imagens usam a mesma chave OpenAI.</small></div>
+  <h2 style="margin:22px 0 10px;font-size:18px">Outras conexões</h2>${integrationsHTML()}`;
+}
+function intCopyCfg() {
+  const t = `'AI_PROVIDER' => 'openai',          // ou 'anthropic'\n'OPENAI_API_KEY' => '',\n'OPENAI_TEXT_MODEL' => 'gpt-4o',\n'ELEVENLABS_API_KEY' => '',\n'MAGNIFIC_API_KEY' => '',\n'HIGGSFIELD_API_KEY' => '',`;
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Trecho copiado.'), () => { showModal('Trecho do config.php', `<textarea rows="8" style="width:100%" class="mono">${esc(t)}</textarea><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`); });
+}
+async function intTest(kind) {
+  INT.testing = kind; renderIntegracoes();
+  try {
+    if (kind === 'text') { const t = await aiText('Responda só com a palavra: ok', 'teste', 20); INT.out.text = {ok: true, msg: 'Resposta recebida: “' + t.trim().slice(0, 40) + '”'}; }
+    else if (kind === 'voices') { const v = await ttsVoices(true); INT.out.voices = {ok: true, msg: v.length + ' voz(es) disponível(is) na sua conta.'}; }
+    else if (kind === 'stock') { const r = await api('magnific.php?action=stock&q=flores'); INT.out.stock = {ok: true, msg: (r.results || []).length + ' resultado(s) para “flores”.'}; }
+  } catch (e) { INT.out[kind] = {ok: false, msg: e.message}; }
+  INT.testing = ''; renderIntegracoes();
+}
+
+/* ---------- banco de imagens (Magnific) ---------- */
+/* guarda um Blob como imagem do Studio e devolve {id, ar} (serve ao Editor de Design, à Diagramação e à capa) */
+async function stockBlobToImg(blob) {
+  const r = await dtpAddImageFile(blob); try { const bm = await createImageBitmap(blob); IMGS.set(r.id, bm); } catch (e) { /* ok */ } return r;
+}
+function stockPick(cb) {
+  if (!stockReady()) { toast(needsLogin() ? 'Entre no Studio para usar o banco de imagens.' : 'Banco de imagens não configurado: defina MAGNIFIC_API_KEY (página Integrações).'); return; }
+  INT.stock = Object.assign(INT.stock, {cb, res: [], page: 1, busy: false});
+  showModal('🔎 Banco de imagens · Magnific', `<div class="row-gap"><input id="stQ" placeholder="Ex.: consultório moderno, folhas verdes, mulher sorrindo" style="flex:1" value="${esc(INT.stock.q)}" onkeydown="if(event.key==='Enter')stockSearch(1)"><select id="stOr" onchange="INT.stock.or=this.value"><option value="">Qualquer formato</option><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option><option value="square">Quadrada</option></select><button class="btn dark" onclick="stockSearch(1)">Buscar</button></div>
+    <div id="stRes" class="stock-grid"><p class="muted" style="grid-column:1/-1">Digite o que procura. Confira a licença de cada imagem no site do banco antes de publicar.</p></div><div id="stMore"></div>`);
+  document.getElementById('modalBox').classList.add('wide'); setTimeout(() => $('stQ') && $('stQ').focus(), 60);
+}
+async function stockSearch(page) {
+  const q = $('stQ').value.trim(); if (!q) { toast('Digite o que procura.'); return; }
+  const S = INT.stock; S.q = q; S.page = page; $('stRes').innerHTML = '<p class="muted" style="grid-column:1/-1">Buscando…</p>';
+  try {
+    const r = await api('magnific.php?action=stock&q=' + encodeURIComponent(q) + '&page=' + page + (S.or ? '&orientation=' + S.or : ''));
+    S.res = r.results || [];
+    $('stRes').innerHTML = S.res.length ? S.res.map((x, i) => `<button class="stock-it" onclick="stockUse(${i})" title="${esc(x.title)}"><img src="${esc(x.url)}" alt="" loading="lazy" referrerpolicy="no-referrer"><span>${esc((x.author || '').slice(0, 24))}</span></button>`).join('') : '<p class="muted" style="grid-column:1/-1">Nada encontrado. Tente outra palavra (em inglês costuma render mais).</p>';
+    $('stMore').innerHTML = `<div class="row-gap" style="justify-content:center;margin-top:8px">${page > 1 ? `<button class="btn sm" onclick="stockSearch(${page - 1})">← Anterior</button>` : ''}<button class="btn sm" onclick="stockSearch(${page + 1})">Próxima →</button></div>`;
+  } catch (e) { $('stRes').innerHTML = `<p class="muted" style="grid-column:1/-1">${esc(e.message)}</p>`; }
+}
+async function stockUse(i) {
+  const x = INT.stock.res[i], cb = INT.stock.cb; if (!x || !cb) return; toast('Baixando imagem…');
+  try {
+    const r = await api('magnific.php?action=fetch&url=' + encodeURIComponent(x.url)), blob = await (await fetch(r.image)).blob();
+    const img = await stockBlobToImg(blob); closeModal(); cb(img); toast('Imagem aplicada. Lembre de conferir a licença.');
+  } catch (e) { toast(e.message); }
+}
+/* amplia a resolução (Magnific). Devolve Blob. */
+async function magUpscale(blob, scale) {
+  const r = await api('magnific.php', {method: 'POST', body: {action: 'upscale', image: await blobToDataURL(blob), scale: scale || 2}});
+  for (let n = 0; n < 40; n++) {
+    await new Promise(z => setTimeout(z, 3000));
+    const s = await api('magnific.php?action=upscale_status&task=' + encodeURIComponent(r.task));
+    if (s.status === 'failed') throw new Error('O Magnific não conseguiu ampliar essa imagem.');
+    if (s.status === 'done') { const f = await api('magnific.php?action=fetch&url=' + encodeURIComponent(s.url)); return (await fetch(f.image)).blob(); }
+  }
+  throw new Error('Tempo esgotado ampliando a imagem.');
+}
+/* ganchos nos editores */
+function dzStockPhoto() { stockPick(r => { const L = dzLayer(); L.imgId = r.id; dzDraw(); dzCommit(); dzInspector(); dzSlidesPanel(); }); }
+async function dzUpscalePhoto() {
+  const L = dzLayer(); if (!L.imgId) return; if (!stockReady()) { toast('Magnific não configurado (página Integrações).'); return; }
+  toast('Ampliando (pode levar ~1 min)…');
+  try { const b = await magUpscale(await imgGet(L.imgId), 2), r = await stockBlobToImg(b); L.imgId = r.id; dzDraw(); dzCommit(); dzInspector(); toast('Imagem ampliada.'); } catch (e) { toast(e.message); }
+}
+function dtpStockImg() { const it = dtpSelItem(); if (!it) return; stockPick(r => { const q = dtpSelItem(); if (!q) return; q.imgId = r.id; q.ar = r.ar; dtpTouch(true); dtpPanel(); }); }
+function covStockImg() { stockPick(r => { covC().imgId = r.id; persist(); renderEditora(); }); }
+
+/* ---------- narração do e-book (ElevenLabs) ---------- */
+async function ttsVoices(force) {
+  if (INT.voices && !force) return INT.voices;
+  const r = await api('tts.php?action=voices'); INT.voices = r.voices || []; return INT.voices;
+}
+function audText(s) {
+  const L = []; if (s.label && s.type === 'chapter') L.push(s.label.toLowerCase() + '.'); if (s.title) L.push(s.title + '.'); if (s.subtitle) L.push(s.subtitle + '.');
+  (s.blocks || []).forEach(b => {
+    if (b.t === 'p' || b.t === 'h2' || b.t === 'box') L.push(b.text);
+    else if (['list', 'check', 'summary'].includes(b.t)) L.push(...(b.items || []));
+    else if (b.t === 'cols2') L.push(...(b.left || []), ...(b.right || []));
+  });
+  return L.filter(Boolean).join('\n\n').replace(/[*_#>`]/g, '');
+}
+/* divide em pedaços de até 4000 caracteres, cortando em fim de parágrafo/frase */
+function audChunks(t, max) {
+  max = max || 4000; const out = []; let cur = '';
+  const push = s => { if ((cur + s).length > max && cur) { out.push(cur.trim()); cur = ''; } cur += s; };
+  t.split(/\n{2,}/).forEach(par => {
+    if (par.length <= max) { push(par + '\n\n'); return; }
+    par.split(/(?<=[.!?…])\s+/).forEach(sn => { while (sn.length > max) { push(sn.slice(0, max)); sn = sn.slice(max); } push(sn + ' '); });
+  });
+  if (cur.trim()) out.push(cur.trim()); return out;
+}
+const aud = {busy: '', cache: {}, msg: ''};
+const audE = eb => eb.audio || (eb.audio = {voiceId: '', voiceName: '', items: {}});
+function audRender(b, eb) {
+  const A = audE(eb), secs = eb.sections.filter(s => ['title', 'chapter', 'text'].includes(s.type) && audText(s).replace(/\s/g, '').length > 3), total = secs.reduce((n, s) => n + audText(s).length, 0);
+  if (!ttsReady()) { b.innerHTML = `<div class="mot-wrap"><div><div class="mot-ch"><b>Áudio · ler o livro em voz alta</b><p class="muted" style="font-size:12.5px">Gera a narração de cada capítulo com a ElevenLabs, com player e download em MP3 (audiolivro, prévia para redes, acessibilidade).</p><p style="font-size:12.5px">${needsLogin() ? 'Entre no Studio para usar.' : 'Falta ligar a ElevenLabs: coloque <span class="mono">ELEVENLABS_API_KEY</span> em <span class="mono">api/config.php</span>.'}</p><button class="btn dark" onclick="go('integracoes')">Abrir Integrações</button></div></div></div>`; return; }
+  const vs = INT.voices;
+  if (!vs && !aud.loading) { aud.loading = true; ttsVoices().then(() => { aud.loading = false; if (eui.bt === 'audio') audRender(b, eb); }, e => { aud.loading = false; INT.voices = []; INT.voicesErr = e.message; if (eui.bt === 'audio') audRender(b, eb); }); }
+  const done = secs.filter(s => A.items[s.id] && A.items[s.id].ids.length).length;
+  b.innerHTML = `<div class="mot-wrap"><div>
+    <div class="mot-ch"><b>Narração do livro</b><p class="muted" style="font-size:12.5px">Escolha a voz, narre cada capítulo e ouça aqui. O texto narrado é o do conteúdo do e-book (aba 1). Revise o texto antes: cada geração consome créditos da sua conta ElevenLabs.</p>
+      <div class="row-gap" style="flex-wrap:wrap;align-items:flex-end"><label class="ins" style="min-width:240px">Voz<select id="audVoice" onchange="audVoice(this)">${vs ? `<option value="">— escolha —</option>${vs.map(v => `<option value="${esc(v.id)}" ${v.id === A.voiceId ? 'selected' : ''}>${esc(v.name)}${v.labels && v.labels.language ? ' · ' + esc(v.labels.language) : ''}${v.category ? ' · ' + esc(v.category) : ''}</option>`).join('')}` : '<option>Carregando vozes…</option>'}</select></label>
+      <button class="btn sm" onclick="audPreview()" ${A.voiceId ? '' : 'disabled'}>▶ Ouvir a voz</button><button class="btn sm dark" onclick="audAll()" ${A.voiceId && !aud.busy ? '' : 'disabled'}>Narrar tudo (${secs.length})</button><button class="btn sm" onclick="audZip()" ${done ? '' : 'disabled'}>⬇ Baixar tudo (ZIP)</button></div>
+      ${INT.voicesErr ? `<small class="muted block">${esc(INT.voicesErr)}</small>` : ''}<small class="muted block" style="margin-top:6px">${total.toLocaleString('pt-BR')} caracteres no total · ${done}/${secs.length} narrados ${aud.msg ? '· ' + esc(aud.msg) : ''}</small></div>
+    <div class="list" style="margin-top:10px">${secs.map(s => { const it = A.items[s.id], t = audText(s); return `<div class="list-item aud-it"><div><strong>${esc(s.label ? s.label + ' · ' : '')}${esc(s.title || '(sem título)')}</strong><small>${t.length.toLocaleString('pt-BR')} caracteres${it && it.ids.length ? ' · narrado' + (it.stale ? ' (texto mudou)' : '') : ''}</small>${it && it.ids.length ? `<audio controls preload="none" id="aud_${s.id}" style="width:100%;margin-top:4px"></audio>` : ''}</div>
+      <div class="row-gap"><button class="btn sm ${it && it.ids.length ? '' : 'dark'}" onclick="audOne('${s.id}')" ${A.voiceId && !aud.busy ? '' : 'disabled'}>${aud.busy === s.id ? 'Gerando…' : it && it.ids.length ? 'Narrar de novo' : 'Narrar'}</button>${it && it.ids.length ? `<button class="btn sm" onclick="audDl('${s.id}')">⬇ MP3</button>` : ''}</div></div>`; }).join('') || '<p class="muted">Gere o conteúdo na aba 1 · Conteúdo para ter o que narrar.</p>'}</div></div></div>`;
+  secs.forEach(s => { const it = A.items[s.id]; if (it && it.ids.length) audLoad(s.id, it); });
+}
+async function audBlob(it) { const parts = []; for (const id of it.ids) { const b = await imgGet(id); if (b) parts.push(b); } return new Blob(parts, {type: 'audio/mpeg'}); }
+async function audLoad(sid, it) { const el = $('aud_' + sid); if (!el || el.dataset.ok) return; el.dataset.ok = 1; const b = await audBlob(it); if (b.size) el.src = URL.createObjectURL(b); }
+function audVoice(sel) { const eb = ebCur(), A = audE(eb), v = (INT.voices || []).find(x => x.id === sel.value); A.voiceId = sel.value; A.voiceName = v ? v.name : ''; persist(); audRender($('bookBody') || sel.closest('.mot-wrap').parentNode, eb); }
+async function audSpeak(text, voice) { const r = await api('tts.php', {method: 'POST', body: {text, voice_id: voice}}); return (await fetch(r.audio)).blob(); }
+async function audPreview() {
+  const A = audE(ebCur()), v = (INT.voices || []).find(x => x.id === A.voiceId); try { toast('Gerando prévia…'); const b = await audSpeak('Olá! Esta é a voz que vai ler o seu livro.', A.voiceId); const a = new Audio(URL.createObjectURL(b)); a.play(); } catch (e) { toast(e.message); }
+}
+async function audNarrate(eb, s) {
+  const A = audE(eb), t = audText(s), parts = audChunks(t), ids = [];
+  for (let i = 0; i < parts.length; i++) { aud.msg = (s.title || '') + ' · parte ' + (i + 1) + '/' + parts.length; const id = uid('aud'); await imgPut(id, await audSpeak(parts[i], A.voiceId)); ids.push(id); }
+  const old = A.items[s.id]; if (old) for (const id of old.ids) imgDel(id).catch(() => { });
+  A.items[s.id] = {ids, chars: t.length, at: new Date().toISOString()}; persist();
+}
+async function audOne(sid) {
+  const eb = ebCur(), s = eb.sections.find(x => x.id === sid); if (!s || aud.busy) return; aud.busy = sid; audRender($('bookBody'), eb);
+  try { await audNarrate(eb, s); aud.msg = 'pronto'; } catch (e) { toast(e.message); aud.msg = ''; }
+  aud.busy = ''; if (eui.bt === 'audio') audRender($('bookBody'), eb);
+}
+async function audAll() {
+  const eb = ebCur(), secs = eb.sections.filter(s => ['title', 'chapter', 'text'].includes(s.type) && audText(s).replace(/\s/g, '').length > 3);
+  const chars = secs.reduce((n, s) => n + audText(s).length, 0);
+  if (!confirm(`Narrar ${secs.length} seção(ões), cerca de ${chars.toLocaleString('pt-BR')} caracteres? Isso consome créditos da ElevenLabs.`)) return;
+  aud.busy = 'all'; audRender($('bookBody'), eb);
+  try { for (const s of secs) { await audNarrate(eb, s); audRender($('bookBody'), eb); } aud.msg = 'tudo narrado'; } catch (e) { toast(e.message); }
+  aud.busy = ''; if (eui.bt === 'audio') audRender($('bookBody'), eb);
+}
+async function audDl(sid) { const eb = ebCur(), s = eb.sections.find(x => x.id === sid), it = audE(eb).items[sid]; if (!it) return; download(slug((s.label ? s.label + '-' : '') + (s.title || 'secao')) + '.mp3', await audBlob(it), 'audio/mpeg'); }
+async function audZip() {
+  const eb = ebCur(), A = audE(eb), files = []; let n = 0;
+  for (const s of eb.sections) { const it = A.items[s.id]; if (!it || !it.ids.length) continue; n++; files.push({name: String(n).padStart(2, '0') + '-' + slug(s.title || 'secao') + '.mp3', data: new Uint8Array(await (await audBlob(it)).arrayBuffer())}); }
+  if (!files.length) return; download(slug(eb.title || eb.name) + '-audio.zip', makeZip(files), 'application/zip');
+}
+
+</script>
+<script>
 /* ===== Skill Editorial (Furacão Editorial Engine): os arquivos da skill. São a fonte única: o agente usa estes textos como instrução e o botão "Baixar skill" entrega o mesmo pacote ===== */
 const EDS_FILES = {
 'skill.md': `# Skill Editorial — Furacão
@@ -8876,7 +9132,7 @@ function eToDesign() {
   else lines = [`${P[0].slice(0, 90)} | ${(P[1] || '').slice(0, 120)}`, ...P.slice(2, -1).map((x, i) => `${c.parts[i + 2].label}: ${x}`), `${P[P.length - 1].slice(0, 90)} | Saiba mais`];
   dzNew(); dz.cmp.text = lines.join('\n'); dz.cmp.name = (s.ideas[s.chosen].tese || '').slice(0, 50); go('design'); toast('Texto enviado. Escolha estilo, fontes e gere as peças.');
 }
-function eToMotor() { const s = EDS(), M = motM(); M.idea = s.ideas[s.chosen].tese; M.source = (s.input.slice(0, 20000) + '\n\n--- Conteúdo editorial ---\n' + eMd()).slice(0, 60000); M.stage = 'material'; persist(); edh.area = 'texto'; mot.open = true; go('editora'); toast('Tese e conteúdo enviados ao Motor de texto.'); }
+function eToMotor() { const s = EDS(), t = s.ideas[s.chosen].tese, eb = bookNew((t || 'Novo e-book').slice(0, 60), ''); const M = (eb.motor = normalizeMotor({})); M.idea = t; M.source = (s.input.slice(0, 20000) + '\n\n--- Conteúdo editorial ---\n' + eMd()).slice(0, 60000); persist(); edh.area = 'livros'; ebOpen(eb.id); go('editora'); toast('Novo e-book criado com a tese e o conteúdo editorial. Gere a estrutura no motor.'); }
 
 /* ---------- memória e DNA ---------- */
 function eMemory() {
@@ -9064,8 +9320,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal
    Valores de referência do KDP (confira sempre no painel do KDP antes de publicar: eles mudam). */
 const KDP_PAPER = {'bw-white': {n: 'Preto e branco · papel branco', k: 0.002252}, 'bw-cream': {n: 'Preto e branco · papel creme', k: 0.0025}, 'color-std': {n: 'Cor padrão', k: 0.002252}, 'color-premium': {n: 'Cor premium', k: 0.002347}};
 const kdpTrims = () => DTP_PRESETS.filter(x => x.kdp);
-const kdpK = () => { const p = curProject(); if (!p) return null; if (!p.kdp || typeof p.kdp !== 'object' || !p.kdp.trim) p.kdp = normalizeKdp(p.kdp); return p.kdp; };
-const kdpDocCur = () => { const p = curProject(), k = kdpK(); return p && k ? (p.layouts || []).find(d => d.id === k.docId) : null; };
+const kdpK = () => { const eb = typeof ebCur === 'function' && eui.id ? ebCur() : null, h = eb || curProject(); if (!h) return null; if (!h.kdp || typeof h.kdp !== 'object' || !h.kdp.trim) h.kdp = normalizeKdp(h.kdp); return h.kdp; };
+const kdpDocCur = () => { const p = curProject(), eb = typeof ebCur === 'function' && eui.id ? ebCur() : null; return p && eb ? (p.layouts || []).find(d => d.id === eb.dtpId) : null; };
 const kdp = {cnt: 0, checks: null};
 function kdpMinInside(pages) { return pages <= 150 ? 0.375 : pages <= 300 ? 0.5 : pages <= 500 ? 0.625 : pages <= 700 ? 0.75 : 0.875; }
 function kdpCalc(k, pagesN) {
@@ -9078,11 +9334,10 @@ const kdpIn = v => (+v).toFixed(3).replace('.', ',') + ' pol. (' + (v * 25.4).to
 
 function kdpRender(r, p) {
   const k = kdpK(), calc = kdpCalc(k, kdpPages()), docs = p.layouts || [], doc = kdpDocCur(), ebs = p.ebooks || [];
-  r.innerHTML = edTabs('amazon') + `<div class="page-head"><div><h1>Amazon KDP</h1><p>Feche o livro para publicar na Amazon: formato do miolo, lombada, capa completa (contracapa + lombada + capa), checklist e arquivos prontos. Os números seguem as regras do KDP; confira no painel do KDP antes de enviar, porque elas mudam.</p></div></div>
+  r.innerHTML = (eui.id ? '' : edTabs('amazon')) + `<div class="page-head"><div><h1>Publicar</h1><p>Amazon KDP: formato do miolo, lombada, capa completa (contracapa + lombada + capa), checklist e arquivos prontos. Os números seguem as regras do KDP; confira no painel do KDP antes de enviar, porque elas mudam.</p></div></div>
   <div class="mot-wrap"><div>
   <div class="form-grid"><div class="field"><label>Formato do livro impresso (corte)</label><select onchange="kdpSet('trim',this.value)">${kdpTrims().map(x => `<option value="${x.id}" ${x.id === k.trim ? 'selected' : ''}>${esc(x.n.replace('Amazon KDP · ', ''))}</option>`).join('')}</select></div>
   <div class="field"><label>Papel e tinta</label><select onchange="kdpSet('paper',this.value)">${Object.entries(KDP_PAPER).map(([id, v]) => `<option value="${id}" ${id === k.paper ? 'selected' : ''}>${v.n}</option>`).join('')}</select></div>
-  <div class="field"><label>Documento do miolo (Diagramação)</label><select onchange="kdpSet('docId',this.value)"><option value="">— nenhum —</option>${docs.map(d => `<option value="${esc(d.id)}" ${d.id === k.docId ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}</select></div>
   <div class="field"><label>Número de páginas ${doc ? '(vazio = contar do documento)' : ''}</label><input type="number" min="0" max="900" value="${k.pages || ''}" placeholder="${kdp.cnt || 24}" onchange="kdpSet('pages',+this.value||0)"></div></div>
   <div class="okr-label">MEDIDAS CALCULADAS (${calc.pages} páginas)</div>
   <table class="ail-t"><tr><td>Corte (página)</td><td><b>${calc.tw} × ${calc.th} pol.</b> (${(calc.tw * 25.4).toFixed(1)} × ${(calc.th * 25.4).toFixed(1)} mm)</td></tr>
@@ -9112,11 +9367,11 @@ function kdpApplyTo(d, calc) {
 async function kdpApplyDoc() {
   const p = curProject(), k = kdpK(), calc = kdpCalc(k, kdpPages());
   let d = kdpDocCur();
-  if (!d) { d = dtpNew(k.trim, 'Miolo · ' + (p.cover && p.cover.title || 'livro')); k.docId = d.id; (p.layouts = p.layouts || []).push(d); }
+  if (!d) { d = bookEnsureMiolo(ebCur(), k.trim); bookSyncMiolo(ebCur(), true); }
   else if (!confirm('Ajustar “' + d.name + '” ao formato KDP ' + calc.tw + '×' + calc.th + ' pol.? Tamanho, margens e sangria mudam (o texto é mantido).')) return;
   kdpApplyTo(d, calc); persist(); kdp.checks = null; await kdpCount(); renderEditora(); toast('Documento ajustado ao formato KDP.');
 }
-function kdpOpenDoc() { const d = kdpDocCur(); if (!d) return; edh.area = 'diag'; go('diagram'); dtpOpen(d.id); }
+function kdpOpenDoc() { if (!kdpDocCur()) return; bookMioloOpen(); }
 async function kdpVerify() {
   const d = kdpDocCur(), k = kdpK(); if (!d) return; await dtpFonts(d); await dtpLoadImgs(d); const f = dtpFlow(d), pages = dtpPageCount(d, f), calc = kdpCalc(k, k.pages || pages), out = [];
   const ck = (ok, t, warn) => out.push({ok, warn: !ok && warn, t});
@@ -9146,7 +9401,7 @@ async function kdpMobile() { const id = $('kdpEb').value, keep = eui.id; eui.id 
 <script>
 /* ===== Engenheiro de capa: capas de livro (frente, capa completa KDP, Kindle e celular) com layouts prontos, referência (IA) e envio à Diagramação ===== */
 const cov = {ref: null, refBlob: null, busy: '', concepts: null, T: 0, nrm: null};
-const covC = () => { const p = curProject(); if (!p) return null; if (!p.cover || typeof p.cover !== 'object' || !p.cover.layout) p.cover = normalizeCover(p.cover); return p.cover; };
+const covC = () => { const eb = typeof ebCur === 'function' && eui.id ? ebCur() : null, h = eb || curProject(); if (!h) return null; if (!h.cover || typeof h.cover !== 'object' || !h.cover.layout) h.cover = normalizeCover(h.cover); return h.cover; };
 const COV_PALS = [
   ['Verde cuidado', {bg: '#4F8A55', fg: '#F4F1EC', accent: '#C9A876', second: '#6AA170'}], ['Vermelho e amarelo', {bg: '#DC2318', fg: '#FDB92F', accent: '#FDB92F', second: '#4A3B33'}], ['Preto e dourado', {bg: '#15120D', fg: '#F2E3B8', accent: '#D8A93A', second: '#6B5320'}],
   ['Laranja névoa', {bg: '#C96A2B', fg: '#FFFFFF', accent: '#FFE2B8', second: '#7A3B12'}], ['Verde escuro e linha dourada', {bg: '#173A32', fg: '#FFFFFF', accent: '#C9B26B', second: '#A8C66C'}], ['Azul-marinho', {bg: '#10264A', fg: '#FFFFFF', accent: '#F2B84B', second: '#4A74C9'}],
@@ -9309,38 +9564,32 @@ function covRender(r, p) {
   <div class="okr-label" style="margin-top:10px">PALETA</div><div class="tchips">${COV_PALS.map(([n, pl], i) => `<button class="tchip" onclick="covPal(${i})" title="${esc(n)}"><span class="cov-sw" style="background:${pl.bg}"></span><span class="cov-sw" style="background:${pl.fg}"></span><span class="cov-sw" style="background:${pl.accent}"></span> ${esc(n)}</button>`).join('')}</div>
   <div class="row-gap" style="margin:6px 0;flex-wrap:wrap">${[['bg', 'Fundo'], ['fg', 'Texto'], ['accent', 'Destaque'], ['second', 'Apoio']].map(([k, l]) => `<label class="dtp-chk">${l} <input type="color" value="${c.pal[k]}" onchange="covPalSet('${k}',this.value)"></label>`).join('')}</div>
   <div class="row-gap" style="margin-bottom:4px"><button class="btn sm" onclick="fbOpen(f => covSet('head', f), covC().head)">Aa Ver fontes do título</button><button class="btn sm" onclick="fbOpen(f => covSet('body', f), covC().body)">Aa Ver fontes do texto</button></div><div class="form-grid"><div class="field"><label>Fonte dos títulos</label><select onchange="covSet('head',this.value)">${dtpFontOpts(c.head)}</select></div><div class="field"><label>Fonte do texto</label><select onchange="covSet('body',this.value)">${dtpFontOpts(c.body)}</select></div></div>
-  <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="covPickImg()">${c.imgId ? 'Trocar a foto/ilustração' : 'Subir foto/ilustração de fundo'}</button>${c.imgId ? '<button class="btn sm" onclick="covSet(\'imgId\',\'\')">Tirar a foto</button>' : ''}<button class="btn sm" onclick="covConcepts()" ${cov.busy ? 'disabled' : ''}>${cov.busy === 'con' ? 'Pensando…' : '✦ Sugestões da IA'}</button></div>
+  <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="covPickImg()">${c.imgId ? 'Trocar a foto/ilustração' : 'Subir foto/ilustração de fundo'}</button><button class="btn sm" onclick="covStockImg()">🔎 Banco de imagens</button>${c.imgId ? '<button class="btn sm" onclick="covSet(\'imgId\',\'\')">Tirar a foto</button>' : ''}<button class="btn sm" onclick="covConcepts()" ${cov.busy ? 'disabled' : ''}>${cov.busy === 'con' ? 'Pensando…' : '✦ Sugestões da IA'}</button></div>
   ${cov.concepts ? `<div class="cov-cons">${cov.concepts.map((k, i) => `<div class="mot-ch"><b>${esc(k.name)}</b><p class="muted" style="font-size:12px;margin:3px 0">${esc(k.why)}</p><p style="font-size:12px;margin:3px 0"><b>Imagem:</b> ${esc(k.imageBrief)}</p><button class="btn sm" onclick="covApplyConcept(${i})">Aplicar</button></div>`).join('')}</div>` : ''}
   ${refBankHTML('cov', ['capas', 'cartaz', 'posts'])}
   ${cov.ref ? `<div class="row-gap" style="flex-wrap:wrap;margin-bottom:8px"><span class="muted" style="font-size:12px">Referência escolhida.</span><button class="btn sm dark" onclick="ailStart(cov.ref,'cov')">✦ Ler layout com IA → peça editável</button><button class="btn sm" onclick="cov.ref=null;covRender()">Tirar</button></div>` : ''}
   </div><div class="cov-prev"><canvas id="covCv" class="cov-cv"></canvas><small class="muted block" id="covInfo"></small>
   <div class="row-gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn dark" onclick="covCreate()">Criar no Editor de Design</button><button class="btn" onclick="covMockupDown()">Mockup do livro (PNG)</button></div>
-  <div class="mot-ch" style="margin-top:10px"><b>Usar esta capa</b><div class="field" style="margin:6px 0"><label>Na Diagramação</label><div class="row-gap"><select id="covDoc">${(p.layouts || []).map(d => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join('') || '<option value="">(nenhum documento)</option>'}</select><button class="btn sm" onclick="covToDoc()">Inserir como página da capa</button></div></div>
-  <div class="field" style="margin:6px 0"><label>No e-book (Editora)</label><div class="row-gap"><select id="covEb">${(p.ebooks || []).map(e => `<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('') || '<option value="">(nenhum e-book)</option>'}</select><button class="btn sm" onclick="covToEbook()">Usar como capa</button></div></div></div></div></div>`;
+  <div class="mot-ch" style="margin-top:10px"><b>Esta capa é a do e-book</b><p class="muted" style="font-size:12px;margin:4px 0">Ao criar, ela fica ligada automaticamente ao e-book (versões e EPUB).</p><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="bookCoverToMiolo()" ${ebCur() && ebCur().coverSetId ? '' : 'disabled'}>Inserir como página 1 do miolo</button><button class="btn sm" onclick="covOpenSet()" ${ebCur() && ebCur().coverSetId ? '' : 'disabled'}>Abrir no Editor de Design</button></div></div></div></div>`;
+  if (eui.id) { const t = r.querySelector(':scope > .edh-tabs'), h = r.querySelector(':scope > .page-head'); if (t) t.remove(); if (h) h.remove(); }
   bankFill(); covPreview(); covThumbs(); if (ACC.covg && ACC.covg.gal) covGalPaint();
 }
-function covSet(k, v, soft) { const c = covC(); c[k] = v; persist(); if (soft) covPrevSoon(); else { covRender(curProject() && $('editoraRoot'), curProject()); } }
-function covPick(k) { const c = covC(), l = COV_LAYOUTS[k]; c.layout = k; c.head = l.head; c.body = l.body; if (l.pal && !cov.keepPal) c.pal = Object.assign({}, l.pal); persist(); covRender($('editoraRoot'), curProject()); }
-function covPal(i) { covC().pal = Object.assign({}, COV_PALS[i][1]); persist(); covRender($('editoraRoot'), curProject()); }
+function covSet(k, v, soft) { const c = covC(); c[k] = v; persist(); if (soft) covPrevSoon(); else { renderEditora(); } }
+function covPick(k) { const c = covC(), l = COV_LAYOUTS[k]; c.layout = k; c.head = l.head; c.body = l.body; if (l.pal && !cov.keepPal) c.pal = Object.assign({}, l.pal); persist(); renderEditora(); }
+function covPal(i) { covC().pal = Object.assign({}, COV_PALS[i][1]); persist(); renderEditora(); }
 function covPalSet(k, v) { covC().pal[k] = v; persist(); covPrevSoon(); }
-function covWrapOpen() { const c = covC(); c.mode = 'wrap'; persist(); edh.area = 'capa'; go('editora'); }
-function covPickImg() { dtpFilePick(r => { covC().imgId = r.id; persist(); covRender($('editoraRoot'), curProject()); }); }
+function covWrapOpen() { const c = covC(); c.mode = 'wrap'; persist(); if (eui.id) bookTab('capa'); else bookGoTab('capa'); }
+function covPickImg() { dtpFilePick(r => { covC().imgId = r.id; persist(); renderEditora(); }); }
 async function covCreate() {
   const p = curProject(), c = covC(), b = covBuild(c, c.mode), set = {id: uid('ds'), name: (c.mode === 'wrap' ? 'Capa completa · ' : 'Capa · ') + (c.title || 'livro'), format: {id: 'custom', w: b.W, h: b.H}, tk: Object.assign(brandTokens(p), {name: 'Capa', bg: b.bg, fg: c.pal.fg, accent: c.pal.accent, head: {family: c.head, weight: 700}, body: {family: c.body, weight: 400}}), slides: [{id: sid(), name: 'Capa', bg: b.bg, layers: b.layers}], created: new Date().toISOString(), updated: new Date().toISOString()};
-  await covFontsAndImgs(set); p.design.sets.push(set); c.setId = set.id; persist(); toast('Capa criada. Refine no Editor de Design; depois volte aqui para enviar.'); go('design'); dzOpen(set.id);
+  await covFontsAndImgs(set); p.design.sets.push(set); c.setId = set.id; const eb = ebCur(); if (eb) { if (c.mode !== 'wrap') eb.coverSetId = set.id; eb.cover = c; dz.pendingFrom = eb.id; } persist(); toast('Capa criada e ligada ao e-book. Refine no Editor de Design e volte pelo botão Voltar ao e-book.'); go('design'); dzOpen(set.id);
 }
 async function covRenderSetBlob(setId, maxW, type, q) {
   const p = curProject(), set = p.design.sets.find(s => s.id === setId); if (!set) throw new Error('A capa não existe mais. Crie de novo.'); await ensureSetResources(set); await ensureFonts(set.slides[0].layers.filter(l => l.type === 'text').map(l => l.family));
   const W = set.format.w, H = set.format.h, s = maxW ? Math.min(1, maxW / W) : 1, cv = document.createElement('canvas'); cv.width = Math.round(W * s); cv.height = Math.round(H * s); const x = cv.getContext('2d'); renderSlide(x, set.slides[0], W, H, s);
   return {cv, blob: await new Promise(r => cv.toBlob(r, type || 'image/png', q)), W, H};
 }
-async function covToDoc() {
-  const p = curProject(), c = covC(), id = $('covDoc').value, d = (p.layouts || []).find(x => x.id === id); if (!d) { toast('Escolha um documento da Diagramação.'); return; }
-  if (!c.setId) { toast('Crie a capa no Editor de Design primeiro (botão Criar no Editor de Design).'); return; }
-  try { const r = await covRenderSetBlob(c.setId, 2000, 'image/jpeg', 0.92), imgId = uid('img'); await imgPut(imgId, r.blob); const ar = r.W / r.H;
-    d.pages.unshift({items: [{id: uid('fr'), k: 'img', x: -d.bleed, y: -d.bleed, w: d.page.w + 2 * d.bleed, h: d.page.h + 2 * d.bleed, wrap: 'none', off: 0, imgId, zoom: 1, ar, fill: '', stroke: '', sw: 1, op: 1, px: 0, py: 0, text: '', st: 'body', pad: 4}]}); d.front = (d.front | 0) + 1; d.nPages = Math.max(d.nPages, d.front + 1); persist(); toast('Capa inserida como página 1 do documento “' + d.name + '”.'); } catch (e) { toast('Falhou: ' + e.message); }
-}
-function covToEbook() { const p = curProject(), c = covC(), eb = (p.ebooks || []).find(e => e.id === $('covEb').value); if (!eb) { toast('Escolha um e-book.'); return; } if (!c.setId) { toast('Crie a capa no Editor de Design primeiro.'); return; } eb.coverSetId = c.setId; persist(); toast('Capa ligada ao e-book “' + eb.name + '”.'); }
+function covOpenSet() { const eb = ebCur(); if (!eb || !eb.coverSetId) return; dz.pendingFrom = eb.id; go('design'); dzOpen(eb.coverSetId); }
 
 /* ---------- exportações ---------- */
 async function covExportWrap() {
@@ -9364,15 +9613,15 @@ async function covMockupDown() {
 
 /* ---------- IA: sugestões de conceito ---------- */
 async function covConcepts() {
-  const c = covC(), M = motM(); cov.busy = 'con'; covRender($('editoraRoot'), curProject());
+  const c = covC(), M = motM(); cov.busy = 'con'; renderEditora();
   try {
     const j = await motJSON('Você é diretor(a) de arte de capas de livros. Pense no mercado editorial brasileiro.', `Livro: ${c.title || M.title || '(sem título)'}${c.subtitle ? ' — ' + c.subtitle : ''}. Autor(a): ${c.author || M.author}. Tema: ${M.idea || '(não informado)'}. Público: ${M.audience || '(não informado)'}.\nProponha 3 conceitos de capa diferentes. JSON: {"concepts":[{"name":"...","why":"1 frase","layout":"${Object.keys(COV_LAYOUTS).join('|')}","palette":{"bg":"#RRGGBB","fg":"#RRGGBB","accent":"#RRGGBB","second":"#RRGGBB"},"head":"fonte","body":"fonte","imageBrief":"descrição da imagem ideal"}]}. Fontes só da lista: ${dtpFontList().slice(0, 70).join(', ')}.`, 2500);
     const fl = dtpFontList(), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v).toUpperCase() : d;
     cov.concepts = (j.concepts || []).slice(0, 3).map(k => ({name: String(k.name || 'Conceito').slice(0, 60), why: String(k.why || '').slice(0, 200), imageBrief: String(k.imageBrief || '').slice(0, 240), layout: COV_LAYOUTS[k.layout] ? k.layout : 'giant', pal: {bg: hex(k.palette && k.palette.bg, c.pal.bg), fg: hex(k.palette && k.palette.fg, c.pal.fg), accent: hex(k.palette && k.palette.accent, c.pal.accent), second: hex(k.palette && k.palette.second, c.pal.second)}, head: fl.includes(k.head) ? k.head : COV_LAYOUTS[k.layout] ? COV_LAYOUTS[k.layout].head : c.head, body: fl.includes(k.body) ? k.body : c.body}));
   } catch (e) { toast(motErr(e)); }
-  cov.busy = ''; covRender($('editoraRoot'), curProject());
+  cov.busy = ''; renderEditora();
 }
-function covApplyConcept(i) { const k = cov.concepts[i], c = covC(); if (!k) return; Object.assign(c, {layout: k.layout, pal: k.pal, head: k.head, body: k.body}); persist(); covRender($('editoraRoot'), curProject()); toast('Conceito aplicado. Suba a imagem sugerida na foto de fundo.'); }
+function covApplyConcept(i) { const k = cov.concepts[i], c = covC(); if (!k) return; Object.assign(c, {layout: k.layout, pal: k.pal, head: k.head, body: k.body}); persist(); renderEditora(); toast('Conceito aplicado. Suba a imagem sugerida na foto de fundo.'); }
 
 /* miniaturas dos layouts de capa (com a paleta e as fontes de cada um) */
 async function covThumbs() {
@@ -9393,7 +9642,79 @@ async function covGalPaint() {
 cov.GT = 0;
 async function covFromGallery(id) {
   const p = curProject(), c = covC(), lay = layoutById(id); if (!lay) return; toast('Abrindo o layout na capa…'); const tk = covGalTokens(), fmt = resolveFmt({fmt: 'custom', cw: 1200, ch: 1800});
-  try { await ensureFonts(lyFamilies(tk)); const copy = covGalCopy(lay), set = layoutSetFrom(lay, tk, copy, fmt, p.name, 'Capa · ' + lay.name + ' · ' + (c.title || p.name)); set.slides[0] = buildLayoutSlide(lay, tk, copy, fmt, p.name); await ensureSetResources(set); p.design.sets.push(set); c.setId = set.id; persist(); go('design'); dzOpen(set.id); toast('Capa criada a partir do layout. Edite os textos e a imagem.'); } catch (e) { toast('Não consegui abrir: ' + e.message); }
+  try { await ensureFonts(lyFamilies(tk)); const copy = covGalCopy(lay), set = layoutSetFrom(lay, tk, copy, fmt, p.name, 'Capa · ' + lay.name + ' · ' + (c.title || p.name)); set.slides[0] = buildLayoutSlide(lay, tk, copy, fmt, p.name); await ensureSetResources(set); p.design.sets.push(set); c.setId = set.id; const eb = ebCur(); if (eb) { eb.coverSetId = set.id; dz.pendingFrom = eb.id; } persist(); go('design'); dzOpen(set.id); toast('Capa criada a partir do layout. Edite os textos e a imagem.'); } catch (e) { toast('Não consegui abrir: ' + e.message); }
+}
+
+</script>
+<script>
+/* ===== O e-book como um só lugar: Conteúdo (motor) → Capa → Miolo (diagramação) → Versões → Áudio → Publicar ===== */
+const BK_TABS = [['conteudo', '1 · Conteúdo', 'sparkles'], ['capa', '2 · Capa', 'palette'], ['miolo', '3 · Miolo', 'layout'], ['versoes', 'Versões', 'book'], ['audio', 'Áudio', 'video'], ['publicar', 'Publicar', 'send']];
+function bookTab(t) { eui.bt = t; renderEditora(); }
+const bookDoc = eb => (curProject().layouts || []).find(d => d.id === (eb || ebCur() || {}).dtpId);
+function bookHead(eb) {
+  const d = bookDoc(eb), hasCover = !!(eb.coverSetId && curProject().design.sets.some(s => s.id === eb.coverSetId)), ch = eb.sections.filter(s => s.type === 'chapter').length;
+  return `<div class="bk-head"><div class="row-gap" style="flex-wrap:wrap;justify-content:space-between"><div class="row-gap"><button class="btn sm" onclick="ebBack()">← E-books</button><input class="dz-name" value="${esc(eb.name)}" onchange="ebCur().name=this.value;persist()"></div><div class="row-gap"><span class="bk-chip ${ch ? 'ok' : ''}">${ch} capítulo(s)</span><span class="bk-chip ${hasCover ? 'ok' : ''}">${hasCover ? 'capa pronta' : 'sem capa'}</span><span class="bk-chip ${d ? 'ok' : ''}">${d ? 'miolo diagramado' : 'sem miolo'}</span><button class="btn sm" onclick="flipRead('eb',eui.id)" title="Folhear em tela cheia">📖 Folhear</button></div></div>
+  <div class="edh-tabs" style="margin-top:8px">${BK_TABS.map(([k, l, ic]) => `<button class="edh-tab ${eui.bt === k ? 'on' : ''}" onclick="bookTab('${k}')">${ico(ic, 15)} ${l}</button>`).join('')}</div></div>`;
+}
+function bookRender(p, r) {
+  const eb = ebCur(); if (!eb) { eui.id = ''; return renderEditora(); } if (!BK_TABS.some(t => t[0] === eui.bt)) eui.bt = 'conteudo';
+  r.innerHTML = bookHead(eb) + '<div id="bookBody"></div>'; const b = $('bookBody');
+  ({conteudo: () => motRender(b, p), capa: () => covRender(b, p), miolo: () => bookMiolo(b, eb), versoes: () => ebEditor(p, b), audio: () => (typeof audRender === 'function' ? audRender(b, eb) : (b.innerHTML = '<p class="muted">Áudio indisponível.</p>')), publicar: () => kdpRender(b, p)})[eui.bt]();
+}
+/* abre o e-book na aba pedida (ou cria um, se não houver nenhum) */
+function bookGoTab(tab) { const L = ebList(); edh.area = 'livros'; if (!L.length) { go('editora'); ebNewOpen(); return; } if (L.length === 1 || eui.id) { if (!eui.id) ebOpen(L[0].id); eui.bt = tab; go('editora'); return; } eui.id = ''; go('editora'); toast('Abra um e-book para ir direto a essa etapa.'); }
+function bookNew(name, author, preset) { const eb = ebNew(preset || 'blank', name || 'Novo e-book', author || ''); ebList().push(eb); persist(); return eb; }
+
+/* ---------- texto do e-book ⇄ marcação (a mesma da Editora) ---------- */
+function ebToMarkup(eb) {
+  const out = []; eb.sections.forEach(s => {
+    if (!['chapter', 'text'].includes(s.type)) return; const L = ['# ' + (s.title || 'Capítulo')]; if (s.subtitle) L.push('## ' + s.subtitle);
+    (s.blocks || []).forEach(b => {
+      if (b.t === 'p') L.push('', b.text); else if (b.t === 'h2') L.push('', '## ' + b.text);
+      else if (b.t === 'box') L.push('', `> ${({case: 'caso', tip: 'dica', warn: 'atencao', know: 'sabia', care: 'cuide', note: 'nota'})[b.kind] || 'nota'}: ${b.text}`);
+      else if (b.t === 'list') L.push('', ...(b.items || []).map((it, i) => (b.ordered ? (i + 1) + '. ' : '- ') + it));
+      else if (b.t === 'check') L.push('', ...(b.items || []).map(it => '[ ] ' + it)); else if (b.t === 'summary') L.push('', ...(b.items || []).map(it => '[v] ' + it));
+      else if (b.t === 'cols2') L.push('', ...(b.left || []).map(it => '@comuns: ' + it), ...(b.right || []).map(it => '@faca: ' + it));
+    }); out.push(L.join('\n'));
+  }); return out.join('\n\n');
+}
+/* aplica um texto marcado (# capítulo, ## subtítulo, > dica: …) na estrutura do e-book; mantém título, sumário e seções de texto */
+function bookApplyText(eb, text, opt) {
+  opt = opt || {}; const secs = ebImport(text, eb); if (!secs.length) { toast('Não encontrei capítulos. Use # no título de cada capítulo.'); return 0; }
+  eb.sections = eb.sections.filter(s => s.type !== 'chapter'); let n = 0; secs.forEach(s => { n++; s.label = 'CAPÍTULO ' + ebPad2(n); });
+  const at = eb.sections.findIndex(x => x.type === 'text' && /plano|conclus/i.test(x.title)); if (at >= 0) eb.sections.splice(at, 0, ...secs); else eb.sections.push(...secs);
+  const M = motM(); if (M && M.title) eb.title = M.title; if (M && M.subtitle) eb.subtitle = M.subtitle; if (M && M.author) eb.author = M.author; eui.cache = {}; persist(); return secs.length;
+}
+/* miolo: cria o documento da Diagramação ligado a este e-book */
+function bookEnsureMiolo(eb, preset, styleId) {
+  let d = bookDoc(eb); if (d) return d; d = dtpNew(preset || 'kdp6x9', 'Miolo · ' + (eb.title || eb.name)); d.styles.list = Object.assign({}, d.styles.body, {n: 'Lista', indent: 0, align: 'left', after: 3});
+  if (typeof dtpApplyStyle === 'function') dtpApplyStyle(d, styleId || 'classico', eb.brand); d.run.header = ''; d.run.folio = true; eb.dtpId = d.id; (curProject().layouts = curProject().layouts || []).push(d); persist(); return d;
+}
+function bookSyncMiolo(eb, quiet) {
+  const d = bookDoc(eb); if (!d) return; const text = ebToMarkup(eb); if (!text.trim()) { if (!quiet) toast('O e-book ainda não tem capítulos. Gere o conteúdo primeiro.'); return; }
+  if (d.story.some(s => s.k === 'img') && !quiet && !confirm('O texto do miolo será refeito a partir do e-book. As imagens que estavam no meio do texto saem do fluxo (os quadros soltos ficam). Continuar?')) return;
+  d.story = motToStory(text); if (!d.styles.list) d.styles.list = Object.assign({}, d.styles.body, {n: 'Lista', indent: 0, align: 'left', after: 3}); persist(); if (!quiet) toast('Miolo atualizado com o texto do e-book.');
+}
+function bookMioloOpen() { const eb = ebCur(), d = bookDoc(eb); if (!d) return; dui.fromBook = eb.id; edh.area = 'diag'; go('diagram'); dtpOpen(d.id); }
+function bookMioloCreate() {
+  const eb = ebCur(), pre = ($('bkPre') || {}).value || 'kdp6x9', sty = ($('bkSty') || {}).value || 'classico'; const d = bookEnsureMiolo(eb, pre, sty); bookSyncMiolo(eb, true);
+  if (eb.coverSetId && !d.front) bookCoverToMiolo(true); persist(); toast('Miolo criado e diagramado com o texto do e-book.'); renderEditora();
+}
+async function bookCoverToMiolo(quiet) {
+  const eb = ebCur(), d = bookDoc(eb), p = curProject(); if (!d || !eb.coverSetId) { if (!quiet) toast('Crie a capa e o miolo primeiro.'); return; }
+  try { const r = await covRenderSetBlob(eb.coverSetId, 2000, 'image/jpeg', 0.92), imgId = uid('img'); await imgPut(imgId, r.blob); d.pages.unshift({items: [{id: uid('fr'), k: 'img', x: -d.bleed, y: -d.bleed, w: d.page.w + 2 * d.bleed, h: d.page.h + 2 * d.bleed, wrap: 'none', off: 0, imgId, zoom: 1, ar: r.W / r.H, fill: '', stroke: '', sw: 1, op: 1, px: 0, py: 0, text: '', st: 'body', pad: 4}]}); d.front = (d.front | 0) + 1; d.nPages = Math.max(d.nPages, d.front + 1); persist(); if (!quiet) { toast('Capa inserida como página 1 do miolo.'); renderEditora(); } } catch (e) { toast('Falhou: ' + e.message); }
+}
+function bookMioloFormat(id) { const eb = ebCur(), d = bookDoc(eb), P = DTP_PRESETS.find(x => x.id === id); if (!d || !P || !confirm('Trocar o formato do miolo para “' + P.n + '”? Tamanho, margens e sangria mudam (o texto é mantido).')) { renderEditora(); return; } d.page = {w: dtpMM(P.w), h: dtpMM(P.h)}; d.margins = {t: dtpMM(P.m.t), b: dtpMM(P.m.b), i: dtpMM(P.m.i), o: dtpMM(P.m.o)}; d.cols = P.cols; d.facing = P.facing; d.bleed = dtpMM(P.bleed); persist(); renderEditora(); }
+function bookMiolo(r, eb) {
+  const d = bookDoc(eb), pres = DTP_PRESETS.filter(x => x.id !== 'custom' && x.id !== 'flyer'), opts = sel => pres.map(x => `<option value="${x.id}" ${x.id === sel ? 'selected' : ''}>${esc(x.n)}</option>`).join(''), styles = typeof DTP_STYLES !== 'undefined' ? DTP_STYLES : [];
+  if (!d) { r.innerHTML = `<div class="mot-wrap"><div><div class="mot-ch"><b>Criar o miolo diagramado</b><p class="muted" style="font-size:12.5px">O miolo é o interior do livro: texto em colunas, margens, sangria, imagens e modelos de página, como no InDesign. O texto vem do conteúdo do e-book (${eb.sections.filter(s => s.type === 'chapter').length} capítulo(s)).</p>
+    <div class="form-grid"><div class="field"><label>Formato</label><select id="bkPre">${opts('kdp6x9')}</select></div><div class="field"><label>Estilo do miolo</label><select id="bkSty">${styles.map(s => `<option value="${s.id}">${esc(s.n)}</option>`).join('')}</select></div></div>
+    <div class="row-gap"><button class="btn dark" onclick="bookMioloCreate()">Criar e diagramar o miolo</button></div><small class="muted block" style="margin-top:6px">${eb.sections.some(s => s.type === 'chapter') ? '' : 'Dica: gere ou cole o conteúdo na aba 1 · Conteúdo antes; o miolo nasce já com o texto.'}</small></div></div></div>`; return; }
+  const f = dtpFlow(d), n = dtpPageCount(d, f);
+  r.innerHTML = `<div class="mot-wrap"><div><div class="mot-ch"><b>Miolo · ${esc(d.name)}</b><p style="font-size:13px;margin:6px 0">${dtpFmt(d.page.w, d.unit)} × ${dtpFmt(d.page.h, d.unit)} ${DTP_UL[d.unit]} · ${n} página(s) · ${d.cols} coluna(s)${d.facing ? ' · páginas opostas' : ''} · sangria ${dtpFmt(d.bleed, d.unit)} ${DTP_UL[d.unit]}${f.overset ? ' · <b style="color:#dc2626">texto em estouro</b>' : ''}</p>
+    <div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" onclick="bookMioloOpen()">Abrir o editor do miolo</button><button class="btn" onclick="bookSyncMiolo(ebCur())">↻ Atualizar o texto a partir do e-book</button><button class="btn" onclick="bookCoverToMiolo()" ${eb.coverSetId ? '' : 'disabled'} title="${eb.coverSetId ? '' : 'Crie a capa primeiro'}">Inserir a capa como página 1</button><button class="btn" onclick="flipRead('dtp','${d.id}')">📖 Folhear</button></div></div>
+    <div class="mot-ch"><b>Formato do livro</b><div class="field" style="margin:6px 0"><select onchange="bookMioloFormat(this.value)"><option value="">Trocar formato…</option>${opts('')}</select></div><small class="muted">Celular, tablet e os tamanhos de livro da Amazon (KDP). Na aba Publicar você confere lombada, margens e capa completa.</small></div></div>
+    <div><div class="mot-ch"><b>Como funciona</b><ol style="margin:6px 0 0 18px;padding:0;font-size:12.5px;line-height:1.6"><li>O texto vem do conteúdo (Motor) e da aba Versões.</li><li>No editor do miolo você ajusta grade, colunas, estilos, modelos de página e arrasta qualquer elemento com a mão livre.</li><li>Mudou o conteúdo? Use ↻ Atualizar: os quadros e estilos do miolo são mantidos.</li></ol></div></div></div>`;
 }
 
 </script>
@@ -9420,15 +9741,15 @@ function accAuto(root, sel, key, opt) {
 (function () {
   const wrap = (name, after) => { const f = window[name]; if (typeof f !== 'function') return; window[name] = function () { const r = f.apply(this, arguments); try { after(); } catch (e) { console.warn(name, e); } return r; }; };
   wrap('dzInspector', () => { const L = typeof dzLayer === 'function' ? dzLayer() : null; accAuto($('dzInsp'), 'h4', 'dz-' + (L ? L.type + (L.role === 'logo' ? 'L' : '') : 'none')); });
-  wrap('dtpPanel', () => { const it = dui.tab === 'objeto' && typeof dtpSelItem === 'function' ? dtpSelItem() : null; accAuto($('dtpPanel'), '.okr-label', 'dtp-' + dui.tab + (it ? it.k : '')); });
-  wrap('covRender', () => accAuto(document.querySelector('.cov-form'), '.okr-label', 'cov', {open: [0, 1, 2]}));
+  wrap('dtpPanel', () => { const it = dui.tab === 'objeto' && typeof dtpSelItem === 'function' ? dtpSelItem() : null; accAuto($('dtpPanel'), '.okr-label', 'dtp-' + dui.tab + (it ? it.k : ''), dui.tab === 'modelos' ? {open: [0, 1]} : undefined); });
+  wrap('covRender', () => accAuto(document.querySelector('.cov-form'), '.okr-label', 'cov', {open: [0, 1, 2, 4]}));
 })();
 
 /* ---------- "Não comece do zero": tudo o que existe para partir de uma base ---------- */
 const start = {group: 'Todos'};
 function startersHTML(p) {
   const A = (id, t, s, b, d) => accSec('start', id, t, s, b, d), tpl = typeof tplList === 'function' ? tplList() : [], sets = p.design.sets.slice().reverse().slice(0, 8), refs = (inspo().items || []).filter(i => i.imgId).slice(0, 24);
-  const cards = [['Capa de e-book', 'Engenheiro de capa: 8 layouts, capa KDP, Kindle, celular', "edGo('capa')"], ['E-book completo', 'Motor de texto: ideia → estrutura → capítulos', "edGo('texto')"], ['Livro, revista ou folheto', 'Diagramação com grade, colunas e PDF de gráfica', "edGo('diag')"], ['Publicar na Amazon', 'Lombada, capa completa e checklist KDP', "edGo('amazon')"], ['Logo', 'Laboratório do logo: tipografia, símbolos, vitrine', 'dzLogoOpen()'], ['Variações de um anúncio', 'Fábrica: textos × estilos × layouts', 'dzVarOpen()'], ['Kit de marca', 'Cores, fontes e logo do projeto', 'dzBrandOpen()'], ['Referências', 'Sua coleção de inspiração', "go('inspiration')"], ['Fontes e combinações', 'Ficha de cada fonte e pares prontos com exemplo', 'dzFontsOpen()']];
+  const cards = [['Capa de e-book', 'Engenheiro de capa: 8 layouts, capa KDP, Kindle, celular', "bookGoTab('capa')"], ['E-book completo', 'Motor de texto: ideia → estrutura → capítulos', "bookGoTab('conteudo')"], ['Livro, revista ou folheto', 'Diagramação com grade, colunas e PDF de gráfica', "bookGoTab('miolo')"], ['Publicar na Amazon', 'Lombada, capa completa e checklist KDP', "bookGoTab('publicar')"], ['Logo', 'Laboratório do logo: tipografia, símbolos, vitrine', 'dzLogoOpen()'], ['Variações de um anúncio', 'Fábrica: textos × estilos × layouts', 'dzVarOpen()'], ['Kit de marca', 'Cores, fontes e logo do projeto', 'dzBrandOpen()'], ['Referências', 'Sua coleção de inspiração', "go('inspiration')"], ['Fontes e combinações', 'Ficha de cada fonte e pares prontos com exemplo', 'dzFontsOpen()']];
   return `<div class="panel" style="margin-top:14px" id="startBox"><div class="section-row"><div><h3>Não comece do zero</h3><p class="muted" style="font-size:12px;margin:0">Modelos, referências e atalhos de criação. Escolha uma base e adapte.</p></div><div class="row-gap"><button class="btn sm" onclick="accAll('start',true)">Expandir tudo</button><button class="btn sm" onclick="accAll('start',false)">Recolher tudo</button></div></div>
   ${A('atalhos', 'Atalhos de criação', cards.length + ' caminhos', `<div class="start-cards">${cards.map(([t, s, fn]) => `<button class="start-card" onclick="${fn}"><b>${esc(t)}</b><small class="muted">${esc(s)}</small></button>`).join('')}</div>`, true)}
   ${A('lay', 'Modelos de layout prontos', LAYOUTS.length + ' composições', startLayBody(), false)}
@@ -9455,8 +9776,8 @@ function navSnap() {
   const s = {page: ui.page, tab: ui.tab, proj: state.activeProjectId};
   if (typeof edh !== 'undefined') s.area = edh.area;
   if (typeof mot !== 'undefined' && mot.open) { s.mot = 1; try { s.stage = motM().stage; } catch (e) { } }
-  if (typeof eui !== 'undefined') s.eb = eui.id;
-  if (typeof dui !== 'undefined') s.doc = dui.id;
+  if (typeof eui !== 'undefined') { s.eb = eui.id; s.bt = eui.bt; }
+  if (typeof dui !== 'undefined') { s.doc = dui.id; s.fb = dui.fromBook; }
   if (typeof dz !== 'undefined') { s.set = dz.setId; s.dzv = dz.view; }
   return s;
 }
@@ -9472,7 +9793,8 @@ function navApply(s) {
     if (s.proj && s.proj !== state.activeProjectId && projectById(s.proj)) setActiveProject(s.proj);
     if (typeof edh !== 'undefined' && s.area) edh.area = s.area;
     if (typeof mot !== 'undefined') { mot.open = !!s.mot; if (s.mot && s.stage) { try { motM().stage = s.stage; } catch (e) { } } }
-    if (typeof eui !== 'undefined') eui.id = s.eb || '';
+    if (typeof eui !== 'undefined') { eui.id = s.eb || ''; if (s.bt) eui.bt = s.bt; }
+    if (typeof dui !== 'undefined') dui.fromBook = s.fb || '';
     if (typeof dui !== 'undefined') { if (s.doc && dui.id !== s.doc) { dui.id = s.doc; dui.pi = 0; dui.sel = null; dui.hist = []; dui.hi = -1; try { dtpSnap(); } catch (e) { } } else if (!s.doc) dui.id = ''; }
     if (typeof dz !== 'undefined') { dz.setId = s.set || ''; if (s.dzv) dz.view = s.dzv; }
     if (s.tab) ui.tab = s.tab;

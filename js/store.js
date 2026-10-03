@@ -140,12 +140,18 @@ function normalizeMotor(m) {
   return {skillId: safeId(m.skillId) ? m.skillId : '', idea: str(m.idea, 4000), source: str(m.source, 60000), audience: str(m.audience, 300), tone: str(m.tone, 300), nch: Math.max(3, Math.min(14, Math.round(+m.nch || 7))), title: str(m.title, 200), subtitle: str(m.subtitle, 300), author: str(m.author, 200), outline: out, chapters, full: str(m.full, 200000), stage: ['material', 'estrutura', 'texto', 'enviar'].includes(m.stage) ? m.stage : 'material', approved: !!m.approved};
 }
 /* Editora: valida cada e-book (ids, textos, tipos de bloco, cores) antes de entrar no estado */
+function normalizeAudio(a) {
+  const o = {voiceId: '', voiceName: '', items: {}}; if (!a || typeof a !== 'object') return o;
+  o.voiceId = /^[A-Za-z0-9]{0,40}$/.test(String(a.voiceId)) ? String(a.voiceId || '') : ''; o.voiceName = String(a.voiceName || '').slice(0, 80);
+  Object.keys(a.items && typeof a.items === 'object' ? a.items : {}).slice(0, 300).forEach(k => { const it = a.items[k]; if (!safeId(k) || !it || !Array.isArray(it.ids)) return; const ids = it.ids.filter(safeId).slice(0, 60); if (ids.length) o.items[k] = {ids, chars: Math.max(0, +it.chars || 0), at: String(it.at || '').slice(0, 40)}; });
+  return o;
+}
 function normalizeEbooks(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TYPES = ['p', 'h2', 'box', 'cols2', 'list', 'check', 'summary', 'pagebreak'], KINDS = ['case', 'tip', 'warn', 'know', 'care', 'note'], STYPES = ['title', 'toc', 'chapter', 'text'];
   const lines = a => (Array.isArray(a) ? a : []).slice(0, 80).map(t => str(t, 1200));
   const D = {primary: '#4F8A55', light: '#6AA170', terra: '#B99B78', gold: '#C9A876', bg: '#F4F1EC', box: '#F7F4EE', text: '#3A3733', soft: '#4A4741'};
   return (Array.isArray(x) ? x : []).filter(e => e && safeId(e.id)).slice(0, 200).map(e => ({
-    id: e.id, dtpId: safeId(e.dtpId) ? e.dtpId : '', motor: normalizeMotor(e.motor), cover: normalizeCover(e.cover), kdp: normalizeKdp(e.kdp), name: str(e.name, 120) || 'E-book', title: str(e.title, 200), subtitle: str(e.subtitle, 300), author: str(e.author, 200), collection: str(e.collection, 200), footer: str(e.footer, 80), coverSetId: safeId(e.coverSetId) ? e.coverSetId : '', created: str(e.created, 40),
+    id: e.id, dtpId: safeId(e.dtpId) ? e.dtpId : '', motor: normalizeMotor(e.motor), cover: normalizeCover(e.cover), kdp: normalizeKdp(e.kdp), audio: normalizeAudio(e.audio), name: str(e.name, 120) || 'E-book', title: str(e.title, 200), subtitle: str(e.subtitle, 300), author: str(e.author, 200), collection: str(e.collection, 200), footer: str(e.footer, 80), coverSetId: safeId(e.coverSetId) ? e.coverSetId : '', created: str(e.created, 40),
     brand: {h: str(e.brand && e.brand.h, 60) || 'Playfair Display', b: str(e.brand && e.brand.b, 60) || 'Montserrat', c: Object.fromEntries(Object.keys(D).map(k => [k, hex(e.brand && e.brand.c && e.brand.c[k], D[k])]))},
     terms: {keep: str(e.terms && e.terms.keep, 80), avoid: (e.terms && Array.isArray(e.terms.avoid) ? e.terms.avoid : []).slice(0, 50).map(t => str(t, 80))},
     sections: (Array.isArray(e.sections) ? e.sections : []).filter(s => s && safeId(s.id)).slice(0, 300).map(s => ({id: s.id, type: STYPES.includes(s.type) ? s.type : 'text', label: str(s.label, 80), title: str(s.title, 300), subtitle: str(s.subtitle, 400), opener: !!s.opener, inToc: s.inToc !== false,

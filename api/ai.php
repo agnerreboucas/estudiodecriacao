@@ -3,8 +3,10 @@ require __DIR__ . '/_lib.php';
 require_auth();
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') fail('Use POST', 405);
 require_json_write();
-$key = (string) cfg('ANTHROPIC_API_KEY', '');
-if ($key === '') fail('IA não configurada: defina ANTHROPIC_API_KEY em api/config.php', 503);
+$prov = strtolower((string) cfg('AI_PROVIDER', 'anthropic'));
+if ($prov !== 'openai') $prov = 'anthropic';
+$key = (string) cfg($prov === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY', '');
+if ($key === '') fail('IA não configurada: defina ' . ($prov === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY') . ' em api/config.php', 503);
 if (!rate_limit('ai:' . (session_id() ?: client_ip()), (int) cfg('AI_CALLS_PER_HOUR', 60), 3600)) fail('Limite de chamadas de IA por hora atingido.', 429);
 
 $b = body_json(7_000_000);
@@ -30,6 +32,28 @@ if ($imgs) {
     }
     $blocks[] = ['type' => 'text', 'text' => $clean[$last]['content']];
     $clean[$last]['content'] = $blocks;
+}
+if ($prov === 'openai') {
+    /* Chat Completions da OpenAI: imagens entram como image_url (data URL); system vira a primeira mensagem */
+    $om = [];
+    if (!empty($b['system']) && is_string($b['system'])) $om[] = ['role' => 'system', 'content' => substr($b['system'], 0, 24000)];
+    foreach ($clean as $m) {
+        if (is_array($m['content'])) {
+            $parts = [];
+            foreach ($m['content'] as $blk) $parts[] = $blk['type'] === 'image'
+                ? ['type' => 'image_url', 'image_url' => ['url' => 'data:' . $blk['source']['media_type'] . ';base64,' . $blk['source']['data']]]
+                : ['type' => 'text', 'text' => $blk['text']];
+            $om[] = ['role' => $m['role'], 'content' => $parts];
+        } else $om[] = $m;
+    }
+    $ob = rtrim((string) cfg('OPENAI_API_URL', 'https://api.openai.com/v1'), '/');
+    [$code, $j, $raw] = http_json($ob . '/chat/completions', ['content-type: application/json', 'Authorization: Bearer ' . $key],
+        ['model' => (string) cfg('OPENAI_TEXT_MODEL', 'gpt-4o'), 'max_completion_tokens' => max(1, min(8000, (int) ($b['max_tokens'] ?? 1500))), 'messages' => $om], 120);
+    if ($code !== 200 || !is_array($j)) {
+        $msg = is_array($j) ? ($j['error']['message'] ?? 'erro do provedor') : $raw;
+        fail('IA (OpenAI): ' . substr((string) $msg, 0, 300), $code === 429 ? 429 : 502);
+    }
+    json_out(['ok' => true, 'text' => (string) ($j['choices'][0]['message']['content'] ?? ''), 'usage' => $j['usage'] ?? null]);
 }
 $payload = ['model' => (string) cfg('ANTHROPIC_MODEL', 'claude-sonnet-5-5'), 'max_tokens' => max(1, min(8000, (int) ($b['max_tokens'] ?? 1500))), 'messages' => $clean];
 if (!empty($b['system']) && is_string($b['system'])) $payload['system'] = substr($b['system'], 0, 24000);

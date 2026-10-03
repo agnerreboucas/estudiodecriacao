@@ -11,6 +11,23 @@ return [
     'ANTHROPIC_MODEL'   => 'claude-sonnet-5-5',
     'AI_CALLS_PER_HOUR' => 60,
 
+    /* Provedor do texto/visão da IA: 'anthropic' (padrão) ou 'openai'. Com 'openai' usa OPENAI_API_KEY e OPENAI_TEXT_MODEL. */
+    'AI_PROVIDER'       => 'anthropic',
+    'OPENAI_TEXT_MODEL' => 'gpt-4o',      // confira o nome do modelo na documentação da OpenAI
+
+    /* Narração (ElevenLabs). Chave em https://elevenlabs.io → Developers → API Keys */
+    'ELEVENLABS_API_KEY'  => '',
+    'ELEVENLABS_MODEL'    => 'eleven_multilingual_v2',
+    'TTS_CHARS_PER_DAY'   => 60000,       // trava de custo (caracteres por dia)
+
+    /* Magnific (antigo Freepik API): banco de imagens e upscale. Chave em https://www.magnific.com/api (ou painel de desenvolvedor Freepik) */
+    'MAGNIFIC_API_KEY'  => '',
+    'MAGNIFIC_API_URL'  => 'https://api.freepik.com/v1',
+    'MAGNIFIC_CALLS_PER_HOUR' => 60,
+
+    /* Higgsfield (vídeo/imagem): espaço reservado. A integração só será escrita quando você contratar e enviar a documentação da API. */
+    'HIGGSFIELD_API_KEY' => '',
+
     /* Geração de imagem (OpenAI). Chave em https://platform.openai.com/api-keys — confira nomes de modelo e preços na documentação da OpenAI */
     'OPENAI_API_KEY'       => '',
     'OPENAI_IMAGE_MODEL'   => 'gpt-image-1',
