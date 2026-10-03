@@ -61,7 +61,7 @@ function slideCopy(sl) {
 
 /* adapta UMA peça de um formato para outro */
 function resizeSlide(sl, from, to, tk) {
-  if (sl.isLogo) return fitLogoSlide(sl, from, to);
+  if (sl.isLogo || sl.keep) return fitLogoSlide(sl, from, to);
   const rf = from.w / from.h, rt = to.w / to.h, rel = rt / rf, wf = isWide(from), wt = isWide(to);
   if ((wf === wt) && rel >= (wt ? 0.8 : 0.7) && rel <= (wt ? 1.25 : 1.45)) return scaleSlide(cloneSlide(sl), to.w / from.w, to.h / from.h);
   if (sl.pm && typeof palette === 'function') { const pl = palette(tk, sl.pm); tk = Object.assign({}, tk, {bg: pl.bg, fg: pl.fg, accent: pl.acc, muted: pl.mut}); }

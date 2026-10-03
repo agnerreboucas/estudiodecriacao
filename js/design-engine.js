@@ -8,6 +8,7 @@ const FORMAT_GROUPS = [
   ['Anúncios Meta (Facebook + Instagram)', [
     ['adsquare', 'Feed 1:1', 1080, 1080], ['ad45', 'Feed 4:5', 1080, 1350], ['adstory', 'Stories / Reels 9:16', 1080, 1920],
     ['adlink', 'Link / paisagem 1.91:1', 1200, 628], ['adcarousel', 'Carrossel 1:1', 1080, 1080], ['admarket', 'Marketplace 1:1', 1080, 1080]]],
+  ['Apresentação', [['deck', 'Slide 16:9', 1920, 1080]]],
   ['Capas e banners de redes', [
     ['fbcover', 'Facebook · capa da página', 851, 315, 'No celular a capa é cortada nas laterais: mantenha o texto no centro.'], ['fbevent', 'Facebook · capa de evento', 1920, 1005],
     ['fbpost', 'Facebook · post com link', 1200, 630], ['ytbanner', 'YouTube · banner do canal', 2560, 1440, 'Só a faixa central (1546×423) aparece em todos os aparelhos: o texto fica nela.', {w: 1546, h: 423}],
