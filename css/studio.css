@@ -146,3 +146,12 @@
 .lg-mocks{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}.lg-mocks .vf-card canvas{width:100%;height:auto;background:#fff}
 
 .lg-tm{margin:4px 0 8px;color:#a15c00}
+
+.lg-bar{display:inline-flex;align-items:center;gap:6px;margin-right:8px;flex-wrap:wrap}.lg-bar i{width:1px;height:20px;background:#ddd;display:inline-block;margin:0 2px}.lg-bar .btn[disabled]{opacity:.4;cursor:default}
+
+.lg-rule{margin:10px 0 14px;padding:12px;border:1.5px solid #e4e4e4;border-radius:12px;background:#fafafa}
+.lg-rule-row{display:flex;align-items:center;gap:10px;margin:6px 0}.lg-rule-row span{font-size:12px;min-width:210px}.lg-rule-row input[type=color]{width:38px;height:30px;padding:0;border:1px solid #ddd;border-radius:8px}
+.lg-meter{margin-top:10px}.lg-stack{display:flex;height:16px;border-radius:8px;overflow:hidden;border:1px solid #ddd}.lg-stack i{display:block;height:100%}.lg-ideal{height:8px;margin-top:4px}
+.lg-meter-rows{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0;font-size:12px}.lg-meter-rows .ok b{color:#1f8a4c}.lg-meter-rows .off b{color:#b4631a}
+
+.lg-tones{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.lg-tone{border:1.5px solid #e4e4e4;border-radius:10px;background:#fff;padding:4px;cursor:pointer;text-align:left}.lg-tone canvas{width:100%;height:auto;display:block;border-radius:6px}.lg-tone span{display:block;font-size:10.5px;color:#555;margin-top:3px}.lg-tone.on{border-color:#111;box-shadow:0 0 0 1px #111}

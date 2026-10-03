@@ -26,7 +26,21 @@ function lgBrandPalette(p) {
 }
 
 /* ---------- cores por modo ---------- */
+/* regra 60-30-10: 60% cor dominante (fundo/neutra), 30% secundária (símbolo e nome), 10% destaque (detalhes e slogan) */
+function lgRuleColors(r) {
+  const bg = r.c60, dark = lum(bg) < 0.4, ink = dark ? '#ffffff' : '#111111', main = contrast(r.c30, bg) >= 3 ? r.c30 : ink, acc = contrast(r.c10, bg) >= 2 ? r.c10 : main, text = contrast(r.c30, bg) >= 4.5 ? r.c30 : ink;
+  return {bg, main, sec: mixHex(bg, main, 0.55), acc, text, mut: mixHex(bg, text, 0.6)};
+}
+function lgAutoRule(sp) { const P = sp.pal, C = lgColors(Object.assign({}, sp, {rule: null})); const c60 = C.bg, pick = [P[1], P[2], P[3], P[0], P[4]].filter(c => c !== c60);
+  let c30 = pick.find(c => contrast(c, c60) >= 3) || pick[0], c10 = pick.filter(c => c !== c30).sort((a, b) => Math.abs(hexHsl(b)[1] - hexHsl(a)[1]) - 0)[0] || c30; const rest = pick.filter(c => c !== c30 && contrast(c, c60) >= 2); if (rest.length) c10 = rest.sort((a, b) => hexHsl(b)[1] - hexHsl(a)[1])[0];
+  return {c60, c30, c10}; }
+/* variações de fundo × logo: claro, médio ou escuro (tons tirados da própria paleta) */
+const LG_TONES = [['light', 'claro'], ['mid', 'médio'], ['dark', 'escuro']];
+function lgToneColors(P) { const mid = [P[1], P[2], P[3]].filter(c => lum(c) > 0.05 && lum(c) < 0.6).sort((a, b) => Math.abs(lum(a) - 0.25) - Math.abs(lum(b) - 0.25))[0] || P[1]; return {light: P[4], mid, dark: P[0]}; }
+function lgToneC(P, t) { const T = lgToneColors(P), bg = T[t.bg], logo = T[t.logo], acc = [P[3], P[2], P[1]].find(c => contrast(c, bg) >= 2 && c !== bg) || logo; return {bg, main: logo, sec: mixHex(bg, logo, 0.55), acc, text: logo, mut: mixHex(bg, logo, 0.6)}; }
 function lgColors(sp) {
+  if (sp.rule && sp.rule.c60) return lgRuleColors(sp.rule);
+  if (sp.tone && sp.tone.bg) return lgToneC(sp.pal, sp.tone);
   const [d, m, s, a, l] = sp.pal;
   if (sp.mode === 'dark') return {bg: d, main: contrast(m, d) >= 3 ? m : contrast(s, d) >= 3 ? s : l, sec: contrast(s, d) >= 2 ? s : l, acc: contrast(a, d) >= 2.5 ? a : l, text: l, mut: mixHex(d, l, 0.62)};
   if (sp.mode === 'color') { const fg = readable(m); return {bg: m, main: fg, sec: mixHex(m, fg, 0.55), acc: contrast(a, m) >= 2.2 ? a : fg, text: fg, mut: mixHex(m, fg, 0.7)}; }
@@ -91,9 +105,9 @@ function lgBuild(sp, o) {
   }
   /* centraliza e ajusta ao quadro */
   const bb = layers.reduce((b, l) => { const h = l.type === 'text' ? layoutText(l).h : l.h; return {x0: Math.min(b.x0, l.x), y0: Math.min(b.y0, l.y), x1: Math.max(b.x1, l.x + l.w), y1: Math.max(b.y1, l.y + h)}; }, {x0: 1e9, y0: 1e9, x1: -1e9, y1: -1e9});
-  const bw = bb.x1 - bb.x0, bh = bb.y1 - bb.y0, mg = o.tight ? 0.06 * Math.max(bw, bh) : 0;
+  const bw = bb.x1 - bb.x0, bh = bb.y1 - bb.y0, mg = o.tight ? (sp.pad == null ? 1 : sp.pad) * 0.06 * Math.max(bw, bh) : 0;
   let W = o.W || 1200, H = o.H || 800, k;
-  if (o.tight) { W = o.W || 1600; k = W / (bw + mg * 2); H = Math.round((bh + mg * 2) * k); } else k = Math.min(W * 0.7 / bw, H * 0.6 / bh, 1.7);
+  if (o.tight) { W = o.W || 1600; k = W / (bw + mg * 2); H = Math.round((bh + mg * 2) * k); } else k = Math.min(W * 0.7 / bw, H * 0.6 / bh, 1.7) ;
   layers.forEach(l => { l.x -= bb.x0; l.y -= bb.y0; });
   const sl = {id: sid(), name: 'Logo', bg: C.bg, noBg: !!o.transparent, layers, isLogo: true, keep: true};
   scaleSlide(sl, k, k);
@@ -116,6 +130,7 @@ function lgGenerate(p, brief, n, seed) {
     const st = sts[out.length % sts.length], useIc = brief.icons !== false && rnd() < (brief.iconCats && brief.iconCats.length ? 0.85 : 0.4) && icPool.length;
     const symPool = rnd() < 0.6 ? seg.sym.concat(st.sym) : st.sym.concat(seg.sym), sym = useIc ? 'ic:' + pick(icPool)[0] : pick(symPool.filter(x => LG_SYMBOLS[x]));
     const sp = {id: uid('lg'), name: brief.name, tag: brief.noTag ? '' : brief.tag, sym, icw: 2.4, style: st.id, font: pick(st.fonts), comp: pick(st.comps), mode: pick(st.modes), pal: (pick(pals)).c.slice(), palId: '', symScale: 1, nameScale: 1, grad: rnd() < 0.22, monoRound: rnd() < 0.4};
+    if (brief.rule603010) sp.rule = lgAutoRule(sp);
     sp.palId = pals.find(x => x.c.join() === sp.pal.join()).id;
     const key = [sp.sym, sp.font, sp.comp, sp.mode, sp.palId].join('|'); if (seen.has(key)) continue; seen.add(key); out.push(sp);
   }
@@ -123,14 +138,40 @@ function lgGenerate(p, brief, n, seed) {
 }
 
 /* ---------- páginas ---------- */
-function dzLogoOpen() { const p = dzP(); if (!p) return; const L = lgLab(p); lg.brief = Object.assign(lgBriefDefault(p), L.brief || {}); if (!lg.brief.name) lg.brief.name = p.name || ''; lg.view = lg.items.length && lg.cur ? lg.view : 'brief'; lg.items = lg.items.length ? lg.items : []; dz.view = 'logolab'; go('design'); renderDesign(); }
+function dzLogoOpen() { const p = dzP(); if (!p) return; if (lg.pid !== p.id) { lg.pid = p.id; lg.items = []; lg.cur = null; lg.fav = {}; lg.view = 'brief'; lg.step = 0; lgH.stack = []; lgH.i = -1; lgNav.stack = []; lgNav.i = -1; lgNav.last = ''; } const L = lgLab(p); lg.brief = Object.assign(lgBriefDefault(p), L.brief || {}); if (!lg.brief.name) lg.brief.name = p.name || ''; lg.view = lg.items.length && lg.cur ? lg.view : 'brief'; lg.items = lg.items.length ? lg.items : []; dz.view = 'logolab'; go('design'); renderDesign(); }
+/* ---------- desfazer/refazer (dados) e voltar/avançar (páginas) ---------- */
+const lgH = {stack: [], i: -1}, lgNav = {stack: [], i: -1, restoring: false, last: ''};
+const lgSnap = () => JSON.stringify({brief: lg.brief, cur: lg.cur, items: lg.items, fav: lg.fav});
+function lgCommit() { if (!lg.brief) return; const sn = lgSnap(); if (lgH.stack[lgH.i] === sn) return; lgH.stack = lgH.stack.slice(0, lgH.i + 1); lgH.stack.push(sn); if (lgH.stack.length > 80) lgH.stack.shift(); lgH.i = lgH.stack.length - 1; }
+let lgCommitT = 0; const lgCommitSoon = () => { clearTimeout(lgCommitT); lgCommitT = setTimeout(() => { lgCommit(); lgBarUpdate(); }, 450); };
+function lgRestore(i) { const o = JSON.parse(lgH.stack[i]); lgH.i = i; lg.brief = o.brief; lg.cur = o.cur; lg.items = o.items; lg.fav = o.fav || {}; if (lg.view === 'edit' && !lg.cur) lg.view = lg.items.length ? 'grid' : 'brief'; if (lg.view === 'grid' && !lg.items.length) lg.view = 'brief'; renderDesign(); }
+function lgUndo() { lgCommit(); if (lgH.i > 0) lgRestore(lgH.i - 1); else toast('Nada para desfazer.'); }
+function lgRedo() { if (lgH.i < lgH.stack.length - 1) lgRestore(lgH.i + 1); else toast('Nada para refazer.'); }
+function lgBack() { if (lgNav.i <= 0) { toast('Esta é a primeira página.'); return; } lgGoNav(lgNav.i - 1); }
+function lgForward() { if (lgNav.i >= lgNav.stack.length - 1) { toast('Não há página para avançar.'); return; } lgGoNav(lgNav.i + 1); }
+function lgGoNav(i) { const e = lgNav.stack[i]; lgNav.i = i; lgNav.restoring = true; lg.view = e.view; lg.step = e.step; if ((lg.view === 'edit' || lg.view === 'mock' || lg.view === 'board') && !lg.cur) lg.view = lg.items.length ? 'grid' : 'brief'; if (lg.view === 'grid' && !lg.items.length) lg.view = 'brief'; renderDesign(); }
+function lgClearSel() {
+  const b = lg.brief; if (lg.view === 'grid') lg.fav = {}; else if (lg.view === 'brief') { b.styles = []; b.mood = []; b.palIds = []; b.iconCats = []; b.useBrand = false; } else { toast('Nada selecionado aqui.'); return; }
+  renderDesign(); toast('Seleção limpa. Use Desfazer para voltar atrás.');
+}
+function lgBarHTML() {
+  const cu = lgH.i > 0, re = lgH.i < lgH.stack.length - 1, ba = lgNav.i > 0, fo = lgNav.i < lgNav.stack.length - 1, b = (fn, on, t, tip) => `<button class="btn sm" ${on ? '' : 'disabled'} onclick="${fn}" title="${tip}">${t}</button>`;
+  return `<span class="lg-bar" id="lgBar">${b('lgBack()', ba, '‹ Voltar', 'Página anterior (Alt+←)')}${b('lgForward()', fo, 'Avançar ›', 'Próxima página (Alt+→)')}<i></i>${b('lgUndo()', cu, '↶ Desfazer', 'Desfazer (Ctrl+Z)')}${b('lgRedo()', re, '↷ Refazer', 'Refazer (Ctrl+Y)')}<i></i>${b('lgClearSel()', true, '⊘ Desmarcar tudo', 'Limpa as seleções desta tela')}</span>`;
+}
+function lgBarUpdate() { const el = $('lgBar'); if (el) el.outerHTML = lgBarHTML(); }
+document.addEventListener('keydown', e => {
+  if (typeof dz === 'undefined' || dz.view !== 'logolab' || ui.page !== 'design') return; const tg = e.target.tagName; if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tg)) return; const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
+  if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? lgRedo() : lgUndo(); } else if (mod && k === 'y') { e.preventDefault(); lgRedo(); } else if (e.altKey && e.key === 'ArrowLeft') { e.preventDefault(); lgBack(); } else if (e.altKey && e.key === 'ArrowRight') { e.preventDefault(); lgForward(); }
+});
 function renderLogoLab(p, r) {
   if (!lg.brief) lg.brief = lgBriefDefault(p);
-  if (lg.view === 'grid' && lg.items.length) return lgGridPage(p, r);
-  if (lg.view === 'edit' && lg.cur) return lgEditPage(p, r);
-  if (lg.view === 'mock' && lg.cur) return lgMockPage(p, r);
-  if (lg.view === 'board' && lg.cur) return lgBoardPage(p, r);
-  lgBriefPage(p, r);
+  lgCommit();
+  let v = lg.view; if ((v === 'grid' && !lg.items.length) || ((v === 'edit' || v === 'mock' || v === 'board') && !lg.cur)) { v = 'brief'; lg.view = 'brief'; }
+  const key = v + '|' + (v === 'brief' ? lg.step || 0 : 0);
+  if (!lgNav.restoring && key !== lgNav.last) { lgNav.stack = lgNav.stack.slice(0, lgNav.i + 1); lgNav.stack.push({view: v, step: lg.step || 0}); lgNav.i = lgNav.stack.length - 1; }
+  lgNav.last = key; lgNav.restoring = false;
+  if (v === 'grid') lgGridPage(p, r); else if (v === 'edit') lgEditPage(p, r); else if (v === 'mock') lgMockPage(p, r); else if (v === 'board') lgBoardPage(p, r); else lgBriefPage(p, r);
+  const ac = r.querySelector('.page-head .actions'); if (ac) ac.insertAdjacentHTML('afterbegin', lgBarHTML());
 }
 const lgChip = (on, fn, label) => `<button class="tchip ${on ? 'on' : ''}" onclick="${fn}">${esc(label)}</button>`;
 const LG_STEPS = ['Negócio', 'Estilo', 'Texto', 'Cores e ícones'];
@@ -141,12 +182,13 @@ function lgBriefPage(p, r) {
   let body = '';
   if (st === 0) body = `<h2 class="lg-q">Que tipo de negócio você tem?</h2><p class="muted">Isso ajuda a oferecer símbolos e slogans mais certos.</p><div class="tchips lg-big">${LG_SEGMENTS.map(s => lgChip(s.id === b.seg, `lg.brief.seg='${s.id}';lg.brief.tag='';renderDesign()`, s.label)).join('')}</div>`;
   else if (st === 1) body = `<h2 class="lg-q">Qual estilo você quer para o seu logo?</h2><p class="muted">As fontes, ícones e cores refletem o estilo. Escolha até 4.</p><div class="tchips lg-big">${LG_STYLES.map(s => lgChip(b.styles.includes(s.id), `lgTogStyle('${s.id}')`, s.label)).join('')}</div>`;
-  else if (st === 2) body = `<h2 class="lg-q">Que texto você quer no seu logo?</h2><p class="muted">Normalmente é o nome da marca.</p><div class="field" style="max-width:520px"><input id="lgName" value="${esc(b.name)}" placeholder="Ex.: seu nome comercial" oninput="lg.brief.name=this.value"></div>
-    <h2 class="lg-q" style="margin-top:22px">Qual é o seu lema ou slogan? <small class="muted">(opcional)</small></h2><div class="field" style="max-width:520px"><input id="lgTag" value="${esc(b.tag)}" placeholder="Ex.: ${esc(sg.tag[0])}" oninput="lg.brief.tag=this.value;lg.brief.noTag=false"></div>
+  else if (st === 2) body = `<h2 class="lg-q">Que texto você quer no seu logo?</h2><p class="muted">Normalmente é o nome da marca.</p><div class="field" style="max-width:520px"><input id="lgName" value="${esc(b.name)}" placeholder="Ex.: seu nome comercial" oninput="lg.brief.name=this.value" onchange="lgCommit();lgBarUpdate()"></div>
+    <h2 class="lg-q" style="margin-top:22px">Qual é o seu lema ou slogan? <small class="muted">(opcional)</small></h2><div class="field" style="max-width:520px"><input id="lgTag" value="${esc(b.tag)}" placeholder="Ex.: ${esc(sg.tag[0])}" oninput="lg.brief.tag=this.value;lg.brief.noTag=false" onchange="lgCommit();lgBarUpdate()"></div>
     <div class="tchips" style="margin-top:6px">${sg.tag.map(t => `<button class="tchip" onclick="lg.brief.tag=this.textContent;lg.brief.noTag=false;$('lgTag').value=lg.brief.tag">${esc(t)}</button>`).join('')}${lgChip(b.noTag, 'lg.brief.noTag=!lg.brief.noTag;renderDesign()', 'Sem slogan')}${aiReady() ? '<button class="tchip" onclick="lgTagAI()">✦ Sugestões com IA</button>' : ''}</div><div class="tchips" id="lgTagAI" style="margin-top:6px"></div><small class="muted block" style="margin-top:6px">Sugestões de slogan podem ser imprecisas. Confira antes de usar.</small>`;
   else body = `<h2 class="lg-q">Cores e ícones</h2>${bp ? `<label class="check"><input type="checkbox" ${b.useBrand ? 'checked' : ''} onchange="lg.brief.useBrand=this.checked;renderDesign()"> Incluir as cores do Brand Kit <span class="bk-chips" style="display:inline-flex;vertical-align:middle;margin-left:6px">${bp.c.map(c => `<i class="bk-chip" style="background:${c};width:14px;height:14px"></i>`).join('')}</span></label>` : '<small class="muted block">Quando houver um Brand Kit, as cores dele aparecem aqui como opção.</small>'}
     <div class="okr-label" style="margin-top:10px">CLIMA <small class="muted">(vazio = segue o estilo)</small></div><div class="tchips">${LG_MOODS.map(m => lgChip(b.mood.includes(m), `lgTogMood('${m}')`, m)).join('')}</div>
     <div class="okr-label" style="margin-top:10px">PALETAS ESPECÍFICAS <small class="muted">(${b.palIds.length} marcada(s))</small></div><div class="lg-pals">${LG_PALETTES.map(x => `<button class="lg-pal ${b.palIds.includes(x.id) ? 'on' : ''}" title="${esc(x.name)}" onclick="lgTogPal('${x.id}')">${x.c.map(c => `<i style="background:${c}"></i>`).join('')}<span>${esc(x.name)}</span></button>`).join('')}</div>
+    <label class="check" style="margin-top:12px"><input type="checkbox" ${b.rule603010 ? 'checked' : ''} onchange="lg.brief.rule603010=this.checked;renderDesign()"> Aplicar a estrutura de cores <b>60-30-10</b> nos logos (60% fundo, 30% símbolo e nome, 10% destaque)</label>
     <div class="okr-label" style="margin-top:12px">BIBLIOTECA DE ÍCONES <small class="muted">(${LG_ICONS.length} ícones)</small></div><label class="check"><input type="checkbox" ${b.icons !== false ? 'checked' : ''} onchange="lg.brief.icons=this.checked;renderDesign()"> Usar ícones da biblioteca nos logos</label>
     <div class="tchips" style="margin-top:6px">${LG_ICON_CATS.map(c => lgChip((b.iconCats || []).includes(c[0]), `lgTogIconCat('${c[0]}')`, c[1])).join('')}</div>${(b.iconCats || []).includes('redes') ? '<small class="muted block lg-tm">Os logotipos de redes e apps são marcas registradas dos seus donos. Use para indicar presença (“Siga-nos”), não como símbolo da sua marca.</small>' : ''}<div class="tchips" style="margin-top:8px">${lgChip(!b.iconStyle, "lg.brief.iconStyle='';renderDesign()", 'Linha e cheio')}${lgChip(b.iconStyle === 'line', "lg.brief.iconStyle='line';renderDesign()", 'Só linha')}${lgChip(b.iconStyle === 'fill', "lg.brief.iconStyle='fill';renderDesign()", 'Só cheio (mais forte para logo)')}</div><small class="muted block">Sem categoria marcada, usa as do segmento (${(LG_SEG_ICONS[b.seg] || []).map(id => (LG_ICON_CATS.find(c => c[0] === id) || [0, id])[1]).join(', ')}).</small>
     <div class="row-gap" style="margin-top:14px"><label class="ins" style="margin:0">Quantidade <b>${b.n}</b><input type="range" min="12" max="60" step="6" value="${b.n}" oninput="lg.brief.n=+this.value;this.previousElementSibling.textContent=this.value"></label></div>
@@ -174,7 +216,7 @@ async function lgRun(more) {
 }
 function lgGridPage(p, r) {
   const view = lg.items.filter(i => lg.filter === 'fav' ? lg.fav[i.id] : true), nf = lg.items.filter(i => lg.fav[i.id]).length;
-  r.innerHTML = `<div class="page-head"><div><h1>${esc(lg.brief.name)} · ${lg.items.length} logos</h1><p>Marque os favoritos com ★ e clique em Editar para ajustar símbolo, fonte, cores e composição.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="lg.view='brief';lg.step=0;renderDesign()">Ajustar briefing</button><button class="btn" onclick="lgIconModal()" title="Troca o símbolo de todos os logos de uma vez, mantendo fonte, composição e cores">Ver outros ícones</button>${lg.items.some(i => i.orig) ? '<button class="btn" onclick="lgRevertIcons()">Reverter ícones</button>' : ''}<button class="btn" onclick="lgRun(true)">＋ Gerar mais</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>${esc(lg.brief.name)} · ${lg.items.length} logos</h1><p>Marque os favoritos com ★ e clique em Editar para ajustar símbolo, fonte, cores e composição.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="lg.view='brief';lg.step=0;renderDesign()">Ajustar briefing</button><button class="btn" onclick="lgIconModal()" title="Troca o símbolo de todos os logos de uma vez, mantendo fonte, composição e cores">Ver outros ícones</button>${lg.items.some(i => i.orig) ? '<button class="btn" onclick="lgRevertIcons()">Reverter ícones</button>' : ''}<button class="btn" onclick="lg.items.forEach(i=>lg.fav[i.id]=true);renderDesign()">★ Marcar todos</button><button class="btn" onclick="lgRun(true)">＋ Gerar mais</button></div></div>
   <div class="vf-bar"><div class="matrix-tabs">${[['all', 'Todos (' + lg.items.length + ')'], ['fav', '★ Favoritos (' + nf + ')']].map(([k, l]) => `<button class="${lg.filter === k ? 'active' : ''}" onclick="lg.filter='${k}';renderDesign()">${l}</button>`).join('')}</div></div>
   <div class="vf-grid lg-grid">${view.map(it => it.kind === 'ai' ? `<article class="vf-card"><canvas data-ai="${it.imgId}" width="300" height="300"></canvas><div class="vf-meta"><b>Conceito com IA</b><small>${esc(it.note || '')}</small></div><div class="row-gap"><button class="btn sm" onclick="lgAISave('${it.id}')">Salvar no Brand Kit</button></div></article>`
     : `<article class="vf-card"><canvas data-lg="${it.id}" width="300" height="200"></canvas><div class="vf-meta"><b>${esc((LG_FONTS[it.font] || {}).label || '')} · ${esc(it.comp)}</b><small>${esc(lgSymDef(it.sym, it).label || '')} · ${esc(it.mode === 'color' ? 'cor cheia' : it.mode === 'dark' ? 'escuro' : 'claro')}</small></div><div class="row-gap"><button class="btn sm ${lg.fav[it.id] ? 'dark' : ''}" onclick="lg.fav['${it.id}']=!lg.fav['${it.id}'];renderDesign()">★</button><button class="btn sm dark" onclick="lgEdit('${it.id}')">Editar</button></div></article>`).join('')}</div>`;
@@ -202,9 +244,11 @@ function lgEditPage(p, r) {
     <label class="ins">Composição<select onchange="lgSet('comp',this.value)">${LG_COMPS.map(([k, l]) => `<option value="${k}" ${s.comp === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
     <div class="ins-row"><label class="ins">Símbolo <b>${Math.round(s.symScale * 100)}%</b><input type="range" min="50" max="180" value="${Math.round(s.symScale * 100)}" oninput="lgSet('symScale',this.value/100,1);this.previousElementSibling.textContent=this.value+'%'"></label>${String(s.sym).startsWith('ic:') && !lgIsFillIcon(lgIcon(s.sym.slice(3)) || []) ? `<label class="ins">Traço do ícone <b>${s.icw || 2}</b><input type="range" min="1" max="3.5" step="0.1" value="${s.icw || 2}" oninput="lgSet('icw',+this.value,1);this.previousElementSibling.textContent=this.value"></label>` : ''}<label class="ins">Nome <b>${Math.round(s.nameScale * 100)}%</b><input type="range" min="60" max="160" value="${Math.round(s.nameScale * 100)}" oninput="lgSet('nameScale',this.value/100,1);this.previousElementSibling.textContent=this.value+'%'"></label></div>
     <label class="check" style="margin:4px 0 10px"><input type="checkbox" ${s.grad ? 'checked' : ''} onchange="lgSet('grad',this.checked)"> Degradê no símbolo</label>
+    ${lgToneHTML(s)}
+    ${lgRuleHTML(s)}
     <div class="okr-label">PALETA</div><div class="lg-pals">${pal.map(x => `<button class="lg-pal ${s.pal.join() === x.c.join() ? 'on' : ''}" title="${esc(x.name)}" onclick="lgSetPal('${x.id}')">${x.c.map(c => `<i style="background:${c}"></i>`).join('')}<span>${esc(x.name)}</span></button>`).join('')}</div>
     <div class="okr-label" style="margin-top:8px">AJUSTE FINO DAS 5 CORES <small class="muted">escura · principal · apoio · destaque · clara</small></div><div class="bk-chips">${s.pal.map((c, i) => `<input type="color" value="${c}" oninput="lgSetColor(${i},this.value)" style="width:42px;height:34px;padding:0;border:1px solid #ddd;border-radius:8px">`).join('')}</div></div></div>`;
-  lgDrawBig(); lgSymCanvases();
+  lgDrawBig(); lgSymCanvases(); lgMeterSoon(); lgTonePaint();
 }
 /* seletor de símbolo: próprios + biblioteca de ícones (busca e categorias) */
 const lgIc = {tab: 'own', q: '', cat: '', sty: ''};
@@ -222,11 +266,62 @@ const lgIconGridHTML = list => list.length ? list.slice(0, 240).map(i => `<butto
 function lgIconGrid() { const el = $('lgIcons'); if (el) el.innerHTML = lgIconGridHTML(lgIconList()); }
 function lgSymRender() { const el = $('lgSymBox'); if (!el) return; el.outerHTML = lgSymPicker(); lgSymCanvases(); }
 function lgSymCanvases() { document.querySelectorAll('canvas[data-sym]').forEach(cv => { const parts = LG_SYMBOLS[cv.dataset.sym].parts, x = cv.getContext('2d'); x.clearRect(0, 0, 56, 56); parts.forEach(pt => { const path = new Path2D(pt.d); x.save(); x.scale(0.56, 0.56); x.fillStyle = x.strokeStyle = pt.role === 'acc' ? '#999' : '#111'; if (pt.stroke) { x.lineWidth = pt.sw || 4; x.lineCap = 'round'; x.stroke(path); } else x.fill(path, pt.rule || 'nonzero'); x.restore(); }); }); }
+function lgToneHTML(s) {
+  const cur = s.tone || null, rows = LG_TONES.flatMap(([bg, bl]) => LG_TONES.filter(([lo]) => lo !== bg).map(([lo, ll]) => ({bg, lo, bl, ll})));
+  return `<div class="lg-rule"><div class="okr-label">VARIAÇÕES DE FUNDO E LOGO</div><small class="muted block">Claro, médio ou escuro, com os tons da sua paleta. Clique para aplicar.</small>
+  <div class="lg-tones">${rows.map(r => { const on = cur && cur.bg === r.bg && cur.logo === r.lo; return `<button class="lg-tone ${on ? 'on' : ''}" onclick="lgToneSet('${r.bg}','${r.lo}')" title="Fundo ${r.bl}, logo ${r.ll}"><canvas data-tone="${r.bg}:${r.lo}" width="180" height="120"></canvas><span>Fundo ${r.bl} · logo ${r.ll}</span></button>`; }).join('')}</div>
+  ${cur ? '<div class="row-gap" style="margin-top:6px"><button class="btn sm" onclick="lgToneSet(null)">Voltar às cores originais</button></div>' : ''}</div>`;
+}
+function lgToneSet(bg, lo) { lg.cur.tone = bg ? {bg, logo: lo} : null; if (bg) { lg.cur.rule = null; lg.cur.pad = 1; } renderDesign(); }
+async function lgTonePaint() { for (const cv of [...document.querySelectorAll('canvas[data-tone]')]) { if (!cv.isConnected || !lg.cur) return; const [bg, lo] = cv.dataset.tone.split(':'); try { await lgPaint(cv, Object.assign({}, lg.cur, {tone: {bg, logo: lo}, rule: null})); } catch (e) { /* vazio */ } } }
+/* mede quanto da peça cada cor ocupa (fundo, 30, 10) em uma versão pequena */
+async function lgMeasure(sp) {
+  await lgFonts(sp); const C = lgColors(sp), r = lgBuild(sp, {tight: true, W: 420}), cv = document.createElement('canvas'); cv.width = r.W; cv.height = r.H; renderSlide(cv.getContext('2d'), r.slide, r.W, r.H, 1);
+  const d = cv.getContext('2d').getImageData(0, 0, r.W, r.H).data, rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  const col = {c60: C.bg, c30: sp.rule ? sp.rule.c30 : C.main, c10: sp.rule ? sp.rule.c10 : C.acc}, cl = [['c60', rgb(col.c60)], ['c30', rgb(col.c30)], ['c10', rgb(col.c10)]], n = {c60: 0, c30: 0, c10: 0}; let tot = 0;
+  for (let i = 0; i < d.length; i += 4) { let best = 'c60', bd = 1e9; for (const [k, c] of cl) { const dd = (d[i] - c[0]) ** 2 + (d[i + 1] - c[1]) ** 2 + (d[i + 2] - c[2]) ** 2; if (dd < bd) { bd = dd; best = k; } } n[best]++; tot++; }
+  return {c60: n.c60 / tot * 100, c30: n.c30 / tot * 100, c10: n.c10 / tot * 100, colors: col};
+}
+async function lgFit60(sp) {   // acha o respiro do quadro para o fundo ficar perto de 60%
+  let lo = 0, hi = 4, best = sp.pad == null ? 1 : sp.pad; for (let i = 0; i < 9; i++) { const mid = (lo + hi) / 2, m = await lgMeasure(Object.assign({}, sp, {pad: mid})); best = mid; if (m.c60 > 60) hi = mid; else lo = mid; } return Math.round(best * 100) / 100;
+}
+/* testa composições, tamanhos e respiro e fica com a combinação mais próxima de 60-30-10 */
+async function lgBalance(sp) {
+  const base = sp.rule && sp.rule.c60 ? sp : Object.assign({}, sp, {rule: lgAutoRule(sp)}), comps = [...new Set([sp.comp, 'pill', 'badge', 'ribbon', 'mono', 'frame', 'stack', 'horizontal'])]; let best = null;
+  const score = m => Math.abs(m.c60 - 60) + 0.7 * Math.abs(m.c30 - 30) + 0.5 * Math.abs(m.c10 - 10);
+  for (const comp of comps) for (const sy of [1, 1.35, 1.7]) for (const nm of [1, 1.25]) for (const pad of [0, 0.5, 1]) { const t = Object.assign({}, base, {comp, symScale: sy, nameScale: nm, pad}), m = await lgMeasure(t), sc = score(m) + (comp === sp.comp ? 0 : 1.5); if (!best || sc < best.sc) best = {sc, t, m}; }
+  return best;
+}
+async function lgRuleBalance() { toast('Procurando o melhor equilíbrio…'); const b = await lgBalance(lg.cur); Object.assign(lg.cur, {rule: b.t.rule, comp: b.t.comp, symScale: b.t.symScale, nameScale: b.t.nameScale, pad: b.t.pad, tone: null}); renderDesign(); toast(`Equilibrado: ${b.m.c60.toFixed(0)}% / ${b.m.c30.toFixed(0)}% / ${b.m.c10.toFixed(0)}%.`); }
+function lgRuleHTML(s) {
+  const r = s.rule, on = !!(r && r.c60), brand = brandOf(dzP()), hasKit = isHex(brand.pal.c60) && isHex(brand.pal.c30) && isHex(brand.pal.c10);
+  const sw = (key) => s.pal.map((c, i) => `<button class="bk-chip" style="background:${c}" title="${c}" onclick="lgRuleSet('${key}','${c}')"></button>`).join('');
+  return `<div class="lg-rule"><div class="okr-label">ESTRUTURA DE CORES 60 · 30 · 10</div>
+  <small class="muted block">A regra 60-30-10 equilibra a peça: <b>60%</b> cor dominante (fundo, neutra), <b>30%</b> cor secundária (símbolo e nome) e <b>10%</b> destaque (detalhes e slogan).</small>
+  <div class="row-gap" style="margin:8px 0"><button class="btn sm ${on ? 'dark' : ''}" onclick="lgRuleAuto()">Aplicar 60-30-10 automático</button>${hasKit ? '<button class="btn sm" onclick="lgRuleKit()" title="Usa a paleta 60/30/10 do Brand Kit">Usar o Brand Kit</button>' : ''}${on ? '<button class="btn sm" onclick="lgRuleOff()">Remover regra</button>' : ''}</div>
+  ${on ? `<div class="lg-rule-rows">${[['c60', '60% · Dominante (fundo)'], ['c30', '30% · Secundária (símbolo e nome)'], ['c10', '10% · Destaque (detalhes)']].map(([k, l]) => `<div class="lg-rule-row"><input type="color" value="${r[k]}" oninput="lgRuleSet('${k}',this.value,1)"><span>${l}</span><div class="bk-chips">${sw(k)}</div></div>`).join('')}</div>
+  <div class="lg-meter" id="lgMeter"><small class="muted">Medindo…</small></div>` : ''}</div>`;
+}
+function lgRuleSet(k, v, live) { if (!lg.cur.rule) lg.cur.rule = lgAutoRule(lg.cur); lg.cur.rule[k] = v; if (live) { lgDrawBig(); lgCommitSoon(); lgMeterSoon(); } else renderDesign(); }
+function lgRuleAuto() { lg.cur.tone = null; lg.cur.rule = lgAutoRule(lg.cur); renderDesign(); }
+function lgRuleKit() { const b = brandOf(dzP()); lg.cur.tone = null; lg.cur.rule = {c60: b.pal.c60, c30: b.pal.c30, c10: b.pal.c10}; renderDesign(); }
+function lgRuleOff() { lg.cur.rule = null; lg.cur.pad = 1; renderDesign(); }
+async function lgRuleFit() { lg.cur.pad = await lgFit60(lg.cur); renderDesign(); }
+let lgMeterT = 0; const lgMeterSoon = () => { clearTimeout(lgMeterT); lgMeterT = setTimeout(lgMeterDraw, 250); };
+async function lgMeterDraw() {
+  const el = $('lgMeter'); if (!el || !lg.cur || !(lg.cur.rule && lg.cur.rule.c60)) return; const m = await lgMeasure(lg.cur), tgt = {c60: 60, c30: 30, c10: 10}, nm = {c60: 'Dominante', c30: 'Secundária', c10: 'Destaque'};
+  const ok = k => Math.abs(m[k] - tgt[k]) <= (k === 'c60' ? 10 : k === 'c30' ? 8 : 5), tips = [];
+  if (m.c60 > 70) tips.push('Fundo grande demais: o logo tem pouca tinta. Aumente símbolo e nome ou use uma composição com placa (pílula, selo, emblema), ou clique em Equilibrar.'); else if (m.c60 < 50) tips.push('Pouco respiro: aumente a margem do quadro.');
+  if (m.c30 < 22 && m.c60 <= 70) tips.push('Pouca cor secundária: aumente o símbolo ou o nome.'); if (m.c10 > 15) tips.push('Destaque forte demais: use-o só em detalhes.'); if (m.c10 < 2) tips.push('Quase sem destaque: use a cor de 10% em um detalhe ou no slogan.');
+  el.innerHTML = `<div class="lg-stack">${['c60', 'c30', 'c10'].map(k => `<i style="width:${Math.max(1, m[k])}%;background:${m.colors[k]}" title="${nm[k]} ${m[k].toFixed(0)}%"></i>`).join('')}</div><div class="lg-stack lg-ideal">${['c60', 'c30', 'c10'].map(k => `<i style="width:${tgt[k]}%;background:${m.colors[k]};opacity:.45"></i>`).join('')}</div>
+  <div class="lg-meter-rows">${['c60', 'c30', 'c10'].map(k => `<span class="${ok(k) ? 'ok' : 'off'}"><b>${m[k].toFixed(0)}%</b> ${nm[k]} <small>(ideal ${tgt[k]}%)</small></span>`).join('')}</div>
+  <small class="muted block">Medido no quadro do logo (barra de cima) · ideal (barra de baixo). ${tips.length ? tips.join(' ') : 'Estrutura equilibrada.'}</small><div class="row-gap" style="margin-top:6px"><button class="btn sm dark" onclick="lgRuleBalance()" title="Testa composição, tamanho do símbolo e do nome e respiro">Equilibrar automaticamente</button><button class="btn sm" onclick="lgRuleFit()">Ajustar só o respiro</button></div><label class="ins">Respiro do quadro <b>${(lg.cur.pad == null ? 1 : lg.cur.pad).toFixed(2)}×</b><input type="range" min="0" max="4" step="0.05" value="${lg.cur.pad == null ? 1 : lg.cur.pad}" oninput="lgSet('pad',+this.value,1);this.previousElementSibling.textContent=(+this.value).toFixed(2)+'×';lgMeterSoon()"></label>`;
+}
 let lgBigT = 0;
 function lgDrawBig() { clearTimeout(lgBigT); lgBigT = setTimeout(async () => { const cv = $('lgBig'); if (cv && lg.cur) { cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); await lgPaint(cv, lg.cur); } }, 30); }
-function lgSet(k, v, live) { lg.cur[k] = v; if (live) lgDrawBig(); else renderDesign(); }
+function lgSet(k, v, live) { lg.cur[k] = v; if (live) { lgDrawBig(); lgCommitSoon(); } else renderDesign(); }
 function lgSetPal(id) { const x = LG_PALETTES.concat(lgBrandPalette(dzP()) || []).find(y => y.id === id); if (x) { lg.cur.pal = x.c.slice(); lg.cur.palId = id; renderDesign(); } }
-function lgSetColor(i, v) { lg.cur.pal[i] = v; lg.cur.palId = ''; lgDrawBig(); }
+function lgSetColor(i, v) { lg.cur.pal[i] = v; lg.cur.palId = ''; lgDrawBig(); lgCommitSoon(); }
 
 /* ---------- saída: PNG, SVG, Brand Kit, Editor ---------- */
 function lgSVG(sp, o) {

@@ -78,10 +78,11 @@ async function lgBoard(sp, mocks) {
 async function lgPackage(sp) {
   const mocks = await lgMockups(sp), board = await lgBoard(sp, mocks), files = [], add = async (name, blob) => files.push({name, data: new Uint8Array(await blob.arrayBuffer())}), txt = (name, t) => files.push({name, data: new TextEncoder().encode(t)}), nm = lgFile(sp);
   for (const m of [['claro', 'light'], ['escuro', 'dark'], ['colorido', 'color']]) await add(`logo/${nm}-${m[0]}.png`, await lgBlob(Object.assign({}, sp, {mode: m[1]}), {tight: true, transparent: true}));
+  for (const [bg, bl] of [['light', 'claro'], ['mid', 'medio'], ['dark', 'escuro']]) for (const [lo, ll] of [['light', 'claro'], ['mid', 'medio'], ['dark', 'escuro']]) { if (bg === lo) continue; await add(`variacoes/fundo-${bl}-logo-${ll}.png`, await lgBlob(Object.assign({}, sp, {tone: {bg, logo: lo}, rule: null}), {W: 1600, H: 1000})); }
   txt(`logo/${nm}.svg`, lgSVG(sp, {tight: true, transparent: true})); await add('prancha-de-marca.png', await lgCanvasPNG(board));
   for (const m of mocks) await add(`mockups/${m.id}.png`, await lgCanvasPNG(m.cv));
   const F = LG_FONTS[sp.font] || LG_FONTS.geo; txt('paleta-e-fontes.txt', `${sp.name}\n\nPaleta\nEscura: ${sp.pal[0]}\nPrincipal: ${sp.pal[1]}\nApoio: ${sp.pal[2]}\nDestaque: ${sp.pal[3]}\nClara: ${sp.pal[4]}\n\nFontes\nTítulo: ${F.head} (${F.hw})\nApoio: ${F.tag} (${F.tw})\n`);
-  txt('LEIA-ME.txt', 'Pacote gerado pelo Laboratório do Logo.\nPNGs transparentes em três versões (fundo claro, escuro e colorido). No SVG o texto continua como texto: instale as fontes do arquivo paleta-e-fontes.txt para abrir igual.\n');
+  txt('LEIA-ME.txt', 'Pacote gerado pelo Laboratório do Logo.\nvariacoes/: logo com fundo claro, médio e escuro em cada combinação de cor de logo.\nPNGs transparentes em três versões (fundo claro, escuro e colorido). No SVG o texto continua como texto: instale as fontes do arquivo paleta-e-fontes.txt para abrir igual.\n');
   return makeZip(files);
 }
 
