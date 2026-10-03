@@ -4116,8 +4116,10 @@ function dzDraw() {
   const ctx = cv.getContext('2d'); renderSlide(ctx, sl, s.format.w, s.format.h, 1);
   const L = dzLayer(), b = L && LBOX[L.id];
   if (b) {
-    ctx.save(); ctx.strokeStyle = '#2f6bff'; ctx.lineWidth = 3 / dz.scale; ctx.setLineDash([10 / dz.scale, 6 / dz.scale]); ctx.strokeRect(b.x, b.y, b.w, b.h); ctx.setLineDash([]);
-    const hs = 22 / dz.scale; ctx.fillStyle = '#2f6bff'; ctx.fillRect(b.x + b.w - hs / 2, b.y + b.h - hs / 2, hs, hs); ctx.restore();
+    ctx.save(); if (L.rot) { const cx = b.x + b.w / 2, cy = b.y + b.h / 2; ctx.translate(cx, cy); ctx.rotate(L.rot * Math.PI / 180); ctx.translate(-cx, -cy); }
+    ctx.strokeStyle = '#2f6bff'; ctx.lineWidth = 3 / dz.scale; ctx.setLineDash([10 / dz.scale, 6 / dz.scale]); ctx.strokeRect(b.x, b.y, b.w, b.h); ctx.setLineDash([]);
+    const hs = 22 / dz.scale; dzHandles(L, b).forEach(h => { ctx.fillStyle = '#fff'; ctx.strokeStyle = '#2f6bff'; ctx.lineWidth = 3 / dz.scale; ctx.fillRect(h.x - hs / 2, h.y - hs / 2, hs, hs); ctx.strokeRect(h.x - hs / 2, h.y - hs / 2, hs, hs); });
+    ctx.restore();
   }
   if (dz.range && L && L.type === 'text' && dz.range.id === L.id && b && b.words) dzDrawRange(ctx, b);
   if (dz.mode === 'emphasis' || dz.mode === 'fmt') sl.layers.filter(l => l.type === 'text').forEach(l => (LBOX[l.id].words || []).forEach(w => { ctx.save(); ctx.strokeStyle = 'rgba(47,107,255,.35)'; ctx.lineWidth = 2 / dz.scale; ctx.strokeRect(w.x, w.y, w.w, w.h); ctx.restore(); }));
@@ -4156,15 +4158,17 @@ function dzBindCanvas() {
       const w = L && LBOX[L.id].words.find(w => p.x >= w.x && p.x <= w.x + w.w && p.y >= w.y && p.y <= w.y + w.h);
       if (w) { const old = plainOf(L.content); L.content = toggleWordEm(L.content, w.ord); if (L.spans) L.spans = remapSpans(old, plainOf(L.content), L.spans); dz.sel = L.id; dzDraw(); dzCommit(); dzInspector(); dzSlidesPanel(); } return;
     }
-    const cur = dzLayer(), cb = cur && LBOX[cur.id], hs = 34 / dz.scale;
-    if (cb && Math.abs(p.x - (cb.x + cb.w)) < hs && Math.abs(p.y - (cb.y + cb.h)) < hs) { dz.drag = {t: 'resize', sx: p.x, sy: p.y, w: cur.w, h: cur.h, ch: false}; return; }
+    const cur = dzLayer(), cb = cur && LBOX[cur.id], hh = cb && dzHandleAt(cur, cb, p);
+    if (hh) { dz.drag = {t: 'resize', h: hh.k, o: {x: cur.x, y: cur.y, w: cur.w, hh: cb.h, size: cur.size, ls: cur.ls, blur: cur.blur, spans: cur.spans ? JSON.parse(JSON.stringify(cur.spans)) : null, hb: cur.h}, ch: false}; return; }
     const hit = [...s.layers].reverse().find(l => !l.hidden && LBOX[l.id] && p.x >= LBOX[l.id].x && p.x <= LBOX[l.id].x + LBOX[l.id].w && p.y >= LBOX[l.id].y && p.y <= LBOX[l.id].y + LBOX[l.id].h && !(l.role === 'overlay'));
     if (hit) { dz.sel = hit.id; dz.drag = {t: 'move', sx: p.x, sy: p.y, x: hit.x, y: hit.y, ch: false}; } else dz.sel = '';
     dzInspector(); dzDraw();
   });
   cv.addEventListener('pointermove', e => {
-    if (!dz.drag) return; const L = dzLayer(), p = pt(e), d = dz.drag; if (!L) return; d.ch = true;
-    if (d.t === 'move') { L.x = Math.round(d.x + p.x - d.sx); L.y = Math.round(d.y + p.y - d.sy); } else { L.w = Math.max(40, Math.round(d.w + p.x - d.sx)); if (L.type !== 'text') L.h = Math.max(20, Math.round(d.h + p.y - d.sy)); }
+    const L = dzLayer(), p = pt(e);
+    if (!dz.drag) { const b = L && LBOX[L.id], h = b && dz.mode === 'select' && dzHandleAt(L, b, p); cv.style.cursor = h ? h.c : ''; return; }
+    const d = dz.drag; if (!L) return; d.ch = true;
+    if (d.t === 'move') { L.x = Math.round(d.x + p.x - d.sx); L.y = Math.round(d.y + p.y - d.sy); } else dzResize(L, d, p, e.shiftKey);
     dzDraw();
   });
   const end = () => { if (dz.drag && dz.drag.ch) { dzCommit(); dzInspector(); dzSlidesPanel(); } dz.drag = null; };
@@ -4174,6 +4178,38 @@ function dzBindCanvas() {
     if (w) { dz.range = {id: L.id, s: w.s, e: w.e}; dzInspector(); dzDraw(); return; }   // duplo clique numa palavra: seleciona para formatar
     const t = $('dzTxt'); if (t) { t.focus(); t.select(); }
   });
+}
+
+/* alças de redimensionamento: 4 cantos (proporcional; Shift = livre) + 4 lados (texto: só largura) */
+const DZ_HND = [['nw', 0, 0, 'nwse-resize'], ['n', .5, 0, 'ns-resize'], ['ne', 1, 0, 'nesw-resize'], ['e', 1, .5, 'ew-resize'], ['se', 1, 1, 'nwse-resize'], ['s', .5, 1, 'ns-resize'], ['sw', 0, 1, 'nesw-resize'], ['w', 0, .5, 'ew-resize']];
+function dzHandles(L, b) { return DZ_HND.filter(h => !(L.type === 'text' && (h[0] === 'n' || h[0] === 's'))).map(h => ({k: h[0], c: h[3], x: b.x + b.w * h[1], y: b.y + b.h * h[2]})); }
+function dzLocal(L, b, p) { if (!L.rot) return p; const cx = b.x + b.w / 2, cy = b.y + b.h / 2, a = -L.rot * Math.PI / 180, dx = p.x - cx, dy = p.y - cy; return {x: cx + dx * Math.cos(a) - dy * Math.sin(a), y: cy + dx * Math.sin(a) + dy * Math.cos(a)}; }
+function dzHandleAt(L, b, p) { const q = dzLocal(L, b, p), r = 24 / dz.scale; let best = null, bd = 1e9; dzHandles(L, b).forEach(h => { const dx = Math.abs(q.x - h.x), dy = Math.abs(q.y - h.y), dd = dx * dx + dy * dy; if (dx <= r && dy <= r && dd < bd) { best = h; bd = dd; } }); return best; }   // a alça mais próxima (caixas pequenas têm alças coladas)
+function dzResize(L, d, p, free) {
+  const o = d.o, k = d.h, b = {x: o.x, y: o.y, w: o.w, h: o.hh}, q = dzLocal({rot: L.rot}, b, p), isT = L.type === 'text';
+  const left = k.includes('w'), right = k.includes('e'), top = k.includes('n'), bot = k.includes('s'), corner = k.length === 2;
+  const fx = left ? o.x + o.w : o.x, fy = top ? o.y + b.h : o.y;               // âncora = lado/canto oposto (fica parado)
+  let nw = o.w, nh = b.h;
+  if (left || right) nw = Math.max(isT ? 60 : 20, left ? fx - q.x : q.x - fx);
+  if (top || bot) nh = Math.max(20, top ? fy - q.y : q.y - fy);
+  if (corner && (!free || isT)) {                                              // proporcional
+    const kk = Math.max(isT ? .15 : 20 / Math.min(o.w, b.h), Math.max(nw / o.w, nh / b.h));
+    nw = o.w * kk; nh = b.h * kk;
+  }
+  if (isT) {
+    if (corner) { const kk = nw / o.w; L.size = Math.max(8, Math.round(o.size * kk * 10) / 10); L.ls = o.ls ? Math.round(o.ls * kk * 10) / 10 : o.ls; if (o.blur) L.blur = o.blur * kk; if (o.spans) L.spans.forEach((sp, i) => { const z = o.spans[i].st.size; if (z) sp.st.size = Math.round(z * kk * 10) / 10; }); }
+    L.w = Math.round(nw);
+  } else { L.w = Math.round(nw); L.h = Math.round(nh); }
+  const ax = left ? 1 : 0, ay = top ? 1 : 0;                                   // novo canto superior esquerdo mantendo a âncora
+  let nx = fx - (left ? nw : 0), ny = fy - (top ? nh : 0);
+  if (!(left || right)) nx = o.x + (o.w - nw) / 2; if (!(top || bot)) ny = o.y + (b.h - nh) / 2;
+  if (L.rot) {                                                                 // com rotação, mantém a âncora no mesmo ponto da tela
+    const r = L.rot * Math.PI / 180, w2 = (cx, cy, x0, y0, w0, h0, ax0, ay0) => { const mx = x0 + w0 / 2, my = y0 + h0 / 2, px = x0 + w0 * ax0 - mx, py = y0 + h0 * ay0 - my; return {x: mx + px * Math.cos(r) - py * Math.sin(r), y: my + px * Math.sin(r) + py * Math.cos(r)}; };
+    const fa = (left || right) ? (left ? 1 : 0) : .5, fb = (top || bot) ? (top ? 1 : 0) : .5;
+    const w0 = w2(0, 0, o.x, o.y, o.w, b.h, fa, fb), w1 = w2(0, 0, nx, ny, nw, nh, fa, fb);
+    nx += w0.x - w1.x; ny += w0.y - w1.y;
+  }
+  L.x = Math.round(nx); L.y = Math.round(ny);
 }
 document.addEventListener('keydown', e => {
   if (ui.page !== 'design' || dz.view !== 'editor') return; const tg = e.target.tagName; if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tg)) return;
