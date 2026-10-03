@@ -176,6 +176,7 @@ function deckSlides(p) {
   /* contador de página (menos na capa e no final) */
   out.forEach((sl, i) => { if (i === 0 || i === out.length - 1) return; const dk = lum(sl.bg) < 0.3, c = dk ? th.muteDark : th.mute;
     sl.layers.push(T('muted', {content: (th.brandName + ' · Pré-Projeto').toUpperCase(), x: m, y: D.H - 60, w: 900, size: 16, ls: 3, color: c, family: th.body, weight: 400}), T('muted', {content: String(i + 1).padStart(2, '0') + ' / ' + String(out.length).padStart(2, '0'), x: D.W - m - 300, y: D.H - 60, w: 300, size: 16, ls: 3, color: c, align: 'right', family: th.body, weight: 400})); });
+  out.forEach(sl => { let k = 0; sl.layers.forEach(l => { if (l.type === 'text') l.slot = sl.name + '#' + (k++); }); });
   return {slides: out, th};
 }
 
@@ -184,10 +185,16 @@ function deckBuildSet(p) {
   const {slides, th} = deckSlides(p), tk = makeTokens(DESIGN_STYLES[0], FONT_PAIRS[0], PHOTO_STYLES[0], {name: 'Apresentação', accent: th.accent, bg: th.light, fg: th.ink, muted: th.mute});
   return {id: uid('ds'), name: 'Apresentação · ' + p.name, format: {id: 'deck', w: DECK.W, h: DECK.H}, tk, slides, deck: {pre: true}, created: new Date().toISOString(), updated: new Date().toISOString()};
 }
-async function preDeckOpen(force) {
+/* com modelos salvos, pergunta de onde partir: padrão ou um dos seus modelos */
+function preDeckChoose(force) {
+  const list = (state.templates || []).filter(t => t.kind === 'deck');
+  showModal('Montar a apresentação', `<p class="muted" style="margin-top:0;font-size:12px">Parta do visual padrão ou de um modelo seu. O texto sempre vem do Pré-Projeto.${force ? ' Os slides atuais serão substituídos.' : ''}</p><div class="tpl-list"><div class="tpl-row"><div><strong>Padrão do Studio</strong><small class="muted block">Usa as cores e fontes do Brand Kit, se houver</small></div><button class="btn sm dark" onclick="closeModal();preDeckOpen(${force ? 'true' : 'false'}, true)">Usar</button></div>${list.map(t => `<div class="tpl-row"><div><strong>${esc(t.name)}</strong><small class="muted block">Modelo salvo · ${t.slides.length} slides${t.from ? ' · de ' + esc(t.from) : ''}</small></div><button class="btn sm dark" onclick="dzTemplateUse('${t.id}')">Usar</button></div>`).join('')}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button></div>`);
+}
+async function preDeckOpen(force, skipChoose) {
   const p = preP(), pre = p.pre, items = preItems(pre);
   if (!items.length) { toast('Selecione ao menos um desafio para montar a apresentação.'); return; }
   let ex = pre.deckSetId && p.design.sets.find(s => s.id === pre.deckSetId);
+  if ((!ex || force) && !skipChoose && (state.templates || []).some(t => t.kind === 'deck')) { preDeckChoose(!!(ex && force)); return; }
   if (ex && force && !confirm('Regenerar os slides a partir do Pré-Projeto? As edições feitas nos slides serão substituídas.')) return;
   if (!ex || force) {
     const th = deckTheme(p); await ensureFonts([th.head, th.body]); if (typeof brandFontsLoad === 'function') await brandFontsLoad(p);
@@ -208,22 +215,27 @@ async function deckRenderImages(set, w) {
 function deckHTML(title, imgs, names, ratio) {
   const E2 = esc;
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${E2(title)}</title><style>
-*{box-sizing:border-box}html,body{margin:0;height:100%;background:#0b0b0b;color:#fff;font-family:Inter,system-ui,Arial,sans-serif}
-aside{position:fixed;left:0;top:0;bottom:0;width:210px;background:#111;overflow:auto;padding:16px 12px}aside b{display:block;font-size:11px;letter-spacing:.1em;margin:4px 6px 14px}
-aside a{display:flex;gap:8px;align-items:center;color:#aaa;text-decoration:none;font-size:11px;padding:6px;border-radius:8px;cursor:pointer;margin-bottom:4px}aside a img{width:84px;border-radius:4px;display:block;opacity:.8}aside a.on,aside a:hover{background:#222;color:#fff}aside a.on img{opacity:1;outline:2px solid #fff}
-main{margin-left:210px;height:100%;display:grid;place-items:center;padding:18px;position:relative}.stage{width:min(100%,calc((100vh - 36px)*${ratio}));aspect-ratio:${ratio};position:relative}.stage img{width:100%;height:100%;display:block;border-radius:6px;object-fit:contain}
-.nav{position:fixed;bottom:16px;right:20px;display:flex;gap:6px;align-items:center}.nav button{background:#222;color:#fff;border:0;border-radius:9px;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer}.nav button:hover{background:#333}.nav span{font-size:12px;color:#aaa;padding:0 8px}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#0b0b0b;color:#fff;font-family:Inter,system-ui,Arial,sans-serif;overflow:hidden}
+aside{position:fixed;left:0;top:0;bottom:0;width:190px;background:#111;overflow:auto;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;scrollbar-width:none}aside::-webkit-scrollbar{display:none}aside a:first-child{margin-top:auto}aside a:last-child{margin-bottom:auto}
+aside a{display:block;width:100%;border-radius:8px;cursor:pointer;padding:4px;transition:background .2s}aside a img{display:block;margin:0 auto;border-radius:4px;opacity:.6;transition:opacity .2s;aspect-ratio:${ratio};height:auto;width:min(100%,calc(max(34px,(100vh - 32px - (var(--n) - 1)*10px)/var(--n) - 8px)*${ratio}))}aside a.on,aside a:hover{background:#1d1d1d}aside a.on img,aside a:hover img{opacity:1}aside a.on img{outline:2px solid #fff}
+main{margin-left:190px;height:100%;display:grid;place-items:center;padding:18px}.stage{width:min(100%,calc((100vh - 36px)*${ratio}));aspect-ratio:${ratio};position:relative}.stage img{width:100%;height:100%;display:block;border-radius:6px;object-fit:contain;cursor:pointer}
+.fade{animation:fd .7s ease both}@keyframes fd{from{opacity:0}to{opacity:1}}
+.fs aside{display:none}.fs main{margin:0;padding:0}.fs .stage{width:min(100vw,calc(100vh*${ratio}))}.fs .stage img{border-radius:0}
+#fs{position:fixed;right:16px;bottom:16px;background:rgba(34,34,34,.85);color:#fff;border:0;border-radius:9px;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer;opacity:.75;transition:opacity .2s}#fs:hover{opacity:1}.fs #fs{opacity:0}.fs #fs:hover{opacity:.9}
 .all{display:none}@media(max-width:800px){aside{display:none}main{margin:0}}
-@media print{aside,.nav,.stage{display:none!important}main{display:block;margin:0;padding:0}.all{display:block}.all img{display:block;width:100%;page-break-after:always}body{background:#fff}@page{size:landscape;margin:0}}
-</style></head><body><aside><b>${E2(title.toUpperCase())}</b>${imgs.map((im, i) => `<a data-i="${i}"><img src="${im}" alt=""><span>${String(i + 1).padStart(2, '0')} ${E2(names[i] || '')}</span></a>`).join('')}</aside>
+@media print{aside,#fs,.stage{display:none!important}html,body{overflow:visible;height:auto}main{display:block;margin:0;padding:0}.all{display:block}.all img{display:block;width:100%;page-break-after:always}body{background:#fff}@page{size:landscape;margin:0}}
+</style></head><body><aside style="--n:${imgs.length}">${imgs.map((im, i) => `<a data-i="${i}" title="${E2(names[i] || 'Slide ' + (i + 1))}"><img src="${im}" alt="${E2(names[i] || 'Slide ' + (i + 1))}"></a>`).join('')}</aside>
 <main><div class="stage"><img id="cur" alt=""></div><div class="all">${imgs.map(im => `<img src="${im}" alt="">`).join('')}</div></main>
-<div class="nav"><button id="pv">←</button><span id="pg"></span><button id="nx">→</button><button id="fs">Tela cheia</button></div>
-<script>var IM=${JSON.stringify(imgs)},i=0,cur=document.getElementById('cur'),links=[].slice.call(document.querySelectorAll('aside a'));
-function show(k){i=Math.max(0,Math.min(IM.length-1,k));cur.src=IM[i];document.getElementById('pg').textContent=(i+1)+' / '+IM.length;links.forEach(function(l,j){l.classList.toggle('on',j===i)});var a=links[i];if(a&&a.scrollIntoView)a.scrollIntoView({block:'nearest'})}
+<button id="fs" title="Tela cheia (F)">Tela cheia</button>
+<script>var IM=${JSON.stringify(imgs)},i=-1,cur=document.getElementById('cur'),links=[].slice.call(document.querySelectorAll('aside a'));
+function show(k){k=Math.max(0,Math.min(IM.length-1,k));if(k===i)return;i=k;cur.classList.remove('fade');void cur.offsetWidth;cur.src=IM[i];cur.classList.add('fade');links.forEach(function(l,j){l.classList.toggle('on',j===i)});var a=links[i];if(a&&a.scrollIntoView)a.scrollIntoView({block:'nearest'});document.title=document.title.split(' · ')[0]+' · '+(i+1)+'/'+IM.length}
 links.forEach(function(l){l.addEventListener('click',function(){show(+l.getAttribute('data-i'))})});
-document.getElementById('pv').onclick=function(){show(i-1)};document.getElementById('nx').onclick=function(){show(i+1)};
-document.getElementById('fs').onclick=function(){var d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d)};
-document.addEventListener('keydown',function(e){if(['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key)>-1){e.preventDefault();show(i+1)}if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>-1){e.preventDefault();show(i-1)}if(e.key==='Home')show(0);if(e.key==='End')show(IM.length-1)});
+function fsEl(){return document.fullscreenElement||document.webkitFullscreenElement}
+function toggleFs(){var d=document.documentElement;if(fsEl()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}else{(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d)}}
+function syncFs(){document.body.classList.toggle('fs',!!fsEl())}
+document.addEventListener('fullscreenchange',syncFs);document.addEventListener('webkitfullscreenchange',syncFs);
+document.getElementById('fs').onclick=toggleFs;
+document.addEventListener('keydown',function(e){if(['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key)>-1){e.preventDefault();show(i+1)}if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>-1){e.preventDefault();show(i-1)}if(e.key==='Home')show(0);if(e.key==='End')show(IM.length-1);if(e.key==='f'||e.key==='F')toggleFs()});
 cur.addEventListener('click',function(){show(i+1)});show(0);<\/script></body></html>`;
 }
 async function dzPresentDeck() {

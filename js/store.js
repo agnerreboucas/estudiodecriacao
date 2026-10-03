@@ -44,7 +44,7 @@ function seedState() {
   const cd = newProject('Cartório Descomplicado', 'Conteúdo + geração de demanda', {cover: 'a6', icon: 'CD'});
   const se = newProject('Saber Ensinar', 'Educação criativa', {cover: 'a8', icon: 'SE'});
   return {
-    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0},
+    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [],
     workspace: {name: 'Ampliação Marketing', instruction: 'Criar com clareza estratégica, consistência de marca e foco na jornada de compra.'},
     credits: 30, activeProjectId: mb.id, projects: [mb, cd, se], creatives
   };
@@ -59,6 +59,7 @@ function normalize(s) {
   s.meta = mergeDefaults(s.meta, base.meta);
   s.workspace = mergeDefaults(s.workspace, base.workspace);
   s.credits = Number.isFinite(+s.credits) ? +s.credits : 30;
+  s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
     return mergeDefaults(p, newProject(p.name || 'Projeto', p.desc));

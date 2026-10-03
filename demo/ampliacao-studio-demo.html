@@ -392,6 +392,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .jp-sum{display:grid;gap:10px;margin:10px 0}.jp-sumblk{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}.sb-head{display:flex;gap:8px;align-items:center;margin-bottom:8px}.sb-label{flex:1;font-weight:700;border:1px solid transparent;border-radius:8px;padding:6px 8px;font:inherit;font-weight:700;background:#fafafa}.sb-label:focus{border-color:#111;background:#fff;outline:none}.sb-kind{font-size:11px;padding:6px;border:1px solid var(--line);border-radius:8px;background:#fff}.sb-tools{display:flex;gap:4px}.sb-tools .btn{padding:6px 8px;display:inline-grid;place-items:center}
 .rel-head .btn{margin-left:auto;padding:4px 7px}.rel-head{display:flex;gap:8px;align-items:center}
 .jp-pitchbox{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fafafa}.jp-pitchbox .type{font-size:10px;letter-spacing:.12em;font-weight:800;color:#777;margin-bottom:6px}
+.tpl-list{display:grid;gap:8px;margin:10px 0}.tpl-row{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
 
 </style>
 </head>
@@ -517,7 +518,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 </div>
 
 <div class="modal-back" id="modalBack" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalBox"></div></div>
-<div class="overlay" id="overlay"><div class="overlay-bar"><strong id="overlayTitle"></strong><div class="row-gap"><button class="btn sm" onclick="overlayDownload()">⬇ Baixar HTML</button><button class="btn sm" onclick="overlayPrint()">Imprimir / PDF</button><button class="btn sm dark" onclick="closeOverlay()">Fechar</button></div></div><iframe id="overlayFrame" title="Pré-visualização"></iframe></div>
+<div class="overlay" id="overlay"><div class="overlay-bar"><strong id="overlayTitle"></strong><div class="row-gap"><button class="btn sm" onclick="overlayDownload()">⬇ Baixar HTML</button><button class="btn sm" onclick="overlayPrint()">Imprimir / PDF</button><button class="btn sm dark" onclick="closeOverlay()">Fechar</button></div></div><iframe id="overlayFrame" title="Pré-visualização" allow="fullscreen" allowfullscreen></iframe></div>
 <input type="file" id="importFile" accept="application/json,.json" hidden onchange="if(this.files[0])importFile(this.files[0]);this.value=''">
 <div class="toast" id="toast"></div>
 
@@ -648,7 +649,7 @@ function seedState() {
   const cd = newProject('Cartório Descomplicado', 'Conteúdo + geração de demanda', {cover: 'a6', icon: 'CD'});
   const se = newProject('Saber Ensinar', 'Educação criativa', {cover: 'a8', icon: 'SE'});
   return {
-    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0},
+    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [],
     workspace: {name: 'Ampliação Marketing', instruction: 'Criar com clareza estratégica, consistência de marca e foco na jornada de compra.'},
     credits: 30, activeProjectId: mb.id, projects: [mb, cd, se], creatives
   };
@@ -663,6 +664,7 @@ function normalize(s) {
   s.meta = mergeDefaults(s.meta, base.meta);
   s.workspace = mergeDefaults(s.workspace, base.workspace);
   s.credits = Number.isFinite(+s.credits) ? +s.credits : 30;
+  s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
     return mergeDefaults(p, newProject(p.name || 'Projeto', p.desc));
@@ -3639,6 +3641,7 @@ function deckSlides(p) {
   /* contador de página (menos na capa e no final) */
   out.forEach((sl, i) => { if (i === 0 || i === out.length - 1) return; const dk = lum(sl.bg) < 0.3, c = dk ? th.muteDark : th.mute;
     sl.layers.push(T('muted', {content: (th.brandName + ' · Pré-Projeto').toUpperCase(), x: m, y: D.H - 60, w: 900, size: 16, ls: 3, color: c, family: th.body, weight: 400}), T('muted', {content: String(i + 1).padStart(2, '0') + ' / ' + String(out.length).padStart(2, '0'), x: D.W - m - 300, y: D.H - 60, w: 300, size: 16, ls: 3, color: c, align: 'right', family: th.body, weight: 400})); });
+  out.forEach(sl => { let k = 0; sl.layers.forEach(l => { if (l.type === 'text') l.slot = sl.name + '#' + (k++); }); });
   return {slides: out, th};
 }
 
@@ -3647,10 +3650,16 @@ function deckBuildSet(p) {
   const {slides, th} = deckSlides(p), tk = makeTokens(DESIGN_STYLES[0], FONT_PAIRS[0], PHOTO_STYLES[0], {name: 'Apresentação', accent: th.accent, bg: th.light, fg: th.ink, muted: th.mute});
   return {id: uid('ds'), name: 'Apresentação · ' + p.name, format: {id: 'deck', w: DECK.W, h: DECK.H}, tk, slides, deck: {pre: true}, created: new Date().toISOString(), updated: new Date().toISOString()};
 }
-async function preDeckOpen(force) {
+/* com modelos salvos, pergunta de onde partir: padrão ou um dos seus modelos */
+function preDeckChoose(force) {
+  const list = (state.templates || []).filter(t => t.kind === 'deck');
+  showModal('Montar a apresentação', `<p class="muted" style="margin-top:0;font-size:12px">Parta do visual padrão ou de um modelo seu. O texto sempre vem do Pré-Projeto.${force ? ' Os slides atuais serão substituídos.' : ''}</p><div class="tpl-list"><div class="tpl-row"><div><strong>Padrão do Studio</strong><small class="muted block">Usa as cores e fontes do Brand Kit, se houver</small></div><button class="btn sm dark" onclick="closeModal();preDeckOpen(${force ? 'true' : 'false'}, true)">Usar</button></div>${list.map(t => `<div class="tpl-row"><div><strong>${esc(t.name)}</strong><small class="muted block">Modelo salvo · ${t.slides.length} slides${t.from ? ' · de ' + esc(t.from) : ''}</small></div><button class="btn sm dark" onclick="dzTemplateUse('${t.id}')">Usar</button></div>`).join('')}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button></div>`);
+}
+async function preDeckOpen(force, skipChoose) {
   const p = preP(), pre = p.pre, items = preItems(pre);
   if (!items.length) { toast('Selecione ao menos um desafio para montar a apresentação.'); return; }
   let ex = pre.deckSetId && p.design.sets.find(s => s.id === pre.deckSetId);
+  if ((!ex || force) && !skipChoose && (state.templates || []).some(t => t.kind === 'deck')) { preDeckChoose(!!(ex && force)); return; }
   if (ex && force && !confirm('Regenerar os slides a partir do Pré-Projeto? As edições feitas nos slides serão substituídas.')) return;
   if (!ex || force) {
     const th = deckTheme(p); await ensureFonts([th.head, th.body]); if (typeof brandFontsLoad === 'function') await brandFontsLoad(p);
@@ -3671,28 +3680,130 @@ async function deckRenderImages(set, w) {
 function deckHTML(title, imgs, names, ratio) {
   const E2 = esc;
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${E2(title)}</title><style>
-*{box-sizing:border-box}html,body{margin:0;height:100%;background:#0b0b0b;color:#fff;font-family:Inter,system-ui,Arial,sans-serif}
-aside{position:fixed;left:0;top:0;bottom:0;width:210px;background:#111;overflow:auto;padding:16px 12px}aside b{display:block;font-size:11px;letter-spacing:.1em;margin:4px 6px 14px}
-aside a{display:flex;gap:8px;align-items:center;color:#aaa;text-decoration:none;font-size:11px;padding:6px;border-radius:8px;cursor:pointer;margin-bottom:4px}aside a img{width:84px;border-radius:4px;display:block;opacity:.8}aside a.on,aside a:hover{background:#222;color:#fff}aside a.on img{opacity:1;outline:2px solid #fff}
-main{margin-left:210px;height:100%;display:grid;place-items:center;padding:18px;position:relative}.stage{width:min(100%,calc((100vh - 36px)*${ratio}));aspect-ratio:${ratio};position:relative}.stage img{width:100%;height:100%;display:block;border-radius:6px;object-fit:contain}
-.nav{position:fixed;bottom:16px;right:20px;display:flex;gap:6px;align-items:center}.nav button{background:#222;color:#fff;border:0;border-radius:9px;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer}.nav button:hover{background:#333}.nav span{font-size:12px;color:#aaa;padding:0 8px}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#0b0b0b;color:#fff;font-family:Inter,system-ui,Arial,sans-serif;overflow:hidden}
+aside{position:fixed;left:0;top:0;bottom:0;width:190px;background:#111;overflow:auto;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;scrollbar-width:none}aside::-webkit-scrollbar{display:none}aside a:first-child{margin-top:auto}aside a:last-child{margin-bottom:auto}
+aside a{display:block;width:100%;border-radius:8px;cursor:pointer;padding:4px;transition:background .2s}aside a img{display:block;margin:0 auto;border-radius:4px;opacity:.6;transition:opacity .2s;aspect-ratio:${ratio};height:auto;width:min(100%,calc(max(34px,(100vh - 32px - (var(--n) - 1)*10px)/var(--n) - 8px)*${ratio}))}aside a.on,aside a:hover{background:#1d1d1d}aside a.on img,aside a:hover img{opacity:1}aside a.on img{outline:2px solid #fff}
+main{margin-left:190px;height:100%;display:grid;place-items:center;padding:18px}.stage{width:min(100%,calc((100vh - 36px)*${ratio}));aspect-ratio:${ratio};position:relative}.stage img{width:100%;height:100%;display:block;border-radius:6px;object-fit:contain;cursor:pointer}
+.fade{animation:fd .7s ease both}@keyframes fd{from{opacity:0}to{opacity:1}}
+.fs aside{display:none}.fs main{margin:0;padding:0}.fs .stage{width:min(100vw,calc(100vh*${ratio}))}.fs .stage img{border-radius:0}
+#fs{position:fixed;right:16px;bottom:16px;background:rgba(34,34,34,.85);color:#fff;border:0;border-radius:9px;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer;opacity:.75;transition:opacity .2s}#fs:hover{opacity:1}.fs #fs{opacity:0}.fs #fs:hover{opacity:.9}
 .all{display:none}@media(max-width:800px){aside{display:none}main{margin:0}}
-@media print{aside,.nav,.stage{display:none!important}main{display:block;margin:0;padding:0}.all{display:block}.all img{display:block;width:100%;page-break-after:always}body{background:#fff}@page{size:landscape;margin:0}}
-</style></head><body><aside><b>${E2(title.toUpperCase())}</b>${imgs.map((im, i) => `<a data-i="${i}"><img src="${im}" alt=""><span>${String(i + 1).padStart(2, '0')} ${E2(names[i] || '')}</span></a>`).join('')}</aside>
+@media print{aside,#fs,.stage{display:none!important}html,body{overflow:visible;height:auto}main{display:block;margin:0;padding:0}.all{display:block}.all img{display:block;width:100%;page-break-after:always}body{background:#fff}@page{size:landscape;margin:0}}
+</style></head><body><aside style="--n:${imgs.length}">${imgs.map((im, i) => `<a data-i="${i}" title="${E2(names[i] || 'Slide ' + (i + 1))}"><img src="${im}" alt="${E2(names[i] || 'Slide ' + (i + 1))}"></a>`).join('')}</aside>
 <main><div class="stage"><img id="cur" alt=""></div><div class="all">${imgs.map(im => `<img src="${im}" alt="">`).join('')}</div></main>
-<div class="nav"><button id="pv">←</button><span id="pg"></span><button id="nx">→</button><button id="fs">Tela cheia</button></div>
-<script>var IM=${JSON.stringify(imgs)},i=0,cur=document.getElementById('cur'),links=[].slice.call(document.querySelectorAll('aside a'));
-function show(k){i=Math.max(0,Math.min(IM.length-1,k));cur.src=IM[i];document.getElementById('pg').textContent=(i+1)+' / '+IM.length;links.forEach(function(l,j){l.classList.toggle('on',j===i)});var a=links[i];if(a&&a.scrollIntoView)a.scrollIntoView({block:'nearest'})}
+<button id="fs" title="Tela cheia (F)">Tela cheia</button>
+<script>var IM=${JSON.stringify(imgs)},i=-1,cur=document.getElementById('cur'),links=[].slice.call(document.querySelectorAll('aside a'));
+function show(k){k=Math.max(0,Math.min(IM.length-1,k));if(k===i)return;i=k;cur.classList.remove('fade');void cur.offsetWidth;cur.src=IM[i];cur.classList.add('fade');links.forEach(function(l,j){l.classList.toggle('on',j===i)});var a=links[i];if(a&&a.scrollIntoView)a.scrollIntoView({block:'nearest'});document.title=document.title.split(' · ')[0]+' · '+(i+1)+'/'+IM.length}
 links.forEach(function(l){l.addEventListener('click',function(){show(+l.getAttribute('data-i'))})});
-document.getElementById('pv').onclick=function(){show(i-1)};document.getElementById('nx').onclick=function(){show(i+1)};
-document.getElementById('fs').onclick=function(){var d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d)};
-document.addEventListener('keydown',function(e){if(['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key)>-1){e.preventDefault();show(i+1)}if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>-1){e.preventDefault();show(i-1)}if(e.key==='Home')show(0);if(e.key==='End')show(IM.length-1)});
+function fsEl(){return document.fullscreenElement||document.webkitFullscreenElement}
+function toggleFs(){var d=document.documentElement;if(fsEl()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}else{(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d)}}
+function syncFs(){document.body.classList.toggle('fs',!!fsEl())}
+document.addEventListener('fullscreenchange',syncFs);document.addEventListener('webkitfullscreenchange',syncFs);
+document.getElementById('fs').onclick=toggleFs;
+document.addEventListener('keydown',function(e){if(['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key)>-1){e.preventDefault();show(i+1)}if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>-1){e.preventDefault();show(i-1)}if(e.key==='Home')show(0);if(e.key==='End')show(IM.length-1);if(e.key==='f'||e.key==='F')toggleFs()});
 cur.addEventListener('click',function(){show(i+1)});show(0);<\/script></body></html>`;
 }
 async function dzPresentDeck() {
   const set = dzSet(); if (!set) return; toast('Montando a apresentação…');
   const imgs = await deckRenderImages(set, 1280), p = dzP();
   showOverlay('Apresentação · ' + (p ? p.name : set.name), deckHTML(set.name, imgs, set.slides.map(s => s.name), set.format.w / set.format.h), `apresentacao-${slug(set.name)}.html`);
+}
+
+</script>
+<script>
+/* Salvar, modelos salvos e PDF das peças/apresentações do Editor de Design */
+
+/* ---- salvar agora (o editor também salva sozinho a cada alteração) ---- */
+async function dzSaveNow() {
+  const s = dzSet(); if (!s) return;
+  s.updated = new Date().toISOString(); persist(); flushLocal();
+  let msg = 'Salvo neste navegador.';
+  if (typeof canSync === 'function' && canSync()) { try { await syncNow(false); msg = 'Salvo e sincronizado com o servidor.'; } catch (e) { msg = 'Salvo neste navegador (a sincronização falhou).'; } }
+  const b = $('dzSaveBtn'); if (b) { b.textContent = '✓ Salvo'; setTimeout(() => { const c = $('dzSaveBtn'); if (c) c.textContent = 'Salvar'; }, 1800); }
+  toast(msg);
+}
+
+/* ---- modelos: guardados no workspace (valem para todos os projetos) ---- */
+const tplList = () => { if (!Array.isArray(state.templates)) state.templates = []; return state.templates; };
+function dzSaveTemplate() {
+  const s = dzSet(); if (!s) return;
+  askText('Salvar como modelo', 'Nome do modelo (ex.: Apresentação escura da Ampliação)', name => {
+    if (!name || !name.trim()) return;
+    const slides = JSON.parse(JSON.stringify(s.slides)); slides.forEach(sl => sl.layers.forEach(l => { if (l.type === 'image' && l.role !== 'logo') l.imgId = ''; }));
+    const t = {id: uid('tp'), name: name.trim().slice(0, 80), kind: s.deck ? 'deck' : 'set', format: {id: s.format.id, w: s.format.w, h: s.format.h}, tk: JSON.parse(JSON.stringify(s.tk)), slides, from: (dzP() || {}).name || '', created: new Date().toISOString()};
+    tplList().push(t); persist(); flushLocal();
+    toast('Modelo salvo. Fotos foram retiradas; textos e estilo ficam. Use em Modelos salvos.');
+  });
+}
+function dzTemplateDel(id) { if (!confirm('Excluir este modelo? As peças já criadas com ele não mudam.')) return; state.templates = tplList().filter(t => t.id !== id); persist(); dzTemplatesOpen(); }
+
+/* aplica um modelo de apresentação aos dados do projeto atual: o texto vem do Pré-Projeto (por "slot"), o visual vem do modelo */
+function tplFillDeck(t, p) {
+  const fresh = deckSlides(p).slides, byName = Object.fromEntries(fresh.map(s => [s.name, s])), out = [];
+  t.slides.forEach(ts => {
+    const sl = cloneSlide(ts); sl.name = ts.name; sl.keep = true; sl.bg = ts.bg;
+    const slotted = sl.layers.some(l => l.type === 'text' && l.slot);
+    if (!slotted) { out.push(sl); return; }                    // slide só do usuário: mantém
+    const src = byName[ts.name]; if (!src) return;             // sem dado equivalente neste projeto: omite
+    const map = {}; src.layers.forEach(l => { if (l.type === 'text' && l.slot) map[l.slot] = l.content; });
+    sl.layers.forEach(l => { if (l.type === 'text' && l.slot) l.content = l.slot in map ? map[l.slot] : ''; });
+    out.push(sl);
+  });
+  return out;
+}
+async function dzTemplateUse(id, openAfter) {
+  const t = tplList().find(x => x.id === id), p = dzP() || preP(); if (!t || !p) return;
+  try {
+    const th = deckTheme(p); await ensureFonts([th.head, th.body, ...t.slides.flatMap(s => s.layers.filter(l => l.type === 'text').map(l => l.family))]); if (typeof brandFontsLoad === 'function') await brandFontsLoad(p);
+    let slides, name;
+    if (t.kind === 'deck') { if (!preItems(p.pre).length) { toast('Selecione ao menos um desafio no Pré-Projeto para preencher o modelo.'); return; } slides = tplFillDeck(t, p); name = 'Apresentação · ' + p.name + ' (' + t.name + ')'; }
+    else { slides = t.slides.map(s => cloneSlide(s)); name = t.name + ' · ' + p.name; }
+    if (!slides.length) { toast('O modelo ficou sem slides para este projeto.'); return; }
+    const set = {id: uid('ds'), name, format: {id: t.format.id, w: t.format.w, h: t.format.h}, tk: JSON.parse(JSON.stringify(t.tk)), slides, created: new Date().toISOString(), updated: new Date().toISOString()};
+    if (t.kind === 'deck') { set.deck = {pre: true, tpl: t.id}; p.pre.deckSetId = set.id; }
+    await ensureSetResources(set); p.design.sets.push(set); persist(); closeModal(); go('design'); dzOpen(set.id);
+    toast(t.kind === 'deck' ? 'Apresentação criada a partir do modelo (' + slides.length + ' slides).' : 'Peça criada a partir do modelo.');
+  } catch (e) { toast('Não consegui aplicar o modelo: ' + e.message); }
+}
+function dzTemplatesOpen() {
+  const list = tplList();
+  showModal('★ Modelos salvos', list.length ? `<p class="muted" style="margin-top:0;font-size:12px">Os modelos valem para todos os projetos. Em apresentações, o texto é refeito com os dados do projeto atual e o visual (cores, fontes, posições) vem do modelo.</p><div class="tpl-list">${list.map(t => `<div class="tpl-row"><div><strong>${esc(t.name)}</strong><small class="muted block">${t.kind === 'deck' ? 'Apresentação' : 'Peça'} · ${t.slides.length} slide(s) · ${t.format.w}×${t.format.h}${t.from ? ' · de ' + esc(t.from) : ''}</small></div><div class="row-gap"><button class="btn sm dark" onclick="dzTemplateUse('${t.id}')">Usar neste projeto</button><button class="btn sm" onclick="dzTemplateDel('${t.id}')" title="Excluir modelo">${ico('trash', 14)}</button></div></div>`).join('')}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`
+    : `<p class="muted" style="font-size:13px">Nenhum modelo ainda. Edite uma peça ou apresentação e use <b>★ Modelo</b> na barra do editor para guardar o estilo.</p><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`);
+}
+
+/* ---- PDF de verdade (uma página por slide, imagem em alta qualidade) ---- */
+function buildPDF(pages, pw, ph) {
+  const enc = new TextEncoder(), chunks = [], offs = []; let len = 0;
+  const add = x => { const b = typeof x === 'string' ? enc.encode(x) : x; chunks.push(b); len += b.length; };
+  const N = 2 + 3 * pages.length, f = v => (+v).toFixed(2);
+  add('%PDF-1.4\n%\xe2\xe3\xcf\xd3\n');
+  const obj = (n, head, stream) => { offs[n] = len; add(n + ' 0 obj\n' + head); if (stream) { add('\nstream\n'); add(stream); add('\nendstream'); } add('\nendobj\n'); };
+  obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2, `<< /Type /Pages /Count ${pages.length} /Kids [${pages.map((_, i) => (3 + 3 * i) + ' 0 R').join(' ')}] >>`);
+  pages.forEach((pg, i) => {
+    const po = 3 + 3 * i, co = po + 1, io = po + 2, content = `q ${f(pw)} 0 0 ${f(ph)} 0 0 cm /Im0 Do Q`;
+    obj(po, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${f(pw)} ${f(ph)}] /Resources << /XObject << /Im0 ${io} 0 R >> >> /Contents ${co} 0 R >>`);
+    obj(co, `<< /Length ${content.length} >>`, content);
+    obj(io, `<< /Type /XObject /Subtype /Image /Width ${pg.w} /Height ${pg.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${pg.jpeg.length} >>`, pg.jpeg);
+  });
+  const xpos = len; let x = 'xref\n0 ' + (N + 1) + '\n0000000000 65535 f \n';
+  for (let n = 1; n <= N; n++) x += String(offs[n]).padStart(10, '0') + ' 00000 n \n';
+  add(x + `trailer\n<< /Size ${N + 1} /Root 1 0 R >>\nstartxref\n${xpos}\n%%EOF\n`);
+  return new Blob(chunks, {type: 'application/pdf'});
+}
+async function dzExportPDF() {
+  const s = dzSet(); if (!s) return; toast('Gerando PDF…');
+  try {
+    await ensureSetResources(s); const f = s.format, W = Math.min(2400, Math.max(1200, f.w)), H = Math.round(W * f.h / f.w), pages = [];
+    for (const sl of s.slides) {
+      const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d'); x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H);
+      renderSlide(x, sl, f.w, f.h, W / f.w);
+      const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.92)); pages.push({jpeg: new Uint8Array(await blob.arrayBuffer()), w: W, h: H});
+      await new Promise(r => setTimeout(r, 0));
+    }
+    const pdf = buildPDF(pages, f.w * 0.75, f.h * 0.75); download(`${slug(s.name)}.pdf`, pdf, 'application/pdf');
+    toast('PDF gerado (' + pages.length + ' página' + (pages.length > 1 ? 's' : '') + '). O texto vai como imagem.');
+  } catch (e) { toast('Não consegui gerar o PDF: ' + e.message); }
 }
 
 </script>
@@ -3808,7 +3919,7 @@ function renderDesign() {
 /* ================= INÍCIO ================= */
 function dzHome(p, r) {
   const {styles, sets} = p.design;
-  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzLayoutsOpen()">▦ Modelos de layout</button><button class="btn" onclick="dzBrandOpen()">◈ Brand Kit</button><button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn" onclick="dzVarOpen()">⚡ Fábrica de variações</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>Estúdio de Design</h1><p>Cruze estilos de design, fontes e fotografia com o seu público, crie as peças e refine no editor. Salve o estilo e use em toda a campanha.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="dzTemplatesOpen()">★ Modelos salvos</button><button class="btn" onclick="dzLayoutsOpen()">▦ Modelos de layout</button><button class="btn" onclick="dzBrandOpen()">◈ Brand Kit</button><button class="btn" onclick="dzLibrary('design')">Explorar biblioteca</button><button class="btn" onclick="dzVarOpen()">⚡ Fábrica de variações</button><button class="btn dark" onclick="dzNew()">＋ Nova composição</button></div></div>
   <div class="panel"><div class="section-row"><h3>Estilos de campanha salvos</h3><small class="muted">${styles.length} salvo(s)</small></div>
     ${styles.length ? `<div class="dz-styles">${styles.map(s => `<article class="dz-style"><div class="dz-sw">${[s.tk.bg, s.tk.fg, s.tk.accent, s.tk.muted].map(c => `<i style="background:${esc(c)}"></i>`).join('')}</div><strong>${esc(s.name)}</strong><small class="muted block">${esc(s.tk.head.family)} + ${esc(s.tk.body.family)} · ${esc((s.tk.photo || {}).name || 'foto')}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dzNew('${s.id}')">Usar em nova peça</button><button class="btn sm" onclick="dzStyleDel('${s.id}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhum estilo salvo', 'Crie uma peça, refine no editor e use “Salvar como estilo” para reaproveitar em toda a campanha.')}</div>
   <div class="panel" style="margin-top:14px"><div class="section-row"><h3>Peças do projeto</h3><small class="muted">${sets.length} peça(s)</small></div>
@@ -3929,7 +4040,7 @@ function dzEditorShell(p, r) {
     <button class="btn sm ${dz.mode === 'emphasis' ? 'dark' : ''}" onclick="dzModeEm()" title="Clique em palavras do texto para destacar">✦ Destacar por clique</button>
     ${dzSet().deck ? '<button class="btn sm dark" onclick="dzPresentDeck()" title="Apresentar e baixar em HTML">▶ Apresentar</button>' : ''}<button class="btn sm" onclick="dzResizeOpen(dz.setId)" title="Adaptar esta arte para outras medidas">⤢ Tamanhos</button>
     <button class="btn sm" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta peça">⚡ Variações</button><button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddLogo()">＋ Logo</button><button class="btn sm" onclick="dzAddPhoto()">＋ Foto</button>
-    <button class="btn sm" onclick="dzSaveStyle()">Salvar como estilo</button><button class="btn sm" onclick="dzApplyStyleModal()">Aplicar estilo…</button><button class="btn sm" onclick="dzExportOne()">PNG</button><button class="btn sm" onclick="dzExportPSD()" title="Photoshop em camadas">PSD</button><button class="btn sm" onclick="dzExportLayers()" title="PNG por camada + manifesto">Camadas</button><button class="btn sm dark" onclick="dzExportAll()">Baixar todos (ZIP)</button></div></div>
+    <button class="btn sm dark" id="dzSaveBtn" onclick="dzSaveNow()" title="Salvar agora (o editor também salva sozinho)">Salvar</button><button class="btn sm" onclick="dzSaveTemplate()" title="Guardar esta peça ou apresentação como modelo">★ Modelo</button><button class="btn sm" onclick="dzSaveStyle()">Salvar como estilo</button><button class="btn sm" onclick="dzApplyStyleModal()">Aplicar estilo…</button><button class="btn sm" onclick="dzExportOne()">PNG</button><button class="btn sm" onclick="dzExportPDF()" title="PDF com uma página por slide">⬇ PDF</button><button class="btn sm" onclick="dzExportPSD()" title="Photoshop em camadas">PSD</button><button class="btn sm" onclick="dzExportLayers()" title="PNG por camada + manifesto">Camadas</button><button class="btn sm dark" onclick="dzExportAll()">Baixar todos (ZIP)</button></div></div>
   <div class="dz-editor"><div class="dz-slides" id="dzSlides"></div><div class="dz-stage" id="dzStage"><canvas id="dzCanvas"></canvas></div><div class="dz-insp" id="dzInsp"></div></div><input type="file" id="dzFile" accept="image/*" hidden>`;
   dzBindCanvas(); dzSlidesPanel(); dzInspector(); dzFit(); ensureSetResources(s).then(() => { dzDraw(); dzSlidesPanel(); });
   if (dz.hist.length === 0) dzSnap();
