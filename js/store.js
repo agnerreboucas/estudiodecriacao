@@ -169,6 +169,21 @@ function normalizeSocial(x) {
   const metrics = {}; if (x.metrics && typeof x.metrics === 'object') Object.keys(x.metrics).filter(sid).slice(0, 30).forEach(k => { metrics[k] = (Array.isArray(x.metrics[k]) ? x.metrics[k] : []).slice(-800).filter(d => d && iso(d.date)).map(d => { const o = {date: String(d.date).slice(0, 10)}; ['followers', 'followersGained', 'followersLost', 'organicReach', 'paidReach', 'organicImpressions', 'paidImpressions', 'organicEngagement', 'paidEngagement', 'adSpend'].forEach(f => { o[f] = num(d[f], 0, 1e10); }); return o; }); });
   return {accounts, posts, boosts, inbox, events, metrics, migrated: !!x.migrated, example: !!x.example};
 }
+/* Landing pages: dados do produto, insumos, blocos (tipos fixos, textos limitados), visual e rastreio. Mantém os campos antigos (headline, sub, bullets, cta, whatsapp). */
+const LP_BLOCK_TYPES = ['hero', 'numeros', 'dor', 'solucao', 'beneficios', 'passos', 'conteudo', 'para_quem', 'autoridade', 'prova', 'oferta', 'bonus', 'garantia', 'faq', 'programa', 'palestrantes', 'local', 'ingressos', 'texto', 'cta_final', 'form'];
+function normalizeLandings(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TY = ['curso', 'ebook', 'servico', 'evento', 'generico'];
+  return (Array.isArray(x) ? x : []).filter(l => l && typeof l === 'object').slice(0, 200).map(l => {
+    const pr = l.product || {}, th = l.theme || {}, tr = l.tracking || {};
+    return {id: sid(l.id) ? l.id : uid('lp'), name: str(l.name, 120) || 'Landing page', goal: str(l.goal, 30) || 'Gerar lead', headline: str(l.headline, 300), sub: str(l.sub, 500), bullets: str(l.bullets, 3000), cta: str(l.cta, 80) || 'Enviar', whatsapp: str(l.whatsapp, 20).replace(/\D/g, ''), status: str(l.status, 30) || 'Rascunho',
+      type: TY.includes(l.type) ? l.type : '', product: {nome: str(pr.nome, 160), preco: str(pr.preco, 80), publico: str(pr.publico, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(pr.checkout || '') ? pr.checkout : '', data: str(pr.data, 80), local: str(pr.local, 200)}, input: str(l.input, 60000),
+      theme: {accent: hex(th.accent, '#e4572e'), bg: hex(th.bg, '#ffffff'), fg: hex(th.fg, '#141414'), dark: !!th.dark, head: str(th.head, 60) || 'Poppins', body: str(th.body, 60) || 'Inter'},
+      tracking: {metaPixel: /^\d{5,20}$/.test(tr.metaPixel || '') ? tr.metaPixel : '', ga4: /^G-[A-Z0-9]{4,14}$/.test(tr.ga4 || '') ? tr.ga4 : ''}, privacyUrl: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(l.privacyUrl || '') ? l.privacyUrl : '',
+      blocks: (Array.isArray(l.blocks) ? l.blocks : []).filter(b => b && LP_BLOCK_TYPES.includes(b.t)).slice(0, 40).map(b => ({id: sid(b.id) ? b.id : uid('bk'), t: b.t, on: b.on !== false, title: str(b.title, 300), text: str(b.text, 3000), kicker: str(b.kicker, 120), cta: str(b.cta, 80), note: str(b.note, 300), name: str(b.name, 160), price: str(b.price, 80), imgId: sid(b.imgId) ? b.imgId : '',
+        items: (Array.isArray(b.items) ? b.items : []).slice(0, 30).map(i => ({t: str(i && i.t, 400), d: str(i && i.d, 1200)})), yes: (Array.isArray(b.yes) ? b.yes : []).slice(0, 12).map(t => str(t, 300)), no: (Array.isArray(b.no) ? b.no : []).slice(0, 12).map(t => str(t, 300))})),
+      created: str(l.created, 40) || new Date().toISOString()};
+  });
+}
 function normalizeCarousel(c) {
   c = c && typeof c === 'object' ? c : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), T = (Array.isArray(c.texts) ? c.texts : []).slice(0, 18).map(t => str(t, 1200)); while (T.length < 18) T.push('');
   return {base: /^[\w-]{1,30}$/.test(c.base || '') ? c.base : 'brandsdecoded', cover: /^[\w-]{1,30}$/.test(c.cover || '') ? c.cover : 'tese', style: /^[\w-]{0,40}$/.test(c.style || '') ? (c.style || '') : '', dark: !!c.dark, idea: str(c.idea, 4000), useAgent: c.useAgent !== false, texts: T,
@@ -203,7 +218,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.social = normalizeSocial(q.social); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');

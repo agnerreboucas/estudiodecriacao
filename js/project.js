@@ -88,7 +88,7 @@ const TABS = {
     return `<div class="section-row"><h2>Feed criativo</h2><button class="btn dark" onclick="openModal('creative')">＋ Nova criação</button></div>${cr.length ? `<div class="masonry">${cr.map(artCard).join('')}</div>` : emptyState('Sem criações', 'Registre a primeira criação ou gere conceitos na Matriz.')}`;
   },
   landing(p) {
-    return `<div class="two"><div class="panel"><div class="section-row"><h3>Landing Pages</h3><button class="btn dark sm" onclick="landingModal('')">＋ Nova</button></div><div class="list">${p.landings.map(l => `<div class="list-item"><div><strong>${esc(l.name)}</strong><small>${esc(l.goal)} · ${esc(l.status)}</small></div><div class="row-gap"><button class="btn sm" onclick="landingModal('${l.id}')">Editar</button><button class="btn sm" onclick="landingExport('${l.id}')">Exportar HTML</button><button class="btn sm" onclick="landingDelete('${l.id}')">×</button></div></div>`).join('') || '<p class="muted">Nenhuma landing page ainda.</p>'}</div></div>
+    return `<div class="two"><div class="panel"><div class="section-row"><h3>Landing Pages</h3><button class="btn dark sm" onclick="go('landings');setTimeout(lpNewModal,50)">＋ Nova</button></div><div class="list">${p.landings.map(l => `<div class="list-item"><div><strong>${esc(l.name)}</strong><small>${esc(l.goal)} · ${esc(l.status)}</small></div><div class="row-gap"><button class="btn sm" onclick="go('landings');lpOpen('${l.id}')">Abrir no editor</button><button class="btn sm" onclick="landingExport('${l.id}')">Exportar HTML</button><button class="btn sm" onclick="landingDelete('${l.id}')">×</button></div></div>`).join('') || '<p class="muted">Nenhuma landing page ainda.</p>'}</div></div>
       <div class="panel"><h3>Estrutura padrão</h3><div class="kv"><span>Hero</span><strong>Problema + promessa</strong></div><div class="kv"><span>Prova</span><strong>Casos e autoridade</strong></div><div class="kv"><span>CTA</span><strong>Formulário e WhatsApp</strong></div><p class="muted" style="font-size:11px">O HTML exportado já traz um formulário que envia o lead para o seu endpoint (Configurações → URL de captura de leads). Suba o arquivo na Hostinger.</p></div></div>`;
   },
   ads(p) { return campaignsHTML(p); },
@@ -154,6 +154,7 @@ fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.s
 }
 function landingExport(id) {
   const p = curProject(), l = p.landings.find(x => x.id === id);
+  if (l.blocks && l.blocks.length) { lpExport(id); return; }
   if (!state.workspace.leadsUrl && l.goal !== 'WhatsApp') toast('Dica: defina a URL de captura de leads em Configurações antes de publicar.');
   download(`${slug(l.name)}.html`, landingHTML(l, p), 'text/html'); l.status = 'Exportada'; persist(); renderProjectTab();
 }

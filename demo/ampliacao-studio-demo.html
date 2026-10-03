@@ -581,6 +581,13 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .an-bar{display:grid;grid-template-columns:110px 1fr 120px;gap:8px;align-items:center;font-size:12px;margin:3px 0}.an-bar div{background:#eee;border-radius:4px;height:10px}.an-bar i{display:block;height:100%;background:#4c6ef5;border-radius:4px}.an-plan{background:#f7f7f9;border-radius:8px;padding:8px 10px;margin-top:8px}
 @media(max-width:1050px){.an-two{grid-template-columns:1fr}}
 .an-sel{font-size:12px;padding:6px 8px;border:1px solid #ddd;border-radius:8px;background:#fff}
+.lp-list{display:grid;gap:10px}.lp-card{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.lp-types{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.lp-type{display:flex;flex-direction:column;gap:4px;border:1px solid #e3e3e3;border-radius:10px;padding:10px;cursor:pointer}.lp-type:has(input:checked){border-color:#111;background:#fafafa}.lp-type input{position:absolute;opacity:0}.lp-type small.mono{font-size:10.5px}
+.lp-wrap{display:grid;grid-template-columns:420px minmax(0,1fr);gap:16px;align-items:start}.lp-side{max-height:calc(100vh - 220px);overflow:auto;padding-right:6px}.lp-prev{position:sticky;top:12px}
+.lp-frame{border:1px solid #e3e3e3;border-radius:12px;background:#fff;overflow:hidden;margin:0 auto;transition:width .2s}.lp-frame.desktop{width:100%}.lp-frame.mobile{width:390px;max-width:100%}.lp-frame iframe{width:100%;height:calc(100vh - 260px);min-height:480px;border:0;display:block}
+.lp-it{display:grid;grid-template-columns:1fr;gap:4px;border:1px solid #eee;border-radius:8px;padding:6px;margin:4px 0;position:relative}.lp-it button{position:absolute;right:6px;top:6px}.lp-it input{padding-right:34px}
+@media(max-width:1100px){.lp-wrap{grid-template-columns:1fr}.lp-side{max-height:none}.lp-prev{position:static}.lp-types{grid-template-columns:1fr}}
+.page-head .actions .so-badge{align-self:center;padding:5px 12px;font-size:11px;line-height:1.2;white-space:nowrap}
 
 </style>
 <style>
@@ -676,6 +683,7 @@ textarea,input,select{max-width:100%}
     <button data-page="matrix" title="Matriz de Criação"><span data-ico="sparkles"></span></button>
     <button data-page="editorial" title="Agente Editorial"><span data-ico="target"></span></button>
     <button data-page="carrosseis" title="Carrosséis"><span data-ico="layout"></span></button>
+    <button data-page="landings" title="Landing pages"><span data-ico="globe"></span></button>
     <button data-page="design" title="Estúdio de Design"><span data-ico="palette"></span></button>
     <button data-page="biblioteca" title="Biblioteca de imagens"><span data-ico="image"></span></button>
     <button data-page="inspiration" title="Inspiração"><span data-ico="pin"></span></button>
@@ -764,6 +772,7 @@ textarea,input,select{max-width:100%}
 <section id="page-editorial" class="page"><div class="subpage dz-wide" id="editorialRoot"></div></section>
 <section id="page-biblioteca" class="page"><div class="subpage dz-wide" id="bibliotecaRoot"></div></section>
 <section id="page-carrosseis" class="page"><div class="subpage dz-wide" id="carrosseisRoot"></div></section>
+<section id="page-landings" class="page"><div class="subpage dz-wide" id="landingsRoot"></div></section>
 <section id="page-diagram" class="page"><div class="subpage dz-wide" id="diagramRoot"></div></section>
 <section id="page-videoLab" class="page"><div class="subpage" id="videoRoot"></div></section>
 <section id="page-campaigns" class="page"><div class="subpage" id="campaignsRoot"></div></section>
@@ -879,6 +888,7 @@ const ICONS = {
   target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
   trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
   up: '<path d="m18 15-6-6-6 6"/>', down: '<path d="m6 9 6 6 6-6"/>', plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
   plug: '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>'
 };
 /* ico('home') → SVG preto no tamanho do texto; use ico('home', 22) para outro tamanho */
@@ -1060,6 +1070,21 @@ function normalizeSocial(x) {
   const metrics = {}; if (x.metrics && typeof x.metrics === 'object') Object.keys(x.metrics).filter(sid).slice(0, 30).forEach(k => { metrics[k] = (Array.isArray(x.metrics[k]) ? x.metrics[k] : []).slice(-800).filter(d => d && iso(d.date)).map(d => { const o = {date: String(d.date).slice(0, 10)}; ['followers', 'followersGained', 'followersLost', 'organicReach', 'paidReach', 'organicImpressions', 'paidImpressions', 'organicEngagement', 'paidEngagement', 'adSpend'].forEach(f => { o[f] = num(d[f], 0, 1e10); }); return o; }); });
   return {accounts, posts, boosts, inbox, events, metrics, migrated: !!x.migrated, example: !!x.example};
 }
+/* Landing pages: dados do produto, insumos, blocos (tipos fixos, textos limitados), visual e rastreio. Mantém os campos antigos (headline, sub, bullets, cta, whatsapp). */
+const LP_BLOCK_TYPES = ['hero', 'numeros', 'dor', 'solucao', 'beneficios', 'passos', 'conteudo', 'para_quem', 'autoridade', 'prova', 'oferta', 'bonus', 'garantia', 'faq', 'programa', 'palestrantes', 'local', 'ingressos', 'texto', 'cta_final', 'form'];
+function normalizeLandings(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TY = ['curso', 'ebook', 'servico', 'evento', 'generico'];
+  return (Array.isArray(x) ? x : []).filter(l => l && typeof l === 'object').slice(0, 200).map(l => {
+    const pr = l.product || {}, th = l.theme || {}, tr = l.tracking || {};
+    return {id: sid(l.id) ? l.id : uid('lp'), name: str(l.name, 120) || 'Landing page', goal: str(l.goal, 30) || 'Gerar lead', headline: str(l.headline, 300), sub: str(l.sub, 500), bullets: str(l.bullets, 3000), cta: str(l.cta, 80) || 'Enviar', whatsapp: str(l.whatsapp, 20).replace(/\D/g, ''), status: str(l.status, 30) || 'Rascunho',
+      type: TY.includes(l.type) ? l.type : '', product: {nome: str(pr.nome, 160), preco: str(pr.preco, 80), publico: str(pr.publico, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(pr.checkout || '') ? pr.checkout : '', data: str(pr.data, 80), local: str(pr.local, 200)}, input: str(l.input, 60000),
+      theme: {accent: hex(th.accent, '#e4572e'), bg: hex(th.bg, '#ffffff'), fg: hex(th.fg, '#141414'), dark: !!th.dark, head: str(th.head, 60) || 'Poppins', body: str(th.body, 60) || 'Inter'},
+      tracking: {metaPixel: /^\d{5,20}$/.test(tr.metaPixel || '') ? tr.metaPixel : '', ga4: /^G-[A-Z0-9]{4,14}$/.test(tr.ga4 || '') ? tr.ga4 : ''}, privacyUrl: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(l.privacyUrl || '') ? l.privacyUrl : '',
+      blocks: (Array.isArray(l.blocks) ? l.blocks : []).filter(b => b && LP_BLOCK_TYPES.includes(b.t)).slice(0, 40).map(b => ({id: sid(b.id) ? b.id : uid('bk'), t: b.t, on: b.on !== false, title: str(b.title, 300), text: str(b.text, 3000), kicker: str(b.kicker, 120), cta: str(b.cta, 80), note: str(b.note, 300), name: str(b.name, 160), price: str(b.price, 80), imgId: sid(b.imgId) ? b.imgId : '',
+        items: (Array.isArray(b.items) ? b.items : []).slice(0, 30).map(i => ({t: str(i && i.t, 400), d: str(i && i.d, 1200)})), yes: (Array.isArray(b.yes) ? b.yes : []).slice(0, 12).map(t => str(t, 300)), no: (Array.isArray(b.no) ? b.no : []).slice(0, 12).map(t => str(t, 300))})),
+      created: str(l.created, 40) || new Date().toISOString()};
+  });
+}
 function normalizeCarousel(c) {
   c = c && typeof c === 'object' ? c : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), T = (Array.isArray(c.texts) ? c.texts : []).slice(0, 18).map(t => str(t, 1200)); while (T.length < 18) T.push('');
   return {base: /^[\w-]{1,30}$/.test(c.base || '') ? c.base : 'brandsdecoded', cover: /^[\w-]{1,30}$/.test(c.cover || '') ? c.cover : 'tese', style: /^[\w-]{0,40}$/.test(c.style || '') ? (c.style || '') : '', dark: !!c.dark, idea: str(c.idea, 4000), useAgent: c.useAgent !== false, texts: T,
@@ -1094,7 +1119,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.social = normalizeSocial(q.social); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
@@ -1305,7 +1330,7 @@ async function testWebhook() { try { await sendWebhook('teste', {from: 'Ampliaç
 </script>
 <script>
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
+const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -1332,7 +1357,7 @@ function go(page) {
 function renderPage(page) {
   ({home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
     videoLab: renderVideoLab, campaigns: renderCampaignsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
-    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, editorial: renderEditorial, biblioteca: renderBiblioteca, carrosseis: renderCarrosseis}[page] || (() => {}))();
+    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, editorial: renderEditorial, biblioteca: renderBiblioteca, carrosseis: renderCarrosseis, landings: renderLandings}[page] || (() => {}))();
 }
 function refreshCurrentView() { renderSyncBadge(); renderHome(); renderPage(ui.page); updateContextUI(); }
 function bootRender() { $('credits').textContent = state.credits; updateContextUI(); renderHome(); renderPage(ui.page); renderSyncBadge(); }
@@ -8241,7 +8266,7 @@ const TABS = {
     return `<div class="section-row"><h2>Feed criativo</h2><button class="btn dark" onclick="openModal('creative')">＋ Nova criação</button></div>${cr.length ? `<div class="masonry">${cr.map(artCard).join('')}</div>` : emptyState('Sem criações', 'Registre a primeira criação ou gere conceitos na Matriz.')}`;
   },
   landing(p) {
-    return `<div class="two"><div class="panel"><div class="section-row"><h3>Landing Pages</h3><button class="btn dark sm" onclick="landingModal('')">＋ Nova</button></div><div class="list">${p.landings.map(l => `<div class="list-item"><div><strong>${esc(l.name)}</strong><small>${esc(l.goal)} · ${esc(l.status)}</small></div><div class="row-gap"><button class="btn sm" onclick="landingModal('${l.id}')">Editar</button><button class="btn sm" onclick="landingExport('${l.id}')">Exportar HTML</button><button class="btn sm" onclick="landingDelete('${l.id}')">×</button></div></div>`).join('') || '<p class="muted">Nenhuma landing page ainda.</p>'}</div></div>
+    return `<div class="two"><div class="panel"><div class="section-row"><h3>Landing Pages</h3><button class="btn dark sm" onclick="go('landings');setTimeout(lpNewModal,50)">＋ Nova</button></div><div class="list">${p.landings.map(l => `<div class="list-item"><div><strong>${esc(l.name)}</strong><small>${esc(l.goal)} · ${esc(l.status)}</small></div><div class="row-gap"><button class="btn sm" onclick="go('landings');lpOpen('${l.id}')">Abrir no editor</button><button class="btn sm" onclick="landingExport('${l.id}')">Exportar HTML</button><button class="btn sm" onclick="landingDelete('${l.id}')">×</button></div></div>`).join('') || '<p class="muted">Nenhuma landing page ainda.</p>'}</div></div>
       <div class="panel"><h3>Estrutura padrão</h3><div class="kv"><span>Hero</span><strong>Problema + promessa</strong></div><div class="kv"><span>Prova</span><strong>Casos e autoridade</strong></div><div class="kv"><span>CTA</span><strong>Formulário e WhatsApp</strong></div><p class="muted" style="font-size:11px">O HTML exportado já traz um formulário que envia o lead para o seu endpoint (Configurações → URL de captura de leads). Suba o arquivo na Hostinger.</p></div></div>`;
   },
   ads(p) { return campaignsHTML(p); },
@@ -8307,6 +8332,7 @@ fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.s
 }
 function landingExport(id) {
   const p = curProject(), l = p.landings.find(x => x.id === id);
+  if (l.blocks && l.blocks.length) { lpExport(id); return; }
   if (!state.workspace.leadsUrl && l.goal !== 'WhatsApp') toast('Dica: defina a URL de captura de leads em Configurações antes de publicar.');
   download(`${slug(l.name)}.html`, landingHTML(l, p), 'text/html'); l.status = 'Exportada'; persist(); renderProjectTab();
 }
@@ -9564,9 +9590,14 @@ function eEntDesign(kind) {
 /* leva a entrega para a Auditoria anti-IA genérica */
 function eEntAudit(kind) { const s = EDS(), E = entS()[kind]; s.content = {format: E.format || kind, parts: E.parts.map(p => ({label: p.label, texto: p.texto, tela: p.tela || undefined, apoio: p.apoio || undefined}))}; s.format = s.content.format; s.audit = null; s.stage = 'auditoria'; eSave(); renderEditorial(); }
 function eEntLanding() {
-  const p = EDp(), L = entS().landing; if (!p) return;
-  const l = {id: uid('lp'), name: 'LP — ' + (L.headline || 'Editorial').slice(0, 40), goal: 'Gerar lead', headline: L.headline, sub: L.sub, bullets: L.bullets.join('\n'), cta: L.cta || 'Enviar', whatsapp: '', status: 'Rascunho'};
-  p.landings.push(l); persist(); toast('Landing criada no projeto (Rascunho).'); showModal('Landing page criada', `<p style="margin-top:0">A landing <b>${esc(l.name)}</b> foi criada no projeto com headline, subtítulo, provas e botão. As seções (problema, solução, prova, FAQ) ficam como roteiro de texto aqui no Agente.</p><div class="modal-actions"><button class="btn" onclick="closeModal()">Continuar aqui</button><button class="btn dark" onclick="closeModal();landingModal('${l.id}')">Abrir e ajustar a landing</button></div>`);
+  const L = entS().landing; if (!L) return;
+  showModal('Criar landing page', `<p style="margin-top:0">A página nasce dos insumos e do briefing deste Agente. Qual é o tipo de produto?</p><div class="field"><select id="elType">${Object.entries(LP_TYPE_INFO).map(([k, t]) => `<option value="${k}">${esc(t.label)}</option>`).join('')}</select></div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="eEntLandingMake()">Criar e abrir o editor</button></div>`);
+}
+function eEntLandingMake() {
+  const L = entS().landing, t = $('elType').value, l = lpCreate({type: t, name: 'LP — ' + (L.headline || 'Editorial').replace(/\*\*/g, '').slice(0, 40), input: (typeof eCtx === 'function' ? eCtx() : '').slice(0, 60000), headline: L.headline, sub: L.sub, bullets: L.bullets.join('\n'), cta: L.cta});
+  const h = l.blocks.find(b => b.t === 'hero'); if (h) { h.title = L.headline; h.text = L.sub; h.cta = L.cta || h.cta; }
+  const be = l.blocks.find(b => b.t === 'beneficios'); if (be) be.items = L.bullets.map(x => ({t: x, d: ''}));
+  persist(); renderLandings(); toast('Landing criada com a promessa do Agente. Clique em “Gerar a página com IA” para escrever todos os blocos.');
 }
 function eEntLandingMd() { const L = entS().landing; return `# ${L.headline}\n\n${L.sub}\n\n${L.bullets.map(b => '- ' + b).join('\n')}\n\n**CTA:** ${L.cta}\n\n` + L.secoes.map(x => `## ${x.label}\n\n${x.texto}`).join('\n\n'); }
 
@@ -9602,10 +9633,12 @@ function eEntregasUI(s) {
 
 /* ===== Insumos do Agente: descrição (campo acima), link de site, foto/imagem de produto, áudio e atributos do projeto.
    Cada fonte vira um bloco de texto rotulado no insumo, que você pode editar antes da triagem. ===== */
-const eSrc = {busy: '', url: '', save: true, rec: null, recT: 0};
+const eSrc = {busy: '', url: '', save: true, rec: null, recT: 0, sink: null, render: null};
+const eSrcRender = () => (eSrc.render || renderEditorial)();
 const eSrcOK = () => canUseApi();
-function eSrcAdd(label, text) { const s = EDS(); text = String(text || '').trim(); if (!text) return; s.input = ((s.input ? s.input.trim() + '\n\n' : '') + `--- ${label} ---\n${text}`).slice(0, 60000); eSave(); }
-function eInsumoSources(s) {
+function eSrcAdd(label, text) { text = String(text || '').trim(); if (!text) return; if (eSrc.sink) { eSrc.sink(label, text); return; } const s = EDS(); s.input = ((s.input ? s.input.trim() + '\n\n' : '') + `--- ${label} ---\n${text}`).slice(0, 60000); eSave(); }
+function eInsumoSources(s, ctx) {
+  eSrc.sink = ctx && ctx.sink || null; eSrc.render = ctx && ctx.render || null;
   const b = eSrc.busy, dis = b ? 'disabled' : '', can = eSrcOK();
   const st = API.status || {}, sttOn = can && st.stt && st.stt.configured;
   return accSec('edi', 'ins', 'Mais insumos: link, imagem do produto, áudio, atributos do projeto', b ? 'trabalhando…' : 'o que você tiver serve',
@@ -9614,7 +9647,7 @@ function eInsumoSources(s) {
     <div class="okr-label" style="margin-top:10px">ÁUDIO (fala, depoimento, reunião)</div><div class="row-gap" style="flex-wrap:wrap"><input type="file" accept="audio/*,video/mp4,video/webm" onchange="eSrcAudio(this.files[0]);this.value=''" ${dis}>${eSrc.rec ? `<button class="btn sm dark" onclick="eSrcRec()">■ Parar e transcrever</button>` : `<button class="btn sm" onclick="eSrcRec()" ${dis}>● Gravar</button>`}</div><small class="muted block">${b === 'aud' ? 'Transcrevendo…' : sttOn ? 'Até 20 MB. O texto transcrito entra no insumo.' : 'Transcrição não configurada: defina ELEVENLABS_API_KEY ou OPENAI_API_KEY no servidor (Configurações → Integrações).'}</small>
     <div class="okr-label" style="margin-top:10px">ATRIBUTOS DO PROJETO</div><div class="row-gap"><button class="btn sm" onclick="eSrcProject()" ${dis}>Incluir posicionamento, tom, público, oferta e referências do projeto</button></div><small class="muted block">O DNA da marca (aba Memória e DNA) já entra em todas as etapas; aqui vai o contexto do projeto, que você pode editar no texto acima.</small></div>`, false);
 }
-async function eSrcRun(kind, fn) { if (eSrc.busy) return; eSrc.busy = kind; renderEditorial(); try { await fn(); } catch (e) { toast(e.message || 'Falhou.'); } eSrc.busy = ''; renderEditorial(); }
+async function eSrcRun(kind, fn) { if (eSrc.busy) return; eSrc.busy = kind; eSrcRender(); try { await fn(); } catch (e) { toast(e.message || 'Falhou.'); } eSrc.busy = ''; eSrcRender(); }
 function eSrcSite() {
   const u = eSrc.url.trim(); if (!u) { toast('Cole o link.'); return; } if (!eSrcOK()) { toast(needsLogin() ? 'Entre no Studio para ler sites.' : 'A leitura de sites exige o servidor PHP.'); return; }
   eSrcRun('site', async () => { const x = await radarFetchScan(u); eSrcAdd('SITE ' + (x.url || u), [x.title && 'Título: ' + x.title, x.description && 'Descrição: ' + x.description, (x.headings || []).length && 'Títulos da página: ' + x.headings.join(' | '), (x.ctas || []).length && 'Chamadas (CTA): ' + x.ctas.join(' | '), x.textSample && 'Trecho: ' + x.textSample].filter(Boolean).join('\n')); eSrc.url = ''; toast('Site lido e adicionado ao insumo.'); });
@@ -9640,11 +9673,11 @@ async function eSrcRec() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({audio: true}), mr = new MediaRecorder(stream), chunks = [];
     mr.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
-    mr.onstop = () => { stream.getTracks().forEach(t => t.stop()); eSrc.rec = null; const blob = new Blob(chunks, {type: mr.mimeType || 'audio/webm'}); renderEditorial(); eSrcAudio(new File([blob], 'gravacao.webm', {type: blob.type})); };
-    mr.start(); eSrc.rec = mr; renderEditorial(); toast('Gravando… clique em “Parar e transcrever”.');
+    mr.onstop = () => { stream.getTracks().forEach(t => t.stop()); eSrc.rec = null; const blob = new Blob(chunks, {type: mr.mimeType || 'audio/webm'}); eSrcRender(); eSrcAudio(new File([blob], 'gravacao.webm', {type: blob.type})); };
+    mr.start(); eSrc.rec = mr; eSrcRender(); toast('Gravando… clique em “Parar e transcrever”.');
   } catch (e) { toast('Não consegui acessar o microfone.'); }
 }
-function eSrcProject() { const p = EDp(); if (!p) return; const br = p.brand || {}, extra = [br.positioning && 'Posicionamento: ' + br.positioning, br.palette && 'Paleta: ' + br.palette, br.visual && 'Direção visual: ' + br.visual, (p.assets || []).length && 'Assets cadastrados: ' + p.assets.slice(0, 12).map(x => x.name).join(', ')].filter(Boolean).join('\n'), t = [typeof projectContext === 'function' ? projectContext(p) : '', extra].filter(Boolean).join('\n'); if (!t.trim()) { toast('O projeto ainda não tem atributos preenchidos.'); return; } eSrcAdd('ATRIBUTOS DO PROJETO ' + p.name, t.slice(0, 5000)); renderEditorial(); toast('Atributos do projeto adicionados ao insumo.'); }
+function eSrcProject() { const p = EDp(); if (!p) return; const br = p.brand || {}, extra = [br.positioning && 'Posicionamento: ' + br.positioning, br.palette && 'Paleta: ' + br.palette, br.visual && 'Direção visual: ' + br.visual, (p.assets || []).length && 'Assets cadastrados: ' + p.assets.slice(0, 12).map(x => x.name).join(', ')].filter(Boolean).join('\n'), t = [typeof projectContext === 'function' ? projectContext(p) : '', extra].filter(Boolean).join('\n'); if (!t.trim()) { toast('O projeto ainda não tem atributos preenchidos.'); return; } eSrcAdd('ATRIBUTOS DO PROJETO ' + p.name, t.slice(0, 5000)); eSrcRender(); toast('Atributos do projeto adicionados ao insumo.'); }
 
 </script>
 <script>
@@ -16807,6 +16840,254 @@ function anManual() {
   const row = Object.assign({date: d, followersGained: Math.max(0, diff), followersLost: Math.max(0, -diff)}, v), i = serie.findIndex(x => x.date === d); if (i >= 0) serie[i] = row; else serie.push(row);
   S.metrics[id] = serie.sort((a, b) => a.date.localeCompare(b.date)); soSave(); toast('Dia salvo.'); renderSocialAnalytics();
 }
+
+</script>
+<script>
+/* ===== Landing pages: tipos de produto → estrutura de blocos → texto (IA, a partir dos insumos do projeto) → HTML responsivo exportável.
+   As estruturas abaixo são uma proposta de partida (curso online, e-book, serviço, evento): ajuste LP_TYPES quando houver modelos de referência. ===== */
+const LP_TYPE_INFO = {
+  curso: {label: 'Curso online', blocks: ['hero', 'dor', 'solucao', 'conteudo', 'para_quem', 'autoridade', 'prova', 'bonus', 'oferta', 'garantia', 'faq', 'cta_final'], goal: 'checkout', cta: 'Quero me inscrever',
+    why: 'Quem compra curso precisa acreditar que o método funciona e que vai conseguir: promessa → dor → método → o que vai aprender → para quem é → professor → prova → oferta e garantia.'},
+  ebook: {label: 'E-book', blocks: ['hero', 'dor', 'conteudo', 'autoridade', 'prova', 'oferta', 'faq', 'cta_final'], goal: 'checkout', cta: 'Quero o e-book',
+    why: 'Produto de decisão rápida: página curta. Capa e promessa no topo, o que tem dentro (capítulos), quem escreveu, prova e oferta.'},
+  servico: {label: 'Serviço', blocks: ['hero', 'dor', 'solucao', 'passos', 'beneficios', 'prova', 'autoridade', 'faq', 'form'], goal: 'lead', cta: 'Falar com a equipe',
+    why: 'Serviço se vende por confiança: problema → como resolvemos → etapas → resultado → provas reais → equipe → perguntas → contato (formulário/WhatsApp).'},
+  evento: {label: 'Evento', blocks: ['hero', 'numeros', 'texto', 'programa', 'palestrantes', 'local', 'ingressos', 'prova', 'faq', 'cta_final'], goal: 'checkout', cta: 'Garantir meu ingresso',
+    why: 'Evento precisa de data, local e programa visíveis logo no começo, contagem regressiva, quem vai estar lá, lotes e urgência honesta.'},
+  generico: {label: 'Captação simples', blocks: ['hero', 'beneficios', 'prova', 'form'], goal: 'lead', cta: 'Quero receber', why: 'Página curta de captação de lead: promessa, benefícios, prova e formulário.'}
+};
+/* campos de cada bloco (editor e IA): [campo, rótulo, tipo] — tipos: line, area, items(rótulo do t / rótulo do d), list, img */
+const LP_BLOCK = {
+  hero: {label: 'Topo (promessa)', fields: [['kicker', 'Etiqueta (acima do título)', 'line'], ['title', 'Título', 'area'], ['text', 'Subtítulo', 'area'], ['cta', 'Botão', 'line'], ['note', 'Nota abaixo do botão', 'line'], ['imgId', 'Imagem', 'img']], ai: 'title: promessa específica (até 80 caracteres); text: subtítulo que explica para quem e como (até 180); cta: texto do botão; note: microtexto de segurança/condição (opcional); kicker: etiqueta curta'},
+  numeros: {label: 'Números / destaques', fields: [['items', 'Itens', 'items:Valor/Legenda']], ai: 'items: 3 a 4 números ou fatos verificáveis do insumo (t = valor, d = legenda). Sem número no insumo, use [CONFIRMAR: …]'},
+  dor: {label: 'Problema / dor', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area'], ['items', 'Sinais da dor', 'items:Situação/Detalhe']], ai: 'title; text: 1 parágrafo; items: 3 a 5 situações reconhecíveis (t) com detalhe opcional (d)'},
+  solucao: {label: 'Solução / método', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area'], ['items', 'Pilares', 'items:Pilar/Explicação']], ai: 'title; text: como funciona em um parágrafo; items: 3 pilares (t, d)'},
+  beneficios: {label: 'Benefícios', fields: [['title', 'Título', 'line'], ['items', 'Benefícios', 'items:Benefício/Explicação']], ai: 'title; items: 3 a 6 benefícios concretos (t, d), sem promessa absoluta'},
+  passos: {label: 'Como funciona (etapas)', fields: [['title', 'Título', 'line'], ['items', 'Etapas', 'items:Etapa/Descrição']], ai: 'title; items: 3 a 5 etapas na ordem (t, d)'},
+  conteudo: {label: 'Conteúdo (módulos / capítulos)', fields: [['title', 'Título', 'line'], ['items', 'Módulos ou capítulos', 'items:Nome/O que tem dentro']], ai: 'title; items: módulos ou capítulos reais do insumo (t = nome, d = o que a pessoa aprende). Não invente conteúdo que não esteja no insumo'},
+  para_quem: {label: 'Para quem é', fields: [['title', 'Título', 'line'], ['yes', 'É para você se…', 'list'], ['no', 'Não é para você se…', 'list']], ai: 'title; yes: 3 a 5 perfis; no: 2 a 3 perfis'},
+  autoridade: {label: 'Quem está por trás', fields: [['title', 'Título', 'line'], ['name', 'Nome', 'line'], ['text', 'Apresentação', 'area'], ['imgId', 'Foto', 'img']], ai: 'title; name; text: apresentação curta com credenciais SÓ do insumo; sem inventar formação, tempo de experiência ou números'},
+  prova: {label: 'Prova (depoimentos / casos)', fields: [['title', 'Título', 'line'], ['items', 'Depoimentos', 'items:Depoimento/Quem disse']], ai: 'title; items: NÃO invente depoimentos. Use o que existir no insumo; onde faltar, escreva "[CONFIRMAR: depoimento real de cliente]" em t e "[CONFIRMAR: nome]" em d'},
+  oferta: {label: 'Oferta e preço', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area'], ['items', 'O que está incluso', 'items:Item/Detalhe'], ['price', 'Preço', 'line'], ['note', 'Condição de pagamento', 'line'], ['cta', 'Botão', 'line']], ai: 'title; text; items: o que está incluso (do insumo); price e note: use exatamente o preço informado, ou "[CONFIRMAR: preço]"; cta'},
+  bonus: {label: 'Bônus', fields: [['title', 'Título', 'line'], ['items', 'Bônus', 'items:Bônus/Descrição']], ai: 'title; items: só bônus que existam no insumo; sem bônus, retorne lista vazia'},
+  garantia: {label: 'Garantia', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area']], ai: 'title; text: use a garantia do insumo (prazo, condição). Sem informação: "[CONFIRMAR: política de garantia]"'},
+  faq: {label: 'Perguntas frequentes', fields: [['title', 'Título', 'line'], ['items', 'Perguntas', 'items:Pergunta/Resposta']], ai: 'title; items: 4 a 6 perguntas que travam a decisão (t = pergunta, d = resposta honesta, sem inventar regras)'},
+  programa: {label: 'Programa / agenda', fields: [['title', 'Título', 'line'], ['items', 'Atividades', 'items:Horário/Atividade']], ai: 'title; items: programação do insumo (t = horário ou dia, d = atividade). Sem programação: "[CONFIRMAR: horário]"'},
+  palestrantes: {label: 'Quem vai estar', fields: [['title', 'Título', 'line'], ['items', 'Pessoas', 'items:Nome/Mini bio']], ai: 'title; items: pessoas do insumo (t = nome, d = bio curta); sem nomes: "[CONFIRMAR: nome]"'},
+  local: {label: 'Data e local', fields: [['title', 'Título', 'line'], ['text', 'Endereço / como chegar / link online', 'area'], ['note', 'Data e hora', 'line']], ai: 'title; text: endereço ou formato online; note: data e hora (do insumo)'},
+  ingressos: {label: 'Ingressos / lotes', fields: [['title', 'Título', 'line'], ['items', 'Lotes', 'items:Lote/Valor e condição'], ['cta', 'Botão', 'line']], ai: 'title; items: lotes do insumo (t = nome, d = valor e condição); sem valores: "[CONFIRMAR: valor]"; cta'},
+  texto: {label: 'Texto livre / sobre', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area']], ai: 'title; text: 1 a 2 parágrafos'},
+  cta_final: {label: 'Chamada final', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area'], ['cta', 'Botão', 'line']], ai: 'title; text: fecha a decisão sem pressão falsa; cta'},
+  form: {label: 'Formulário de contato', fields: [['title', 'Título', 'line'], ['text', 'Texto', 'area'], ['cta', 'Botão', 'line']], ai: 'title; text: o que acontece depois de enviar; cta'}
+};
+const lpBlockNew = t => Object.assign({id: uid('bk'), t, on: true, title: '', text: '', kicker: '', cta: '', note: '', name: '', price: '', imgId: '', items: [], yes: [], no: []}, {});
+const lpStructure = type => (LP_TYPE_INFO[type] || LP_TYPE_INFO.generico).blocks.map(lpBlockNew);
+
+/* texto de partida quando a IA não está disponível: usa o que o projeto já tem */
+function lpSeedBlocks(l) {
+  const bl = lpStructure(l.type || 'generico'), P = l.product, by = t => bl.find(b => b.t === t);
+  const h = by('hero'); if (h) { h.title = l.headline || P.nome || ''; h.text = l.sub || ''; h.cta = l.cta || LP_TYPE_INFO[l.type || 'generico'].cta; }
+  const be = by('beneficios'); if (be && l.bullets) be.items = l.bullets.split('\n').map(x => x.trim()).filter(Boolean).map(t => ({t, d: ''}));
+  return bl;
+}
+
+/* ---------- renderização do HTML ---------- */
+const lpE = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]);
+const lpRich = s => lpE(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+const lpPending = l => (l.blocks || []).filter(b => b.on).reduce((n, b) => n + (JSON.stringify([b.title, b.text, b.note, b.price, b.items, b.yes, b.no]).match(/\[CONFIRMAR/g) || []).length, 0);
+function lpCta(l, b) {
+  const P = l.product, hasForm = (l.blocks || []).some(x => x.t === 'form' && x.on);
+  if (P.checkout && l.type !== 'servico') return {href: P.checkout, ext: true};
+  if (hasForm) return {href: '#form', ext: false};
+  if (l.whatsapp) return {href: 'https://wa.me/' + l.whatsapp + '?text=' + encodeURIComponent('Olá! Vim pela página: ' + (l.name || '')), ext: true};
+  return {href: P.checkout || '#', ext: !!P.checkout};
+}
+async function lpImg(id) { if (!id) return ''; try { const b = await imgGet(id); if (!b) return ''; return (await ailBlob(b, 1200)).url; } catch (e) { return ''; } }
+function lpFontsLink(th) { const f = [...new Set([th.head, th.body])].filter(Boolean).map(x => 'family=' + encodeURIComponent(x).replace(/%20/g, '+') + ':wght@400;600;700;800').join('&'); return f ? `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?${f}&display=swap">` : ''; }
+function lpCss(th) {
+  const dark = th.dark, bg = dark ? '#0e0e10' : th.bg, fg = dark ? '#f5f5f5' : th.fg, soft = dark ? '#18181b' : 'color-mix(in srgb,' + th.bg + ' 94%,' + th.fg + ')', line = dark ? '#2a2a2f' : 'color-mix(in srgb,' + th.fg + ' 14%,transparent)', mut = dark ? '#a1a1aa' : 'color-mix(in srgb,' + th.fg + ' 62%,' + th.bg + ')';
+  return `:root{--a:${th.accent};--bg:${bg};--fg:${fg};--soft:${soft};--line:${line};--mut:${mut}}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 '${th.body}',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'${th.head}','${th.body}',system-ui,sans-serif;line-height:1.12;margin:0 0 .5em;letter-spacing:-.01em}h1{font-size:clamp(32px,6vw,58px);font-weight:800}h2{font-size:clamp(25px,4vw,38px);font-weight:800}h3{font-size:19px;font-weight:700}p{margin:0 0 1em}
+.w{max-width:1040px;margin:0 auto;padding:0 22px}section{padding:clamp(44px,7vw,84px) 0}section.alt{background:var(--soft)}.k{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--a);margin-bottom:12px}.mut{color:var(--mut)}
+.btn{display:inline-block;background:var(--a);color:#fff;text-decoration:none;font-weight:700;padding:16px 30px;border-radius:12px;font-size:17px;border:0;cursor:pointer;font-family:inherit;box-shadow:0 8px 24px color-mix(in srgb,var(--a) 35%,transparent);transition:transform .15s}.btn:hover{transform:translateY(-2px)}.note{font-size:13px;color:var(--mut);margin-top:10px}
+.hero{padding:clamp(48px,8vw,100px) 0}.hero .g{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}.hero.noimg .g{grid-template-columns:1fr;max-width:760px}.hero img{width:100%;border-radius:18px;display:block;box-shadow:0 20px 60px rgba(0,0,0,.18)}.hero p.sub{font-size:clamp(18px,2.4vw,22px);color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:24px}.card{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:22px}section.alt .card{background:var(--bg)}.card h3{margin-bottom:.35em}.card p{margin:0;color:var(--mut);font-size:15.5px}
+.num{font-size:clamp(34px,5vw,48px);font-weight:800;color:var(--a);font-family:'${th.head}',sans-serif;line-height:1}.step{counter-increment:s}.step::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--a);color:#fff;font-weight:800;margin-bottom:12px}.steps{counter-reset:s}
+ul.ck{list-style:none;padding:0;margin:14px 0 0}ul.ck li{padding:6px 0 6px 30px;position:relative}ul.ck li::before{content:'✓';position:absolute;left:0;color:var(--a);font-weight:800}ul.ck.no li::before{content:'✕';color:#b3261e}
+.q{font-size:18px;font-style:italic;margin-bottom:10px}.price{font-size:clamp(38px,6vw,56px);font-weight:800;font-family:'${th.head}',sans-serif;color:var(--a)}.box{background:var(--bg);border:2px solid var(--a);border-radius:20px;padding:clamp(24px,4vw,40px);max-width:640px;margin:20px auto 0;text-align:center}.box ul.ck{text-align:left;display:inline-block}
+details{border-bottom:1px solid var(--line);padding:14px 0}summary{cursor:pointer;font-weight:700;font-size:18px;list-style:none}summary::-webkit-details-marker{display:none}summary::after{content:'+';float:right;color:var(--a);font-size:22px}details[open] summary::after{content:'–'}details p{margin:10px 0 0;color:var(--mut)}
+.tl{border-left:3px solid var(--a);padding-left:18px;margin:0 0 18px}.tl b{display:block;color:var(--a)}.center{text-align:center}.cd{display:flex;gap:12px;margin:18px 0}.cd div{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 14px;text-align:center;min-width:64px}.cd b{display:block;font-size:26px;font-family:'${th.head}',sans-serif}.cd small{font-size:11px;color:var(--mut);text-transform:uppercase}
+form{max-width:480px;display:grid;gap:12px;margin-top:18px}.center form{margin-left:auto;margin-right:auto;text-align:left}input,textarea{width:100%;padding:14px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--bg);color:var(--fg)}.hp{position:absolute;left:-9999px}.lg{font-size:12.5px;color:var(--mut);display:flex;gap:8px;align-items:flex-start}.lg input{width:auto;margin-top:3px}#ok{display:none;background:#e6f6ea;color:#176b30;padding:12px;border-radius:10px}.wa{display:inline-block;margin-top:12px;font-weight:700;color:var(--a)}
+footer{padding:34px 0;border-top:1px solid var(--line);font-size:13px;color:var(--mut)}.bar{display:none;position:fixed;left:0;right:0;bottom:0;padding:10px 14px;background:var(--bg);border-top:1px solid var(--line);z-index:50}.bar .btn{display:block;text-align:center;padding:14px}
+@media(max-width:760px){.hero .g{grid-template-columns:1fr}.bar{display:block}body{padding-bottom:74px}.btn{width:100%;text-align:center}}`;
+}
+function lpBlockHTML(l, b, ctx) {
+  const E = lpE, R = lpRich, cta = lpCta(l, b), btn = (txt, id) => `<a class="btn" href="${E(cta.href)}"${cta.ext ? ' target="_blank" rel="noopener"' : ''}${id ? ' id="' + id + '"' : ''}>${E(txt || LP_TYPE_INFO[l.type || 'generico'].cta)}</a>`;
+  const head = (extra) => (b.title ? `<h2>${R(b.title)}</h2>` : '') + (extra || ''), items = (cls, fn) => `<div class="grid ${cls || ''}">${b.items.filter(i => i.t || i.d).map(fn).join('')}</div>`;
+  const card = i => `<div class="card">${i.t ? `<h3>${R(i.t)}</h3>` : ''}${i.d ? `<p>${R(i.d)}</p>` : ''}</div>`;
+  switch (b.t) {
+    case 'hero': return `<header class="hero ${ctx.img ? '' : 'noimg'}"><div class="w"><div class="g"><div>${b.kicker ? `<span class="k">${E(b.kicker)}</span>` : ''}<h1>${R(b.title)}</h1>${b.text ? `<p class="sub">${R(b.text)}</p>` : ''}${ctx.countdown}${btn(b.cta, 'cta1')}${b.note ? `<div class="note">${E(b.note)}</div>` : ''}</div>${ctx.img ? `<div><img src="${ctx.img}" alt="${E(b.title)}"></div>` : ''}</div></div></header>`;
+    case 'numeros': return `<section class="alt"><div class="w center"><div class="grid">${b.items.filter(i => i.t).map(i => `<div><div class="num">${E(i.t)}</div><div class="mut">${E(i.d)}</div></div>`).join('')}</div></div></section>`;
+    case 'dor': return `<section><div class="w">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${b.items.length ? `<ul class="ck no">${b.items.filter(i => i.t).map(i => `<li><strong>${R(i.t)}</strong>${i.d ? ' ' + R(i.d) : ''}</li>`).join('')}</ul>` : ''}</div></section>`;
+    case 'solucao': return `<section class="alt"><div class="w">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${items('', card)}</div></section>`;
+    case 'beneficios': return `<section><div class="w">${head()}${items('', card)}</div></section>`;
+    case 'passos': return `<section class="alt"><div class="w">${head()}<div class="grid steps">${b.items.filter(i => i.t || i.d).map(i => `<div class="card step">${i.t ? `<h3>${R(i.t)}</h3>` : ''}${i.d ? `<p>${R(i.d)}</p>` : ''}</div>`).join('')}</div></div></section>`;
+    case 'conteudo': return `<section><div class="w">${head()}${items('', i => `<div class="card"><h3>${R(i.t)}</h3>${i.d ? `<p>${R(i.d)}</p>` : ''}</div>`)}</div></section>`;
+    case 'para_quem': return `<section class="alt"><div class="w">${head()}<div class="grid"><div class="card"><h3>É para você se…</h3><ul class="ck">${b.yes.map(x => `<li>${R(x)}</li>`).join('')}</ul></div>${b.no.length ? `<div class="card"><h3>Não é para você se…</h3><ul class="ck no">${b.no.map(x => `<li>${R(x)}</li>`).join('')}</ul></div>` : ''}</div></div></section>`;
+    case 'autoridade': return `<section><div class="w"><div class="hero ${ctx.img ? '' : 'noimg'}" style="padding:0"><div class="g" style="grid-template-columns:${ctx.img ? '.4fr 1fr' : '1fr'}">${ctx.img ? `<div><img src="${ctx.img}" alt="${E(b.name)}" style="border-radius:50%;aspect-ratio:1;object-fit:cover"></div>` : ''}<div>${head()}${b.name ? `<p><strong>${E(b.name)}</strong></p>` : ''}<p class="mut">${R(b.text)}</p></div></div></div></div></section>`;
+    case 'prova': return `<section class="alt"><div class="w">${head()}${items('', i => `<div class="card"><p class="q">“${R(i.t)}”</p><p><strong>${R(i.d)}</strong></p></div>`)}</div></section>`;
+    case 'oferta': return `<section id="oferta"><div class="w center">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}<div class="box">${b.items.length ? `<ul class="ck">${b.items.filter(i => i.t).map(i => `<li><strong>${R(i.t)}</strong>${i.d ? ' ' + R(i.d) : ''}</li>`).join('')}</ul>` : ''}${b.price ? `<div class="price">${E(b.price)}</div>` : ''}${b.note ? `<div class="note" style="margin:0 0 16px">${E(b.note)}</div>` : ''}${btn(b.cta)}</div></div></section>`;
+    case 'bonus': return b.items.some(i => i.t) ? `<section class="alt"><div class="w">${head()}${items('', card)}</div></section>` : '';
+    case 'garantia': return `<section><div class="w center" style="max-width:720px">${head(`<p class="mut">${R(b.text)}</p>`)}</div></section>`;
+    case 'faq': return `<section><div class="w" style="max-width:780px">${head()}${b.items.filter(i => i.t).map(i => `<details><summary>${R(i.t)}</summary><p>${R(i.d)}</p></details>`).join('')}</div></section>`;
+    case 'programa': return `<section class="alt"><div class="w" style="max-width:780px">${head()}${b.items.filter(i => i.t || i.d).map(i => `<div class="tl"><b>${E(i.t)}</b>${R(i.d)}</div>`).join('')}</div></section>`;
+    case 'palestrantes': return `<section><div class="w">${head()}${items('', card)}</div></section>`;
+    case 'local': return `<section class="alt"><div class="w center" style="max-width:760px">${head(b.note ? `<p><strong>${E(b.note)}</strong></p>` : '')}<p class="mut">${R(b.text)}</p></div></section>`;
+    case 'ingressos': return `<section id="ingressos"><div class="w center">${head()}${items('', i => `<div class="card"><h3>${R(i.t)}</h3><p>${R(i.d)}</p></div>`)}<p style="margin-top:26px">${btn(b.cta)}</p></div></section>`;
+    case 'texto': return `<section><div class="w" style="max-width:780px">${head(`<p class="mut">${R(b.text)}</p>`)}</div></section>`;
+    case 'cta_final': return `<section class="alt"><div class="w center" style="max-width:760px">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${btn(b.cta)}</div></section>`;
+    case 'form': return `<section id="form"><div class="w center" style="max-width:640px">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}<form id="f" novalidate><input name="name" placeholder="Seu nome" required autocomplete="name"><input name="phone" placeholder="WhatsApp com DDD" required autocomplete="tel" inputmode="tel"><input name="email" type="email" placeholder="E-mail (opcional)" autocomplete="email"><input class="hp" name="website" tabindex="-1" autocomplete="off"><label class="lg"><input type="checkbox" name="consent" required> <span>Concordo em receber contato sobre ${E(l.product.nome || l.name)}${l.privacyUrl ? `. <a href="${E(l.privacyUrl)}" target="_blank" rel="noopener">Política de privacidade</a>` : ''}.</span></label><button class="btn" type="submit">${E(b.cta || 'Enviar')}</button><div id="ok">Recebemos seus dados. Entraremos em contato.</div></form>${l.whatsapp ? `<a class="wa" href="https://wa.me/${E(l.whatsapp)}?text=${encodeURIComponent('Olá! Vim pela página: ' + (l.name || ''))}" target="_blank" rel="noopener">Prefere falar no WhatsApp?</a>` : ''}</div></section>`;
+  } return '';
+}
+async function lpHTML(l, p, opts) {
+  opts = opts || {}; const T0 = l.theme || {}, hx = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? v : d, fn = (v, d) => (String(v || '').replace(/[^\w \-]/g, '').trim().slice(0, 60) || d);
+  const th = {accent: hx(T0.accent, '#e4572e'), bg: hx(T0.bg, '#ffffff'), fg: hx(T0.fg, '#141414'), dark: !!T0.dark, head: fn(T0.head, 'Poppins'), body: fn(T0.body, 'Inter')};
+  const TR = {metaPixel: /^\d{5,20}$/.test(l.tracking && l.tracking.metaPixel || '') ? l.tracking.metaPixel : '', ga4: /^G-[A-Z0-9]{4,14}$/.test(l.tracking && l.tracking.ga4 || '') ? l.tracking.ga4 : ''};
+  const blocks = (l.blocks || []).filter(b => b.on), hero = blocks.find(b => b.t === 'hero'), leadsUrl = state.workspace.leadsUrl || '';
+  const sections = []; let hasForm = false, countdown = '';
+  if (l.type === 'evento' && /^\d{4}-\d{2}-\d{2}/.test(l.product.data || '')) countdown = `<div class="cd" id="cd" data-t="${lpE(l.product.data)}"><div><b id="cdd">0</b><small>dias</small></div><div><b id="cdh">0</b><small>horas</small></div><div><b id="cdm">0</b><small>min</small></div></div>`;
+  for (const b of blocks) { const img = b.imgId ? await lpImg(b.imgId) : ''; if (b.t === 'form') hasForm = true; sections.push(lpBlockHTML(l, b, {img, countdown: b.t === 'hero' ? countdown : ''})); }
+  const title = (hero && hero.title ? hero.title.replace(/\*\*/g, '') : l.name) + (l.product.nome ? ' · ' + l.product.nome : ''), desc = (hero && hero.text || l.sub || '').replace(/\*\*/g, '').slice(0, 160), cta = hero ? lpCta(l, hero) : null;
+  const track = opts.preview ? '' : [TR.metaPixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${TR.metaPixel}');fbq('track','PageView');<\/script>` : '', TR.ga4 ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${TR.ga4}"><\/script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${TR.ga4}');<\/script>` : ''].join('');
+  const js = `<script>(function(){var f=document.getElementById('f');if(f)f.addEventListener('submit',function(e){e.preventDefault();var d={source:${JSON.stringify(l.name || 'landing').replace(/</g, '\\u003c')}};new FormData(f).forEach(function(v,k){d[k]=v});if(d.website)return;if(!d.name||!d.phone||!d.consent){alert('Preencha nome, WhatsApp e aceite o contato.');return}delete d.consent;d.consent='sim';var q=location.search.slice(1).split('&');q.forEach(function(x){var s=x.split('=');if(s[0].indexOf('utm_')===0)d[s[0]]=decodeURIComponent(s[1]||'')});${opts.preview ? "document.getElementById('ok').style.display='block';return;" : `var url=${JSON.stringify(leadsUrl).replace(/</g, '\\u003c')};if(!url){alert('Formulário sem destino configurado.');return}`}fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){if(!r.ok)throw 0;f.querySelectorAll('input,button').forEach(function(x){x.disabled=true});document.getElementById('ok').style.display='block';if(window.fbq)fbq('track','Lead');if(window.gtag)gtag('event','generate_lead')}).catch(function(){alert('Não foi possível enviar. Tente pelo WhatsApp.')})});var c=document.getElementById('cd');if(c){var t=new Date(c.dataset.t).getTime();var u=function(){var s=Math.max(0,Math.floor((t-Date.now())/1000));document.getElementById('cdd').textContent=Math.floor(s/86400);document.getElementById('cdh').textContent=Math.floor(s%86400/3600);document.getElementById('cdm').textContent=Math.floor(s%3600/60)};u();setInterval(u,30000)}${opts.preview ? "document.querySelectorAll('a[href^=\"http\"]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault()})});" : ''}})();<\/script>`;
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${lpE(title)}</title><meta name="description" content="${lpE(desc)}"><meta property="og:title" content="${lpE(title)}"><meta property="og:description" content="${lpE(desc)}"><meta name="theme-color" content="${th.accent}">${lpFontsLink(th)}<style>${lpCss(th)}</style>${track}</head><body>${sections.join('\n')}<footer><div class="w">${lpE(p.name)} · ${new Date().getFullYear()}${l.privacyUrl ? ` · <a href="${lpE(l.privacyUrl)}" style="color:inherit">Privacidade</a>` : ''}</div></footer>${cta && hero ? `<div class="bar"><a class="btn" href="${lpE(cta.href)}"${cta.ext ? ' target="_blank" rel="noopener"' : ''}>${lpE(hero.cta || LP_TYPE_INFO[l.type || 'generico'].cta)}</a></div>` : ''}${js}</body></html>`;
+}
+
+</script>
+<script>
+/* ===== Landing pages (tela): lista → novo (tipo de produto) → editor com insumos, blocos, visual e publicar; prévia ao vivo (desktop/celular) ===== */
+const lpUI = {id: '', tab: 'produto', open: {}, device: 'desktop', busy: '', useAgent: true};
+const lpCur = () => { const p = curProject(); return p && p.landings.find(x => x.id === lpUI.id); };
+const lpA = esc;
+
+function renderLandings() {
+  const r = $('landingsRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Landing pages'); return; }
+  if (lpUI.id && !lpCur()) lpUI.id = '';
+  if (lpUI.id) return lpEditor(r, p, lpCur());
+  eSrc.sink = null; eSrc.render = null;
+  r.innerHTML = `<div class="page-head"><div><h1>Landing pages</h1><p>Escolha o tipo de produto, passe os insumos do projeto (descrição, site, imagem, áudio, atributos) e a página é montada em blocos editáveis, com HTML responsivo pronto para publicar.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="lpNewModal()">＋ Nova landing page</button></div></div>
+  ${p.landings.length ? `<div class="lp-list">${p.landings.map(l => { const t = LP_TYPE_INFO[l.type]; return `<div class="panel lp-card"><div><span class="so-badge" style="margin:0 6px 0 0">${lpA(t ? t.label : 'Simples')}</span><small class="muted">${lpA(l.status)}</small><h3 style="margin:6px 0 2px">${lpA(l.name)}</h3><small class="muted block">${(l.blocks || []).filter(b => b.on).length ? (l.blocks.filter(b => b.on).length + ' blocos') : 'formato simples (será convertido ao abrir)'}${lpPending(l) ? ` · <span class="so-warn">${lpPending(l)} item(ns) a confirmar</span>` : ''}</small></div><div class="row-gap"><button class="btn sm dark" onclick="lpOpen('${l.id}')">Abrir</button><button class="btn sm" onclick="lpExport('${l.id}')">⬇ HTML</button><button class="btn sm" onclick="lpDelete('${l.id}')">Excluir</button></div></div>`; }).join('')}</div>` : `<div class="panel"><h3>Nenhuma landing page ainda</h3><p class="muted">Comece pelo tipo de produto: cada um já vem com a estrutura de blocos que mais costuma converter.</p><button class="btn dark" onclick="lpNewModal()">＋ Nova landing page</button></div>`}`;
+}
+function lpNewModal() {
+  showModal('Nova landing page', `<div class="field"><label>Nome interno</label><input id="lpnName" placeholder="Ex.: Curso Finanças sem medo — lançamento"></div><div class="okr-label">TIPO DE PRODUTO</div><div class="lp-types">${Object.entries(LP_TYPE_INFO).map(([k, t], i) => `<label class="lp-type"><input type="radio" name="lpnT" value="${k}" ${i === 0 ? 'checked' : ''}><b>${lpA(t.label)}</b><small class="muted">${lpA(t.why)}</small><small class="mono muted">${t.blocks.map(b => LP_BLOCK[b].label).join(' → ')}</small></label>`).join('')}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="lpCreate()">Criar e abrir</button></div>`);
+  document.getElementById('modalBox').classList.add('wide');
+}
+function lpTheme(p) { try { const tk = lyStyles(p)[0].tk; return {accent: tk.accent, bg: tk.bg, fg: tk.fg, dark: false, head: tk.head.family, body: tk.body.family}; } catch (e) { return {}; } }
+function lpCreate(init) {
+  const p = curProject(), t = init && init.type || (document.querySelector('input[name=lpnT]:checked') || {}).value || 'generico', name = init && init.name || ($('lpnName') && $('lpnName').value.trim()) || 'LP — ' + LP_TYPE_INFO[t].label;
+  const l = normalizeLandings([Object.assign({id: uid('lp'), name, type: t, goal: LP_TYPE_INFO[t].goal === 'lead' ? 'Gerar lead' : 'Conteúdo', cta: LP_TYPE_INFO[t].cta, theme: lpTheme(p), blocks: lpStructure(t), whatsapp: '', status: 'Rascunho'}, init || {})])[0];
+  p.landings.push(l); persist(); closeModal(); lpUI.id = l.id; lpUI.tab = 'produto'; if (ui.page !== 'landings') go('landings'); else renderLandings(); return l;
+}
+function lpOpen(id) {
+  const l = curProject().landings.find(x => x.id === id); if (!l) return;
+  if (!l.type) l.type = 'generico'; if (!(l.blocks || []).length) l.blocks = lpSeedBlocks(l);
+  lpUI.id = id; lpUI.tab = 'blocos'; persist(); renderLandings();
+}
+function lpDelete(id) { if (!confirm('Excluir esta landing page?')) return; const p = curProject(); p.landings = p.landings.filter(x => x.id !== id); persist(); renderLandings(); }
+async function lpExport(id) { const p = curProject(), l = p.landings.find(x => x.id === id); if (!l.blocks.length) { lpOpen(id); return; } if (!state.workspace.leadsUrl && l.blocks.some(b => b.t === 'form' && b.on)) toast('Dica: defina a URL de captura de leads em Configurações antes de publicar.'); if (lpPending(l)) toast(`Atenção: ${lpPending(l)} item(ns) ainda marcado(s) como [CONFIRMAR].`); download(slug(l.name) + '.html', await lpHTML(l, p), 'text/html'); l.status = 'Exportada'; persist(); renderLandings(); }
+
+/* ---------- editor ---------- */
+function lpEditor(r, p, l) {
+  const tabs = [['produto', 'Produto e insumos'], ['blocos', 'Blocos'], ['visual', 'Visual'], ['publicar', 'Publicar']];
+  r.innerHTML = `<div class="page-head"><div><button class="btn sm" onclick="lpUI.id='';renderLandings()">← Todas as landing pages</button><h1 style="margin-top:8px">${lpA(l.name)}</h1></div><div class="actions"><span class="so-badge" style="margin:0">${lpA((LP_TYPE_INFO[l.type] || {}).label || '')}</span><button class="btn dark" onclick="lpExport('${l.id}')">⬇ Exportar HTML</button></div></div>
+  <div class="edh-tabs">${tabs.map(([k, t]) => `<button class="edh-tab ${lpUI.tab === k ? 'on' : ''}" onclick="lpUI.tab='${k}';renderLandings()">${t}</button>`).join('')}</div>
+  <div class="lp-wrap"><div class="lp-side" id="lpSide"></div><div class="lp-prev"><div class="row-gap" style="margin-bottom:8px"><button class="tchip ${lpUI.device === 'desktop' ? 'on' : ''}" onclick="lpUI.device='desktop';lpDevice()">Computador</button><button class="tchip ${lpUI.device === 'mobile' ? 'on' : ''}" onclick="lpUI.device='mobile';lpDevice()">Celular</button><button class="btn sm" onclick="lpPaint()">↻ Atualizar prévia</button></div><div class="lp-frame ${lpUI.device}" id="lpFrameBox"><iframe id="lpFrame" title="Prévia da landing page"></iframe></div></div></div>`;
+  ({produto: lpTabProduto, blocos: lpTabBlocos, visual: lpTabVisual, publicar: lpTabPublicar})[lpUI.tab]($('lpSide'), l, p); lpPaint();
+}
+function lpDevice() { document.querySelectorAll('.lp-prev .tchip').forEach((b, i) => b.classList.toggle('on', (i === 0) === (lpUI.device === 'desktop'))); const f = $('lpFrameBox'); if (f) f.className = 'lp-frame ' + lpUI.device; }
+async function lpPaint() { const l = lpCur(), f = $('lpFrame'); if (!l || !f) return; try { f.srcdoc = await lpHTML(l, curProject(), {preview: true}); } catch (e) { f.srcdoc = '<p style="font:14px sans-serif;padding:20px">Não consegui montar a prévia: ' + lpA(e.message) + '</p>'; } }
+const lpPaintSoon = debounce(() => lpPaint(), 450);
+const lpIn = (label, val, oninput, rows, ph) => `<div class="field"><label>${label}</label>${rows ? `<textarea rows="${rows}" oninput="${oninput}" placeholder="${lpA(ph || '')}">${lpA(val)}</textarea>` : `<input value="${lpA(val)}" oninput="${oninput}" placeholder="${lpA(ph || '')}">`}</div>`;
+function lpSet(path, v) { const l = lpCur(), a = path.split('.'); let o = l; for (let i = 0; i < a.length - 1; i++) o = o[a[i]]; o[a[a.length - 1]] = v; persist(); lpPaintSoon(); }
+
+function lpTabProduto(b, l, p) {
+  const t = LP_TYPE_INFO[l.type] || LP_TYPE_INFO.generico, ev = l.type === 'evento', ready = aiReady(), agentOK = !!(EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief);
+  b.innerHTML = `${lpIn('Nome interno', l.name, `lpSet('name',this.value)`)}
+  <div class="field"><label>Tipo de produto</label><select onchange="lpChangeType(this.value)">${Object.entries(LP_TYPE_INFO).map(([k, x]) => `<option value="${k}" ${l.type === k ? 'selected' : ''}>${lpA(x.label)}</option>`).join('')}</select><small class="muted block">${lpA(t.why)}</small></div>
+  ${accSec('lp', 'prod', 'Dados do produto', lpA(l.product.nome || ''), lpIn('Nome do produto', l.product.nome, `lpSet('product.nome',this.value)`) + lpIn('Preço e condição', l.product.preco, `lpSet('product.preco',this.value)`, 0, 'Ex.: 12x de R$ 49,90 ou R$ 497 à vista') + lpIn('Público', l.product.publico, `lpSet('product.publico',this.value)`, 2) + lpIn('Link de compra / inscrição (checkout)', l.product.checkout, `lpSet('product.checkout',this.value)`, 0, 'https://…') + (ev ? lpIn('Data e hora (AAAA-MM-DDTHH:MM)', l.product.data, `lpSet('product.data',this.value)`, 0, '2026-11-20T19:00') + lpIn('Local ou link online', l.product.local, `lpSet('product.local',this.value)`) : '') + lpIn('WhatsApp (só números, com DDI)', l.whatsapp, `lpSet('whatsapp',this.value.replace(/\\D/g,''))`, 0, '5511999999999'), true)}
+  <div class="field"><label>Insumos <small class="muted">${l.input.length.toLocaleString('pt-BR')} caracteres</small></label><textarea rows="9" oninput="lpCur().input=this.value;persist()" placeholder="Cole a descrição do produto, a ementa, o roteiro do evento, o que o cliente recebe, garantia, depoimentos reais… Quanto mais concreto, menos [CONFIRMAR] na página.">${lpA(l.input)}</textarea></div>
+  ${eInsumoSources(null, {sink: lpSink, render: renderLandings})}
+  <label class="ins inl" style="margin-top:6px"><input type="checkbox" ${lpUI.useAgent && agentOK ? 'checked' : ''} ${agentOK ? '' : 'disabled'} onchange="lpUI.useAgent=this.checked"> usar a ideia e o briefing do Agente Editorial${agentOK ? ': “' + lpA((EDS().ideas[EDS().chosen].tese || '').slice(0, 50)) + '”' : ' (escolha uma ideia no Agente)'}</label>
+  <div class="row-gap" style="margin-top:10px;flex-wrap:wrap"><button class="btn dark" onclick="lpGenerate()" ${lpUI.busy || !ready ? 'disabled' : ''} title="${ready ? '' : 'IA não configurada (Configurações → Integrações)'}">${lpUI.busy ? 'Escrevendo a página…' : '✦ Gerar a página com IA'}</button></div>
+  <small class="muted block" style="margin-top:6px">A IA preenche cada bloco só com o que está nos insumos. O que faltar (preço, depoimento, garantia, números) fica como <b>[CONFIRMAR]</b> para você completar: nada é inventado.</small>`;
+}
+function lpSink(label, text) { const l = lpCur(); l.input = ((l.input ? l.input.trim() + '\n\n' : '') + `--- ${label} ---\n${text}`).slice(0, 60000); persist(); }
+function lpChangeType(t) {
+  const l = lpCur(), had = l.blocks.some(b => b.title || b.text || b.items.length);
+  if (had && !confirm('Trocar o tipo recria a estrutura de blocos e apaga os textos atuais. Continuar?')) { renderLandings(); return; }
+  l.type = t; l.blocks = lpStructure(t); l.cta = LP_TYPE_INFO[t].cta; persist(); renderLandings();
+}
+function lpPrompt(l) {
+  const t = LP_TYPE_INFO[l.type], P = l.product, blocks = l.blocks.filter(b => b.on);
+  return `PRODUTO: ${t.label}\nNome: ${P.nome || '(não informado)'}\nPreço/condição: ${P.preco || '(não informado)'}\nPúblico: ${P.publico || '(não informado)'}\nLink de compra: ${P.checkout ? 'informado' : 'não informado'}${l.type === 'evento' ? `\nData/hora: ${P.data || '(não informada)'}\nLocal: ${P.local || '(não informado)'}` : ''}\nWhatsApp de contato: ${l.whatsapp ? 'sim' : 'não'}\n\nINSUMOS (única fonte de fatos):\n${l.input || '(vazio)'}\n\n${lpUI.useAgent && EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief ? 'IDEIA E BRIEFING DO AGENTE EDITORIAL:\n' + eCtx() + '\n' : ''}ESTRUTURA DA PÁGINA (na ordem; devolva um objeto por bloco):\n${blocks.map((b, i) => `${i + 1}. t="${b.t}" — ${LP_BLOCK[b.t].ai}`).join('\n')}\n\nFormato: JSON {"blocks":[{"t":"hero","kicker":"","title":"","text":"","cta":"","note":"","name":"","price":"","items":[{"t":"","d":""}],"yes":[],"no":[]}]} usando só os campos pedidos em cada bloco.\nRegras: português do Brasil, frases curtas e específicas; use **negrito** para 1 ou 2 palavras-chave do título; NUNCA invente números, depoimentos, nomes, prazos, garantias, preços, credenciais ou resultados: onde o insumo não trouxer o dado, escreva [CONFIRMAR: o que falta]; não prometa resultado garantido; conteúdo de saúde, finanças ou jurídico sem promessa de cura, ganho ou aprovação.`;
+}
+async function lpGenerate() {
+  const l = lpCur(); if (lpUI.busy) return; if (!l.input.trim() && !l.product.nome) { toast('Escreva os insumos ou ao menos o nome do produto.'); return; }
+  lpUI.busy = 'gen'; renderLandings();
+  try {
+    const j = await motJSON('Você é um redator de resposta direta que monta landing pages que convertem sem enganar. ' + (eBrandTxt() ? '\n' + eBrandTxt().slice(0, 6000) : ''), lpPrompt(l), 7000), got = Array.isArray(j.blocks) ? j.blocks : [], used = new Set(), s = (v, n) => String(v == null ? '' : v).slice(0, n);
+    if (!got.length) throw new Error('a IA não devolveu a página.');
+    l.blocks.filter(b => b.on).forEach(b => {
+      const i = got.findIndex((x, k) => !used.has(k) && x && x.t === b.t); if (i < 0) return; used.add(i); const g = got[i];
+      LP_BLOCK[b.t].fields.forEach(([f, , kind]) => { if (kind === 'img') return; if (f === 'items') b.items = (Array.isArray(g.items) ? g.items : []).slice(0, 20).map(x => ({t: s(x && x.t, 400), d: s(x && x.d, 1200)})); else if (f === 'yes' || f === 'no') b[f] = (Array.isArray(g[f]) ? g[f] : []).slice(0, 10).map(x => s(x, 300)); else if (g[f] != null) b[f] = s(g[f], f === 'text' ? 3000 : 400); });
+    });
+    const h = l.blocks.find(b => b.t === 'hero'); if (h) { l.headline = h.title; l.sub = h.text; l.cta = h.cta || l.cta; }
+    persist(); toast('Página escrita. Revise os blocos e complete o que estiver em [CONFIRMAR].'); lpUI.tab = 'blocos';
+  } catch (e) { toast(eErr(e)); }
+  lpUI.busy = ''; renderLandings();
+}
+
+function lpTabBlocos(b, l) {
+  b.innerHTML = `<small class="muted block" style="margin-bottom:8px">Ligue/desligue, reordene e edite cada bloco. A prévia ao lado atualiza sozinha. Itens com <b>[CONFIRMAR]</b> precisam de um dado real antes de publicar.</small>
+  ${l.blocks.map((k, i) => { const def = LP_BLOCK[k.t], pend = (JSON.stringify([k.title, k.text, k.note, k.price, k.items, k.yes, k.no]).match(/\[CONFIRMAR/g) || []).length; return accSec('lp', k.id, `<label onclick="event.stopPropagation()" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" ${k.on ? 'checked' : ''} onchange="lpBlk('${k.id}','on',this.checked,true)"> ${i + 1}. ${lpA(def.label)}</label>`, `${pend ? `<span class="so-warn">${pend} a confirmar</span> ` : ''}${lpA((k.title || k.items[0] && k.items[0].t || '').replace(/\*\*/g, '').slice(0, 28))}`, `<div class="row-gap" style="margin-bottom:8px"><button class="btn sm" onclick="lpMove('${k.id}',-1)" ${i === 0 ? 'disabled' : ''}>▲</button><button class="btn sm" onclick="lpMove('${k.id}',1)" ${i === l.blocks.length - 1 ? 'disabled' : ''}>▼</button><button class="btn sm" onclick="lpDup('${k.id}')">Duplicar</button><button class="btn sm" onclick="lpBlkDel('${k.id}')">Remover</button></div>${def.fields.map(f => lpField(k, f)).join('')}`, i === 0); }).join('')}
+  <div class="row-gap" style="margin-top:10px"><select id="lpAdd">${Object.entries(LP_BLOCK).map(([t, d]) => `<option value="${t}">${lpA(d.label)}</option>`).join('')}</select><button class="btn sm dark" onclick="lpAddBlock()">＋ Adicionar bloco</button></div>`;
+}
+function lpField(k, [f, label, kind]) {
+  if (kind === 'line') return `<div class="field"><label>${label}</label><input value="${lpA(k[f])}" oninput="lpBlk('${k.id}','${f}',this.value)"></div>`;
+  if (kind === 'area') return `<div class="field"><label>${label}</label><textarea rows="3" oninput="lpBlk('${k.id}','${f}',this.value)">${lpA(k[f])}</textarea></div>`;
+  if (kind === 'list') return `<div class="field"><label>${label} (um por linha)</label><textarea rows="4" oninput="lpBlk('${k.id}','${f}',this.value.split('\\n').filter(Boolean))">${lpA(k[f].join('\n'))}</textarea></div>`;
+  if (kind === 'img') return `<div class="field"><label>${label}</label><div class="row-gap"><button class="btn sm" onclick="lpPickImg('${k.id}')">${k[f] ? 'Trocar' : '📚 Escolher da biblioteca'}</button>${k[f] ? `<button class="btn sm" onclick="lpBlk('${k.id}','${f}','',true)">Remover</button>` : ''}</div></div>`;
+  if (kind.startsWith('items')) { const [a, c] = kind.slice(6).split('/'); return `<div class="field"><label>${label}</label>${k.items.map((it, n) => `<div class="lp-it"><input value="${lpA(it.t)}" placeholder="${a}" oninput="lpItem('${k.id}',${n},'t',this.value)"><textarea rows="2" placeholder="${c}" oninput="lpItem('${k.id}',${n},'d',this.value)">${lpA(it.d)}</textarea><button class="btn sm" onclick="lpItemDel('${k.id}',${n})" title="Remover item">×</button></div>`).join('')}<button class="btn sm" onclick="lpItemAdd('${k.id}')">＋ Item</button></div>`; }
+  return '';
+}
+const lpBk = id => lpCur().blocks.find(b => b.id === id);
+function lpBlk(id, f, v, rerender) { lpBk(id)[f] = v; persist(); if (rerender) renderLandings(); else lpPaintSoon(); }
+function lpItem(id, n, k, v) { lpBk(id).items[n][k] = v; persist(); lpPaintSoon(); }
+function lpItemAdd(id) { lpBk(id).items.push({t: '', d: ''}); persist(); renderLandings(); }
+function lpItemDel(id, n) { lpBk(id).items.splice(n, 1); persist(); renderLandings(); }
+function lpMove(id, d) { const a = lpCur().blocks, i = a.findIndex(b => b.id === id), j = i + d; if (j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; persist(); renderLandings(); }
+function lpDup(id) { const a = lpCur().blocks, i = a.findIndex(b => b.id === id), c = JSON.parse(JSON.stringify(a[i])); c.id = uid('bk'); a.splice(i + 1, 0, c); persist(); renderLandings(); }
+function lpBlkDel(id) { const l = lpCur(); l.blocks = l.blocks.filter(b => b.id !== id); persist(); renderLandings(); }
+function lpAddBlock() { lpCur().blocks.push(lpBlockNew($('lpAdd').value)); persist(); renderLandings(); }
+function lpPickImg(id) { libPick(r => { lpBk(id).imgId = r.id; persist(); renderLandings(); }); }
+
+function lpTabVisual(b, l, p) {
+  const th = l.theme, col = (k, lab) => `<label class="ins">${lab}<input type="color" value="${th[k]}" oninput="lpSet('theme.${k}',this.value)"></label>`;
+  b.innerHTML = `<div class="ins-row">${col('accent', 'Cor de destaque')}${col('bg', 'Fundo')}${col('fg', 'Texto')}<label class="ins inl"><input type="checkbox" ${th.dark ? 'checked' : ''} onchange="lpSet('theme.dark',this.checked)"> modo escuro</label></div>
+  <div class="ins-row"><div class="field"><label>Fonte dos títulos</label><button class="btn sm" onclick="lpFont('head')">${lpA(th.head)} · trocar</button></div><div class="field"><label>Fonte do texto</label><button class="btn sm" onclick="lpFont('body')">${lpA(th.body)} · trocar</button></div></div>
+  <div class="row-gap"><button class="btn sm" onclick="lpBrandTheme()">Usar as cores e fontes da marca</button></div><small class="muted block" style="margin-top:6px">As fontes são carregadas do Google Fonts na página publicada; sem internet o navegador usa uma fonte do sistema.</small>`;
+}
+function lpFont(k) { fbOpen(fam => { lpSet('theme.' + k, fam); closeModal(); renderLandings(); }, lpCur().theme[k]); }
+function lpBrandTheme() { const l = lpCur(); Object.assign(l.theme, lpTheme(curProject())); persist(); renderLandings(); }
+
+function lpTabPublicar(b, l) {
+  const checks = [[!!l.blocks.find(x => x.t === 'hero' && x.on && x.title), 'Título (promessa) preenchido'], [!!(l.product.checkout || l.whatsapp || l.blocks.some(x => x.t === 'form' && x.on)), 'A página tem para onde levar o clique (checkout, WhatsApp ou formulário)'], [lpPending(l) === 0, lpPending(l) ? `${lpPending(l)} item(ns) ainda como [CONFIRMAR]` : 'Nenhum item pendente de confirmação'], [!l.blocks.some(x => x.t === 'form' && x.on) || !!state.workspace.leadsUrl, 'Formulário com destino de leads configurado (Configurações)'], [!l.blocks.some(x => x.t === 'form' && x.on) || !!l.privacyUrl, 'Link da política de privacidade (LGPD) no formulário'], [!l.blocks.some(x => x.t === 'prova' && x.on) || !/\[CONFIRMAR/.test(JSON.stringify(l.blocks.filter(x => x.t === 'prova')) ), 'Depoimentos reais e autorizados']];
+  b.innerHTML = `<div class="panel"><h3>Antes de publicar</h3>${checks.map(([ok, t]) => `<div class="so-issue ${ok ? '' : 'aviso'}" style="${ok ? 'background:#e9f7ee;color:#176b30' : ''}">${ok ? '✓' : '⚠'} ${lpA(t)}</div>`).join('')}</div>
+  ${lpIn('Política de privacidade (URL)', l.privacyUrl, `lpSet('privacyUrl',this.value)`, 0, 'https://…')}${lpIn('ID do Pixel da Meta (só números)', l.tracking.metaPixel, `lpSet('tracking.metaPixel',this.value.trim())`)}${lpIn('ID do Google Analytics 4 (G-XXXXXXX)', l.tracking.ga4, `lpSet('tracking.ga4',this.value.trim())`)}
+  <div class="field"><label>Status</label><select onchange="lpCur().status=this.value;persist()">${['Rascunho', 'Em revisão', 'Aprovada', 'Exportada', 'Publicada'].map(s => `<option ${l.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+  <div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" onclick="lpExport('${l.id}')">⬇ Exportar HTML</button><button class="btn" onclick="lpCopyHTML()">Copiar HTML</button></div><small class="muted block" style="margin-top:8px">O arquivo é uma página única, responsiva, sem dependência além das fontes. Suba na Hostinger (public_html) ou em qualquer hospedagem. O formulário envia para <span class="mono">${lpA(state.workspace.leadsUrl || 'a URL de leads (não configurada)')}</span>. O Pixel e o GA4 só entram no arquivo exportado, não na prévia.</small>`;
+}
+async function lpCopyHTML() { const l = lpCur(); try { await navigator.clipboard.writeText(await lpHTML(l, curProject())); toast('HTML copiado.'); } catch (e) { toast('Não consegui copiar; use Exportar.'); } }
 
 </script>
 <script>

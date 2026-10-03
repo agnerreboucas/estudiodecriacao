@@ -60,9 +60,14 @@ function eEntDesign(kind) {
 /* leva a entrega para a Auditoria anti-IA genérica */
 function eEntAudit(kind) { const s = EDS(), E = entS()[kind]; s.content = {format: E.format || kind, parts: E.parts.map(p => ({label: p.label, texto: p.texto, tela: p.tela || undefined, apoio: p.apoio || undefined}))}; s.format = s.content.format; s.audit = null; s.stage = 'auditoria'; eSave(); renderEditorial(); }
 function eEntLanding() {
-  const p = EDp(), L = entS().landing; if (!p) return;
-  const l = {id: uid('lp'), name: 'LP — ' + (L.headline || 'Editorial').slice(0, 40), goal: 'Gerar lead', headline: L.headline, sub: L.sub, bullets: L.bullets.join('\n'), cta: L.cta || 'Enviar', whatsapp: '', status: 'Rascunho'};
-  p.landings.push(l); persist(); toast('Landing criada no projeto (Rascunho).'); showModal('Landing page criada', `<p style="margin-top:0">A landing <b>${esc(l.name)}</b> foi criada no projeto com headline, subtítulo, provas e botão. As seções (problema, solução, prova, FAQ) ficam como roteiro de texto aqui no Agente.</p><div class="modal-actions"><button class="btn" onclick="closeModal()">Continuar aqui</button><button class="btn dark" onclick="closeModal();landingModal('${l.id}')">Abrir e ajustar a landing</button></div>`);
+  const L = entS().landing; if (!L) return;
+  showModal('Criar landing page', `<p style="margin-top:0">A página nasce dos insumos e do briefing deste Agente. Qual é o tipo de produto?</p><div class="field"><select id="elType">${Object.entries(LP_TYPE_INFO).map(([k, t]) => `<option value="${k}">${esc(t.label)}</option>`).join('')}</select></div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="eEntLandingMake()">Criar e abrir o editor</button></div>`);
+}
+function eEntLandingMake() {
+  const L = entS().landing, t = $('elType').value, l = lpCreate({type: t, name: 'LP — ' + (L.headline || 'Editorial').replace(/\*\*/g, '').slice(0, 40), input: (typeof eCtx === 'function' ? eCtx() : '').slice(0, 60000), headline: L.headline, sub: L.sub, bullets: L.bullets.join('\n'), cta: L.cta});
+  const h = l.blocks.find(b => b.t === 'hero'); if (h) { h.title = L.headline; h.text = L.sub; h.cta = L.cta || h.cta; }
+  const be = l.blocks.find(b => b.t === 'beneficios'); if (be) be.items = L.bullets.map(x => ({t: x, d: ''}));
+  persist(); renderLandings(); toast('Landing criada com a promessa do Agente. Clique em “Gerar a página com IA” para escrever todos os blocos.');
 }
 function eEntLandingMd() { const L = entS().landing; return `# ${L.headline}\n\n${L.sub}\n\n${L.bullets.map(b => '- ' + b).join('\n')}\n\n**CTA:** ${L.cta}\n\n` + L.secoes.map(x => `## ${x.label}\n\n${x.texto}`).join('\n\n'); }
 
@@ -98,10 +103,12 @@ function eEntregasUI(s) {
 
 /* ===== Insumos do Agente: descrição (campo acima), link de site, foto/imagem de produto, áudio e atributos do projeto.
    Cada fonte vira um bloco de texto rotulado no insumo, que você pode editar antes da triagem. ===== */
-const eSrc = {busy: '', url: '', save: true, rec: null, recT: 0};
+const eSrc = {busy: '', url: '', save: true, rec: null, recT: 0, sink: null, render: null};
+const eSrcRender = () => (eSrc.render || renderEditorial)();
 const eSrcOK = () => canUseApi();
-function eSrcAdd(label, text) { const s = EDS(); text = String(text || '').trim(); if (!text) return; s.input = ((s.input ? s.input.trim() + '\n\n' : '') + `--- ${label} ---\n${text}`).slice(0, 60000); eSave(); }
-function eInsumoSources(s) {
+function eSrcAdd(label, text) { text = String(text || '').trim(); if (!text) return; if (eSrc.sink) { eSrc.sink(label, text); return; } const s = EDS(); s.input = ((s.input ? s.input.trim() + '\n\n' : '') + `--- ${label} ---\n${text}`).slice(0, 60000); eSave(); }
+function eInsumoSources(s, ctx) {
+  eSrc.sink = ctx && ctx.sink || null; eSrc.render = ctx && ctx.render || null;
   const b = eSrc.busy, dis = b ? 'disabled' : '', can = eSrcOK();
   const st = API.status || {}, sttOn = can && st.stt && st.stt.configured;
   return accSec('edi', 'ins', 'Mais insumos: link, imagem do produto, áudio, atributos do projeto', b ? 'trabalhando…' : 'o que você tiver serve',
@@ -110,7 +117,7 @@ function eInsumoSources(s) {
     <div class="okr-label" style="margin-top:10px">ÁUDIO (fala, depoimento, reunião)</div><div class="row-gap" style="flex-wrap:wrap"><input type="file" accept="audio/*,video/mp4,video/webm" onchange="eSrcAudio(this.files[0]);this.value=''" ${dis}>${eSrc.rec ? `<button class="btn sm dark" onclick="eSrcRec()">■ Parar e transcrever</button>` : `<button class="btn sm" onclick="eSrcRec()" ${dis}>● Gravar</button>`}</div><small class="muted block">${b === 'aud' ? 'Transcrevendo…' : sttOn ? 'Até 20 MB. O texto transcrito entra no insumo.' : 'Transcrição não configurada: defina ELEVENLABS_API_KEY ou OPENAI_API_KEY no servidor (Configurações → Integrações).'}</small>
     <div class="okr-label" style="margin-top:10px">ATRIBUTOS DO PROJETO</div><div class="row-gap"><button class="btn sm" onclick="eSrcProject()" ${dis}>Incluir posicionamento, tom, público, oferta e referências do projeto</button></div><small class="muted block">O DNA da marca (aba Memória e DNA) já entra em todas as etapas; aqui vai o contexto do projeto, que você pode editar no texto acima.</small></div>`, false);
 }
-async function eSrcRun(kind, fn) { if (eSrc.busy) return; eSrc.busy = kind; renderEditorial(); try { await fn(); } catch (e) { toast(e.message || 'Falhou.'); } eSrc.busy = ''; renderEditorial(); }
+async function eSrcRun(kind, fn) { if (eSrc.busy) return; eSrc.busy = kind; eSrcRender(); try { await fn(); } catch (e) { toast(e.message || 'Falhou.'); } eSrc.busy = ''; eSrcRender(); }
 function eSrcSite() {
   const u = eSrc.url.trim(); if (!u) { toast('Cole o link.'); return; } if (!eSrcOK()) { toast(needsLogin() ? 'Entre no Studio para ler sites.' : 'A leitura de sites exige o servidor PHP.'); return; }
   eSrcRun('site', async () => { const x = await radarFetchScan(u); eSrcAdd('SITE ' + (x.url || u), [x.title && 'Título: ' + x.title, x.description && 'Descrição: ' + x.description, (x.headings || []).length && 'Títulos da página: ' + x.headings.join(' | '), (x.ctas || []).length && 'Chamadas (CTA): ' + x.ctas.join(' | '), x.textSample && 'Trecho: ' + x.textSample].filter(Boolean).join('\n')); eSrc.url = ''; toast('Site lido e adicionado ao insumo.'); });
@@ -136,8 +143,8 @@ async function eSrcRec() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({audio: true}), mr = new MediaRecorder(stream), chunks = [];
     mr.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
-    mr.onstop = () => { stream.getTracks().forEach(t => t.stop()); eSrc.rec = null; const blob = new Blob(chunks, {type: mr.mimeType || 'audio/webm'}); renderEditorial(); eSrcAudio(new File([blob], 'gravacao.webm', {type: blob.type})); };
-    mr.start(); eSrc.rec = mr; renderEditorial(); toast('Gravando… clique em “Parar e transcrever”.');
+    mr.onstop = () => { stream.getTracks().forEach(t => t.stop()); eSrc.rec = null; const blob = new Blob(chunks, {type: mr.mimeType || 'audio/webm'}); eSrcRender(); eSrcAudio(new File([blob], 'gravacao.webm', {type: blob.type})); };
+    mr.start(); eSrc.rec = mr; eSrcRender(); toast('Gravando… clique em “Parar e transcrever”.');
   } catch (e) { toast('Não consegui acessar o microfone.'); }
 }
-function eSrcProject() { const p = EDp(); if (!p) return; const br = p.brand || {}, extra = [br.positioning && 'Posicionamento: ' + br.positioning, br.palette && 'Paleta: ' + br.palette, br.visual && 'Direção visual: ' + br.visual, (p.assets || []).length && 'Assets cadastrados: ' + p.assets.slice(0, 12).map(x => x.name).join(', ')].filter(Boolean).join('\n'), t = [typeof projectContext === 'function' ? projectContext(p) : '', extra].filter(Boolean).join('\n'); if (!t.trim()) { toast('O projeto ainda não tem atributos preenchidos.'); return; } eSrcAdd('ATRIBUTOS DO PROJETO ' + p.name, t.slice(0, 5000)); renderEditorial(); toast('Atributos do projeto adicionados ao insumo.'); }
+function eSrcProject() { const p = EDp(); if (!p) return; const br = p.brand || {}, extra = [br.positioning && 'Posicionamento: ' + br.positioning, br.palette && 'Paleta: ' + br.palette, br.visual && 'Direção visual: ' + br.visual, (p.assets || []).length && 'Assets cadastrados: ' + p.assets.slice(0, 12).map(x => x.name).join(', ')].filter(Boolean).join('\n'), t = [typeof projectContext === 'function' ? projectContext(p) : '', extra].filter(Boolean).join('\n'); if (!t.trim()) { toast('O projeto ainda não tem atributos preenchidos.'); return; } eSrcAdd('ATRIBUTOS DO PROJETO ' + p.name, t.slice(0, 5000)); eSrcRender(); toast('Atributos do projeto adicionados ao insumo.'); }
