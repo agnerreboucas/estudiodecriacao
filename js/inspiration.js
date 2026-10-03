@@ -1,6 +1,6 @@
 /* ===== Inspiração: o nosso Pinterest. Referências por categoria (imagens, links e paletas), quadros, busca, filtro por cor ===== */
 const INSPO_CATS = [
-  {id: 'posts', label: 'Posts', hint: 'Feed, carrosséis, stories e capas'}, {id: 'diagramacao', label: 'Diagramação', hint: 'Grids, hierarquia, composição de página'}, {id: 'logos', label: 'Logos', hint: 'Marcas, símbolos e lockups'},
+  {id: 'posts', label: 'Posts', hint: 'Feed, carrosséis, stories e capas'}, {id: 'capas', label: 'Capas de livro', hint: 'Capas, tipografia de título, mockups'}, {id: 'diagramacao', label: 'Diagramação', hint: 'Grids, hierarquia, composição de página'}, {id: 'logos', label: 'Logos', hint: 'Marcas, símbolos e lockups'},
   {id: 'cartaz', label: 'Cartaz e pôster', hint: 'Cartazes, flyers, eventos e capas'}, {id: 'foto', label: 'Fotografia', hint: 'Luz, enquadramento, direção de arte'}, {id: 'estilos', label: 'Estilos de design', hint: 'Movimentos, tendências e linguagens visuais'}, {id: 'cores', label: 'Cores', hint: 'Paletas e combinações'}
 ];
 const INSPO_HUES = [['red', 'Vermelho', '#e5484d'], ['orange', 'Laranja', '#f08a24'], ['yellow', 'Amarelo', '#f5c518'], ['green', 'Verde', '#30a46c'], ['teal', 'Turquesa', '#12a594'], ['blue', 'Azul', '#3e63dd'], ['purple', 'Roxo', '#8e4ec6'], ['pink', 'Rosa', '#e93d82'], ['neutral', 'Neutras', '#8b8d98']];

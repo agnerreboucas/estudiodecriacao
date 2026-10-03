@@ -3,7 +3,8 @@
 /* ---------- referência ---------- */
 function dtpRefHTML(d) {
   const r = dui.refRes, pc = v => (v * 100).toFixed(1) + '%';
-  return `<small class="muted block">Suba um print ou foto de uma página que você quer imitar. Ela vira uma camada translúcida sobre a página (para você alinhar guias na mão) e o Studio mede margens, colunas, entrelinha e cores para aplicar no seu documento, com o seu conteúdo.</small>
+  setTimeout(bankFill, 30);
+  return `${refBankHTML('dtp', ['diagramacao', 'capas', 'posts', 'cartaz'])}<small class="muted block">Suba um print ou foto de uma página que você quer imitar. Ela vira uma camada translúcida sobre a página (para você alinhar guias na mão) e o Studio mede margens, colunas, entrelinha e cores para aplicar no seu documento, com o seu conteúdo.</small>
   <div class="row-gap" style="margin:8px 0;flex-wrap:wrap"><button class="btn sm dark" onclick="dtpRefPick()">${dui.ref ? 'Trocar referência' : 'Subir referência'}</button>${dui.ref ? `<button class="btn sm" onclick="dui.ref=null;dui.refOn=false;dui.refRes=null;dtpDraw();dtpPanel()">Remover</button>` : ''}</div>
   ${dui.ref ? `<label class="dtp-chk"><input type="checkbox" ${dui.refOn ? 'checked' : ''} onchange="dui.refOn=this.checked;dtpDraw()"> Mostrar sobre a página</label><label class="muted" style="font-size:11px">Opacidade ${Math.round(dui.refOp * 100)}%</label><input type="range" min="10" max="90" value="${Math.round(dui.refOp * 100)}" oninput="dui.refOp=this.value/100;dtpDraw()"><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dtpRefRun()">Medir (margens, colunas, entrelinha)</button><button class="btn sm dark" onclick="ailStart(dui.ref,'dtp')" title="A IA lê fontes, tamanhos, cores e blocos">✦ Ler layout com IA</button></div>` : ''}
   ${r ? `<div class="dtp-res"><div class="okr-label">O QUE FOI ENCONTRADO</div><ul style="margin:4px 0 8px 16px;padding:0;font-size:12px;line-height:1.55">
@@ -88,17 +89,22 @@ async function dtpRenderPage(d, f, i, dpi, bl, marks) {
     [[0, 0, -1, -1], [W, 0, 1, -1], [0, H, -1, 1], [W, H, 1, 1]].forEach(([cx, cy, sx, sy]) => { line(cx, cy + sy * o, cx, cy + sy * (o + L)); line(cx + sx * o, cy, cx + sx * (o + L), cy); }); }
   return {cv, S};
 }
+/* monta o PDF de um documento; o={dpi, marks, bleed(bool), from, to, progress} */
+async function dtpPdfBuild(d, o) {
+  await dtpFonts(d); await dtpLoadImgs(d); const f = dtpFlow(d), n = dtpPageCount(d, f), dpi = o.dpi || 300, marks = !!o.marks, bl = o.bleed ? d.bleed : 0, pages = [];
+  const a = Math.max(1, Math.min(n, o.from || 1)), z = Math.max(a, Math.min(n, o.to || n));
+  for (let i = a - 1; i < z; i++) {
+    const {cv, S} = await dtpRenderPage(d, f, i, dpi, bl, marks), blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.92));
+    pages.push({jpeg: new Uint8Array(await blob.arrayBuffer()), w: cv.width, h: cv.height, pw: d.page.w + 2 * S, ph: d.page.h + 2 * S, tb: {s: S, w: d.page.w, h: d.page.h, bl}});
+    if (o.progress) o.progress(i + 1, z); await new Promise(r => setTimeout(r, 0));
+  }
+  return {blob: buildPDF(pages, d.page.w, d.page.h), n: pages.length, flow: f};
+}
 async function dtpExportPDF() {
   const d = dtpDoc(); if (!d) return; toast('Preparando o PDF…');
   try {
-    await dtpFonts(d); await dtpLoadImgs(d); const f = dtpFlow(d), n = dtpPageCount(d, f), dpi = +$('dtpDpi').value || 300, marks = $('dtpMk').checked, bl = $('dtpBl').checked ? d.bleed : 0;
-    const a = Math.max(1, Math.min(n, +$('dtpFrom').value || 1)), z = Math.max(a, Math.min(n, +$('dtpTo').value || n)), pages = [];
-    for (let i = a - 1; i < z; i++) {
-      const {cv, S} = await dtpRenderPage(d, f, i, dpi, bl, marks), blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.92));
-      pages.push({jpeg: new Uint8Array(await blob.arrayBuffer()), w: cv.width, h: cv.height, pw: d.page.w + 2 * S, ph: d.page.h + 2 * S, tb: {s: S, w: d.page.w, h: d.page.h, bl}});
-      toast(`PDF: página ${i + 1} de ${z}…`); await new Promise(r => setTimeout(r, 0));
-    }
-    download(`${dtpFileName(d)}.pdf`, buildPDF(pages, d.page.w, d.page.h), 'application/pdf'); toast(`PDF baixado (${pages.length} página(s), ${dpi} dpi${marks ? ', com marcas de corte' : ''}).`);
+    const dpi = +$('dtpDpi').value || 300, marks = $('dtpMk').checked, r = await dtpPdfBuild(d, {dpi, marks, bleed: $('dtpBl').checked, from: +$('dtpFrom').value, to: +$('dtpTo').value, progress: (i, z) => toast(`PDF: página ${i} de ${z}…`)});
+    download(`${dtpFileName(d)}.pdf`, r.blob, 'application/pdf'); toast(`PDF baixado (${r.n} página(s), ${dpi} dpi${marks ? ', com marcas de corte' : ''}).`);
   } catch (e) { toast('Falhou: ' + e.message); }
 }
 async function dtpExportPNG() { const d = dtpDoc(); await dtpFonts(d); await dtpLoadImgs(d); const f = dtpFlow(d), {cv} = await dtpRenderPage(d, f, dui.pi, 200, 0, false); cv.toBlob(b => download(`${dtpFileName(d)}-pag${dui.pi + 1}.png`, b, 'image/png')); }

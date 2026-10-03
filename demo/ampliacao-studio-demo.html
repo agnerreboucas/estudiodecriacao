@@ -508,6 +508,11 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 #modal .grid-2,.modal .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ail-t{width:100%;font-size:12.5px;border-collapse:collapse}.ail-t td{padding:3px 4px;border-bottom:1px solid #eee}.ail-blocks{display:flex;flex-wrap:wrap;gap:4px;max-height:110px;overflow:auto}
 .mot-wrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start;margin-top:10px}@media(max-width:1100px){.mot-wrap{grid-template-columns:1fr}}.mot-steps{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.mot-ch{border:1.5px solid #e6e6e6;border-radius:12px;padding:10px;margin-bottom:8px;background:#fff}.mot-ch textarea{width:100%;font-size:13px}.mot-ch.on{border-color:#2563eb}
+.edh-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}.edh-tab{display:inline-flex;gap:6px;align-items:center;border:1.5px solid #e2e2e2;background:#fff;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer}.edh-tab.on{background:#111;color:#fff;border-color:#111}
+.bank-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;max-height:210px;overflow:auto}.bank-th{border:1.5px solid #e6e6e6;border-radius:8px;padding:0;background:#f3f1ec;aspect-ratio:3/4;overflow:hidden;cursor:pointer}.bank-th:hover{border-color:#2563eb}.bank-th img{width:100%;height:100%;object-fit:cover;display:block}
+.nav-btns{display:flex;gap:6px;margin-right:auto}.nav-btns .top-btn:disabled{opacity:.35;cursor:default}
+.cov-wrap{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:16px;align-items:start;margin-top:10px}@media(max-width:1100px){.cov-wrap{grid-template-columns:1fr}}.cov-prev{position:sticky;top:10px}.cov-cv{width:100%;max-height:72vh;object-fit:contain;background:#ddd;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.cov-lays{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px}.cov-lay{border:1.5px solid #e2e2e2;border-radius:10px;padding:8px 10px;text-align:left;background:#fff;cursor:pointer;display:flex;flex-direction:column;gap:2px;font-size:12.5px}.cov-lay.on{border-color:#111;background:#f4f4f1}.cov-sw{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid #8884;vertical-align:-2px}.cov-cons{display:grid;gap:6px;margin:8px 0}
 
 </style>
 </head>
@@ -522,7 +527,6 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
     <button data-page="design" title="Estúdio de Design"><span data-ico="palette"></span></button>
     <button data-page="inspiration" title="Inspiração"><span data-ico="pin"></span></button>
     <button data-page="editora" title="Editora (e-books)"><span data-ico="book"></span></button>
-    <button data-page="diagram" title="Diagramação (livros, revistas, folhetos)"><span data-ico="layout"></span></button>
     <button data-page="videoLab" title="Video Lab"><span data-ico="video"></span></button>
     <button data-page="campaigns" title="Campanhas"><span data-ico="megaphone"></span></button>
     <button data-page="approval" title="Aprovação"><span data-ico="check"></span></button>
@@ -538,6 +542,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 
 <main class="main">
 <header class="topbar">
+  <div class="nav-btns"><button class="top-btn" id="navBack" onclick="navBack()" title="Voltar (Alt+←)" disabled>‹ Voltar</button><button class="top-btn" id="navFwd" onclick="navFwd()" title="Avançar (Alt+→)" disabled>Avançar ›</button></div>
   <button class="top-btn" onclick="openCreate()">＋ Criar</button>
   <button class="top-btn sync-badge local" id="syncBadge" onclick="syncBadgeClick()">● Local</button>
   <button class="top-btn credit" title="Créditos de produção (estimativa)">⚡ <span id="credits">30</span></button>
@@ -757,7 +762,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], motor: {}, competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -821,13 +826,23 @@ function normalizeLayouts(x) {
       id: d.id, name: str(d.name, 120) || 'Documento', created: str(d.created, 40), unit: UNITS.includes(d.unit) ? d.unit : 'mm',
       page: {w: num(pg.w, 420, 36, 6000), h: num(pg.h, 595, 36, 6000)}, facing: !!d.facing, bleed: num(d.bleed, 8.5, 0, 72),
       margins: {t: num(m.t, 40, 0, 2000), b: num(m.b, 40, 0, 2000), i: num(m.i, 40, 0, 2000), o: num(m.o, 40, 0, 2000)},
-      cols: Math.round(num(d.cols, 1, 1, 8)), gutter: num(d.gutter, 14, 0, 200), baseline: num(d.baseline, 0, 0, 100), nPages: Math.round(num(d.nPages, 1, 1, 400)), autoflow: d.autoflow !== false, paper: hex(d.paper, '#FFFFFF'),
+      cols: Math.round(num(d.cols, 1, 1, 8)), colw: (Array.isArray(d.colw) ? d.colw : []).slice(0, 8).map(v => num(v, 1, 0.1, 20)), mod: {cols: Math.round(num(d.mod && d.mod.cols, 6, 0, 24)), rows: Math.round(num(d.mod && d.mod.rows, 8, 0, 24))}, front: Math.round(num(d.front, 0, 0, 20)), gutter: num(d.gutter, 14, 0, 200), baseline: num(d.baseline, 0, 0, 100), nPages: Math.round(num(d.nPages, 1, 1, 400)), autoflow: d.autoflow !== false, paper: hex(d.paper, '#FFFFFF'),
       run: {folio: !!rn.folio, pos: ['outer', 'center', 'inner'].includes(rn.pos) ? rn.pos : 'outer', header: str(rn.header, 120), headerR: str(rn.headerR, 120), size: num(rn.size, 8, 4, 40), color: hex(rn.color, '#777777'), font: str(rn.font, 60) || 'Inter'},
       styles, story,
       pages: (Array.isArray(d.pages) ? d.pages : []).slice(0, 400).map(p => ({items: items(p && p.items)})).concat([{items: []}]).slice(0, Math.max(1, Math.min(400, (Array.isArray(d.pages) ? d.pages.length : 1) || 1))),
       guides: {v: (Array.isArray(d.guides && d.guides.v) ? d.guides.v : []).slice(0, 60).map(v => num(v, 0, -5000, 9000)), h: (Array.isArray(d.guides && d.guides.h) ? d.guides.h : []).slice(0, 60).map(v => num(v, 0, -5000, 9000))}
     };
   });
+}
+/* Engenheiro de capa e módulo Amazon KDP: rascunhos por projeto */
+function normalizeCover(c) {
+  c = c && typeof c === 'object' ? c : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, p = c.pal || {};
+  return {title: str(c.title, 200), subtitle: str(c.subtitle, 300), author: str(c.author, 200), collection: str(c.collection, 120), blurb: str(c.blurb, 2000), tagline: str(c.tagline, 200), layout: /^[a-z0-9_-]{1,24}$/i.test(c.layout || '') ? c.layout : 'giant',
+    pal: {bg: hex(p.bg, '#1F3A2E'), fg: hex(p.fg, '#F4F1EC'), accent: hex(p.accent, '#C9A876'), second: hex(p.second, '#6AA170')}, head: str(c.head, 60) || 'Playfair Display', body: str(c.body, 60) || 'Montserrat', imgId: safeId(c.imgId) ? c.imgId : '', mode: ['front', 'wrap', 'kindle'].includes(c.mode) ? c.mode : 'front', setId: safeId(c.setId) ? c.setId : ''};
+}
+function normalizeKdp(k) {
+  k = k && typeof k === 'object' ? k : {}; const n = (v, d, lo, hi) => { v = +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+  return {trim: /^kdp[a-z0-9]{1,8}$/.test(k.trim || '') ? k.trim : 'kdp6x9', pages: Math.round(n(k.pages, 0, 0, 900)), paper: ['bw-white', 'bw-cream', 'color-std', 'color-premium'].includes(k.paper) ? k.paper : 'bw-white', docId: safeId(k.docId) ? k.docId : '', bleed: k.bleed !== false};
 }
 /* Motor de e-book: skills (workspace) e rascunho de produção (projeto) */
 function normalizeSkills(x) {
@@ -863,7 +878,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
@@ -1095,7 +1110,7 @@ function askText(title, label, cb) {
 function go(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = $('page-' + page); if (el) el.classList.add('active');
-  document.querySelectorAll('.rail-nav button,.rail-bottom button').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+  document.querySelectorAll('.rail-nav button,.rail-bottom button').forEach(b => b.classList.toggle('active', b.dataset.page === (page === 'diagram' ? 'editora' : page)));
   ui.page = page; renderPage(page); window.scrollTo(0, 0);
 }
 function renderPage(page) {
@@ -5177,7 +5192,7 @@ async function lgPrEdit() {
 <script>
 /* ===== Inspiração: o nosso Pinterest. Referências por categoria (imagens, links e paletas), quadros, busca, filtro por cor ===== */
 const INSPO_CATS = [
-  {id: 'posts', label: 'Posts', hint: 'Feed, carrosséis, stories e capas'}, {id: 'diagramacao', label: 'Diagramação', hint: 'Grids, hierarquia, composição de página'}, {id: 'logos', label: 'Logos', hint: 'Marcas, símbolos e lockups'},
+  {id: 'posts', label: 'Posts', hint: 'Feed, carrosséis, stories e capas'}, {id: 'capas', label: 'Capas de livro', hint: 'Capas, tipografia de título, mockups'}, {id: 'diagramacao', label: 'Diagramação', hint: 'Grids, hierarquia, composição de página'}, {id: 'logos', label: 'Logos', hint: 'Marcas, símbolos e lockups'},
   {id: 'cartaz', label: 'Cartaz e pôster', hint: 'Cartazes, flyers, eventos e capas'}, {id: 'foto', label: 'Fotografia', hint: 'Luz, enquadramento, direção de arte'}, {id: 'estilos', label: 'Estilos de design', hint: 'Movimentos, tendências e linguagens visuais'}, {id: 'cores', label: 'Cores', hint: 'Paletas e combinações'}
 ];
 const INSPO_HUES = [['red', 'Vermelho', '#e5484d'], ['orange', 'Laranja', '#f08a24'], ['yellow', 'Amarelo', '#f5c518'], ['green', 'Verde', '#30a46c'], ['teal', 'Turquesa', '#12a594'], ['blue', 'Azul', '#3e63dd'], ['purple', 'Roxo', '#8e4ec6'], ['pink', 'Rosa', '#e93d82'], ['neutral', 'Neutras', '#8b8d98']];
@@ -5636,10 +5651,13 @@ const ebTypeLabel = {title: 'Página de título', toc: 'Sumário', chapter: 'Cap
 function renderEditora() {
   const r = $('editoraRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Editora'); return; }
   if (typeof mot !== 'undefined' && mot.open) return motRender(r, p);
+  if (edh.area === 'capa') return covRender(r, p);
+  if (edh.area === 'amazon') return kdpRender(r, p);
   if (eui.id && ebCur()) return ebEditor(p, r);
   const list = ebList();
-  r.innerHTML = `<div class="page-head"><div><h1>Editora</h1><p>Produza e-books completos: capítulos, caixas e checklists diagramados em 4 versões (celular, tablet 6×9, A4 preto e branco e A4 econômico), capa criada no Editor de Design, documento de revisão e EPUB.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="motOpen()">✦ Motor de e-book (IA)</button><button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>Editora</h1><p>Produza e-books completos: capítulos, caixas e checklists diagramados em 4 versões (celular, tablet 6×9, A4 preto e branco e A4 econômico), capa criada no Editor de Design, documento de revisão e EPUB.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button></div></div>
   ${list.length ? `<div class="dz-sets">${list.map(e => `<article class="dz-set eb-card"><div class="eb-cover" style="background:${esc(e.brand.c.primary)}"><small style="color:${esc(e.brand.c.gold)}">${esc((e.sections.find(s => s.type === 'title') || {}).label || 'GUIA PRÁTICO')}</small><b style="font-family:'${esc(e.brand.h)}',serif">${esc(e.title)}</b></div><strong>${esc(e.name)}</strong><small class="muted block">${esc(e.author || 'sem autor')} · ${e.sections.length} seções${e.coverSetId ? ' · com capa' : ''}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="ebOpen('${esc(e.id)}')">Abrir editor</button><button class="btn sm" onclick="ebDup('${esc(e.id)}')">Duplicar</button><button class="btn sm" onclick="ebDel('${esc(e.id)}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhum e-book ainda', 'Comece pelo modelo da coleção Método Cuidado Seguro (36 páginas, 7 capítulos) ou por um e-book em branco.', '<button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button>')}`;
+  r.insertAdjacentHTML('afterbegin', edTabs('livros'));
 }
 function ebNewOpen() {
   showModal('Novo e-book', `<div class="field"><label>Modelo</label><select id="ebPreset"><option value="mcs">Método Cuidado Seguro (7 capítulos, ~36 páginas)</option><option value="blank">Em branco (título, sumário e 1 capítulo)</option></select></div><div class="field"><label>Título</label><input id="ebTitle" placeholder="Ex.: Transferência segura da pessoa idosa"></div><div class="field"><label>Autor(a)</label><input id="ebAuthor" placeholder="Prof.ª Mestre Francisca Antonia Almeida da Silva"></div>
@@ -5813,9 +5831,29 @@ const DTP_PRESETS = [
   {id: 'quadrado', n: 'Quadrado 210 × 210 mm', w: 210, h: 210, m: {t: 14, b: 14, i: 14, o: 14}, cols: 2, facing: false, bleed: 3},
   {id: 'custom', n: 'Personalizado', w: 150, h: 210, m: {t: 15, b: 15, i: 15, o: 15}, cols: 1, facing: false, bleed: 3}
 ];
+DTP_PRESETS.splice(DTP_PRESETS.length - 1, 0,
+  {id: 'celular', n: 'Celular (9:16, leitura em tela)', w: 100, h: 177.8, m: {t: 12, b: 14, i: 9, o: 9}, cols: 1, facing: false, bleed: 0, fs: 1.45, mobile: true},
+  {id: 'tablet', n: 'Tablet 6 × 9 pol.', w: 152.4, h: 228.6, m: {t: 14, b: 16, i: 14, o: 14}, cols: 1, facing: false, bleed: 0, fs: 1.15},
+  {id: 'kdp5x8', n: 'Amazon KDP · 5 × 8 pol.', w: 127, h: 203.2, m: {t: 15, b: 15, i: 19, o: 12.7}, cols: 1, facing: true, bleed: 3.175, kdp: [5, 8]},
+  {id: 'kdp55', n: 'Amazon KDP · 5,5 × 8,5 pol.', w: 139.7, h: 215.9, m: {t: 15, b: 15, i: 19, o: 12.7}, cols: 1, facing: true, bleed: 3.175, kdp: [5.5, 8.5]},
+  {id: 'kdp6x9', n: 'Amazon KDP · 6 × 9 pol. (mais usado)', w: 152.4, h: 228.6, m: {t: 15, b: 15, i: 19, o: 12.7}, cols: 1, facing: true, bleed: 3.175, kdp: [6, 9]},
+  {id: 'kdp614', n: 'Amazon KDP · 6,14 × 9,21 pol.', w: 156, h: 234, m: {t: 15, b: 15, i: 19, o: 12.7}, cols: 1, facing: true, bleed: 3.175, kdp: [6.14, 9.21]},
+  {id: 'kdp7x10', n: 'Amazon KDP · 7 × 10 pol.', w: 177.8, h: 254, m: {t: 15, b: 15, i: 19, o: 12.7}, cols: 1, facing: true, bleed: 3.175, kdp: [7, 10]},
+  {id: 'kdp85', n: 'Amazon KDP · 8,5 × 11 pol.', w: 215.9, h: 279.4, m: {t: 15, b: 15, i: 19, o: 12.7}, cols: 1, facing: true, bleed: 3.175, kdp: [8.5, 11]});
+const DTP_GRIDS = [
+  {id: 'c1', n: '1 coluna (livro)', cols: 1, colw: [], mod: {cols: 6, rows: 8}},
+  {id: 'c2', n: '2 colunas iguais', cols: 2, colw: [], mod: {cols: 6, rows: 8}},
+  {id: 'c3', n: '3 colunas (revista)', cols: 3, colw: [], mod: {cols: 6, rows: 8}},
+  {id: 'a12', n: 'Assimétrica 1:2 (nota lateral + texto)', cols: 2, colw: [1, 2], mod: {cols: 6, rows: 8}},
+  {id: 'a21', n: 'Assimétrica 2:1 (texto + nota lateral)', cols: 2, colw: [2, 1], mod: {cols: 6, rows: 8}},
+  {id: 'j5', n: 'Jornal (5 colunas)', cols: 5, colw: [], gut: 9, mod: {cols: 10, rows: 12}},
+  {id: 'm68', n: 'Modular 6 × 8 (estilo adidas)', cols: 1, colw: [], mod: {cols: 6, rows: 8}},
+  {id: 'm12', n: '12 colunas (flexível)', cols: 1, colw: [], mod: {cols: 12, rows: 0}},
+  {id: 't33', n: 'Terços 3 × 3', cols: 1, colw: [], mod: {cols: 3, rows: 3}}
+];
 const DTP_STYLE_KEYS = ['body', 'h1', 'h2', 'h3', 'quote', 'caption'];
-function dtpDefaultStyles(head, body, color, accent) {
-  const S = (n, font, size, lead, o) => Object.assign({n, font, size, lead, color, align: 'left', b: 0, i: 0, caps: 0, before: 0, after: 0, indent: 0, drop: 0, keep: 0}, o || {});
+function dtpDefaultStyles(head, body, color, accent, fs) {
+  fs = fs || 1; const S = (n, font, size, lead, o) => Object.assign({n, font, size: +(size * fs).toFixed(2), lead: +(lead * fs).toFixed(2), color, align: 'left', b: 0, i: 0, caps: 0, before: 0, after: 0, indent: 0, drop: 0, keep: 0}, o || {});
   return {
     body: S('Corpo', body, 10, 14.5, {align: 'justify', after: 0, indent: 12}),
     h1: S('Título 1', head, 30, 34, {b: 1, before: 0, after: 18, keep: 1, color: accent, align: 'left', indent: 0}),
@@ -5832,7 +5870,8 @@ function dtpNew(presetId, name, unit) {
     page: {w: mm(P.w), h: mm(P.h)}, facing: !!P.facing, bleed: mm(P.bleed), margins: {t: mm(P.m.t), b: mm(P.m.b), i: mm(P.m.i), o: mm(P.m.o)},
     cols: P.cols, gutter: mm(5), baseline: 0, nPages: P.pages || 1, autoflow: true, paper: '#FFFFFF',
     run: {folio: P.facing || P.id === 'a5', pos: 'outer', header: '', headerR: '', size: 8, color: '#777777', font: 'Inter'},
-    styles: dtpDefaultStyles('Playfair Display', 'Lora', '#2B2B2B', '#8A5A2B'),
+    styles: dtpDefaultStyles('Playfair Display', 'Lora', '#2B2B2B', '#8A5A2B', P.fs),
+    colw: [], mod: {cols: 6, rows: 8}, front: 0,
     story: [], pages: [{items: []}], guides: {v: [], h: []}
   };
 }
@@ -5840,12 +5879,12 @@ const dtpPageCount = (doc, flow) => Math.max(1, doc.nPages || 1, flow ? flow.pag
 
 /* ---- geometria da página (margens internas/externas em páginas opostas) ---- */
 function dtpGeom(doc, pi) {
-  const W = doc.page.w, H = doc.page.h, m = doc.margins, n = Math.max(1, doc.cols | 0), gut = doc.gutter, recto = !doc.facing || (pi + 1) % 2 === 1;
+  const W = doc.page.w, H = doc.page.h, m = doc.margins, pn = pi + 1, n = Math.max(1, doc.cols | 0), gut = doc.gutter, recto = !doc.facing || pn % 2 === 1;
   const L = doc.facing ? (recto ? m.i : m.o) : m.i, R = doc.facing ? (recto ? m.o : m.i) : m.o;
-  const cw = Math.max(10, (W - L - R - (n - 1) * gut) / n);
-  return {W, H, x0: L, x1: W - R, y0: m.t, y1: H - m.b, n, gut, cw, recto, colX: k => L + k * (cw + gut)};
+  const tot = Math.max(10 * n, W - L - R - (n - 1) * gut), ws = Array.isArray(doc.colw) && doc.colw.length === n && doc.colw.every(v => v > 0) ? doc.colw : Array(n).fill(1), sum = ws.reduce((a, b) => a + b, 0);
+  const cwk = ws.map(v => Math.max(10, tot * v / sum)), xs = []; let acc = L; cwk.forEach(w => { xs.push(acc); acc += w + gut; });
+  return {W, H, x0: L, x1: W - R, y0: m.t, y1: H - m.b, n, gut, cw: tot / n, colW: k => cwk[k], recto, colX: k => xs[k]};
 }
-
 /* ---- texto: marcação **negrito** e *itálico*, palavras e medição ---- */
 let DTP_MC = null;
 const dtpMeasureCtx = () => DTP_MC || (DTP_MC = document.createElement('canvas').getContext('2d'));
@@ -5901,22 +5940,22 @@ function dtpBest(iv, minW) { let best = null; for (const [a, b] of iv) if (b - a
 /* ---- fluxo da matéria pelas colunas e páginas ---- */
 function dtpFlow(doc) {
   const out = {pages: [], overset: null, warns: []}, story = doc.story, S = doc.styles, base = doc.baseline || 0;
-  const maxPages = doc.autoflow ? 400 : Math.max(1, doc.nPages || 1);
+  const maxPages = doc.autoflow ? 400 : Math.max(1, doc.nPages || 1, (doc.front | 0) + 1);
   const pg = i => { while (out.pages.length <= i) out.pages.push({lines: [], blocks: [], band: 0}); return out.pages[i]; };
   const items = i => ((doc.pages[i] && doc.pages[i].items) || []).filter(it => it.k === 'img' || it.k === 'rect' || it.k === 'text').map(it => ({x: it.x, y: it.y, w: it.w, h: it.h, off: it.off != null ? it.off : 6, wrap: it.wrap || 'none'}));
   const bandOf = i => (out.pages[i] ? out.pages[i].band : 0);
   const colTop = i => dtpGeom(doc, i).y0 + bandOf(i);
   const snap = (y, i) => base > 0 ? dtpGeom(doc, i).y0 + Math.ceil((y - dtpGeom(doc, i).y0) / base - 1e-6) * base : y;
-  let cur = {pi: 0, col: 0, y: colTop(0)}, stop = false, guard = 0;
+  const front = Math.max(0, Math.min(20, doc.front | 0)); pg(front); let cur = {pi: front, col: 0, y: colTop(front)}, stop = false, guard = 0;
   const advance = c => { const g = dtpGeom(doc, c.pi); if (c.col + 1 < g.n) { c.col++; c.y = colTop(c.pi); return true; } if (c.pi + 1 >= maxPages) return false; c.pi++; c.col = 0; c.y = colTop(c.pi); return true; };
   const atTop = c => Math.abs(c.y - colTop(c.pi)) < 0.01;
   const lineBox = (c, lead, indentMin) => {
     const g = dtpGeom(doc, c.pi); let y = c.y;
     for (let t = 0; t < 400; t++) {
       if (y + lead > g.y1 + 0.01) return null;
-      const iv = dtpFree(g.colX(c.col), g.colX(c.col) + g.cw, y, y + lead, items(c.pi));
+      const iv = dtpFree(g.colX(c.col), g.colX(c.col) + g.colW(c.col), y, y + lead, items(c.pi));
       if (iv.jump) { y = snap(iv.jump, c.pi); continue; }
-      const b = dtpBest(iv, Math.min(g.cw, 4 * (indentMin || 8)));
+      const b = dtpBest(iv, Math.min(g.colW(c.col), 4 * (indentMin || 8)));
       if (b) { c.y = y; return b; }
       y = snap(y + (base || lead), c.pi);
     }
@@ -5966,7 +6005,7 @@ function dtpFlow(doc) {
       const full = it.w === 'full' && g().n > 1;
       let ok = true;
       const fit = () => {
-        const G = g(), W = full ? G.x1 - G.x0 : G.cw, w = Math.max(20, W * Math.min(100, Math.max(10, it.pct || 100)) / 100), ar = it.ar > 0 ? it.ar : 1.5;
+        const G = g(), W = full ? G.x1 - G.x0 : G.colW(cur.col), w = Math.max(20, W * Math.min(100, Math.max(10, it.pct || 100)) / 100), ar = it.ar > 0 ? it.ar : 1.5;
         let h = w / ar; const maxH = G.y1 - colTop(cur.pi); if (h > maxH - 6) h = maxH - 6;
         const cl = it.cap ? dtpWordsLines(it.cap, capSt, W) : [];
         return {G, W, w: h * ar > w ? w : h * ar, h, cl, total: h + (cl.length ? capSt.before + cl.length * capSt.lead : 0)};
@@ -5975,7 +6014,7 @@ function dtpFlow(doc) {
       if (full) { if (!(atTop(cur) && !cur.col && bandOf(cur.pi) === 0)) { if (cur.pi + 1 >= maxPages) ok = false; else { cur.pi++; cur.col = 0; cur.y = colTop(cur.pi); } } if (ok) f = fit(); }
       else if (cur.y + f.total > f.G.y1 + 0.01 && !atTop(cur)) { if (!advance(cur)) ok = false; else f = fit(); }
       if (!ok) { out.overset = {sidx, words: wordsLeft(sidx)}; break; }
-      const G = f.G, x = (full ? G.x0 : G.colX(cur.col)) + ((full ? G.x1 - G.x0 : G.cw) - f.w) * ({l: 0, c: 0.5, r: 1}[it.al || 'l']);
+      const G = f.G, x = (full ? G.x0 : G.colX(cur.col)) + ((full ? G.x1 - G.x0 : G.colW(cur.col)) - f.w) * ({l: 0, c: 0.5, r: 1}[it.al || 'l']);
       pg(cur.pi).blocks.push({pi: cur.pi, sidx, x, y: cur.y, w: f.w, h: f.h, imgId: it.imgId, fit: 'fill', cap: f.cl.map((t, q) => ({t, y: cur.y + f.h + capSt.before + q * capSt.lead, lead: capSt.lead, size: capSt.size, font: capSt.font, color: capSt.color, b: capSt.b, i: capSt.i, x: x})), capW: f.w});
       const gap = Math.max(4, bd.lead * 0.6);
       if (full) { out.pages[cur.pi].band = (cur.y - G.y0) + f.total + gap; cur.y = colTop(cur.pi); } else cur.y += f.total + gap;
@@ -6059,9 +6098,9 @@ function dtpDrawPage(ctx, doc, flow, pi, z, o) {
   its.forEach(it => { if (it.k === 'text') { const f = flow.frames.find(q => q.id === it.id); if (it.fill) { ctx.fillStyle = it.fill; ctx.fillRect(it.x * z, it.y * z, it.w * z, it.h * z); } if (f) f.lines.forEach(l => text(l)); } });
   /* cabeçalho e número de página */
   const R = doc.run;
-  if (R && (R.folio || R.header || R.headerR) && !o.noRun) {
+  if (R && (R.folio || R.header || R.headerR) && !o.noRun && pi >= (doc.front | 0)) {
     ctx.fillStyle = R.color; ctx.font = `${R.size * z}px "${R.font}", sans-serif`; ctx.textBaseline = 'alphabetic';
-    const num = String(pi + 1), yF = g.H - g.y1 < 6 ? g.H - 6 : g.y1 + (g.H - g.y1) * 0.55, hdr = (g.recto ? (R.headerR || R.header) : R.header) || '';
+    const num = String(pi - (doc.front | 0) + 1), yF = g.H - g.y1 < 6 ? g.H - 6 : g.y1 + (g.H - g.y1) * 0.55, hdr = (g.recto ? (R.headerR || R.header) : R.header) || '';
     if (R.folio) { const w = ctx.measureText(num).width / z; let x = (g.x0 + g.x1) / 2 - w / 2; if (R.pos === 'outer') x = doc.facing && g.recto || !doc.facing ? g.x1 - w : g.x0; if (R.pos === 'inner') x = doc.facing && g.recto ? g.x0 : g.x1 - w; ctx.fillText(num, x * z, yF * z); }
     if (hdr) { const w = ctx.measureText(hdr).width / z; let x = g.recto ? g.x1 - w : g.x0; if (!doc.facing) x = g.x0; ctx.fillText(hdr, x * z, (g.y0 * 0.55) * z); }
   }
@@ -6071,7 +6110,7 @@ function dtpDrawPage(ctx, doc, flow, pi, z, o) {
 </script>
 <script>
 /* ===== Diagramação · telas: biblioteca, mesa de trabalho com réguas/guias, matéria, estilos, página e objetos ===== */
-const dui = {id: '', view: 'layout', pi: 0, z: 1, vx: 30, vy: 30, tool: 'v', sel: null, tab: 'texto', show: {margins: true, cols: true, grid: true, guides: true, bleed: true, rulers: true}, hist: [], hi: -1, flow: null, imgs: {}, thumbs: {}, drag: null, mouse: null, sw: 0, ref: null, refOn: false, refOp: 0.45, space: false, refRes: null};
+const dui = {id: '', view: 'layout', pi: 0, z: 1, vx: 30, vy: 30, tool: 'v', sel: null, tab: 'texto', show: {margins: true, cols: true, grid: true, mod: true, guides: true, bleed: true, rulers: true}, hist: [], hi: -1, flow: null, imgs: {}, thumbs: {}, drag: null, mouse: null, sw: 0, ref: null, refOn: false, refOp: 0.45, space: false, refRes: null};
 const DTP_RULER = 22;
 const dtpList = () => { const p = curProject(); if (!p) return []; p.layouts = Array.isArray(p.layouts) ? p.layouts : []; return p.layouts; };
 const dtpDoc = () => dtpList().find(d => d.id === dui.id);
@@ -6085,7 +6124,7 @@ function renderDiagram() {
   const r = $('diagramRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Diagramação'); return; }
   if (dui.id && dtpDoc()) return dtpEditor(p, r);
   const list = dtpList();
-  r.innerHTML = `<div class="page-head"><div><h1>Diagramação</h1><p>Monte livros, revistas, folhetos e cartazes como no InDesign: tamanho e unidades de medida, margens, sangria, colunas, grade de linha de base, régua, linhas-guia, páginas espelhadas, quadros de imagem com contorno de texto e exportação em PDF com marcas de corte.</p></div><div class="row-gap"><button class="btn dark" onclick="dtpNewOpen()">＋ Novo documento</button></div></div>
+  r.innerHTML = edTabs('diag') + `<div class="page-head"><div><h1>Diagramação</h1><p>Monte livros, revistas, folhetos e cartazes como no InDesign: tamanho e unidades de medida, margens, sangria, colunas, grade de linha de base, régua, linhas-guia, páginas espelhadas, quadros de imagem com contorno de texto e exportação em PDF com marcas de corte.</p></div><div class="row-gap"><button class="btn dark" onclick="dtpNewOpen()">＋ Novo documento</button></div></div>
   ${list.length ? `<div class="dz-sets">${list.map(d => `<article class="dz-set"><div class="dtp-card" onclick="dtpOpen('${d.id}')"><span style="aspect-ratio:${(d.page.w / d.page.h).toFixed(3)}"></span></div><strong>${esc(d.name)}</strong><small class="muted block">${dtpFmt(d.page.w, d.unit)}×${dtpFmt(d.page.h, d.unit)} ${DTP_UL[d.unit]} · ${d.cols} col. · ${d.story.length} bloco(s)</small><div class="row-gap" style="margin-top:6px"><button class="btn sm dark" onclick="dtpOpen('${d.id}')">Abrir</button><button class="btn sm" onclick="dtpDup('${d.id}')">Duplicar</button><button class="btn sm" onclick="dtpDel('${d.id}')" title="Excluir">${ico('trash', 14)}</button></div></article>`).join('')}</div>` : emptyState('Nenhum documento ainda', 'Escolha um formato (livro, revista, folheto…) e comece a diagramar.', '<button class="btn dark" onclick="dtpNewOpen()">＋ Novo documento</button>')}`;
 }
 function dtpNewOpen() {
@@ -6117,7 +6156,7 @@ function dtpEditor(p, r) {
     <select class="sm" onchange="histSetLimit(this.value);dtpStatus()" title="Passos de histórico">${HIST_OPTS.map(n => `<option value="${n}" ${n === histLimit() ? 'selected' : ''}>${n} passos</option>`).join('')}</select>
     <button class="btn sm dark" onclick="dtpTabSet('exportar')">Exportar PDF</button></div></div>
   <div class="dtp-bar"><div class="row-gap">${[['v', 'Selecionar', 'V'], ['t', 'Texto', 'T'], ['i', 'Imagem', 'I'], ['r', 'Retângulo', 'R']].map(([k, l, h]) => `<button class="tchip ${dui.tool === k ? 'on' : ''}" data-tool="${k}" onclick="dtpTool('${k}')" title="${l} (${h})">${l}</button>`).join('')}</div>
-    <div class="row-gap" style="flex-wrap:wrap">${[['margins', 'Margens'], ['cols', 'Colunas'], ['grid', 'Grade'], ['guides', 'Guias'], ['bleed', 'Sangria'], ['rulers', 'Réguas']].map(([k, l]) => `<label class="dtp-chk"><input type="checkbox" ${dui.show[k] ? 'checked' : ''} onchange="dui.show.${k}=this.checked;dtpDraw()"> ${l}</label>`).join('')}</div>
+    <div class="row-gap" style="flex-wrap:wrap">${[['margins', 'Margens'], ['cols', 'Colunas'], ['grid', 'Linha de base'], ['mod', 'Grade modular'], ['guides', 'Guias'], ['bleed', 'Sangria'], ['rulers', 'Réguas']].map(([k, l]) => `<label class="dtp-chk"><input type="checkbox" ${dui.show[k] ? 'checked' : ''} onchange="dui.show.${k}=this.checked;dtpDraw()"> ${l}</label>`).join('')}</div>
     <div class="row-gap"><select class="sm" onchange="dtpDoc().unit=this.value;dtpTouch();dtpPanel();dtpDraw()" title="Unidade de medida">${Object.keys(DTP_U).map(k => `<option value="${k}" ${k === u ? 'selected' : ''}>${DTP_UL[k]}</option>`).join('')}</select><button class="btn sm" onclick="dtpZoom(0.8)">−</button><span id="dtpZ" class="muted" style="min-width:44px;text-align:center;font-size:12px"></span><button class="btn sm" onclick="dtpZoom(1.25)">＋</button><button class="btn sm" onclick="dtpFit()">Ajustar</button>
     <button class="tchip ${dui.view === 'story' ? 'on' : ''}" onclick="dtpView(dui.view==='story'?'layout':'story')" title="Edição só do texto, com a marca do estouro">Editar texto (matéria)</button></div></div>
   <div class="dtp-wrap"><div class="dtp-left" id="dtpLeft"></div><div class="dtp-mid"><div class="dtp-stage" id="dtpStage"><canvas id="dtpCv"></canvas></div><div id="dtpStory" class="dtp-story" style="display:none"></div><div class="dtp-foot"><span id="dtpInfo"></span><span id="dtpAuto" class="muted"></span></div></div>
@@ -6166,7 +6205,8 @@ function dtpDraw() {
     x.scale(z, z); x.lineWidth = 1 / z;
     if (sh.bleed && d.bleed > 0) { x.strokeStyle = '#ef4444'; x.setLineDash([4 / z, 3 / z]); x.strokeRect(-d.bleed, -d.bleed, g.W + 2 * d.bleed, g.H + 2 * d.bleed); x.setLineDash([]); }
     if (sh.grid && d.baseline > 0) { x.strokeStyle = 'rgba(70,160,255,.45)'; x.beginPath(); for (let y = g.y0; y <= g.y1 + 0.01; y += d.baseline) { x.moveTo(g.x0, y); x.lineTo(g.x1, y); } x.stroke(); }
-    if (sh.cols) { x.fillStyle = 'rgba(140,90,255,.07)'; x.strokeStyle = 'rgba(140,90,255,.7)'; for (let k = 0; k < g.n; k++) { x.fillRect(g.colX(k), g.y0, g.cw, g.y1 - g.y0); x.strokeRect(g.colX(k), g.y0, g.cw, g.y1 - g.y0); } }
+    if (sh.mod && d.mod && (d.mod.cols > 0 || d.mod.rows > 0)) { x.strokeStyle = 'rgba(0,170,220,.55)'; x.beginPath(); const G = dtpModLines(d, pi); G.X.forEach(v => { x.moveTo(v, g.y0); x.lineTo(v, g.y1); }); G.Y.forEach(v => { x.moveTo(g.x0, v); x.lineTo(g.x1, v); }); x.stroke(); }
+    if (sh.cols) { x.fillStyle = 'rgba(140,90,255,.07)'; x.strokeStyle = 'rgba(140,90,255,.7)'; for (let k = 0; k < g.n; k++) { x.fillRect(g.colX(k), g.y0, g.colW(k), g.y1 - g.y0); x.strokeRect(g.colX(k), g.y0, g.colW(k), g.y1 - g.y0); } }
     if (sh.margins) { x.strokeStyle = '#e0338c'; x.strokeRect(g.x0, g.y0, g.x1 - g.x0, g.y1 - g.y0); }
     if (sh.guides) { x.strokeStyle = '#14b8c4'; x.beginPath(); d.guides.v.forEach(v => { x.moveTo(v, -dui.vy / z); x.lineTo(v, (ch - dui.vy) / z); }); d.guides.h.forEach(v => { x.moveTo(-5000, v); x.lineTo(9000, v); }); x.stroke(); }
     /* seleção */
@@ -6196,7 +6236,14 @@ function dtpRulers(x, cw, ch) {
 
 /* ---------- interação ---------- */
 const dtpPick = (sx, sy) => { const d = dtpDoc(); let best = null; for (const {pi, ox} of dtpView2()) { const x = (sx - dui.vx) / dui.z - ox, y = (sy - dui.vy) / dui.z; const o = {pi, ox, x, y, inside: x >= 0 && y >= 0 && x <= d.page.w && y <= d.page.h}; if (o.inside) return o; if (!best || Math.abs(x - d.page.w / 2) < Math.abs(best.x - d.page.w / 2)) best = o; } return best; };
-function dtpSnapTargets(d, pi) { const g = dtpGeom(d, pi), X = [0, g.W, g.W / 2, g.x0, g.x1, ...d.guides.v], Y = [0, g.H, g.H / 2, g.y0, g.y1, ...d.guides.h]; for (let k = 0; k < g.n; k++) { X.push(g.colX(k), g.colX(k) + g.cw); } if (d.baseline > 0) for (let y = g.y0; y <= g.y1; y += d.baseline) Y.push(y); return {X, Y}; }
+/* linhas da grade modular (colunas × linhas) dentro das margens, com os cortes das células */
+function dtpModLines(d, pi) {
+  const g = dtpGeom(d, pi), M = d.mod || {}, X = [], Y = [], gut = Math.min(6, g.gut); const cx = M.cols | 0, ry = M.rows | 0;
+  if (cx > 0) { const w = (g.x1 - g.x0 - (cx - 1) * gut) / cx; for (let k = 0; k < cx; k++) { X.push(g.x0 + k * (w + gut)); X.push(g.x0 + k * (w + gut) + w); } }
+  if (ry > 0) { const h = (g.y1 - g.y0 - (ry - 1) * gut) / ry; for (let k = 0; k < ry; k++) { Y.push(g.y0 + k * (h + gut)); Y.push(g.y0 + k * (h + gut) + h); } }
+  return {X, Y};
+}
+function dtpSnapTargets(d, pi) { const g = dtpGeom(d, pi), X = [0, g.W, g.W / 2, g.x0, g.x1, ...d.guides.v], Y = [0, g.H, g.H / 2, g.y0, g.y1, ...d.guides.h]; for (let k = 0; k < g.n; k++) { X.push(g.colX(k), g.colX(k) + g.colW(k)); } const ML = dtpModLines(d, pi); X.push(...ML.X); Y.push(...ML.Y); if (d.baseline > 0) for (let y = g.y0; y <= g.y1; y += d.baseline) Y.push(y); return {X, Y}; }
 function dtpSnapV(v, T, thr) { let b = v, m = thr; for (const t of T) { const e = Math.abs(t - v); if (e < m) { m = e; b = t; } } return b; }
 const dtpPosOf = e => { const r = $('dtpCv').getBoundingClientRect(); return {sx: e.clientX - r.left, sy: e.clientY - r.top}; };
 function dtpBindStage() {
@@ -6218,7 +6265,7 @@ function dtpCanvasEvents(c, pos) {
     if (sel && sel.t === 'item') { const it = its.find(q => q.id === sel.id); if (it) { const hs = dtpHandles(it); let hb = null, hd = 9 / dui.z; hs.forEach(h => { const dd = Math.hypot(h.x - pk.x, h.y - pk.y); if (dd < hd) { hd = dd; hb = h.n; } }); if (hb) { dui.drag = {t: 'resize', h: hb, id: it.id, pi: pk.pi, o: {x: it.x, y: it.y, w: it.w, h: it.h}, p0: pk}; return; } } }
     for (let i = its.length - 1; i >= 0; i--) { const it = its[i]; if (pk.x >= it.x && pk.x <= it.x + it.w && pk.y >= it.y && pk.y <= it.y + it.h) { dui.sel = {t: 'item', id: it.id, pi: pk.pi}; dui.drag = {t: 'move', id: it.id, pi: pk.pi, o: {x: it.x, y: it.y}, p0: pk, moved: false, dup: e.altKey}; dtpDraw(); dtpTabSet('objeto'); return; } }
     const P = dui.flow.pages[pk.pi];
-    if (P) { const b = P.blocks.find(b => pk.x >= b.x && pk.x <= b.x + b.w && pk.y >= b.y && pk.y <= b.y + b.h); if (b) { dui.sel = {t: 'block', i: b.sidx}; dtpDraw(); dtpTabSet('texto'); dtpScrollRow(b.sidx); return; } const l = P.lines.find(l => pk.y >= l.y && pk.y <= l.y + l.lead && pk.x >= l.x0 - 2 && pk.x <= Math.max(l.x1, l.x0 + 20) + 2); if (l) { dui.sel = {t: 'para', i: l.sidx}; dtpDraw(); dtpTabSet('texto'); dtpScrollRow(l.sidx); return; } }
+    if (P) { const b = P.blocks.find(b => pk.x >= b.x && pk.x <= b.x + b.w && pk.y >= b.y && pk.y <= b.y + b.h); if (b) { dui.sel = {t: 'block', i: b.sidx}; dui.drag = {t: 'detach', kind: 'block', sidx: b.sidx, pi: pk.pi, col: 0, p0: pk, sx, sy}; dtpDraw(); dtpTabSet('texto'); dtpScrollRow(b.sidx); return; } const l = P.lines.find(l => pk.y >= l.y && pk.y <= l.y + l.lead && pk.x >= l.x0 - 2 && pk.x <= Math.max(l.x1, l.x0 + 20) + 2); if (l) { dui.sel = {t: 'para', i: l.sidx}; dui.drag = {t: 'detach', kind: 'para', sidx: l.sidx, pi: pk.pi, col: l.col, p0: pk, sx, sy}; dtpDraw(); dtpTabSet('texto'); dtpScrollRow(l.sidx); return; } }
     dui.sel = null; dtpDraw(); if (dui.tab === 'objeto') dtpPanel();
   });
   c.addEventListener('dblclick', () => { if (dui.sel && dui.sel.t === 'para') { dtpTabSet('texto'); dtpScrollRow(dui.sel.i, true); } });
@@ -6228,6 +6275,7 @@ function dtpWindowEvents(pos) {
     if (!$('dtpCv')) return; const d = dtpDoc(); if (!d) return; const {sx, sy} = pos(e); dui.mouse = {sx, sy}; const dr = dui.drag;
     if (!dr) { if (dui.show.rulers) dtpDraw(); return; }
     if (dr.t === 'pan') { dui.vx = dr.vx + sx - dr.sx; dui.vy = dr.vy + sy - dr.sy; dtpDraw(); return; }
+    if (dr.t === 'detach') { if (Math.hypot(sx - dr.sx, sy - dr.sy) < 5) return; const fr = dtpDetach(dr); if (!fr) { dui.drag = null; return; } dui.sel = {t: 'item', id: fr.id, pi: dr.pi}; dui.drag = {t: 'move', id: fr.id, pi: dr.pi, o: {x: fr.x, y: fr.y}, p0: dr.p0, moved: true, dup: false}; dui.flow = dtpFlow(d); dtpDraw(); return; }
     const pk = dtpPick(sx, sy); if (!pk) return;
     if (dr.t === 'guide') { const x = (sx - dui.vx) / dui.z - (pk.ox || 0), y = (sy - dui.vy) / dui.z; dr.v = dr.axis === 'v' ? x : y; dr.cur = {sx, sy}; const arr = dr.axis === 'v' ? d.guides.v : d.guides.h; if (dr.isNew) { arr.push(dr.v); dr.i = arr.length - 1; dr.isNew = false; } arr[dr.i] = dr.v; dtpDraw(); return; }
     const T = dtpSnapTargets(d, dr.pi), thr = 6 / dui.z, mx = pk.pi === dr.pi ? pk.x : (sx - dui.vx) / dui.z - (dtpView2().find(v => v.pi === dr.pi) || {ox: 0}).ox, my = (sy - dui.vy) / dui.z;
@@ -6240,7 +6288,7 @@ function dtpWindowEvents(pos) {
   });
   window.addEventListener('mouseup', e => {
     const dr = dui.drag; if (!dr) return; dui.drag = null; const d = dtpDoc(); if (!d) return;
-    if (dr.t === 'pan') return;
+    if (dr.t === 'pan' || dr.t === 'detach') return;
     if (dr.t === 'guide') { const c = $('dtpCv').getBoundingClientRect(), sx = e.clientX - c.left, sy = e.clientY - c.top, R = DTP_RULER, arr = dr.axis === 'v' ? d.guides.v : d.guides.h; if (dr.i != null && ((dr.axis === 'v' && sx < R) || (dr.axis === 'h' && sy < R) || sx < 0 || sy < 0 || sx > c.width || sy > c.height)) arr.splice(dr.i, 1); dtpTouch(); dtpSnap(); dtpDraw(); return; }
     if (dr.t === 'create') { const w = Math.abs(dr.x - dr.x0), h = Math.abs(dr.y - dr.y0), x = Math.min(dr.x0, dr.x), y = Math.min(dr.y0, dr.y); if (w < 8 || h < 8) { dtpTool('v'); return; } const it = dtpMakeItem(dui.tool, x, y, w, h); dtpItems(d, dr.pi).push(it); dui.sel = {t: 'item', id: it.id, pi: dr.pi}; const wasImg = dui.tool === 'i'; dtpTool('v'); dtpTouch(true); dtpSnap(); dtpTabSet('objeto'); if (wasImg) dtpPickImg(); return; }
     if (dr.t === 'move' && !dr.moved) return; dtpTouch(true); dtpSnap(); dtpPanel();
@@ -6287,6 +6335,10 @@ function dtpPanel() {
   <div class="okr-label" style="margin-top:12px">MARGENS</div><div class="grid-2">${N('Topo', 'margins.t')}${N('Base', 'margins.b')}${N(fo ? 'Interna (lombada)' : 'Esquerda', 'margins.i')}${N(fo ? 'Externa' : 'Direita', 'margins.o')}</div>
   <div class="okr-label" style="margin-top:12px">COLUNAS E GRADE</div><div class="grid-2"><div class="field"><label>Colunas</label><input type="number" min="1" max="8" value="${d.cols}" onchange="dtpDoc().cols=Math.max(1,Math.min(8,Math.round(+this.value||1)));dtpTouch(true)"></div>${N('Espaço entre colunas', 'gutter')}</div>
   <div class="field"><label>Grade de linha de base (${DTP_UL[u]}; 0 = desligada)</label><input type="number" step="any" value="${dtpFmt(d.baseline, u)}" onchange="dtpSetPt('baseline',this.value)"><small class="muted">Com a grade ligada, as linhas de texto e os espaços se alinham a ela, como no InDesign.</small></div>
+  <div class="okr-label" style="margin-top:12px">MODELOS DE GRADE (por baixo do layout)</div><div class="field"><select onchange="dtpApplyGrid(this.value)"><option value="">Escolher um modelo de grade…</option>${DTP_GRIDS.map(x => `<option value="${x.id}">${esc(x.n)}</option>`).join('')}</select></div>
+  <div class="grid-2"><div class="field"><label>Proporção das colunas</label><input value="${esc((d.colw.length ? d.colw : Array(d.cols).fill(1)).join(':'))}" onchange="dtpSetColw(this.value)" placeholder="ex.: 1:2"></div><div class="field"><label>Páginas antes do texto (capa etc.)</label><input type="number" min="0" max="20" value="${d.front | 0}" onchange="dtpDoc().front=Math.max(0,Math.min(20,+this.value||0));dtpTouch(true)"></div>
+  <div class="field"><label>Grade modular · colunas</label><input type="number" min="0" max="24" value="${d.mod.cols}" onchange="dtpDoc().mod.cols=Math.max(0,Math.min(24,+this.value||0));dtpTouch(true)"></div><div class="field"><label>Grade modular · linhas</label><input type="number" min="0" max="24" value="${d.mod.rows}" onchange="dtpDoc().mod.rows=Math.max(0,Math.min(24,+this.value||0));dtpTouch(true)"></div></div>
+  <small class="muted block">A grade modular (azul) não guia o texto corrido: ela serve de base para posicionar imagens e quadros, que grudam nas linhas. As colunas de texto (roxo) é que recebem o texto.</small>
   <div class="okr-label" style="margin-top:12px">SANGRIA</div>${N('Sangria (todos os lados)', 'bleed')}
   <div class="okr-label" style="margin-top:12px">FUNDO E PÁGINA-MESTRE</div><div class="field"><label>Cor do papel</label><input type="color" value="${d.paper}" onchange="dtpDoc().paper=this.value;dtpTouch(true)"></div>
   <label class="dtp-chk"><input type="checkbox" ${d.run.folio ? 'checked' : ''} onchange="dtpDoc().run.folio=this.checked;dtpTouch(true)"> Número de página (folio)</label>
@@ -6294,6 +6346,8 @@ function dtpPanel() {
   <div class="field"><label>Cabeçalho (páginas pares/esquerda)</label><input value="${esc(d.run.header)}" oninput="dtpDoc().run.header=this.value;dtpTouch()"></div><div class="field"><label>Cabeçalho (páginas ímpares/direita)</label><input value="${esc(d.run.headerR)}" oninput="dtpDoc().run.headerR=this.value;dtpTouch()"></div>
   <div class="okr-label" style="margin-top:12px">LINHAS-GUIA</div><small class="muted block">Arraste da régua (de cima ou da esquerda) para criar uma guia; arraste de volta para a régua para apagar. Objetos grudam nas guias, margens e colunas.</small><div class="row-gap" style="margin-top:6px"><button class="btn sm" onclick="dtpGuidesClear()">Limpar guias</button></div>`;
 }
+function dtpApplyGrid(id) { const G = DTP_GRIDS.find(x => x.id === id), d = dtpDoc(); if (!G) return; d.cols = G.cols; d.colw = G.colw.slice(); d.mod = Object.assign({}, G.mod); if (G.gut) d.gutter = dtpMM(G.gut); dui.show.mod = true; dtpTouch(true); dtpPanel(); dtpDraw(); toast('Grade aplicada: ' + G.n); }
+function dtpSetColw(v) { const d = dtpDoc(), a = String(v).split(/[:\s,;]+/).map(Number).filter(n => n > 0); d.colw = a.length === d.cols && a.some(n => n !== a[0]) ? a : []; if (a.length > 1 && a.length !== d.cols) { d.cols = Math.min(8, a.length); d.colw = a.length === d.cols ? a : []; } dtpTouch(true); dtpPanel(); }
 function dtpSetPt(path, val) { const d = dtpDoc(), ks = path.split('.'), last = ks.pop(), o = ks.reduce((a, k) => a[k], d); o[last] = Math.max(0, dtpToPt(val, d.unit)); if (path === 'page.w' || path === 'page.h') { o[last] = Math.max(36, o[last]); dtpTouch(true); dtpFit(); } else dtpTouch(true); }
 function dtpSwap() { const d = dtpDoc(); [d.page.w, d.page.h] = [d.page.h, d.page.w]; dtpTouch(true); dtpPanel(); dtpFit(); }
 function dtpApplyPreset(id) { const P = DTP_PRESETS.find(x => x.id === id), d = dtpDoc(); if (!P || !confirm('Aplicar o formato “' + P.n + '”? Tamanho, margens, colunas e sangria serão trocados (o texto é mantido).')) { dtpPanel(); return; } d.page = {w: dtpMM(P.w), h: dtpMM(P.h)}; d.margins = {t: dtpMM(P.m.t), b: dtpMM(P.m.b), i: dtpMM(P.m.i), o: dtpMM(P.m.o)}; d.cols = P.cols; d.facing = P.facing; d.bleed = dtpMM(P.bleed); if (P.pages) d.nPages = Math.max(d.nPages, P.pages); dtpTouch(true); dtpPanel(); dtpFit(); }
@@ -6354,7 +6408,7 @@ function dtpStyleSwap() { const d = dtpDoc(), h = prompt('Fonte dos títulos (no
 const dtpSelItem = () => { const d = dtpDoc(); return dui.sel && dui.sel.t === 'item' ? dtpItems(d, dui.sel.pi).find(q => q.id === dui.sel.id) : null; };
 function dtpObjetoHTML(d, N) {
   const it = dtpSelItem(), u = d.unit;
-  const add = `<div class="okr-label">INSERIR NA PÁGINA ${dui.pi + 1}</div><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpAddFloat('img')">＋ Imagem flutuante</button><button class="btn sm" onclick="dtpAddFloat('text')">＋ Quadro de texto</button><button class="btn sm" onclick="dtpAddFloat('rect')">＋ Retângulo</button></div><small class="muted block" style="margin:6px 0">Também dá para desenhar na mesa com as ferramentas Texto (T), Imagem (I) e Retângulo (R). Imagem flutuante com “Contornar” faz o texto desviar dela.</small>`;
+  const add = `<div class="okr-label">INSERIR NA PÁGINA ${dui.pi + 1}</div><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpAddFloat('img')">＋ Imagem flutuante</button><button class="btn sm" onclick="dtpAddFloat('text')">＋ Quadro de texto</button><button class="btn sm" onclick="dtpAddFloat('rect')">＋ Retângulo</button></div><small class="muted block" style="margin:6px 0">Mão livre: <b>arraste qualquer parágrafo ou imagem da página</b> e ele vira um quadro solto, que você leva para onde quiser (↩ Devolver ao fluxo volta ao texto corrido). Também dá para desenhar com as ferramentas Texto (T), Imagem (I) e Retângulo (R). Imagem flutuante com “Contornar” faz o texto desviar dela.</small>`;
   if (!it) return add + '<p class="muted" style="font-size:12px">Selecione um objeto na página para editar medidas e contorno de texto.</p>';
   const fld = (k, lab) => `<div class="field"><label>${lab}</label><input type="number" step="any" value="${dtpFmt(it[k], u)}" onchange="dtpItemSet('${k}',dtpToPt(this.value,dtpUnit()))"></div>`;
   return add + `<div class="okr-label">${it.k === 'img' ? 'IMAGEM' : it.k === 'text' ? 'QUADRO DE TEXTO' : 'RETÂNGULO'} · medidas em ${DTP_UL[u]}</div><div class="grid-2">${fld('x', 'X')}${fld('y', 'Y')}${fld('w', 'Largura')}${fld('h', 'Altura')}</div>
@@ -6363,14 +6417,37 @@ function dtpObjetoHTML(d, N) {
   ${it.k === 'img' ? `<div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpPickImg()">${it.imgId ? 'Trocar imagem' : 'Escolher imagem'}</button></div><label class="muted" style="font-size:11px">Zoom do enquadramento: ${(it.zoom || 1).toFixed(2)}×</label><input type="range" min="1" max="4" step="0.05" value="${it.zoom || 1}" oninput="dtpItemSet('zoom',+this.value,true)">` : ''}
   ${it.k === 'rect' ? `<div class="grid-2"><div class="field"><label>Cor</label><input type="color" value="${it.fill || '#E7DCC8'}" onchange="dtpItemSet('fill',this.value)"></div><div class="field"><label>Opacidade</label><input type="range" min="0" max="1" step="0.05" value="${it.op != null ? it.op : 1}" oninput="dtpItemSet('op',+this.value,true)"></div></div>` : ''}
   ${it.k === 'text' ? `<div class="field"><label>Texto</label><textarea rows="5" oninput="dtpItemSet('text',this.value,true)">${esc(it.text)}</textarea></div><div class="grid-2"><div class="field"><label>Estilo</label><select onchange="dtpItemSet('st',this.value)">${Object.keys(d.styles).map(k => `<option value="${k}" ${it.st === k ? 'selected' : ''}>${esc(d.styles[k].n)}</option>`).join('')}</select></div><div class="field"><label>Cor de fundo</label><input type="color" value="${it.fill || '#FFFFFF'}" onchange="dtpItemSet('fill',this.value)"><label class="dtp-chk"><input type="checkbox" ${it.fill ? 'checked' : ''} onchange="dtpItemSet('fill',this.checked?'#FFFFFF':'')"> usar fundo</label></div></div>` : ''}
+  ${it.k === 'text' || it.k === 'img' ? `<div class="row-gap" style="margin-top:8px;flex-wrap:wrap">${it.k === 'text' ? '<button class="btn sm" onclick="dtpItemFitH()">Ajustar altura ao texto</button>' : ''}<button class="btn sm" onclick="dtpItemToFlow()" title="Devolve ao fluxo do texto (após o parágrafo selecionado ou no fim)">↩ Devolver ao fluxo</button></div>` : ''}
   <div class="row-gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn sm" onclick="dtpItemOrder(1)">Trazer para frente</button><button class="btn sm" onclick="dtpItemOrder(-1)">Enviar para trás</button><button class="btn sm" onclick="dtpItemDup()">Duplicar (Ctrl+D)</button><button class="btn sm" onclick="dtpItemDel()">${ico('trash', 13)} Excluir</button></div>`;
 }
 function dtpItemSet(k, v, quiet) { const it = dtpSelItem(); if (!it) return; it[k] = v; dtpTouch(true); if (!quiet && !['x', 'y', 'w', 'h', 'off'].includes(k)) dtpPanel(); }
-function dtpItemAlign(m) { const d = dtpDoc(), it = dtpSelItem(); if (!it) return; const g = dtpGeom(d, dui.sel.pi); if (m === 'h') it.x = (g.W - it.w) / 2; if (m === 'm') { it.x = g.x0; it.w = g.x1 - g.x0; } if (m === 'col') { it.x = g.colX(0); it.w = g.cw; } dtpTouch(true); dtpPanel(); }
+function dtpItemAlign(m) { const d = dtpDoc(), it = dtpSelItem(); if (!it) return; const g = dtpGeom(d, dui.sel.pi); if (m === 'h') it.x = (g.W - it.w) / 2; if (m === 'm') { it.x = g.x0; it.w = g.x1 - g.x0; } if (m === 'col') { it.x = g.colX(0); it.w = g.colW(0); } dtpTouch(true); dtpPanel(); }
 function dtpItemOrder(dd) { const d = dtpDoc(), a = dtpItems(d, dui.sel.pi), i = a.findIndex(q => q.id === dui.sel.id), j = Math.max(0, Math.min(a.length - 1, i + dd)); [a[i], a[j]] = [a[j], a[i]]; dtpTouch(true); }
 function dtpItemDup() { const d = dtpDoc(), it = dtpSelItem(); if (!it) return; const c = JSON.parse(JSON.stringify(it)); c.id = uid('fr'); c.x += 12; c.y += 12; dtpItems(d, dui.sel.pi).push(c); dui.sel = {t: 'item', id: c.id, pi: dui.sel.pi}; dtpTouch(true); dtpPanel(); }
+/* mão livre: solta o parágrafo/imagem do fluxo e vira um quadro que você arrasta para onde quiser */
+function dtpDetach(dr) {
+  const d = dtpDoc(), f = dui.flow, it = d.story[dr.sidx], P = f.pages[dr.pi]; if (!it || !P) return null; let fr;
+  if (dr.kind === 'para' && it.k === 'p') {
+    const ls = P.lines.filter(l => l.sidx === dr.sidx && l.col === dr.col); if (!ls.length) return null; const st = d.styles[it.st] || d.styles.body, pad = 4;
+    const x0 = Math.min(...ls.map(l => l.x0)), x1 = Math.max(...ls.map(l => l.x1));
+    fr = {id: uid('fr'), k: 'text', x: x0 - pad, y: ls[0].y - pad, w: Math.max(60, x1 - x0) + 2 * pad, h: 9999, wrap: 'around', off: 6, text: it.t, st: it.st, pad, fill: '', imgId: '', zoom: 1};
+    const r = dtpFrame(d, fr, dr.pi), last = r.lines[r.lines.length - 1]; fr.h = Math.max(20, (last ? last.y + last.lead - fr.y : st.lead) + pad);
+  } else if (dr.kind === 'block' && it.k === 'img') {
+    const b = P.blocks.find(q => q.sidx === dr.sidx); if (!b) return null;
+    fr = {id: uid('fr'), k: 'img', x: b.x, y: b.y, w: b.w, h: b.h, wrap: 'around', off: 8, imgId: it.imgId, zoom: 1, ar: it.ar};
+  } else return null;
+  d.story.splice(dr.sidx, 1); dtpItems(d, dr.pi).push(fr); return fr;
+}
+function dtpItemToFlow() {
+  const d = dtpDoc(), it = dtpSelItem(); if (!it) return; const at = dui.sel && dui.sel.i != null ? dui.sel.i + 1 : d.story.length;
+  if (it.k === 'text') d.story.splice(at, 0, {k: 'p', st: d.styles[it.st] ? it.st : 'body', t: it.text.replace(/\n+/g, ' ')});
+  else if (it.k === 'img' && it.imgId) d.story.splice(at, 0, {k: 'img', imgId: it.imgId, ar: it.ar || it.w / it.h, w: 'col', pct: 100, al: 'l', cap: ''});
+  else { toast('Só texto e imagem voltam ao fluxo.'); return; }
+  const a = dtpItems(d, dui.sel.pi), i = a.findIndex(q => q.id === it.id); a.splice(i, 1); dui.sel = null; dtpTouch(true); dtpSnap(); dtpPanel(); toast('O quadro voltou para o fluxo do texto.');
+}
+function dtpItemFitH() { const d = dtpDoc(), it = dtpSelItem(); if (!it || it.k !== 'text') return; const t = Object.assign({}, it, {h: 9999}), r = dtpFrame(d, t, dui.sel.pi), last = r.lines[r.lines.length - 1]; if (last) { it.h = Math.max(16, last.y + last.lead - it.y + (it.pad != null ? it.pad : 4)); dtpTouch(true); dtpPanel(); } }
 function dtpItemDel() { const d = dtpDoc(), a = dtpItems(d, dui.sel.pi), i = a.findIndex(q => q.id === dui.sel.id); if (i < 0) return; a.splice(i, 1); dui.sel = null; dtpTouch(true); dtpPanel(); }
-function dtpAddFloat(k) { const d = dtpDoc(), g = dtpGeom(d, dui.pi), w = k === 'rect' ? g.cw : g.cw, h = k === 'text' ? 80 : g.cw * 0.7; const it = dtpMakeItem(k === 'img' ? 'i' : k === 'text' ? 't' : 'r', g.colX(0), g.y0, w, h); dtpItems(d, dui.pi).push(it); dui.sel = {t: 'item', id: it.id, pi: dui.pi}; dtpTouch(true); dtpPanel(); if (k === 'img') dtpPickImg(); }
+function dtpAddFloat(k) { const d = dtpDoc(), g = dtpGeom(d, dui.pi), w = g.colW(0), h = k === 'text' ? 80 : g.colW(0) * 0.7; const it = dtpMakeItem(k === 'img' ? 'i' : k === 'text' ? 't' : 'r', g.colX(0), g.y0, w, h); dtpItems(d, dui.pi).push(it); dui.sel = {t: 'item', id: it.id, pi: dui.pi}; dtpTouch(true); dtpPanel(); if (k === 'img') dtpPickImg(); }
 function dtpPickImg() { const it = dtpSelItem(); if (!it) return; dtpFilePick(r => { const q = dtpSelItem(); if (!q) return; q.imgId = r.id; q.ar = r.ar; dtpTouch(true); dtpPanel(); }); }
 
 /* ---------- matéria (modo só texto, com a marca do estouro) ---------- */
@@ -6404,7 +6481,8 @@ function dtpStoryApply() { const d = dtpDoc(), ta = $('dtpStoryTa'); if (!ta) re
 /* ---------- referência ---------- */
 function dtpRefHTML(d) {
   const r = dui.refRes, pc = v => (v * 100).toFixed(1) + '%';
-  return `<small class="muted block">Suba um print ou foto de uma página que você quer imitar. Ela vira uma camada translúcida sobre a página (para você alinhar guias na mão) e o Studio mede margens, colunas, entrelinha e cores para aplicar no seu documento, com o seu conteúdo.</small>
+  setTimeout(bankFill, 30);
+  return `${refBankHTML('dtp', ['diagramacao', 'capas', 'posts', 'cartaz'])}<small class="muted block">Suba um print ou foto de uma página que você quer imitar. Ela vira uma camada translúcida sobre a página (para você alinhar guias na mão) e o Studio mede margens, colunas, entrelinha e cores para aplicar no seu documento, com o seu conteúdo.</small>
   <div class="row-gap" style="margin:8px 0;flex-wrap:wrap"><button class="btn sm dark" onclick="dtpRefPick()">${dui.ref ? 'Trocar referência' : 'Subir referência'}</button>${dui.ref ? `<button class="btn sm" onclick="dui.ref=null;dui.refOn=false;dui.refRes=null;dtpDraw();dtpPanel()">Remover</button>` : ''}</div>
   ${dui.ref ? `<label class="dtp-chk"><input type="checkbox" ${dui.refOn ? 'checked' : ''} onchange="dui.refOn=this.checked;dtpDraw()"> Mostrar sobre a página</label><label class="muted" style="font-size:11px">Opacidade ${Math.round(dui.refOp * 100)}%</label><input type="range" min="10" max="90" value="${Math.round(dui.refOp * 100)}" oninput="dui.refOp=this.value/100;dtpDraw()"><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dtpRefRun()">Medir (margens, colunas, entrelinha)</button><button class="btn sm dark" onclick="ailStart(dui.ref,'dtp')" title="A IA lê fontes, tamanhos, cores e blocos">✦ Ler layout com IA</button></div>` : ''}
   ${r ? `<div class="dtp-res"><div class="okr-label">O QUE FOI ENCONTRADO</div><ul style="margin:4px 0 8px 16px;padding:0;font-size:12px;line-height:1.55">
@@ -6489,17 +6567,22 @@ async function dtpRenderPage(d, f, i, dpi, bl, marks) {
     [[0, 0, -1, -1], [W, 0, 1, -1], [0, H, -1, 1], [W, H, 1, 1]].forEach(([cx, cy, sx, sy]) => { line(cx, cy + sy * o, cx, cy + sy * (o + L)); line(cx + sx * o, cy, cx + sx * (o + L), cy); }); }
   return {cv, S};
 }
+/* monta o PDF de um documento; o={dpi, marks, bleed(bool), from, to, progress} */
+async function dtpPdfBuild(d, o) {
+  await dtpFonts(d); await dtpLoadImgs(d); const f = dtpFlow(d), n = dtpPageCount(d, f), dpi = o.dpi || 300, marks = !!o.marks, bl = o.bleed ? d.bleed : 0, pages = [];
+  const a = Math.max(1, Math.min(n, o.from || 1)), z = Math.max(a, Math.min(n, o.to || n));
+  for (let i = a - 1; i < z; i++) {
+    const {cv, S} = await dtpRenderPage(d, f, i, dpi, bl, marks), blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.92));
+    pages.push({jpeg: new Uint8Array(await blob.arrayBuffer()), w: cv.width, h: cv.height, pw: d.page.w + 2 * S, ph: d.page.h + 2 * S, tb: {s: S, w: d.page.w, h: d.page.h, bl}});
+    if (o.progress) o.progress(i + 1, z); await new Promise(r => setTimeout(r, 0));
+  }
+  return {blob: buildPDF(pages, d.page.w, d.page.h), n: pages.length, flow: f};
+}
 async function dtpExportPDF() {
   const d = dtpDoc(); if (!d) return; toast('Preparando o PDF…');
   try {
-    await dtpFonts(d); await dtpLoadImgs(d); const f = dtpFlow(d), n = dtpPageCount(d, f), dpi = +$('dtpDpi').value || 300, marks = $('dtpMk').checked, bl = $('dtpBl').checked ? d.bleed : 0;
-    const a = Math.max(1, Math.min(n, +$('dtpFrom').value || 1)), z = Math.max(a, Math.min(n, +$('dtpTo').value || n)), pages = [];
-    for (let i = a - 1; i < z; i++) {
-      const {cv, S} = await dtpRenderPage(d, f, i, dpi, bl, marks), blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.92));
-      pages.push({jpeg: new Uint8Array(await blob.arrayBuffer()), w: cv.width, h: cv.height, pw: d.page.w + 2 * S, ph: d.page.h + 2 * S, tb: {s: S, w: d.page.w, h: d.page.h, bl}});
-      toast(`PDF: página ${i + 1} de ${z}…`); await new Promise(r => setTimeout(r, 0));
-    }
-    download(`${dtpFileName(d)}.pdf`, buildPDF(pages, d.page.w, d.page.h), 'application/pdf'); toast(`PDF baixado (${pages.length} página(s), ${dpi} dpi${marks ? ', com marcas de corte' : ''}).`);
+    const dpi = +$('dtpDpi').value || 300, marks = $('dtpMk').checked, r = await dtpPdfBuild(d, {dpi, marks, bleed: $('dtpBl').checked, from: +$('dtpFrom').value, to: +$('dtpTo').value, progress: (i, z) => toast(`PDF: página ${i} de ${z}…`)});
+    download(`${dtpFileName(d)}.pdf`, r.blob, 'application/pdf'); toast(`PDF baixado (${r.n} página(s), ${dpi} dpi${marks ? ', com marcas de corte' : ''}).`);
   } catch (e) { toast('Falhou: ' + e.message); }
 }
 async function dtpExportPNG() { const d = dtpDoc(); await dtpFonts(d); await dtpLoadImgs(d); const f = dtpFlow(d), {cv} = await dtpRenderPage(d, f, dui.pi, 200, 0, false); cv.toBlob(b => download(`${dtpFileName(d)}-pag${dui.pi + 1}.png`, b, 'image/png')); }
@@ -6597,6 +6680,38 @@ function ailToDoc() {
 
 </script>
 <script>
+/* ===== Editora · hub: abas (e-books, motor de texto, engenheiro de capa, diagramação, Amazon) e banco de referências compartilhado ===== */
+const EDH_TABS = [['livros', 'E-books', 'book'], ['texto', 'Motor de texto', 'sparkles'], ['capa', 'Engenheiro de capa', 'palette'], ['diag', 'Diagramação', 'layout'], ['amazon', 'Amazon KDP', 'send']];
+const edh = {area: 'livros'};
+function edTabs(active) {
+  return `<div class="edh-tabs">${EDH_TABS.map(([k, l, ic]) => `<button class="edh-tab ${active === k ? 'on' : ''}" onclick="edGo('${k}')">${ico(ic, 15)} ${l}</button>`).join('')}</div>`;
+}
+function edGo(k) {
+  edh.area = k; if (typeof mot !== 'undefined') mot.open = k === 'texto';
+  if (k === 'texto') { if (typeof motM === 'function') motM().stage = motM().stage || 'material'; }
+  if (k === 'diag') { dui.id = ''; go('diagram'); return; }
+  if (k === 'livros') eui.id = '';
+  go('editora');
+}
+
+/* ---------- banco de referências (usa as imagens da página Inspiração) ---------- */
+const bank = {cat: ''};
+function refBankHTML(ctx, cats) {
+  const I = inspo(), all = I.items.filter(i => i.imgId), list = all.filter(i => !bank.cat || i.cat === bank.cat).slice(0, 36), cs = inspoCats().filter(c => cats.includes(c.id) || all.some(i => i.cat === c.id));
+  return `<div class="okr-label">BANCO DE REFERÊNCIAS <small class="muted">(da página Inspiração)</small></div><div class="tchips" style="margin:4px 0"><button class="tchip ${bank.cat ? '' : 'on'}" onclick="bank.cat='';edhRefresh('${ctx}')">Todas</button>${cs.map(c => `<button class="tchip ${bank.cat === c.id ? 'on' : ''}" onclick="bank.cat='${esc(c.id)}';edhRefresh('${ctx}')">${esc(c.label)}</button>`).join('')}</div>
+  ${list.length ? `<div class="bank-grid">${list.map(i => `<button class="bank-th" title="${esc(i.title)}" onclick="bankPick('${ctx}','${esc(i.id)}')"><img data-bank="${esc(i.imgId)}" alt=""></button>`).join('')}</div>` : '<p class="muted" style="font-size:12px;margin:4px 0">Nenhuma imagem nesta categoria ainda.</p>'}
+  <div class="row-gap" style="margin:6px 0 10px"><button class="btn sm" onclick="go('inspiration')">＋ Subir referências (Inspiração)</button><button class="btn sm" onclick="edhRefresh('${ctx}')">↻ Atualizar</button></div>`;
+}
+function edhRefresh(ctx) { if (ctx === 'dtp') dtpPanel(); else if (ctx === 'cov' && typeof covRender === 'function') covRender(); }
+async function bankFill() { for (const im of document.querySelectorAll('img[data-bank]')) { const u = await inspoURL(im.dataset.bank); if (u) im.src = u; } }
+async function bankPick(ctx, id) {
+  const it = inspo().items.find(i => i.id === id), b = it && await imgGet(it.imgId); if (!b) { toast('Imagem não encontrada.'); return; } const bm = await createImageBitmap(b);
+  if (ctx === 'dtp') { dui.ref = bm; dui.refOn = true; dui.refRes = null; dtpPanel(); dtpDraw(); toast('Referência carregada sobre a página.'); }
+  else if (ctx === 'cov') { cov.ref = bm; cov.refBlob = b; covRender(); toast('Referência escolhida para a capa.'); }
+}
+
+</script>
+<script>
 /* ===== Motor de e-book: ideia/conteúdo + skill → estrutura (aprovação) → texto por capítulo → Editora ou Diagramação ===== */
 const mot = {open: false, busy: '', sel: '', skillBuf: null};
 const MOT_SKILL_GENERIC = {id: 'sk-generico', name: 'Criador de e-books em série (genérico)', builtin: true, text: `Você é editor(a) e redator(a) de e-books em série, para qualquer nicho. Siga este padrão.
@@ -6613,14 +6728,14 @@ const motSkillCur = () => { const M = motM(); return motSkills().find(s => s.id 
 const motSave = () => { persist(); AUTO_AT = Date.now(); };
 
 /* ---------- entrada ---------- */
-function motOpen(stage) { mot.open = true; const M = motM(); if (stage) M.stage = stage; renderEditora(); }
-function motClose() { mot.open = false; renderEditora(); }
+function motOpen(stage) { mot.open = true; edh.area = 'texto'; const M = motM(); if (stage) M.stage = stage; renderEditora(); }
+function motClose() { mot.open = false; edh.area = 'livros'; renderEditora(); }
 function motStage(s) { const M = motM(); if (s === 'texto' && !M.approved) { toast('Aprove a estrutura primeiro.'); return; } M.stage = s; motSave(); renderEditora(); }
 
 /* ---------- tela ---------- */
 function motRender(r, p) {
   const M = motM(), steps = [['material', '1 · Material'], ['estrutura', '2 · Estrutura'], ['texto', '3 · Texto'], ['enviar', '4 · Enviar']];
-  r.innerHTML = `<div class="page-head"><div><h1>Motor de e-book</h1><p>Entre com uma ideia ou com o conteúdo bruto, escolha uma skill (o padrão de escrita), aprove a estrutura, deixe a IA escrever capítulo por capítulo, revise e mande para a Editora (4 versões) ou para a Diagramação (livro/revista). Se você já tem o texto pronto, vá direto ao passo 4.</p></div><div class="row-gap"><button class="btn" onclick="motClose()">← Editora</button></div></div>
+  r.innerHTML = edTabs('texto') + `<div class="page-head"><div><h1>Motor de texto</h1><p>Entre com uma ideia ou com o conteúdo bruto, escolha uma skill (o padrão de escrita), aprove a estrutura, deixe a IA escrever capítulo por capítulo, revise e mande para a Editora (4 versões) ou para a Diagramação (livro/revista). Se você já tem o texto pronto, vá direto ao passo 4.</p></div></div>
   <div class="mot-steps">${steps.map(([k, l]) => `<button class="tchip ${M.stage === k ? 'on' : ''}" onclick="motStage('${k}')">${l}</button>`).join('')}</div>
   <div id="motBody">${({material: motMaterial, estrutura: motEstrutura, texto: motTexto, enviar: motEnviar})[M.stage](M)}</div>`;
 }
@@ -6740,7 +6855,7 @@ function motToEditora() {
   eb.sections = eb.sections.filter(s => s.type !== 'chapter'); const secs = ebImport(t, eb); if (!secs.length) { toast('Não encontrei capítulos. Use # no título de cada capítulo.'); return; }
   let n = eb.sections.filter(s => s.type === 'chapter').length; secs.forEach(s => { n++; s.label = 'CAPÍTULO ' + ebPad2(n); });
   const at = eb.sections.findIndex(x => x.type === 'text' && /plano|conclus/i.test(x.title)); if (at >= 0) eb.sections.splice(at, 0, ...secs); else eb.sections.push(...secs);
-  ebList().push(eb); persist(); mot.open = false; toast(secs.length + ' capítulo(s) enviados à Editora.'); ebOpen(eb.id);
+  ebList().push(eb); persist(); mot.open = false; edh.area = 'livros'; toast(secs.length + ' capítulo(s) enviados à Editora.'); ebOpen(eb.id);
 }
 /* texto com marcações da Editora → matéria da Diagramação */
 function motToStory(text) {
@@ -6767,7 +6882,7 @@ function motToDtp() {
   const M = motM(), t = (M.full || '').trim(); if (!t) { toast('Não há texto para enviar.'); return; }
   const d = dtpNew($('mPre').value, M.title || 'Documento'), story = motToStory(t); if (!story.length) { toast('Não encontrei texto.'); return; }
   d.styles.list = Object.assign({}, d.styles.body, {n: 'Lista', indent: 0, align: 'left', after: 3}); d.story = story;
-  dtpList().push(d); persist(); mot.open = false; toast('Documento criado na Diagramação.'); go('diagram'); dtpOpen(d.id);
+  dtpList().push(d); persist(); mot.open = false; edh.area = 'diag'; toast('Documento criado na Diagramação.'); go('diagram'); dtpOpen(d.id);
 }
 
 </script>
@@ -8138,6 +8253,316 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal
   if (canSync()) await pullWorkspace();
   refreshCurrentView();
 })();
+
+</script>
+<script>
+/* ===== Amazon KDP: cálculo de lombada e capa completa, margens por nº de páginas, checklist e exportações =====
+   Valores de referência do KDP (confira sempre no painel do KDP antes de publicar: eles mudam). */
+const KDP_PAPER = {'bw-white': {n: 'Preto e branco · papel branco', k: 0.002252}, 'bw-cream': {n: 'Preto e branco · papel creme', k: 0.0025}, 'color-std': {n: 'Cor padrão', k: 0.002252}, 'color-premium': {n: 'Cor premium', k: 0.002347}};
+const kdpTrims = () => DTP_PRESETS.filter(x => x.kdp);
+const kdpK = () => { const p = curProject(); if (!p) return null; if (!p.kdp || typeof p.kdp !== 'object' || !p.kdp.trim) p.kdp = normalizeKdp(p.kdp); return p.kdp; };
+const kdpDocCur = () => { const p = curProject(), k = kdpK(); return p && k ? (p.layouts || []).find(d => d.id === k.docId) : null; };
+const kdp = {cnt: 0, checks: null};
+function kdpMinInside(pages) { return pages <= 150 ? 0.375 : pages <= 300 ? 0.5 : pages <= 500 ? 0.625 : pages <= 700 ? 0.75 : 0.875; }
+function kdpCalc(k, pagesN) {
+  const P = DTP_PRESETS.find(x => x.id === k.trim) || DTP_PRESETS.find(x => x.id === 'kdp6x9'), [tw, th] = P.kdp, pages = Math.max(24, Math.ceil((pagesN || 24) / 2) * 2), spine = pages * KDP_PAPER[k.paper].k, bleed = 0.125;
+  const wrapW = 2 * tw + spine + 2 * bleed, wrapH = th + 2 * bleed, minIn = kdpMinInside(pages), px = v => Math.round(v * 300);
+  return {tw, th, pages, spine, bleed, wrapW, wrapH, minIn, px: {w: px(wrapW), h: px(wrapH)}, spineText: pages >= 80, preset: P};
+}
+const kdpPages = () => { const k = kdpK(); return k.pages > 0 ? k.pages : kdp.cnt || 24; };
+const kdpIn = v => (+v).toFixed(3).replace('.', ',') + ' pol. (' + (v * 25.4).toFixed(1).replace('.', ',') + ' mm)';
+
+function kdpRender(r, p) {
+  const k = kdpK(), calc = kdpCalc(k, kdpPages()), docs = p.layouts || [], doc = kdpDocCur(), ebs = p.ebooks || [];
+  r.innerHTML = edTabs('amazon') + `<div class="page-head"><div><h1>Amazon KDP</h1><p>Feche o livro para publicar na Amazon: formato do miolo, lombada, capa completa (contracapa + lombada + capa), checklist e arquivos prontos. Os números seguem as regras do KDP; confira no painel do KDP antes de enviar, porque elas mudam.</p></div></div>
+  <div class="mot-wrap"><div>
+  <div class="form-grid"><div class="field"><label>Formato do livro impresso (corte)</label><select onchange="kdpSet('trim',this.value)">${kdpTrims().map(x => `<option value="${x.id}" ${x.id === k.trim ? 'selected' : ''}>${esc(x.n.replace('Amazon KDP · ', ''))}</option>`).join('')}</select></div>
+  <div class="field"><label>Papel e tinta</label><select onchange="kdpSet('paper',this.value)">${Object.entries(KDP_PAPER).map(([id, v]) => `<option value="${id}" ${id === k.paper ? 'selected' : ''}>${v.n}</option>`).join('')}</select></div>
+  <div class="field"><label>Documento do miolo (Diagramação)</label><select onchange="kdpSet('docId',this.value)"><option value="">— nenhum —</option>${docs.map(d => `<option value="${esc(d.id)}" ${d.id === k.docId ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}</select></div>
+  <div class="field"><label>Número de páginas ${doc ? '(vazio = contar do documento)' : ''}</label><input type="number" min="0" max="900" value="${k.pages || ''}" placeholder="${kdp.cnt || 24}" onchange="kdpSet('pages',+this.value||0)"></div></div>
+  <div class="okr-label">MEDIDAS CALCULADAS (${calc.pages} páginas)</div>
+  <table class="ail-t"><tr><td>Corte (página)</td><td><b>${calc.tw} × ${calc.th} pol.</b> (${(calc.tw * 25.4).toFixed(1)} × ${(calc.th * 25.4).toFixed(1)} mm)</td></tr>
+  <tr><td>Lombada</td><td><b>${kdpIn(calc.spine)}</b></td></tr>
+  <tr><td>Capa completa (com sangria 0,125 pol.)</td><td><b>${calc.wrapW.toFixed(3).replace('.', ',')} × ${calc.wrapH.toFixed(3).replace('.', ',')} pol.</b> → ${calc.px.w} × ${calc.px.h} px a 300 dpi</td></tr>
+  <tr><td>Margem interna mínima (lombada)</td><td><b>${kdpIn(calc.minIn)}</b> para ${calc.pages} páginas</td></tr>
+  <tr><td>Texto na lombada</td><td>${calc.spineText ? 'permitido (80 páginas ou mais)' : '<b style="color:#b45309">não recomendado</b> (menos de 80 páginas)'}</td></tr>
+  <tr><td>Código de barras</td><td>reserve 2 × 1,2 pol. no canto inferior direito da contracapa (o KDP coloca o ISBN)</td></tr></table>
+  <div class="row-gap" style="margin:10px 0;flex-wrap:wrap"><button class="btn dark" onclick="kdpApplyDoc()">${doc ? 'Ajustar o documento ao formato KDP' : 'Criar documento do miolo neste formato'}</button><button class="btn" onclick="kdpOpenDoc()" ${doc ? '' : 'disabled'}>Abrir na Diagramação</button></div>
+  <div class="okr-label">CHECKLIST DO MIOLO</div><div id="kdpChecks">${kdp.checks ? kdpChecksHTML(kdp.checks) : '<p class="muted" style="font-size:12px">Escolha o documento e clique em Verificar.</p>'}</div>
+  <div class="row-gap" style="margin:8px 0"><button class="btn sm" onclick="kdpVerify()" ${doc ? '' : 'disabled'}>Verificar o miolo</button></div></div>
+  <div><div class="mot-ch"><b>Arquivos para a Amazon</b><p class="muted" style="font-size:12px">1) Miolo em PDF · 2) Capa completa em PDF · 3) EPUB para o Kindle · 4) Capa do Kindle (JPG).</p>
+  <div class="row-gap" style="flex-direction:column;align-items:stretch;gap:6px">
+  <button class="btn" onclick="kdpExportInterior()" ${doc ? '' : 'disabled'}>Miolo em PDF (300 dpi, com sangria)</button>
+  <button class="btn" onclick="covWrapOpen()">Criar a capa completa (Engenheiro de capa)</button>
+  <button class="btn" onclick="covExportWrap()" ${p.cover && p.cover.setId && p.cover.mode === 'wrap' ? '' : 'disabled'}>Capa completa em PDF (última criada)</button>
+  <button class="btn" onclick="covExportKindle()" ${p.cover && p.cover.setId ? '' : 'disabled'}>Capa do Kindle (JPG 1600 × 2560)</button>
+  ${ebs.length ? `<div class="field" style="margin:0"><label>EPUB do e-book</label><div class="row-gap"><select id="kdpEb">${ebs.map(e => `<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('')}</select><button class="btn" onclick="kdpEpub()">Baixar EPUB</button><button class="btn" onclick="kdpMobile()">Versão celular (PDF 9:16)</button></div></div>` : '<small class="muted">Crie o e-book na Editora para gerar o EPUB do Kindle.</small>'}</div></div>
+  <small class="muted block" style="margin-top:8px">Limites: o PDF do miolo leva o texto como imagem de 300 dpi (o KDP aceita, mas o texto não é selecionável). Confira a prévia no Visualizador do KDP antes de publicar.</small></div></div>`;
+}
+function kdpSet(f, v) { const k = kdpK(); k[f] = v; if (f === 'docId' || f === 'pages') kdp.checks = null; persist(); kdpCount().then(() => renderEditora()); }
+async function kdpCount() { const d = kdpDocCur(); if (!d) { kdp.cnt = 0; return; } try { await ensureFonts([...Object.values(d.styles).map(s => s.font), d.run.font]); kdp.cnt = dtpPageCount(d, dtpFlow(d)); } catch (e) { kdp.cnt = 0; } }
+function kdpApplyTo(d, calc) {
+  const mm = v => v * 25.4 * 72 / 25.4, inch = v => v * 72, P = calc.preset;
+  d.page = {w: inch(calc.tw), h: inch(calc.th)}; d.facing = true; d.bleed = inch(calc.bleed); d.margins = {t: inch(0.5), b: inch(0.5), i: inch(calc.minIn + 0.125), o: inch(0.5)}; d.front = 0; d.run.folio = true;
+}
+async function kdpApplyDoc() {
+  const p = curProject(), k = kdpK(), calc = kdpCalc(k, kdpPages());
+  let d = kdpDocCur();
+  if (!d) { d = dtpNew(k.trim, 'Miolo · ' + (p.cover && p.cover.title || 'livro')); k.docId = d.id; (p.layouts = p.layouts || []).push(d); }
+  else if (!confirm('Ajustar “' + d.name + '” ao formato KDP ' + calc.tw + '×' + calc.th + ' pol.? Tamanho, margens e sangria mudam (o texto é mantido).')) return;
+  kdpApplyTo(d, calc); persist(); kdp.checks = null; await kdpCount(); renderEditora(); toast('Documento ajustado ao formato KDP.');
+}
+function kdpOpenDoc() { const d = kdpDocCur(); if (!d) return; edh.area = 'diag'; go('diagram'); dtpOpen(d.id); }
+async function kdpVerify() {
+  const d = kdpDocCur(), k = kdpK(); if (!d) return; await dtpFonts(d); await dtpLoadImgs(d); const f = dtpFlow(d), pages = dtpPageCount(d, f), calc = kdpCalc(k, k.pages || pages), out = [];
+  const ck = (ok, t, warn) => out.push({ok, warn: !ok && warn, t});
+  ck(pages >= 24, `Número de páginas: ${pages} (mínimo 24 no KDP)`);
+  ck(pages % 2 === 0, `Páginas ${pages % 2 ? 'ímpares: o KDP acrescenta uma página em branco ao final' : 'pares'}`, true);
+  ck(Math.abs(d.page.w - calc.tw * 72) < 1 && Math.abs(d.page.h - calc.th * 72) < 1, `Tamanho do documento ${(d.page.w / 72).toFixed(2)} × ${(d.page.h / 72).toFixed(2)} pol. ${Math.abs(d.page.w - calc.tw * 72) < 1 ? '= formato escolhido' : '≠ formato escolhido (use Ajustar)'}`);
+  const inner = Math.min(d.margins.i, d.facing ? d.margins.i : Math.min(d.margins.i, d.margins.o)) / 72;
+  ck(inner >= calc.minIn - 0.001, `Margem interna ${inner.toFixed(3)} pol. (mínimo ${calc.minIn} para ${calc.pages} páginas)`);
+  ck(Math.min(d.margins.t, d.margins.b, d.margins.o) / 72 >= 0.25, `Margens externas, topo e base ≥ 0,25 pol. (recomendado 0,5)`);
+  ck(d.bleed / 72 >= 0.124, `Sangria de ${(d.bleed / 72).toFixed(3)} pol. (0,125 se houver imagem até a borda)`, true);
+  ck(!f.overset, f.overset ? `Há texto em ESTOURO (~${f.overset.words} palavras que não cabem)` : 'Todo o texto cabe nas páginas');
+  const low = []; const chk = (imgId, wpt, name) => { const bm = dui.imgs[imgId]; if (!bm || !wpt) return; const ppi = bm.width / (wpt / 72); if (ppi < 200) low.push(`${name} (${Math.round(ppi)} ppi)`); };
+  d.pages.forEach((pg, i) => pg.items.forEach(it => it.k === 'img' && chk(it.imgId, it.w, `quadro da pág. ${i + 1}`))); f.pages.forEach((P, i) => P.blocks.forEach(b => chk(b.imgId, b.w, `imagem da pág. ${i + 1}`)));
+  ck(!low.length, low.length ? 'Imagens com resolução baixa (o KDP pede 300 ppi): ' + low.slice(0, 5).join(', ') : 'Resolução das imagens ok (≥ 200 ppi)', true);
+  const miss = (d.story.some(s => s.t && /\[CONFIRMAR/.test(s.t))); ck(!miss, miss ? 'Ainda há marcas [CONFIRMAR] no texto' : 'Sem marcas [CONFIRMAR] pendentes');
+  kdp.checks = out; kdp.cnt = pages; renderEditora();
+}
+const kdpChecksHTML = a => `<ul style="list-style:none;margin:0;padding:0;font-size:12.5px;line-height:1.7">${a.map(c => `<li>${c.ok ? '<span style="color:#15803d">✔</span>' : c.warn ? '<span style="color:#b45309">⚠</span>' : '<span style="color:#dc2626">✘</span>'} ${esc(c.t)}</li>`).join('')}</ul>`;
+async function kdpExportInterior() {
+  const d = kdpDocCur(); if (!d) return; toast('Gerando o miolo…');
+  try { const r = await dtpPdfBuild(d, {dpi: 300, marks: false, bleed: d.bleed > 0, progress: (i, z) => toast(`Miolo: página ${i} de ${z}…`)}); download(`${dtpFileName(d)}-miolo-kdp.pdf`, r.blob, 'application/pdf'); toast(`Miolo baixado (${r.n} páginas, 300 dpi${d.bleed > 0 ? ', com sangria' : ''}).`); } catch (e) { toast('Falhou: ' + e.message); }
+}
+async function kdpEpub() { const id = $('kdpEb').value, keep = eui.id; eui.id = id; try { await ebEpubDown(); } finally { eui.id = keep; } }
+async function kdpMobile() { const id = $('kdpEb').value, keep = eui.id; eui.id = id; try { await ebPdf('mobile'); } finally { eui.id = keep; } }
+
+</script>
+<script>
+/* ===== Engenheiro de capa: capas de livro (frente, capa completa KDP, Kindle e celular) com layouts prontos, referência (IA) e envio à Diagramação ===== */
+const cov = {ref: null, refBlob: null, busy: '', concepts: null, T: 0, nrm: null};
+const covC = () => { const p = curProject(); if (!p) return null; if (!p.cover || typeof p.cover !== 'object' || !p.cover.layout) p.cover = normalizeCover(p.cover); return p.cover; };
+const COV_PALS = [
+  ['Verde cuidado', {bg: '#4F8A55', fg: '#F4F1EC', accent: '#C9A876', second: '#6AA170'}], ['Vermelho e amarelo', {bg: '#DC2318', fg: '#FDB92F', accent: '#FDB92F', second: '#4A3B33'}], ['Preto e dourado', {bg: '#15120D', fg: '#F2E3B8', accent: '#D8A93A', second: '#6B5320'}],
+  ['Laranja névoa', {bg: '#C96A2B', fg: '#FFFFFF', accent: '#FFE2B8', second: '#7A3B12'}], ['Verde escuro e linha dourada', {bg: '#173A32', fg: '#FFFFFF', accent: '#C9B26B', second: '#A8C66C'}], ['Azul-marinho', {bg: '#10264A', fg: '#FFFFFF', accent: '#F2B84B', second: '#4A74C9'}],
+  ['Branco e preto', {bg: '#FFFFFF', fg: '#111111', accent: '#111111', second: '#888888'}], ['Terracota', {bg: '#E9DCCB', fg: '#3A2A20', accent: '#B4532A', second: '#7B8F5E'}]
+];
+const covFit = (L, maxW, maxH, minS) => { minS = minS || 12; for (let i = 0; i < 70; i++) { const l = layoutText(L); if (!l.lines.some(x => x.w > maxW + 1) && (!maxH || l.h <= maxH)) break; if (L.size <= minS) break; L.size = Math.max(minS, Math.round(L.size * 0.94)); } return L; };
+const covTxt = (role, o) => covFit(T(role, Object.assign({w: 800}, o)), o.fitW || o.w, o.fitH, o.minS);
+const covPh = (f, o) => IM('photo', Object.assign({imgId: f.imgId || '', brief: 'Foto ou ilustração da capa', fx: 0.5, fy: 0.5}, o));
+
+/* ---------- layouts: cada um recebe o formulário f e a região da frente R ({x,y,w,h,full}) ---------- */
+const COV_LAYOUTS = {
+  giant: {n: 'Tipografia gigante', head: 'Anton', body: 'Montserrat', build(f, R) {
+    const u = R.w / 1000, p = f.pal, pad = 70 * u, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))], W = R.w - 2 * pad, words = f.title.toUpperCase().split(/\s+/).filter(Boolean);
+    const content = words.length <= 5 ? words.join('\n') : f.title.toUpperCase();
+    L.push(covTxt('kicker', {x: R.x + pad, y: R.y + pad * 0.8, w: W, content: (f.collection || f.tagline || '').toUpperCase(), family: f.body, size: 34 * u, weight: 700, color: p.second, ls: 6 * u, fitW: W}));
+    const t = covTxt('title', {x: R.x + pad, y: R.y + pad * 1.9, w: W, content, family: f.head, size: 430 * u, weight: 700, color: p.fg, lh: 0.92, fitW: W, fitH: R.h * 0.56, minS: 40 * u}); L.push(t); const th = layoutText(t).h;
+    if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: R.y + pad * 1.9 + th + 30 * u, w: W, content: f.subtitle.toUpperCase(), family: f.head, size: 70 * u, weight: 400, color: p.accent, lh: 1.1, ls: 3 * u, fitW: W}));
+    const a = covTxt('author', {x: R.x + pad, y: R.y + R.h - pad * 1.2 - 360 * u, w: W * 0.62, content: f.author.toUpperCase().split(/\s+/).join('\n'), family: f.head, size: 150 * u, weight: 700, color: p.second === p.bg ? p.accent : p.second, lh: 0.95, fitW: W * 0.62, fitH: 360 * u, minS: 30 * u}); a.y = R.y + R.h - pad - layoutText(a).h; L.push(a);
+    return L; }},
+  photo: {n: 'Foto com título branco', head: 'Montserrat', body: 'Montserrat', build(f, R) {
+    const u = R.w / 1000, p = f.pal, pad = 80 * u, W = R.w - 2 * pad, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg})), covPh(f, Object.assign({}, R.full))];
+    L.push(RC('shade', Object.assign({}, R.full, {fill: '#000000', opacity: 0.55, grad: {a: 0, c1: 'rgba(0,0,0,0.65)', c2: 'rgba(0,0,0,0)'}})));
+    L.push(covTxt('author', {x: R.x + pad, y: R.y + pad, w: W, content: f.author, family: f.body, size: 78 * u, weight: 400, color: '#FFFFFF', fitW: W}));
+    const t = covTxt('title', {x: R.x + pad, y: R.y + R.h * 0.3, w: W, content: f.title.toUpperCase(), family: f.head, size: 190 * u, weight: 800, color: '#FFFFFF', lh: 1.02, fitW: W, fitH: R.h * 0.4, minS: 40 * u}); L.push(t);
+    if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: R.y + R.h * 0.3 + layoutText(t).h + 40 * u, w: W, content: f.subtitle, family: f.body, size: 58 * u, weight: 400, color: '#FFFFFF', lh: 1.3, fitW: W}));
+    if (f.collection) L.push(covTxt('selo', {x: R.x + pad, y: R.y + R.h - pad - 40 * u, w: W, content: f.collection.toUpperCase(), family: f.body, size: 30 * u, weight: 700, color: '#FFFFFF', ls: 8 * u, align: 'center', fitW: W}));
+    return L; }},
+  band: {n: 'Foto em cima, faixa de cor embaixo', head: 'Playfair Display', body: 'Montserrat', build(f, R) {
+    const u = R.w / 1000, p = f.pal, pad = 70 * u, W = R.w - 2 * pad, ph = R.h * 0.56, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg})), covPh(f, {x: R.full.x, y: R.full.y, w: R.full.w, h: ph + (R.y - R.full.y)})];
+    L.push(RC('band', {x: R.full.x, y: R.y + ph - 10 * u, w: R.full.w, h: 14 * u, fill: p.accent}));
+    const t = covTxt('title', {x: R.x + pad, y: R.y + ph + 60 * u, w: W, content: f.title, family: f.head, size: 130 * u, weight: 700, color: p.fg, lh: 1.08, fitW: W, fitH: R.h * 0.22, minS: 36 * u}); L.push(t);
+    if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: R.y + ph + 60 * u + layoutText(t).h + 20 * u, w: W, content: f.subtitle, family: f.body, size: 46 * u, weight: 400, color: p.accent, lh: 1.3, fitW: W}));
+    L.push(covTxt('author', {x: R.x + pad, y: R.y + R.h - pad - 60 * u, w: W, content: f.author.toUpperCase(), family: f.body, size: 46 * u, weight: 700, color: p.fg, ls: 6 * u, fitW: W}));
+    return L; }},
+  line: {n: 'Linha dourada sobre fundo escuro', head: 'Montserrat', body: 'Cormorant Garamond', build(f, R) {
+    const u = R.w / 1000, p = f.pal, pad = 80 * u, W = R.w - 2 * pad, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))];
+    L.push(covTxt('author', {x: R.x + pad, y: R.y + pad * 0.9, w: W, content: f.author.toUpperCase(), family: f.body, size: 62 * u, weight: 600, color: p.fg, ls: 12 * u, align: 'center', fitW: W}));
+    L.push({id: lid(), type: 'path', role: 'art', vb: 100, x: R.x + R.w * 0.12, y: R.y + R.h * 0.12, w: R.w * 0.8, h: R.h * 0.5, d: 'M50 100 C48 82 50 70 50 56 C40 52 28 46 20 34 C32 30 44 36 50 48 C54 36 64 26 80 20 C78 34 68 46 54 54 M50 70 C38 66 26 66 14 58 C26 52 40 56 50 66 M50 76 C60 68 74 66 90 70 C80 80 64 82 50 78', rule: '', fill: '', stroke: p.accent, strokeW: 3 * u, opacity: 1});
+    const t = covTxt('title', {x: R.x + pad, y: R.y + R.h * 0.68, w: W, content: f.title.toUpperCase(), family: f.head, size: 112 * u, weight: 700, color: p.fg, lh: 1.08, fitW: W, fitH: R.h * 0.17, minS: 30 * u}); L.push(t);
+    const yb = R.y + R.h * 0.68 + layoutText(t).h + 22 * u; L.push(RC('rule', {x: R.x, y: yb, w: R.w, h: 3 * u, fill: p.accent}));
+    if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: yb + 26 * u, w: W, content: f.subtitle, family: f.head, size: 52 * u, weight: 700, color: p.second, fitW: W}));
+    return L; }},
+  serif: {n: 'Minimalista serifado, centralizado', head: 'Playfair Display', body: 'Montserrat', build(f, R) {
+    const u = R.w / 1000, p = f.pal, pad = 90 * u, W = R.w - 2 * pad, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg})), RC('frame', {x: R.x + 40 * u, y: R.y + 40 * u, w: R.w - 80 * u, h: R.h - 80 * u, fill: '', stroke: p.accent, strokeW: 3 * u, radius: 0})];
+    if (f.imgId) L.push(covPh(f, {x: R.x + 40 * u, y: R.y + 40 * u, w: R.w - 80 * u, h: R.h * 0.42}));
+    const y0 = R.y + R.h * (f.imgId ? 0.5 : 0.24);
+    L.push(covTxt('kicker', {x: R.x + pad, y: y0 - 90 * u, w: W, content: (f.collection || '').toUpperCase(), family: f.body, size: 34 * u, weight: 700, color: p.accent, ls: 10 * u, align: 'center', fitW: W}));
+    const t = covTxt('title', {x: R.x + pad, y: y0, w: W, content: f.title, family: f.head, size: 150 * u, weight: 700, color: p.fg, lh: 1.08, align: 'center', fitW: W, fitH: R.h * 0.3, minS: 36 * u}); L.push(t); const th = layoutText(t).h;
+    L.push(RC('rule', {x: R.x + R.w / 2 - 70 * u, y: y0 + th + 30 * u, w: 140 * u, h: 6 * u, fill: p.accent, radius: 3 * u}));
+    if (f.subtitle) { const s = covTxt('subtitle', {x: R.x + pad, y: y0 + th + 70 * u, w: W, content: f.subtitle, family: f.body, size: 52 * u, weight: 400, color: p.fg, lh: 1.35, align: 'center', fitW: W}); const n = plainOf(s.content).length; if (n) s.spans = [{s: 0, e: n, st: {italic: true}}]; L.push(s); }
+    L.push(covTxt('author', {x: R.x + pad, y: R.y + R.h - 190 * u, w: W, content: f.author, family: f.head, size: 56 * u, weight: 600, color: p.fg, align: 'center', fitW: W}));
+    return L; }},
+  circle: {n: 'Círculo com imagem', head: 'DM Serif Display', body: 'Montserrat', build(f, R) {
+    const u = R.w / 1000, p = f.pal, pad = 80 * u, W = R.w - 2 * pad, d = R.w * 0.72, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))];
+    L.push(covTxt('author', {x: R.x + pad, y: R.y + pad, w: W, content: f.author.toUpperCase(), family: f.body, size: 40 * u, weight: 700, color: p.accent, ls: 8 * u, align: 'center', fitW: W}));
+    L.push(RC('disc', {x: R.x + (R.w - d) / 2, y: R.y + R.h * 0.12, w: d, h: d, fill: p.second, radius: d / 2})); if (f.imgId) L.push(covPh(f, {x: R.x + (R.w - d) / 2, y: R.y + R.h * 0.12, w: d, h: d, radius: d / 2}));
+    const ty = R.y + R.h * 0.12 + d + 50 * u, t = covTxt('title', {x: R.x + pad, y: ty, w: W, content: f.title, family: f.head, size: 120 * u, weight: 400, color: p.fg, lh: 1.05, align: 'center', fitW: W, fitH: R.h * 0.16, minS: 30 * u}); L.push(t);
+    if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: ty + layoutText(t).h + 16 * u, w: W, content: f.subtitle, family: f.body, size: 42 * u, weight: 400, color: p.fg, align: 'center', fitW: W}));
+    return L; }},
+  duo: {n: 'Duotone com título sobreposto', head: 'Bebas Neue', body: 'Montserrat', build(f, R) {
+    const u = R.w / 1000, p = f.pal, pad = 60 * u, W = R.w - 2 * pad, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))];
+    L.push(covPh(f, Object.assign({}, R.full, {filter: 'grayscale(1) contrast(1.6)', ovColor: p.bg, ovMode: 'multiply'})));
+    const t = covTxt('title', {x: R.x + pad, y: R.y + pad, w: W, content: f.title.toUpperCase(), family: f.head, size: 230 * u, weight: 400, color: p.fg, lh: 0.95, fitW: W, fitH: R.h * 0.32, minS: 40 * u}); L.push(t);
+    if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + pad, y: R.y + pad + layoutText(t).h + 20 * u, w: W, content: f.subtitle.toUpperCase(), family: f.body, size: 40 * u, weight: 700, color: p.accent, ls: 4 * u, fitW: W}));
+    const a = covTxt('author', {x: R.x + pad, y: R.y + R.h * 0.62, w: W, content: f.author.toUpperCase().split(/\s+/).join('\n'), family: f.head, size: 300 * u, weight: 400, color: p.fg, lh: 0.9, fitW: W, fitH: R.h * 0.34, minS: 40 * u}); a.y = R.y + R.h - pad - layoutText(a).h; L.push(a);
+    return L; }},
+  grid: {n: 'Grade modular (estilo adidas)', head: 'Archivo Black', body: 'Inter', build(f, R) {
+    const u = R.w / 1000, p = f.pal, gx = R.w / 6, gy = R.h / 8, L = [RC('bg', Object.assign({}, R.full, {fill: p.bg}))];
+    for (let i = 1; i < 6; i++) L.push(RC('gridline', {x: R.x + i * gx - 1, y: R.y, w: 2 * u, h: R.h, fill: p.accent, opacity: 0.25}));
+    for (let j = 1; j < 8; j++) L.push(RC('gridline', {x: R.x, y: R.y + j * gy - 1, w: R.w, h: 2 * u, fill: p.accent, opacity: 0.25}));
+    L.push(RC('block', {x: R.x + 2 * gx, y: R.y + 1 * gy, w: 3 * gx, h: 3 * gy, fill: p.second})); L.push(covPh(f, {x: R.x + 2 * gx, y: R.y + 1 * gy, w: 3 * gx, h: 3 * gy}));
+    const t = covTxt('title', {x: R.x + gx, y: R.y + 4.4 * gy, w: 5 * gx, content: f.title.toUpperCase(), family: f.head, size: 140 * u, weight: 800, color: p.fg, lh: 1, fitW: 5 * gx, fitH: 2.4 * gy, minS: 30 * u}); L.push(t);
+    if (f.subtitle) L.push(covTxt('subtitle', {x: R.x + gx, y: R.y + 4.4 * gy + layoutText(t).h + 14 * u, w: 4 * gx, content: f.subtitle, family: f.body, size: 40 * u, weight: 400, color: p.fg, fitW: 4 * gx}));
+    L.push(covTxt('author', {x: R.x + gx, y: R.y + 7.1 * gy, w: 4 * gx, content: f.author.toUpperCase(), family: f.body, size: 36 * u, weight: 700, color: p.accent, ls: 6 * u, fitW: 4 * gx}));
+    return L; }}
+};
+const COV_MODES = {front: {n: 'Capa frontal', w: 1600, h: 2400}, kindle: {n: 'Kindle (1600 × 2560)', w: 1600, h: 2560}, mobile: {n: 'Celular / Stories (1080 × 1920)', w: 1080, h: 1920}, wrap: {n: 'Capa completa para a Amazon (contracapa + lombada + capa)'}};
+
+/* ---------- montagem da peça ---------- */
+function covForm(c) { return {title: c.title || 'Título do livro', subtitle: c.subtitle, author: c.author || 'Nome do autor', collection: c.collection, tagline: c.tagline, pal: c.pal, head: c.head, body: c.body, imgId: c.imgId}; }
+function covBuild(c, mode) {
+  const f = covForm(c), lay = COV_LAYOUTS[c.layout] || COV_LAYOUTS.giant;
+  if (mode !== 'wrap') { const M = COV_MODES[mode] || COV_MODES.front, R = {x: 0, y: 0, w: M.w, h: M.h}; R.full = {x: 0, y: 0, w: M.w, h: M.h}; return {W: M.w, H: M.h, layers: lay.build(f, R), bg: c.pal.bg}; }
+  const k = kdpK(), calc = kdpCalc(k, kdpPages()), D = 300, W = calc.px.w, H = calc.px.h, bl = calc.bleed * D, tw = calc.tw * D, sp = calc.spine * D, p = c.pal, u = tw / 1000;
+  const front = {x: bl + tw + sp, y: bl, w: tw, h: calc.th * D}; front.full = {x: front.x, y: 0, w: tw + bl, h: H};
+  const L = [RC('bg', {x: 0, y: 0, w: W, h: H, fill: p.bg})]; const fl = lay.build(f, front);
+  /* a frente sangra à direita, em cima e embaixo; o fundo da frente cobre a sangria */
+  const back = {x: bl, y: bl, w: tw, h: calc.th * D}, pad = 0.5 * D;
+  L.push(covTxt('blurb-title', {x: back.x + pad, y: back.y + pad, w: back.w - 2 * pad, content: f.tagline || f.title, family: f.head, size: 70 * u, weight: 700, color: p.fg, lh: 1.15, fitW: back.w - 2 * pad, fitH: back.h * 0.2, minS: 24}));
+  L.push(covTxt('blurb', {x: back.x + pad, y: back.y + pad + 190 * u, w: back.w - 2 * pad, content: c.blurb || 'Texto da contracapa: escreva aqui a sinopse, o que o leitor vai aprender e a chamada para a compra.', family: f.body, size: 34 * u, weight: 400, color: p.fg, lh: 1.5, fitW: back.w - 2 * pad, fitH: back.h * 0.5, minS: 14}));
+  L.push(RC('barcode', {x: back.x + back.w - 0.25 * D - 2 * D, y: back.y + back.h - 0.25 * D - 1.2 * D, w: 2 * D, h: 1.2 * D, fill: '#FFFFFF'}));
+  L.push(T('barcode-note', {x: back.x + back.w - 0.25 * D - 2 * D, y: back.y + back.h - 0.25 * D - 0.75 * D, w: 2 * D, content: 'Espaço do código de barras (KDP)', family: 'Inter', size: 26, weight: 400, color: '#999999', align: 'center'}));
+  if (calc.spineText) { const len = calc.th * D - 2 * 0.6 * D, st = covTxt('spine-title', {x: 0, y: 0, w: len, content: f.title, family: f.head, size: sp * 0.52, weight: 700, color: p.fg, lh: 1, fitW: len * 0.66, minS: 20}), sa = covTxt('spine-author', {x: 0, y: 0, w: len * 0.3, content: f.author, family: f.body, size: sp * 0.34, weight: 600, color: p.accent, align: 'right', fitW: len * 0.3, minS: 14}), cx = bl + tw + sp / 2, cy = H / 2, th = layoutText(st).h, ah = layoutText(sa).h;
+    st.w = len * 0.66; st.x = cx - st.w / 2 - len * 0.17; st.y = cy - th / 2; st.rot = 90; sa.w = len * 0.3; sa.x = cx - sa.w / 2 + len * 0.33; sa.y = cy - ah / 2; sa.rot = 90; L.push(st, sa); }
+  L.push(...fl); L.push(RC('fold', {x: bl + tw - 1, y: 0, w: 2, h: H, fill: '#00AEEF', opacity: 0})); return {W, H, layers: L, bg: p.bg, calc};
+}
+async function covFontsAndImgs(set) { await ensureFonts(set.slides[0].layers.filter(l => l.type === 'text').map(l => l.family)); if (typeof ensureSetResources === 'function') await ensureSetResources(set); }
+async function covPreview() {
+  const c = covC(), cv = $('covCv'); if (!cv || !c) return; const mode = c.mode, b = covBuild(c, mode), set = {id: 'cov-prev', format: {id: 'custom', w: b.W, h: b.H}, tk: {}, slides: [{id: 'p', name: 'p', bg: b.bg, layers: b.layers}]};
+  const my = ++cov.T; await covFontsAndImgs(set); if (my !== cov.T || !$('covCv')) return;
+  const sc = Math.min(1, 900 / b.W); cv.width = Math.round(b.W * sc); cv.height = Math.round(b.H * sc); const x = cv.getContext('2d'); x.save(); x.scale(sc, sc); renderSlide(x, set.slides[0], b.W, b.H, 1); x.restore();
+  const info = $('covInfo'); if (info) info.textContent = mode === 'wrap' ? `Capa completa ${b.calc.wrapW.toFixed(2)} × ${b.calc.wrapH.toFixed(2)} pol. · lombada ${b.calc.spine.toFixed(3)} pol. · ${b.W} × ${b.H} px` : `${b.W} × ${b.H} px`;
+}
+const covPrevSoon = () => { clearTimeout(cov.tm); cov.tm = setTimeout(covPreview, 260); };
+
+/* ---------- tela ---------- */
+function covRender(r, p) {
+  const c = covC(), L = COV_LAYOUTS;
+  r.innerHTML = edTabs('capa') + `<div class="page-head"><div><h1>Engenheiro de capa</h1><p>Monte a capa do livro: escolha um layout, preencha os textos, ponha a foto e a paleta. Crie a capa para a frente, para a Amazon (capa completa com lombada), para o Kindle ou para o celular. Depois refine no Editor de Design e mande para a Diagramação ou para o e-book.</p></div></div>
+  <div class="cov-wrap"><div class="cov-form">
+  <div class="okr-label">FORMATO</div><div class="tchips">${Object.entries(COV_MODES).map(([k, v]) => `<button class="tchip ${c.mode === k ? 'on' : ''}" onclick="covSet('mode','${k}')">${esc(v.n)}</button>`).join('')}</div>
+  <div class="okr-label" style="margin-top:10px">TEXTOS</div><div class="form-grid">${[['title', 'Título'], ['subtitle', 'Subtítulo'], ['author', 'Autor(a)'], ['collection', 'Coleção / selo / editora'], ['tagline', 'Chamada (contracapa)']].map(([k, l]) => `<div class="field"><label>${l}</label><input value="${esc(c[k])}" oninput="covSet('${k}',this.value,true)"></div>`).join('')}</div>
+  ${c.mode === 'wrap' ? `<div class="field"><label>Texto da contracapa (sinopse)</label><textarea rows="4" oninput="covSet('blurb',this.value,true)">${esc(c.blurb)}</textarea></div>` : ''}
+  <div class="okr-label">LAYOUT</div><div class="cov-lays">${Object.entries(L).map(([k, v]) => `<button class="cov-lay ${c.layout === k ? 'on' : ''}" onclick="covPick('${k}')"><b>${esc(v.n)}</b><small class="muted">${esc(v.head)} + ${esc(v.body)}</small></button>`).join('')}</div>
+  <div class="okr-label" style="margin-top:10px">PALETA</div><div class="tchips">${COV_PALS.map(([n, pl], i) => `<button class="tchip" onclick="covPal(${i})" title="${esc(n)}"><span class="cov-sw" style="background:${pl.bg}"></span><span class="cov-sw" style="background:${pl.fg}"></span><span class="cov-sw" style="background:${pl.accent}"></span> ${esc(n)}</button>`).join('')}</div>
+  <div class="row-gap" style="margin:6px 0;flex-wrap:wrap">${[['bg', 'Fundo'], ['fg', 'Texto'], ['accent', 'Destaque'], ['second', 'Apoio']].map(([k, l]) => `<label class="dtp-chk">${l} <input type="color" value="${c.pal[k]}" onchange="covPalSet('${k}',this.value)"></label>`).join('')}</div>
+  <div class="form-grid"><div class="field"><label>Fonte dos títulos</label><select onchange="covSet('head',this.value)">${dtpFontOpts(c.head)}</select></div><div class="field"><label>Fonte do texto</label><select onchange="covSet('body',this.value)">${dtpFontOpts(c.body)}</select></div></div>
+  <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="covPickImg()">${c.imgId ? 'Trocar a foto/ilustração' : 'Subir foto/ilustração de fundo'}</button>${c.imgId ? '<button class="btn sm" onclick="covSet(\'imgId\',\'\')">Tirar a foto</button>' : ''}<button class="btn sm" onclick="covConcepts()" ${cov.busy ? 'disabled' : ''}>${cov.busy === 'con' ? 'Pensando…' : '✦ Sugestões da IA'}</button></div>
+  ${cov.concepts ? `<div class="cov-cons">${cov.concepts.map((k, i) => `<div class="mot-ch"><b>${esc(k.name)}</b><p class="muted" style="font-size:12px;margin:3px 0">${esc(k.why)}</p><p style="font-size:12px;margin:3px 0"><b>Imagem:</b> ${esc(k.imageBrief)}</p><button class="btn sm" onclick="covApplyConcept(${i})">Aplicar</button></div>`).join('')}</div>` : ''}
+  ${refBankHTML('cov', ['capas', 'cartaz', 'posts'])}
+  ${cov.ref ? `<div class="row-gap" style="flex-wrap:wrap;margin-bottom:8px"><span class="muted" style="font-size:12px">Referência escolhida.</span><button class="btn sm dark" onclick="ailStart(cov.ref,'cov')">✦ Ler layout com IA → peça editável</button><button class="btn sm" onclick="cov.ref=null;covRender()">Tirar</button></div>` : ''}
+  </div><div class="cov-prev"><canvas id="covCv" class="cov-cv"></canvas><small class="muted block" id="covInfo"></small>
+  <div class="row-gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn dark" onclick="covCreate()">Criar no Editor de Design</button><button class="btn" onclick="covMockupDown()">Mockup do livro (PNG)</button></div>
+  <div class="mot-ch" style="margin-top:10px"><b>Usar esta capa</b><div class="field" style="margin:6px 0"><label>Na Diagramação</label><div class="row-gap"><select id="covDoc">${(p.layouts || []).map(d => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join('') || '<option value="">(nenhum documento)</option>'}</select><button class="btn sm" onclick="covToDoc()">Inserir como página da capa</button></div></div>
+  <div class="field" style="margin:6px 0"><label>No e-book (Editora)</label><div class="row-gap"><select id="covEb">${(p.ebooks || []).map(e => `<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('') || '<option value="">(nenhum e-book)</option>'}</select><button class="btn sm" onclick="covToEbook()">Usar como capa</button></div></div></div></div></div>`;
+  bankFill(); covPreview();
+}
+function covSet(k, v, soft) { const c = covC(); c[k] = v; persist(); if (soft) covPrevSoon(); else { covRender(curProject() && $('editoraRoot'), curProject()); } }
+function covPick(k) { const c = covC(), l = COV_LAYOUTS[k]; c.layout = k; c.head = l.head; c.body = l.body; persist(); covRender($('editoraRoot'), curProject()); }
+function covPal(i) { covC().pal = Object.assign({}, COV_PALS[i][1]); persist(); covRender($('editoraRoot'), curProject()); }
+function covPalSet(k, v) { covC().pal[k] = v; persist(); covPrevSoon(); }
+function covWrapOpen() { const c = covC(); c.mode = 'wrap'; persist(); edh.area = 'capa'; go('editora'); }
+function covPickImg() { dtpFilePick(r => { covC().imgId = r.id; persist(); covRender($('editoraRoot'), curProject()); }); }
+async function covCreate() {
+  const p = curProject(), c = covC(), b = covBuild(c, c.mode), set = {id: uid('ds'), name: (c.mode === 'wrap' ? 'Capa completa · ' : 'Capa · ') + (c.title || 'livro'), format: {id: 'custom', w: b.W, h: b.H}, tk: Object.assign(brandTokens(p), {name: 'Capa', bg: b.bg, fg: c.pal.fg, accent: c.pal.accent, head: {family: c.head, weight: 700}, body: {family: c.body, weight: 400}}), slides: [{id: sid(), name: 'Capa', bg: b.bg, layers: b.layers}], created: new Date().toISOString(), updated: new Date().toISOString()};
+  await covFontsAndImgs(set); p.design.sets.push(set); c.setId = set.id; persist(); toast('Capa criada. Refine no Editor de Design; depois volte aqui para enviar.'); go('design'); dzOpen(set.id);
+}
+async function covRenderSetBlob(setId, maxW, type, q) {
+  const p = curProject(), set = p.design.sets.find(s => s.id === setId); if (!set) throw new Error('A capa não existe mais. Crie de novo.'); await ensureSetResources(set); await ensureFonts(set.slides[0].layers.filter(l => l.type === 'text').map(l => l.family));
+  const W = set.format.w, H = set.format.h, s = maxW ? Math.min(1, maxW / W) : 1, cv = document.createElement('canvas'); cv.width = Math.round(W * s); cv.height = Math.round(H * s); const x = cv.getContext('2d'); x.save(); x.scale(s, s); renderSlide(x, set.slides[0], W, H, 1); x.restore();
+  return {cv, blob: await new Promise(r => cv.toBlob(r, type || 'image/png', q)), W, H};
+}
+async function covToDoc() {
+  const p = curProject(), c = covC(), id = $('covDoc').value, d = (p.layouts || []).find(x => x.id === id); if (!d) { toast('Escolha um documento da Diagramação.'); return; }
+  if (!c.setId) { toast('Crie a capa no Editor de Design primeiro (botão Criar no Editor de Design).'); return; }
+  try { const r = await covRenderSetBlob(c.setId, 2000, 'image/jpeg', 0.92), imgId = uid('img'); await imgPut(imgId, r.blob); const ar = r.W / r.H;
+    d.pages.unshift({items: [{id: uid('fr'), k: 'img', x: -d.bleed, y: -d.bleed, w: d.page.w + 2 * d.bleed, h: d.page.h + 2 * d.bleed, wrap: 'none', off: 0, imgId, zoom: 1, ar, fill: '', stroke: '', sw: 1, op: 1, px: 0, py: 0, text: '', st: 'body', pad: 4}]}); d.front = (d.front | 0) + 1; d.nPages = Math.max(d.nPages, d.front + 1); persist(); toast('Capa inserida como página 1 do documento “' + d.name + '”.'); } catch (e) { toast('Falhou: ' + e.message); }
+}
+function covToEbook() { const p = curProject(), c = covC(), eb = (p.ebooks || []).find(e => e.id === $('covEb').value); if (!eb) { toast('Escolha um e-book.'); return; } if (!c.setId) { toast('Crie a capa no Editor de Design primeiro.'); return; } eb.coverSetId = c.setId; persist(); toast('Capa ligada ao e-book “' + eb.name + '”.'); }
+
+/* ---------- exportações ---------- */
+async function covExportWrap() {
+  const c = covC(); toast('Gerando a capa completa…');
+  try { const r = await covRenderSetBlob(c.setId, 0, 'image/jpeg', 0.92), calc = kdpCalc(kdpK(), kdpPages()), buf = new Uint8Array(await r.blob.arrayBuffer());
+    download(`${dtpFileName({name: c.title || 'livro'})}-capa-completa-kdp.pdf`, buildPDF([{jpeg: buf, w: r.cv.width, h: r.cv.height, pw: calc.wrapW * 72, ph: calc.wrapH * 72}], calc.wrapW * 72, calc.wrapH * 72), 'application/pdf'); toast('Capa completa baixada (' + r.cv.width + ' × ' + r.cv.height + ' px).'); } catch (e) { toast('Falhou: ' + e.message); }
+}
+async function covExportKindle() {
+  const c = covC(); try { const r = await covRenderSetBlob(c.setId, 0, 'image/png'); const cv = document.createElement('canvas'); cv.height = 2560; cv.width = 1600; const x = cv.getContext('2d'); x.fillStyle = c.pal.bg; x.fillRect(0, 0, 1600, 2560); const s = Math.min(1600 / r.cv.width, 2560 / r.cv.height); x.drawImage(r.cv, (1600 - r.cv.width * s) / 2, (2560 - r.cv.height * s) / 2, r.cv.width * s, r.cv.height * s); cv.toBlob(b => download(`${dtpFileName({name: c.title || 'livro'})}-capa-kindle.jpg`, b, 'image/jpeg'), 'image/jpeg', 0.92); toast('Capa do Kindle baixada.'); } catch (e) { toast('Falhou: ' + e.message); }
+}
+async function covMockupDown() {
+  const c = covC(), b = covBuild(c, c.mode === 'wrap' ? 'front' : c.mode), set = {id: 'cov-m', format: {id: 'custom', w: b.W, h: b.H}, tk: {}, slides: [{id: 'p', name: 'p', bg: b.bg, layers: b.layers}]}; await covFontsAndImgs(set);
+  const cv = document.createElement('canvas'); cv.width = cv.height = 1600; const x = cv.getContext('2d'), g = x.createLinearGradient(0, 0, 0, 1600); g.addColorStop(0, '#EDEBE6'); g.addColorStop(0.72, '#D9D5CC'); g.addColorStop(0.72, '#C9A878'); g.addColorStop(1, '#B38F5E'); x.fillStyle = g; x.fillRect(0, 0, 1600, 1600);
+  const bh = 1180, bw = Math.round(bh * b.W / b.H), bx = (1600 - bw) / 2 + 20, by = 190, sp = 38;
+  x.fillStyle = 'rgba(0,0,0,.28)'; x.filter = 'blur(26px)'; x.beginPath(); x.ellipse(bx + bw / 2, by + bh + 8, bw * 0.62, 36, 0, 0, 7); x.fill(); x.filter = 'none';
+  const t = document.createElement('canvas'); t.width = b.W; t.height = b.H; renderSlide(t.getContext('2d'), set.slides[0], b.W, b.H, 1); x.drawImage(t, bx, by, bw, bh);
+  const sg = x.createLinearGradient(bx - sp, 0, bx, 0); sg.addColorStop(0, 'rgba(0,0,0,.55)'); sg.addColorStop(1, 'rgba(0,0,0,.18)'); x.fillStyle = c.pal.bg; x.fillRect(bx - sp, by + 4, sp, bh - 8); x.fillStyle = sg; x.fillRect(bx - sp, by + 4, sp, bh - 8);
+  const hl = x.createLinearGradient(bx, 0, bx + bw, 0); hl.addColorStop(0, 'rgba(255,255,255,.18)'); hl.addColorStop(0.08, 'rgba(255,255,255,0)'); hl.addColorStop(1, 'rgba(0,0,0,.12)'); x.fillStyle = hl; x.fillRect(bx, by, bw, bh);
+  cv.toBlob(bl => download(`${dtpFileName({name: c.title || 'livro'})}-mockup.png`, bl, 'image/png'), 'image/png'); toast('Mockup baixado.');
+}
+
+/* ---------- IA: sugestões de conceito ---------- */
+async function covConcepts() {
+  const c = covC(), M = motM(); cov.busy = 'con'; covRender($('editoraRoot'), curProject());
+  try {
+    const j = await motJSON('Você é diretor(a) de arte de capas de livros. Pense no mercado editorial brasileiro.', `Livro: ${c.title || M.title || '(sem título)'}${c.subtitle ? ' — ' + c.subtitle : ''}. Autor(a): ${c.author || M.author}. Tema: ${M.idea || '(não informado)'}. Público: ${M.audience || '(não informado)'}.\nProponha 3 conceitos de capa diferentes. JSON: {"concepts":[{"name":"...","why":"1 frase","layout":"${Object.keys(COV_LAYOUTS).join('|')}","palette":{"bg":"#RRGGBB","fg":"#RRGGBB","accent":"#RRGGBB","second":"#RRGGBB"},"head":"fonte","body":"fonte","imageBrief":"descrição da imagem ideal"}]}. Fontes só da lista: ${dtpFontList().slice(0, 70).join(', ')}.`, 2500);
+    const fl = dtpFontList(), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v).toUpperCase() : d;
+    cov.concepts = (j.concepts || []).slice(0, 3).map(k => ({name: String(k.name || 'Conceito').slice(0, 60), why: String(k.why || '').slice(0, 200), imageBrief: String(k.imageBrief || '').slice(0, 240), layout: COV_LAYOUTS[k.layout] ? k.layout : 'giant', pal: {bg: hex(k.palette && k.palette.bg, c.pal.bg), fg: hex(k.palette && k.palette.fg, c.pal.fg), accent: hex(k.palette && k.palette.accent, c.pal.accent), second: hex(k.palette && k.palette.second, c.pal.second)}, head: fl.includes(k.head) ? k.head : COV_LAYOUTS[k.layout] ? COV_LAYOUTS[k.layout].head : c.head, body: fl.includes(k.body) ? k.body : c.body}));
+  } catch (e) { toast(motErr(e)); }
+  cov.busy = ''; covRender($('editoraRoot'), curProject());
+}
+function covApplyConcept(i) { const k = cov.concepts[i], c = covC(); if (!k) return; Object.assign(c, {layout: k.layout, pal: k.pal, head: k.head, body: k.body}); persist(); covRender($('editoraRoot'), curProject()); toast('Conceito aplicado. Suba a imagem sugerida na foto de fundo.'); }
+
+</script>
+<script>
+/* ===== Navegação voltar/avançar em todas as telas (histórico próprio do Studio) ===== */
+const NAV = {stack: [], i: -1, restoring: false, max: 80};
+function navSnap() {
+  const s = {page: ui.page, tab: ui.tab, proj: state.activeProjectId};
+  if (typeof edh !== 'undefined') s.area = edh.area;
+  if (typeof mot !== 'undefined' && mot.open) { s.mot = 1; try { s.stage = motM().stage; } catch (e) { } }
+  if (typeof eui !== 'undefined') s.eb = eui.id;
+  if (typeof dui !== 'undefined') s.doc = dui.id;
+  if (typeof dz !== 'undefined') { s.set = dz.setId; s.dzv = dz.view; }
+  return s;
+}
+function navRecord() {
+  if (NAV.restoring) return; const s = navSnap(), k = JSON.stringify(s);
+  if (NAV.i >= 0 && NAV.stack[NAV.i].k === k) { navButtons(); return; }
+  NAV.stack = NAV.stack.slice(0, NAV.i + 1); NAV.stack.push({k, s}); if (NAV.stack.length > NAV.max) NAV.stack.shift(); NAV.i = NAV.stack.length - 1; navButtons();
+}
+function navButtons() { const b = $('navBack'), f = $('navFwd'); if (b) b.disabled = NAV.i <= 0; if (f) f.disabled = NAV.i >= NAV.stack.length - 1; }
+function navApply(s) {
+  NAV.restoring = true;
+  try {
+    if (s.proj && s.proj !== state.activeProjectId && projectById(s.proj)) setActiveProject(s.proj);
+    if (typeof edh !== 'undefined' && s.area) edh.area = s.area;
+    if (typeof mot !== 'undefined') { mot.open = !!s.mot; if (s.mot && s.stage) { try { motM().stage = s.stage; } catch (e) { } } }
+    if (typeof eui !== 'undefined') eui.id = s.eb || '';
+    if (typeof dui !== 'undefined') { if (s.doc && dui.id !== s.doc) { dui.id = s.doc; dui.pi = 0; dui.sel = null; dui.hist = []; dui.hi = -1; try { dtpSnap(); } catch (e) { } } else if (!s.doc) dui.id = ''; }
+    if (typeof dz !== 'undefined') { dz.setId = s.set || ''; if (s.dzv) dz.view = s.dzv; }
+    if (s.tab) ui.tab = s.tab;
+    go(s.page);
+  } finally { NAV.restoring = false; }
+  navButtons();
+}
+function navBack() { if (NAV.i <= 0) return; NAV.i--; navApply(NAV.stack[NAV.i].s); }
+function navFwd() { if (NAV.i >= NAV.stack.length - 1) return; NAV.i++; navApply(NAV.stack[NAV.i].s); }
+['renderPage', 'renderEditora', 'renderDiagram', 'renderDesign'].forEach(n => { const f = window[n]; if (typeof f === 'function') window[n] = function () { const r = f.apply(this, arguments); try { navRecord(); } catch (e) { } return r; }; });
+document.addEventListener('keydown', e => { if (e.altKey && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) { if (e.key === 'ArrowLeft') { e.preventDefault(); navBack(); } else if (e.key === 'ArrowRight') { e.preventDefault(); navFwd(); } } });
+setTimeout(navRecord, 400);
 
 </script>
 </body>

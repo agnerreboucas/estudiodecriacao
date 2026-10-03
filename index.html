@@ -20,7 +20,6 @@
     <button data-page="design" title="Estúdio de Design"><span data-ico="palette"></span></button>
     <button data-page="inspiration" title="Inspiração"><span data-ico="pin"></span></button>
     <button data-page="editora" title="Editora (e-books)"><span data-ico="book"></span></button>
-    <button data-page="diagram" title="Diagramação (livros, revistas, folhetos)"><span data-ico="layout"></span></button>
     <button data-page="videoLab" title="Video Lab"><span data-ico="video"></span></button>
     <button data-page="campaigns" title="Campanhas"><span data-ico="megaphone"></span></button>
     <button data-page="approval" title="Aprovação"><span data-ico="check"></span></button>
@@ -36,6 +35,7 @@
 
 <main class="main">
 <header class="topbar">
+  <div class="nav-btns"><button class="top-btn" id="navBack" onclick="navBack()" title="Voltar (Alt+←)" disabled>‹ Voltar</button><button class="top-btn" id="navFwd" onclick="navFwd()" title="Avançar (Alt+→)" disabled>Avançar ›</button></div>
   <button class="top-btn" onclick="openCreate()">＋ Criar</button>
   <button class="top-btn sync-badge local" id="syncBadge" onclick="syncBadgeClick()">● Local</button>
   <button class="top-btn credit" title="Créditos de produção (estimativa)">⚡ <span id="credits">30</span></button>
@@ -178,6 +178,7 @@
 <script src="js/dtp-ui.js"></script>
 <script src="js/dtp-extra.js"></script>
 <script src="js/ai-layout.js"></script>
+<script src="js/editora-hub.js"></script>
 <script src="js/ebook-motor.js"></script>
 <script src="js/design-templates.js"></script>
 <script src="js/design-psd.js"></script>
@@ -186,5 +187,8 @@
 <script src="js/project.js"></script>
 <script src="js/hubs.js"></script>
 <script src="js/app.js"></script>
+<script src="js/ebook-kdp.js"></script>
+<script src="js/ebook-cover.js"></script>
+<script src="js/nav.js"></script>
 </body>
 </html>

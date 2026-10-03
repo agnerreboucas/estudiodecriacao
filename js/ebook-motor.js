@@ -14,14 +14,14 @@ const motSkillCur = () => { const M = motM(); return motSkills().find(s => s.id 
 const motSave = () => { persist(); AUTO_AT = Date.now(); };
 
 /* ---------- entrada ---------- */
-function motOpen(stage) { mot.open = true; const M = motM(); if (stage) M.stage = stage; renderEditora(); }
-function motClose() { mot.open = false; renderEditora(); }
+function motOpen(stage) { mot.open = true; edh.area = 'texto'; const M = motM(); if (stage) M.stage = stage; renderEditora(); }
+function motClose() { mot.open = false; edh.area = 'livros'; renderEditora(); }
 function motStage(s) { const M = motM(); if (s === 'texto' && !M.approved) { toast('Aprove a estrutura primeiro.'); return; } M.stage = s; motSave(); renderEditora(); }
 
 /* ---------- tela ---------- */
 function motRender(r, p) {
   const M = motM(), steps = [['material', '1 · Material'], ['estrutura', '2 · Estrutura'], ['texto', '3 · Texto'], ['enviar', '4 · Enviar']];
-  r.innerHTML = `<div class="page-head"><div><h1>Motor de e-book</h1><p>Entre com uma ideia ou com o conteúdo bruto, escolha uma skill (o padrão de escrita), aprove a estrutura, deixe a IA escrever capítulo por capítulo, revise e mande para a Editora (4 versões) ou para a Diagramação (livro/revista). Se você já tem o texto pronto, vá direto ao passo 4.</p></div><div class="row-gap"><button class="btn" onclick="motClose()">← Editora</button></div></div>
+  r.innerHTML = edTabs('texto') + `<div class="page-head"><div><h1>Motor de texto</h1><p>Entre com uma ideia ou com o conteúdo bruto, escolha uma skill (o padrão de escrita), aprove a estrutura, deixe a IA escrever capítulo por capítulo, revise e mande para a Editora (4 versões) ou para a Diagramação (livro/revista). Se você já tem o texto pronto, vá direto ao passo 4.</p></div></div>
   <div class="mot-steps">${steps.map(([k, l]) => `<button class="tchip ${M.stage === k ? 'on' : ''}" onclick="motStage('${k}')">${l}</button>`).join('')}</div>
   <div id="motBody">${({material: motMaterial, estrutura: motEstrutura, texto: motTexto, enviar: motEnviar})[M.stage](M)}</div>`;
 }
@@ -141,7 +141,7 @@ function motToEditora() {
   eb.sections = eb.sections.filter(s => s.type !== 'chapter'); const secs = ebImport(t, eb); if (!secs.length) { toast('Não encontrei capítulos. Use # no título de cada capítulo.'); return; }
   let n = eb.sections.filter(s => s.type === 'chapter').length; secs.forEach(s => { n++; s.label = 'CAPÍTULO ' + ebPad2(n); });
   const at = eb.sections.findIndex(x => x.type === 'text' && /plano|conclus/i.test(x.title)); if (at >= 0) eb.sections.splice(at, 0, ...secs); else eb.sections.push(...secs);
-  ebList().push(eb); persist(); mot.open = false; toast(secs.length + ' capítulo(s) enviados à Editora.'); ebOpen(eb.id);
+  ebList().push(eb); persist(); mot.open = false; edh.area = 'livros'; toast(secs.length + ' capítulo(s) enviados à Editora.'); ebOpen(eb.id);
 }
 /* texto com marcações da Editora → matéria da Diagramação */
 function motToStory(text) {
@@ -168,5 +168,5 @@ function motToDtp() {
   const M = motM(), t = (M.full || '').trim(); if (!t) { toast('Não há texto para enviar.'); return; }
   const d = dtpNew($('mPre').value, M.title || 'Documento'), story = motToStory(t); if (!story.length) { toast('Não encontrei texto.'); return; }
   d.styles.list = Object.assign({}, d.styles.body, {n: 'Lista', indent: 0, align: 'left', after: 3}); d.story = story;
-  dtpList().push(d); persist(); mot.open = false; toast('Documento criado na Diagramação.'); go('diagram'); dtpOpen(d.id);
+  dtpList().push(d); persist(); mot.open = false; edh.area = 'diag'; toast('Documento criado na Diagramação.'); go('diagram'); dtpOpen(d.id);
 }

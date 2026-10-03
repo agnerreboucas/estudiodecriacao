@@ -19,9 +19,29 @@ const DTP_PRESETS = [
   {id: 'quadrado', n: 'Quadrado 210 × 210 mm', w: 210, h: 210, m: {t: 14, b: 14, i: 14, o: 14}, cols: 2, facing: false, bleed: 3},
   {id: 'custom', n: 'Personalizado', w: 150, h: 210, m: {t: 15, b: 15, i: 15, o: 15}, cols: 1, facing: false, bleed: 3}
 ];
+DTP_PRESETS.splice(DTP_PRESETS.length - 1, 0,
+  {id: 'celular', n: 'Celular (9:16, leitura em tela)', w: 100, h: 177.8, m: {t: 12, b: 14, i: 9, o: 9}, cols: 1, facing: false, bleed: 0, fs: 1.45, mobile: true},
+  {id: 'tablet', n: 'Tablet 6 × 9 pol.', w: 152.4, h: 228.6, m: {t: 14, b: 16, i: 14, o: 14}, cols: 1, facing: false, bleed: 0, fs: 1.15},
+  {id: 'kdp5x8', n: 'Amazon KDP · 5 × 8 pol.', w: 127, h: 203.2, m: {t: 15, b: 15, i: 19, o: 12.7}, cols: 1, facing: true, bleed: 3.175, kdp: [5, 8]},
+  {id: 'kdp55', n: 'Amazon KDP · 5,5 × 8,5 pol.', w: 139.7, h: 215.9, m: {t: 15, b: 15, i: 19, o: 12.7}, cols: 1, facing: true, bleed: 3.175, kdp: [5.5, 8.5]},
+  {id: 'kdp6x9', n: 'Amazon KDP · 6 × 9 pol. (mais usado)', w: 152.4, h: 228.6, m: {t: 15, b: 15, i: 19, o: 12.7}, cols: 1, facing: true, bleed: 3.175, kdp: [6, 9]},
+  {id: 'kdp614', n: 'Amazon KDP · 6,14 × 9,21 pol.', w: 156, h: 234, m: {t: 15, b: 15, i: 19, o: 12.7}, cols: 1, facing: true, bleed: 3.175, kdp: [6.14, 9.21]},
+  {id: 'kdp7x10', n: 'Amazon KDP · 7 × 10 pol.', w: 177.8, h: 254, m: {t: 15, b: 15, i: 19, o: 12.7}, cols: 1, facing: true, bleed: 3.175, kdp: [7, 10]},
+  {id: 'kdp85', n: 'Amazon KDP · 8,5 × 11 pol.', w: 215.9, h: 279.4, m: {t: 15, b: 15, i: 19, o: 12.7}, cols: 1, facing: true, bleed: 3.175, kdp: [8.5, 11]});
+const DTP_GRIDS = [
+  {id: 'c1', n: '1 coluna (livro)', cols: 1, colw: [], mod: {cols: 6, rows: 8}},
+  {id: 'c2', n: '2 colunas iguais', cols: 2, colw: [], mod: {cols: 6, rows: 8}},
+  {id: 'c3', n: '3 colunas (revista)', cols: 3, colw: [], mod: {cols: 6, rows: 8}},
+  {id: 'a12', n: 'Assimétrica 1:2 (nota lateral + texto)', cols: 2, colw: [1, 2], mod: {cols: 6, rows: 8}},
+  {id: 'a21', n: 'Assimétrica 2:1 (texto + nota lateral)', cols: 2, colw: [2, 1], mod: {cols: 6, rows: 8}},
+  {id: 'j5', n: 'Jornal (5 colunas)', cols: 5, colw: [], gut: 9, mod: {cols: 10, rows: 12}},
+  {id: 'm68', n: 'Modular 6 × 8 (estilo adidas)', cols: 1, colw: [], mod: {cols: 6, rows: 8}},
+  {id: 'm12', n: '12 colunas (flexível)', cols: 1, colw: [], mod: {cols: 12, rows: 0}},
+  {id: 't33', n: 'Terços 3 × 3', cols: 1, colw: [], mod: {cols: 3, rows: 3}}
+];
 const DTP_STYLE_KEYS = ['body', 'h1', 'h2', 'h3', 'quote', 'caption'];
-function dtpDefaultStyles(head, body, color, accent) {
-  const S = (n, font, size, lead, o) => Object.assign({n, font, size, lead, color, align: 'left', b: 0, i: 0, caps: 0, before: 0, after: 0, indent: 0, drop: 0, keep: 0}, o || {});
+function dtpDefaultStyles(head, body, color, accent, fs) {
+  fs = fs || 1; const S = (n, font, size, lead, o) => Object.assign({n, font, size: +(size * fs).toFixed(2), lead: +(lead * fs).toFixed(2), color, align: 'left', b: 0, i: 0, caps: 0, before: 0, after: 0, indent: 0, drop: 0, keep: 0}, o || {});
   return {
     body: S('Corpo', body, 10, 14.5, {align: 'justify', after: 0, indent: 12}),
     h1: S('Título 1', head, 30, 34, {b: 1, before: 0, after: 18, keep: 1, color: accent, align: 'left', indent: 0}),
@@ -38,7 +58,8 @@ function dtpNew(presetId, name, unit) {
     page: {w: mm(P.w), h: mm(P.h)}, facing: !!P.facing, bleed: mm(P.bleed), margins: {t: mm(P.m.t), b: mm(P.m.b), i: mm(P.m.i), o: mm(P.m.o)},
     cols: P.cols, gutter: mm(5), baseline: 0, nPages: P.pages || 1, autoflow: true, paper: '#FFFFFF',
     run: {folio: P.facing || P.id === 'a5', pos: 'outer', header: '', headerR: '', size: 8, color: '#777777', font: 'Inter'},
-    styles: dtpDefaultStyles('Playfair Display', 'Lora', '#2B2B2B', '#8A5A2B'),
+    styles: dtpDefaultStyles('Playfair Display', 'Lora', '#2B2B2B', '#8A5A2B', P.fs),
+    colw: [], mod: {cols: 6, rows: 8}, front: 0,
     story: [], pages: [{items: []}], guides: {v: [], h: []}
   };
 }
@@ -46,12 +67,12 @@ const dtpPageCount = (doc, flow) => Math.max(1, doc.nPages || 1, flow ? flow.pag
 
 /* ---- geometria da página (margens internas/externas em páginas opostas) ---- */
 function dtpGeom(doc, pi) {
-  const W = doc.page.w, H = doc.page.h, m = doc.margins, n = Math.max(1, doc.cols | 0), gut = doc.gutter, recto = !doc.facing || (pi + 1) % 2 === 1;
+  const W = doc.page.w, H = doc.page.h, m = doc.margins, pn = pi + 1, n = Math.max(1, doc.cols | 0), gut = doc.gutter, recto = !doc.facing || pn % 2 === 1;
   const L = doc.facing ? (recto ? m.i : m.o) : m.i, R = doc.facing ? (recto ? m.o : m.i) : m.o;
-  const cw = Math.max(10, (W - L - R - (n - 1) * gut) / n);
-  return {W, H, x0: L, x1: W - R, y0: m.t, y1: H - m.b, n, gut, cw, recto, colX: k => L + k * (cw + gut)};
+  const tot = Math.max(10 * n, W - L - R - (n - 1) * gut), ws = Array.isArray(doc.colw) && doc.colw.length === n && doc.colw.every(v => v > 0) ? doc.colw : Array(n).fill(1), sum = ws.reduce((a, b) => a + b, 0);
+  const cwk = ws.map(v => Math.max(10, tot * v / sum)), xs = []; let acc = L; cwk.forEach(w => { xs.push(acc); acc += w + gut; });
+  return {W, H, x0: L, x1: W - R, y0: m.t, y1: H - m.b, n, gut, cw: tot / n, colW: k => cwk[k], recto, colX: k => xs[k]};
 }
-
 /* ---- texto: marcação **negrito** e *itálico*, palavras e medição ---- */
 let DTP_MC = null;
 const dtpMeasureCtx = () => DTP_MC || (DTP_MC = document.createElement('canvas').getContext('2d'));
@@ -107,22 +128,22 @@ function dtpBest(iv, minW) { let best = null; for (const [a, b] of iv) if (b - a
 /* ---- fluxo da matéria pelas colunas e páginas ---- */
 function dtpFlow(doc) {
   const out = {pages: [], overset: null, warns: []}, story = doc.story, S = doc.styles, base = doc.baseline || 0;
-  const maxPages = doc.autoflow ? 400 : Math.max(1, doc.nPages || 1);
+  const maxPages = doc.autoflow ? 400 : Math.max(1, doc.nPages || 1, (doc.front | 0) + 1);
   const pg = i => { while (out.pages.length <= i) out.pages.push({lines: [], blocks: [], band: 0}); return out.pages[i]; };
   const items = i => ((doc.pages[i] && doc.pages[i].items) || []).filter(it => it.k === 'img' || it.k === 'rect' || it.k === 'text').map(it => ({x: it.x, y: it.y, w: it.w, h: it.h, off: it.off != null ? it.off : 6, wrap: it.wrap || 'none'}));
   const bandOf = i => (out.pages[i] ? out.pages[i].band : 0);
   const colTop = i => dtpGeom(doc, i).y0 + bandOf(i);
   const snap = (y, i) => base > 0 ? dtpGeom(doc, i).y0 + Math.ceil((y - dtpGeom(doc, i).y0) / base - 1e-6) * base : y;
-  let cur = {pi: 0, col: 0, y: colTop(0)}, stop = false, guard = 0;
+  const front = Math.max(0, Math.min(20, doc.front | 0)); pg(front); let cur = {pi: front, col: 0, y: colTop(front)}, stop = false, guard = 0;
   const advance = c => { const g = dtpGeom(doc, c.pi); if (c.col + 1 < g.n) { c.col++; c.y = colTop(c.pi); return true; } if (c.pi + 1 >= maxPages) return false; c.pi++; c.col = 0; c.y = colTop(c.pi); return true; };
   const atTop = c => Math.abs(c.y - colTop(c.pi)) < 0.01;
   const lineBox = (c, lead, indentMin) => {
     const g = dtpGeom(doc, c.pi); let y = c.y;
     for (let t = 0; t < 400; t++) {
       if (y + lead > g.y1 + 0.01) return null;
-      const iv = dtpFree(g.colX(c.col), g.colX(c.col) + g.cw, y, y + lead, items(c.pi));
+      const iv = dtpFree(g.colX(c.col), g.colX(c.col) + g.colW(c.col), y, y + lead, items(c.pi));
       if (iv.jump) { y = snap(iv.jump, c.pi); continue; }
-      const b = dtpBest(iv, Math.min(g.cw, 4 * (indentMin || 8)));
+      const b = dtpBest(iv, Math.min(g.colW(c.col), 4 * (indentMin || 8)));
       if (b) { c.y = y; return b; }
       y = snap(y + (base || lead), c.pi);
     }
@@ -172,7 +193,7 @@ function dtpFlow(doc) {
       const full = it.w === 'full' && g().n > 1;
       let ok = true;
       const fit = () => {
-        const G = g(), W = full ? G.x1 - G.x0 : G.cw, w = Math.max(20, W * Math.min(100, Math.max(10, it.pct || 100)) / 100), ar = it.ar > 0 ? it.ar : 1.5;
+        const G = g(), W = full ? G.x1 - G.x0 : G.colW(cur.col), w = Math.max(20, W * Math.min(100, Math.max(10, it.pct || 100)) / 100), ar = it.ar > 0 ? it.ar : 1.5;
         let h = w / ar; const maxH = G.y1 - colTop(cur.pi); if (h > maxH - 6) h = maxH - 6;
         const cl = it.cap ? dtpWordsLines(it.cap, capSt, W) : [];
         return {G, W, w: h * ar > w ? w : h * ar, h, cl, total: h + (cl.length ? capSt.before + cl.length * capSt.lead : 0)};
@@ -181,7 +202,7 @@ function dtpFlow(doc) {
       if (full) { if (!(atTop(cur) && !cur.col && bandOf(cur.pi) === 0)) { if (cur.pi + 1 >= maxPages) ok = false; else { cur.pi++; cur.col = 0; cur.y = colTop(cur.pi); } } if (ok) f = fit(); }
       else if (cur.y + f.total > f.G.y1 + 0.01 && !atTop(cur)) { if (!advance(cur)) ok = false; else f = fit(); }
       if (!ok) { out.overset = {sidx, words: wordsLeft(sidx)}; break; }
-      const G = f.G, x = (full ? G.x0 : G.colX(cur.col)) + ((full ? G.x1 - G.x0 : G.cw) - f.w) * ({l: 0, c: 0.5, r: 1}[it.al || 'l']);
+      const G = f.G, x = (full ? G.x0 : G.colX(cur.col)) + ((full ? G.x1 - G.x0 : G.colW(cur.col)) - f.w) * ({l: 0, c: 0.5, r: 1}[it.al || 'l']);
       pg(cur.pi).blocks.push({pi: cur.pi, sidx, x, y: cur.y, w: f.w, h: f.h, imgId: it.imgId, fit: 'fill', cap: f.cl.map((t, q) => ({t, y: cur.y + f.h + capSt.before + q * capSt.lead, lead: capSt.lead, size: capSt.size, font: capSt.font, color: capSt.color, b: capSt.b, i: capSt.i, x: x})), capW: f.w});
       const gap = Math.max(4, bd.lead * 0.6);
       if (full) { out.pages[cur.pi].band = (cur.y - G.y0) + f.total + gap; cur.y = colTop(cur.pi); } else cur.y += f.total + gap;
@@ -265,9 +286,9 @@ function dtpDrawPage(ctx, doc, flow, pi, z, o) {
   its.forEach(it => { if (it.k === 'text') { const f = flow.frames.find(q => q.id === it.id); if (it.fill) { ctx.fillStyle = it.fill; ctx.fillRect(it.x * z, it.y * z, it.w * z, it.h * z); } if (f) f.lines.forEach(l => text(l)); } });
   /* cabeçalho e número de página */
   const R = doc.run;
-  if (R && (R.folio || R.header || R.headerR) && !o.noRun) {
+  if (R && (R.folio || R.header || R.headerR) && !o.noRun && pi >= (doc.front | 0)) {
     ctx.fillStyle = R.color; ctx.font = `${R.size * z}px "${R.font}", sans-serif`; ctx.textBaseline = 'alphabetic';
-    const num = String(pi + 1), yF = g.H - g.y1 < 6 ? g.H - 6 : g.y1 + (g.H - g.y1) * 0.55, hdr = (g.recto ? (R.headerR || R.header) : R.header) || '';
+    const num = String(pi - (doc.front | 0) + 1), yF = g.H - g.y1 < 6 ? g.H - 6 : g.y1 + (g.H - g.y1) * 0.55, hdr = (g.recto ? (R.headerR || R.header) : R.header) || '';
     if (R.folio) { const w = ctx.measureText(num).width / z; let x = (g.x0 + g.x1) / 2 - w / 2; if (R.pos === 'outer') x = doc.facing && g.recto || !doc.facing ? g.x1 - w : g.x0; if (R.pos === 'inner') x = doc.facing && g.recto ? g.x0 : g.x1 - w; ctx.fillText(num, x * z, yF * z); }
     if (hdr) { const w = ctx.measureText(hdr).width / z; let x = g.recto ? g.x1 - w : g.x0; if (!doc.facing) x = g.x0; ctx.fillText(hdr, x * z, (g.y0 * 0.55) * z); }
   }

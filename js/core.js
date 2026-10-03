@@ -20,7 +20,7 @@ function askText(title, label, cb) {
 function go(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = $('page-' + page); if (el) el.classList.add('active');
-  document.querySelectorAll('.rail-nav button,.rail-bottom button').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+  document.querySelectorAll('.rail-nav button,.rail-bottom button').forEach(b => b.classList.toggle('active', b.dataset.page === (page === 'diagram' ? 'editora' : page)));
   ui.page = page; renderPage(page); window.scrollTo(0, 0);
 }
 function renderPage(page) {

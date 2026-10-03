@@ -1,5 +1,5 @@
 /* ===== Diagramação · telas: biblioteca, mesa de trabalho com réguas/guias, matéria, estilos, página e objetos ===== */
-const dui = {id: '', view: 'layout', pi: 0, z: 1, vx: 30, vy: 30, tool: 'v', sel: null, tab: 'texto', show: {margins: true, cols: true, grid: true, guides: true, bleed: true, rulers: true}, hist: [], hi: -1, flow: null, imgs: {}, thumbs: {}, drag: null, mouse: null, sw: 0, ref: null, refOn: false, refOp: 0.45, space: false, refRes: null};
+const dui = {id: '', view: 'layout', pi: 0, z: 1, vx: 30, vy: 30, tool: 'v', sel: null, tab: 'texto', show: {margins: true, cols: true, grid: true, mod: true, guides: true, bleed: true, rulers: true}, hist: [], hi: -1, flow: null, imgs: {}, thumbs: {}, drag: null, mouse: null, sw: 0, ref: null, refOn: false, refOp: 0.45, space: false, refRes: null};
 const DTP_RULER = 22;
 const dtpList = () => { const p = curProject(); if (!p) return []; p.layouts = Array.isArray(p.layouts) ? p.layouts : []; return p.layouts; };
 const dtpDoc = () => dtpList().find(d => d.id === dui.id);
@@ -13,7 +13,7 @@ function renderDiagram() {
   const r = $('diagramRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Diagramação'); return; }
   if (dui.id && dtpDoc()) return dtpEditor(p, r);
   const list = dtpList();
-  r.innerHTML = `<div class="page-head"><div><h1>Diagramação</h1><p>Monte livros, revistas, folhetos e cartazes como no InDesign: tamanho e unidades de medida, margens, sangria, colunas, grade de linha de base, régua, linhas-guia, páginas espelhadas, quadros de imagem com contorno de texto e exportação em PDF com marcas de corte.</p></div><div class="row-gap"><button class="btn dark" onclick="dtpNewOpen()">＋ Novo documento</button></div></div>
+  r.innerHTML = edTabs('diag') + `<div class="page-head"><div><h1>Diagramação</h1><p>Monte livros, revistas, folhetos e cartazes como no InDesign: tamanho e unidades de medida, margens, sangria, colunas, grade de linha de base, régua, linhas-guia, páginas espelhadas, quadros de imagem com contorno de texto e exportação em PDF com marcas de corte.</p></div><div class="row-gap"><button class="btn dark" onclick="dtpNewOpen()">＋ Novo documento</button></div></div>
   ${list.length ? `<div class="dz-sets">${list.map(d => `<article class="dz-set"><div class="dtp-card" onclick="dtpOpen('${d.id}')"><span style="aspect-ratio:${(d.page.w / d.page.h).toFixed(3)}"></span></div><strong>${esc(d.name)}</strong><small class="muted block">${dtpFmt(d.page.w, d.unit)}×${dtpFmt(d.page.h, d.unit)} ${DTP_UL[d.unit]} · ${d.cols} col. · ${d.story.length} bloco(s)</small><div class="row-gap" style="margin-top:6px"><button class="btn sm dark" onclick="dtpOpen('${d.id}')">Abrir</button><button class="btn sm" onclick="dtpDup('${d.id}')">Duplicar</button><button class="btn sm" onclick="dtpDel('${d.id}')" title="Excluir">${ico('trash', 14)}</button></div></article>`).join('')}</div>` : emptyState('Nenhum documento ainda', 'Escolha um formato (livro, revista, folheto…) e comece a diagramar.', '<button class="btn dark" onclick="dtpNewOpen()">＋ Novo documento</button>')}`;
 }
 function dtpNewOpen() {
@@ -45,7 +45,7 @@ function dtpEditor(p, r) {
     <select class="sm" onchange="histSetLimit(this.value);dtpStatus()" title="Passos de histórico">${HIST_OPTS.map(n => `<option value="${n}" ${n === histLimit() ? 'selected' : ''}>${n} passos</option>`).join('')}</select>
     <button class="btn sm dark" onclick="dtpTabSet('exportar')">Exportar PDF</button></div></div>
   <div class="dtp-bar"><div class="row-gap">${[['v', 'Selecionar', 'V'], ['t', 'Texto', 'T'], ['i', 'Imagem', 'I'], ['r', 'Retângulo', 'R']].map(([k, l, h]) => `<button class="tchip ${dui.tool === k ? 'on' : ''}" data-tool="${k}" onclick="dtpTool('${k}')" title="${l} (${h})">${l}</button>`).join('')}</div>
-    <div class="row-gap" style="flex-wrap:wrap">${[['margins', 'Margens'], ['cols', 'Colunas'], ['grid', 'Grade'], ['guides', 'Guias'], ['bleed', 'Sangria'], ['rulers', 'Réguas']].map(([k, l]) => `<label class="dtp-chk"><input type="checkbox" ${dui.show[k] ? 'checked' : ''} onchange="dui.show.${k}=this.checked;dtpDraw()"> ${l}</label>`).join('')}</div>
+    <div class="row-gap" style="flex-wrap:wrap">${[['margins', 'Margens'], ['cols', 'Colunas'], ['grid', 'Linha de base'], ['mod', 'Grade modular'], ['guides', 'Guias'], ['bleed', 'Sangria'], ['rulers', 'Réguas']].map(([k, l]) => `<label class="dtp-chk"><input type="checkbox" ${dui.show[k] ? 'checked' : ''} onchange="dui.show.${k}=this.checked;dtpDraw()"> ${l}</label>`).join('')}</div>
     <div class="row-gap"><select class="sm" onchange="dtpDoc().unit=this.value;dtpTouch();dtpPanel();dtpDraw()" title="Unidade de medida">${Object.keys(DTP_U).map(k => `<option value="${k}" ${k === u ? 'selected' : ''}>${DTP_UL[k]}</option>`).join('')}</select><button class="btn sm" onclick="dtpZoom(0.8)">−</button><span id="dtpZ" class="muted" style="min-width:44px;text-align:center;font-size:12px"></span><button class="btn sm" onclick="dtpZoom(1.25)">＋</button><button class="btn sm" onclick="dtpFit()">Ajustar</button>
     <button class="tchip ${dui.view === 'story' ? 'on' : ''}" onclick="dtpView(dui.view==='story'?'layout':'story')" title="Edição só do texto, com a marca do estouro">Editar texto (matéria)</button></div></div>
   <div class="dtp-wrap"><div class="dtp-left" id="dtpLeft"></div><div class="dtp-mid"><div class="dtp-stage" id="dtpStage"><canvas id="dtpCv"></canvas></div><div id="dtpStory" class="dtp-story" style="display:none"></div><div class="dtp-foot"><span id="dtpInfo"></span><span id="dtpAuto" class="muted"></span></div></div>
@@ -94,7 +94,8 @@ function dtpDraw() {
     x.scale(z, z); x.lineWidth = 1 / z;
     if (sh.bleed && d.bleed > 0) { x.strokeStyle = '#ef4444'; x.setLineDash([4 / z, 3 / z]); x.strokeRect(-d.bleed, -d.bleed, g.W + 2 * d.bleed, g.H + 2 * d.bleed); x.setLineDash([]); }
     if (sh.grid && d.baseline > 0) { x.strokeStyle = 'rgba(70,160,255,.45)'; x.beginPath(); for (let y = g.y0; y <= g.y1 + 0.01; y += d.baseline) { x.moveTo(g.x0, y); x.lineTo(g.x1, y); } x.stroke(); }
-    if (sh.cols) { x.fillStyle = 'rgba(140,90,255,.07)'; x.strokeStyle = 'rgba(140,90,255,.7)'; for (let k = 0; k < g.n; k++) { x.fillRect(g.colX(k), g.y0, g.cw, g.y1 - g.y0); x.strokeRect(g.colX(k), g.y0, g.cw, g.y1 - g.y0); } }
+    if (sh.mod && d.mod && (d.mod.cols > 0 || d.mod.rows > 0)) { x.strokeStyle = 'rgba(0,170,220,.55)'; x.beginPath(); const G = dtpModLines(d, pi); G.X.forEach(v => { x.moveTo(v, g.y0); x.lineTo(v, g.y1); }); G.Y.forEach(v => { x.moveTo(g.x0, v); x.lineTo(g.x1, v); }); x.stroke(); }
+    if (sh.cols) { x.fillStyle = 'rgba(140,90,255,.07)'; x.strokeStyle = 'rgba(140,90,255,.7)'; for (let k = 0; k < g.n; k++) { x.fillRect(g.colX(k), g.y0, g.colW(k), g.y1 - g.y0); x.strokeRect(g.colX(k), g.y0, g.colW(k), g.y1 - g.y0); } }
     if (sh.margins) { x.strokeStyle = '#e0338c'; x.strokeRect(g.x0, g.y0, g.x1 - g.x0, g.y1 - g.y0); }
     if (sh.guides) { x.strokeStyle = '#14b8c4'; x.beginPath(); d.guides.v.forEach(v => { x.moveTo(v, -dui.vy / z); x.lineTo(v, (ch - dui.vy) / z); }); d.guides.h.forEach(v => { x.moveTo(-5000, v); x.lineTo(9000, v); }); x.stroke(); }
     /* seleção */
@@ -124,7 +125,14 @@ function dtpRulers(x, cw, ch) {
 
 /* ---------- interação ---------- */
 const dtpPick = (sx, sy) => { const d = dtpDoc(); let best = null; for (const {pi, ox} of dtpView2()) { const x = (sx - dui.vx) / dui.z - ox, y = (sy - dui.vy) / dui.z; const o = {pi, ox, x, y, inside: x >= 0 && y >= 0 && x <= d.page.w && y <= d.page.h}; if (o.inside) return o; if (!best || Math.abs(x - d.page.w / 2) < Math.abs(best.x - d.page.w / 2)) best = o; } return best; };
-function dtpSnapTargets(d, pi) { const g = dtpGeom(d, pi), X = [0, g.W, g.W / 2, g.x0, g.x1, ...d.guides.v], Y = [0, g.H, g.H / 2, g.y0, g.y1, ...d.guides.h]; for (let k = 0; k < g.n; k++) { X.push(g.colX(k), g.colX(k) + g.cw); } if (d.baseline > 0) for (let y = g.y0; y <= g.y1; y += d.baseline) Y.push(y); return {X, Y}; }
+/* linhas da grade modular (colunas × linhas) dentro das margens, com os cortes das células */
+function dtpModLines(d, pi) {
+  const g = dtpGeom(d, pi), M = d.mod || {}, X = [], Y = [], gut = Math.min(6, g.gut); const cx = M.cols | 0, ry = M.rows | 0;
+  if (cx > 0) { const w = (g.x1 - g.x0 - (cx - 1) * gut) / cx; for (let k = 0; k < cx; k++) { X.push(g.x0 + k * (w + gut)); X.push(g.x0 + k * (w + gut) + w); } }
+  if (ry > 0) { const h = (g.y1 - g.y0 - (ry - 1) * gut) / ry; for (let k = 0; k < ry; k++) { Y.push(g.y0 + k * (h + gut)); Y.push(g.y0 + k * (h + gut) + h); } }
+  return {X, Y};
+}
+function dtpSnapTargets(d, pi) { const g = dtpGeom(d, pi), X = [0, g.W, g.W / 2, g.x0, g.x1, ...d.guides.v], Y = [0, g.H, g.H / 2, g.y0, g.y1, ...d.guides.h]; for (let k = 0; k < g.n; k++) { X.push(g.colX(k), g.colX(k) + g.colW(k)); } const ML = dtpModLines(d, pi); X.push(...ML.X); Y.push(...ML.Y); if (d.baseline > 0) for (let y = g.y0; y <= g.y1; y += d.baseline) Y.push(y); return {X, Y}; }
 function dtpSnapV(v, T, thr) { let b = v, m = thr; for (const t of T) { const e = Math.abs(t - v); if (e < m) { m = e; b = t; } } return b; }
 const dtpPosOf = e => { const r = $('dtpCv').getBoundingClientRect(); return {sx: e.clientX - r.left, sy: e.clientY - r.top}; };
 function dtpBindStage() {
@@ -146,7 +154,7 @@ function dtpCanvasEvents(c, pos) {
     if (sel && sel.t === 'item') { const it = its.find(q => q.id === sel.id); if (it) { const hs = dtpHandles(it); let hb = null, hd = 9 / dui.z; hs.forEach(h => { const dd = Math.hypot(h.x - pk.x, h.y - pk.y); if (dd < hd) { hd = dd; hb = h.n; } }); if (hb) { dui.drag = {t: 'resize', h: hb, id: it.id, pi: pk.pi, o: {x: it.x, y: it.y, w: it.w, h: it.h}, p0: pk}; return; } } }
     for (let i = its.length - 1; i >= 0; i--) { const it = its[i]; if (pk.x >= it.x && pk.x <= it.x + it.w && pk.y >= it.y && pk.y <= it.y + it.h) { dui.sel = {t: 'item', id: it.id, pi: pk.pi}; dui.drag = {t: 'move', id: it.id, pi: pk.pi, o: {x: it.x, y: it.y}, p0: pk, moved: false, dup: e.altKey}; dtpDraw(); dtpTabSet('objeto'); return; } }
     const P = dui.flow.pages[pk.pi];
-    if (P) { const b = P.blocks.find(b => pk.x >= b.x && pk.x <= b.x + b.w && pk.y >= b.y && pk.y <= b.y + b.h); if (b) { dui.sel = {t: 'block', i: b.sidx}; dtpDraw(); dtpTabSet('texto'); dtpScrollRow(b.sidx); return; } const l = P.lines.find(l => pk.y >= l.y && pk.y <= l.y + l.lead && pk.x >= l.x0 - 2 && pk.x <= Math.max(l.x1, l.x0 + 20) + 2); if (l) { dui.sel = {t: 'para', i: l.sidx}; dtpDraw(); dtpTabSet('texto'); dtpScrollRow(l.sidx); return; } }
+    if (P) { const b = P.blocks.find(b => pk.x >= b.x && pk.x <= b.x + b.w && pk.y >= b.y && pk.y <= b.y + b.h); if (b) { dui.sel = {t: 'block', i: b.sidx}; dui.drag = {t: 'detach', kind: 'block', sidx: b.sidx, pi: pk.pi, col: 0, p0: pk, sx, sy}; dtpDraw(); dtpTabSet('texto'); dtpScrollRow(b.sidx); return; } const l = P.lines.find(l => pk.y >= l.y && pk.y <= l.y + l.lead && pk.x >= l.x0 - 2 && pk.x <= Math.max(l.x1, l.x0 + 20) + 2); if (l) { dui.sel = {t: 'para', i: l.sidx}; dui.drag = {t: 'detach', kind: 'para', sidx: l.sidx, pi: pk.pi, col: l.col, p0: pk, sx, sy}; dtpDraw(); dtpTabSet('texto'); dtpScrollRow(l.sidx); return; } }
     dui.sel = null; dtpDraw(); if (dui.tab === 'objeto') dtpPanel();
   });
   c.addEventListener('dblclick', () => { if (dui.sel && dui.sel.t === 'para') { dtpTabSet('texto'); dtpScrollRow(dui.sel.i, true); } });
@@ -156,6 +164,7 @@ function dtpWindowEvents(pos) {
     if (!$('dtpCv')) return; const d = dtpDoc(); if (!d) return; const {sx, sy} = pos(e); dui.mouse = {sx, sy}; const dr = dui.drag;
     if (!dr) { if (dui.show.rulers) dtpDraw(); return; }
     if (dr.t === 'pan') { dui.vx = dr.vx + sx - dr.sx; dui.vy = dr.vy + sy - dr.sy; dtpDraw(); return; }
+    if (dr.t === 'detach') { if (Math.hypot(sx - dr.sx, sy - dr.sy) < 5) return; const fr = dtpDetach(dr); if (!fr) { dui.drag = null; return; } dui.sel = {t: 'item', id: fr.id, pi: dr.pi}; dui.drag = {t: 'move', id: fr.id, pi: dr.pi, o: {x: fr.x, y: fr.y}, p0: dr.p0, moved: true, dup: false}; dui.flow = dtpFlow(d); dtpDraw(); return; }
     const pk = dtpPick(sx, sy); if (!pk) return;
     if (dr.t === 'guide') { const x = (sx - dui.vx) / dui.z - (pk.ox || 0), y = (sy - dui.vy) / dui.z; dr.v = dr.axis === 'v' ? x : y; dr.cur = {sx, sy}; const arr = dr.axis === 'v' ? d.guides.v : d.guides.h; if (dr.isNew) { arr.push(dr.v); dr.i = arr.length - 1; dr.isNew = false; } arr[dr.i] = dr.v; dtpDraw(); return; }
     const T = dtpSnapTargets(d, dr.pi), thr = 6 / dui.z, mx = pk.pi === dr.pi ? pk.x : (sx - dui.vx) / dui.z - (dtpView2().find(v => v.pi === dr.pi) || {ox: 0}).ox, my = (sy - dui.vy) / dui.z;
@@ -168,7 +177,7 @@ function dtpWindowEvents(pos) {
   });
   window.addEventListener('mouseup', e => {
     const dr = dui.drag; if (!dr) return; dui.drag = null; const d = dtpDoc(); if (!d) return;
-    if (dr.t === 'pan') return;
+    if (dr.t === 'pan' || dr.t === 'detach') return;
     if (dr.t === 'guide') { const c = $('dtpCv').getBoundingClientRect(), sx = e.clientX - c.left, sy = e.clientY - c.top, R = DTP_RULER, arr = dr.axis === 'v' ? d.guides.v : d.guides.h; if (dr.i != null && ((dr.axis === 'v' && sx < R) || (dr.axis === 'h' && sy < R) || sx < 0 || sy < 0 || sx > c.width || sy > c.height)) arr.splice(dr.i, 1); dtpTouch(); dtpSnap(); dtpDraw(); return; }
     if (dr.t === 'create') { const w = Math.abs(dr.x - dr.x0), h = Math.abs(dr.y - dr.y0), x = Math.min(dr.x0, dr.x), y = Math.min(dr.y0, dr.y); if (w < 8 || h < 8) { dtpTool('v'); return; } const it = dtpMakeItem(dui.tool, x, y, w, h); dtpItems(d, dr.pi).push(it); dui.sel = {t: 'item', id: it.id, pi: dr.pi}; const wasImg = dui.tool === 'i'; dtpTool('v'); dtpTouch(true); dtpSnap(); dtpTabSet('objeto'); if (wasImg) dtpPickImg(); return; }
     if (dr.t === 'move' && !dr.moved) return; dtpTouch(true); dtpSnap(); dtpPanel();
@@ -215,6 +224,10 @@ function dtpPanel() {
   <div class="okr-label" style="margin-top:12px">MARGENS</div><div class="grid-2">${N('Topo', 'margins.t')}${N('Base', 'margins.b')}${N(fo ? 'Interna (lombada)' : 'Esquerda', 'margins.i')}${N(fo ? 'Externa' : 'Direita', 'margins.o')}</div>
   <div class="okr-label" style="margin-top:12px">COLUNAS E GRADE</div><div class="grid-2"><div class="field"><label>Colunas</label><input type="number" min="1" max="8" value="${d.cols}" onchange="dtpDoc().cols=Math.max(1,Math.min(8,Math.round(+this.value||1)));dtpTouch(true)"></div>${N('Espaço entre colunas', 'gutter')}</div>
   <div class="field"><label>Grade de linha de base (${DTP_UL[u]}; 0 = desligada)</label><input type="number" step="any" value="${dtpFmt(d.baseline, u)}" onchange="dtpSetPt('baseline',this.value)"><small class="muted">Com a grade ligada, as linhas de texto e os espaços se alinham a ela, como no InDesign.</small></div>
+  <div class="okr-label" style="margin-top:12px">MODELOS DE GRADE (por baixo do layout)</div><div class="field"><select onchange="dtpApplyGrid(this.value)"><option value="">Escolher um modelo de grade…</option>${DTP_GRIDS.map(x => `<option value="${x.id}">${esc(x.n)}</option>`).join('')}</select></div>
+  <div class="grid-2"><div class="field"><label>Proporção das colunas</label><input value="${esc((d.colw.length ? d.colw : Array(d.cols).fill(1)).join(':'))}" onchange="dtpSetColw(this.value)" placeholder="ex.: 1:2"></div><div class="field"><label>Páginas antes do texto (capa etc.)</label><input type="number" min="0" max="20" value="${d.front | 0}" onchange="dtpDoc().front=Math.max(0,Math.min(20,+this.value||0));dtpTouch(true)"></div>
+  <div class="field"><label>Grade modular · colunas</label><input type="number" min="0" max="24" value="${d.mod.cols}" onchange="dtpDoc().mod.cols=Math.max(0,Math.min(24,+this.value||0));dtpTouch(true)"></div><div class="field"><label>Grade modular · linhas</label><input type="number" min="0" max="24" value="${d.mod.rows}" onchange="dtpDoc().mod.rows=Math.max(0,Math.min(24,+this.value||0));dtpTouch(true)"></div></div>
+  <small class="muted block">A grade modular (azul) não guia o texto corrido: ela serve de base para posicionar imagens e quadros, que grudam nas linhas. As colunas de texto (roxo) é que recebem o texto.</small>
   <div class="okr-label" style="margin-top:12px">SANGRIA</div>${N('Sangria (todos os lados)', 'bleed')}
   <div class="okr-label" style="margin-top:12px">FUNDO E PÁGINA-MESTRE</div><div class="field"><label>Cor do papel</label><input type="color" value="${d.paper}" onchange="dtpDoc().paper=this.value;dtpTouch(true)"></div>
   <label class="dtp-chk"><input type="checkbox" ${d.run.folio ? 'checked' : ''} onchange="dtpDoc().run.folio=this.checked;dtpTouch(true)"> Número de página (folio)</label>
@@ -222,6 +235,8 @@ function dtpPanel() {
   <div class="field"><label>Cabeçalho (páginas pares/esquerda)</label><input value="${esc(d.run.header)}" oninput="dtpDoc().run.header=this.value;dtpTouch()"></div><div class="field"><label>Cabeçalho (páginas ímpares/direita)</label><input value="${esc(d.run.headerR)}" oninput="dtpDoc().run.headerR=this.value;dtpTouch()"></div>
   <div class="okr-label" style="margin-top:12px">LINHAS-GUIA</div><small class="muted block">Arraste da régua (de cima ou da esquerda) para criar uma guia; arraste de volta para a régua para apagar. Objetos grudam nas guias, margens e colunas.</small><div class="row-gap" style="margin-top:6px"><button class="btn sm" onclick="dtpGuidesClear()">Limpar guias</button></div>`;
 }
+function dtpApplyGrid(id) { const G = DTP_GRIDS.find(x => x.id === id), d = dtpDoc(); if (!G) return; d.cols = G.cols; d.colw = G.colw.slice(); d.mod = Object.assign({}, G.mod); if (G.gut) d.gutter = dtpMM(G.gut); dui.show.mod = true; dtpTouch(true); dtpPanel(); dtpDraw(); toast('Grade aplicada: ' + G.n); }
+function dtpSetColw(v) { const d = dtpDoc(), a = String(v).split(/[:\s,;]+/).map(Number).filter(n => n > 0); d.colw = a.length === d.cols && a.some(n => n !== a[0]) ? a : []; if (a.length > 1 && a.length !== d.cols) { d.cols = Math.min(8, a.length); d.colw = a.length === d.cols ? a : []; } dtpTouch(true); dtpPanel(); }
 function dtpSetPt(path, val) { const d = dtpDoc(), ks = path.split('.'), last = ks.pop(), o = ks.reduce((a, k) => a[k], d); o[last] = Math.max(0, dtpToPt(val, d.unit)); if (path === 'page.w' || path === 'page.h') { o[last] = Math.max(36, o[last]); dtpTouch(true); dtpFit(); } else dtpTouch(true); }
 function dtpSwap() { const d = dtpDoc(); [d.page.w, d.page.h] = [d.page.h, d.page.w]; dtpTouch(true); dtpPanel(); dtpFit(); }
 function dtpApplyPreset(id) { const P = DTP_PRESETS.find(x => x.id === id), d = dtpDoc(); if (!P || !confirm('Aplicar o formato “' + P.n + '”? Tamanho, margens, colunas e sangria serão trocados (o texto é mantido).')) { dtpPanel(); return; } d.page = {w: dtpMM(P.w), h: dtpMM(P.h)}; d.margins = {t: dtpMM(P.m.t), b: dtpMM(P.m.b), i: dtpMM(P.m.i), o: dtpMM(P.m.o)}; d.cols = P.cols; d.facing = P.facing; d.bleed = dtpMM(P.bleed); if (P.pages) d.nPages = Math.max(d.nPages, P.pages); dtpTouch(true); dtpPanel(); dtpFit(); }
@@ -282,7 +297,7 @@ function dtpStyleSwap() { const d = dtpDoc(), h = prompt('Fonte dos títulos (no
 const dtpSelItem = () => { const d = dtpDoc(); return dui.sel && dui.sel.t === 'item' ? dtpItems(d, dui.sel.pi).find(q => q.id === dui.sel.id) : null; };
 function dtpObjetoHTML(d, N) {
   const it = dtpSelItem(), u = d.unit;
-  const add = `<div class="okr-label">INSERIR NA PÁGINA ${dui.pi + 1}</div><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpAddFloat('img')">＋ Imagem flutuante</button><button class="btn sm" onclick="dtpAddFloat('text')">＋ Quadro de texto</button><button class="btn sm" onclick="dtpAddFloat('rect')">＋ Retângulo</button></div><small class="muted block" style="margin:6px 0">Também dá para desenhar na mesa com as ferramentas Texto (T), Imagem (I) e Retângulo (R). Imagem flutuante com “Contornar” faz o texto desviar dela.</small>`;
+  const add = `<div class="okr-label">INSERIR NA PÁGINA ${dui.pi + 1}</div><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpAddFloat('img')">＋ Imagem flutuante</button><button class="btn sm" onclick="dtpAddFloat('text')">＋ Quadro de texto</button><button class="btn sm" onclick="dtpAddFloat('rect')">＋ Retângulo</button></div><small class="muted block" style="margin:6px 0">Mão livre: <b>arraste qualquer parágrafo ou imagem da página</b> e ele vira um quadro solto, que você leva para onde quiser (↩ Devolver ao fluxo volta ao texto corrido). Também dá para desenhar com as ferramentas Texto (T), Imagem (I) e Retângulo (R). Imagem flutuante com “Contornar” faz o texto desviar dela.</small>`;
   if (!it) return add + '<p class="muted" style="font-size:12px">Selecione um objeto na página para editar medidas e contorno de texto.</p>';
   const fld = (k, lab) => `<div class="field"><label>${lab}</label><input type="number" step="any" value="${dtpFmt(it[k], u)}" onchange="dtpItemSet('${k}',dtpToPt(this.value,dtpUnit()))"></div>`;
   return add + `<div class="okr-label">${it.k === 'img' ? 'IMAGEM' : it.k === 'text' ? 'QUADRO DE TEXTO' : 'RETÂNGULO'} · medidas em ${DTP_UL[u]}</div><div class="grid-2">${fld('x', 'X')}${fld('y', 'Y')}${fld('w', 'Largura')}${fld('h', 'Altura')}</div>
@@ -291,14 +306,37 @@ function dtpObjetoHTML(d, N) {
   ${it.k === 'img' ? `<div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dtpPickImg()">${it.imgId ? 'Trocar imagem' : 'Escolher imagem'}</button></div><label class="muted" style="font-size:11px">Zoom do enquadramento: ${(it.zoom || 1).toFixed(2)}×</label><input type="range" min="1" max="4" step="0.05" value="${it.zoom || 1}" oninput="dtpItemSet('zoom',+this.value,true)">` : ''}
   ${it.k === 'rect' ? `<div class="grid-2"><div class="field"><label>Cor</label><input type="color" value="${it.fill || '#E7DCC8'}" onchange="dtpItemSet('fill',this.value)"></div><div class="field"><label>Opacidade</label><input type="range" min="0" max="1" step="0.05" value="${it.op != null ? it.op : 1}" oninput="dtpItemSet('op',+this.value,true)"></div></div>` : ''}
   ${it.k === 'text' ? `<div class="field"><label>Texto</label><textarea rows="5" oninput="dtpItemSet('text',this.value,true)">${esc(it.text)}</textarea></div><div class="grid-2"><div class="field"><label>Estilo</label><select onchange="dtpItemSet('st',this.value)">${Object.keys(d.styles).map(k => `<option value="${k}" ${it.st === k ? 'selected' : ''}>${esc(d.styles[k].n)}</option>`).join('')}</select></div><div class="field"><label>Cor de fundo</label><input type="color" value="${it.fill || '#FFFFFF'}" onchange="dtpItemSet('fill',this.value)"><label class="dtp-chk"><input type="checkbox" ${it.fill ? 'checked' : ''} onchange="dtpItemSet('fill',this.checked?'#FFFFFF':'')"> usar fundo</label></div></div>` : ''}
+  ${it.k === 'text' || it.k === 'img' ? `<div class="row-gap" style="margin-top:8px;flex-wrap:wrap">${it.k === 'text' ? '<button class="btn sm" onclick="dtpItemFitH()">Ajustar altura ao texto</button>' : ''}<button class="btn sm" onclick="dtpItemToFlow()" title="Devolve ao fluxo do texto (após o parágrafo selecionado ou no fim)">↩ Devolver ao fluxo</button></div>` : ''}
   <div class="row-gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn sm" onclick="dtpItemOrder(1)">Trazer para frente</button><button class="btn sm" onclick="dtpItemOrder(-1)">Enviar para trás</button><button class="btn sm" onclick="dtpItemDup()">Duplicar (Ctrl+D)</button><button class="btn sm" onclick="dtpItemDel()">${ico('trash', 13)} Excluir</button></div>`;
 }
 function dtpItemSet(k, v, quiet) { const it = dtpSelItem(); if (!it) return; it[k] = v; dtpTouch(true); if (!quiet && !['x', 'y', 'w', 'h', 'off'].includes(k)) dtpPanel(); }
-function dtpItemAlign(m) { const d = dtpDoc(), it = dtpSelItem(); if (!it) return; const g = dtpGeom(d, dui.sel.pi); if (m === 'h') it.x = (g.W - it.w) / 2; if (m === 'm') { it.x = g.x0; it.w = g.x1 - g.x0; } if (m === 'col') { it.x = g.colX(0); it.w = g.cw; } dtpTouch(true); dtpPanel(); }
+function dtpItemAlign(m) { const d = dtpDoc(), it = dtpSelItem(); if (!it) return; const g = dtpGeom(d, dui.sel.pi); if (m === 'h') it.x = (g.W - it.w) / 2; if (m === 'm') { it.x = g.x0; it.w = g.x1 - g.x0; } if (m === 'col') { it.x = g.colX(0); it.w = g.colW(0); } dtpTouch(true); dtpPanel(); }
 function dtpItemOrder(dd) { const d = dtpDoc(), a = dtpItems(d, dui.sel.pi), i = a.findIndex(q => q.id === dui.sel.id), j = Math.max(0, Math.min(a.length - 1, i + dd)); [a[i], a[j]] = [a[j], a[i]]; dtpTouch(true); }
 function dtpItemDup() { const d = dtpDoc(), it = dtpSelItem(); if (!it) return; const c = JSON.parse(JSON.stringify(it)); c.id = uid('fr'); c.x += 12; c.y += 12; dtpItems(d, dui.sel.pi).push(c); dui.sel = {t: 'item', id: c.id, pi: dui.sel.pi}; dtpTouch(true); dtpPanel(); }
+/* mão livre: solta o parágrafo/imagem do fluxo e vira um quadro que você arrasta para onde quiser */
+function dtpDetach(dr) {
+  const d = dtpDoc(), f = dui.flow, it = d.story[dr.sidx], P = f.pages[dr.pi]; if (!it || !P) return null; let fr;
+  if (dr.kind === 'para' && it.k === 'p') {
+    const ls = P.lines.filter(l => l.sidx === dr.sidx && l.col === dr.col); if (!ls.length) return null; const st = d.styles[it.st] || d.styles.body, pad = 4;
+    const x0 = Math.min(...ls.map(l => l.x0)), x1 = Math.max(...ls.map(l => l.x1));
+    fr = {id: uid('fr'), k: 'text', x: x0 - pad, y: ls[0].y - pad, w: Math.max(60, x1 - x0) + 2 * pad, h: 9999, wrap: 'around', off: 6, text: it.t, st: it.st, pad, fill: '', imgId: '', zoom: 1};
+    const r = dtpFrame(d, fr, dr.pi), last = r.lines[r.lines.length - 1]; fr.h = Math.max(20, (last ? last.y + last.lead - fr.y : st.lead) + pad);
+  } else if (dr.kind === 'block' && it.k === 'img') {
+    const b = P.blocks.find(q => q.sidx === dr.sidx); if (!b) return null;
+    fr = {id: uid('fr'), k: 'img', x: b.x, y: b.y, w: b.w, h: b.h, wrap: 'around', off: 8, imgId: it.imgId, zoom: 1, ar: it.ar};
+  } else return null;
+  d.story.splice(dr.sidx, 1); dtpItems(d, dr.pi).push(fr); return fr;
+}
+function dtpItemToFlow() {
+  const d = dtpDoc(), it = dtpSelItem(); if (!it) return; const at = dui.sel && dui.sel.i != null ? dui.sel.i + 1 : d.story.length;
+  if (it.k === 'text') d.story.splice(at, 0, {k: 'p', st: d.styles[it.st] ? it.st : 'body', t: it.text.replace(/\n+/g, ' ')});
+  else if (it.k === 'img' && it.imgId) d.story.splice(at, 0, {k: 'img', imgId: it.imgId, ar: it.ar || it.w / it.h, w: 'col', pct: 100, al: 'l', cap: ''});
+  else { toast('Só texto e imagem voltam ao fluxo.'); return; }
+  const a = dtpItems(d, dui.sel.pi), i = a.findIndex(q => q.id === it.id); a.splice(i, 1); dui.sel = null; dtpTouch(true); dtpSnap(); dtpPanel(); toast('O quadro voltou para o fluxo do texto.');
+}
+function dtpItemFitH() { const d = dtpDoc(), it = dtpSelItem(); if (!it || it.k !== 'text') return; const t = Object.assign({}, it, {h: 9999}), r = dtpFrame(d, t, dui.sel.pi), last = r.lines[r.lines.length - 1]; if (last) { it.h = Math.max(16, last.y + last.lead - it.y + (it.pad != null ? it.pad : 4)); dtpTouch(true); dtpPanel(); } }
 function dtpItemDel() { const d = dtpDoc(), a = dtpItems(d, dui.sel.pi), i = a.findIndex(q => q.id === dui.sel.id); if (i < 0) return; a.splice(i, 1); dui.sel = null; dtpTouch(true); dtpPanel(); }
-function dtpAddFloat(k) { const d = dtpDoc(), g = dtpGeom(d, dui.pi), w = k === 'rect' ? g.cw : g.cw, h = k === 'text' ? 80 : g.cw * 0.7; const it = dtpMakeItem(k === 'img' ? 'i' : k === 'text' ? 't' : 'r', g.colX(0), g.y0, w, h); dtpItems(d, dui.pi).push(it); dui.sel = {t: 'item', id: it.id, pi: dui.pi}; dtpTouch(true); dtpPanel(); if (k === 'img') dtpPickImg(); }
+function dtpAddFloat(k) { const d = dtpDoc(), g = dtpGeom(d, dui.pi), w = g.colW(0), h = k === 'text' ? 80 : g.colW(0) * 0.7; const it = dtpMakeItem(k === 'img' ? 'i' : k === 'text' ? 't' : 'r', g.colX(0), g.y0, w, h); dtpItems(d, dui.pi).push(it); dui.sel = {t: 'item', id: it.id, pi: dui.pi}; dtpTouch(true); dtpPanel(); if (k === 'img') dtpPickImg(); }
 function dtpPickImg() { const it = dtpSelItem(); if (!it) return; dtpFilePick(r => { const q = dtpSelItem(); if (!q) return; q.imgId = r.id; q.ar = r.ar; dtpTouch(true); dtpPanel(); }); }
 
 /* ---------- matéria (modo só texto, com a marca do estouro) ---------- */

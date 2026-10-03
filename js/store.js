@@ -29,7 +29,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], motor: {}, competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -93,13 +93,23 @@ function normalizeLayouts(x) {
       id: d.id, name: str(d.name, 120) || 'Documento', created: str(d.created, 40), unit: UNITS.includes(d.unit) ? d.unit : 'mm',
       page: {w: num(pg.w, 420, 36, 6000), h: num(pg.h, 595, 36, 6000)}, facing: !!d.facing, bleed: num(d.bleed, 8.5, 0, 72),
       margins: {t: num(m.t, 40, 0, 2000), b: num(m.b, 40, 0, 2000), i: num(m.i, 40, 0, 2000), o: num(m.o, 40, 0, 2000)},
-      cols: Math.round(num(d.cols, 1, 1, 8)), gutter: num(d.gutter, 14, 0, 200), baseline: num(d.baseline, 0, 0, 100), nPages: Math.round(num(d.nPages, 1, 1, 400)), autoflow: d.autoflow !== false, paper: hex(d.paper, '#FFFFFF'),
+      cols: Math.round(num(d.cols, 1, 1, 8)), colw: (Array.isArray(d.colw) ? d.colw : []).slice(0, 8).map(v => num(v, 1, 0.1, 20)), mod: {cols: Math.round(num(d.mod && d.mod.cols, 6, 0, 24)), rows: Math.round(num(d.mod && d.mod.rows, 8, 0, 24))}, front: Math.round(num(d.front, 0, 0, 20)), gutter: num(d.gutter, 14, 0, 200), baseline: num(d.baseline, 0, 0, 100), nPages: Math.round(num(d.nPages, 1, 1, 400)), autoflow: d.autoflow !== false, paper: hex(d.paper, '#FFFFFF'),
       run: {folio: !!rn.folio, pos: ['outer', 'center', 'inner'].includes(rn.pos) ? rn.pos : 'outer', header: str(rn.header, 120), headerR: str(rn.headerR, 120), size: num(rn.size, 8, 4, 40), color: hex(rn.color, '#777777'), font: str(rn.font, 60) || 'Inter'},
       styles, story,
       pages: (Array.isArray(d.pages) ? d.pages : []).slice(0, 400).map(p => ({items: items(p && p.items)})).concat([{items: []}]).slice(0, Math.max(1, Math.min(400, (Array.isArray(d.pages) ? d.pages.length : 1) || 1))),
       guides: {v: (Array.isArray(d.guides && d.guides.v) ? d.guides.v : []).slice(0, 60).map(v => num(v, 0, -5000, 9000)), h: (Array.isArray(d.guides && d.guides.h) ? d.guides.h : []).slice(0, 60).map(v => num(v, 0, -5000, 9000))}
     };
   });
+}
+/* Engenheiro de capa e módulo Amazon KDP: rascunhos por projeto */
+function normalizeCover(c) {
+  c = c && typeof c === 'object' ? c : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, p = c.pal || {};
+  return {title: str(c.title, 200), subtitle: str(c.subtitle, 300), author: str(c.author, 200), collection: str(c.collection, 120), blurb: str(c.blurb, 2000), tagline: str(c.tagline, 200), layout: /^[a-z0-9_-]{1,24}$/i.test(c.layout || '') ? c.layout : 'giant',
+    pal: {bg: hex(p.bg, '#1F3A2E'), fg: hex(p.fg, '#F4F1EC'), accent: hex(p.accent, '#C9A876'), second: hex(p.second, '#6AA170')}, head: str(c.head, 60) || 'Playfair Display', body: str(c.body, 60) || 'Montserrat', imgId: safeId(c.imgId) ? c.imgId : '', mode: ['front', 'wrap', 'kindle'].includes(c.mode) ? c.mode : 'front', setId: safeId(c.setId) ? c.setId : ''};
+}
+function normalizeKdp(k) {
+  k = k && typeof k === 'object' ? k : {}; const n = (v, d, lo, hi) => { v = +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+  return {trim: /^kdp[a-z0-9]{1,8}$/.test(k.trim || '') ? k.trim : 'kdp6x9', pages: Math.round(n(k.pages, 0, 0, 900)), paper: ['bw-white', 'bw-cream', 'color-std', 'color-premium'].includes(k.paper) ? k.paper : 'bw-white', docId: safeId(k.docId) ? k.docId : '', bleed: k.bleed !== false};
 }
 /* Motor de e-book: skills (workspace) e rascunho de produção (projeto) */
 function normalizeSkills(x) {
@@ -135,7 +145,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
