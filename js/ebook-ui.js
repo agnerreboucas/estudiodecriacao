@@ -8,9 +8,10 @@ const ebTypeLabel = {title: 'Página de título', toc: 'Sumário', chapter: 'Cap
 /* ---------- biblioteca ---------- */
 function renderEditora() {
   const r = $('editoraRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Editora'); return; }
+  if (typeof mot !== 'undefined' && mot.open) return motRender(r, p);
   if (eui.id && ebCur()) return ebEditor(p, r);
   const list = ebList();
-  r.innerHTML = `<div class="page-head"><div><h1>Editora</h1><p>Produza e-books completos: capítulos, caixas e checklists diagramados em 4 versões (celular, tablet 6×9, A4 preto e branco e A4 econômico), capa criada no Editor de Design, documento de revisão e EPUB.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>Editora</h1><p>Produza e-books completos: capítulos, caixas e checklists diagramados em 4 versões (celular, tablet 6×9, A4 preto e branco e A4 econômico), capa criada no Editor de Design, documento de revisão e EPUB.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="motOpen()">✦ Motor de e-book (IA)</button><button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button></div></div>
   ${list.length ? `<div class="dz-sets">${list.map(e => `<article class="dz-set eb-card"><div class="eb-cover" style="background:${esc(e.brand.c.primary)}"><small style="color:${esc(e.brand.c.gold)}">${esc((e.sections.find(s => s.type === 'title') || {}).label || 'GUIA PRÁTICO')}</small><b style="font-family:'${esc(e.brand.h)}',serif">${esc(e.title)}</b></div><strong>${esc(e.name)}</strong><small class="muted block">${esc(e.author || 'sem autor')} · ${e.sections.length} seções${e.coverSetId ? ' · com capa' : ''}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="ebOpen('${esc(e.id)}')">Abrir editor</button><button class="btn sm" onclick="ebDup('${esc(e.id)}')">Duplicar</button><button class="btn sm" onclick="ebDel('${esc(e.id)}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhum e-book ainda', 'Comece pelo modelo da coleção Método Cuidado Seguro (36 páginas, 7 capítulos) ou por um e-book em branco.', '<button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button>')}`;
 }
 function ebNewOpen() {

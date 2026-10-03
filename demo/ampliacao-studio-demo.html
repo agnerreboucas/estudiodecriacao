@@ -506,6 +506,8 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .dtp-sw{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid #888;vertical-align:-2px;margin:0 3px}.dtp-res{border-top:1px solid #e6e6e6;margin-top:10px;padding-top:6px}
 .dtp-right .grid-2,.dtp-card~.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dtp-right .field{margin-bottom:8px}.dtp-right .field input:not([type=checkbox]):not([type=range]):not([type=color]),.dtp-right .field select,.dtp-right select.sm{padding:6px 8px;font-size:12.5px;border-radius:8px;min-height:0;height:auto}.dtp-right input[type=color]{width:100%;height:30px;padding:2px}
 #modal .grid-2,.modal .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ail-t{width:100%;font-size:12.5px;border-collapse:collapse}.ail-t td{padding:3px 4px;border-bottom:1px solid #eee}.ail-blocks{display:flex;flex-wrap:wrap;gap:4px;max-height:110px;overflow:auto}
+.mot-wrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start;margin-top:10px}@media(max-width:1100px){.mot-wrap{grid-template-columns:1fr}}.mot-steps{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.mot-ch{border:1.5px solid #e6e6e6;border-radius:12px;padding:10px;margin-bottom:8px;background:#fff}.mot-ch textarea{width:100%;font-size:13px}.mot-ch.on{border-color:#2563eb}
 
 </style>
 </head>
@@ -755,7 +757,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -770,7 +772,7 @@ function seedState() {
   const cd = newProject('Cartório Descomplicado', 'Conteúdo + geração de demanda', {cover: 'a6', icon: 'CD'});
   const se = newProject('Saber Ensinar', 'Educação criativa', {cover: 'a8', icon: 'SE'});
   return {
-    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], inspo: {items: [], boards: [], cats: []}, myFonts: [],
+    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], inspo: {items: [], boards: [], cats: []}, myFonts: [],
     workspace: {name: 'Ampliação Marketing', instruction: 'Criar com clareza estratégica, consistência de marca e foco na jornada de compra.'},
     credits: 30, activeProjectId: mb.id, projects: [mb, cd, se], creatives
   };
@@ -827,6 +829,16 @@ function normalizeLayouts(x) {
     };
   });
 }
+/* Motor de e-book: skills (workspace) e rascunho de produção (projeto) */
+function normalizeSkills(x) {
+  return (Array.isArray(x) ? x : []).filter(k => k && safeId(k.id) && typeof k.text === 'string').slice(0, 30).map(k => ({id: k.id, name: String(k.name || 'Skill').slice(0, 80), text: k.text.slice(0, 30000)}));
+}
+function normalizeMotor(m) {
+  m = m && typeof m === 'object' ? m : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n);
+  const out = (Array.isArray(m.outline) ? m.outline : []).slice(0, 30).filter(c => c && safeId(c.id)).map(c => ({id: c.id, title: str(c.title, 160), summary: str(c.summary, 800), points: (Array.isArray(c.points) ? c.points : []).slice(0, 12).map(t => str(t, 240))}));
+  const chapters = {}; out.forEach(c => { if (m.chapters && typeof m.chapters[c.id] === 'string') chapters[c.id] = m.chapters[c.id].slice(0, 40000); });
+  return {skillId: safeId(m.skillId) ? m.skillId : '', idea: str(m.idea, 4000), source: str(m.source, 60000), audience: str(m.audience, 300), tone: str(m.tone, 300), nch: Math.max(3, Math.min(14, Math.round(+m.nch || 7))), title: str(m.title, 200), subtitle: str(m.subtitle, 300), author: str(m.author, 200), outline: out, chapters, full: str(m.full, 200000), stage: ['material', 'estrutura', 'texto', 'enviar'].includes(m.stage) ? m.stage : 'material', approved: !!m.approved};
+}
 /* Editora: valida cada e-book (ids, textos, tipos de bloco, cores) antes de entrar no estado */
 function normalizeEbooks(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TYPES = ['p', 'h2', 'box', 'cols2', 'list', 'check', 'summary', 'pagebreak'], KINDS = ['case', 'tip', 'warn', 'know', 'care', 'note'], STYPES = ['title', 'toc', 'chapter', 'text'];
@@ -847,11 +859,11 @@ function normalize(s) {
   s.workspace = mergeDefaults(s.workspace, base.workspace);
   s.credits = Number.isFinite(+s.credits) ? +s.credits : 30;
   s.inspo = normalizeInspo(s.inspo);
-  s.myFonts = normalizeMyFonts(s.myFonts);
+  s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills);
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
@@ -5289,7 +5301,7 @@ async function inspoOpen(id) {
   ${(it.colors || []).length ? `<div class="okr-label">CORES <small class="muted">(clique para copiar)</small></div><div class="in-sw big">${it.colors.map(c => `<button style="background:${esc(c)}" title="${esc(c)}" onclick="inspoCopy('${esc(c)}')"><small>${esc(c)}</small></button>`).join('')}</div>` : ''}
   ${I.boards.length ? `<div class="okr-label" style="margin-top:10px">QUADROS</div><div class="tchips">${I.boards.map(b => `<button class="tchip ${(it.boards || []).includes(b.id) ? 'on' : ''}" onclick="inspoToggleBoard('${esc(id)}','${esc(b.id)}')">${esc(b.name)}</button>`).join('')}</div>` : ''}
   ${it.url ? `<div class="field" style="margin-top:8px"><label>Link</label><a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">${esc(it.url.slice(0, 70))}</a></div>` : ''}
-  <div class="row-gap" style="margin-top:12px;flex-wrap:wrap"><button class="btn sm ${it.fav ? 'dark' : ''}" onclick="inspoFav('${esc(id)}');inspoOpen('${esc(id)}')">${it.fav ? '★ Favorita' : '☆ Favoritar'}</button>${it.imgId ? `<button class="btn sm" onclick="inspoDown('${esc(id)}')">Baixar</button>` : ''}${(it.colors || []).length >= 2 ? `<button class="btn sm" onclick="inspoToKit('${esc(id)}')" title="Usa estas cores como base da paleta 60/30/10">Aplicar cores no Brand Kit</button>` : ''}${go ? `<button class="btn sm" onclick="closeModal();${go[1]}">${go[0]}</button>` : ''}<button class="btn sm" onclick="inspoDelOne('${esc(id)}')">Excluir</button></div></div></div>`);
+  <div class="row-gap" style="margin-top:12px;flex-wrap:wrap"><button class="btn sm ${it.fav ? 'dark' : ''}" onclick="inspoFav('${esc(id)}');inspoOpen('${esc(id)}')">${it.fav ? '★ Favorita' : '☆ Favoritar'}</button>${it.imgId ? `<button class="btn sm" onclick="inspoDown('${esc(id)}')">Baixar</button>` : ''}${it.imgId ? `<button class="btn sm" onclick="inspoReadLayout('${esc(id)}')" title="A IA lê fontes, tamanhos, cores e blocos e cria uma peça editável">✦ Ler layout (IA)</button>` : ''}${(it.colors || []).length >= 2 ? `<button class="btn sm" onclick="inspoToKit('${esc(id)}')" title="Usa estas cores como base da paleta 60/30/10">Aplicar cores no Brand Kit</button>` : ''}${go ? `<button class="btn sm" onclick="closeModal();${go[1]}">${go[0]}</button>` : ''}<button class="btn sm" onclick="inspoDelOne('${esc(id)}')">Excluir</button></div></div></div>`);
   if (it.imgId) { const u = await inspoURL(it.imgId); const im = $('inBig'); if (im && u) im.src = u; }
 }
 function inspoSet(id, k, v) { const it = inspo().items.find(i => i.id === id); if (!it) return; it[k] = v; persist(); renderInspiration(); }
@@ -5314,6 +5326,8 @@ document.addEventListener('paste', e => { if (ui.page !== 'inspiration' || ['INP
 ['dragenter', 'dragover'].forEach(ev => document.addEventListener(ev, e => { if (ui.page !== 'inspiration' || !e.dataTransfer || ![...e.dataTransfer.types].includes('Files')) return; e.preventDefault(); const d = $('inDrop'); if (d) d.classList.add('on'); }));
 document.addEventListener('dragleave', e => { if (ui.page === 'inspiration' && !e.relatedTarget) { const d = $('inDrop'); if (d) d.classList.remove('on'); } });
 document.addEventListener('drop', e => { if (ui.page !== 'inspiration' || !e.dataTransfer || !e.dataTransfer.files.length) return; e.preventDefault(); const d = $('inDrop'); if (d) d.classList.remove('on'); if (!$('inDz')) inspoAddOpen(e.dataTransfer.files); });
+
+async function inspoReadLayout(id) { const it = inspo().items.find(x => x.id === id), b = it && await imgGet(it.imgId); if (!b) { toast('Imagem não encontrada.'); return; } ailStart(b, 'inspo'); }
 
 </script>
 <script>
@@ -5621,9 +5635,10 @@ const ebTypeLabel = {title: 'Página de título', toc: 'Sumário', chapter: 'Cap
 /* ---------- biblioteca ---------- */
 function renderEditora() {
   const r = $('editoraRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Editora'); return; }
+  if (typeof mot !== 'undefined' && mot.open) return motRender(r, p);
   if (eui.id && ebCur()) return ebEditor(p, r);
   const list = ebList();
-  r.innerHTML = `<div class="page-head"><div><h1>Editora</h1><p>Produza e-books completos: capítulos, caixas e checklists diagramados em 4 versões (celular, tablet 6×9, A4 preto e branco e A4 econômico), capa criada no Editor de Design, documento de revisão e EPUB.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>Editora</h1><p>Produza e-books completos: capítulos, caixas e checklists diagramados em 4 versões (celular, tablet 6×9, A4 preto e branco e A4 econômico), capa criada no Editor de Design, documento de revisão e EPUB.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="motOpen()">✦ Motor de e-book (IA)</button><button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button></div></div>
   ${list.length ? `<div class="dz-sets">${list.map(e => `<article class="dz-set eb-card"><div class="eb-cover" style="background:${esc(e.brand.c.primary)}"><small style="color:${esc(e.brand.c.gold)}">${esc((e.sections.find(s => s.type === 'title') || {}).label || 'GUIA PRÁTICO')}</small><b style="font-family:'${esc(e.brand.h)}',serif">${esc(e.title)}</b></div><strong>${esc(e.name)}</strong><small class="muted block">${esc(e.author || 'sem autor')} · ${e.sections.length} seções${e.coverSetId ? ' · com capa' : ''}</small><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="ebOpen('${esc(e.id)}')">Abrir editor</button><button class="btn sm" onclick="ebDup('${esc(e.id)}')">Duplicar</button><button class="btn sm" onclick="ebDel('${esc(e.id)}')">×</button></div></article>`).join('')}</div>` : emptyState('Nenhum e-book ainda', 'Comece pelo modelo da coleção Método Cuidado Seguro (36 páginas, 7 capítulos) ou por um e-book em branco.', '<button class="btn dark" onclick="ebNewOpen()">＋ Novo e-book</button>')}`;
 }
 function ebNewOpen() {
@@ -6391,7 +6406,7 @@ function dtpRefHTML(d) {
   const r = dui.refRes, pc = v => (v * 100).toFixed(1) + '%';
   return `<small class="muted block">Suba um print ou foto de uma página que você quer imitar. Ela vira uma camada translúcida sobre a página (para você alinhar guias na mão) e o Studio mede margens, colunas, entrelinha e cores para aplicar no seu documento, com o seu conteúdo.</small>
   <div class="row-gap" style="margin:8px 0;flex-wrap:wrap"><button class="btn sm dark" onclick="dtpRefPick()">${dui.ref ? 'Trocar referência' : 'Subir referência'}</button>${dui.ref ? `<button class="btn sm" onclick="dui.ref=null;dui.refOn=false;dui.refRes=null;dtpDraw();dtpPanel()">Remover</button>` : ''}</div>
-  ${dui.ref ? `<label class="dtp-chk"><input type="checkbox" ${dui.refOn ? 'checked' : ''} onchange="dui.refOn=this.checked;dtpDraw()"> Mostrar sobre a página</label><label class="muted" style="font-size:11px">Opacidade ${Math.round(dui.refOp * 100)}%</label><input type="range" min="10" max="90" value="${Math.round(dui.refOp * 100)}" oninput="dui.refOp=this.value/100;dtpDraw()"><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dtpRefRun()">Analisar a referência</button></div>` : ''}
+  ${dui.ref ? `<label class="dtp-chk"><input type="checkbox" ${dui.refOn ? 'checked' : ''} onchange="dui.refOn=this.checked;dtpDraw()"> Mostrar sobre a página</label><label class="muted" style="font-size:11px">Opacidade ${Math.round(dui.refOp * 100)}%</label><input type="range" min="10" max="90" value="${Math.round(dui.refOp * 100)}" oninput="dui.refOp=this.value/100;dtpDraw()"><div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dtpRefRun()">Medir (margens, colunas, entrelinha)</button><button class="btn sm dark" onclick="ailStart(dui.ref,'dtp')" title="A IA lê fontes, tamanhos, cores e blocos">✦ Ler layout com IA</button></div>` : ''}
   ${r ? `<div class="dtp-res"><div class="okr-label">O QUE FOI ENCONTRADO</div><ul style="margin:4px 0 8px 16px;padding:0;font-size:12px;line-height:1.55">
    <li><b>Estrutura:</b> ${r.aligned >= 0.55 ? 'composição em <b>grade</b> (textos alinhados à mesma borda)' : 'composição <b>mais livre</b> (pouco alinhamento a uma grade)'} · ${r.cols} coluna(s)${r.cols > 1 ? ` · espaço entre colunas ${(r.gutter * d.page.w).toFixed(1)} pt` : ''}</li>
    <li><b>Margens</b> (proporção da página): topo ${pc(r.m.t)} · base ${pc(r.m.b)} · esquerda ${pc(r.m.l)} · direita ${pc(r.m.r)}</li>
@@ -6400,7 +6415,7 @@ function dtpRefHTML(d) {
    ${r.warn.map(w => `<li style="color:#b45309">${esc(w)}</li>`).join('')}</ul>
    <div class="row-gap" style="flex-wrap:wrap">${[['margins', 'Margens'], ['cols', 'Colunas'], ['lead', 'Corpo e entrelinha'], ['grid', 'Grade de linha de base'], ['colors', 'Cores']].map(([k, l]) => `<label class="dtp-chk"><input type="checkbox" id="dtpRa-${k}" ${k === 'grid' ? '' : 'checked'}> ${l}</label>`).join('')}</div>
    <div class="row-gap" style="margin-top:8px"><button class="btn sm dark" onclick="dtpRefApply()">Aplicar ao documento</button></div>
-   <small class="muted block" style="margin-top:6px"><b>Fontes:</b> a medição é feita só pelos pixels, então não identifica a fonte. Compare na referência e escolha na aba Estilos. A leitura da fonte e dos blocos por IA (visão) é a próxima etapa e depende da chave de IA no servidor.</small></div>` : ''}`;
+   <small class="muted block" style="margin-top:6px"><b>Fontes:</b> a medição é feita só pelos pixels, então não identifica a fonte. Compare na referência e escolha na aba Estilos. Para ler fontes, tamanhos e blocos use <b>✦ Ler layout com IA</b> (precisa da chave de IA no servidor).</small></div>` : ''}`;
 }
 function dtpRefPick() { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = async () => { const f = i.files[0]; if (!f) return; try { dui.ref = await createImageBitmap(f); dui.refOn = true; dui.refRes = null; dtpPanel(); dtpDraw(); } catch (e) { toast('Não consegui abrir essa imagem.'); } }; i.click(); }
 function dtpRefRun() { if (!dui.ref) return; dui.refRes = dtpAnalyze(dui.ref, dtpDoc()); dtpPanel(); }
@@ -6489,6 +6504,271 @@ async function dtpExportPDF() {
 }
 async function dtpExportPNG() { const d = dtpDoc(); await dtpFonts(d); await dtpLoadImgs(d); const f = dtpFlow(d), {cv} = await dtpRenderPage(d, f, dui.pi, 200, 0, false); cv.toBlob(b => download(`${dtpFileName(d)}-pag${dui.pi + 1}.png`, b, 'image/png')); }
 function dtpJsonDown() { const d = dtpDoc(); download(`${dtpFileName(d)}.json`, JSON.stringify(d, null, 1)); }
+
+</script>
+<script>
+/* ===== Leitura de layout por IA (visão): lê uma referência e devolve fontes, tamanhos, cores e blocos =====
+   A imagem vai ao servidor (api/ai.php), que chama o modelo com a chave guardada só lá. */
+const AIL_PROMPT = `Você é um diretor de arte lendo o layout de uma peça (capa, página de livro/revista, folheto, post). Devolva SÓ um JSON com este formato:
+{"orientation":"portrait|landscape|square","bg":"#RRGGBB","structure":"grid|free","cols":1,"margins":{"t":0.0,"b":0.0,"l":0.0,"r":0.0},"palette":["#RRGGBB"],
+"blocks":[{"role":"title|subtitle|kicker|body|caption|quote|label|number|image|shape|logo|line","x":0.0,"y":0.0,"w":0.0,"h":0.0,"text":"texto lido, curto","font":"nome provável da fonte","fontClass":"serif|sans|slab|display|script|mono","weight":400,"italic":false,"caps":false,"align":"left|center|right|justify","sizeRel":0.0,"color":"#RRGGBB","fill":"#RRGGBB","radius":0.0}]}
+Regras: x,y,w,h e margens são frações (0 a 1) da largura/altura da página; sizeRel é a altura da fonte (em) como fração da ALTURA da página; weight só 300,400,600,700,800 ou 900; no máximo 30 blocos, do maior destaque para o menor; em "image" e "shape" use fill com a cor dominante; copie o texto legível (no máximo 80 caracteres por bloco); se não souber a fonte exata, dê a mais parecida e preencha fontClass. Não invente blocos que não existem.`;
+const AIL_ROLES = ['title', 'subtitle', 'kicker', 'body', 'caption', 'quote', 'label', 'number', 'image', 'shape', 'logo', 'line'];
+
+async function ailBlob(src, max) {
+  const bm = src instanceof ImageBitmap ? src : await createImageBitmap(src), s = Math.min(1, (max || 1400) / Math.max(bm.width, bm.height)), c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(bm.width * s)); c.height = Math.max(1, Math.round(bm.height * s)); const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(bm, 0, 0, c.width, c.height);
+  return {url: c.toDataURL('image/jpeg', 0.85), w: bm.width, h: bm.height};
+}
+async function aiVisionJSON(system, user, src, max) {
+  const im = await ailBlob(src), b64 = im.url.split(',')[1];
+  const j = await api('ai.php', {method: 'POST', body: {system: system + '\nResponda APENAS com JSON válido, sem markdown nem comentários.', messages: [{role: 'user', content: user}], images: [{media_type: 'image/jpeg', data: b64}], max_tokens: max || 3500}});
+  const s = String(j.text || '').replace(/```json|```/g, '').trim(), a = s.search(/[\[{]/), z = Math.max(s.lastIndexOf('}'), s.lastIndexOf(']'));
+  try { return {json: JSON.parse(s.slice(a, z + 1)), w: im.w, h: im.h}; } catch (e) { throw new Error('a IA devolveu um formato inesperado; tente de novo.'); }
+}
+/* valida o que veio da IA: números limitados, cores hexadecimais, textos curtos */
+function ailClean(j, w, h) {
+  const hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v).toUpperCase() : d, n = (v, lo, hi, d) => { v = +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; }, str = (v, k) => String(v == null ? '' : v).slice(0, k);
+  j = j && typeof j === 'object' ? j : {}; const m = j.margins || {}, blocks = (Array.isArray(j.blocks) ? j.blocks : []).slice(0, 30).filter(b => b && typeof b === 'object').map(b => ({
+    role: AIL_ROLES.includes(b.role) ? b.role : 'body', x: n(b.x, 0, 1, 0), y: n(b.y, 0, 1, 0), w: n(b.w, 0.01, 1, 0.5), h: n(b.h, 0.005, 1, 0.1), text: str(b.text, 120), font: str(b.font, 60), fontClass: ['serif', 'sans', 'slab', 'display', 'script', 'mono'].includes(b.fontClass) ? b.fontClass : 'sans',
+    weight: [300, 400, 600, 700, 800, 900].includes(+b.weight) ? +b.weight : 400, italic: !!b.italic, caps: !!b.caps, align: ['left', 'center', 'right', 'justify'].includes(b.align) ? b.align : 'left', sizeRel: n(b.sizeRel, 0.004, 0.4, 0.02), color: hex(b.color, '#222222'), fill: hex(b.fill, ''), radius: n(b.radius, 0, 0.5, 0)}));
+  return {w, h, orientation: ['portrait', 'landscape', 'square'].includes(j.orientation) ? j.orientation : (w > h * 1.1 ? 'landscape' : h > w * 1.1 ? 'portrait' : 'square'), bg: hex(j.bg, '#FFFFFF'), structure: j.structure === 'grid' ? 'grid' : 'free', cols: Math.round(n(j.cols, 1, 6, 1)), margins: {t: n(m.t, 0, 0.4, 0.06), b: n(m.b, 0, 0.4, 0.06), l: n(m.l, 0, 0.4, 0.06), r: n(m.r, 0, 0.4, 0.06)}, palette: (Array.isArray(j.palette) ? j.palette : []).slice(0, 8).map(c => hex(c, '')).filter(Boolean), blocks};
+}
+/* fonte mais parecida dentro do catálogo (158 do Studio + as suas) */
+const AIL_CLASS = {serif: ['Lora', 'Playfair Display', 'Cormorant Garamond', 'Source Serif 4', 'Merriweather'], sans: ['Inter', 'Montserrat', 'Poppins', 'DM Sans', 'Work Sans'], slab: ['Merriweather', 'Source Serif 4'], display: ['DM Serif Display', 'Abril Fatface', 'Bebas Neue', 'Anton', 'Playfair Display'], script: ['Caveat', 'Kalam'], mono: ['Space Grotesk', 'Inter']};
+function ailMapFont(name, cls, wantHeavy) {
+  const all = typeof dtpFontList === 'function' ? dtpFontList() : Object.keys(FONT_META), norm = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, ''), n = norm(name || '');
+  if (n) { const ex = all.find(f => norm(f) === n); if (ex) return {font: ex, exact: true}; const part = all.filter(f => norm(f).length >= 4 && (n.includes(norm(f)) || norm(f).includes(n) && n.length >= 5)).sort((a, b) => norm(b).length - norm(a).length)[0]; if (part) return {font: part, exact: false}; }
+  const L = AIL_CLASS[cls] || AIL_CLASS.sans, pick = L.find(f => all.includes(f)) || 'Inter'; return {font: wantHeavy && cls === 'display' ? (L.find(f => all.includes(f)) || pick) : pick, exact: false};
+}
+async function ailRead(src) {
+  const r = await aiVisionJSON(AIL_PROMPT, 'Leia o layout desta imagem.', src, 3500);
+  const res = ailClean(r.json, r.w, r.h); res.blocks.forEach(b => { const m = ailMapFont(b.font, b.fontClass, b.weight >= 700); b.map = m.font; b.exact = m.exact; }); return res;
+}
+
+/* ---------- tela de revisão ---------- */
+const ail = {res: null, src: null, from: ''};
+async function ailStart(src, from) {
+  ail.src = src; ail.from = from || ''; toast('Lendo o layout com IA…');
+  try { ail.res = await ailRead(src); ailReview(); } catch (e) { toast(e.status === 503 ? 'A IA não está configurada no servidor (ANTHROPIC_API_KEY em api/config.php).' : 'Não consegui ler o layout: ' + e.message); }
+}
+function ailReview() {
+  const r = ail.res, fonts = [...new Map(r.blocks.filter(b => b.text || b.role !== 'shape').map(b => [b.map, b])).values()].filter(b => !['image', 'shape', 'line', 'logo'].includes(b.role));
+  $('modalBox') && $('modalBox').classList.add('wide');
+  showModal('Layout lido pela IA', `<p class="muted" style="font-size:12px;margin-top:0">Confira antes de usar. A IA lê os pixels e pode errar tamanho e fonte; tudo fica editável.</p>
+  <div class="form-grid"><div><div class="okr-label">ESTRUTURA</div><p style="font-size:13px;margin:4px 0">${r.structure === 'grid' ? 'Composição em <b>grade</b>' : 'Composição <b>livre</b>'} · ${r.cols} coluna(s) · ${r.orientation === 'portrait' ? 'retrato' : r.orientation === 'landscape' ? 'paisagem' : 'quadrado'}</p><p style="font-size:12px" class="muted">Margens: topo ${(r.margins.t * 100).toFixed(0)}% · base ${(r.margins.b * 100).toFixed(0)}% · esq. ${(r.margins.l * 100).toFixed(0)}% · dir. ${(r.margins.r * 100).toFixed(0)}%</p>
+  <div class="okr-label" style="margin-top:8px">CORES</div><div class="in-sw">${[r.bg, ...r.palette].map(c => `<button style="background:${esc(c)}" title="${esc(c)}"><small>${esc(c)}</small></button>`).join('')}</div></div>
+  <div><div class="okr-label">FONTES (lida → usada)</div><table class="ail-t">${fonts.map(b => `<tr><td>${esc(b.font || b.fontClass)}</td><td>→</td><td><b style="font-family:'${esc(b.map)}'">${esc(b.map)}</b>${b.exact ? '' : ' <small class="muted">(parecida)</small>'}</td></tr>`).join('') || '<tr><td class="muted">Nenhum texto identificado.</td></tr>'}</table></div></div>
+  <div class="okr-label" style="margin-top:8px">BLOCOS (${r.blocks.length})</div><div class="ail-blocks">${r.blocks.map(b => `<span class="tchip">${esc(b.role)}${b.text ? ': ' + esc(b.text.slice(0, 28)) : ''}</span>`).join('')}</div>
+  <div class="modal-actions" style="flex-wrap:wrap"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn" onclick="ailToSlide()">Criar peça editável (capa/layout)</button>${typeof dtpDoc === 'function' && ail.from === 'dtp' && dtpDoc() ? '<button class="btn dark" onclick="ailToDoc()">Aplicar ao documento da Diagramação</button>' : ''}</div>`);
+}
+
+/* ---------- resultado 1: peça editável no Editor de Design ---------- */
+async function ailToSlide() {
+  const p = curProject(), r = ail.res; if (!p || !r) return;
+  const W = 1600, H = Math.round(W * r.h / r.w), L = [];
+  await ensureFonts(r.blocks.map(b => b.map));
+  r.blocks.forEach((b, i) => {
+    const x = b.x * W, y = b.y * H, w = Math.max(20, b.w * W), h = Math.max(10, b.h * H);
+    if (b.role === 'shape' || b.role === 'line') L.push(RC(b.role === 'line' ? 'rule' : 'shape', {x, y, w, h: b.role === 'line' ? Math.max(3, h) : h, fill: b.fill || b.color, radius: Math.round(b.radius * Math.min(w, h))}));
+    else if (b.role === 'image' || b.role === 'logo') L.push(IM(b.role === 'logo' ? 'logo' : 'photo', {x, y, w, h, brief: 'Troque pela sua imagem', radius: Math.round(b.radius * Math.min(w, h))}));
+    else L.push(T(b.role, {x, y, w, content: b.text || 'Texto', family: b.map, size: Math.max(14, Math.round(b.sizeRel * H)), weight: b.weight, color: b.color, align: b.align === 'justify' ? 'left' : b.align, lh: b.role === 'body' ? 1.45 : 1.15, upper: b.caps, spans: b.italic && b.text ? [{s: 0, e: b.text.length, st: {italic: true}}] : undefined}));
+  });
+  const tk = brandTokens(p); Object.assign(tk, {name: 'Layout lido', bg: r.bg, fg: r.blocks.find(b => b.role === 'title') ? r.blocks.find(b => b.role === 'title').color : '#111111'});
+  const set = {id: uid('ds'), name: 'Layout lido · ' + new Date().toLocaleDateString('pt-BR'), format: {id: 'custom', w: W, h: H}, tk, slides: [{id: sid(), name: 'Layout', bg: r.bg, layers: L}], created: new Date().toISOString(), updated: new Date().toISOString()};
+  await ensureSetResources(set); p.design.sets.push(set); persist(); closeModal(); go('design'); dzOpen(set.id);
+  toast('Peça criada. Troque os textos e imagens; use ★ Modelo no editor para guardar na galeria de layouts.');
+}
+
+/* ---------- resultado 2: estilos, cores e grade do documento da Diagramação ---------- */
+function ailToDoc() {
+  const d = dtpDoc(), r = ail.res; if (!d || !r) return; const H = d.page.h, W = d.page.w, by = role => r.blocks.filter(b => b.role === role).sort((a, b) => b.sizeRel - a.sizeRel);
+  const S = d.styles, set = (k, b, o) => { if (!b) return; Object.assign(S[k], {font: b.map, color: b.color, align: b.align, b: b.weight >= 600 ? 1 : 0, i: b.italic ? 1 : 0, caps: b.caps ? 1 : 0}, o || {}); };
+  const body = by('body')[0], title = by('title')[0], sub = by('subtitle')[0] || by('kicker')[0], cap = by('caption')[0], quote = by('quote')[0], lab = by('label')[0] || by('kicker')[0];
+  if (body) { const size = Math.max(6, Math.round(body.sizeRel * H * 2) / 2); set('body', body, {size, lead: +(size * 1.45).toFixed(1), indent: body.align === 'justify' ? 12 : 0}); }
+  if (title) { const size = Math.max(14, Math.round(title.sizeRel * H)); set('h1', title, {size, lead: +(size * 1.12).toFixed(1)}); S.h1.align = title.align === 'justify' ? 'left' : title.align; }
+  if (sub) { const size = Math.max(10, Math.round(sub.sizeRel * H)); set('h2', sub, {size, lead: +(size * 1.2).toFixed(1)}); }
+  if (lab) { const size = Math.max(6, Math.round(lab.sizeRel * H * 2) / 2); set('h3', lab, {size, lead: +(size * 1.4).toFixed(1)}); }
+  if (cap) { const size = Math.max(5, Math.round(cap.sizeRel * H * 2) / 2); set('caption', cap, {size, lead: +(size * 1.35).toFixed(1)}); }
+  if (quote) { const size = Math.max(8, Math.round(quote.sizeRel * H)); set('quote', quote, {size, lead: +(size * 1.4).toFixed(1)}); }
+  d.paper = r.bg; d.cols = r.cols; d.margins = {t: r.margins.t * H, b: r.margins.b * H, i: r.margins.l * W, o: r.margins.r * W};
+  closeModal(); dtpTouch(true); dtpSnap(); dtpRefresh(true); toast('Estilos, cores e grade aplicados. Desfaça com Ctrl+Z se não gostar.');
+}
+
+</script>
+<script>
+/* ===== Motor de e-book: ideia/conteúdo + skill → estrutura (aprovação) → texto por capítulo → Editora ou Diagramação ===== */
+const mot = {open: false, busy: '', sel: '', skillBuf: null};
+const MOT_SKILL_GENERIC = {id: 'sk-generico', name: 'Criador de e-books em série (genérico)', builtin: true, text: `Você é editor(a) e redator(a) de e-books em série, para qualquer nicho. Siga este padrão.
+ESTRUTURA do e-book: Apresentação (3-4 parágrafos) → Sumário → 7 capítulos → Plano final (7 itens + checklist) → Conclusão (3 parágrafos) → Bônus e fechamento (lista + texto sobre a coleção + caixa de contato + tagline) → Referências (2 fontes reais e verificáveis, nunca inventadas).
+CADA CAPÍTULO: abertura (título + subtítulo de efeito) → caso prático fictício (nome + situação + resolução) → 3 parágrafos de corpo → 1 caixa de apoio (dado, dica prática, alerta ou autocuidado, o tipo mais adequado) → duas colunas "Situações comuns" × "Faça assim" (4 itens cada) → checklist (4 perguntas) → resumo (3 frases-síntese).
+REGRAS: tom acolhedor e direto, nunca alarmista; terminologia consistente com o título do livro; NUNCA invente estatísticas, números, leis, estudos ou fatos técnicos: onde faltar base no material do autor, escreva [CONFIRMAR: o que falta]; atue como revisor e aponte inconsistências.`};
+const MOT_SKILL_MCS = {id: 'sk-mcs', name: 'Método Cuidado Seguro (coleção da Francisca)', builtin: true, text: `Você escreve para a coleção Método Cuidado Seguro (autora: Prof.ª Mestre Francisca Antonia Almeida da Silva), voltada a cuidadores e famílias de pessoas idosas.
+Tom: acolhedor, prático, sem jargão, nunca alarmista. Identidade: Playfair Display (títulos) + Montserrat (corpo).
+Cada capítulo: abertura, caso prático fictício (nome + situação + resolução), 3 parágrafos de corpo, 1 caixa de apoio, colunas "Situações comuns" × "Faça assim" (4 itens), checklist de 4 perguntas e resumo de 3 frases. Fechamento com plano final, conclusão, bônus, caixa de contato e referências.
+REGRA CLÍNICA: nunca invente dados, doses, protocolos ou estatísticas; use [CONFIRMAR: ...] onde precisar da validação da autora.`};
+const motSkills = () => [MOT_SKILL_GENERIC, MOT_SKILL_MCS, ...(state.skills = Array.isArray(state.skills) ? state.skills : [])];
+const motM = () => { const p = curProject(); if (!p) return null; if (!p.motor || typeof p.motor !== 'object' || !p.motor.stage || !Array.isArray(p.motor.outline)) p.motor = normalizeMotor(p.motor); return p.motor; };
+const motSkillCur = () => { const M = motM(); return motSkills().find(s => s.id === M.skillId) || MOT_SKILL_GENERIC; };
+const motSave = () => { persist(); AUTO_AT = Date.now(); };
+
+/* ---------- entrada ---------- */
+function motOpen(stage) { mot.open = true; const M = motM(); if (stage) M.stage = stage; renderEditora(); }
+function motClose() { mot.open = false; renderEditora(); }
+function motStage(s) { const M = motM(); if (s === 'texto' && !M.approved) { toast('Aprove a estrutura primeiro.'); return; } M.stage = s; motSave(); renderEditora(); }
+
+/* ---------- tela ---------- */
+function motRender(r, p) {
+  const M = motM(), steps = [['material', '1 · Material'], ['estrutura', '2 · Estrutura'], ['texto', '3 · Texto'], ['enviar', '4 · Enviar']];
+  r.innerHTML = `<div class="page-head"><div><h1>Motor de e-book</h1><p>Entre com uma ideia ou com o conteúdo bruto, escolha uma skill (o padrão de escrita), aprove a estrutura, deixe a IA escrever capítulo por capítulo, revise e mande para a Editora (4 versões) ou para a Diagramação (livro/revista). Se você já tem o texto pronto, vá direto ao passo 4.</p></div><div class="row-gap"><button class="btn" onclick="motClose()">← Editora</button></div></div>
+  <div class="mot-steps">${steps.map(([k, l]) => `<button class="tchip ${M.stage === k ? 'on' : ''}" onclick="motStage('${k}')">${l}</button>`).join('')}</div>
+  <div id="motBody">${({material: motMaterial, estrutura: motEstrutura, texto: motTexto, enviar: motEnviar})[M.stage](M)}</div>`;
+}
+const motIn = (id, lab, val, ph, rows) => `<div class="field"><label>${lab}</label>${rows ? `<textarea id="${id}" rows="${rows}" placeholder="${esc(ph || '')}" oninput="motSet('${id}',this.value)">${esc(val)}</textarea>` : `<input id="${id}" value="${esc(val)}" placeholder="${esc(ph || '')}" oninput="motSet('${id}',this.value)">`}</div>`;
+function motSet(k, v) { const M = motM(); const map = {mIdea: 'idea', mSource: 'source', mAud: 'audience', mTone: 'tone', mTitle: 'title', mSub: 'subtitle', mAuthor: 'author', mFull: 'full'}; if (map[k]) M[map[k]] = v; if (k === 'mN') M.nch = Math.max(3, Math.min(14, Math.round(+v || 7))); motSave(); }
+
+function motMaterial(M) {
+  const sk = motSkillCur(), custom = !sk.builtin;
+  return `<div class="mot-wrap"><div>
+  ${motIn('mIdea', 'Ideia ou tema do e-book', M.idea, 'Ex.: guia para pequenos empreendedores organizarem o financeiro; ou só o assunto', 3)}
+  ${motIn('mSource', 'Conteúdo-fonte (opcional): cole aqui o material bruto, anotações, transcrição, texto da autora…', M.source, 'Quanto mais material do autor, menos a IA precisa supor. Aceita arquivo .txt/.md abaixo.', 12)}
+  <div class="row-gap" style="margin-bottom:10px"><input type="file" accept=".txt,.md,text/plain" onchange="motFile(this)"><small class="muted">${M.source.length.toLocaleString('pt-BR')} caracteres</small></div>
+  <div class="form-grid">${motIn('mAud', 'Público-alvo (ICP)', M.audience, 'Quem vai ler')}${motIn('mTone', 'Tom e pedidos extras', M.tone, 'Ex.: acolhedor, exemplos do dia a dia')}${motIn('mTitle', 'Título provisório', M.title, '')}${motIn('mAuthor', 'Autor(a) e credencial', M.author, '')}</div>
+  <div class="field"><label>Capítulos</label><input id="mN" type="number" min="3" max="14" value="${M.nch}" style="width:90px" oninput="motSet('mN',this.value)"></div>
+  <div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" onclick="motGenOutline()" ${mot.busy ? 'disabled' : ''}>${mot.busy === 'outline' ? 'Gerando…' : '✦ Gerar estrutura com IA'}</button><button class="btn" onclick="motStage('enviar')">Já tenho o texto completo →</button></div></div>
+  <div><div class="okr-label">SKILL (PADRÃO DE ESCRITA)</div><div class="field"><select onchange="motPickSkill(this.value)">${motSkills().map(s => `<option value="${esc(s.id)}" ${s.id === sk.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div>
+  <div class="field"><label>Instruções da skill ${sk.builtin ? '(padrão do Studio: duplique para editar)' : ''}</label><textarea id="skText" rows="14" ${sk.builtin ? 'readonly' : ''}>${esc(sk.text)}</textarea></div>
+  <div class="row-gap" style="flex-wrap:wrap">${custom ? `<button class="btn sm dark" onclick="motSkillSave()">Salvar alterações</button><button class="btn sm" onclick="motSkillDel()">Excluir</button>` : `<button class="btn sm" onclick="motSkillDup()">Duplicar para editar</button>`}<button class="btn sm" onclick="motSkillUpload()">Subir skill (.md/.txt)</button></div>
+  <small class="muted block" style="margin-top:6px">Uma skill é só o texto com o seu método: estrutura, tom, regras. A IA segue esse texto em todos os capítulos. Fica guardada no workspace e vale para todos os projetos.</small></div></div>`;
+}
+async function motFile(inp) { const f = inp.files[0]; if (!f) return; const t = await f.text(), M = motM(); M.source = (M.source ? M.source + '\n\n' : '') + t.slice(0, 60000); motSave(); renderEditora(); }
+function motPickSkill(id) { motM().skillId = id; motSave(); renderEditora(); }
+function motSkillDup() { const s = motSkillCur(), k = {id: uid('sk'), name: s.name + ' (cópia)', text: s.text}; state.skills.push(k); motM().skillId = k.id; motSave(); renderEditora(); }
+function motSkillSave() { const s = state.skills.find(x => x.id === motM().skillId); if (!s) return; s.text = $('skText').value.slice(0, 30000); const n = prompt('Nome da skill:', s.name); if (n) s.name = n.slice(0, 80); motSave(); renderEditora(); toast('Skill salva.'); }
+function motSkillDel() { const s = state.skills.find(x => x.id === motM().skillId); if (!s || !confirm('Excluir a skill “' + s.name + '”?')) return; state.skills = state.skills.filter(x => x.id !== s.id); motM().skillId = ''; motSave(); renderEditora(); }
+function motSkillUpload() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.md,.txt,text/plain,text/markdown'; i.onchange = async () => { const f = i.files[0]; if (!f) return; let t = await f.text(); t = t.replace(/^---[\s\S]*?---\s*/, ''); const k = {id: uid('sk'), name: f.name.replace(/\.[a-z]+$/i, '').slice(0, 80), text: t.slice(0, 30000)}; state.skills.push(k); motM().skillId = k.id; motSave(); renderEditora(); toast('Skill “' + k.name + '” carregada.'); }; i.click(); }
+
+/* ---------- IA ---------- */
+const MOT_GRAMMAR = `FORMATO DE SAÍDA do texto de capítulo (use só isto):
+# Título do capítulo
+## Subtítulo de efeito (a primeira linha "##" logo após o título)
+Parágrafos separados por linha em branco (texto corrido, sem markdown além de **negrito** e *itálico*).
+## Intertítulo (quando a seção precisar)
+- item de lista   (ou 1. item numerado)
+> caso: texto do caso prático (nome + situação + resolução)
+> dica: ...   > atencao: ...   > sabia: ...   > cuide: ...   > nota: ...   (use a caixa mais adequada)
+@comuns: situação comum (4 linhas @comuns:)
+@faca: faça assim (4 linhas @faca:)
+[ ] pergunta do checklist (4 linhas)
+[v] frase-síntese do resumo (3 linhas)`;
+function motSystem() { return motSkillCur().text + '\n\nRegras fixas: escreva em português do Brasil; não invente estatísticas, números, leis, estudos ou fatos técnicos; onde faltar base no material fornecido escreva [CONFIRMAR: o que falta]; trate o material do autor como fonte principal.'; }
+const motCtx = M => [M.idea && 'IDEIA/TEMA: ' + M.idea, M.audience && 'PÚBLICO: ' + M.audience, M.tone && 'TOM/PEDIDOS: ' + M.tone, M.author && 'AUTOR(A): ' + M.author, M.source && 'MATERIAL DO AUTOR (fonte principal):\n' + M.source.slice(0, 24000)].filter(Boolean).join('\n\n');
+async function motJSON(system, user, max) {
+  const t = await aiText(system + '\nResponda APENAS com JSON válido, sem markdown nem comentários.', user, max || 4000), s = t.replace(/```json|```/g, '').trim(), a = s.search(/[\[{]/), z = Math.max(s.lastIndexOf('}'), s.lastIndexOf(']'));
+  try { return JSON.parse(s.slice(a, z + 1)); } catch (e) { throw new Error('a IA devolveu um formato inesperado; tente de novo.'); }
+}
+const motErr = e => e.status === 503 ? 'A IA não está configurada no servidor (ANTHROPIC_API_KEY em api/config.php).' : 'Falhou: ' + e.message;
+async function motGenOutline(extra) {
+  const M = motM(); if (!M.idea.trim() && !M.source.trim()) { toast('Escreva a ideia ou cole um conteúdo-fonte.'); return; }
+  mot.busy = 'outline'; renderEditora();
+  try {
+    const j = await motJSON(motSystem(), `${motCtx(M)}\n\n${extra ? 'AJUSTE PEDIDO PELO AUTOR: ' + extra + '\n\n' : ''}Proponha a estrutura de um e-book com ${M.nch} capítulos (além de apresentação e fechamento, que já são padrão). JSON: {"title":"...","subtitle":"...","chapters":[{"title":"...","summary":"1-2 frases do que o capítulo resolve","points":["ponto-chave 1","ponto-chave 2","ponto-chave 3"]}]}. Use só o que o material sustenta; não invente fatos.`, 4000);
+    const ch = (Array.isArray(j.chapters) ? j.chapters : []).slice(0, 14).map(c => ({id: uid('mc'), title: String(c.title || '').slice(0, 160), summary: String(c.summary || '').slice(0, 800), points: (Array.isArray(c.points) ? c.points : []).slice(0, 12).map(x => String(x).slice(0, 240))}));
+    if (!ch.length) throw new Error('a IA não devolveu capítulos.');
+    M.outline = ch; M.chapters = {}; M.approved = false; M.title = String(j.title || M.title).slice(0, 200); M.subtitle = String(j.subtitle || M.subtitle).slice(0, 300); M.stage = 'estrutura';
+  } catch (e) { toast(motErr(e)); }
+  mot.busy = ''; motSave(); renderEditora();
+}
+async function motWrite(id, instruction) {
+  const M = motM(), i = M.outline.findIndex(c => c.id === id), c = M.outline[i]; if (!c) return; mot.busy = id; motRefreshCard(id);
+  try {
+    const prev = i > 0 ? (M.chapters[M.outline[i - 1].id] || '').slice(-700) : '';
+    const t = await aiText(motSystem(), `${motCtx(M)}\n\nE-BOOK: ${M.title}${M.subtitle ? ' — ' + M.subtitle : ''}\nESTRUTURA COMPLETA:\n${M.outline.map((q, k) => `${k + 1}. ${q.title}: ${q.summary}`).join('\n')}\n\nESCREVA O CAPÍTULO ${i + 1}: "${c.title}"\nResumo: ${c.summary}\nPontos-chave: ${c.points.join('; ')}\n${prev ? 'Final do capítulo anterior (para dar continuidade, sem repetir):\n' + prev + '\n' : ''}${instruction ? 'INSTRUÇÃO DO AUTOR PARA ESTA VERSÃO: ' + instruction + '\n' : ''}\n${MOT_GRAMMAR}`, 4500);
+    M.chapters[id] = t.replace(/```[a-z]*|```/g, '').trim();
+  } catch (e) { toast(motErr(e)); }
+  mot.busy = ''; motSave(); motRefreshCard(id);
+}
+async function motWriteAll() { const M = motM(), has = M.outline.some(c => M.chapters[c.id]), redo = has && confirm('Já existem capítulos escritos. OK = reescrever todos; Cancelar = escrever só os que faltam.'); for (const c of M.outline) { if (M.chapters[c.id] && !redo) continue; await motWrite(c.id); } toast('Capítulos escritos. Revise cada um antes de enviar.'); }
+
+/* ---------- estrutura ---------- */
+function motEstrutura(M) {
+  return `<div class="form-grid">${motIn('mTitle', 'Título', M.title, '')}${motIn('mSub', 'Subtítulo', M.subtitle, '')}</div>
+  <div class="okr-label">CAPÍTULOS (edite, reordene, apague ou acrescente)</div>${M.outline.map((c, i) => `<div class="mot-ch"><div class="row-gap" style="justify-content:space-between"><b>Capítulo ${i + 1}</b><span class="row-gap"><button class="btn sm" onclick="motMove(${i},-1)">↑</button><button class="btn sm" onclick="motMove(${i},1)">↓</button><button class="btn sm" onclick="motDelCh(${i})">${ico('trash', 13)}</button></span></div>
+  <input value="${esc(c.title)}" onchange="motEdit(${i},'title',this.value)" style="width:100%;margin:6px 0"><textarea rows="2" onchange="motEdit(${i},'summary',this.value)" placeholder="O que este capítulo resolve">${esc(c.summary)}</textarea><textarea rows="3" onchange="motEdit(${i},'points',this.value)" placeholder="Pontos-chave, um por linha">${esc(c.points.join('\n'))}</textarea></div>`).join('') || '<p class="muted">Sem capítulos ainda. Volte ao passo 1 e gere a estrutura, ou adicione manualmente.</p>'}
+  <div class="row-gap" style="flex-wrap:wrap;margin-top:8px"><button class="btn sm" onclick="motAddCh()">＋ Capítulo</button><input id="mAdj" placeholder="Pedir ajuste à IA (ex.: juntar os capítulos 3 e 4; foco em iniciantes)" style="flex:1;min-width:240px"><button class="btn sm" onclick="motGenOutline($('mAdj').value)" ${mot.busy ? 'disabled' : ''}>✦ Refazer a estrutura</button></div>
+  <div class="row-gap" style="margin-top:12px"><button class="btn dark" onclick="motApprove()" ${M.outline.length ? '' : 'disabled'}>✔ Aprovar estrutura e ir para o texto</button></div>`;
+}
+function motEdit(i, k, v) { const c = motM().outline[i]; c[k] = k === 'points' ? v.split('\n').map(x => x.trim()).filter(Boolean).slice(0, 12) : v; motSave(); }
+function motMove(i, d) { const a = motM().outline, j = i + d; if (j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; motSave(); renderEditora(); }
+function motDelCh(i) { const M = motM(), c = M.outline[i]; if (!confirm('Excluir o capítulo “' + c.title + '”?')) return; M.outline.splice(i, 1); delete M.chapters[c.id]; motSave(); renderEditora(); }
+function motAddCh() { motM().outline.push({id: uid('mc'), title: 'Novo capítulo', summary: '', points: []}); motSave(); renderEditora(); }
+function motApprove() { const M = motM(); M.approved = true; M.stage = 'texto'; motSave(); renderEditora(); }
+
+/* ---------- texto ---------- */
+const motConf = t => (String(t || '').match(/\[CONFIRMAR/g) || []).length;
+function motCard(M, c, i) {
+  const t = M.chapters[c.id] || '', busy = mot.busy === c.id, n = t.split(/\s+/).filter(Boolean).length;
+  return `<div class="mot-ch" id="motC-${esc(c.id)}"><div class="row-gap" style="justify-content:space-between;flex-wrap:wrap"><b>${i + 1}. ${esc(c.title)}</b><small class="muted">${t ? n + ' palavras' + (motConf(t) ? ` · <b style="color:#b45309">${motConf(t)} [CONFIRMAR]</b>` : '') : 'ainda não escrito'}</small></div>
+  <textarea rows="${t ? 14 : 3}" placeholder="O texto do capítulo aparece aqui. Você pode escrever ou editar à mão." oninput="motChText('${esc(c.id)}',this.value)">${esc(t)}</textarea>
+  <div class="row-gap" style="margin-top:6px;flex-wrap:wrap"><button class="btn sm dark" onclick="motWrite('${esc(c.id)}')" ${mot.busy ? 'disabled' : ''}>${busy ? 'Escrevendo…' : t ? '✦ Reescrever' : '✦ Escrever este capítulo'}</button><input id="mI-${esc(c.id)}" placeholder="Instrução para reescrever (ex.: mais curto, exemplo diferente)" style="flex:1;min-width:200px"><button class="btn sm" onclick="motWrite('${esc(c.id)}',$('mI-${esc(c.id)}').value)" ${mot.busy || !t ? 'disabled' : ''}>Reescrever com instrução</button></div></div>`;
+}
+function motTexto(M) {
+  const done = M.outline.filter(c => (M.chapters[c.id] || '').trim()).length;
+  return `<div class="row-gap" style="flex-wrap:wrap;margin-bottom:10px"><button class="btn dark" onclick="motWriteAll()" ${mot.busy ? 'disabled' : ''}>✦ Escrever todos os capítulos</button><small class="muted">${done} de ${M.outline.length} escritos · a IA usa só o seu material; o que faltar vem marcado com [CONFIRMAR]</small><span style="flex:1"></span><button class="btn" onclick="motStage('enviar')">Ir para o envio →</button></div><div id="motCards">${M.outline.map((c, i) => motCard(M, c, i)).join('')}</div>`;
+}
+function motChText(id, v) { motM().chapters[id] = v.slice(0, 40000); motSave(); }
+function motRefreshCard(id) { const M = motM(), i = M.outline.findIndex(c => c.id === id), el = $('motC-' + id); if (!el || i < 0) { if (!el) renderEditora(); return; } const tmp = document.createElement('div'); tmp.innerHTML = motCard(M, M.outline[i], i); el.replaceWith(tmp.firstElementChild); document.querySelectorAll('#motCards button, #motCards input').forEach(b => { if (mot.busy && b.tagName === 'BUTTON') b.disabled = true; }); }
+
+/* ---------- enviar ---------- */
+function motAssemble(M) { return M.outline.map(c => (M.chapters[c.id] || '').trim()).filter(Boolean).join('\n\n'); }
+function motEnviar(M) {
+  const asm = motAssemble(M); if (asm && !M.full) M.full = asm; const txt = M.full || '';
+  return `<p class="muted" style="font-size:13px;margin-top:0">Este é o texto completo. ${asm ? 'Veio dos capítulos aprovados; você ainda pode editar aqui.' : 'Cole o seu texto pronto aqui (com # para capítulos, ## para subtítulos, > dica: para caixas…).'} Depois escolha o destino.</p>
+  ${asm ? `<div class="row-gap" style="margin-bottom:6px"><button class="btn sm" onclick="motReassemble()">Recompor a partir dos capítulos</button></div>` : ''}
+  <textarea id="mFull" rows="18" style="width:100%;font-size:13px" oninput="motSet('mFull',this.value);motCountUpd()">${esc(txt)}</textarea><small class="muted" id="motCnt">${motCountTxt(txt)}</small>
+  <div class="mot-wrap" style="margin-top:12px"><div class="mot-ch"><b>→ Editora (e-book em 4 versões)</b><p class="muted" style="font-size:12px">Capítulos com caixas, checklists e resumo, versões celular, tablet, A4 P&B e A4 econômico, capa e EPUB.</p><div class="form-grid">${motIn('mTitle', 'Título', M.title, '')}${motIn('mAuthor', 'Autor(a)', M.author, '')}</div><button class="btn dark" onclick="motToEditora()">Criar e-book na Editora</button></div>
+  <div class="mot-ch"><b>→ Diagramação (livro/revista)</b><p class="muted" style="font-size:12px">Documento com colunas, margens, sangria e PDF de gráfica. Cada capítulo começa em página nova.</p><div class="field"><label>Formato</label><select id="mPre">${DTP_PRESETS.filter(x => x.id !== 'custom' && x.id !== 'flyer').map(x => `<option value="${x.id}">${esc(x.n)}</option>`).join('')}</select></div><button class="btn dark" onclick="motToDtp()">Criar documento na Diagramação</button></div></div>
+  <div class="row-gap" style="margin-top:8px"><button class="btn sm" onclick="motDownMd()">Baixar .md</button></div>`;
+}
+const motCountTxt = t => `${String(t || '').split(/\s+/).filter(Boolean).length.toLocaleString('pt-BR')} palavras · ${(String(t || '').match(/^# /gm) || []).length} capítulo(s) · ${motConf(t)} marca(s) [CONFIRMAR]`;
+function motCountUpd() { const e = $('motCnt'); if (e) e.textContent = motCountTxt(motM().full); }
+function motReassemble() { const M = motM(); M.full = motAssemble(M); motSave(); renderEditora(); }
+function motDownMd() { const M = motM(); download((M.title || 'ebook').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.md', M.full || motAssemble(M), 'text/markdown'); }
+function motToEditora() {
+  const M = motM(), t = (M.full || '').trim(); if (!t) { toast('Não há texto para enviar.'); return; }
+  const eb = ebNew('blank', M.title || 'E-book', M.author || ''); if (M.subtitle) eb.subtitle = M.subtitle;
+  eb.sections = eb.sections.filter(s => s.type !== 'chapter'); const secs = ebImport(t, eb); if (!secs.length) { toast('Não encontrei capítulos. Use # no título de cada capítulo.'); return; }
+  let n = eb.sections.filter(s => s.type === 'chapter').length; secs.forEach(s => { n++; s.label = 'CAPÍTULO ' + ebPad2(n); });
+  const at = eb.sections.findIndex(x => x.type === 'text' && /plano|conclus/i.test(x.title)); if (at >= 0) eb.sections.splice(at, 0, ...secs); else eb.sections.push(...secs);
+  ebList().push(eb); persist(); mot.open = false; toast(secs.length + ' capítulo(s) enviados à Editora.'); ebOpen(eb.id);
+}
+/* texto com marcações da Editora → matéria da Diagramação */
+function motToStory(text) {
+  const out = [], BOX = {caso: 'Caso', dica: 'Dica', atencao: 'Atenção', 'atenção': 'Atenção', sabia: 'Você sabia?', cuide: 'Cuide-se', nota: 'Nota'}; let para = [], firstH1 = true;
+  const flush = () => { if (para.length) out.push({k: 'p', st: 'body', t: para.join(' ').trim()}); para = []; };
+  for (const raw of String(text || '').replace(/\r/g, '').split('\n')) {
+    const ln = raw.trim(); let m;
+    if (!ln) { flush(); continue; }
+    if ((m = ln.match(/^#\s+(.+)/))) { flush(); if (!firstH1) out.push({k: 'break'}); firstH1 = false; out.push({k: 'p', st: 'h1', t: m[1]}); continue; }
+    if ((m = ln.match(/^##\s+(.+)/))) { flush(); out.push({k: 'p', st: 'h2', t: m[1]}); continue; }
+    if ((m = ln.match(/^###\s+(.+)/))) { flush(); out.push({k: 'p', st: 'h3', t: m[1]}); continue; }
+    if ((m = ln.match(/^>\s*([\p{L}]+)\s*:\s*(.+)/u)) && BOX[m[1].toLowerCase()]) { flush(); out.push({k: 'p', st: 'quote', t: `**${BOX[m[1].toLowerCase()]}:** ${m[2]}`}); continue; }
+    if ((m = ln.match(/^>\s?(.+)/))) { flush(); out.push({k: 'p', st: 'quote', t: m[1]}); continue; }
+    if ((m = ln.match(/^\[ \]\s*(.+)/))) { flush(); out.push({k: 'p', st: 'list', t: '☐ ' + m[1]}); continue; }
+    if ((m = ln.match(/^\[[vVxX✔]\]\s*(.+)/))) { flush(); out.push({k: 'p', st: 'list', t: '✔ ' + m[1]}); continue; }
+    if ((m = ln.match(/^@comuns?\s*:\s*(.+)/i))) { flush(); out.push({k: 'p', st: 'list', t: '✗ ' + m[1]}); continue; }
+    if ((m = ln.match(/^@fa[cç]a\s*:\s*(.+)/i))) { flush(); out.push({k: 'p', st: 'list', t: '✓ ' + m[1]}); continue; }
+    if ((m = ln.match(/^(?:[-•*]|\d+[.)])\s+(.+)/))) { flush(); out.push({k: 'p', st: 'list', t: '• ' + m[1]}); continue; }
+    para.push(ln);
+  }
+  flush(); return out;
+}
+function motToDtp() {
+  const M = motM(), t = (M.full || '').trim(); if (!t) { toast('Não há texto para enviar.'); return; }
+  const d = dtpNew($('mPre').value, M.title || 'Documento'), story = motToStory(t); if (!story.length) { toast('Não encontrei texto.'); return; }
+  d.styles.list = Object.assign({}, d.styles.body, {n: 'Lista', indent: 0, align: 'left', after: 3}); d.story = story;
+  dtpList().push(d); persist(); mot.open = false; toast('Documento criado na Diagramação.'); go('diagram'); dtpOpen(d.id);
+}
 
 </script>
 <script>
