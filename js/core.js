@@ -1,5 +1,5 @@
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
+const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'feed', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -24,7 +24,7 @@ function go(page) {
   ui.page = page; renderPage(page); window.scrollTo(0, 0);
 }
 function renderPage(page) {
-  ({home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
+  ({feed: renderFeed, home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
     videoLab: renderVideoLab, campaigns: renderCampaignsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
     analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, editorial: renderEditorial, biblioteca: renderBiblioteca, carrosseis: renderCarrosseis, landings: renderLandings}[page] || (() => {}))();
 }

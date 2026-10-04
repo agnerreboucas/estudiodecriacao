@@ -29,7 +29,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -185,6 +185,15 @@ function lpSeoNorm(o) {
   o = o && typeof o === 'object' ? o : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')) ? v : '';
   return {title: str(o.title, 120), desc: str(o.desc, 320), keyword: str(o.keyword, 80), baseUrl: seoBase(o.baseUrl), ogImgId: sid(o.ogImgId), faviconImgId: sid(o.faviconImgId)};
 }
+function normalizeFeeds(arr) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')) ? String(v) : '';
+  return (Array.isArray(arr) ? arr : []).filter(f => f && typeof f === 'object').slice(0, 30).map(f => {
+    const rows = Math.max(3, Math.min(8, Math.round(+f.rows) || 4)), sl = Array.isArray(f.slots) ? f.slots : [];
+    return {id: sid(f.id) || uid('fd'), name: str(f.name, 80) || 'Feed', type: /^[\w-]{1,40}$/.test(f.type || '') ? f.type : 'xadrez', rows, style: /^[\w-]{0,40}$/.test(f.style || '') ? (f.style || '') : '', defKind: ['carousel', 'post', 'video'].includes(f.defKind) ? f.defKind : 'carousel', view: ['tons', 'comp', 'pecas'].includes(f.view) ? f.view : 'comp',
+      slots: Array.from({length: rows * 3}, (_, i) => { const s = sl[i] && typeof sl[i] === 'object' ? sl[i] : {}, r = s.ref && typeof s.ref === 'object' ? s.ref : {};
+        return {kind: ['carousel', 'post', 'video'].includes(s.kind) ? s.kind : ['carousel', 'post', 'video'].includes(f.defKind) ? f.defKind : 'carousel', tone: ['D', 'M', 'L', 'B', 'S'].includes(s.tone) ? s.tone : 'M', label: str(s.label, 80), ref: {t: ['car', 'set'].includes(r.t) ? r.t : '', id: sid(r.id)}, postId: sid(s.postId)}; }), created: str(f.created, 40) || new Date().toISOString()};
+  });
+}
 function normalizeSites(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || ''));
   return (Array.isArray(x) ? x : []).filter(s => s && sid(s.id)).slice(0, 50).map(s => { const b = s.bs || {}, o = (k, n) => str(b[k], n);
@@ -272,7 +281,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
