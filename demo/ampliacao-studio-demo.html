@@ -710,6 +710,70 @@ textarea,input,select{max-width:100%}
 @media(max-width:640px){.section-row{flex-wrap:wrap;gap:8px}.so-leg{gap:4px 10px}}
 
 </style>
+<style>
+/* Menu principal por categorias (Planejar → Criar → Aprovar e publicar → Medir) e página Mapa do projeto */
+.rail .rail-gh{all:unset;justify-items:start;text-align:left;box-sizing:border-box;cursor:pointer;display:grid!important;grid-template-columns:1fr auto;align-items:center;column-gap:6px;width:100%;padding:6px 10px;border-radius:8px;color:#111;height:auto!important;position:static}
+.rail .rail-gh:hover{background:#f4f4f5}.rail .rail-gh:focus-visible{outline:2px solid #1118;outline-offset:1px}
+.rail .rail-gh::after{display:none!important}
+.rail .rail-gt{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.rail .rail-gh small{grid-column:1;font-size:11px;font-weight:400;color:#777;text-transform:none;letter-spacing:0}
+.rail .rail-gh i{grid-row:1/3;grid-column:2;font-style:normal;color:#888;font-size:12px;transition:transform .15s}
+.rail .rail-grp.closed .rail-gh i{transform:rotate(-90deg)}
+.rail .rail-grp.closed .rail-items{display:none}
+.rail .rail-items{display:flex;flex-direction:column;gap:1px;margin:2px 0 0 6px;padding-left:6px;border-left:2px solid #eee}
+.rail .rail-grp{margin-top:8px}
+.rail .rail-mini-btn{display:none}
+@media(min-width:1025px){
+  :root{--sidebar:252px}
+  body.rail-mini{--sidebar:64px}
+  .rail{width:var(--sidebar)!important;align-items:stretch;padding:14px 10px;overflow-y:auto}
+  .main{margin-left:var(--sidebar)!important}
+  .rail .logo{margin:0 0 12px 8px}
+  .rail-nav,.rail-bottom{width:100%;gap:1px}
+  .rail-bottom{margin-top:14px;padding-top:10px;border-top:1px solid var(--line)}
+  .rail button[data-page]{width:100%;height:auto;min-height:34px;display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:6px 10px;border-radius:9px;text-align:left}
+  .rail .rail-lb{display:inline;font-size:13.5px;font-weight:600;color:#222;line-height:1.2}
+  .rail button[data-page]::after{display:none}
+  .rail button[data-page].active{box-shadow:none;background:#111}.rail button[data-page].active .rail-lb,.rail button[data-page].active svg{color:#fff;stroke:#fff}
+  .rail .rail-mini-btn{display:flex;width:100%;height:auto;min-height:32px;margin-top:4px;padding:6px 10px;border-radius:9px;font-size:12px;color:#777;align-items:center;gap:8px;background:transparent;border:0}
+  .rail .rail-mini-btn:hover{background:#f4f4f5}
+  /* menu recolhido: só ícones, com uma linha entre as categorias */
+  body.rail-mini .rail{align-items:center;padding:14px 9px}
+  body.rail-mini .rail .logo{margin:0 0 12px}
+  body.rail-mini .rail button[data-page]{width:42px;height:42px;padding:0;justify-content:center;position:relative}
+  body.rail-mini .rail .rail-lb,body.rail-mini .rail .rail-lb2,body.rail-mini .rail .rail-gh{display:none!important}
+  body.rail-mini .rail .rail-grp{margin-top:8px;padding-top:8px;border-top:1px solid #eee}
+  body.rail-mini .rail .rail-grp.closed .rail-items,body.rail-mini .rail .rail-items{display:flex}
+  body.rail-mini .rail .rail-items{margin:0;padding:0;border:0;align-items:center}
+  body.rail-mini .rail button[data-page]::after{display:block;content:attr(title);position:absolute;left:52px;top:50%;transform:translateY(-50%);background:#111;color:#fff;padding:6px 8px;border-radius:7px;font-size:11px;white-space:nowrap;opacity:0;pointer-events:none;transition:.15s;z-index:60}
+  body.rail-mini .rail button[data-page]:hover::after{opacity:1}
+  body.rail-mini .rail .rail-mini-btn{width:42px;justify-content:center;padding:6px 0}
+}
+@media(max-width:1024px){.rail .rail-mini-btn{display:none!important}.rail .rail-grp{margin-top:10px}.rail .rail-items button{height:42px!important}}
+
+/* Mapa do projeto */
+.fl-wrap{max-width:1180px;margin:0 auto}
+.fl-steps{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px;align-items:center}
+.fl-step{display:flex;align-items:center;gap:8px;border:1.5px solid #111;background:#fff;border-radius:999px;padding:7px 14px 7px 8px;font-weight:700;font-size:13px;cursor:pointer}
+.fl-step b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#111;color:#fff;font-size:12px}
+.fl-step.done{border-color:#2e7d4f;color:#2e7d4f}.fl-step.done b{background:#2e7d4f}
+.fl-row{display:grid;grid-template-columns:1fr 28px 1.45fr 28px 1fr 28px 1fr;gap:6px;align-items:stretch}
+.fl-arrow{display:grid;place-items:center;font-size:22px;color:#999}
+.fl-col{border:1px solid var(--line,#ddd);border-radius:14px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:8px;border-top:6px solid var(--c)}
+.fl-col h3{margin:0;font-size:15px}.fl-col h3 span{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--c);color:#fff;font-size:13px;margin-right:6px}
+.fl-col>p{margin:0;font-size:12.5px;color:#666}
+.fl-box{all:unset;box-sizing:border-box;cursor:pointer;display:block;border:1px solid #e3e3e8;border-left:4px solid var(--c);border-radius:10px;padding:8px 10px;background:#fafafa;width:100%}
+.fl-box:hover,.fl-box:focus-visible{background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.08);outline:none}
+.fl-box b{display:block;font-size:13.5px}.fl-box small{display:block;color:#666;font-size:12px;margin-top:1px;line-height:1.35}
+.fl-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fl-loop{margin:14px 0;border:2px dashed #bbb;border-radius:12px;padding:10px 14px;font-size:13px;color:#444;background:#fff}
+.fl-side{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fl-side .fl-col{border-top-width:1px;border-top-color:var(--line,#ddd);border-left:6px solid var(--c)}
+@media(max-width:1024px){
+  .fl-row{grid-template-columns:1fr}.fl-arrow{transform:rotate(90deg);height:20px}.fl-side{grid-template-columns:1fr}.fl-two{grid-template-columns:1fr}
+}
+
+</style>
 </head>
 <body>
 <div class="app">
@@ -717,27 +781,39 @@ textarea,input,select{max-width:100%}
 <aside class="rail" id="rail" aria-label="Menu principal">
   <div class="logo">A</div>
   <nav class="rail-nav">
-    <button class="active" data-page="home" title="Início"><span data-ico="home"></span></button>
-    <button data-page="projects" title="Projetos"><span data-ico="folder"></span></button>
-    <button data-page="matrix" title="Matriz de Criação"><span data-ico="sparkles"></span></button>
-    <button data-page="editorial" title="Agente Editorial"><span data-ico="target"></span></button>
-    <button data-page="carrosseis" title="Carrosséis"><span data-ico="layout"></span></button>
-    <button data-page="feed" title="Planejador de feed"><span data-ico="grid"></span></button>
-    <button data-page="landings" title="Sites e landing pages"><span data-ico="globe"></span></button>
-    <button data-page="design" title="Estúdio de Design"><span data-ico="palette"></span></button>
-    <button data-page="biblioteca" title="Biblioteca de imagens"><span data-ico="image"></span></button>
-    <button data-page="inspiration" title="Inspiração"><span data-ico="pin"></span></button>
-    <button data-page="editora" title="Editora (e-books)"><span data-ico="book"></span></button>
-    <button data-page="videoLab" title="Video Lab"><span data-ico="video"></span></button>
-    <button data-page="campaigns" title="Campanhas"><span data-ico="megaphone"></span></button>
-    <button data-page="approval" title="Aprovação"><span data-ico="check"></span></button>
-    <button data-page="publishingHub" title="Publicação"><span data-ico="send"></span></button>
-    <button data-page="analyticsHub" title="Performance"><span data-ico="chart"></span></button>
-    <button data-page="library" title="Biblioteca"><span data-ico="library"></span></button>
-    <button data-page="brand" title="Brand Brain"><span data-ico="brain"></span></button>
+    <button class="active" data-page="home" title="Início"><span data-ico="home"></span><span class="rail-lb">Início</span></button>
+    <button data-page="flow" title="Mapa do projeto"><span data-ico="webhook"></span><span class="rail-lb">Mapa do projeto</span></button>
+    <div class="rail-grp" data-g="Planejar"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">1 · Planejar</span><small>Entender o cliente e a marca</small><i aria-hidden="true">▾</i></button><div class="rail-items">
+      <button data-page="projects" title="Projetos"><span data-ico="folder"></span><span class="rail-lb">Projetos</span></button>
+      <button data-page="brand" title="Brand Brain"><span data-ico="brain"></span><span class="rail-lb">Brand Brain</span></button>
+      <button data-page="matrix" title="Matriz de Criação"><span data-ico="sparkles"></span><span class="rail-lb">Matriz de Criação</span></button>
+      <button data-page="inspiration" title="Inspiração"><span data-ico="pin"></span><span class="rail-lb">Inspiração</span></button>
+    </div></div>
+    <div class="rail-grp" data-g="Criar"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">2 · Criar</span><small>Produzir as peças</small><i aria-hidden="true">▾</i></button><div class="rail-items">
+      <button data-page="editorial" title="Agente Editorial"><span data-ico="target"></span><span class="rail-lb">Agente Editorial</span></button>
+      <button data-page="carrosseis" title="Carrosséis"><span data-ico="layout"></span><span class="rail-lb">Carrosséis</span></button>
+      <button data-page="feed" title="Planejador de feed"><span data-ico="grid"></span><span class="rail-lb">Planejador de feed</span></button>
+      <button data-page="design" title="Estúdio de Design"><span data-ico="palette"></span><span class="rail-lb">Estúdio de Design</span></button>
+      <button data-page="landings" title="Sites e landing pages"><span data-ico="globe"></span><span class="rail-lb">Sites e landing pages</span></button>
+      <button data-page="editora" title="Editora (e-books)"><span data-ico="book"></span><span class="rail-lb">Editora (e-books)</span></button>
+      <button data-page="videoLab" title="Video Lab"><span data-ico="video"></span><span class="rail-lb">Video Lab</span></button>
+    </div></div>
+    <div class="rail-grp" data-g="Aprovar e publicar"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">3 · Aprovar e publicar</span><small>Revisar e colocar no ar</small><i aria-hidden="true">▾</i></button><div class="rail-items">
+      <button data-page="campaigns" title="Campanhas"><span data-ico="megaphone"></span><span class="rail-lb">Campanhas</span></button>
+      <button data-page="approval" title="Aprovação"><span data-ico="check"></span><span class="rail-lb">Aprovação</span></button>
+      <button data-page="publishingHub" title="Publicação"><span data-ico="send"></span><span class="rail-lb">Publicação</span></button>
+    </div></div>
+    <div class="rail-grp" data-g="Medir"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">4 · Medir</span><small>Ver o resultado e aprender</small><i aria-hidden="true">▾</i></button><div class="rail-items">
+      <button data-page="analyticsHub" title="Performance"><span data-ico="chart"></span><span class="rail-lb">Performance</span></button>
+    </div></div>
+    <div class="rail-grp" data-g="Acervo"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">Acervo</span><small>Tudo o que já existe</small><i aria-hidden="true">▾</i></button><div class="rail-items">
+      <button data-page="biblioteca" title="Imagens"><span data-ico="image"></span><span class="rail-lb">Imagens</span></button>
+      <button data-page="library" title="Peças criadas"><span data-ico="library"></span><span class="rail-lb">Peças criadas</span></button>
+    </div></div>
   </nav>
   <div class="rail-bottom">
-    <button data-page="settings" title="Configurações"><span data-ico="settings"></span></button>
+    <button data-page="settings" title="Configurações"><span data-ico="settings"></span><span class="rail-lb">Configurações</span></button>
+    <button type="button" class="rail-mini-btn" id="railMini" title="Recolher o menu" onclick="railMini()">◀ <span class="rail-lb2">Recolher</span></button>
   </div>
 </aside>
 
@@ -815,6 +891,7 @@ textarea,input,select{max-width:100%}
 <section id="page-editorial" class="page"><div class="subpage dz-wide" id="editorialRoot"></div></section>
 <section id="page-biblioteca" class="page"><div class="subpage dz-wide" id="bibliotecaRoot"></div></section>
 <section id="page-carrosseis" class="page"><div class="subpage dz-wide" id="carrosseisRoot"></div></section>
+<section id="page-flow" class="page"><div class="subpage dz-wide" id="flowRoot"></div></section>
 <section id="page-feed" class="page"><div class="subpage dz-wide" id="feedRoot"></div></section>
 <section id="page-landings" class="page"><div class="subpage dz-wide" id="landingsRoot"></div></section>
 <section id="page-diagram" class="page"><div class="subpage dz-wide" id="diagramRoot"></div></section>
@@ -1463,7 +1540,7 @@ async function testWebhook() { try { await sendWebhook('teste', {from: 'Ampliaç
 </script>
 <script>
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'feed', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project'];
+const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'feed', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project', 'flow'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -1490,7 +1567,7 @@ function go(page) {
 function renderPage(page) {
   ({feed: renderFeed, home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
     videoLab: renderVideoLab, campaigns: renderCampaignsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
-    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, editorial: renderEditorial, biblioteca: renderBiblioteca, carrosseis: renderCarrosseis, landings: renderLandings}[page] || (() => {}))();
+    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, flow: renderFlow, editorial: renderEditorial, biblioteca: renderBiblioteca, carrosseis: renderCarrosseis, landings: renderLandings}[page] || (() => {}))();
 }
 function refreshCurrentView() { renderSyncBadge(); renderHome(); renderPage(ui.page); updateContextUI(); }
 function bootRender() { $('credits').textContent = state.credits; updateContextUI(); renderHome(); renderPage(ui.page); renderSyncBadge(); }
@@ -19091,6 +19168,62 @@ async function tplBrandNow(id) {
   const o = bxFind(id).o, pl = await tplPayload(o.tpl.id), th = lpTheme(curProject()); if (!pl) return;
   bxMut(() => { const t = bxFind(id).o.tpl; if (pl.colors[0] && th.accent) t.map[pl.colors[0]] = th.accent; if (pl.fonts[0] && th.head) t.fonts[pl.fonts[0]] = th.head; if (pl.fonts[1] && th.body) t.fonts[pl.fonts[1]] = th.body; }); toast('Cor e fontes da marca aplicadas.');
 }
+
+</script>
+<script>
+/* ===== Menu por categorias (recolher categorias e menu) e página "Mapa do projeto": o fluxo de trabalho do começo ao fim, clicável ===== */
+const FLOW = [
+  {n: '1', t: 'Planejar', c: '#3b3b46', d: 'Entender o cliente e a marca antes de criar qualquer coisa.', items: [
+    ['projects', 'Projetos', 'Um projeto por cliente ou marca. Tudo o que você criar fica dentro dele.'],
+    ['brand', 'Brand Brain', 'Cores, fontes, tom de voz, logo e produtos da marca.'],
+    ['matrix', 'Matriz de Criação', 'Públicos (ICP), jornada, hipóteses e diagnóstico.'],
+    ['inspiration', 'Inspiração', 'Referências e concorrentes para se basear.']]},
+  {n: '2', t: 'Criar', c: '#e4572e', d: 'Produzir as peças. Cada ferramenta usa a marca do projeto.', items: [
+    ['editorial', 'Agente Editorial', 'Da ideia aos ângulos, headlines e roteiros.'],
+    ['carrosseis', 'Carrosséis', '3 a 20 slides, textos, legenda e anúncio.'],
+    ['feed', 'Planejador de feed', '26 tipos de feed e grids com carrossel.'],
+    ['design', 'Estúdio de Design', 'Posts, stories e anúncios com editor.'],
+    ['landings', 'Sites e landing pages', 'Páginas de venda, sites e templates importados.'],
+    ['editora', 'Editora (e-books)', 'Capa, texto, diagramação e Amazon.'],
+    ['videoLab', 'Video Lab', 'Roteiros, storyboard e narração.']], two: true},
+  {n: '3', t: 'Aprovar e publicar', c: '#2f6fcf', d: 'Revisar com o cliente e colocar no ar.', items: [
+    ['campaigns', 'Campanhas', 'Agrupa as peças por campanha.'],
+    ['approval', 'Aprovação', 'Fila de revisão e aprovação das peças.'],
+    ['publishingHub', 'Publicação', 'Calendário, legenda e envio por rede.']]},
+  {n: '4', t: 'Medir', c: '#c9952a', d: 'Ver o que funcionou e aprender.', items: [
+    ['analyticsHub', 'Performance', 'Resultado, leads e o que repetir.']]}
+];
+const FLOW_SIDE = [
+  {t: 'Acervo (usado em todas as etapas)', c: '#2e7d4f', items: [['biblioteca', 'Imagens', 'Biblioteca de imagens: fotos geradas, enviadas e do produto.'], ['library', 'Peças criadas', 'Tudo o que já foi feito neste projeto.']]},
+  {t: 'Ajustes', c: '#7c4dbd', items: [['settings', 'Configurações', 'Chaves das APIs, conexões e dados da conta.']]}
+];
+function renderFlow() {
+  const r = $('flowRoot'); if (!r) return; const p = typeof curProject === 'function' ? curProject() : null, has = !!p, br = has && p.brand && (p.brand.name || p.brand.colors && p.brand.colors.length);
+  const box = (c, [pg, t, d]) => `<button class="fl-box" style="--c:${c}" onclick="go('${pg}')"><b>${esc(t)}</b><small>${esc(d)}</small></button>`;
+  r.innerHTML = `<div class="fl-wrap"><div class="page-head"><div><h1>Mapa do projeto</h1><p>Como o Studio funciona, do começo ao fim. Cada caixa abre a ferramenta. O menu da esquerda segue a mesma ordem.</p></div></div>
+  <h3 style="margin:6px 0 0">Por onde começar</h3>
+  <div class="fl-steps"><button class="fl-step ${has ? 'done' : ''}" onclick="go('projects')"><b>1</b> Criar o projeto${has ? ' ✓' : ''}</button><span>→</span><button class="fl-step ${br ? 'done' : ''}" onclick="go('brand')"><b>2</b> Preencher a marca${br ? ' ✓' : ''}</button><span>→</span><button class="fl-step" onclick="go('editorial')"><b>3</b> Escolher o que criar</button><span>→</span><button class="fl-step" onclick="go('publishingHub')"><b>4</b> Publicar e medir</button></div>
+  <div class="fl-row">${FLOW.map((s, i) => `${i ? '<div class="fl-arrow">→</div>' : ''}<div class="fl-col" style="--c:${s.c}"><h3><span>${s.n}</span>${esc(s.t)}</h3><p>${esc(s.d)}</p><div class="${s.two ? 'fl-two' : ''}" style="display:${s.two ? 'grid' : 'flex'};${s.two ? '' : 'flex-direction:column;'}gap:8px">${s.items.map(it => box(s.c, it)).join('')}</div></div>`).join('')}</div>
+  <div class="fl-loop"><b>↺ O ciclo:</b> o que você aprende em <b>Medir</b> volta para <b>Planejar</b> (novos públicos e hipóteses na Matriz) e gera novas ideias no Agente Editorial. A marca, as cores, as fontes e os produtos do projeto são herdados por todas as ferramentas.</div>
+  <div class="fl-side">${FLOW_SIDE.map(s => `<div class="fl-col" style="--c:${s.c}"><h3>${esc(s.t)}</h3>${s.items.map(it => box(s.c, it)).join('')}</div>`).join('')}</div></div>`;
+}
+
+/* ---- menu: recolher categorias e recolher o menu todo ---- */
+(function () {
+  const KEY = 'amp_rail_closed', MINI = 'amp_rail_mini';
+  const load = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }, save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sem armazenamento */ } };
+  const grp = () => [...document.querySelectorAll('#rail .rail-grp')];
+  function closed() { return grp().filter(g => g.classList.contains('closed')).map(g => g.dataset.g); }
+  function apply() { const c = load(KEY) || []; grp().forEach(g => { const on = c.includes(g.dataset.g); g.classList.toggle('closed', on); const h = g.querySelector('.rail-gh'); if (h) h.setAttribute('aria-expanded', String(!on)); }); }
+  window.railMini = function (on) { const m = on === undefined ? !document.body.classList.contains('rail-mini') : !!on; document.body.classList.toggle('rail-mini', m); save(MINI, m); const b = document.getElementById('railMini'); if (b) { b.firstChild.textContent = m ? '▶ ' : '◀ '; b.title = m ? 'Expandir o menu' : 'Recolher o menu'; } };
+  window.railShowActive = function () { const a = document.querySelector('#rail button[data-page].active'); const g = a && a.closest('.rail-grp'); if (g && g.classList.contains('closed')) { g.classList.remove('closed'); save(KEY, closed()); const h = g.querySelector('.rail-gh'); if (h) h.setAttribute('aria-expanded', 'true'); } };
+  const init = () => {
+    apply(); if (load(MINI)) railMini(true);
+    document.getElementById('rail').addEventListener('click', e => { const h = e.target.closest('.rail-gh'); if (!h) return; const g = h.closest('.rail-grp'); g.classList.toggle('closed'); h.setAttribute('aria-expanded', String(!g.classList.contains('closed'))); save(KEY, closed()); });
+    const g0 = window.go; if (typeof g0 === 'function') window.go = function (page) { const r = g0.apply(this, arguments); railShowActive(); return r; };
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
 
 </script>
 <script>
