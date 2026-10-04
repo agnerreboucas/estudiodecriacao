@@ -72,7 +72,7 @@ function layoutCtx(lay, tk, fmt, copy, brand) {
 }
 /* texto padrão do modelo + o que o usuário preencheu */
 function layoutCopy(lay, copy) {
-  const s = JSON.parse(JSON.stringify(lay.sample || {})), out = Object.assign(s, Object.fromEntries(Object.entries(copy || {}).filter(([, v]) => v !== '' && v != null)));
+  const s = JSON.parse(JSON.stringify(lay.sample || {})), out = Object.assign(s, Object.fromEntries(Object.entries(copy || {}).filter(([, v]) => v !== '' && v != null).map(([k, v]) => [k, v === '∅' ? '' : v])));   // '∅' = campo vazio de propósito (não usa o texto de exemplo)
   if (!Array.isArray(out.items)) out.items = String(out.items || '').split('\n').filter(Boolean);
   return out;
 }

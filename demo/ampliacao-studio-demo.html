@@ -599,6 +599,19 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .bx-wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.bx-wbtn{display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid #e3e3e3;border-radius:10px;padding:12px 6px;background:#fff;font-size:12px;cursor:pointer}.bx-wbtn span{font-size:20px}.bx-wbtn:hover{border-color:#111}
 .seo-card{border:1px solid var(--line,#ddd);border-radius:10px;overflow:hidden;max-width:380px;background:#fff;color:#111}.seo-card img{display:block;width:100%;aspect-ratio:1200/630;object-fit:cover}.seo-noimg{aspect-ratio:1200/630;background:#eee;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px}.seo-t{padding:8px 12px;background:#f1f2f4;display:flex;flex-direction:column;gap:2px;font-size:13px}.seo-t small{color:#65676b;font-size:11px}.seo-t span{color:#65676b;font-size:12.5px}
 .sec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.sec-card{border:1px solid var(--line,#ddd);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:5px;background:#fff}.sec-th{height:150px;overflow:hidden;border-radius:6px;background:#f4f4f5;position:relative}.sec-th iframe{width:1000px;height:650px;border:0;transform:scale(.23);transform-origin:0 0;pointer-events:none;background:#fff}
+/* Estúdio de Carrosséis */
+.cs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}.cs-card{border:1px solid var(--line,#ddd);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;background:#fff}.cs-th{position:relative;border-radius:8px;overflow:hidden;background:#eee;cursor:pointer;line-height:0}.cs-th canvas{width:100%;height:auto}.cs-n{position:absolute;right:8px;top:8px;background:#fff;border:1px solid #111;border-radius:6px;font:700 11px/1 system-ui;padding:4px 6px;line-height:1}
+.cs-tpls{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.cs-tpl{display:flex;flex-direction:column;gap:4px;cursor:pointer;border:2px solid transparent;border-radius:10px;padding:4px}.cs-tpl input{position:absolute;opacity:0}.cs-tpl:has(input:checked){border-color:var(--accent,#e4572e);background:#fff7f3}.cs-tpl canvas{width:100%;height:auto;border-radius:6px;background:#eee}.cs-tpl small{font-size:11.5px}
+.cs-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}.cs-name{border:1px solid var(--line,#ddd);border-radius:8px;padding:6px 10px;font:700 14px system-ui;min-width:200px}
+.cs-wrap{display:grid;grid-template-columns:340px minmax(0,1fr) 150px;gap:14px;align-items:start}.cs-left{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 150px);overflow:auto;padding-right:4px}.cs-center{text-align:center}.cs-main{border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.18);background:#fff}.cs-right{position:sticky;top:8px}.cs-strip{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 170px);overflow:auto}
+.cs-fr{border:2px solid transparent;border-radius:8px;padding:3px;cursor:pointer;display:flex;flex-direction:column;gap:2px}.cs-fr.on{border-color:var(--accent,#e4572e)}.cs-fr canvas{border-radius:4px;display:block}.cs-fr small{font-size:10.5px;color:#666;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:120px}
+.cs-gf{display:flex;align-items:center;justify-content:space-between;margin-top:8px}.cs-gf label{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#555}.cs-eye{border:0;background:none;cursor:pointer;font-size:15px}.cs-eye.off{opacity:.4}
+.cs-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.cs-slot{position:relative;aspect-ratio:1;border:1.5px dashed #aaa;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;color:#888}.cs-slot.cur{border-color:var(--accent,#e4572e)}.cs-slot b{position:absolute;left:4px;top:4px;background:#111;color:#fff;border-radius:4px;font-size:10px;padding:1px 5px;z-index:1}.cs-slot img{width:100%;height:100%;object-fit:cover}.cs-slot i{position:absolute;right:3px;top:3px;background:#fff;border-radius:50%;width:18px;height:18px;text-align:center;font-style:normal;font-size:12px;line-height:18px}
+.cs-18{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+.cs-phone{width:340px;margin:0 auto;border:8px solid #111;border-radius:38px;background:#fff;color:#111;padding:14px 0 8px;position:relative}.cs-notch{position:absolute;left:50%;top:6px;width:90px;height:20px;margin-left:-45px;background:#111;border-radius:12px}.cs-ph-h{display:flex;align-items:center;gap:8px;padding:22px 12px 8px;font-size:13px}.cs-ph-h img,.cs-av{width:28px;height:28px;border-radius:50%;object-fit:cover;background:#e4572e;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}.cs-tick{background:#1d9bf0;color:#fff;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center}
+.cs-ph-s{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;width:300px;margin:0 auto}.cs-ph-s canvas{flex:none;scroll-snap-align:start}.cs-dots{display:flex;gap:4px;justify-content:center;margin:8px 0}.cs-dots i{width:6px;height:6px;border-radius:50%;background:#ccc}.cs-dots i.on{background:#3897f0}.cs-ph-a{display:flex;gap:12px;padding:0 14px 4px;font-size:18px}.cs-phone small{display:block;padding:0 14px}
+@media(max-width:1100px){.cs-wrap{grid-template-columns:1fr}.cs-right{position:static}.cs-strip{flex-direction:row;max-height:none;overflow:auto}.cs-left{max-height:none}.cs-18{grid-template-columns:1fr}}
+.cs-left>*{flex:none}
 
 </style>
 <style>
@@ -941,7 +954,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -1139,9 +1152,21 @@ function normalizeLandings(x) {
   });
 }
 function normalizeCarousel(c) {
-  c = c && typeof c === 'object' ? c : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), T = (Array.isArray(c.texts) ? c.texts : []).slice(0, 18).map(t => str(t, 1200)); while (T.length < 18) T.push('');
-  return {base: /^[\w-]{1,30}$/.test(c.base || '') ? c.base : 'brandsdecoded', cover: /^[\w-]{1,30}$/.test(c.cover || '') ? c.cover : 'tese', style: /^[\w-]{0,40}$/.test(c.style || '') ? (c.style || '') : '', dark: !!c.dark, idea: str(c.idea, 4000), useAgent: c.useAgent !== false, texts: T,
-    covers: (Array.isArray(c.covers) ? c.covers : []).slice(0, 8).map(o => ({titulo: str(o && o.titulo, 300), subtitulo: str(o && o.subtitulo, 500)})).filter(o => o.titulo)};
+  c = c && typeof c === 'object' ? c : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')) ? String(v) : '', hex = v => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : '', T = (Array.isArray(c.texts) ? c.texts : []).slice(0, 18).map(t => str(t, 1200)); while (T.length < 18) T.push('');
+  const map = (o, f, n) => { const r = {}; if (o && typeof o === 'object') Object.keys(o).slice(0, 30).forEach(k => { if (/^\d{1,2}$/.test(k)) { const v = f(o[k]); if (v) r[k] = v; } }); return r; }, g = c.globals && typeof c.globals === 'object' ? c.globals : {}, ct = c.cta && typeof c.cta === 'object' ? c.cta : {};
+  return {id: sid(c.id) || uid('car'), name: str(c.name, 80) || 'Carrossel', stage: ['topo', 'meio', 'fundo'].includes(c.stage) ? c.stage : 'topo', tpl: /^[\w-]{1,40}$/.test(c.tpl || '') ? c.tpl : 'foto', ratio: c.ratio === '9:16' ? '9:16' : '4:5', grad: Math.max(0, Math.min(100, Math.round(+c.grad >= 0 ? +c.grad : 70))),
+    media: map(c.media, sid), bgs: map(c.bgs, hex), fx: map(c.fx, v => (v && typeof v === 'object' ? {x: Math.max(0, Math.min(1, +v.x || 0.5)), y: Math.max(0, Math.min(1, +v.y || 0.5))} : null)),
+    globals: {handle: str(g.handle, 60), name: str(g.name, 60), copyright: str(g.copyright, 80), verified: g.verified !== false, avatarId: sid(g.avatarId), show: {handle: !(g.show && g.show.handle === false), name: !(g.show && g.show.name === false), copyright: !(g.show && g.show.copyright === false), avatar: !(g.show && g.show.avatar === false)}},
+    cta: {on: ct.on !== false, text: str(ct.text, 40), style: ['solid', 'outline', 'glass'].includes(ct.style) ? ct.style : 'solid', align: ['left', 'center', 'right'].includes(ct.align) ? ct.align : 'left', icon: ['', 'arrow', 'send', 'play', 'heart', 'star', 'bookmark'].includes(ct.icon) ? ct.icon : 'arrow', color: hex(ct.color), textColor: hex(ct.textColor)},
+    versions: (Array.isArray(c.versions) ? c.versions : []).slice(0, 12).map(v => ({at: str(v && v.at, 40), label: str(v && v.label, 60), texts: (Array.isArray(v && v.texts) ? v.texts : []).slice(0, 18).map(t => str(t, 1200))})).filter(v => v.texts.length),
+    base: /^[\w-]{1,30}$/.test(c.base || '') ? c.base : 'brandsdecoded', cover: /^[\w-]{1,30}$/.test(c.cover || '') ? c.cover : 'tese', style: /^[\w-]{0,40}$/.test(c.style || '') ? (c.style || '') : '', dark: !!c.dark, idea: str(c.idea, 4000), useAgent: c.useAgent !== false, texts: T,
+    covers: (Array.isArray(c.covers) ? c.covers : []).slice(0, 8).map(o => ({titulo: str(o && o.titulo, 300), subtitulo: str(o && o.subtitulo, 500)})).filter(o => o.titulo), created: str(c.created, 40) || new Date().toISOString(), updated: str(c.updated, 40) || new Date().toISOString()};
+}
+/* vários carrosséis por projeto; o carrossel único antigo (p.carousel) vira o primeiro da lista, uma vez */
+function normalizeCarousels(arr, legacy) {
+  const out = (Array.isArray(arr) ? arr : []).filter(x => x && typeof x === 'object').slice(0, 100).map(normalizeCarousel);
+  if (!out.length && legacy && Array.isArray(legacy.texts) && legacy.texts.some(t => String(t).trim())) out.push(Object.assign(normalizeCarousel(legacy), {name: String(legacy.texts[0] || 'Carrossel').slice(0, 60)}));
+  return out;
 }
 function normalizeAudio(a) {
   const o = {voiceId: '', voiceName: '', items: {}}; if (!a || typeof a !== 'object') return o;
@@ -1172,7 +1197,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
@@ -3431,7 +3456,7 @@ async function dzAddLogo() {
    Cada modelo monta a peça numa tela de 1080 de largura e escala para qualquer formato; cores e fontes vêm do estilo ativo (ou do Brand Kit).
    Só a estrutura é recriada: textos, marcas e imagens dos posts de referência não entram. */
 const LAYOUTS = [];
-const LAYOUT_GROUPS = ['Tipografia', 'Foto + texto', 'Camadas', 'Promoção e evento', 'Estrutura', 'Capas de vídeo'];
+const LAYOUT_GROUPS = ['Tipografia', 'Foto + texto', 'Camadas', 'Promoção e evento', 'Estrutura', 'Capas de vídeo', 'Capas de carrossel', 'Carrossel editorial'];
 
 /* ---- fontes por tipo: o modelo pede "condensada", "serifada", "manuscrita"; o estilo/Brand Kit decide a família ---- */
 const COND = ['Anton', 'Bebas Neue', 'Oswald', 'Barlow Condensed', 'Fjalla One', 'Archivo Narrow', 'Big Shoulders Display'];
@@ -3461,7 +3486,7 @@ function palette(tk, mode) {
   if (mode === 'dark') { bg = lum(tk.bg) < 0.1 ? tk.bg : lum(tk.fg) < 0.14 ? tk.fg : mixHex('#0b0b10', acc, 0.12); fg = '#ffffff'; mut = mixHex(bg, '#ffffff', 0.62); }
   else if (mode === 'accent') { bg = acc; fg = readable(acc); mut = mixHex(bg, fg, 0.7); ac = contrast(sec, bg) >= 2.2 ? sec : fg; }
   else { bg = lum(tk.bg) > 0.55 ? tk.bg : '#f6f3ec'; fg = lum(tk.fg) < 0.35 ? tk.fg : '#141414'; mut = mixHex(bg, fg, 0.55); }
-  return {bg, fg, mut, acc: ac, sec, on: readable(ac), inv: readable(bg), rev: readable(fg), alt: mixHex(bg, fg, 0.08), line: mixHex(bg, fg, 0.18), grad2: mixHex(acc, sec, 0.5)};
+  return {bg, fg, mut, acc: ac, sec, on: readable(ac), inv: readable(bg), rev: readable(fg), alt: mixHex(bg, fg, 0.08), line: mixHex(bg, fg, 0.18), grad2: mixHex(acc, sec, 0.5), brand: acc === ac ? acc : tk.accent, paper: mode === 'accent' ? mixHex('#ffffff', '#d9cfb8', 0.55) : mixHex(bg, fg, 0.08), ink: '#171717'};
 }
 /* aplica a paleta/fonte do papel à camada (também usado ao trocar o estilo da peça) */
 function themePal(L, tk, pal) {
@@ -3501,7 +3526,7 @@ function layoutCtx(lay, tk, fmt, copy, brand) {
 }
 /* texto padrão do modelo + o que o usuário preencheu */
 function layoutCopy(lay, copy) {
-  const s = JSON.parse(JSON.stringify(lay.sample || {})), out = Object.assign(s, Object.fromEntries(Object.entries(copy || {}).filter(([, v]) => v !== '' && v != null)));
+  const s = JSON.parse(JSON.stringify(lay.sample || {})), out = Object.assign(s, Object.fromEntries(Object.entries(copy || {}).filter(([, v]) => v !== '' && v != null).map(([k, v]) => [k, v === '∅' ? '' : v])));   // '∅' = campo vazio de propósito (não usa o texto de exemplo)
   if (!Array.isArray(out.items)) out.items = String(out.items || '').split('\n').filter(Boolean);
   return out;
 }
@@ -4168,9 +4193,217 @@ LAYOUTS.push(
 
 </script>
 <script>
+/* Modelos · Capas de carrossel e Carrossel editorial.
+   Estrutura recriada a partir de capas de feeds de conteúdo (foto cheia com título condensado, serifado, faixa branca, fundo claro com ilustração,
+   círculo de marca, legenda em caixa, vitrine, cartão com recortes, etiquetas escalonadas). Só a composição é reproduzida: posição, proporção,
+   hierarquia e tipo de letra por categoria. Nenhum texto, logo, rosto ou imagem dos posts de referência entra; as cores e as fontes vêm do
+   estilo ativo ou do Brand Kit, e as áreas cinza são para a sua foto ou ilustração. */
+const CAPA_W = L => { const l = layoutText(Object.assign({}, L, {w: 4000})).lines[0]; return l ? Math.ceil(l.w) : 0; };
+const CAPA_FIX = col => ({c1: col, c2: col, a: 0});
+const CAPA_SHADE = (c, from, a) => c.r('overlay', {x: 0, y: Math.round(c.H * from), w: c.W, h: c.H - Math.round(c.H * from), pk: 'none', grad: {c1: 'rgba(0,0,0,0)', c2: 'rgba(0,0,0,' + a + ')', a: 180}});
+/* faixa fina no topo: etiqueta da série à esquerda, @ no meio, data ou direitos à direita */
+function capaTop(c, onP) {
+  const o = {size: 19, y: 36, w: 360, ls: 0.6, fw: 500, pk: onP ? 'fg' : 'mut', fixUp: false}, cp = c.copy;
+  if (cp.tag) c.t('muted', cp.tag, Object.assign({x: 48}, o));
+  if (cp.handle) c.t('muted', cp.handle, Object.assign({x: (c.W - 360) / 2, align: 'center'}, o));
+  if (cp.date) c.t('muted', cp.date, Object.assign({x: c.W - 48 - 360, align: 'right'}, o));
+}
+/* selo do perfil: círculo da marca + @ + marca de verificado */
+function capaChip(c, y, center, x0) {
+  const h = c.copy.handle; if (!h) return;
+  const lab = c.t('muted', h, {size: 22, fw: 600, pk: 'fg', w: 700, x: 0, y: y + 8, fixUp: false}), tw = CAPA_W(lab), tot = 44 + 12 + tw + 12 + 24, x = center ? Math.round((c.W - tot) / 2) : (x0 == null ? c.m : x0);
+  c.r('avatar', {shape: 'ellipse', x, y, w: 44, h: 44, pk: 'acc'}); c.r('avatar-dot', {shape: 'ellipse', x: x + 12, y: y + 12, w: 20, h: 20, pk: 'on'});
+  lab.x = x + 56; lab.w = tw + 8; const tx = x + 56 + tw + 12;
+  c.r('verified', {shape: 'ellipse', x: tx, y: y + 10, w: 24, h: 24, pk: 'none', grad: CAPA_FIX('#1d9bf0')});
+  c.t('muted', '✓', {x: tx, y: y + 11, w: 24, align: 'center', size: 16, fw: 800, pk: 'fg'});
+}
+/* bloco inferior: legenda curta + título + linha de chamada, com o selo acima */
+function capaBottom(c, o) {
+  const cp = c.copy, al = o.align || 'center', X = 60, Wd = c.W - 120, items = [];
+  let cap = null;
+  if (cp.sub) { cap = c.t('body', cp.sub, {size: 24, align: al, pk: 'fg', fw: 500, x: X, w: Wd, lh: 1.25}); items.push(cap); }
+  const t = c.t('title', cp.title, Object.assign({align: al, x: X, w: Wd, lh: 1}, o.title)); c.fit(t, c.H * (o.maxH || 0.34), o.min || 48); items.push(t);
+  if (cp.button) items.push(c.t('body', cp.button, {size: 19, align: al, pk: 'acc', fw: 700, ls: 0.5, x: X, w: Wd, fixUp: true}));
+  c.stack(items, c.H * 0.4, c.H - 64, 'bottom', 18, X, Wd);
+  if (o.chip !== false) capaChip(c, items[0].y - 66, al === 'center', X);
+  return {title: t, top: items[0].y};
+}
+const CAPA_PHOTO = c => c.i('photo', {x: 0, y: 0, w: c.W, h: c.H, brief: 'Foto do assunto da capa'});
+const CAPA_SAMPLE = {tag: 'Série · Episódio 01', handle: '@seunegocio', date: '2026 ©', sub: 'Legenda curta que contextualiza o assunto', title: 'Por que as marcas estão **pagando caro** por conteúdos que parecem feitos por pessoas comuns', button: '→ Cole seus posts e descubra o que vale escalar'};
+const CAPA_F = ['tag', 'handle', 'date', 'sub', 'title', 'button'];
+const CAPA_ILU_SAMPLE = {tag: 'CAPA', handle: '@seunegocio', date: '', num: '01/08', title: 'Seu conteúdo ensina, mas **ajuda o cliente a escolher?**', sub: '5 tipos de conteúdo para educar quem já está comparando soluções.'};
+
+/* ilustração + título condensado em fundo claro (ou escuro) */
+function capaEditorial(c) {
+  const cp = c.copy; capaTop(c, false);
+  const t = c.t('title', cp.title, {fk: 'cond', fixUp: true, size: 124, lh: 0.95, fw: 400, em0: 'color', x: 60, w: c.W - 120, y: 110}); c.fit(t, c.H * 0.46, 56);
+  const s = c.t('body', cp.sub, {size: 30, fw: 500, lh: 1.3, x: 60, w: 520}); c.fit(s, 200, 22);
+  c.stack([t, s], 110, c.H * 0.7, 'top', 26, 60, c.W - 120);
+  c.i('cutout', {x: Math.round(c.W * 0.42), y: Math.round(c.H * 0.6), w: Math.round(c.W * 0.54), h: Math.round(c.H * 0.3), brief: 'Ilustração 3D ou objeto recortado (PNG sem fundo)'});
+  c.r('rule', {x: 60, y: c.H - 78, w: c.W - 120, h: 2, pk: 'line'});
+  c.t('muted', cp.tag, {x: 60, y: c.H - 58, w: 300, size: 18, ls: 2, pk: 'mut', fixUp: true}); c.t('muted', cp.num, {x: c.W - 360, y: c.H - 58, w: 300, size: 18, ls: 2, align: 'right', pk: 'mut'});
+}
+
+LAYOUTS.push(
+/* ===== CAPAS COM FOTO ===== */
+{id: 'cap-foto-condensado', name: 'Capa · foto cheia + título condensado (centro)', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel foto título condensado caixa-alta destaque laranja selo gradiente', fields: CAPA_F, sample: CAPA_SAMPLE,
+  build(c) { CAPA_PHOTO(c); CAPA_SHADE(c, 0.4, 0.94); capaTop(c, true); capaBottom(c, {align: 'center', title: {fk: 'cond', fixUp: true, size: 108, lh: 0.98, fw: 400, em0: 'color'}}); }},
+{id: 'cap-foto-condensado-esq', name: 'Capa · foto cheia + título condensado (esquerda)', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel foto título condensado esquerda destaque', fields: CAPA_F, sample: CAPA_SAMPLE,
+  build(c) { CAPA_PHOTO(c); CAPA_SHADE(c, 0.38, 0.95); capaTop(c, true); capaBottom(c, {align: 'left', title: {fk: 'cond', fixUp: true, size: 112, lh: 0.97, fw: 400, em0: 'color'}}); }},
+{id: 'cap-foto-serifado', name: 'Capa · foto cheia + título serifado', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel foto serifado editorial história pessoa', fields: CAPA_F, sample: Object.assign({}, CAPA_SAMPLE, {sub: '', button: '', title: 'Como a fundadora transformou uma ideia simples em um negócio que ninguém mais poderia copiar'}),
+  build(c) { CAPA_PHOTO(c); CAPA_SHADE(c, 0.36, 0.92); capaTop(c, true); capaBottom(c, {align: 'left', title: {fk: 'serif', fixUp: false, size: 92, lh: 1.03, fw: 400, em0: 'color'}, maxH: 0.38, min: 44}); }},
+{id: 'cap-foto-sans', name: 'Capa · foto cheia + título em letra de texto', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel foto título sem caixa-alta tendência mercado', fields: CAPA_F, sample: Object.assign({}, CAPA_SAMPLE, {sub: '', button: '', title: 'As marcas pequenas já encontraram a nova grande tendência do mercado'}),
+  build(c) { CAPA_PHOTO(c); CAPA_SHADE(c, 0.4, 0.9); capaTop(c, true); capaBottom(c, {align: 'left', chip: false, title: {fk: 'body', fixUp: false, size: 80, lh: 1.08, fw: 800, em0: 'color'}, maxH: 0.36, min: 44}); }},
+{id: 'cap-foto-faixa-branca', name: 'Capa · foto no topo + faixa branca com título', group: 'Capas de carrossel', mode: 'light', tags: 'capa carrossel série episódio foto topo faixa título escuro nicho', fields: ['tag', 'handle', 'date', 'title'], sample: {tag: 'Série · Episódio 05', handle: '@seunegocio', date: '2026', title: 'Como produzir conteúdo no nicho de **finanças:** 4 criadores provam que conteúdo chato não existe.'},
+  build(c) { const ph = Math.round(c.H * 0.63);
+    c.i('photo', {x: 0, y: 0, w: c.W, h: ph, brief: 'Foto principal (pessoas ou cena)'}); c.r('band', {x: 0, y: ph, w: c.W, h: c.H - ph, pk: 'bg'});
+    capaTop(c, true);
+    const t = c.t('title', c.copy.title, {fk: 'body', fixUp: false, size: 68, lh: 1.1, fw: 800, em0: 'color', x: 56, w: c.W - 112, y: ph + 44}); c.fit(t, c.H - ph - 90, 36); }},
+{id: 'cap-circulo-grande', name: 'Capa · sujeito sobre círculo da marca', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel sujeito recortado círculo marca cor perfil executivo', fields: CAPA_F, sample: Object.assign({}, CAPA_SAMPLE, {sub: 'Decodificando os melhores profissionais do mercado', title: 'Como a gestão da diretora de marketing aproximou a empresa **do dia a dia** do cliente', button: ''}),
+  build(c) { c.bgRect({pk: 'bg'}); const d = Math.round(c.W * 0.86);
+    c.r('circle', {shape: 'ellipse', x: Math.round((c.W - d) / 2), y: 90, w: d, h: d, pk: 'acc'});
+    c.i('cutout', {x: 110, y: 110, w: c.W - 220, h: Math.round(c.H * 0.62), brief: 'Pessoa recortada (PNG sem fundo)'});
+    CAPA_SHADE(c, 0.52, 0.95); capaTop(c, true); capaBottom(c, {align: 'center', title: {fk: 'cond', fixUp: true, size: 96, lh: 0.98, fw: 400, em0: 'color'}, maxH: 0.26, min: 44}); }},
+{id: 'cap-circulo-inset', name: 'Capa · foto cheia + círculo de detalhe', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel foto círculo detalhe inserido produto esporte', fields: CAPA_F, sample: Object.assign({}, CAPA_SAMPLE, {sub: '', button: '', title: 'Como a marca transformou **um detalhe** do produto em um item de desejo'}),
+  build(c) { CAPA_PHOTO(c); CAPA_SHADE(c, 0.42, 0.93);
+    c.r('ring', {shape: 'ellipse', x: c.W - 60 - 292, y: 80, w: 292, h: 292, pk: 'fg'}); c.i('photo', {x: c.W - 60 - 280, y: 86, w: 280, h: 280, radius: 140, brief: 'Foto de detalhe (círculo)'});
+    capaTop(c, true); capaBottom(c, {align: 'center', title: {fk: 'cond', fixUp: true, size: 104, lh: 0.98, fw: 400, em0: 'color'}}); }},
+{id: 'cap-split-duas', name: 'Capa · duas fotos lado a lado', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel comparação duas pessoas debate duelo divisão', fields: CAPA_F, sample: Object.assign({}, CAPA_SAMPLE, {sub: '', button: '', title: 'Como o **último debate** terminou antes mesmo de começar'}),
+  build(c) { const h = Math.round(c.W / 2); c.i('photo', {x: 0, y: 0, w: h, h: c.H, brief: 'Foto da pessoa A'}); c.i('photo', {x: h, y: 0, w: c.W - h, h: c.H, brief: 'Foto da pessoa B'});
+    c.r('divider', {x: h - 2, y: 0, w: 4, h: c.H, pk: 'fg'}); CAPA_SHADE(c, 0.5, 0.95); capaTop(c, true); capaBottom(c, {align: 'center', title: {fk: 'cond', fixUp: true, size: 100, lh: 0.98, fw: 400, em0: 'color'}, maxH: 0.28, min: 44}); }},
+{id: 'cap-duas-fotos', name: 'Capa · duas fotos empilhadas com margem', group: 'Capas de carrossel', mode: 'light', tags: 'capa carrossel duas fotos bastidores evento margem branca', fields: ['tag', 'handle', 'date'], sample: {tag: '', handle: '@seunegocio', date: '2026'},
+  build(c) { const g = 14, hh = Math.round((c.H - 3 * g) / 2); c.bgRect({pk: 'bg'});
+    c.i('photo', {x: g, y: g, w: c.W - 2 * g, h: hh, brief: 'Foto 1'}); c.i('photo', {x: g, y: 2 * g + hh, w: c.W - 2 * g, h: hh, brief: 'Foto 2'}); capaTop(c, false); }},
+{id: 'cap-grade-4', name: 'Capa · grade de 4 fotos + título', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel grade colagem quatro fotos equipe bastidores', fields: ['tag', 'handle', 'date', 'title'], sample: {tag: 'Série · Episódio 02', handle: '@seunegocio', date: '2026', title: 'Quatro rotinas que **mudaram** o jeito de produzir conteúdo'},
+  build(c) { const g = 10, gh = Math.round(c.H * 0.64), cw = Math.round((c.W - 3 * g) / 2), ch = Math.round((gh - 3 * g) / 2); c.bgRect({pk: 'bg'});
+    [[0, 0], [1, 0], [0, 1], [1, 1]].forEach(([i, j]) => c.i('photo', {x: g + i * (cw + g), y: g + j * (ch + g), w: cw, h: ch, brief: 'Foto ' + (j * 2 + i + 1)})); capaTop(c, true);
+    const t = c.t('title', c.copy.title, {fk: 'cond', fixUp: true, size: 110, lh: 0.97, fw: 400, em0: 'color', x: 56, w: c.W - 112, y: gh + 30}); c.fit(t, c.H - gh - 80, 50); }},
+{id: 'cap-foto-limpa', name: 'Capa · foto limpa só com o cabeçalho', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel foto cena sem título bastidores imagem forte', fields: ['tag', 'handle', 'date', 'button'], sample: {tag: 'Série · Episódio 03', handle: '@seunegocio', date: '2026 ©', button: 'ARRASTE →'},
+  build(c) { CAPA_PHOTO(c); CAPA_SHADE(c, 0.8, 0.5); capaTop(c, true); if (c.copy.button) c.t('muted', c.copy.button, {x: 60, y: c.H - 70, w: c.W - 120, size: 22, ls: 3, align: 'right', pk: 'fg', fw: 600}); }},
+{id: 'cap-legenda-caixa', name: 'Capa de vídeo · legenda em caixa colorida', group: 'Capas de carrossel', mode: 'dark', tags: 'capa reels vídeo legenda caixa amarela pergunta frame', fields: ['title'], sample: {title: 'por que viralizar no instagram está tão difícil em 2026?'},
+  build(c) { CAPA_PHOTO(c); c.r('veil', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: {c1: 'rgba(0,0,0,0.12)', c2: 'rgba(0,0,0,0.3)', a: 180}});
+    const t = c.t('title', c.copy.title, {fk: 'body', fixUp: false, size: 62, fw: 700, lh: 1.16, align: 'center', pk: 'on', x: 150, w: c.W - 300, y: Math.round(c.H * 0.58)}); c.fit(t, 360, 34);
+    const lay = layoutText(t), mw = Math.ceil(Math.max.apply(null, lay.lines.map(l => l.w))), bw = Math.min(c.W - 140, mw + 80), bh = lay.h + 56, bx = Math.round((c.W - bw) / 2), by = t.y - 28;
+    const box = c.r('capbox', {x: bx, y: by, w: bw, h: bh, radius: 26, pk: 'acc'}); c.layers.splice(c.layers.indexOf(box), 1); c.layers.splice(c.layers.indexOf(t), 0, box); t.x = bx + 40; t.w = bw - 80; }},
+{id: 'cap-legenda-central', name: 'Capa de vídeo · legenda grande no centro', group: 'Capas de carrossel', mode: 'dark', tags: 'capa reels vídeo legenda central frase destaque edição', fields: ['title', 'tag'], sample: {title: 'nossas atuais obsessões no mundo do marketing', tag: '[edição #01] pedi que adorem nos seguir'},
+  build(c) { CAPA_PHOTO(c); c.r('veil', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: {c1: 'rgba(0,0,0,0.38)', c2: 'rgba(0,0,0,0.5)', a: 180}});
+    const t = c.t('title', c.copy.title, {fk: 'body', fixUp: false, size: 92, fw: 700, lh: 1.1, align: 'center', x: 90, w: c.W - 180}); c.fit(t, c.H * 0.5, 44); c.stack([t], c.H * 0.2, c.H * 0.8, 'middle', 0, 90, c.W - 180);
+    if (c.copy.tag) c.t('muted', c.copy.tag, {x: 60, y: c.H - 90, w: c.W - 120, size: 22, align: 'center', pk: 'fg', fw: 500}); }},
+{id: 'cap-halftone-etiquetas', name: 'Capa · foto P&B com título em etiquetas', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel foto preto e branco granulada etiquetas palavra gigante', fields: ['tag', 'date', 'title', 'kicker', 'sub'], sample: {tag: '', date: '2026', title: 'Por que pessoas criativas\npostam', kicker: 'DIFERENTE', sub: 'Enquanto todo mundo copia a trend, elas reescrevem a trend do próprio jeito.'},
+  build(c) { const ph = c.i('photo', {x: 0, y: 0, w: c.W, h: c.H, brief: 'Foto (fica em preto e branco)'}); ph.filter = 'grayscale(1) contrast(1.35)'; CAPA_SHADE(c, 0.5, 0.7); capaTop(c, true);
+    const lines = String(c.copy.title).split('\n').filter(Boolean); let y = Math.round(c.H * 0.3);
+    lines.forEach(ln => { const t = c.t('title', ln, {fk: 'cond', fixUp: true, size: 84, fw: 400, lh: 1.05, pk: 'rev', x: 0, w: 1000, y: y + 8}); while (CAPA_W(t) > c.W - 52 - 44 - 48 && t.size > 30) t.size -= 2; const w = CAPA_W(t), bx = 52;
+      const box = c.r('label', {x: bx, y, w: w + 44, h: 106, pk: 'fg'}); c.layers.splice(c.layers.indexOf(box), 1); c.layers.splice(c.layers.indexOf(t), 0, box); t.x = bx + 22; t.w = w + 10; y += 106; });
+    const k = c.t('display', c.copy.kicker, {fk: 'cond', fixUp: true, size: 320, fw: 400, lh: 0.9, pk: 'acc', x: 40, w: c.W - 80, y: y + 6}); c.fit(k, 330, 90, 1);
+    if (c.copy.sub) c.t('body', c.copy.sub, {size: 28, fw: 600, x: 56, w: c.W - 112, y: c.H - 150, pk: 'fg', lh: 1.25}); }},
+{id: 'cap-print-post', name: 'Capa · título serifado sobre faixa escura + foto', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel print post série episódio serifado foto abaixo', fields: ['tag', 'handle', 'title'], sample: {tag: 'Série · Episódio 06', handle: '@seunegocio', title: 'Como o chef transformou os erros dos outros em uma **máquina infinita** de conteúdo'},
+  build(c) { const ph = Math.round(c.H * 0.34); c.bgRect({pk: 'bg'}); c.i('photo', {x: 0, y: ph, w: c.W, h: c.H - ph, brief: 'Foto da pessoa'}); capaTop(c, true);
+    const t = c.t('title', c.copy.title, {fk: 'serif', fixUp: false, size: 74, lh: 1.08, fw: 400, em0: 'color', x: 56, w: c.W - 112, y: 92}); c.fit(t, ph - 118, 40);
+    CAPA_SHADE(c, 0.8, 0.55); capaChip(c, c.H - 96, false, 56); }},
+{id: 'cap-objeto-topo', name: 'Capa · título no topo + produto no centro', group: 'Capas de carrossel', mode: 'light', tags: 'capa carrossel produto objeto cutout título topo nome mudou', fields: ['tag', 'handle', 'date', 'title', 'sub'], sample: {tag: '', handle: '@seunegocio', date: '2026', title: 'A marca trocou de **nome.**', sub: 'No Brasil, são 2 milhões de unidades por mês. Em outro país, ela tem outro nome.'},
+  build(c) { capaTop(c, false); const t = c.t('title', c.copy.title, {fk: 'cond', fixUp: true, size: 150, lh: 0.94, fw: 400, em0: 'color', x: 56, w: c.W - 112, y: 100}); c.fit(t, c.H * 0.3, 70);
+    c.i('cutout', {x: 100, y: t.y + c.h(t) + 20, w: c.W - 200, h: Math.round(c.H * 0.4), brief: 'Produto ou objeto recortado'});
+    c.t('body', c.copy.sub, {size: 30, fw: 600, lh: 1.25, x: 56, w: c.W - 112, y: c.H - 150, pk: 'fg'}); }},
+/* ===== EDITORIAL ===== */
+{id: 'cap-editorial-claro', name: 'Capa editorial · título condensado + ilustração (claro)', group: 'Capas de carrossel', mode: 'light', tags: 'capa carrossel editorial fundo claro ilustração 3d título condensado subtítulo', fields: ['tag', 'handle', 'date', 'num', 'title', 'sub'], sample: CAPA_ILU_SAMPLE, build: capaEditorial},
+{id: 'cap-editorial-escuro', name: 'Capa editorial · título condensado + ilustração (escuro)', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel editorial fundo escuro ilustração título condensado', fields: ['tag', 'handle', 'date', 'num', 'title', 'sub'], sample: CAPA_ILU_SAMPLE, build: capaEditorial},
+{id: 'cap-notas', name: 'Capa · print de aplicativo de notas', group: 'Capas de carrossel', mode: 'light', tags: 'capa carrossel notas celular confissão opinião marca-texto', fields: ['kicker', 'title', 'sub', 'date'], sample: {kicker: 'Isso pode me cancelar, mas lá vai:', title: 'Eu **amo** o novo algoritmo do Instagram.', sub: 'E o motivo não é o que você imagina…', date: 'Hoje'},
+  build(c) { c.t('muted', '‹ Notas', {x: 56, y: 70, w: 300, size: 30, pk: 'acc', fw: 600}); c.t('muted', c.copy.date, {x: c.W - 356, y: 74, w: 300, size: 24, align: 'right', pk: 'mut'});
+    const k = c.t('body', c.copy.kicker, {size: 42, fw: 500, pk: 'mut', lh: 1.25, x: 56, w: c.W - 112}), t = c.t('title', c.copy.title, {fk: 'body', fixUp: false, size: 96, fw: 800, lh: 1.15, em0: 'bg', x: 56, w: c.W - 112}); c.fit(t, c.H * 0.4, 48);
+    const s = c.t('body', c.copy.sub, {size: 38, fw: 500, pk: 'fg', lh: 1.3, x: 56, w: c.W - 112}); c.stack([k, t, s], 200, c.H - 120, 'top', 28, 56, c.W - 112); }},
+{id: 'cap-colagem-cor', name: 'Capa · colagem editorial com polaroide', group: 'Capas de carrossel', mode: 'accent', tags: 'capa carrossel colagem polaroide cor da marca palavra gigante história', fields: ['kicker', 'title', 'num', 'sub'], sample: {kicker: 'por que a marca fingiu que ia', title: 'mudar de nome', num: '61 anos', sub: 'depois de'},
+  build(c) { c.t('body', c.copy.kicker, {fk: 'serif', fixUp: false, size: 50, fw: 400, x: 60, w: c.W - 120, y: 80, align: 'center', pk: 'fg'});
+    const t = c.t('title', c.copy.title, {fk: 'cond', fixUp: true, size: 190, lh: 0.92, fw: 400, align: 'center', x: 50, w: c.W - 100, y: 150, pk: 'fg'}); c.fit(t, 340, 80);
+    const px = 250, py = t.y + c.h(t) + 30, pw = 540, ph = 560, fr = c.r('frame', {x: px, y: py, w: pw, h: ph, pk: 'paper'}), im = c.i('photo', {x: px + 26, y: py + 26, w: pw - 52, h: ph - 150, brief: 'Foto ou recorte'});
+    c.rotGroup([fr, im], px + pw / 2, py + ph / 2, -4);
+    c.t('body', c.copy.sub, {fk: 'serif', fixUp: false, size: 44, x: 60, y: py + ph + 30, w: 420, pk: 'fg'}); c.t('display', c.copy.num, {fk: 'cond', fixUp: true, size: 150, fw: 400, x: 380, y: py + ph - 30, w: 640, align: 'right', pk: 'sec', lh: 1}); }}
+);
+
+/* ===== CARROSSEL EDITORIAL: acentuado + creme, na cor da marca ===== */
+LAYOUTS.push(
+{id: 'ed-etiquetas', name: 'Editorial · frase em etiquetas escalonadas', group: 'Carrossel editorial', mode: 'accent', tags: 'capa carrossel editorial frase etiquetas escalonadas círculos cor da marca opinião', fields: ['date', 'kicker', 'title', 'sub', 'handle'], sample: {date: '© 2026', kicker: 'repita comigo:', title: 'marca\nsem\npropósito\né só um\nlogo.', sub: 'te explico o porquê.', handle: '@seunegocio'},
+  build(c) { [[-380, 0, 1000], [-210, 360, 720], [-60, 640, 420]].forEach(([x, y, d]) => c.r('ring', {shape: 'ellipse', x: x, y: y, w: d, h: d, pk: 'none', pks: 'line', strokeW: 2}));
+    c.t('muted', c.copy.date, {x: 60, y: 60, w: 300, size: 24, pk: 'fg'});
+    const edge = c.W - 70, lines = String(c.copy.title).split('\n').filter(Boolean), sz = 124, bh = Math.round(sz * 1.08), kk = c.t('body', c.copy.kicker, {size: 40, fw: 600, pk: 'fg', align: 'right', x: edge - 700, w: 700, y: 0});
+    let y = Math.round((c.H - lines.length * bh) / 2) + 10; kk.y = y - 80;
+    lines.forEach(ln => { const t = c.t('title', ln, {fk: 'body', fixUp: false, size: sz, fw: 800, lh: 1, pk: 'brand', x: 0, w: 1000, y: y + 4}), w = CAPA_W(t), bx = edge - w - 56;
+      const box = c.r('label', {x: bx, y, w: w + 56, h: bh, pk: 'paper'}); c.layers.splice(c.layers.indexOf(box), 1); c.layers.splice(c.layers.indexOf(t), 0, box); t.x = bx + 28; t.w = w + 10; y += bh; });
+    c.t('body', c.copy.sub, {size: 40, fw: 600, pk: 'fg', align: 'right', x: edge - 700, w: 700, y: y + 36});
+    c.t('muted', c.copy.handle, {x: 60, y: c.H - 84, w: 500, size: 26, pk: 'fg'}); c.r('pill', {x: c.W - 70 - 150, y: c.H - 96, w: 150, h: 56, radius: 28, pk: 'paper'}); c.r('pill-dot', {shape: 'ellipse', x: c.W - 70 - 52, y: c.H - 92, w: 48, h: 48, pk: 'brand'}); c.t('muted', '→', {x: c.W - 70 - 52, y: c.H - 88, w: 48, size: 30, align: 'center', pk: 'paper', fw: 800}); }},
+{id: 'ed-indice', name: 'Editorial · título + índice numerado', group: 'Carrossel editorial', mode: 'accent', tags: 'capa carrossel editorial índice lista numerada título minúsculo cantos', fields: ['date', 'title', 'sub', 'items', 'handle'], sample: {date: '© 2026', title: 'tipos de arquitetura de marca.', sub: 'arquitetura de marca é a estrutura que organiza as diferentes marcas, produtos e serviços de um negócio.', items: 'monolítica\nendossada\nindependente\nhíbrida', handle: '@seunegocio'},
+  build(c) { c.t('muted', c.copy.date, {x: 60, y: 60, w: 300, size: 24, pk: 'fg'});
+    c.copy.items.forEach((it, i) => { c.t('muted', String(i + 1).padStart(2, '0'), {x: 60, y: 540 + i * 36, w: 70, size: 26, pk: 'fg'}); c.t('muted', it, {x: 160, y: 540 + i * 36, w: 300, size: 26, pk: 'fg', fw: 500}); });
+    c.t('body', c.copy.sub, {size: 26, fw: 500, lh: 1.3, x: 540, y: 540, w: 480, pk: 'fg'});
+    const t = c.t('title', c.copy.title, {fk: 'body', fixUp: false, size: 168, lh: 0.94, fw: 800, pk: 'paper', x: 60, w: c.W - 120, y: 740}); c.fit(t, Math.max(140, c.H - 140 - 740), 44); t.y = c.H - 140 - c.h(t);
+    c.t('muted', c.copy.handle, {x: 60, y: c.H - 84, w: 500, size: 26, pk: 'fg'}); c.t('muted', '→', {x: c.W - 160, y: c.H - 110, w: 100, size: 80, align: 'right', pk: 'paper', fw: 300}); }},
+{id: 'ed-numero-lista', name: 'Editorial · número gigante + lista', group: 'Carrossel editorial', mode: 'accent', tags: 'capa carrossel editorial número gigante lista estilos referências', fields: ['date', 'num', 'title', 'items', 'handle'], sample: {date: '© 2026', num: '20', title: 'estilos de design gráfico', items: 'minimalismo\nmaximalismo\nvector art\nbrutalismo\nbauhaus\npixel art\nfotografia\neditorial\ncolagem\ngrafite', handle: '@seunegocio'},
+  build(c) { c.t('muted', c.copy.date, {x: 60, y: 60, w: 300, size: 24, pk: 'fg'});
+    const n = c.t('display', c.copy.num, {fk: 'body', fixUp: false, size: 640, fw: 900, lh: 0.8, pk: 'paper', x: 20, y: 150, w: 760});
+    c.copy.items.slice(0, 14).forEach((it, i) => c.t('muted', String(i + 1).padStart(2, '0') + '  ' + it, {x: 70, y: 250 + i * 32, w: 360, size: 21, pk: 'ink', fw: 600}));
+    const t = c.t('title', c.copy.title, {fk: 'body', fixUp: false, size: 104, lh: 0.98, fw: 800, pk: 'paper', x: 540, w: 480, y: 760}); c.fit(t, 330, 56);
+    c.t('muted', c.copy.handle, {x: 60, y: c.H - 84, w: 500, size: 26, pk: 'fg'}); c.t('muted', '→', {x: c.W - 160, y: c.H - 110, w: 100, size: 80, align: 'right', pk: 'paper', fw: 300}); }},
+{id: 'ed-vitrine-claro', name: 'Editorial · vitrine de exemplo (fundo creme)', group: 'Carrossel editorial', mode: 'light', tags: 'miolo carrossel editorial vitrine exemplo poster lista referência numerada', fields: ['num', 'title', 'tag'], sample: {num: '//19', title: 'risografia', tag: ''},
+  build(c) { c.bgRect({pk: 'paper'}); EDITORIAL_VITRINE(c, 'brand'); }},
+{id: 'ed-vitrine-cor', name: 'Editorial · vitrine de exemplo (cor da marca)', group: 'Carrossel editorial', mode: 'accent', tags: 'miolo carrossel editorial vitrine exemplo poster lista referência numerada', fields: ['num', 'title', 'tag'], sample: {num: '//20', title: 'colagem', tag: ''},
+  build(c) { EDITORIAL_VITRINE(c, 'fg'); }},
+{id: 'ed-cartao-recortes', name: 'Editorial · cartão com recortes e texto centralizado', group: 'Carrossel editorial', mode: 'accent', tags: 'miolo carrossel editorial cartão ingresso recorte centralizado definição', fields: ['num', 'title', 'sub'], sample: {num: '// 001', title: 'monolítica', sub: 'nesse sistema toda a estrutura se apoia em uma marca principal, e as extensões usam o mesmo logotipo, diferenciando-se apenas pela descrição de cada unidade.'},
+  build(c) { EDITORIAL_CARTAO(c, false); }},
+{id: 'ed-cartao-arvore', name: 'Editorial · cartão com recortes + diagrama em árvore', group: 'Carrossel editorial', mode: 'accent', tags: 'miolo carrossel editorial cartão diagrama árvore ramificação estrutura', fields: ['num', 'title', 'sub', 'items'], sample: {num: '// 002', title: 'endossada', sub: 'existe sinergia entre a marca principal e as marcas do portfólio, mas elas não usam a mesma estrutura.', items: 'Marca A\nMarca B\nMarca C\nMarca D'},
+  build(c) { EDITORIAL_CARTAO(c, true); }}
+);
+/* vitrine: cartaz de exemplo ao centro, número no canto superior e nome embaixo, ambos sublinhados */
+function EDITORIAL_VITRINE(c, pkLink) {
+  const ul = (txt, x, y, w, al) => { const t = c.t('muted', txt, {x, y, w, size: 36, fw: 600, pk: pkLink, align: al || 'left'}), tw = CAPA_W(t); c.r('uline', {x: al === 'right' ? x + w - tw : x, y: y + 48, w: tw, h: 2, pk: pkLink}); };
+  ul(c.copy.num, 70, 70, 300); if (c.copy.tag) ul(c.copy.tag, c.W - 370, 70, 300, 'right');
+  const pw = Math.round(c.W * 0.58), ph = Math.round(pw * 1.42); c.i('photo', {x: Math.round((c.W - pw) / 2), y: Math.round((c.H - ph) / 2) + 10, w: pw, h: ph, brief: 'Cartaz ou exemplo (3:4)'});
+  ul(c.copy.title, 70, c.H - 130, 600);
+}
+/* cartão creme com meio-círculos recortados no topo e na base */
+function EDITORIAL_CARTAO(c, tree) {
+  const cx = 64, cy = 84, cw = c.W - 128, ch = c.H - 168; c.r('card', {x: cx, y: cy, w: cw, h: ch, radius: 70, pk: 'paper'});
+  c.r('notch', {shape: 'ellipse', x: c.W / 2 - 70, y: cy - 70, w: 140, h: 140, pk: 'bg'}); c.r('notch', {shape: 'ellipse', x: c.W / 2 - 70, y: cy + ch - 70, w: 140, h: 140, pk: 'bg'});
+  c.t('muted', c.copy.num, {x: cx, y: cy + 96, w: cw, size: 30, align: 'center', pk: 'brand', fw: 500});
+  const t = c.t('title', c.copy.title, {fk: 'body', fixUp: false, size: 104, fw: 800, align: 'center', pk: 'brand', x: cx + 40, w: cw - 80, y: cy + 150}); c.fit(t, 150, 60, 1);
+  const b = c.t('body', c.copy.sub, {size: 33, fw: 500, lh: 1.35, align: 'center', pk: 'ink', x: cx + 90, w: cw - 180, y: t.y + c.h(t) + 30}); c.fit(b, 300, 24);
+  const top = b.y + c.h(b) + 56;
+  if (!tree) { c.i('cutout', {x: cx + 120, y: top, w: cw - 240, h: cy + ch - top - 110, brief: 'Ilustração, diagrama ou logos'}); return; }
+  const n = Math.max(2, Math.min(5, c.copy.items.length || 3)), mid = c.W / 2, step = Math.round((cw - 200) / (n - 1)), x0 = cx + 100, ly = top + 70;
+  c.r('node', {shape: 'ellipse', x: mid - 20, y: top, w: 40, h: 40, pk: 'brand'}); c.r('stem', {x: mid - 2, y: top + 40, w: 4, h: 30, pk: 'brand'}); c.r('beam', {x: x0, y: ly, w: step * (n - 1), h: 4, pk: 'brand'});
+  for (let i = 0; i < n; i++) { const x = x0 + i * step; c.r('drop', {x: x - 2, y: ly, w: 4, h: 50, pk: 'brand'}); c.r('node', {shape: i % 2 ? undefined : 'ellipse', x: x - 22, y: ly + 50, w: 44, h: 44, radius: i % 2 ? 10 : 0, pk: 'brand'});
+    c.t('muted', c.copy.items[i] || '', {x: x - 90, y: ly + 108, w: 180, size: 22, align: 'center', pk: 'ink', fw: 600}); }
+  const root = c.i('cutout', {x: cx + 220, y: ly + 170, w: cw - 440, h: cy + ch - (ly + 170) - 100, brief: 'Marca principal e marcas do portfólio (logos)'});
+}
+
+/* ===== CAPAS DE FOTO COM TIPOGRAFIA SERIFADA (estilo revista, tom quente) ===== */
+const CAPA_REV = {tag: 'Estúdio | Seu nome', date: 'Branding & design', kicker: 'Eu não quero que você me', title: 'copie', sub: 'Quero que você se descubra.'};
+LAYOUTS.push(
+{id: 'cap-serifa-gigante', name: 'Capa · foto + palavra serifada gigante', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel foto palavra gigante serifa itálico revista marca pessoal', fields: ['tag', 'date', 'kicker', 'title', 'sub'], sample: CAPA_REV,
+  build(c) { CAPA_PHOTO(c); c.r('veil', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: {c1: 'rgba(0,0,0,0.25)', c2: 'rgba(0,0,0,0.38)', a: 180}});
+    capaTop(c, true); const k = c.t('body', c.copy.kicker, {size: 46, fw: 500, align: 'center', x: 60, w: c.W - 120, y: Math.round(c.H * 0.1), pk: 'fg'});
+    const t = c.t('display', c.copy.title, {fk: 'serif', fixUp: false, size: 420, fw: 400, lh: 0.9, align: 'center', pk: 'acc', x: 30, w: c.W - 60, y: k.y + 70}); c.fit(t, 520, 120, 1);
+    if (c.copy.sub) c.t('body', c.copy.sub, {size: 30, fw: 500, align: 'center', x: 60, w: c.W - 120, y: c.H - 110, pk: 'fg'}); }},
+{id: 'cap-serifa-condensada', name: 'Capa · foto + título serifado condensado em caixa-alta', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel foto serifa condensada caixa-alta lista momentos revista', fields: ['tag', 'date', 'kicker', 'title', 'sub'], sample: {tag: 'Estúdio | Seu nome', date: 'Branding & design', kicker: 'Momentos que me fizeram feliz em', title: 'MARÇO', sub: ''},
+  build(c) { CAPA_PHOTO(c); c.r('veil', {x: 0, y: 0, w: c.W, h: c.H, pk: 'none', grad: {c1: 'rgba(0,0,0,0.4)', c2: 'rgba(0,0,0,0.1)', a: 180}});
+    capaTop(c, true); const k = c.t('body', c.copy.kicker, {size: 38, fw: 500, align: 'center', x: 60, w: c.W - 120, y: Math.round(c.H * 0.085), pk: 'fg', lh: 1.15});
+    const t = c.t('display', c.copy.title, {fk: 'serif', fixUp: true, size: 300, fw: 400, lh: 0.88, align: 'center', pk: 'fg', x: 40, w: c.W - 80, y: k.y + c.h(k) + 16}); c.fit(t, 440, 90, 2);
+    if (c.copy.sub) c.t('body', c.copy.sub, {size: 28, fw: 500, align: 'center', x: 60, w: c.W - 120, y: c.H - 120, pk: 'fg'}); }},
+{id: 'cap-serifa-mista', name: 'Capa · frase curta + palavra serifada de destaque', group: 'Capas de carrossel', mode: 'dark', tags: 'capa carrossel foto frase curta palavra serifa destaque sobreposta posicionamento', fields: ['tag', 'date', 'kicker', 'title', 'sub'], sample: {tag: 'Estúdio | Seu nome', date: 'Branding & design', kicker: 'Pequenas batalhas que eu preciso', title: 'VENCER', sub: 'para crescer a minha marca pessoal'},
+  build(c) { CAPA_PHOTO(c); CAPA_SHADE(c, 0.3, 0.7); capaTop(c, true);
+    const k = c.t('body', c.copy.kicker, {size: 36, fw: 600, x: 70, w: 560, y: Math.round(c.H * 0.56), pk: 'fg', lh: 1.15});
+    const t = c.t('display', c.copy.title, {fk: 'serif', fixUp: true, size: 280, fw: 400, lh: 0.88, x: 60, w: c.W - 120, y: k.y + c.h(k) + 6, pk: 'fg'}); c.fit(t, 330, 90, 1);
+    if (c.copy.sub) c.t('body', c.copy.sub, {size: 32, fw: 500, x: 70, w: 560, y: t.y + c.h(t) + 14, pk: 'fg', lh: 1.2}); }},
+{id: 'cap-cartaz-creme', name: 'Capa · cartaz creme com foto recortada e selo', group: 'Capas de carrossel', mode: 'light', tags: 'capa carrossel cartaz procurada creme foto quadro clipe carimbo pergunta', fields: ['tag', 'date', 'title', 'sub'], sample: {tag: 'Estúdio | Seu nome', date: 'Branding & design', title: 'PROCURADA', sub: 'Como recuperar o posicionamento depois de um chá de sumiço?'},
+  build(c) { capaTop(c, false); const t = c.t('title', c.copy.title, {fk: 'serif', fixUp: true, size: 190, fw: 400, lh: 0.95, align: 'center', pk: 'brand', x: 40, w: c.W - 80, y: 100}); c.fit(t, 240, 80, 1);
+    const fx = 190, fy = t.y + c.h(t) + 30, fw2 = c.W - 380, fh = Math.round(c.H * 0.5); c.r('frame', {x: fx, y: fy, w: fw2, h: fh, pk: 'paper'}); c.i('photo', {x: fx + 22, y: fy + 22, w: fw2 - 44, h: fh - 44, brief: 'Foto da pessoa'});
+    c.r('clip', {x: fx + fw2 - 120, y: fy - 40, w: 26, h: 120, radius: 13, pk: 'mut'});
+    c.t('body', c.copy.sub, {size: 38, fw: 500, align: 'center', lh: 1.2, x: 100, w: c.W - 200, y: fy + fh + 40, pk: 'fg', em0: 'color'}); }}
+);
+
+</script>
+<script>
 /* Galeria de modelos de layout (folha de contato) e criação de peça a partir de um modelo */
 const lyState = {group: 'Todos', q: '', style: ''};
-const LY_LABEL = {title: 'Título (use **palavra** para destacar)', sub: 'Texto de apoio', kicker: 'Chamada / etiqueta', button: 'Botão ou chamada final', handle: '@ ou assinatura', num: 'Número', label: 'Texto 2', items: 'Itens (um por linha; "Título|descrição" quando houver os dois)'};
+const LY_LABEL = {title: 'Título (use **palavra** para destacar)', sub: 'Texto de apoio', kicker: 'Chamada / etiqueta', button: 'Botão ou chamada final', handle: '@ ou assinatura', num: 'Número ou contagem', tag: 'Etiqueta do topo (série, episódio)', date: 'Data ou direitos (topo direito)', label: 'Texto 2', items: 'Itens (um por linha; "Título|descrição" quando houver os dois)'};
 const LY_NEUTRAL = () => makeTokens(DESIGN_STYLES[0], FONT_PAIRS[0], PHOTO_STYLES[0], {name: 'Neutro', accent: '#e4572e', second: '#1d3557', bg: '#f6f3ec', fg: '#141414', muted: '#6b6b6b'});
 
 /* estilos disponíveis para aplicar nos modelos: Kit de marca, estilos salvos e um neutro */
@@ -9752,41 +9985,15 @@ const CAR_BASES = [{
   ]
 }];
 const carBase = () => CAR_BASES.find(b => b.id === carS().base) || CAR_BASES[0];
-const carState = {busy: '', thumbs: 0, paste: false};
+const carBaseOf = c => CAR_BASES.find(b => b.id === c.base) || CAR_BASES[0];
+const carUI = {id: '', frame: 0};
+const carState = {busy: '', thumbs: 0, paste: false, set: null};
 function carS() {
-  const p = curProject(); if (!p) return {base: 'brandsdecoded', cover: 'tese', style: '', dark: false, idea: '', useAgent: true, texts: Array(18).fill(''), covers: []};
-  if (!p.carousel || !Array.isArray(p.carousel.texts)) p.carousel = normalizeCarousel(p.carousel); return p.carousel;
+  const p = curProject(); if (!p) return normalizeCarousel({});
+  return p.carousels.find(x => x.id === carUI.id) || normalizeCarousel({});
 }
-const carSave = () => persist();
+const carSave = () => { const c = carS(); c.updated = new Date().toISOString(); persist(); };
 
-function renderCarrosseis() {
-  const r = $('carrosseisRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Carrosséis'); return; }
-  const c = carS(), B = carBase(), cov = B.covers.find(x => x.id === c.cover) || B.covers[0], styles = lyStyles(p), ready = aiReady(), has = c.texts.some(t => t.trim()), agentOK = !!(EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief);
-  const SZ = EDX().sizes;
-  r.innerHTML = `<div class="page-head"><div><h1>Carrosséis</h1><p>Escolha a base (criador) e a estrutura, gere o texto, copie ou cole, e ele cai nos slides do Editor de Design, tudo editável. ${esc(p.name)}.</p></div><div class="actions">${projectSelect()}</div></div>
-  <div class="car-wrap"><div class="car-left">
-    <div class="car-bases">${CAR_BASES.map(b => `<button class="tchip ${b.id === B.id ? 'on' : ''}" onclick="carS().base='${b.id}';carSave();renderCarrosseis()">${esc(b.name)}</button>`).join('')}<button class="tchip" disabled title="Novos criadores entram depois da base BrandsDecoded">＋ outros criadores (em breve)</button></div>
-    <small class="muted block">${esc(B.desc)}</small>
-    ${accSec('car', 'cap', '1 · Estrutura da capa', esc(cov.name), B.covers.map(x => `<label class="ent-opt ${x.id === cov.id ? 'on' : ''}" style="flex-direction:column;gap:2px"><span style="display:flex;gap:8px"><input type="radio" name="carcov" ${x.id === cov.id ? 'checked' : ''} onchange="carS().cover='${x.id}';carSave();renderCarrosseis()"><b>${esc(x.name)}</b></span><small class="muted">${esc(x.how)}</small></label>`).join(''), true)}
-    ${accSec('car', 'cor', '2 · Estrutura do carrossel', '18 textos · 7 slides', `<ol class="car-slots">${B.slots.map((s, i) => `<li><b>${i + 1}</b> ${esc(s)}</li>`).join('')}</ol><small class="muted">Slides: capa (1–2) · bloco A (3–6) · bloco B (7–10) · bloco C (11–13) · bloco D (14–16) · fechamento (17–18).</small>`, false)}
-    ${accSec('car', 'vis', '3 · Visual dos slides', '', `<label class="ins">Estilo<select onchange="carS().style=this.value;carSave();carThumbs()">${styles.map(s => `<option value="${s.id}" ${s.id === (c.style || styles[0].id) ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label><label class="ins inl"><input type="checkbox" ${c.dark ? 'checked' : ''} onchange="carS().dark=this.checked;carSave();carThumbs()"> fundo escuro</label>`, false)}
-    <div class="okr-label" style="margin-top:14px">PRÉVIA DOS SLIDES</div><div class="car-prev" id="carPrev">${has ? '<small class="muted">Montando…</small>' : '<small class="muted">A prévia aparece quando houver texto.</small>'}</div>
-  </div><div class="car-main">
-    <div class="car-gen"><div class="okr-label">TEMA OU IDEIA</div><textarea rows="3" id="carIdea" oninput="carS().idea=this.value" placeholder="Sobre o que é o carrossel? Cole um tema, uma tese, um texto ou use a ideia do Agente Editorial.">${esc(c.idea)}</textarea>
-      <label class="ins inl"><input type="checkbox" ${c.useAgent && agentOK ? 'checked' : ''} ${agentOK ? '' : 'disabled'} onchange="carS().useAgent=this.checked;carSave()"> usar a ideia, o briefing e o DNA do Agente Editorial${agentOK ? ': “' + esc((EDS().ideas[EDS().chosen].tese || '').slice(0, 60)) + '”' : ' (escolha uma ideia no Agente)'}</label>
-      <div class="row-gap" style="flex-wrap:wrap;margin-top:6px"><button class="btn dark" onclick="carGenCover()" ${carState.busy || !ready ? 'disabled' : ''} title="${ready ? '' : 'IA não configurada (Configurações → Integrações)'}">${carState.busy === 'cover' ? 'Escrevendo…' : '✦ Gerar texto da capa'}</button><button class="btn dark" onclick="carGenAll()" ${carState.busy || !ready ? 'disabled' : ''}>${carState.busy === 'all' ? 'Escrevendo…' : '✦ Gerar texto do carrossel'}</button></div></div>
-    ${c.covers.length ? `<div class="okr-label" style="margin-top:12px">OPÇÕES DE CAPA (clique para usar)</div>${c.covers.map((o, i) => `<button class="ed-hl ${c.texts[0] === o.titulo && c.texts[1] === o.subtitulo ? 'on' : ''}" onclick="carPickCover(${i})"><b>${esc(o.titulo)}</b><em>${esc(o.subtitulo)}</em></button>`).join('')}` : ''}
-    <div class="section-row" style="margin-top:14px"><div class="okr-label">TEXTOS (editáveis)</div><div class="row-gap"><button class="btn sm" onclick="carCopy()" ${has ? '' : 'disabled'}>⧉ Copiar texto</button><button class="btn sm" onclick="carPasteOpen()">Colar texto</button></div></div>
-    ${carState.paste ? `<div class="car-paste"><textarea id="carPaste" rows="8" placeholder="Cole aqui o texto numerado (1. … 2. … até 18.). Também aceito parágrafos separados por linha em branco."></textarea><div class="row-gap"><button class="btn sm dark" onclick="carPasteApply()">Aplicar nos slides</button><button class="btn sm" onclick="carState.paste=false;renderCarrosseis()">Cancelar</button></div></div>` : ''}
-    <div class="car-texts">${c.texts.map((t, i) => { const [lab, rg] = ED_CAR(i + 1, SZ); const out = t && (t.length < rg[0] || t.length > rg[1]); return `<div class="car-t"><b>${i + 1} · ${esc(lab)}</b><textarea rows="${i === 0 || i === 1 || [2, 6, 10, 13].includes(i) ? 2 : 4}" oninput="carSet(${i},this.value)" placeholder="${esc(lab)}">${esc(t)}</textarea><small class="${out ? 'bad' : 'muted'}" id="carc${i}">${t.length} / ${rg[0]}–${rg[1]}</small></div>`; }).join('')}</div>
-    <div class="row-gap" style="margin-top:12px;flex-wrap:wrap"><button class="btn dark" onclick="carToSlides()" ${has ? '' : 'disabled'}>Enviar aos slides (Editor de Design)</button><button class="btn" onclick="carAudit()" ${has ? '' : 'disabled'}>Auditar (anti-IA genérica)</button><button class="btn" onclick="carClear()">Limpar</button></div>
-  </div></div>`;
-  if (has) carThumbs();
-}
-function carSet(i, v) {
-  const c = carS(); c.texts[i] = v.slice(0, 1200); carSave(); const [, rg] = ED_CAR(i + 1, EDX().sizes), el = $('carc' + i);
-  if (el) { el.textContent = `${v.length} / ${rg[0]}–${rg[1]}`; el.className = v && (v.length < rg[0] || v.length > rg[1]) ? 'bad' : 'muted'; } carThumbsSoon();
-}
 /* ---- geração: dois botões ---- */
 function carCtx() {
   const c = carS(), s = EDS(), ag = c.useAgent && s.ideas && s.ideas[s.chosen] && s.brief;
@@ -9821,7 +10028,7 @@ async function carGenAll() {
 /* ---- copiar / colar ---- */
 const carMd = () => carS().texts.map((t, i) => `${i + 1}. ${t.replace(/\n+/g, ' ').trim()}`).join('\n\n');
 function carCopy() { try { navigator.clipboard.writeText(carMd()); toast('Texto copiado (numerado de 1 a 18).'); } catch (e) { showModal('Texto do carrossel', `<textarea rows="14" style="width:100%">${esc(carMd())}</textarea><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`); } }
-function carPasteOpen() { carState.paste = true; renderCarrosseis(); setTimeout(() => $('carPaste') && $('carPaste').focus(), 30); }
+function carPasteOpen() { const e = $('carPaste'); if (e) e.focus(); }
 /* aceita “1. texto”, “1) texto”, “1 - texto”, “1: texto”; sem numeração, usa blocos separados por linha em branco */
 function carParse(raw) {
   const t = String(raw || '').replace(/\r/g, '').trim(), out = Array(18).fill(''); if (!t) return null;
@@ -9832,38 +10039,247 @@ function carParse(raw) {
 }
 function carPasteApply() {
   const o = carParse($('carPaste').value); if (!o) { toast('Não reconheci o texto. Use a lista numerada (1. … 18.) ou parágrafos separados por linha em branco.'); return; }
-  carS().texts = o.map(x => x.slice(0, 1200)); carState.paste = false; carSave(); renderCarrosseis(); toast('Texto aplicado nos slides.');
+  carS().texts = o.map(x => x.slice(0, 1200)); $('carPaste').value = ''; carSave(); renderCarrosseis(); toast('Texto aplicado nos slides.');
 }
 function carClear() { if (!confirm('Limpar todos os textos?')) return; const c = carS(); c.texts = Array(18).fill(''); c.covers = []; carSave(); renderCarrosseis(); }
 function carAudit() { const c = carS(), s = EDS(); s.content = {format: 'carrossel', parts: c.texts.map((t, i) => ({label: `${i + 1} · ${ED_CAR(i + 1, EDX().sizes)[0]}`, texto: t}))}; s.format = 'carrossel'; s.audit = null; s.stage = 'auditoria'; eSave(); go('editorial'); }
-/* ---- slides ---- */
-function carCopyObj() {
-  const c = carS(), B = carBase(), T = c.texts.map(t => (t || '').trim()), g = B.groups;
-  return {cover: {kicker: '', title: T[0] || 'Título da capa', sub: T[1]}, slides: g.map(ix => ({title: T[ix[0]], body: ix.slice(1).map(i => T[i]).filter(Boolean).join('\n\n')})).filter(s => s.title || s.body), cta: {title: T[16] || '', sub: T[17] || '', button: (EDX().prod.cta || '').trim() || 'Salvar e compartilhar'}};
+/* Agente Editorial → Carrosséis: leva o carrossel gerado nas Entregas */
+function eEntToCarousel() { const E = entS().carrossel; if (!E) return; const c = carNew('Carrossel do Agente Editorial', 'topo', ''); c.texts = E.parts.map(p => p.texto || '').concat(Array(18).fill('')).slice(0, 18); c.idea = ''; carSave(); go('carrosseis'); toast('Carrossel levado para a área de Carrosséis.'); }
+
+</script>
+<script>
+/* ===== Estúdio de Carrosséis: início (carrosséis do projeto) → novo (etapa do funil + modelo) → estúdio (painel, slide, frames) → preview no celular.
+   A capa vem do banco de layouts (js/design-layouts-e.js); os miolos seguem o estilo do modelo; texto, mídia, cores, gradiente, CTA e proporção vêm do estado do carrossel. ===== */
+const CAR_STAGES = [
+  ['topo', 'Topo de funil', 'Para quem ainda não conhece você: ganchos curtos, polêmicas e frases de impacto. Foco em alcance e descoberta.'],
+  ['meio', 'Meio de funil', 'Para quem já te segue: listas, tutoriais e comparações. Foco em aprofundar e gerar confiança.'],
+  ['fundo', 'Fundo de funil', 'Para quem está perto de decidir: prova, oferta e chamada para ação. Foco em converter.']];
+const CAR_TPL = [
+  {id: 'foto', stage: 'topo', name: 'Foto + título condensado', cover: 'cap-foto-condensado', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left', photo: true}},
+  {id: 'foto-esq', stage: 'topo', name: 'Foto + título à esquerda', cover: 'cap-foto-condensado-esq', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left', photo: true}},
+  {id: 'serifado', stage: 'topo', name: 'Foto + título serifado', cover: 'cap-foto-serifado', inner: {bg: 'dark', head: 'serif', upper: false, align: 'left', photo: true}},
+  {id: 'circulo', stage: 'topo', name: 'Sujeito sobre círculo', cover: 'cap-circulo-grande', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left', photo: true}},
+  {id: 'serifa-gigante', stage: 'topo', name: 'Palavra serifada gigante', cover: 'cap-serifa-gigante', inner: {bg: 'dark', head: 'serif', upper: false, align: 'left', photo: true}, short: true},
+  {id: 'editorial-claro', stage: 'topo', name: 'Editorial claro + ilustração', cover: 'cap-editorial-claro', inner: {bg: 'light', head: 'cond', upper: true, align: 'left'}},
+  {id: 'etiquetas', stage: 'topo', name: 'Etiquetas escalonadas', cover: 'ed-etiquetas', inner: {bg: 'accent', layout: 'ed-cartao-recortes'}},
+  {id: 'halftone', stage: 'topo', name: 'Foto P&B + etiquetas', cover: 'cap-halftone-etiquetas', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left', photo: true}},
+  {id: 'notas', stage: 'topo', name: 'Print de notas', cover: 'cap-notas', inner: {bg: 'light', head: 'body', upper: false, align: 'left'}},
+  {id: 'faixa', stage: 'meio', name: 'Foto + faixa branca', cover: 'cap-foto-faixa-branca', inner: {bg: 'light', head: 'body', upper: false, align: 'left'}},
+  {id: 'editorial-escuro', stage: 'meio', name: 'Editorial escuro + ilustração', cover: 'cap-editorial-escuro', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left'}},
+  {id: 'indice', stage: 'meio', name: 'Título + índice numerado', cover: 'ed-indice', inner: {bg: 'accent', layout: 'ed-cartao-recortes'}},
+  {id: 'numero', stage: 'meio', name: 'Número gigante + lista', cover: 'ed-numero-lista', inner: {bg: 'accent', layout: 'ed-cartao-recortes'}},
+  {id: 'cartao', stage: 'meio', name: 'Cartão com recortes', cover: 'ed-cartao-recortes', inner: {bg: 'accent', layout: 'ed-cartao-recortes'}},
+  {id: 'serifa-mista', stage: 'meio', name: 'Frase + palavra serifada', cover: 'cap-serifa-mista', inner: {bg: 'dark', head: 'serif', upper: false, align: 'left', photo: true}, short: true},
+  {id: 'cartaz', stage: 'fundo', name: 'Cartaz creme', cover: 'cap-cartaz-creme', inner: {bg: 'light', head: 'serif', upper: false, align: 'left'}, short: true},
+  {id: 'objeto', stage: 'fundo', name: 'Produto + título no topo', cover: 'cap-objeto-topo', inner: {bg: 'light', head: 'cond', upper: true, align: 'left'}},
+  {id: 'colagem', stage: 'fundo', name: 'Colagem na cor da marca', cover: 'cap-colagem-cor', inner: {bg: 'accent', head: 'cond', upper: true, align: 'left'}, short: true},
+  {id: 'legenda', stage: 'fundo', name: 'Legenda em caixa (vídeo)', cover: 'cap-legenda-caixa', inner: {bg: 'dark', head: 'body', upper: false, align: 'left', photo: true}, short: true}
+];
+const carTplOf = c => CAR_TPL.find(t => t.id === c.tpl) || CAR_TPL[0];
+const carPad = n => String(n).padStart(2, '0');
+
+/* ---------- dados ---------- */
+function carNew(name, stage, tpl) {
+  const p = curProject(), t = CAR_TPL.find(x => x.id === tpl) || CAR_TPL.find(x => x.stage === stage) || CAR_TPL[0];
+  const c = normalizeCarousel({name: name || 'Carrossel', stage: t.stage, tpl: t.id, globals: {name: p.name, handle: '', copyright: String(new Date().getFullYear()) + ' ©'}, cta: {text: ''}});
+  p.carousels.unshift(c); carUI.id = c.id; carUI.frame = 0; persist(); return c;
 }
-function carTokens() {
-  const p = curProject(), c = carS(), B = carBase(), cov = B.covers.find(x => x.id === c.cover) || B.covers[0], tk = JSON.parse(JSON.stringify(lyTokens(p, c.style || lyStyles(p)[0].id)));
-  tk.photoMode = 'none'; tk.align = cov.align; if (c.dark) { const bg = tk.bg; tk.bg = tk.fg; tk.fg = bg; if (tk.muted) tk.muted = mixHex(tk.bg, tk.fg, 0.6); } return tk;
+function carDup(id) { const p = curProject(), s = p.carousels.find(x => x.id === id); if (!s) return; const c = normalizeCarousel(Object.assign(JSON.parse(JSON.stringify(s)), {id: '', name: s.name + ' (cópia)', versions: [], created: '', updated: ''})); c.id = uid('car'); p.carousels.splice(p.carousels.indexOf(s) + 1, 0, c); persist(); renderCarrosseis(); toast('Carrossel duplicado.'); }
+function carDel(id) { if (!confirm('Excluir este carrossel?')) return; const p = curProject(); p.carousels = p.carousels.filter(x => x.id !== id); if (carUI.id === id) carUI.id = ''; persist(); renderCarrosseis(); }
+function carOpen(id) { carUI.id = id; carUI.frame = 0; renderCarrosseis(); }
+function carBack() { carUI.id = ''; renderCarrosseis(); }
+function carRename(v) { carS().name = v.slice(0, 80); carSave(); }
+
+/* ---------- montagem dos slides ---------- */
+function carCopyOf(c) {
+  const B = carBaseOf(c), T = c.texts.map(t => (t || '').trim()), g = B.groups;
+  return {cover: {title: T[0] || 'Título da capa', sub: T[1]}, blocks: g.map((ix, k) => ({idx: ix, title: T[ix[0]], body: ix.slice(1).map(i => T[i]).filter(Boolean).join('\n\n')})).filter(s => s.title || s.body), cta: {title: T[16] || '', sub: T[17] || '', button: (c.cta.text || (EDX().prod.cta || '').trim() || 'Salvar e compartilhar')}};
 }
-function carBuildSet(name) { const p = curProject(), tk = carTokens(), fmt = resolveFmt({fmt: 'feed45', cw: 1080, ch: 1350}); return {set: buildSet(name, tk, carCopyObj(), fmt, p.name), tk}; }
-const carThumbsSoon = debounce(() => carThumbs(), 500);
-async function carThumbs() {
-  const box = $('carPrev'); if (!box || !carS().texts.some(t => t.trim())) return; const tok = ++carState.thumbs;
+function carTk(c, tpl) {
+  const p = curProject(), tk = JSON.parse(JSON.stringify(lyTokens(p, c.style || lyStyles(p)[0].id))), I = tpl.inner || {}, acc = tk.accent;
+  tk.photoMode = 'none'; tk.align = I.align || 'left'; tk.upper = !!I.upper;
+  if (I.bg === 'accent') { tk.bg = acc; tk.fg = readable(acc); tk.muted = mixHex(acc, tk.fg, 0.7); tk.accent = '#e7e1d3'; }
+  else if (I.bg === 'light' && !c.dark) { tk.bg = '#f6f3ec'; tk.fg = '#141414'; tk.muted = '#6b6b6b'; }
+  else { tk.bg = '#111214'; tk.fg = '#ffffff'; tk.muted = '#a6a6ad'; }
+  const fam = I.head === 'serif' ? 'DM Serif Display' : I.head === 'cond' ? 'Anton' : null; if (fam) tk.head = {family: fam, weight: 400};
+  return tk;
+}
+const carWrap = (txt, n) => { const out = []; let cur = ''; String(txt).split(/\s+/).forEach(w => { if ((cur + ' ' + w).trim().length > n && cur) { out.push(cur); cur = w; } else cur = (cur + ' ' + w).trim(); }); if (cur) out.push(cur); return out; };
+function carCoverCopy(c, tpl, cp, total) {
+  const g = c.globals, S = g.show, o = {title: cp.cover.title, sub: cp.cover.sub || '∅', tag: S.name && g.name ? g.name : '∅', handle: S.handle && g.handle ? g.handle : '∅', date: S.copyright && g.copyright ? g.copyright : '∅', button: '∅', kicker: '∅', num: '∅'};
+  const id = tpl.cover;
+  if (id === 'ed-etiquetas') { o.title = carWrap(cp.cover.title, 13).join('\n'); o.kicker = '∅'; o.sub = cp.cover.sub || '∅'; }
+  if (id === 'cap-halftone-etiquetas') { const w = String(cp.cover.title).replace(/[.?!]+$/, '').split(/\s+/); o.kicker = (w.pop() || '').toUpperCase(); o.title = carWrap(w.join(' '), 24).join('\n'); }
+  if (id === 'ed-indice' || id === 'ed-numero-lista') { o.items = cp.blocks.map(b => b.title).filter(Boolean).slice(0, 14).join('\n') || '∅'; o.num = String(cp.blocks.length || ''); if (id === 'ed-indice') o.sub = cp.cover.sub || '∅'; }
+  if (id === 'cap-editorial-claro' || id === 'cap-editorial-escuro') { o.tag = 'CAPA'; o.num = carPad(1) + '/' + carPad(total); }
+  if (id === 'cap-notas') { o.kicker = '∅'; o.date = '∅'; }
+  if (id === 'ed-cartao-recortes') { o.num = '//  ' + carPad(1); o.sub = cp.cover.sub || '∅'; }
+  if (tpl.short && /\s/.test(cp.cover.title) && cp.cover.title.length > 22) { /* modelos de palavra única: usa a última palavra forte como destaque */ }
+  return o;
+}
+function carMake(c, o) {
+  o = o || {};
+  const p = curProject(), tpl = carTplOf(c), tk = carTk(c, tpl), fmt = resolveFmt({fmt: c.ratio === '9:16' ? 'story' : 'feed45'}), cp = carCopyOf(c), g = c.globals, brand = g.name || p.name, total = cp.blocks.length + 2, I = tpl.inner || {};
+  const slides = [], labels = [], lay = layoutById(tpl.cover);
+  slides.push(buildLayoutSlide(lay, tk, carCoverCopy(c, tpl, cp, total), fmt, brand)); labels.push('Capa');
+  cp.blocks.forEach((b, i) => {
+    let s;
+    if (I.layout) s = buildLayoutSlide(layoutById(I.layout), tk, {num: '//  ' + carPad(i + 2), title: b.title || '∅', sub: (b.body || '').replace(/\n+/g, ' ') || '∅', items: '∅'}, fmt, brand);
+    else { const tkI = Object.assign({}, tk, {photoMode: I.photo && c.media[String(i + 1)] ? 'full' : 'none'}); s = slideContent(tkI, {title: b.title || '', body: b.body}, fmt, brand, i + 2, total); }
+    slides.push(s); labels.push(b.title ? b.title.replace(/\*\*/g, '').slice(0, 26) : 'Slide ' + (i + 2));
+  });
+  const cta = slideCta(tk, cp.cta, fmt, brand);
+  if (!c.cta.on) cta.layers = cta.layers.filter(L => L.role !== 'cta-fill' && L.role !== 'cta-text');
+  else carStyleCta(cta, c.cta, tk, fmt);
+  slides.push(cta); labels.push('CTA');
+  slides.forEach((s, f) => {
+    if (f > 0 && !I.layout) carTopStrip(s, tk, fmt, c, !!(s.layers.some(L => L.type === 'image' && L.imgId !== undefined && L.role === 'photo')));
+    const ph = s.layers.filter(L => L.type === 'image' && (L.role === 'photo' || L.role === 'cutout'));
+    ph.forEach((L, j) => { const id = j === 0 ? c.media[String(f)] : (f === 0 ? c.media[String(19 + j)] : ''); if (id) L.imgId = id; });
+    s.layers.forEach(L => { if (L.grad && (L.role === 'overlay' || L.role === 'veil')) { const k = c.grad / 70, sc = col => String(col).replace(/rgba\((\d+),(\d+),(\d+),([\d.]+)\)/, (m, r, gg, b, a) => `rgba(${r},${gg},${b},${Math.max(0, Math.min(1, +a * k)).toFixed(3)})`); L.grad = Object.assign({}, L.grad, {c1: sc(L.grad.c1), c2: sc(L.grad.c2)}); } else if (L.role === 'overlay' && L.fill && !L.grad) { const k = c.grad / 70; L.fill = String(L.fill).replace(/rgba\((\d+),(\d+),(\d+),([\d.]+)\)/, (m, r, gg, b, a) => `rgba(${r},${gg},${b},${Math.max(0, Math.min(1, +a * k)).toFixed(3)})`); } });
+    if (o.final) {   // sem imagem: fundo suave da marca no lugar do espaço de foto (o exportado não leva textos de ajuda)
+      const out = []; s.layers.forEach(L => { if (L.type === 'image' && !L.imgId) { if (L.role === 'cutout') return; const full = L.w >= fmt.w - 2 && L.h >= fmt.h - 2; out.push(RC('photofill', Object.assign({x: L.x, y: L.y, w: L.w, h: L.h, radius: L.radius || 0, rot: L.rot}, full ? {fill: '', grad: {c1: mixHex(tk.bg, tk.accent, 0.38), c2: mixHex(tk.bg, tk.fg, 0.1), a: 160}} : {fill: mixHex(tk.bg, tk.fg, 0.12)}))); } else out.push(L); }); s.layers = out;
+    }
+    if (c.bgs[String(f)]) { s.bg = c.bgs[String(f)]; s.layers.forEach(L => { if (L.role === 'bgfill') L.fill = c.bgs[String(f)]; }); }
+  });
+  return {set: {id: 'car-' + c.id, name: c.name, format: {id: fmt.id, w: fmt.w, h: fmt.h}, tk, slides, created: c.created, updated: c.updated}, labels};
+}
+function carTopStrip(s, tk, fmt, c, onP) {
+  const g = c.globals, S = g.show, W = fmt.w, y = 36, o = {size: 19, y, w: 360, ls: 0.6, upper: false, onPhoto: onP}, add = (txt, x, al) => { if (!txt) return; const L = T('muted', Object.assign({content: txt, x, align: al}, o)); themeLayer(L, tk); s.layers.push(L); };
+  add(S.name && g.name ? g.name : '', 48, 'left'); add(S.handle && g.handle ? g.handle : '', (W - 360) / 2, 'center'); add(S.copyright && g.copyright ? g.copyright : '', W - 48 - 360, 'right');
+}
+function carStyleCta(slide, cta, tk, fmt) {
+  const btn = slide.layers.find(L => L.role === 'cta-fill'), txt = slide.layers.find(L => L.role === 'cta-text'); if (!btn || !txt) return;
+  const W = fmt.w, bw = btn.w; let bx = cta.align === 'center' ? (W - bw) / 2 : cta.align === 'right' ? W - 90 - bw : 90; const dx = bx - btn.x; btn.x += dx; txt.x += dx;
+  if (cta.style === 'outline') { btn.fill = ''; btn.stroke = cta.color || tk.accent; btn.strokeW = 4; txt.color = cta.textColor || cta.color || tk.accent; }
+  else if (cta.style === 'glass') { btn.fill = 'rgba(255,255,255,0.18)'; btn.stroke = 'rgba(255,255,255,0.55)'; btn.strokeW = 2; txt.color = cta.textColor || '#ffffff'; }
+  else { if (cta.color) btn.fill = cta.color; if (cta.textColor) txt.color = cta.textColor; }
+  const ic = {arrow: ' →', send: ' ➤', play: ' ▶', heart: ' ♥', star: ' ★', bookmark: ' ⚑'}[cta.icon]; if (ic && !String(txt.content).endsWith(ic)) txt.content += ic;
+}
+
+/* ---------- render (slide grande, faixa de frames, miniaturas) ---------- */
+async function carRenderAll() {
+  const c = carS(), tok = ++carState.thumbs; if (!$('carMain') && !document.querySelector('.cs-home')) return;
   try {
-    const {set, tk} = carBuildSet('prévia'); await ensureFonts(lyFamilies(tk)); await brandFontsLoad(curProject()); if (tok !== carState.thumbs || !$('carPrev')) return;
-    box.innerHTML = ''; const W = set.format.w, H = set.format.h;
-    for (const sl of set.slides) { const cv = document.createElement('canvas'); cv.width = 170; cv.height = Math.round(170 * H / W); cv.className = 'car-th'; box.appendChild(cv); renderSlide(cv.getContext('2d'), sl, W, H, cv.width / W); }
-  } catch (e) { box.innerHTML = `<small class="muted">Não consegui montar a prévia: ${esc(e.message)}</small>`; }
+    if ($('carMain')) {
+      const {set, labels} = carMake(c); await ensureFonts(lyFamilies(set.tk)); await brandFontsLoad(curProject()); await ensureSetResources(set); if (tok !== carState.thumbs || !$('carMain')) return;
+      carState.set = set; carState.labels = labels; if (carUI.frame >= set.slides.length) carUI.frame = set.slides.length - 1;
+      const W = set.format.w, H = set.format.h, cv = $('carMain'), css = Math.min(460, Math.round(620 * W / H)), k = 2 * css / W; cv.width = Math.round(W * k); cv.height = Math.round(H * k); cv.style.width = css + 'px'; cv.style.height = Math.round(css * H / W) + 'px'; renderSlide(cv.getContext('2d'), set.slides[carUI.frame], W, H, k);
+      const st = $('carStrip'); if (st) { st.innerHTML = ''; set.slides.forEach((s, i) => { const d = document.createElement('div'); d.className = 'cs-fr' + (i === carUI.frame ? ' on' : ''); d.onclick = () => { carUI.frame = i; renderCarrosseis(); }; const cv2 = document.createElement('canvas'), tw = 120; cv2.width = tw * 2; cv2.height = Math.round(tw * 2 * H / W); cv2.style.width = tw + 'px'; cv2.style.height = Math.round(tw * H / W) + 'px'; renderSlide(cv2.getContext('2d'), s, W, H, cv2.width / W); const lb = document.createElement('small'); lb.textContent = carPad(i + 1) + ' ' + (labels[i] || ''); d.appendChild(cv2); d.appendChild(lb); st.appendChild(d); }); }
+    }
+  } catch (e) { console.warn('carrossel', e); const b = $('carMain'); if (b) b.insertAdjacentHTML('afterend', `<small class="muted">Não consegui montar o slide: ${esc(e.message)}</small>`); }
 }
-async function carToSlides() {
-  const p = curProject(), c = carS(); if (!c.texts.some(t => t.trim())) return; toast('Montando os slides…');
+const carRenderSoon = debounce(() => carRenderAll(), 350);
+
+/* ---------- início: carrosséis do projeto ---------- */
+function renderCarrosseis() {
+  const r = $('carrosseisRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Carrosséis'); return; }
+  const c = p.carousels.find(x => x.id === carUI.id); if (c) return carStudio(r, p, c);
+  r.innerHTML = `<div class="page-head"><div><h1>Carrosséis</h1><p>Seus carrosséis de ${esc(p.name)}. Escolha a etapa do funil e um modelo, escreva ou gere o texto, ajuste mídia, cores e botão, veja no celular e exporte.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="carNewModal()">＋ Novo carrossel</button></div></div>
+  <div class="cs-home panel">${p.carousels.length ? `<div class="cs-grid">${p.carousels.map(x => `<article class="cs-card"><div class="cs-th" onclick="carOpen('${x.id}')"><canvas data-car="${x.id}" width="320" height="400"></canvas><span class="cs-n">${carMakeCount(x)} slides</span></div><strong>${esc(x.name)}</strong><small class="muted block">${esc((CAR_STAGES.find(s => s[0] === x.stage) || [0, ''])[1])} · ${esc(carTplOf(x).name)} · ${esc(timeAgo(x.updated))}</small><div class="row-gap"><button class="btn sm dark" onclick="carOpen('${x.id}')">Abrir</button><button class="btn sm" onclick="carDup('${x.id}')">⧉ Duplicar</button><button class="btn sm" onclick="carDel('${x.id}')">×</button></div></article>`).join('')}</div>` : `<p class="muted">Nenhum carrossel ainda. Clique em <b>＋ Novo carrossel</b> e escolha um modelo.</p>`}</div>`;
+  carHomeThumbs();
+}
+const carMakeCount = x => { try { return carCopyOf(x).blocks.length + 2; } catch (e) { return 6; } };
+function timeAgo(iso) { const d = (Date.now() - new Date(iso).getTime()) / 1000; if (!isFinite(d) || d < 60) return 'agora'; if (d < 3600) return 'há ' + Math.floor(d / 60) + ' min'; if (d < 86400) return 'há ' + Math.floor(d / 3600) + ' h'; return 'há ' + Math.floor(d / 86400) + ' dia(s)'; }
+async function carHomeThumbs() {
+  const p = curProject(); for (const cv of [...document.querySelectorAll('canvas[data-car]')]) {
+    const c = p.carousels.find(x => x.id === cv.dataset.car); if (!c || !cv.isConnected) continue;
+    try { const {set} = carMake(c, {final: true}); await ensureFonts(lyFamilies(set.tk)); await ensureSetResources(set); const W = set.format.w, H = set.format.h; cv.height = Math.round(320 * H / W); renderSlide(cv.getContext('2d'), set.slides[0], W, H, 320 / W); } catch (e) { /* sem miniatura */ }
+  }
+}
+
+/* ---------- novo carrossel / trocar modelo ---------- */
+let carNewState = {mode: 'new', stage: 'topo'};
+function carNewModal(mode) {
+  carNewState = {mode: mode || 'new'}; const isNew = carNewState.mode === 'new';
+  showModal(isNew ? 'Novo carrossel' : 'Trocar o modelo', `${isNew ? `<div class="field"><input id="cnName" placeholder="Nome do carrossel" autofocus></div>` : ''}<small class="muted block" style="margin-bottom:8px">Escolha a etapa do funil e o modelo da capa. Os miolos seguem o mesmo estilo; você troca cores, fontes e mídia depois.</small>
+  ${CAR_STAGES.map(([k, n, d]) => `<div class="okr-label" style="margin-top:10px">${n.toUpperCase()}</div><small class="muted block" style="margin-bottom:6px">${esc(d)}</small><div class="cs-tpls">${CAR_TPL.filter(t => t.stage === k).map(t => `<label class="cs-tpl"><input type="radio" name="cnT" value="${t.id}" ${t.id === (isNew ? 'foto' : carS().tpl) ? 'checked' : ''}><canvas data-tpl="${t.id}" width="150" height="188"></canvas><small>${esc(t.name)}</small></label>`).join('')}</div>`).join('')}
+  <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="carNewGo()">${isNew ? 'Criar carrossel' : 'Usar este modelo'}</button></div>`);
+  document.getElementById('modalBox').classList.add('wide'); carTplThumbs();
+}
+async function carTplThumbs() {
+  const p = curProject(), base = carS(), c0 = normalizeCarousel({globals: {name: p.name, handle: '@seunegocio', copyright: '2026 ©'}, style: base.style, dark: base.dark, texts: ['Seu título forte para a capa do carrossel', 'Subtítulo que abre a tensão', 'Primeiro bloco', 'Texto do primeiro bloco.', '', '', 'Segundo bloco', 'Texto do segundo bloco.'].concat(Array(10).fill(''))});
+  for (const t of CAR_TPL) { const cv = document.querySelector(`canvas[data-tpl="${t.id}"]`); if (!cv) continue; try { c0.tpl = t.id; const {set} = carMake(c0); await ensureFonts(lyFamilies(set.tk)); LAYOUT_PREVIEW = true; try { renderSlide(cv.getContext('2d'), set.slides[0], set.format.w, set.format.h, cv.width / set.format.w); } finally { LAYOUT_PREVIEW = false; } } catch (e) { console.warn('tpl', t.id, e); } }
+}
+function carNewGo() {
+  const t = (document.querySelector('input[name=cnT]:checked') || {}).value || 'foto';
+  if (carNewState.mode === 'new') { const c = carNew((($('cnName') || {}).value || '').trim() || 'Carrossel', '', t); closeModal(); renderCarrosseis(); return c; }
+  const c = carS(), tpl = CAR_TPL.find(x => x.id === t); c.tpl = t; c.stage = tpl.stage; carSave(); closeModal(); renderCarrosseis();
+}
+
+/* ---------- estúdio ---------- */
+function carStudio(r, p, c) {
+  const B = carBaseOf(c), styles = lyStyles(p), ready = aiReady(), has = c.texts.some(t => t.trim()), agentOK = !!(EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief), cov = B.covers.find(x => x.id === c.cover) || B.covers[0], cp = carCopyOf(c), nFrames = cp.blocks.length + 2;
+  const fr = Math.min(carUI.frame, nFrames - 1), idx = fr === 0 ? [0, 1] : fr === nFrames - 1 ? [16, 17] : cp.blocks[fr - 1].idx, G = c.globals, S = G.show;
+  const eye = k => `<button class="cs-eye ${S[k] ? '' : 'off'}" title="${S[k] ? 'Visível' : 'Oculto'}" onclick="carShow('${k}')">${S[k] ? '👁' : '◌'}</button>`;
+  r.innerHTML = `<div class="cs-top"><button class="btn sm" onclick="carBack()">← Carrosséis</button><input class="cs-name" value="${esc(c.name)}" oninput="carRename(this.value)"><span style="flex:1"></span><button class="btn sm" onclick="carPreview()">📱 Preview</button><button class="btn sm" onclick="carVersionSave()">Salvar versão</button><button class="btn sm" onclick="carNewModal('change')">Trocar modelo</button><button class="btn dark sm" onclick="carExport('zip')">⬇ Exportar PNG</button><button class="btn sm" onclick="carExport('design')">Abrir no Editor de Design</button></div>
+  <div class="cs-wrap"><div class="cs-left">
+    ${accSec('cs', 'cont', 'Conteúdo', has ? '18 textos' : 'vazio', `<div class="field"><label>Tema ou ideia</label><textarea rows="3" id="carIdea" oninput="carS().idea=this.value;carSave()" placeholder="Sobre o que é o carrossel? Cole um tema, tese ou texto.">${esc(c.idea)}</textarea></div>
+      <label class="ins inl"><input type="checkbox" ${c.useAgent && agentOK ? 'checked' : ''} ${agentOK ? '' : 'disabled'} onchange="carS().useAgent=this.checked;carSave()"> usar a ideia e o briefing do Agente Editorial${agentOK ? '' : ' (escolha uma ideia no Agente)'}</label>
+      <div class="field" style="margin-top:6px"><label>Estrutura da capa</label><select onchange="carS().cover=this.value;carSave()">${B.covers.map(x => `<option value="${x.id}" ${x.id === cov.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>
+      <div class="row-gap" style="flex-wrap:wrap"><button class="btn dark sm" onclick="carGenCover()" ${carState.busy || !ready ? 'disabled' : ''}>${carState.busy === 'cover' ? 'Gerando…' : '✦ Gerar capa'}</button><button class="btn dark sm" onclick="carGenAll()" ${carState.busy || !ready ? 'disabled' : ''}>${carState.busy === 'all' ? 'Escrevendo…' : '✦ Gerar texto do carrossel'}</button></div>
+      ${c.covers.length ? `<div class="okr-label" style="margin-top:8px">OPÇÕES DE CAPA</div>${c.covers.map((o, i) => `<label class="ent-opt ${o.titulo === c.texts[0] ? 'on' : ''}" style="flex-direction:column;gap:2px" onclick="carPickCover(${i})"><b style="font-size:12.5px">${esc(o.titulo)}</b><small class="muted">${esc(o.subtitulo)}</small></label>`).join('')}` : ''}
+      <div class="field" style="margin-top:8px"><label>Cole o texto aqui (lista numerada 1–18 ou parágrafos)</label><textarea rows="4" id="carPaste" placeholder="- Texto linha 1&#10;- Texto linha 2"></textarea></div>
+      <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm dark" onclick="carPasteApply()">Aplicar texto ➤</button><button class="btn sm" onclick="carTextsModal()">Editar os 18 textos</button><button class="btn sm" onclick="carCopy()">Copiar</button><button class="btn sm" onclick="carClear()">Limpar</button></div>`, true)}
+    ${accSec('cs', 'txt', 'Texto deste slide', carState.labels ? carState.labels[fr] || '' : '', idx.map(i => `<div class="field"><label>${i + 1} · ${esc(ED_CAR(i + 1, EDX().sizes)[0])} <small id="carc${i}" class="muted">${c.texts[i].length} / ${ED_CAR(i + 1, EDX().sizes)[1][0]}–${ED_CAR(i + 1, EDX().sizes)[1][1]}</small></label><textarea rows="${i === 0 || /^(Título)/.test(CAR_SLOTS[i]) ? 2 : 3}" oninput="carEdit(${i},this.value)">${esc(c.texts[i])}</textarea></div>`).join('') + '<small class="muted block">Use **palavra** para destacar na cor do estilo.</small>', true)}
+    ${accSec('cs', 'glob', 'Campos globais', 'nome, @, direitos, avatar', `<div class="cs-gf"><label>Nome da marca</label>${eye('name')}</div><input value="${esc(G.name)}" oninput="carG('name',this.value)"><div class="cs-gf"><label>@ do perfil</label>${eye('handle')}</div><input value="${esc(G.handle)}" placeholder="@seunegocio" oninput="carG('handle',this.value)"><div class="cs-gf"><label>Direitos / data</label>${eye('copyright')}</div><input value="${esc(G.copyright)}" oninput="carG('copyright',this.value)"><div class="cs-gf"><label>Avatar</label>${eye('avatar')}</div><div class="row-gap"><button class="btn sm" onclick="carAvatar()">📚 ${G.avatarId ? 'Trocar' : 'Escolher'}</button>${G.avatarId ? `<button class="btn sm" onclick="carG('avatarId','')">×</button>` : ''}</div><small class="muted block">Aparecem em todos os slides que têm cabeçalho; o olho liga e desliga.</small>`)}
+    ${accSec('cs', 'mid', 'Mídia', carMediaSum(c, nFrames), carMediaHTML(c, nFrames, fr))}
+    ${accSec('cs', 'cor', 'Cores, fundo e estilo', '', `<label class="ins">Estilo<select onchange="carS().style=this.value;carSave();carRenderAll()">${styles.map(s => `<option value="${esc(s.id)}" ${s.id === (c.style || styles[0].id) ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label><label class="ins inl"><input type="checkbox" ${c.dark ? 'checked' : ''} onchange="carS().dark=this.checked;carSave();carRenderAll()"> fundo escuro nos miolos</label>
+      <div class="okr-label" style="margin-top:8px">FUNDO DESTE SLIDE</div><div class="row-gap"><input type="color" value="${c.bgs[String(fr)] || '#ffffff'}" oninput="carBg(this.value)"><button class="btn sm" onclick="carBg('')">usar o do modelo</button></div>`)}
+    ${accSec('cs', 'grad', 'Gradiente', c.grad + '%', `<small class="muted block" style="margin-bottom:6px">Escurece a parte de baixo das fotos para o texto ficar legível. 0% = sem gradiente.</small><input type="range" min="0" max="100" value="${c.grad}" oninput="carGrad(this.value)" style="width:100%"><div class="row-gap"><button class="btn sm" onclick="carGrad(70,true)">Resetar</button></div>`)}
+    ${accSec('cs', 'cta', 'Botão (CTA)', c.cta.on ? 'ligado' : 'desligado', `<label class="ins inl"><input type="checkbox" ${c.cta.on ? 'checked' : ''} onchange="carCta('on',this.checked)"> mostrar botão no último slide</label><div class="field"><label>Texto do botão</label><input value="${esc(c.cta.text)}" placeholder="Salvar e compartilhar" oninput="carCta('text',this.value,true)"></div>
+      <div class="ins-row"><label class="ins">Estilo<select onchange="carCta('style',this.value)">${[['solid', 'Sólido'], ['outline', 'Contorno'], ['glass', 'Glass']].map(([v, n]) => `<option value="${v}" ${c.cta.style === v ? 'selected' : ''}>${n}</option>`).join('')}</select></label><label class="ins">Posição<select onchange="carCta('align',this.value)">${[['left', 'Esquerda'], ['center', 'Centro'], ['right', 'Direita']].map(([v, n]) => `<option value="${v}" ${c.cta.align === v ? 'selected' : ''}>${n}</option>`).join('')}</select></label><label class="ins">Ícone<select onchange="carCta('icon',this.value)">${[['', 'nenhum'], ['arrow', '→ seta'], ['send', '➤ enviar'], ['play', '▶ play'], ['heart', '♥ coração'], ['star', '★ estrela'], ['bookmark', '⚑ salvar']].map(([v, n]) => `<option value="${v}" ${c.cta.icon === v ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
+      <div class="ins-row"><label class="ins">Cor do botão<input type="color" value="${c.cta.color || '#e4572e'}" oninput="carCta('color',this.value,true)"></label><label class="ins">Cor do texto<input type="color" value="${c.cta.textColor || '#ffffff'}" oninput="carCta('textColor',this.value,true)"></label><button class="btn sm" onclick="carCta('color','');carCta('textColor','')">padrão</button></div>`)}
+    ${accSec('cs', 'prop', 'Proporção', c.ratio, `<div class="row-gap"><button class="btn sm ${c.ratio === '4:5' ? 'dark' : ''}" onclick="carRatio('4:5')">4:5 (feed)</button><button class="btn sm ${c.ratio === '9:16' ? 'dark' : ''}" onclick="carRatio('9:16')">9:16 (Stories/Reels)</button></div><small class="muted block">No 9:16 o fundo aumenta acima e abaixo; o conteúdo se reorganiza.</small>`)}
+    ${accSec('cs', 'hist', 'Histórico', c.versions.length ? c.versions.length + ' versões' : 'nenhuma', c.versions.length ? c.versions.map((v, i) => `<div class="list-item"><div><strong>${esc(v.label)}</strong><small>${esc(timeAgo(v.at))}</small></div><button class="btn sm" onclick="carVersionRestore(${i})">Restaurar</button></div>`).join('') : '<small class="muted">Use “Salvar versão” no topo para guardar o texto neste ponto.</small>')}
+  </div>
+  <div class="cs-center"><canvas id="carMain" class="cs-main"></canvas><div class="row-gap" style="justify-content:center;margin-top:8px"><button class="btn sm" onclick="carGo(-1)" ${fr === 0 ? 'disabled' : ''}>‹</button><small class="muted">Slide ${fr + 1} de ${nFrames}</small><button class="btn sm" onclick="carGo(1)" ${fr === nFrames - 1 ? 'disabled' : ''}>›</button></div><small class="muted block" style="text-align:center;margin-top:6px">Modelo: ${esc(carTplOf(c).name)}${carTplOf(c).short ? ' · funciona melhor com título curto' : ''}. Para ajustar posição e estilo de cada texto, use “Abrir no Editor de Design”.</small></div>
+  <div class="cs-right"><div class="okr-label">FRAMES</div><div id="carStrip" class="cs-strip"></div></div></div>`;
+  carRenderAll();
+}
+const carGo = d => { carUI.frame = Math.max(0, carUI.frame + d); renderCarrosseis(); };
+function carEdit(i, v) { const c = carS(); c.texts[i] = v.slice(0, 1200); carSave(); const el = $('carc' + i), rg = ED_CAR(i + 1, EDX().sizes)[1]; if (el) { el.textContent = `${v.length} / ${rg[0]}–${rg[1]}`; el.className = v && (v.length < rg[0] || v.length > rg[1]) ? 'bad' : 'muted'; } carRenderSoon(); }
+function carG(k, v) { const c = carS(); c.globals[k] = String(v).slice(0, 80); carSave(); if (k === 'avatarId') renderCarrosseis(); else carRenderSoon(); }
+function carShow(k) { const c = carS(); c.globals.show[k] = !c.globals.show[k]; carSave(); renderCarrosseis(); }
+function carAvatar() { libPick(r => { carS().globals.avatarId = r.id; carSave(); renderCarrosseis(); }); }
+function carBg(v) { const c = carS(); if (v) c.bgs[String(carUI.frame)] = v; else delete c.bgs[String(carUI.frame)]; carSave(); carRenderSoon(); }
+function carGrad(v, re) { const c = carS(); c.grad = Math.max(0, Math.min(100, Math.round(+v))); carSave(); if (re) renderCarrosseis(); else carRenderSoon(); }
+function carCta(k, v, quiet) { const c = carS(); c.cta[k] = v; carSave(); if (quiet) carRenderSoon(); else renderCarrosseis(); }
+function carRatio(r) { carS().ratio = r; carSave(); renderCarrosseis(); }
+function carMediaSum(c, n) { return Object.keys(c.media).length + ' de ' + n; }
+function carMediaHTML(c, n, fr) {
+  const cells = Array.from({length: n}, (_, i) => { const id = c.media[String(i)]; return `<div class="cs-slot ${i === fr ? 'cur' : ''}" onclick="carMedia(${i})" title="${id ? 'Trocar imagem do slide ' + (i + 1) : 'Escolher imagem do slide ' + (i + 1)}"><b>${i + 1}</b>${id ? `<img data-img="${id}" alt="">` : '<span>＋</span>'}${id ? `<i onclick="event.stopPropagation();carMediaClear(${i})">×</i>` : ''}</div>`; }).join('');
+  setTimeout(() => document.querySelectorAll('img[data-img]').forEach(async el => { try { const b = await imgGet(el.dataset.img); if (b) el.src = URL.createObjectURL(b); } catch (e) { /* sem miniatura */ } }), 30);
+  return `<small class="muted block" style="margin-bottom:6px">Um espaço por slide, da Biblioteca. Slides sem foto no modelo ignoram a imagem.</small><div class="cs-slots">${cells}</div>`;
+}
+function carMedia(i) { libPick(r => { carS().media[String(i)] = r.id; carSave(); renderCarrosseis(); }); }
+function carMediaClear(i) { delete carS().media[String(i)]; carSave(); renderCarrosseis(); }
+function carTextsModal() {
+  const c = carS(); showModal('Os 18 textos', `<small class="muted block" style="margin-bottom:6px">Editáveis, com faixa de caracteres por tipo.</small><div class="cs-18">${c.texts.map((t, i) => { const rg = ED_CAR(i + 1, EDX().sizes); return `<div class="field"><label>${i + 1} · ${esc(rg[0])} <small id="carc${i}" class="${t && (t.length < rg[1][0] || t.length > rg[1][1]) ? 'bad' : 'muted'}">${t.length} / ${rg[1][0]}–${rg[1][1]}</small></label><textarea rows="2" oninput="carEdit(${i},this.value)">${esc(t)}</textarea></div>`; }).join('')}</div><div class="modal-actions"><button class="btn dark" onclick="closeModal();renderCarrosseis()">Pronto</button></div>`);
+  document.getElementById('modalBox').classList.add('wide');
+}
+function carVersionSave() { const c = carS(); c.versions.unshift({at: new Date().toISOString(), label: (c.texts[0] || 'Versão').slice(0, 50), texts: c.texts.slice()}); c.versions = c.versions.slice(0, 12); carSave(); renderCarrosseis(); toast('Versão salva.'); }
+function carVersionRestore(i) { const c = carS(), v = c.versions[i]; if (!v) return; c.texts = v.texts.concat(Array(18).fill('')).slice(0, 18); carSave(); renderCarrosseis(); toast('Versão restaurada.'); }
+
+/* ---------- exportar ---------- */
+async function carExport(kind) {
+  const c = carS(); if (!c.texts.some(t => t.trim())) { toast('Escreva ou gere o texto primeiro.'); return; } toast('Montando os slides…');
   try {
-    const name = ((c.texts[0] || 'Carrossel').slice(0, 40)) + ' · carrossel', {set, tk} = carBuildSet(name); await ensureFonts(lyFamilies(tk)); await brandFontsLoad(p); await ensureSetResources(set);
-    p.design.sets.push(set); persist(); go('design'); dzOpen(set.id); toast('Slides criados. Clique nos textos para editar e arraste para mover.');
+    const {set} = carMake(c, {final: kind === 'zip'}); set.id = uid('ds'); set.name = c.name + ' · carrossel'; await ensureFonts(lyFamilies(set.tk)); await brandFontsLoad(curProject()); await ensureSetResources(set);
+    if (kind === 'zip') { download(slug(c.name) + '-carrossel.zip', await exportSetZip(set), 'application/zip'); toast('PNGs exportados (um por slide).'); return; }
+    curProject().design.sets.push(set); persist(); go('design'); dzOpen(set.id); toast('Slides criados. Clique nos textos para editar e arraste para mover.');
   } catch (e) { toast('Não consegui montar os slides: ' + e.message); }
 }
-/* Agente Editorial → Carrosséis: leva o carrossel gerado nas Entregas */
-function eEntToCarousel() { const E = entS().carrossel; if (!E) return; const c = carS(); c.texts = E.parts.map(p => p.texto || '').concat(Array(18).fill('')).slice(0, 18); carSave(); go('carrosseis'); toast('Carrossel levado para a área de Carrosséis.'); }
+
+/* ---------- preview no celular ---------- */
+async function carPreview() {
+  const c = carS(); if (!c.texts.some(t => t.trim())) { toast('Escreva ou gere o texto primeiro.'); return; }
+  const {set} = carMake(c, {final: true}); await ensureFonts(lyFamilies(set.tk)); await brandFontsLoad(curProject()); await ensureSetResources(set); const G = c.globals, W = set.format.w, H = set.format.h, pw = 300, ph = Math.round(pw * H / W);
+  let av = ''; if (G.avatarId) { try { const b = await imgGet(G.avatarId); if (b) av = URL.createObjectURL(b); } catch (e) { /* sem avatar */ } }
+  showModal('Preview no celular', `<div class="cs-phone"><div class="cs-notch"></div><div class="cs-ph-h">${av ? `<img src="${av}" alt="">` : `<span class="cs-av">${esc((G.name || '?').slice(0, 1).toUpperCase())}</span>`}<b>${esc(G.handle ? G.handle.replace(/^@/, '') : (G.name || ''))}</b><span class="cs-tick">✓</span><span style="flex:1"></span>⋮</div><div class="cs-ph-s" id="carPh" onscroll="carPhDots()">${set.slides.map((s, i) => `<canvas data-i="${i}" width="${pw * 2}" height="${ph * 2}" style="width:${pw}px;height:${ph}px"></canvas>`).join('')}</div><div class="cs-dots" id="carDots">${set.slides.map((s, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div><div class="cs-ph-a">♡ 💬 ➤ <span style="flex:1"></span>⚑</div><small class="muted">curtidas de exemplo · slide <span id="carPhN">1</span> de ${set.slides.length}</small></div><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`);
+  document.querySelectorAll('#carPh canvas').forEach(cv => renderSlide(cv.getContext('2d'), set.slides[+cv.dataset.i], W, H, cv.width / W));
+}
+function carPhDots() { const s = $('carPh'); if (!s) return; const i = Math.round(s.scrollLeft / s.clientWidth); document.querySelectorAll('#carDots i').forEach((d, k) => d.classList.toggle('on', k === i)); if ($('carPhN')) $('carPhN').textContent = i + 1; }
 
 </script>
 <script>
