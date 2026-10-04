@@ -29,7 +29,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -227,9 +227,21 @@ function normalizeLandings(x) {
   });
 }
 function normalizeCarousel(c) {
-  c = c && typeof c === 'object' ? c : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), T = (Array.isArray(c.texts) ? c.texts : []).slice(0, 18).map(t => str(t, 1200)); while (T.length < 18) T.push('');
-  return {base: /^[\w-]{1,30}$/.test(c.base || '') ? c.base : 'brandsdecoded', cover: /^[\w-]{1,30}$/.test(c.cover || '') ? c.cover : 'tese', style: /^[\w-]{0,40}$/.test(c.style || '') ? (c.style || '') : '', dark: !!c.dark, idea: str(c.idea, 4000), useAgent: c.useAgent !== false, texts: T,
-    covers: (Array.isArray(c.covers) ? c.covers : []).slice(0, 8).map(o => ({titulo: str(o && o.titulo, 300), subtitulo: str(o && o.subtitulo, 500)})).filter(o => o.titulo)};
+  c = c && typeof c === 'object' ? c : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')) ? String(v) : '', hex = v => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : '', T = (Array.isArray(c.texts) ? c.texts : []).slice(0, 18).map(t => str(t, 1200)); while (T.length < 18) T.push('');
+  const map = (o, f, n) => { const r = {}; if (o && typeof o === 'object') Object.keys(o).slice(0, 30).forEach(k => { if (/^\d{1,2}$/.test(k)) { const v = f(o[k]); if (v) r[k] = v; } }); return r; }, g = c.globals && typeof c.globals === 'object' ? c.globals : {}, ct = c.cta && typeof c.cta === 'object' ? c.cta : {};
+  return {id: sid(c.id) || uid('car'), name: str(c.name, 80) || 'Carrossel', stage: ['topo', 'meio', 'fundo'].includes(c.stage) ? c.stage : 'topo', tpl: /^[\w-]{1,40}$/.test(c.tpl || '') ? c.tpl : 'foto', ratio: c.ratio === '9:16' ? '9:16' : '4:5', grad: Math.max(0, Math.min(100, Math.round(+c.grad >= 0 ? +c.grad : 70))),
+    media: map(c.media, sid), bgs: map(c.bgs, hex), fx: map(c.fx, v => (v && typeof v === 'object' ? {x: Math.max(0, Math.min(1, +v.x || 0.5)), y: Math.max(0, Math.min(1, +v.y || 0.5))} : null)),
+    globals: {handle: str(g.handle, 60), name: str(g.name, 60), copyright: str(g.copyright, 80), verified: g.verified !== false, avatarId: sid(g.avatarId), show: {handle: !(g.show && g.show.handle === false), name: !(g.show && g.show.name === false), copyright: !(g.show && g.show.copyright === false), avatar: !(g.show && g.show.avatar === false)}},
+    cta: {on: ct.on !== false, text: str(ct.text, 40), style: ['solid', 'outline', 'glass'].includes(ct.style) ? ct.style : 'solid', align: ['left', 'center', 'right'].includes(ct.align) ? ct.align : 'left', icon: ['', 'arrow', 'send', 'play', 'heart', 'star', 'bookmark'].includes(ct.icon) ? ct.icon : 'arrow', color: hex(ct.color), textColor: hex(ct.textColor)},
+    versions: (Array.isArray(c.versions) ? c.versions : []).slice(0, 12).map(v => ({at: str(v && v.at, 40), label: str(v && v.label, 60), texts: (Array.isArray(v && v.texts) ? v.texts : []).slice(0, 18).map(t => str(t, 1200))})).filter(v => v.texts.length),
+    base: /^[\w-]{1,30}$/.test(c.base || '') ? c.base : 'brandsdecoded', cover: /^[\w-]{1,30}$/.test(c.cover || '') ? c.cover : 'tese', style: /^[\w-]{0,40}$/.test(c.style || '') ? (c.style || '') : '', dark: !!c.dark, idea: str(c.idea, 4000), useAgent: c.useAgent !== false, texts: T,
+    covers: (Array.isArray(c.covers) ? c.covers : []).slice(0, 8).map(o => ({titulo: str(o && o.titulo, 300), subtitulo: str(o && o.subtitulo, 500)})).filter(o => o.titulo), created: str(c.created, 40) || new Date().toISOString(), updated: str(c.updated, 40) || new Date().toISOString()};
+}
+/* vários carrosséis por projeto; o carrossel único antigo (p.carousel) vira o primeiro da lista, uma vez */
+function normalizeCarousels(arr, legacy) {
+  const out = (Array.isArray(arr) ? arr : []).filter(x => x && typeof x === 'object').slice(0, 100).map(normalizeCarousel);
+  if (!out.length && legacy && Array.isArray(legacy.texts) && legacy.texts.some(t => String(t).trim())) out.push(Object.assign(normalizeCarousel(legacy), {name: String(legacy.texts[0] || 'Carrossel').slice(0, 60)}));
+  return out;
 }
 function normalizeAudio(a) {
   const o = {voiceId: '', voiceName: '', items: {}}; if (!a || typeof a !== 'object') return o;
@@ -260,7 +272,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');

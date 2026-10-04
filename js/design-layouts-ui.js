@@ -1,6 +1,6 @@
 /* Galeria de modelos de layout (folha de contato) e criação de peça a partir de um modelo */
 const lyState = {group: 'Todos', q: '', style: ''};
-const LY_LABEL = {title: 'Título (use **palavra** para destacar)', sub: 'Texto de apoio', kicker: 'Chamada / etiqueta', button: 'Botão ou chamada final', handle: '@ ou assinatura', num: 'Número', label: 'Texto 2', items: 'Itens (um por linha; "Título|descrição" quando houver os dois)'};
+const LY_LABEL = {title: 'Título (use **palavra** para destacar)', sub: 'Texto de apoio', kicker: 'Chamada / etiqueta', button: 'Botão ou chamada final', handle: '@ ou assinatura', num: 'Número ou contagem', tag: 'Etiqueta do topo (série, episódio)', date: 'Data ou direitos (topo direito)', label: 'Texto 2', items: 'Itens (um por linha; "Título|descrição" quando houver os dois)'};
 const LY_NEUTRAL = () => makeTokens(DESIGN_STYLES[0], FONT_PAIRS[0], PHOTO_STYLES[0], {name: 'Neutro', accent: '#e4572e', second: '#1d3557', bg: '#f6f3ec', fg: '#141414', muted: '#6b6b6b'});
 
 /* estilos disponíveis para aplicar nos modelos: Kit de marca, estilos salvos e um neutro */

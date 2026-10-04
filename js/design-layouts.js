@@ -2,7 +2,7 @@
    Cada modelo monta a peça numa tela de 1080 de largura e escala para qualquer formato; cores e fontes vêm do estilo ativo (ou do Brand Kit).
    Só a estrutura é recriada: textos, marcas e imagens dos posts de referência não entram. */
 const LAYOUTS = [];
-const LAYOUT_GROUPS = ['Tipografia', 'Foto + texto', 'Camadas', 'Promoção e evento', 'Estrutura', 'Capas de vídeo'];
+const LAYOUT_GROUPS = ['Tipografia', 'Foto + texto', 'Camadas', 'Promoção e evento', 'Estrutura', 'Capas de vídeo', 'Capas de carrossel', 'Carrossel editorial'];
 
 /* ---- fontes por tipo: o modelo pede "condensada", "serifada", "manuscrita"; o estilo/Brand Kit decide a família ---- */
 const COND = ['Anton', 'Bebas Neue', 'Oswald', 'Barlow Condensed', 'Fjalla One', 'Archivo Narrow', 'Big Shoulders Display'];
@@ -32,7 +32,7 @@ function palette(tk, mode) {
   if (mode === 'dark') { bg = lum(tk.bg) < 0.1 ? tk.bg : lum(tk.fg) < 0.14 ? tk.fg : mixHex('#0b0b10', acc, 0.12); fg = '#ffffff'; mut = mixHex(bg, '#ffffff', 0.62); }
   else if (mode === 'accent') { bg = acc; fg = readable(acc); mut = mixHex(bg, fg, 0.7); ac = contrast(sec, bg) >= 2.2 ? sec : fg; }
   else { bg = lum(tk.bg) > 0.55 ? tk.bg : '#f6f3ec'; fg = lum(tk.fg) < 0.35 ? tk.fg : '#141414'; mut = mixHex(bg, fg, 0.55); }
-  return {bg, fg, mut, acc: ac, sec, on: readable(ac), inv: readable(bg), rev: readable(fg), alt: mixHex(bg, fg, 0.08), line: mixHex(bg, fg, 0.18), grad2: mixHex(acc, sec, 0.5)};
+  return {bg, fg, mut, acc: ac, sec, on: readable(ac), inv: readable(bg), rev: readable(fg), alt: mixHex(bg, fg, 0.08), line: mixHex(bg, fg, 0.18), grad2: mixHex(acc, sec, 0.5), brand: acc === ac ? acc : tk.accent, paper: mode === 'accent' ? mixHex('#ffffff', '#d9cfb8', 0.55) : mixHex(bg, fg, 0.08), ink: '#171717'};
 }
 /* aplica a paleta/fonte do papel à camada (também usado ao trocar o estilo da peça) */
 function themePal(L, tk, pal) {
