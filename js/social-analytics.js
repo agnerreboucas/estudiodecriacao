@@ -1,6 +1,6 @@
 /* ===== Analytics (Social): visão geral e insights · orgânico × pago · conteúdo e horários · localidades · importar dados · aprendizado (matriz) ===== */
-const anUI = {tab: 'geral', period: '30d', acc: 'todas', sort: 'alcance', imp: null};
-const AN_TABS = [['geral', 'Visão geral'], ['opago', 'Orgânico × pago'], ['conteudo', 'Conteúdo e horários'], ['locais', 'Localidades'], ['importar', 'Importar dados'], ['aprendizado', 'Aprendizado (matriz)']];
+const anUI = {tab: 'leads', period: '30d', acc: 'todas', sort: 'alcance', imp: null};
+const AN_TABS = [['leads', 'Leads e origem'], ['geral', 'Visão geral'], ['opago', 'Orgânico × pago'], ['conteudo', 'Conteúdo e horários'], ['locais', 'Localidades'], ['importar', 'Importar dados'], ['aprendizado', 'Aprendizado (matriz)']];
 const anF = KS.format, anE = esc;
 
 function anMetrics(S) {
@@ -14,6 +14,7 @@ function renderSocialAnalytics() {
     `<div class="edh-tabs">${AN_TABS.map(([k, l]) => `<button class="edh-tab ${anUI.tab === k ? 'on' : ''}" onclick="anUI.tab='${k}';renderSocialAnalytics()">${l}</button>`).join('')}</div><div id="anBody"></div>`;
   const b = $('anBody');
   if (anUI.tab === 'aprendizado') { b.innerHTML = performanceHTML(p); return; }
+  if (anUI.tab === 'leads') { b.innerHTML = typeof canUseApi === 'function' && canUseApi() && API.status.leads && API.status.leads.configured ? `<div class="panel"><h3>De onde vêm os leads</h3><div id="leadsOrigin"><p class="muted">Carregando…</p></div></div><div class="panel" style="margin-top:14px"><h3>Leads recebidos</h3><div id="leadsInbox"><p class="muted">Carregando…</p></div></div>` : `<div class="panel"><h3>Leads e origem</h3><p class="muted">Para ver os leads, a campanha de onde vieram e o canal, o servidor (api/) precisa estar ligado e o formulário das páginas apontando para ele (Configurações → URL de captura de leads). Os leads chegam com nome, telefone, e-mail e a origem (UTM) do anúncio.</p><button class="btn sm" onclick="utmOpen()">🔗 Gerar link com UTM</button></div>`; if ($('leadsInbox')) loadLeadsInbox(p.id); return; }
   if (!S.accounts.length && anUI.tab !== 'importar') { b.innerHTML = `<div class="panel"><h3>Ainda não há dados</h3><p class="muted">Cadastre uma conta e importe o histórico (aba “Importar dados”), ou carregue os dados de exemplo para conhecer as telas.</p><div class="row-gap"><button class="btn dark" onclick="go('publishingHub');soTab('contas')">Cadastrar conta</button><button class="btn" onclick="soExample();renderSocialAnalytics()">Carregar dados de exemplo</button></div></div>`; return; }
   ({geral: anGeral, opago: anOPago, conteudo: anConteudo, locais: anLocais, importar: anImportar})[anUI.tab](b, S);
 }

@@ -96,6 +96,7 @@ async function siteExport(id) {
   const pend = pages.reduce((n, l) => n + lpPending(l), 0); if (pend) toast(`Atenção: ${pend} item(ns) ainda como [CONFIRMAR].`); toast('Montando o ZIP…');
   const enc = new TextEncoder(), files = []; const imgSeen = new Set(); for (const l of pages) { const ex = lpExtractImgs(await lpHTML(l, p)); files.push({name: lpFile(l), data: enc.encode(ex.html)}); ex.files.forEach(f => { if (!imgSeen.has(f.name)) { imgSeen.add(f.name); files.push(f); } }); }
   const seen = new Set(); for (const l of pages) for (const a of await lpAssets(l, p)) if (!seen.has(a.name)) { seen.add(a.name); files.push(a); }
+  { const tl = pages.find(l => (l.thanks || {}).mode === 'page' || !l.thanks); if (tl && pages.some(l => (l.thanks || {}).mode !== 'none' && (l.thanks || {}).mode !== 'url' && (l.blocks.some(b => b.t === 'form' && b.on) || (l.vis && JSON.stringify(l.vis).includes('"t":"form"'))))) files.push({name: 'obrigado.html', data: enc.encode(await lpThanksHTML(pages.find(l => (l.thanks || {}).mode === 'page') || tl, p))}); }
   if (!files.some(f => f.name === 'index.html')) files[0] = {name: 'index.html', data: files[0].data};
   download(slug(s.name) + '-site.zip', makeZip(files), 'application/zip'); pages.forEach(l => { l.status = 'Exportada'; }); persist();
 }
