@@ -28,7 +28,8 @@ function preBrief(p) {
     b.budget && 'Orçamento: ' + b.budget, b.deadline && 'Prazo: ' + b.deadline, b.competitors && 'Concorrentes e referências: ' + b.competitors, b.notes && 'Observações: ' + b.notes,
     pre.briefing && 'Resumo do briefing: ' + pre.briefing, items.length && 'Desafios marcados: ' + items.map(i => i.title).join('; '),
     (br.tone || br.positioning) && `Marca: tom ${br.tone || '-'}; posicionamento ${br.positioning || '-'}`, (p.products || []).length && 'Produtos/serviços já cadastrados: ' + p.products.map(x => x.name + (x.summary ? ' (' + x.summary.slice(0, 120) + ')' : '')).join('; '),
-    b.original && 'RESPOSTAS ORIGINAIS (texto livre ou transcrição):\n' + String(b.original).slice(0, 7000)].filter(Boolean).join('\n');
+    p.bf && p.bf.text && 'BRIEFING DETALHADO PREENCHIDO PELO CLIENTE (fonte mais confiável sobre empresa, público e produtos):\n' + String(p.bf.text).slice(0, 14000),
+    b.original && 'RESPOSTAS ORIGINAIS (texto livre ou transcrição):\n' + String(b.original).slice(0, p.bf && p.bf.text ? 3500 : 7000)].filter(Boolean).join('\n');
 }
 async function preJSON(system, user, max) {
   const t = await aiText(system + '\nResponda APENAS com JSON válido (sem markdown, sem comentários, sem vírgula sobrando no fim). Português do Brasil.', user, max || 7000), s = String(t).replace(/```json|```/g, '').trim(), a = s.search(/[\[{]/), z = Math.max(s.lastIndexOf('}'), s.lastIndexOf(']'));

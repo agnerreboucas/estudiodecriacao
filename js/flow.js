@@ -5,6 +5,7 @@ const FLOW = [
   {n: '1', t: 'Cliente e pré-projeto', c: '#3b3b46', d: 'O cliente entra em contato, você agenda a reunião, entende a necessidade e monta o pré-projeto.', items: [
     [null, 'Contato e reunião', 'Primeiro contato e agenda da reunião. Entra junto com o CRM.', 'soon'],
     ['projects', 'Projetos', 'Um projeto por cliente. A IA lê as respostas e gera o pré-projeto completo: ICPs, produtos e serviços, linha editorial.', 'ok'],
+    ['projects', 'Briefing do cliente', 'Formulário que o cliente preenche por link (empresa, público, produtos e serviços). As respostas viram a base do pré-projeto.', 'ok'],
     ['matrix', 'Matriz de Criação', 'ICPs com dores, dúvidas, desejos e dores ocultas, cruzados com os serviços. Gera a matriz de conteúdo.', 'ok'],
     ['brand', 'Brand Brain', 'Marca: cores, fontes, tom e logo. Tem logo, suba aqui; não tem, crie no Estúdio de Design (Logo Lab).', 'ok'],
     ['inspiration', 'Inspiração', 'Referências e concorrentes.', 'ok']]},
@@ -24,7 +25,7 @@ const FLOW = [
   {n: '5', t: 'Mostrar ao cliente', c: '#7c4dbd', d: 'Aprovar, publicar e mostrar os anúncios que estão no ar.', items: [
     ['approval', 'Aprovação', 'Fila de revisão das peças.', 'ok'],
     ['publishingHub', 'Publicação', 'Calendário, legenda e envio por rede.', 'part'],
-    [null, 'Vitrine do cliente', 'Uma página para mostrar ao cliente os anúncios no ar.', 'soon']]},
+    [null, 'Portal do cliente', 'Área para o cliente ver o projeto, o cronograma, as peças e os anúncios no ar, e aprovar.', 'soon']]},
   {n: '6', t: 'Resultados e vendas', c: '#c9952a', d: 'Alcance, cliques, de onde vêm e quem interage. Depois, o CRM.', items: [
     ['analyticsHub', 'Performance', 'Alcance, cliques, leads, origem e público. Importa do Meta Ads.', 'part'],
     [null, 'Dashboard para o cliente', 'O que hoje fica no Looker Studio, dentro do Studio e para compartilhar.', 'soon'],

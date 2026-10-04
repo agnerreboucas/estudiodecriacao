@@ -819,7 +819,7 @@ textarea,input,select{max-width:100%}
     <div class="rail-grp" data-g="Mostrar ao cliente"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">5 · Mostrar ao cliente</span><small>Aprovar, publicar e apresentar</small><i aria-hidden="true">▾</i></button><div class="rail-items">
       <button data-page="approval" title="Aprovação"><span data-ico="check"></span><span class="rail-lb">Aprovação</span></button>
       <button data-page="publishingHub" title="Publicação"><span data-ico="send"></span><span class="rail-lb">Publicação</span></button>
-      <button type="button" class="rail-soon" disabled title="Vitrine do cliente (em breve)"><span data-ico="inbox"></span><span class="rail-lb">Vitrine do cliente<em>em breve</em></span></button>
+      <button type="button" class="rail-soon" disabled title="Portal do cliente (em breve)"><span data-ico="inbox"></span><span class="rail-lb">Portal do cliente<em>em breve</em></span></button>
     </div></div>
     <div class="rail-grp" data-g="Resultados e vendas"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">6 · Resultados e vendas</span><small>Dashboard e CRM</small><i aria-hidden="true">▾</i></button><div class="rail-items">
       <button data-page="analyticsHub" title="Performance"><span data-ico="chart"></span><span class="rail-lb">Performance</span></button>
@@ -2201,6 +2201,7 @@ function renderPre() {
 
   c.innerHTML = `
   <div class="jp-wrap">
+    ${typeof briefingPanel === 'function' ? briefingPanel(p) : ''}
     <div class="jp-panel" style="border:2px solid #111"><div class="section-row"><div><h3 style="margin:0">✦ Gerar o pré-projeto completo com IA</h3><p class="sub" style="margin:2px 0 0">A IA lê todas as respostas do projeto e monta o briefing do projeto inteiro: diagnóstico, objetivo, resumo, pitch, <b>ICPs com dores, dúvidas, desejos e dores ocultas</b>, jornada, <b>produtos e serviços</b>, pilares da linha editorial e a matriz de conteúdo. Tudo fica editável e alimenta anúncios, conteúdo e landing pages.</p></div><div class="row-gap"><button class="btn dark" onclick="preGenAll()">✦ Gerar pré-projeto</button><button class="btn" onclick="go('matrix')">Ver matriz de conteúdo</button></div></div>${pre.gen && pre.gen.at ? `<small class="muted">Última geração: ${fmtDateTime(pre.gen.at)}. ${(pre.pillars || []).length} pilar(es) de conteúdo.</small>` : ''}</div>
     <div class="jp-head"><div><div class="eyebrow">JOURNEY ARCHITECT · MOTOR DO PROJETO</div><h2>Diagnóstico & Pré-Projeto</h2><p>Transforme desafios em hipóteses, diagnóstico, justificativa e objetivo mensurável. O pré-projeto define onde começar sem antecipar decisões que dependem do posicionamento.</p></div>
       <div class="jp-actions"><span class="jp-status st-${pre.status.replace(/\s/g, '').toLowerCase()}" id="jpStatus">${pre.status}</span><button class="btn dark" onclick="preDeckOpen()" title="Abre os slides no Editor de Design">▣ Apresentação</button><button class="btn" onclick="preDeckOpen(true)" title="Refaz os slides a partir do Pré-Projeto">↻ Slides</button><button class="btn" onclick="prePresent()" title="Documento completo em HTML">▤ Documento</button><button class="btn" onclick="prePDF()">PDF</button><button class="btn" onclick="exportProject('${p.id}')" title="Baixar o projeto em JSON">⬇ JSON</button>${flow}</div></div>
@@ -8670,6 +8671,7 @@ function gateBanner(p) {
 }
 function nextActions(p) {
   const a = [], pre = p.pre, pend = p.approvals.filter(x => x.status === 'Pendente').length;
+  if (typeof bfStore === 'function' && !bfStore(p).t && !(p.brief && p.brief.offer && String(p.brief.offer).length > 120)) a.push(['Enviar o briefing detalhado ao cliente', 'Empresa, público e cada produto ou serviço', "ui.tab='preproject';renderProjectTab()"]);
   if (pre.status !== 'APROVADO') a.push(['Concluir e aprovar o Pré-Projeto', 'Status: ' + pre.status, "ui.tab='preproject';renderProjectTab()"]);
   else if (!pre.positioning) a.push(['Definir o Posicionamento', 'Gate depois do pré-projeto aprovado', "ui.tab='strategy';renderProjectTab()"]);
   if (!p.matrix.concepts.length) a.push(['Gerar conceitos na Matriz de Criação', 'Primeiro conceito, depois produção', "go('matrix')"]);
@@ -19250,6 +19252,7 @@ const FLOW = [
   {n: '1', t: 'Cliente e pré-projeto', c: '#3b3b46', d: 'O cliente entra em contato, você agenda a reunião, entende a necessidade e monta o pré-projeto.', items: [
     [null, 'Contato e reunião', 'Primeiro contato e agenda da reunião. Entra junto com o CRM.', 'soon'],
     ['projects', 'Projetos', 'Um projeto por cliente. A IA lê as respostas e gera o pré-projeto completo: ICPs, produtos e serviços, linha editorial.', 'ok'],
+    ['projects', 'Briefing do cliente', 'Formulário que o cliente preenche por link (empresa, público, produtos e serviços). As respostas viram a base do pré-projeto.', 'ok'],
     ['matrix', 'Matriz de Criação', 'ICPs com dores, dúvidas, desejos e dores ocultas, cruzados com os serviços. Gera a matriz de conteúdo.', 'ok'],
     ['brand', 'Brand Brain', 'Marca: cores, fontes, tom e logo. Tem logo, suba aqui; não tem, crie no Estúdio de Design (Logo Lab).', 'ok'],
     ['inspiration', 'Inspiração', 'Referências e concorrentes.', 'ok']]},
@@ -19269,7 +19272,7 @@ const FLOW = [
   {n: '5', t: 'Mostrar ao cliente', c: '#7c4dbd', d: 'Aprovar, publicar e mostrar os anúncios que estão no ar.', items: [
     ['approval', 'Aprovação', 'Fila de revisão das peças.', 'ok'],
     ['publishingHub', 'Publicação', 'Calendário, legenda e envio por rede.', 'part'],
-    [null, 'Vitrine do cliente', 'Uma página para mostrar ao cliente os anúncios no ar.', 'soon']]},
+    [null, 'Portal do cliente', 'Área para o cliente ver o projeto, o cronograma, as peças e os anúncios no ar, e aprovar.', 'soon']]},
   {n: '6', t: 'Resultados e vendas', c: '#c9952a', d: 'Alcance, cliques, de onde vêm e quem interage. Depois, o CRM.', items: [
     ['analyticsHub', 'Performance', 'Alcance, cliques, leads, origem e público. Importa do Meta Ads.', 'part'],
     [null, 'Dashboard para o cliente', 'O que hoje fica no Looker Studio, dentro do Studio e para compartilhar.', 'soon'],
@@ -19365,6 +19368,139 @@ function utmCopy() { const o = $('utmOut'); o.select(); try { navigator.clipboar
 
 </script>
 <script>
+/* ===== Briefing do cliente: perguntas do formulário (usadas pela página pública briefing.html e pelo Studio),
+   texto para a IA e planilha (CSV). Tipos: text, tel, email, url, area, select, checks. ===== */
+const BF_TONES = ['Formal', 'Próximo e acolhedor', 'Técnico', 'Direto', 'Divertido', 'Inspirador', 'Sério e seguro'];
+const BF_SECTIONS = [
+  {k: 'contato', t: 'Quem está respondendo', d: 'Para a gente falar com a pessoa certa.', f: [
+    ['nome', 'Seu nome', 'text', 1], ['cargo', 'Seu cargo ou função', 'text'], ['whatsapp', 'Seu WhatsApp (com DDD)', 'tel', 1], ['email', 'Seu e-mail', 'email']]},
+  {k: 'empresa', t: 'Sobre a empresa', d: 'Conte como se estivesse apresentando a empresa para alguém que não a conhece.', f: [
+    ['nome', 'Nome da empresa (como as pessoas a conhecem)', 'text', 1], ['razao', 'Razão social ou CNPJ (opcional)', 'text'], ['site', 'Site (se tiver)', 'url'], ['instagram', 'Instagram (link ou @)', 'text'], ['redes', 'Outras redes: Facebook, TikTok, LinkedIn, YouTube', 'text'],
+    ['cidade', 'Cidade e região onde atende', 'text'], ['tempo', 'Há quanto tempo a empresa existe', 'text'], ['equipe', 'Tamanho da equipe', 'text'],
+    ['historia', 'A história da empresa, em poucas linhas', 'area'], ['missao', 'Missão, valores e propósito (se existirem)', 'area'],
+    ['diferenciais', 'O que a empresa faz melhor do que os concorrentes? (um por linha)', 'area'],
+    ['tom', 'Como a empresa fala com as pessoas?', 'checks', BF_TONES], ['usar', 'Palavras e expressões que a empresa USA', 'area'], ['evitar', 'Palavras e assuntos que a empresa EVITA', 'area'],
+    ['regras', 'Regras do setor que a comunicação precisa seguir (OAB, CRM, CREA, ANVISA...). O que é proibido anunciar?', 'area']]},
+  {k: 'publico', t: 'O cliente do seu cliente', d: 'Quem compra de você e como ele pensa. Escreva do jeito que ele fala.', f: [
+    ['quem', 'Quem são os seus clientes? (perfil, idade, cidade, profissão)', 'area'], ['decide', 'Quem decide a compra? Alguém mais participa?', 'text'],
+    ['situacoes', 'Em que situações as pessoas procuram vocês? (liste as mais comuns, uma por linha)', 'area'],
+    ['problemas', 'Quais problemas e dores elas têm quando chegam? (uma por linha)', 'area'], ['perguntas', 'Que perguntas elas sempre fazem antes de contratar ou comprar? (uma por linha)', 'area'],
+    ['desejos', 'O que elas querem alcançar?', 'area'], ['ocultas', 'O que elas sentem, mas não costumam dizer? (medo, vergonha, desconfiança)', 'area'],
+    ['objecoes', 'Que objeções aparecem? ("é caro", "preciso pensar", "já tentei antes")', 'area'], ['descobre', 'Como elas encontram vocês hoje?', 'checks', ['Indicação', 'Instagram', 'Google', 'Facebook', 'WhatsApp', 'Site', 'Anúncios', 'Parceiros', 'Eventos']],
+    ['perdem', 'Por que algumas pessoas procuram e não fecham?', 'area']]},
+  {k: 'produtos', t: 'Produtos e serviços', d: 'Cadastre cada produto ou serviço que quer divulgar (até 8). Quanto mais detalhe, melhores serão os anúncios, os posts e a página de vendas.', repeat: 8, item: 'Produto ou serviço', f: [
+    ['nome', 'Nome', 'text', 1], ['tipo', 'Tipo', 'select', ['Serviço', 'Produto', 'Curso ou treinamento', 'Evento', 'Outro']], ['oque', 'O que é, em 2 ou 3 frases', 'area'], ['paraquem', 'Para quem é', 'area'],
+    ['como', 'Como funciona? Etapas, do primeiro contato até a entrega', 'area'], ['incluso', 'O que está incluso', 'area'], ['preco', 'Preço ou faixa de preço (ou "sob consulta")', 'text'], ['prazo', 'Prazo de entrega ou duração', 'text'],
+    ['diferencial', 'Por que escolher este e não o do concorrente?', 'area'], ['perguntas', 'Perguntas que as pessoas fazem sobre ele (uma por linha)', 'area'],
+    ['provas', 'Resultados, casos e depoimentos REAIS que você pode usar (só o que é verdadeiro e autorizado)', 'area'], ['objecoes', 'Objeções mais comuns', 'area'],
+    ['acao', 'O que a pessoa deve fazer ao ver o anúncio?', 'select', ['Agendar uma conversa', 'Falar no WhatsApp', 'Pedir orçamento', 'Comprar online', 'Preencher um formulário', 'Outro']], ['link', 'Link de compra ou agendamento (se houver)', 'url']]},
+  {k: 'concorrencia', t: 'Concorrentes e referências', f: [
+    ['lista', 'Quem são os principais concorrentes? (nome e @ ou site, um por linha)', 'area'], ['admira', 'Quais empresas ou perfis você admira? O que gosta neles?', 'area'], ['naoquer', 'O que você NÃO quer que a empresa pareça?', 'area']]},
+  {k: 'marketing', t: 'Marketing e vendas hoje', f: [
+    ['canais', 'O que já usam hoje? (Instagram, Google, anúncios, blog, indicação...)', 'area'], ['ja', 'O que já foi feito e funcionou? O que não funcionou?', 'area'],
+    ['orcamento', 'Orçamento mensal para anúncios (faixa; pode ser aproximado)', 'text'], ['metas', 'Metas para os próximos meses (contatos, vendas, agendamentos por mês)', 'area'], ['prazo', 'Datas importantes ou prazos', 'text'],
+    ['atendimento', 'Quem atende os contatos? Em que horários? Responde rápido no WhatsApp?', 'area'], ['ferramentas', 'Usam algum CRM, planilha ou sistema de vendas?', 'text']]},
+  {k: 'materiais', t: 'Materiais e acessos', d: 'Cole links (Google Drive, Dropbox...). Não envie senhas por aqui.', f: [
+    ['logo', 'Link com a logo (de preferência em PNG ou SVG)', 'url'], ['fotos', 'Link com fotos da empresa, da equipe e dos produtos', 'url'], ['videos', 'Link com vídeos', 'url'], ['marca', 'Cores, fontes ou manual de marca (link ou descrição)', 'area'], ['outros', 'Outros materiais úteis (apresentações, tabelas de preço, depoimentos)', 'area']]}
+];
+const bfSec = k => BF_SECTIONS.find(s => s.k === k);
+const bfStr = v => (Array.isArray(v) ? v.join(', ') : String(v == null ? '' : v)).trim();
+/* respostas em texto corrido, para a IA e para ler */
+function bfText(a, name) {
+  a = a || {}; const L = [`BRIEFING DETALHADO DO CLIENTE${name ? ' · ' + name : ''}`];
+  BF_SECTIONS.forEach(s => {
+    if (s.repeat) { const items = (Array.isArray(a[s.k]) ? a[s.k] : []).filter(x => x && bfStr(x.nome)); if (!items.length) return; L.push(`\n## ${s.t}`); items.forEach((it, i) => { L.push(`\n${s.item} ${i + 1}: ${bfStr(it.nome)}`); s.f.slice(1).forEach(([k, l]) => { const v = bfStr(it[k]); if (v) L.push(`- ${l}: ${v}`); }); }); return; }
+    const x = a[s.k] || {}, rows = s.f.map(([k, l]) => [l, bfStr(x[k])]).filter(r => r[1]); if (!rows.length) return; L.push(`\n## ${s.t}`); rows.forEach(([l, v]) => L.push(`- ${l}: ${v}`));
+  });
+  return L.join('\n');
+}
+/* planilha: uma linha por pergunta respondida */
+function bfRows(a) {
+  a = a || {}; const R = [['Seção', 'Item', 'Pergunta', 'Resposta']];
+  BF_SECTIONS.forEach(s => { if (s.repeat) (Array.isArray(a[s.k]) ? a[s.k] : []).forEach((it, i) => { if (!it || !bfStr(it.nome)) return; s.f.forEach(([k, l]) => { const v = bfStr(it[k]); if (v) R.push([s.t, (s.item + ' ' + (i + 1)), l, v]); }); }); else { const x = a[s.k] || {}; s.f.forEach(([k, l]) => { const v = bfStr(x[k]); if (v) R.push([s.t, '', l, v]); }); } });
+  return R;
+}
+/* o que falta para poder enviar */
+function bfMissing(a) {
+  a = a || {}; const m = []; if (!bfStr((a.empresa || {}).nome)) m.push('nome da empresa'); if (!bfStr((a.contato || {}).nome)) m.push('seu nome'); if (!bfStr((a.contato || {}).whatsapp)) m.push('seu WhatsApp');
+  if (!(Array.isArray(a.produtos) ? a.produtos : []).some(x => x && bfStr(x.nome))) m.push('pelo menos um produto ou serviço'); if (!a.aceite) m.push('a autorização de uso das informações'); return m;
+}
+
+</script>
+<script>
+/* ===== Briefing do cliente no Studio: criar o link, acompanhar o status, importar as respostas (empresa, público, produtos e serviços, voz) e baixar a planilha ===== */
+const BFX = {busy: '', answers: null};
+const bfStore = p => { if (!p.bf || typeof p.bf !== 'object') p.bf = {}; return Object.assign(p.bf, {t: p.bf.t || '', name: p.bf.name || '', createdAt: p.bf.createdAt || '', importedAt: p.bf.importedAt || '', status: p.bf.status || '', submittedAt: p.bf.submittedAt || '', updatedAt: p.bf.updatedAt || '', text: p.bf.text || '', prev: p.bf.prev || {}}); };
+const bfURL = t => location.origin + location.pathname.replace(/[^/]*$/, '') + 'briefing.html?t=' + t;
+const bfLines = v => String(v || '').split(/\n+/).map(x => x.replace(/^[\s\-•*\d.)]+/, '').trim()).filter(Boolean);
+function briefingPanel(p) {
+  const b = bfStore(p), head = `<h3 style="margin:0">📋 Briefing do cliente</h3>`;
+  const wrap = body => `<div class="jp-panel">${body}</div>`;
+  if (typeof API === 'undefined' || !API.available) return wrap(`<div class="section-row"><div>${head}<p class="sub" style="margin:2px 0 0">O cliente preenche um formulário e as respostas chegam aqui. Para receber, o Studio precisa estar no servidor (Hostinger): neste arquivo local não dá para receber respostas.</p></div></div>`);
+  if (typeof needsLogin === 'function' && needsLogin()) return wrap(`<div class="section-row"><div>${head}<p class="sub" style="margin:2px 0 0">Entre no Studio para criar o link do briefing.</p></div><button class="btn dark" onclick="showLogin()">Entrar</button></div>`);
+  if (!b.t) return wrap(`<div class="section-row"><div>${head}<p class="sub" style="margin:2px 0 0">Um formulário completo sobre a empresa, o público e cada produto ou serviço. O cliente preenche pelo link (pode salvar e voltar depois), você recebe por e-mail e planilha, e importa tudo para o projeto. A IA usa isso para criar anúncios, posts e as copies das landing pages.</p></div><button class="btn dark" onclick="bfCreate()" ${BFX.busy ? 'disabled' : ''}>Criar link do briefing</button></div>`);
+  const url = bfURL(b.t), st = b.status === 'enviado' ? `<span class="so-badge" style="margin:0;background:#e9f7ee;color:#176b30">Enviado${b.submittedAt ? ' em ' + esc(fmtDateTime(b.submittedAt)) : ''}</span>` : b.updatedAt ? `<span class="so-badge" style="margin:0">Preenchendo (salvo ${esc(fmtDateTime(b.updatedAt))})</span>` : `<span class="so-badge" style="margin:0">Aguardando o cliente</span>`;
+  const msg = encodeURIComponent(`Olá! Para eu montar o seu projeto de marketing, preciso conhecer melhor a empresa e os produtos/serviços. Pode preencher este formulário (leva uns 20 minutos e salva sozinho): ${url}`);
+  return wrap(`<div class="section-row"><div>${head}<p class="sub" style="margin:2px 0 0">Status: ${st}${b.importedAt ? ` · importado em ${esc(fmtDateTime(b.importedAt))}` : ''}</p></div><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="bfRefresh()">↻ Atualizar</button><button class="btn sm dark" onclick="bfImport()" ${b.updatedAt || b.status === 'enviado' ? '' : 'disabled'}>⇣ Importar respostas</button></div></div>
+    <div class="row-gap" style="flex-wrap:wrap;margin-top:8px"><input readonly value="${esc(url)}" style="flex:1;min-width:240px" onclick="this.select()"><button class="btn sm" onclick="bfCopy()">Copiar</button><a class="btn sm" href="https://wa.me/?text=${msg}" target="_blank" rel="noopener">Enviar por WhatsApp</a><a class="btn sm" href="${esc(url)}" target="_blank" rel="noopener">Abrir</a></div>
+    <div class="row-gap" style="flex-wrap:wrap;margin-top:8px"><button class="btn sm" onclick="bfView()">Ver respostas</button><button class="btn sm" onclick="bfCsv()">⬇ Planilha (CSV)</button><button class="btn sm" onclick="bfRevoke()">Desativar link</button></div>
+    <small class="muted block" style="margin-top:6px">Quando o cliente enviar, os e-mails do gestor (Configurações → Integrações → Distribuição de leads) recebem um aviso e a planilha conectada recebe as respostas.</small>`);
+}
+function bfRerender() { if (ui.page === 'project' && ui.tab === 'preproject' && typeof renderPre === 'function') keepScroll(renderPre); }
+async function bfCreate() {
+  const p = curProject(); BFX.busy = 'c';
+  try { const j = await api('briefing.php', {method: 'POST', body: {action: 'create', project: p.id, name: p.client || p.name}}); const b = bfStore(p); Object.assign(b, {t: j.t, name: p.client || p.name, createdAt: new Date().toISOString(), status: 'rascunho', submittedAt: '', updatedAt: '', importedAt: ''}); persist(); toast('Link criado. Copie e envie ao cliente.'); }
+  catch (e) { toast(e.message); } BFX.busy = ''; bfRerender();
+}
+async function bfFetch() { const b = bfStore(curProject()); const j = await api('briefing.php', {method: 'POST', body: {action: 'get', t: b.t}}); return j.record; }
+async function bfRefresh() {
+  const p = curProject(), b = bfStore(p); try { const r = await bfFetch(); b.status = r.status || 'rascunho'; b.submittedAt = r.submittedAt || ''; b.updatedAt = r.updatedAt || ''; BFX.answers = r.answers || {}; persist(); toast(r.status === 'enviado' ? 'O cliente já enviou o briefing.' : r.updatedAt ? 'O cliente está preenchendo.' : 'Ainda sem respostas.'); } catch (e) { toast(e.message); } bfRerender();
+}
+function bfCopy() { const t = bfURL(bfStore(curProject()).t); try { navigator.clipboard.writeText(t); toast('Link copiado.'); } catch (e) { prompt('Copie o link:', t); } }
+async function bfRevoke() {
+  if (!confirm('Desativar este link? O cliente não conseguirá mais abrir o formulário (as respostas já recebidas continuam no servidor).')) return; const p = curProject(), b = bfStore(p);
+  try { await api('briefing.php', {method: 'POST', body: {action: 'revoke', t: b.t}}); } catch (e) { toast(e.message); return; } b.t = ''; b.status = ''; persist(); bfRerender();
+}
+async function bfView() { try { const r = await bfFetch(); showModal('Respostas do briefing', `<pre style="white-space:pre-wrap;max-height:60vh;overflow:auto;font:13px/1.5 system-ui">${esc(bfText(r.answers, curProject().name))}</pre><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`); $('modalBox').classList.add('wide'); } catch (e) { toast(e.message); } }
+async function bfCsv() {
+  try { const r = await bfFetch(), q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; download('briefing-' + slug(curProject().name) + '.csv', '﻿' + bfRows(r.answers).map(x => x.map(q).join(',')).join('\r\n'), 'text/csv'); } catch (e) { toast(e.message); }
+}
+/* respostas → projeto: ficha, voz, produtos e serviços (o que o cliente já respondeu não é apagado) */
+function bfApply(p, a) {
+  const b = bfStore(p), E = a.empresa || {}, C = a.contato || {}, P = a.publico || {}, K = a.concorrencia || {}, M = a.marketing || {}, br = p.brief, S = bfStr;
+  const prods = (Array.isArray(a.produtos) ? a.produtos : []).filter(x => x && S(x.nome));
+  const put = (k, v) => { v = S(v); if (!v) return; const cur = String(br[k] || '').trim(); if (!cur || cur === (b.prev[k] || '')) { br[k] = v; b.prev[k] = v; } };
+  put('offer', prods.map(x => S(x.nome) + (S(x.oque) ? ': ' + S(x.oque) : '')).join('\n')); put('audience', P.quem); put('problem', P.problemas); put('goal', M.metas); put('channels', M.canais); put('budget', M.orcamento); put('deadline', M.prazo); put('competitors', K.lista);
+  const who = `Responsável pelo briefing: ${S(C.nome)}${S(C.cargo) ? ' (' + S(C.cargo) + ')' : ''}${S(C.whatsapp) ? ' · WhatsApp ' + S(C.whatsapp) : ''}${S(C.email) ? ' · ' + S(C.email) : ''}`;
+  if (!String(br.notes || '').includes('Responsável pelo briefing:')) br.notes = (br.notes ? br.notes + '\n' : '') + who;
+  if (!String(p.client || '').trim() && S(E.nome)) p.client = S(E.nome);
+  const v = p.voice || (p.voice = {}); const fill = (o, k, x) => { x = S(x); if (x && !String(o[k] || '').trim()) o[k] = x; };
+  fill(v, 'vocabulary', E.usar); fill(v, 'antivocab', E.evitar); fill(v, 'rules', E.regras); fill(v, 'personality', Array.isArray(E.tom) ? E.tom.join(', ') : E.tom); if (p.brand) fill(p.brand, 'tone', Array.isArray(E.tom) ? E.tom.join(', ') : E.tom);
+  const TY = {'Serviço': 'servico', 'Produto': 'produto', 'Curso ou treinamento': 'curso', 'Evento': 'evento'}; let added = 0, upd = 0; const list = (p.products = p.products || []);
+  prods.forEach(x => {
+    const cand = {name: S(x.nome), type: TY[S(x.tipo)] || 'servico', summary: S(x.oque), audience: S(x.paraquem), price: S(x.preco), checkout: /^https?:\/\/\S+$/i.test(S(x.link)) ? S(x.link) : '',
+      benefits: bfLines(x.diferencial), features: bfLines(x.como).concat(bfLines(x.incluso).map(t => 'Incluso: ' + t), S(x.prazo) ? ['Prazo: ' + S(x.prazo)] : []), objections: bfLines(x.objecoes).concat(bfLines(x.perguntas)), proofs: bfLines(x.provas)};
+    const ex = list.find(y => y.name.toLowerCase() === cand.name.toLowerCase());
+    if (ex) { ['summary', 'audience', 'price', 'checkout'].forEach(k => { if (!String(ex[k] || '').trim() && cand[k]) ex[k] = cand[k]; }); ['benefits', 'features', 'objections', 'proofs'].forEach(k => { if (!(ex[k] || []).length && cand[k].length) ex[k] = cand[k]; }); upd++; }
+    else { list.push(Object.assign({id: uid('pd'), images: []}, cand)); added++; }
+  });
+  p.products = normalizeProducts(list);
+  b.text = bfText(a, p.name).slice(0, 40000); b.importedAt = new Date().toISOString();
+  if (p.pre && p.pre.history) p.pre.history.unshift({at: b.importedAt, action: 'Briefing do cliente importado', note: `${added} produto(s)/serviço(s) novo(s), ${upd} atualizado(s).`});
+  return {added, upd};
+}
+async function bfImport() {
+  const p = curProject(), b = bfStore(p);
+  try {
+    const r = await bfFetch(), a = r.answers || {}; if (!bfText(a).split('\n').length || bfText(a).length < 60) { toast('Ainda não há respostas para importar.'); return; }
+    const miss = bfMissing(a); if (r.status !== 'enviado' && !confirm('O cliente ainda não enviou o briefing (falta: ' + miss.join(', ') + '). Importar o que já foi preenchido?')) return;
+    const x = bfApply(p, a); b.status = r.status; b.submittedAt = r.submittedAt || ''; b.updatedAt = r.updatedAt || ''; persist();
+    showModal('Briefing importado', `<p>As respostas foram para o projeto: ficha do briefing, voz da marca, <b>${x.added}</b> produto(s) ou serviço(s) novo(s) e ${x.upd} atualizado(s). O que você já tinha preenchido foi mantido.</p><p class="muted" style="font-size:13px">Agora a IA usa esse material quando você gerar o pré-projeto, os anúncios, os posts e as páginas.</p><div class="modal-actions"><button class="btn" onclick="closeModal();bfRerender()">Fechar</button><button class="btn dark" onclick="closeModal();preGenAll(true)">✦ Gerar o pré-projeto agora</button></div>`);
+  } catch (e) { toast(e.message); } bfRerender();
+}
+
+</script>
+<script>
 /* ===== Motor do pré-projeto: lê o briefing e as respostas do projeto e monta o PRÉ-PROJETO COMPLETO com IA, em 3 etapas:
    1) diagnóstico, objetivo, resumo, pitch e cuidados do setor · 2) ICPs (dores, dúvidas, desejos, dores ocultas) e jornada ·
    3) produtos/serviços, pilares da linha editorial e as variáveis da Matriz de Criação.
@@ -19395,7 +19531,8 @@ function preBrief(p) {
     b.budget && 'Orçamento: ' + b.budget, b.deadline && 'Prazo: ' + b.deadline, b.competitors && 'Concorrentes e referências: ' + b.competitors, b.notes && 'Observações: ' + b.notes,
     pre.briefing && 'Resumo do briefing: ' + pre.briefing, items.length && 'Desafios marcados: ' + items.map(i => i.title).join('; '),
     (br.tone || br.positioning) && `Marca: tom ${br.tone || '-'}; posicionamento ${br.positioning || '-'}`, (p.products || []).length && 'Produtos/serviços já cadastrados: ' + p.products.map(x => x.name + (x.summary ? ' (' + x.summary.slice(0, 120) + ')' : '')).join('; '),
-    b.original && 'RESPOSTAS ORIGINAIS (texto livre ou transcrição):\n' + String(b.original).slice(0, 7000)].filter(Boolean).join('\n');
+    p.bf && p.bf.text && 'BRIEFING DETALHADO PREENCHIDO PELO CLIENTE (fonte mais confiável sobre empresa, público e produtos):\n' + String(p.bf.text).slice(0, 14000),
+    b.original && 'RESPOSTAS ORIGINAIS (texto livre ou transcrição):\n' + String(b.original).slice(0, p.bf && p.bf.text ? 3500 : 7000)].filter(Boolean).join('\n');
 }
 async function preJSON(system, user, max) {
   const t = await aiText(system + '\nResponda APENAS com JSON válido (sem markdown, sem comentários, sem vírgula sobrando no fim). Português do Brasil.', user, max || 7000), s = String(t).replace(/```json|```/g, '').trim(), a = s.search(/[\[{]/), z = Math.max(s.lastIndexOf('}'), s.lastIndexOf(']'));

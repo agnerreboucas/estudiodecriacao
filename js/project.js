@@ -50,6 +50,7 @@ function gateBanner(p) {
 }
 function nextActions(p) {
   const a = [], pre = p.pre, pend = p.approvals.filter(x => x.status === 'Pendente').length;
+  if (typeof bfStore === 'function' && !bfStore(p).t && !(p.brief && p.brief.offer && String(p.brief.offer).length > 120)) a.push(['Enviar o briefing detalhado ao cliente', 'Empresa, público e cada produto ou serviço', "ui.tab='preproject';renderProjectTab()"]);
   if (pre.status !== 'APROVADO') a.push(['Concluir e aprovar o Pré-Projeto', 'Status: ' + pre.status, "ui.tab='preproject';renderProjectTab()"]);
   else if (!pre.positioning) a.push(['Definir o Posicionamento', 'Gate depois do pré-projeto aprovado', "ui.tab='strategy';renderProjectTab()"]);
   if (!p.matrix.concepts.length) a.push(['Gerar conceitos na Matriz de Criação', 'Primeiro conceito, depois produção', "go('matrix')"]);

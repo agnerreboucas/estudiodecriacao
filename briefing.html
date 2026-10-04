@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Briefing do projeto</title>
+<style>
+:root{--ink:#141414;--mut:#5f6368;--line:#e3e3e8;--bg:#f5f5f7;--card:#fff;--ac:#111;--ok:#176b30;--bad:#b3472f}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:20px 16px 90px}
+header.top{padding:26px 0 10px}header.top h1{font-size:clamp(26px,5vw,38px);line-height:1.1;margin:0 0 8px}header.top p{margin:0;color:var(--mut)}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 8px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.prog{height:8px;background:#e6e6ea;border-radius:99px;overflow:hidden}.prog i{display:block;height:100%;background:var(--ac);width:0;transition:width .3s}
+.bar small{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;margin-top:5px}
+details.sec{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:10px 0;overflow:hidden}
+details.sec>summary{list-style:none;cursor:pointer;padding:15px 16px;font-weight:700;font-size:17px;display:flex;align-items:center;gap:10px}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary .n{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--ac);color:#fff;font-size:13px;flex:none}
+details.sec>summary .st{margin-left:auto;font-size:12px;font-weight:600;color:var(--mut)}details.sec.ok>summary .st{color:var(--ok)}
+.body{padding:2px 16px 16px;border-top:1px solid var(--line)}.body>p.d{color:var(--mut);font-size:14px;margin:10px 0 2px}
+.f{margin:14px 0 0}.f label,.f .l{display:block;font-weight:600;font-size:14.5px;margin-bottom:5px}.f .req{color:var(--bad)}
+input[type=text],input[type=tel],input[type=email],input[type=url],select,textarea{width:100%;border:1.5px solid #cfd0d6;border-radius:10px;padding:11px 12px;font:inherit;background:#fff;color:inherit}
+textarea{min-height:92px;resize:vertical}input:focus,select:focus,textarea:focus{outline:2px solid #1118;outline-offset:1px;border-color:#111}
+.chk{display:flex;flex-wrap:wrap;gap:8px}.chk label{display:inline-flex;align-items:center;gap:7px;border:1.5px solid #cfd0d6;border-radius:99px;padding:7px 13px;font-weight:500;cursor:pointer;margin:0;font-size:14.5px}
+.chk input{width:auto}.chk label:has(input:checked){background:#111;color:#fff;border-color:#111}
+.it{border:1.5px dashed #c9c9d0;border-radius:12px;padding:4px 14px 14px;margin:14px 0}.it h4{margin:12px 0 0;display:flex;justify-content:space-between;align-items:center}
+button{font:inherit;cursor:pointer}.btn{border:1.5px solid #111;background:#fff;border-radius:10px;padding:10px 16px;font-weight:700}.btn.dark{background:#111;color:#fff}.btn.sm{padding:6px 11px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:default}
+.acc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0}.acc label{display:flex;gap:10px;align-items:flex-start;font-size:15px}.acc input{margin-top:5px;width:18px;height:18px;flex:none}
+.act{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0}
+.msg{border-radius:10px;padding:11px 14px;margin:10px 0;font-size:14.5px}.msg.bad{background:#fbeae6;color:var(--bad)}.msg.ok{background:#e9f7ee;color:var(--ok)}
+.done{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 20px;text-align:center;margin:18px 0}.done .ck{width:64px;height:64px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:32px;margin:0 auto 12px}
+.err{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 20px;text-align:center;margin:40px 0}
+.save{font-size:13px;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="wrap" id="root"><div class="err">Carregando…</div></div>
+<script src="js/briefing-form.js"></script>
+<script>
+(function () {
+  var root = document.getElementById('root'), T = (new URLSearchParams(location.search).get('t') || '').trim(), A = {}, info = {name: '', status: 'rascunho'}, timer = null, saving = false, dirty = false, savedAt = '', sent = false;
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]; }); };
+  function api(body, get) {
+    var opt = get ? {} : {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)};
+    return fetch('api/briefing.php' + (get ? '?t=' + encodeURIComponent(T) : ''), opt).then(function (r) { return r.json().catch(function () { return {ok: false, error: 'Resposta inesperada do servidor.'}; }); });
+  }
+  function val(path) { var p = path.split('.'), c = A; for (var i = 0; i < p.length; i++) { if (c == null) return ''; c = c[p[i]]; } return c == null ? '' : c; }
+  function put(path, v) { var p = path.split('.'), c = A; for (var i = 0; i < p.length - 1; i++) { var k = p[i]; if (c[k] == null || typeof c[k] !== 'object') c[k] = /^\d+$/.test(p[i + 1]) ? [] : {}; c = c[k]; } c[p[p.length - 1]] = v; }
+  function field(base, f) {
+    var k = f[0], l = f[1], t = f[2], req = f[3] === 1, opts = Array.isArray(f[3]) ? f[3] : f[4], path = base + '.' + k, v = val(path), id = 'f_' + path.replace(/\./g, '_'), lab = esc(l) + (req ? ' <span class="req">*</span>' : '');
+    if (t === 'area') return '<div class="f"><label for="' + id + '">' + lab + '</label><textarea id="' + id + '" data-p="' + path + '">' + esc(v) + '</textarea></div>';
+    if (t === 'select') return '<div class="f"><label for="' + id + '">' + lab + '</label><select id="' + id + '" data-p="' + path + '"><option value="">Escolha…</option>' + opts.map(function (o) { return '<option ' + (v === o ? 'selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></div>';
+    if (t === 'checks') { var cur = Array.isArray(v) ? v : []; return '<div class="f"><span class="l">' + lab + '</span><div class="chk">' + opts.map(function (o) { return '<label><input type="checkbox" data-c="' + path + '" value="' + esc(o) + '" ' + (cur.indexOf(o) >= 0 ? 'checked' : '') + '> ' + esc(o) + '</label>'; }).join('') + '</div></div>'; }
+    return '<div class="f"><label for="' + id + '">' + lab + '</label><input id="' + id + '" type="' + (t === 'text' ? 'text' : t) + '" data-p="' + path + '" value="' + esc(v) + '"' + (t === 'tel' ? ' inputmode="tel" autocomplete="tel"' : t === 'email' ? ' autocomplete="email"' : '') + '></div>';
+  }
+  function secDone(s) { if (s.repeat) return (Array.isArray(A[s.k]) ? A[s.k] : []).some(function (x) { return x && bfStr(x.nome); }); var x = A[s.k] || {}; return s.f.some(function (f) { return bfStr(x[f[0]]); }); }
+  function render(keepOpen) {
+    var open = {}; if (keepOpen) [].forEach.call(root.querySelectorAll('details.sec'), function (d) { open[d.dataset.k] = d.open; });
+    if (!Array.isArray(A.produtos) || !A.produtos.length) A.produtos = [{}];
+    var h = '<header class="top"><h1>Briefing do projeto' + (info.name ? ' · ' + esc(info.name) : '') + '</h1><p>Responda com calma. Não precisa terminar de uma vez: tudo é salvo sozinho e você pode voltar a este link quando quiser. Quanto mais detalhe, melhores ficam os anúncios, os posts e a página de vendas.</p></header>';
+    h += '<div class="bar"><div class="prog"><i id="prog"></i></div><small><span id="progT"></span><span class="save" id="saveT"></span></small></div>';
+    if (sent) h += '<div class="done"><div class="ck">✓</div><h2 style="margin:0 0 6px">Briefing enviado, obrigado!</h2><p style="margin:0;color:var(--mut)">Recebemos as suas respostas. Se lembrar de mais alguma coisa, é só editar abaixo e enviar de novo.</p></div>';
+    BF_SECTIONS.forEach(function (s, i) {
+      h += '<details class="sec" data-k="' + s.k + '" ' + ((keepOpen ? open[s.k] : i === 0) ? 'open' : '') + '><summary><span class="n">' + (i + 1) + '</span>' + esc(s.t) + '<span class="st"></span></summary><div class="body">' + (s.d ? '<p class="d">' + esc(s.d) + '</p>' : '');
+      if (s.repeat) {
+        (A[s.k] || []).forEach(function (it, n) { h += '<div class="it"><h4>' + esc(s.item) + ' ' + (n + 1) + (A[s.k].length > 1 ? '<button type="button" class="btn sm" data-rm="' + n + '">Remover</button>' : '') + '</h4>' + s.f.map(function (f) { return field(s.k + '.' + n, f); }).join('') + '</div>'; });
+        if ((A[s.k] || []).length < s.repeat) h += '<button type="button" class="btn" data-add="1">＋ Adicionar outro ' + esc(s.item.toLowerCase()) + '</button>';
+      } else h += s.f.map(function (f) { return field(s.k, f); }).join('');
+      h += '</div></details>';
+    });
+    h += '<div class="acc"><label><input type="checkbox" id="aceite" ' + (A.aceite ? 'checked' : '') + '><span>Autorizo o uso das informações deste formulário para elaborar o projeto de marketing da minha empresa. Declaro que os resultados, depoimentos e dados informados são verdadeiros e que tenho autorização para divulgá-los.</span></label></div>';
+    h += '<div id="msg"></div><div class="act"><button class="btn dark" id="send" type="button">' + (sent ? 'Enviar novamente' : 'Enviar briefing') + '</button><button class="btn" id="saveNow" type="button">Salvar agora</button></div>';
+    root.innerHTML = h; progress();
+  }
+  function progress() {
+    var done = BF_SECTIONS.filter(secDone).length, n = BF_SECTIONS.length; var p = document.getElementById('prog'); if (p) p.style.width = Math.round(done / n * 100) + '%';
+    var t = document.getElementById('progT'); if (t) t.textContent = done + ' de ' + n + ' partes preenchidas';
+    [].forEach.call(root.querySelectorAll('details.sec'), function (d) { var s = BF_SECTIONS.filter(function (x) { return x.k === d.dataset.k; })[0], ok = secDone(s); d.classList.toggle('ok', ok); d.querySelector('.st').textContent = ok ? '✓ preenchida' : ''; });
+  }
+  function saveT() { var e = document.getElementById('saveT'); if (e) e.textContent = saving ? 'Salvando…' : dirty ? 'Alterações ainda não salvas' : savedAt ? 'Salvo às ' + savedAt : ''; }
+  function save(now) { clearTimeout(timer); if (!dirty && !now) return Promise.resolve(); saving = true; saveT(); return api({action: 'save', t: T, answers: A}).then(function (r) { saving = false; if (r.ok) { dirty = false; var d = new Date(); savedAt = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); } else msg(r.error || 'Não consegui salvar. Tente de novo.', 'bad'); saveT(); return r; }, function () { saving = false; msg('Sem conexão. As respostas continuam aqui; tente salvar de novo.', 'bad'); saveT(); }); }
+  function later() { dirty = true; saveT(); clearTimeout(timer); timer = setTimeout(function () { save(); }, 1500); progress(); }
+  function msg(t, k) { var m = document.getElementById('msg'); if (m) m.innerHTML = t ? '<div class="msg ' + (k || 'ok') + '">' + esc(t) + '</div>' : ''; }
+  root.addEventListener('input', function (e) { var p = e.target.getAttribute && e.target.getAttribute('data-p'); if (p) { put(p, e.target.value); later(); } });
+  root.addEventListener('change', function (e) {
+    var t = e.target, c = t.getAttribute && t.getAttribute('data-c');
+    if (c) { var cur = val(c); cur = Array.isArray(cur) ? cur.slice() : []; var i = cur.indexOf(t.value); if (t.checked && i < 0) cur.push(t.value); if (!t.checked && i >= 0) cur.splice(i, 1); put(c, cur); later(); }
+    else if (t.id === 'aceite') { A.aceite = t.checked; later(); } else if (t.tagName === 'SELECT') { later(); }
+  });
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-add')) { A.produtos.push({}); later(); render(true); var d = root.querySelector('details[data-k="produtos"]'); if (d) d.open = true; }
+    else if (b.hasAttribute('data-rm')) { if (confirm('Remover este item?')) { A.produtos.splice(+b.getAttribute('data-rm'), 1); later(); render(true); } }
+    else if (b.id === 'saveNow') { save(true).then(function (r) { if (r && r.ok) msg('Salvo. Pode fechar e voltar depois neste mesmo link.', 'ok'); }); }
+    else if (b.id === 'send') {
+      var miss = bfMissing(A); if (miss.length) { msg('Falta preencher: ' + miss.join(', ') + '.', 'bad'); return; }
+      b.disabled = true; msg('Enviando…', 'ok');
+      api({action: 'submit', t: T, answers: A}).then(function (r) { b.disabled = false; if (r.ok) { sent = true; dirty = false; render(true); window.scrollTo(0, 0); } else msg(r.error || 'Não consegui enviar.', 'bad'); }, function () { b.disabled = false; msg('Sem conexão. Tente de novo.', 'bad'); });
+    }
+  });
+  window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+  if (!/^[a-f0-9]{24}$/.test(T)) { root.innerHTML = '<div class="err"><h2>Link inválido</h2><p>Peça um novo link do briefing ao seu contato.</p></div>'; return; }
+  api(null, true).then(function (r) {
+    if (!r.ok) { root.innerHTML = '<div class="err"><h2>Não foi possível abrir</h2><p>' + esc(r.error || 'Link inválido.') + '</p></div>'; return; }
+    info = r; A = r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers) ? r.answers : {}; sent = r.status === 'enviado'; document.title = 'Briefing' + (r.name ? ' · ' + r.name : ''); render(false);
+  }, function () { root.innerHTML = '<div class="err"><h2>Sem conexão</h2><p>Não consegui falar com o servidor. Tente de novo em instantes.</p></div>'; });
+})();
+</script>
+</body>
+</html>
