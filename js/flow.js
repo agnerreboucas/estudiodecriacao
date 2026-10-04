@@ -16,7 +16,7 @@ const FLOW = [
     ['campaigns', 'Campanhas', 'Agrupa os anúncios por campanha e por produto.', 'part'],
     [null, 'Subir no Meta, Google e TikTok', 'Hoje você sobe nas plataformas; o envio direto ainda não existe.', 'soon']]},
   {n: '3', t: 'Site e landing page', c: '#2f6fcf', d: 'Para onde o anúncio leva. Sem site, cria o site; com site, uma landing page por produto. Ou vai direto ao WhatsApp.', items: [
-    ['landings', 'Sites e landing pages', 'Sites, landing pages por produto, templates importados, formulário e botão de WhatsApp.', 'ok']]},
+    ['landings', 'Sites e landing pages', 'Sites, landing pages por produto, templates importados, formulário, WhatsApp e tema do WordPress (Elementor).', 'ok']]},
   {n: '4', t: 'Conteúdo orgânico', c: '#2e7d4f', d: 'Posts que reforçam a autoridade do cliente nas redes e no blog.', items: [
     ['carrosseis', 'Carrosséis', 'De 3 a 20 slides, com legenda.', 'ok'],
     ['feed', 'Planejador de feed', 'Posts simples, stories, vídeos e grids.', 'ok'],

@@ -19245,6 +19245,713 @@ async function tplBrandNow(id) {
 
 </script>
 <script>
+/* ===== Arquivos PHP/JS/CSS do tema WordPress gerado (modelos com marcadores __TOKEN__ trocados pelo gerador). Sem dependência além do Elementor (gratuito). ===== */
+const WPT = {};
+WPT.functions = String.raw`<?php
+/**
+ * Tema gerado pelo Ampliação Studio para __NAME__.
+ * As páginas são criadas na ativação e editadas no Elementor.
+ */
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+define( 'AMP_VER', '__VER__' );
+define( 'AMP_SLUG', '__SLUG__' );
+
+function amp_defaults() {
+	static $d = null;
+	if ( null === $d ) {
+		$f = get_template_directory() . '/inc/defaults.json';
+		$d = is_file( $f ) ? json_decode( file_get_contents( $f ), true ) : array();
+		if ( ! is_array( $d ) ) {
+			$d = array();
+		}
+	}
+	return $d;
+}
+function amp_opt( $key ) {
+	$d = amp_defaults();
+	return get_theme_mod( $key, isset( $d[ $key ] ) ? $d[ $key ] : '' );
+}
+
+add_action( 'after_setup_theme', function () {
+	add_theme_support( 'title-tag' );
+	add_theme_support( 'post-thumbnails' );
+	add_theme_support( 'custom-logo', array( 'height' => 80, 'width' => 260, 'flex-width' => true, 'flex-height' => true ) );
+	add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' ) );
+	add_theme_support( 'responsive-embeds' );
+	add_theme_support( 'align-wide' );
+	register_nav_menus( array( 'primary' => 'Menu principal', 'footer' => 'Menu do rodapé' ) );
+} );
+
+add_action( 'wp_enqueue_scripts', function () {
+	$d = amp_defaults();
+	if ( ! empty( $d['fonts'] ) && is_array( $d['fonts'] ) ) {
+		$fam = array();
+		foreach ( $d['fonts'] as $f ) {
+			$fam[] = 'family=' . str_replace( '%20', '+', rawurlencode( $f ) ) . ':wght@400;600;700;800';
+		}
+		wp_enqueue_style( 'amp-fonts', 'https://fonts.googleapis.com/css2?' . implode( '&', $fam ) . '&display=swap', array(), null );
+	}
+	wp_enqueue_style( 'amp-style', get_stylesheet_uri(), array(), AMP_VER );
+	wp_enqueue_script( 'amp-theme', get_template_directory_uri() . '/assets/js/theme.js', array(), AMP_VER, true );
+} );
+
+/* ---------- Personalizar: marca, leads e rastreamento ---------- */
+add_action( 'customize_register', function ( $wp ) {
+	$sections = array(
+		'amp_brand'  => array( 'Marca e contato', array(
+			'brand'          => 'Nome da marca (se não houver logo)',
+			'header_cta'     => 'Texto do botão do cabeçalho (vazio = sem botão)',
+			'header_cta_url' => 'Endereço do botão do cabeçalho',
+			'footer_text'    => 'Texto do rodapé',
+			'contact_text'   => 'Contato no rodapé',
+			'wa_number'      => 'WhatsApp (DDI + DDD + número)',
+			'wa_message'     => 'Mensagem inicial do WhatsApp',
+			'privacy_url'    => 'Política de privacidade (endereço)',
+		) ),
+		'amp_leads'  => array( 'Captura de leads', array(
+			'leads_url'  => 'Endereço de captura de leads (do Studio)',
+			'thanks_url' => 'Página de obrigado (endereço)',
+			'thanks_title' => 'Título da página de obrigado',
+			'thanks_text'  => 'Texto da página de obrigado',
+		) ),
+		'amp_track'  => array( 'Rastreamento', array(
+			'pixel' => 'ID do Pixel da Meta (só números)',
+			'ga4'   => 'ID do Google Analytics 4 (G-XXXXXXX)',
+		) ),
+	);
+	$d = amp_defaults();
+	foreach ( $sections as $sid => $s ) {
+		$wp->add_section( $sid, array( 'title' => $s[0], 'priority' => 30 ) );
+		foreach ( $s[1] as $key => $label ) {
+			$wp->add_setting( $key, array( 'default' => isset( $d[ $key ] ) ? $d[ $key ] : '', 'sanitize_callback' => 'sanitize_text_field' ) );
+			$wp->add_control( $key, array( 'label' => $label, 'section' => $sid, 'type' => 'text' ) );
+		}
+	}
+} );
+
+/* ---------- Formulário de leads: [amp_lead_form title="" text="" button="Enviar"] ---------- */
+add_shortcode( 'amp_lead_form', function ( $atts ) {
+	$a = shortcode_atts( array( 'title' => '', 'text' => '', 'button' => 'Enviar' ), $atts, 'amp_lead_form' );
+	$privacy = amp_opt( 'privacy_url' );
+	ob_start();
+	?>
+	<div class="amp-form" data-leads="<?php echo esc_url( amp_opt( 'leads_url' ) ); ?>" data-thanks="<?php echo esc_url( amp_opt( 'thanks_url' ) ); ?>">
+		<?php if ( $a['title'] ) : ?><h2><?php echo esc_html( $a['title'] ); ?></h2><?php endif; ?>
+		<?php if ( $a['text'] ) : ?><p class="amp-sub"><?php echo esc_html( $a['text'] ); ?></p><?php endif; ?>
+		<form novalidate>
+			<input type="text" name="name" placeholder="Seu nome" required autocomplete="name" aria-label="Seu nome">
+			<input type="tel" name="phone" placeholder="WhatsApp com DDD" required autocomplete="tel" inputmode="tel" aria-label="WhatsApp">
+			<input type="email" name="email" placeholder="E-mail (opcional)" autocomplete="email" aria-label="E-mail">
+			<input type="text" name="message" placeholder="O que você precisa? (opcional)" aria-label="Mensagem">
+			<input type="text" name="website" tabindex="-1" autocomplete="off" class="amp-hp" aria-hidden="true">
+			<label class="amp-consent"><input type="checkbox" name="consent" value="sim"> Concordo em receber contato por WhatsApp, telefone ou e-mail.<?php if ( $privacy ) : ?> <a href="<?php echo esc_url( $privacy ); ?>" target="_blank" rel="noopener">Política de privacidade</a><?php endif; ?></label>
+			<button type="submit" class="amp-btn"><?php echo esc_html( $a['button'] ); ?></button>
+			<p class="amp-msg" role="status" hidden></p>
+		</form>
+	</div>
+	<?php
+	return ob_get_clean();
+} );
+
+/* ---------- SEO básico (só se não houver plugin de SEO), rastreamento e ícone ---------- */
+function amp_has_seo_plugin() {
+	return defined( 'WPSEO_VERSION' ) || class_exists( 'RankMath' ) || defined( 'AIOSEO_VERSION' );
+}
+add_filter( 'pre_get_document_title', function ( $t ) {
+	if ( is_singular() && ! amp_has_seo_plugin() ) {
+		$m = get_post_meta( get_the_ID(), '_amp_title', true );
+		if ( $m ) {
+			return $m;
+		}
+	}
+	return $t;
+} );
+add_action( 'wp_head', function () {
+	if ( is_singular() && ! amp_has_seo_plugin() ) {
+		$id   = get_the_ID();
+		$desc = get_post_meta( $id, '_amp_desc', true );
+		$og   = get_post_meta( $id, '_amp_og', true );
+		if ( $desc ) {
+			echo '<meta name="description" content="' . esc_attr( $desc ) . '">' . "\n";
+			echo '<meta property="og:description" content="' . esc_attr( $desc ) . '">' . "\n";
+		}
+		echo '<meta property="og:title" content="' . esc_attr( wp_get_document_title() ) . '">' . "\n";
+		echo '<meta property="og:type" content="website">' . "\n";
+		echo '<meta property="og:url" content="' . esc_url( get_permalink( $id ) ) . '">' . "\n";
+		if ( $og ) {
+			echo '<meta property="og:image" content="' . esc_url( get_template_directory_uri() . '/assets/img/' . $og ) . '">' . "\n";
+		}
+	}
+	if ( ! has_site_icon() && is_file( get_template_directory() . '/assets/favicon.png' ) ) {
+		echo '<link rel="icon" type="image/png" href="' . esc_url( get_template_directory_uri() . '/assets/favicon.png' ) . '">' . "\n";
+	}
+	$px  = preg_replace( '/\D/', '', (string) amp_opt( 'pixel' ) );
+	$ga  = preg_replace( '/[^A-Za-z0-9\-]/', '', (string) amp_opt( 'ga4' ) );
+	$thx = is_page( 'obrigado' );
+	if ( $px ) {
+		echo "<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','" . esc_js( $px ) . "');fbq('track','PageView');" . ( $thx ? "fbq('track','Lead');" : '' ) . "<\/script>\n";
+	}
+	if ( $ga ) {
+		echo '<script async src="https://www.googletagmanager.com/gtag/js?id=' . esc_attr( $ga ) . '"><\/script>';
+		echo "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','" . esc_js( $ga ) . "');" . ( $thx ? "gtag('event','generate_lead');" : '' ) . "<\/script>\n";
+	}
+}, 5 );
+
+/* ---------- Instalação das páginas, do menu e do obrigado ao ativar o tema ---------- */
+function amp_install_content( $force = false ) {
+	$file = get_template_directory() . '/inc/pages.json';
+	if ( ! is_file( $file ) ) {
+		return array( 'created' => 0, 'updated' => 0, 'skipped' => 0 );
+	}
+	$pages = json_decode( file_get_contents( $file ), true );
+	if ( ! is_array( $pages ) ) {
+		return array( 'created' => 0, 'updated' => 0, 'skipped' => 0 );
+	}
+	$uri      = untrailingslashit( get_template_directory_uri() );
+	$created  = 0;
+	$updated  = 0;
+	$skipped  = 0;
+	$ids      = array();
+	$home     = 0;
+	$order    = 0;
+	foreach ( $pages as $pg ) {
+		$order++;
+		$slug = sanitize_title( $pg['slug'] );
+		$ex   = get_page_by_path( $slug, OBJECT, 'page' );
+		$data = isset( $pg['elementor'] ) ? $pg['elementor'] : array();
+		array_walk_recursive( $data, function ( &$v ) use ( $uri ) {
+			if ( is_string( $v ) ) {
+				$v = str_replace( '{{THEME_URI}}', $uri, $v );
+			}
+		} );
+		$meta = array(
+			'_amp_page'                => 1,
+			'_amp_title'               => isset( $pg['seo']['title'] ) ? $pg['seo']['title'] : '',
+			'_amp_desc'                => isset( $pg['seo']['desc'] ) ? $pg['seo']['desc'] : '',
+			'_amp_og'                  => isset( $pg['seo']['og'] ) ? $pg['seo']['og'] : '',
+			'_wp_page_template'        => 'default',
+			'_elementor_edit_mode'     => 'builder',
+			'_elementor_template_type' => 'wp-page',
+			'_elementor_version'       => '3.18.0',
+			'_elementor_data'          => wp_slash( wp_json_encode( $data ) ),
+		);
+		if ( $ex && ! ( $force && get_post_meta( $ex->ID, '_amp_page', true ) ) ) {
+			$ids[ $slug ] = $ex->ID;
+			$skipped++;
+			if ( ! empty( $pg['home'] ) ) {
+				$home = $ex->ID;
+			}
+			continue;
+		}
+		if ( $ex ) {
+			$id = $ex->ID;
+			wp_update_post( array( 'ID' => $id, 'post_title' => $pg['title'], 'post_status' => 'publish' ) );
+			$updated++;
+		} else {
+			$id = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => $pg['title'], 'post_name' => $slug, 'post_content' => '', 'menu_order' => $order ) );
+			if ( is_wp_error( $id ) || ! $id ) {
+				continue;
+			}
+			$created++;
+		}
+		foreach ( $meta as $k => $v ) {
+			update_post_meta( $id, $k, $v );
+		}
+		$ids[ $slug ] = $id;
+		if ( ! empty( $pg['home'] ) ) {
+			$home = $id;
+		}
+	}
+	/* página de obrigado */
+	if ( ! get_page_by_path( 'obrigado', OBJECT, 'page' ) ) {
+		$tid = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Obrigado', 'post_name' => 'obrigado', 'post_content' => '' ) );
+		if ( $tid && ! is_wp_error( $tid ) ) {
+			update_post_meta( $tid, '_amp_page', 1 );
+			update_post_meta( $tid, '_amp_title', 'Obrigado' );
+		}
+	}
+	/* página inicial */
+	if ( $home ) {
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $home );
+	}
+	/* menu */
+	$menu = wp_get_nav_menu_object( 'Menu principal' );
+	if ( ! $menu ) {
+		$mid = wp_create_nav_menu( 'Menu principal' );
+		if ( ! is_wp_error( $mid ) ) {
+			$pos = 0;
+			foreach ( $pages as $pg ) {
+				$slug = sanitize_title( $pg['slug'] );
+				if ( empty( $pg['menu'] ) || empty( $ids[ $slug ] ) ) {
+					continue;
+				}
+				$pos++;
+				wp_update_nav_menu_item( $mid, 0, array(
+					'menu-item-title'     => $pg['title'],
+					'menu-item-object'    => 'page',
+					'menu-item-object-id' => $ids[ $slug ],
+					'menu-item-type'      => 'post_type',
+					'menu-item-status'    => 'publish',
+					'menu-item-position'  => $pos,
+				) );
+			}
+			$loc            = get_theme_mod( 'nav_menu_locations', array() );
+			$loc['primary'] = $mid;
+			$loc['footer']  = $mid;
+			set_theme_mod( 'nav_menu_locations', $loc );
+		}
+	}
+	if ( '' === get_option( 'permalink_structure' ) ) {
+		update_option( 'permalink_structure', '/%postname%/' );
+	}
+	flush_rewrite_rules();
+	if ( class_exists( '\Elementor\Plugin' ) && isset( \Elementor\Plugin::$instance->files_manager ) ) {
+		\Elementor\Plugin::$instance->files_manager->clear_cache();
+	}
+	update_option( 'amp_installed_' . AMP_SLUG, 1 );
+	return array( 'created' => $created, 'updated' => $updated, 'skipped' => $skipped );
+}
+add_action( 'after_switch_theme', function () {
+	if ( ! get_option( 'amp_installed_' . AMP_SLUG ) ) {
+		amp_install_content( false );
+	}
+} );
+
+/* ---------- Aviso do Elementor e tela "Páginas do Studio" ---------- */
+add_action( 'admin_notices', function () {
+	if ( ! current_user_can( 'manage_options' ) || defined( 'ELEMENTOR_VERSION' ) ) {
+		return;
+	}
+	echo '<div class="notice notice-warning"><p><strong>' . esc_html( '__NAME__' ) . ':</strong> as páginas deste tema são feitas no Elementor. Instale e ative o plugin <strong>Elementor</strong> (gratuito) para vê-las e editá-las.</p></div>';
+} );
+add_action( 'admin_menu', function () {
+	add_theme_page( 'Páginas do Studio', 'Páginas do Studio', 'manage_options', 'amp-pages', function () {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		$msg = isset( $_GET['amp_done'] ) ? sanitize_text_field( wp_unslash( $_GET['amp_done'] ) ) : '';
+		echo '<div class="wrap"><h1>Páginas do Studio</h1>';
+		if ( $msg ) {
+			echo '<div class="notice notice-success"><p>' . esc_html( $msg ) . '</p></div>';
+		}
+		echo '<p>As páginas, o menu e a página de obrigado foram criados quando o tema foi ativado. Se alguma página sumiu ou você quer voltar ao desenho original do Studio, use os botões abaixo.</p>';
+		foreach ( array( 'missing' => 'Criar só as páginas que faltam', 'reset' => 'Refazer as páginas do tema (apaga as edições feitas nelas)' ) as $mode => $label ) {
+			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin:10px 0">';
+			wp_nonce_field( 'amp_reinstall' );
+			echo '<input type="hidden" name="action" value="amp_reinstall"><input type="hidden" name="mode" value="' . esc_attr( $mode ) . '">';
+			submit_button( $label, 'reset' === $mode ? 'secondary' : 'primary', 'submit', false, 'reset' === $mode ? array( 'onclick' => "return confirm('Isso substitui o conteúdo das páginas criadas pelo tema. Continuar?')" ) : array() );
+			echo '</form>';
+		}
+		echo '</div>';
+	} );
+} );
+add_action( 'admin_post_amp_reinstall', function () {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Sem permissão.' );
+	}
+	check_admin_referer( 'amp_reinstall' );
+	$r   = amp_install_content( isset( $_POST['mode'] ) && 'reset' === $_POST['mode'] );
+	$txt = sprintf( '%d criada(s), %d refeita(s), %d mantida(s).', $r['created'], $r['updated'], $r['skipped'] );
+	wp_safe_redirect( add_query_arg( array( 'page' => 'amp-pages', 'amp_done' => rawurlencode( $txt ) ), admin_url( 'themes.php' ) ) );
+	exit;
+} );
+`;
+
+WPT.header = String.raw`<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?><!doctype html>
+<html <?php language_attributes(); ?>>
+<head>
+<meta charset="<?php bloginfo( 'charset' ); ?>">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<?php wp_head(); ?>
+</head>
+<body <?php body_class(); ?>>
+<?php wp_body_open(); ?>
+<header class="sh">
+	<div class="w sh-in">
+		<a class="sh-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>">
+			<?php
+			if ( has_custom_logo() ) {
+				the_custom_logo();
+			} else {
+				echo esc_html( amp_opt( 'brand' ) ? amp_opt( 'brand' ) : get_bloginfo( 'name' ) );
+			}
+			?>
+		</a>
+		<input type="checkbox" id="mn" class="mn-i" aria-label="Abrir menu">
+		<label for="mn" class="mn-b" aria-hidden="true"><i></i><i></i><i></i></label>
+		<nav class="sh-nav" aria-label="Menu principal">
+			<?php
+			wp_nav_menu( array( 'theme_location' => 'primary', 'container' => false, 'menu_class' => 'sh-menu', 'fallback_cb' => false, 'depth' => 2 ) );
+			if ( amp_opt( 'header_cta' ) ) {
+				echo '<a class="amp-btn sh-cta" href="' . esc_url( amp_opt( 'header_cta_url' ) ? amp_opt( 'header_cta_url' ) : '#form' ) . '">' . esc_html( amp_opt( 'header_cta' ) ) . '</a>';
+			}
+			?>
+		</nav>
+	</div>
+</header>
+<main id="conteudo">
+`;
+
+WPT.footer = String.raw`<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+$wa = preg_replace( '/\D/', '', (string) amp_opt( 'wa_number' ) );
+?>
+</main>
+<footer class="sf">
+	<div class="w">
+		<div class="sf-g">
+			<div>
+				<b><?php echo esc_html( amp_opt( 'brand' ) ? amp_opt( 'brand' ) : get_bloginfo( 'name' ) ); ?></b>
+				<?php if ( amp_opt( 'footer_text' ) ) : ?><p><?php echo esc_html( amp_opt( 'footer_text' ) ); ?></p><?php endif; ?>
+			</div>
+			<div class="sf-n"><?php wp_nav_menu( array( 'theme_location' => 'footer', 'container' => false, 'menu_class' => 'sf-menu', 'fallback_cb' => false, 'depth' => 1 ) ); ?></div>
+			<div><?php if ( amp_opt( 'contact_text' ) ) { echo wp_kses_post( nl2br( esc_html( amp_opt( 'contact_text' ) ) ) ); } ?></div>
+		</div>
+		<div class="sf-c"><?php echo esc_html( amp_opt( 'brand' ) ? amp_opt( 'brand' ) : get_bloginfo( 'name' ) ); ?> &middot; <?php echo esc_html( gmdate( 'Y' ) ); ?><?php if ( amp_opt( 'privacy_url' ) ) : ?> &middot; <a href="<?php echo esc_url( amp_opt( 'privacy_url' ) ); ?>">Privacidade</a><?php endif; ?></div>
+	</div>
+</footer>
+<?php if ( $wa ) : ?>
+<a class="wa-fab" href="<?php echo esc_url( 'https://wa.me/' . $wa . '?text=' . rawurlencode( amp_opt( 'wa_message' ) ? amp_opt( 'wa_message' ) : 'Olá! Vim pelo site.' ) ); ?>" target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><path fill="#fff" d="M16 3C9 3 3.4 8.6 3.4 15.5c0 2.4.7 4.7 1.9 6.6L3 29l7.1-1.9c1.9 1 4 1.6 6.1 1.6 7 0 12.6-5.6 12.6-12.5S23 3 16 3zm0 22.9c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-4.2 1.1 1.1-4.1-.3-.4a10.3 10.3 0 1 1 9.2 5.1zm5.7-7.7c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2s-.8 1-1 1.2c-.2.2-.4.2-.7.1-1.9-.9-3.1-1.7-4.3-3.8-.3-.5.3-.5.9-1.6.1-.2.1-.4 0-.5l-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1.1 1.1-1.1 2.6s1.1 3 1.3 3.2c.2.2 2.2 3.4 5.3 4.7 2 .8 2.7.9 3.7.7.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg></a>
+<?php endif; ?>
+<?php wp_footer(); ?>
+</body>
+</html>
+`;
+
+WPT.page = String.raw`<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+get_header();
+while ( have_posts() ) {
+	the_post();
+	the_content();
+}
+get_footer();
+`;
+WPT.index = String.raw`<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+get_header();
+?>
+<div class="w amp-blog">
+<?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
+	<article <?php post_class( 'amp-post' ); ?>>
+		<h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
+		<?php if ( is_singular() ) { the_content(); } else { the_excerpt(); } ?>
+	</article>
+<?php endwhile; the_posts_pagination(); else : ?>
+	<p>Nada por aqui ainda.</p>
+<?php endif; ?>
+</div>
+<?php get_footer(); ?>
+`;
+WPT.notfound = String.raw`<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+get_header();
+?>
+<div class="w amp-thx"><h1>Página não encontrada</h1><p>O endereço que você abriu não existe ou foi movido.</p><p><a class="amp-btn" href="<?php echo esc_url( home_url( '/' ) ); ?>">Voltar ao início</a></p></div>
+<?php get_footer(); ?>
+`;
+WPT.thanks = String.raw`<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+get_header();
+$wa = preg_replace( '/\D/', '', (string) amp_opt( 'wa_number' ) );
+?>
+<div class="w amp-thx">
+	<div class="amp-ck" aria-hidden="true">&#10003;</div>
+	<h1><?php echo esc_html( amp_opt( 'thanks_title' ) ? amp_opt( 'thanks_title' ) : 'Recebemos os seus dados' ); ?></h1>
+	<p><?php echo esc_html( amp_opt( 'thanks_text' ) ? amp_opt( 'thanks_text' ) : 'Obrigado! Nossa equipe vai entrar em contato com você em breve, pelo WhatsApp informado.' ); ?></p>
+	<?php if ( $wa ) : ?><p><a class="amp-btn" href="<?php echo esc_url( 'https://wa.me/' . $wa . '?text=' . rawurlencode( amp_opt( 'wa_message' ) ? amp_opt( 'wa_message' ) : 'Olá! Acabei de enviar meus dados pelo site.' ) ); ?>" rel="noopener">Falar agora no WhatsApp</a></p><?php endif; ?>
+	<p><a href="<?php echo esc_url( home_url( '/' ) ); ?>">Voltar ao início</a></p>
+</div>
+<?php get_footer(); ?>
+`;
+WPT.js = String.raw`(function () {
+	'use strict';
+	/* guarda a origem (UTM) durante a visita, para o lead chegar com a campanha */
+	try {
+		var q = new URLSearchParams(location.search), u = JSON.parse(sessionStorage.getItem('amp_utm') || '{}'), ch = false;
+		q.forEach(function (v, k) { if (/^utm_|^gclid$|^fbclid$/.test(k)) { u[k] = v; ch = true; } });
+		if (ch) { sessionStorage.setItem('amp_utm', JSON.stringify(u)); }
+	} catch (e) { /* sem armazenamento */ }
+	document.addEventListener('submit', function (e) {
+		var f = e.target.closest && e.target.closest('.amp-form form');
+		if (!f) { return; }
+		e.preventDefault();
+		var box = f.parentNode, msg = f.querySelector('.amp-msg'), d = {}, utm = {};
+		new FormData(f).forEach(function (v, k) { d[k] = v; });
+		var say = function (t, bad) { msg.hidden = false; msg.textContent = t; msg.className = 'amp-msg' + (bad ? ' bad' : ''); };
+		if (d.website) { return; }
+		if (!d.name || !d.phone || !d.consent) { say('Preencha nome, WhatsApp e aceite o contato.', true); return; }
+		var url = box.getAttribute('data-leads');
+		if (!url) { say('Formulário sem destino configurado (Personalizar → Captura de leads).', true); return; }
+		try { utm = JSON.parse(sessionStorage.getItem('amp_utm') || '{}'); } catch (x) { utm = {}; }
+		var body = { source: document.title || 'site', name: d.name, phone: d.phone, email: d.email || '', message: d.message || '', consent: 'sim' };
+		Object.keys(utm).forEach(function (k) { if (/^utm_/.test(k)) { body[k] = utm[k]; } });
+		var btn = f.querySelector('button[type=submit]'); btn.disabled = true;
+		fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) {
+			if (!r.ok) { throw 0; }
+			var t = box.getAttribute('data-thanks');
+			if (t) { location.href = t + (t.indexOf('?') < 0 ? location.search : ''); } else { say('Recebemos os seus dados. Obrigado!', false); f.reset(); btn.disabled = false; }
+		}).catch(function () { btn.disabled = false; say('Não foi possível enviar. Tente pelo WhatsApp.', true); });
+	});
+})();
+`;
+WPT.css = String.raw`
+:root{--a:__ACCENT__;--bg:__BG__;--fg:__FG__;--soft:__SOFT__;--line:__LINE__;--mut:__MUT__}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 '__BODY__',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'__HEAD__',sans-serif;line-height:1.15}
+img{max-width:100%;height:auto}
+a{color:var(--a)}
+.w{max-width:1120px;margin:0 auto;padding:0 20px}
+.amp-btn,.amp-form button{display:inline-block;background:var(--a);color:#fff;border:0;border-radius:10px;padding:13px 24px;font:700 16px/1.2 inherit;text-decoration:none;cursor:pointer}
+.amp-btn:hover,.amp-form button:hover{filter:brightness(.92)}
+.sh{position:sticky;top:0;z-index:60;background:var(--bg);border-bottom:1px solid var(--line)}
+.admin-bar .sh{top:32px}
+.sh-in{display:flex;align-items:center;justify-content:space-between;height:68px;gap:16px}
+.sh-brand{font-weight:800;font-size:19px;color:var(--fg);text-decoration:none;font-family:'__HEAD__',sans-serif}
+.sh-brand img{max-height:46px;width:auto}
+.sh-nav{display:flex;align-items:center;gap:22px}
+.sh-menu,.sf-menu{list-style:none;margin:0;padding:0;display:flex;gap:22px;align-items:center}
+.sh-nav a{color:var(--fg);text-decoration:none;font-size:15px;font-weight:600}
+.sh-nav a:hover,.sh-menu .current-menu-item>a{color:var(--a)}
+.sh-nav .sh-cta{color:#fff;padding:10px 18px}
+.mn-i,.mn-b{display:none}
+.sf{background:var(--soft);border-top:1px solid var(--line);padding:40px 0 18px;font-size:14px}
+.sf-g{display:grid;grid-template-columns:2fr 1fr 1.4fr;gap:28px}
+.sf-g p{color:var(--mut);margin:6px 0 0}
+.sf-menu{flex-direction:column;align-items:flex-start;gap:6px}
+.sf a{color:var(--fg);text-decoration:none}
+.sf-c{margin-top:26px;color:var(--mut);font-size:12.5px;border-top:1px solid var(--line);padding-top:14px}
+.wa-fab{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:#25d366;display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:70}
+.amp-form{max-width:520px}
+.amp-form form{display:grid;gap:10px}
+.amp-form input[type=text],.amp-form input[type=tel],.amp-form input[type=email]{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:13px 14px;font:inherit;background:#fff;color:#141414}
+.amp-form .amp-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.amp-consent{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--mut)}
+.amp-msg{margin:0;font-size:14px;color:#176b30}.amp-msg.bad{color:#b3472f}
+.amp-thx{text-align:center;padding:90px 20px;min-height:60vh}
+.amp-ck{width:72px;height:72px;border-radius:50%;background:var(--a);color:#fff;display:grid;place-items:center;font-size:36px;margin:0 auto 18px}
+.amp-blog{padding:40px 20px}
+@media(max-width:760px){
+.mn-b{display:flex;flex-direction:column;gap:4px;cursor:pointer;padding:8px}
+.mn-b i{width:22px;height:2px;background:var(--fg);display:block}
+.sh-nav{display:none;position:absolute;left:0;right:0;top:68px;background:var(--bg);flex-direction:column;align-items:stretch;padding:12px 22px 18px;border-bottom:1px solid var(--line);gap:12px}
+.sh-menu{flex-direction:column;align-items:flex-start;gap:12px}
+.mn-i:checked~.sh-nav{display:flex}
+.sf-g{grid-template-columns:1fr}
+}
+`;
+WPT.readme = String.raw`# __NAME__ · tema do WordPress
+
+Gerado pelo Ampliação Studio em __DATE__. As páginas do site viram páginas do WordPress **editáveis no Elementor**.
+
+## Como instalar
+1. No WordPress: **Plugins → Adicionar novo** e instale e ative o **Elementor** (gratuito).
+2. Instale os plugins que acompanham este pacote (pasta ` + "`plugins`" + String.raw`, se houver): **Plugins → Adicionar novo → Enviar plugin**.
+3. **Aparência → Temas → Adicionar novo → Enviar tema** e escolha o arquivo ` + "`__SLUG__.zip`" + String.raw`. Clique em **Ativar**.
+4. Ao ativar, o tema cria sozinho: as **páginas** (__PAGES__), o **menu**, a **página inicial** e a página **Obrigado**.
+5. Abra qualquer página e clique em **Editar com Elementor**.
+
+## Ajustes depois de ativar (Aparência → Personalizar)
+- **Marca e contato:** nome, botão do cabeçalho, rodapé, WhatsApp, política de privacidade.
+- **Captura de leads:** o endereço de captura do Studio (já vem preenchido se estava em Configurações) e a página de obrigado.
+- **Rastreamento:** Pixel da Meta e Google Analytics 4. A conversão (Lead) dispara na página Obrigado.
+
+## O formulário
+O formulário das páginas é o shortcode ` + "`[amp_lead_form]`" + String.raw`. Ele envia nome, WhatsApp, e-mail e a origem (UTM) para o Studio, que distribui para e-mail, planilha, CRM e WhatsApp do vendedor. Depois do envio, a pessoa vai para a página Obrigado.
+
+## Se alguma coisa não aparecer
+- **Aparência → Páginas do Studio:** recria as páginas que faltam ou refaz todas (apaga as edições).
+- Manualmente: **Elementor → Modelos → Importar** e use os arquivos da pasta ` + "`elementor-templates`" + String.raw` deste pacote (as imagens apontam para ` + "`/wp-content/themes/__SLUG__/assets/img/`" + String.raw`).
+
+## Observações
+- Este tema não depende de nenhum plugin pago. O formulário e o rastreamento são do próprio tema.
+- Seções importadas de templates de terceiros viram blocos de HTML dentro do Elementor (editáveis como HTML).
+- Teste a página inicial em celular e computador antes de publicar.
+`;
+
+</script>
+<script>
+/* ===== Gerador de tema do WordPress: cada Site vira um tema instalável. As páginas viram páginas do Elementor (seções, colunas e widgets),
+   com menu, página inicial, página de obrigado, formulário de leads (shortcode), SEO básico e rastreamento. Imagens vão para assets/img em WebP. ===== */
+const wpHex = () => Math.random().toString(16).slice(2, 9).padEnd(7, '0');
+const wpNum = (n, d) => (isFinite(+n) ? +n : d);
+const wpMix = (a, b, t) => { const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), x = p(a), y = p(b); return '#' + x.map((v, i) => Math.round(v * (1 - t) + y[i] * t).toString(16).padStart(2, '0')).join(''); };
+const wpPx = (n, k) => ({unit: 'px', size: n, sizes: []});
+const wpBox = (t, r, b, l) => ({unit: 'px', top: String(t), right: String(r), bottom: String(b), left: String(l), isLinked: t === r && r === b && b === l});
+const wpHtml = s => String(s == null ? '' : s);
+
+/* tamanhos por dispositivo: computador (d), tablet (t) e celular (m) */
+function wpDev(o, base, key, f) {
+  const r = {}; if (!o) return r; if (o.d != null) r[base + (key || '')] = f(o.d); if (o.t != null) r[base + '_tablet'] = f(o.t); if (o.m != null) r[base + '_mobile'] = f(o.m); else if (o.l != null) r[base + '_mobile'] = f(o.l); return r;
+}
+async function wpImgFile(ctx, imgId, max) {
+  if (!imgId) return ''; if (ctx.imgs.has(imgId)) return ctx.imgs.get(imgId);
+  const u = await lpImg(imgId, max || 1600), m = u && u.match(/^data:image\/(webp|jpeg);base64,(.+)$/); if (!m) { ctx.imgs.set(imgId, ''); return ''; }
+  const name = 'img-' + String(imgId).replace(/[^\w-]/g, '') + (m[1] === 'webp' ? '.webp' : '.jpg'); ctx.files.push({name: 'assets/img/' + name, data: Uint8Array.from(atob(m[2]), c => c.charCodeAt(0))}); ctx.imgs.set(imgId, name); return name;
+}
+/* imagens embutidas (data:) dentro de HTML/CSS importado viram arquivos do tema */
+function wpExtract(ctx, str) {
+  return str.replace(/data:image\/(webp|jpeg|png);base64,([A-Za-z0-9+\/=]+)/g, (m, t, b64) => {
+    if (!ctx.dataImgs.has(m)) { let x = 2166136261; for (let i = 0; i < b64.length; i += 7) x = Math.imul(x ^ b64.charCodeAt(i), 16777619); const name = 'inline-' + (x >>> 0).toString(36) + (b64.length % 997).toString(36) + (t === 'webp' ? '.webp' : t === 'png' ? '.png' : '.jpg'); ctx.dataImgs.set(m, name); ctx.files.push({name: 'assets/img/' + name, data: Uint8Array.from(atob(b64), c => c.charCodeAt(0))}); }
+    return '{{THEME_URI}}/assets/img/' + ctx.dataImgs.get(m);
+  });
+}
+
+/* ---------- widgets do editor visual → widgets do Elementor ---------- */
+async function wpWidget(w, ctx) {
+  const T = ctx.th, fg = ctx.dark ? '#ffffff' : T.fg, mut = ctx.dark ? '#d4d4d8' : ctx.mut, id = wpHex(), E = lpE, R = lpRich;
+  const common = {}; if (w.hide && w.hide.t) common.hide_tablet = 'hidden-tablet'; if (w.hide && (w.hide.m || w.hide.l)) common.hide_mobile = 'hidden-phone';
+  const typo = (size, weight, family) => Object.assign({}, size ? Object.assign({typography_typography: 'custom'}, wpDev(size, 'typography_font_size', '', v => wpPx(v))) : {}, (weight || w.fw) ? {typography_typography: 'custom', typography_font_weight: String(w.fw || weight)} : {}, w.ff ? {typography_typography: 'custom', typography_font_family: w.ff} : {});
+  const al = wpDev(w.al, 'align', '', v => v), mk = (type, settings) => ({id, elType: 'widget', widgetType: type, settings: Object.assign({}, settings, common), elements: []});
+  switch (w.t) {
+    case 'heading': return mk('heading', Object.assign({title: R(w.text), header_size: w.tag || 'h2', title_color: w.color || fg}, al, typo(w.size, 700)));
+    case 'text': { const html = '<p>' + R(w.text).replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>') + '</p>'; return mk('text-editor', Object.assign({editor: html, text_color: w.color || (w.muted ? mut : fg)}, al, typo(w.size)));
+    }
+    case 'image': {
+      const f = await wpImgFile(ctx, w.imgId); const url = f ? '{{THEME_URI}}/assets/img/' + f : (/^https?:\/\//i.test(w.src || '') ? w.src : ''); if (!url) { ctx.warn.push('Imagem sem arquivo foi ignorada (escolha uma imagem da Biblioteca).'); return null; }
+      return mk('image', Object.assign({image: {url, id: '', alt: w.alt || '', source: 'library'}, image_size: 'full', link_to: 'none', image_border_radius: wpBox(w.rad, w.rad, w.rad, w.rad)}, al, w.wpct && w.wpct.d ? {width: {unit: '%', size: w.wpct.d, sizes: []}} : {}, w.wpct && w.wpct.m ? {width_mobile: {unit: '%', size: w.wpct.m, sizes: []}} : {}));
+    }
+    case 'video': {
+      const s = w.src || '', yt = s.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/))([\w-]{11})/), vm = s.match(/vimeo\.com\/(\d+)/), ar = {'16:9': '169', '9:16': '916', '1:1': '11', '4:5': '43'}[w.ratio] || '169';
+      if (yt) return mk('video', {video_type: 'youtube', youtube_url: 'https://www.youtube.com/watch?v=' + yt[1], aspect_ratio: ar}); if (vm) return mk('video', {video_type: 'vimeo', vimeo_url: 'https://vimeo.com/' + vm[1], aspect_ratio: ar});
+      if (/^https?:\/\/\S+\.(mp4|webm)(\?.*)?$/i.test(s)) return mk('video', {video_type: 'hosted', hosted_url: {url: s, id: ''}, aspect_ratio: ar}); ctx.warn.push('Vídeo sem endereço válido foi ignorado.'); return null;
+    }
+    case 'button': {
+      let url = '#'; if (w.link === 'checkout') url = ctx.l.product.checkout || '#form'; else if (w.link === 'form') url = '#form'; else if (w.link === 'whatsapp') url = ctx.l.whatsapp ? 'https://wa.me/' + ctx.l.whatsapp : '#form'; else url = /^(https?:\/\/|#|mailto:|tel:)/i.test(w.href || '') ? w.href : '#';
+      const ext = /^https?:/i.test(url), onAcc = T.accent, txt = bxLum(onAcc) < .5 ? '#ffffff' : '#141414', out = w.style === 'outline';
+      return mk('button', Object.assign({text: w.text, link: {url, is_external: ext ? 'on' : '', nofollow: '', custom_attributes: ''}, size: 'lg', button_text_color: out ? onAcc : txt, background_color: out ? 'rgba(0,0,0,0)' : onAcc, border_radius: wpBox(10, 10, 10, 10)}, out ? {border_border: 'solid', border_width: wpBox(2, 2, 2, 2), border_color: onAcc} : {}, w.full ? {align: 'justify'} : al, typo(w.size, 700)));
+    }
+    case 'list': { const ic = {check: 'fas fa-check', x: 'fas fa-times', dot: 'fas fa-circle'}[w.icon] || 'fas fa-check'; return mk('icon-list', {icon_list: w.items.filter(i => i.t).map(i => ({text: i.t, selected_icon: {value: ic, library: 'fa-solid'}, _id: wpHex()})), text_color: fg, icon_color: w.icon === 'x' ? '#b3472f' : T.accent, icon_size: wpPx(w.icon === 'dot' ? 8 : 16), space_between: wpPx(10)}); }
+    case 'feature': {
+      const html = (w.emoji ? '<div style="font-size:28px;margin-bottom:6px">' + E(w.emoji) + '</div>' : '') + (w.title ? '<h3 style="margin:0 0 6px;font-size:20px">' + R(w.title) + '</h3>' : '') + (w.text ? '<p style="margin:0;color:' + mut + '">' + R(w.text) + '</p>' : '');
+      return mk('text-editor', {editor: html, text_color: fg, _padding: wpBox(22, 22, 22, 22), _background_background: 'classic', _background_color: ctx.dark ? 'rgba(255,255,255,.07)' : '#ffffff', _border_radius: wpBox(14, 14, 14, 14), _border_border: 'solid', _border_width: wpBox(1, 1, 1, 1), _border_color: ctx.dark ? 'rgba(255,255,255,.18)' : T.line});
+    }
+    case 'spacer': return mk('spacer', Object.assign({}, wpDev(w.h, 'space', '', v => wpPx(v))));
+    case 'divider': return mk('divider', {style: 'solid', weight: wpPx(1), color: T.line});
+    case 'form': return mk('shortcode', {shortcode: '[amp_lead_form title="' + String(w.title || '').replace(/"/g, '') + '" text="' + String(w.text || '').replace(/"/g, '') + '" button="' + String(w.text2 || 'Enviar').replace(/"/g, '') + '"]'});
+    case 'faq': return mk('accordion', {tabs: w.items.filter(i => i.t).map(i => ({tab_title: i.t, tab_content: '<p>' + R(i.d || '') + '</p>', _id: wpHex()})), title_color: fg, tab_active_color: T.accent});
+    case 'quote': {
+      const it = w.items.filter(i => i.t), rows = []; for (let i = 0; i < it.length; i += 3) rows.push(it.slice(i, i + 3));
+      return mk('__inner', {rows: rows.map(r => r.map(q => ({id: wpHex(), elType: 'widget', widgetType: 'testimonial', settings: {testimonial_content: q.t, testimonial_name: q.d, testimonial_job: '', testimonial_alignment: 'left', content_content_color: fg, name_text_color: fg}, elements: []})))});
+    }
+    case 'countdown': { if (!w.date) return null; const d = E(w.date), html = `<div class="amp-cd" data-t="${d}" style="display:flex;gap:16px;justify-content:center;font:700 32px/1 inherit"><div><b class="d">0</b><small style="display:block;font-size:12px;font-weight:400">dias</small></div><div><b class="h">0</b><small style="display:block;font-size:12px;font-weight:400">horas</small></div><div><b class="m">0</b><small style="display:block;font-size:12px;font-weight:400">min</small></div></div><script>(function(){document.querySelectorAll('.amp-cd[data-t]').forEach(function(c){var t=new Date(c.dataset.t).getTime();function u(){var s=Math.max(0,Math.floor((t-Date.now())/1000));c.querySelector('.d').textContent=Math.floor(s/86400);c.querySelector('.h').textContent=Math.floor(s%86400/3600);c.querySelector('.m').textContent=Math.floor(s%3600/60)}u();setInterval(u,30000)})})();<\/script>`; return mk('html', {html}); }
+    case 'tpl': {
+      TPL_R.fonts = new Set(); TPL_R.css = []; TPL_R.form = true; TPL_R.hf = false;
+      const h = await tplWidgetHTML(w, 'tpl' + id, '', false, ctx.l, 1600), css = TPL_R.css.join('\n'); ctx.warn.push('Seção importada de template vira um bloco de HTML no Elementor (editável como HTML).');
+      return mk('html', {html: wpExtract(ctx, '<style>' + css + '</style>' + h)});
+    }
+  }
+  return null;
+}
+/* seção → seção do Elementor (com colunas) */
+async function wpSection(s, ctx, firstForm) {
+  const T = ctx.th, dark = !!s.bg && bxLum(s.bg) < .4, sctx = Object.assign({}, ctx, {dark}), soft = wpMix(T.bg, T.fg, .05);
+  const pd = s.pad || {}, pb = s.padB || {}, top = v => wpNum(v, 0), pt = {d: pd.d != null ? pd.d : 64, t: pd.t != null ? pd.t : (pd.d != null ? pd.d : 48), m: pd.m != null ? pd.m : (pd.t != null ? pd.t : pd.d != null ? Math.min(pd.d, 36) : 36)};
+  const bt = {d: pb.d != null ? pb.d : pt.d, t: pb.t != null ? pb.t : (pb.d != null ? pb.d : pt.t), m: pb.m != null ? pb.m : (pb.t != null ? pb.t : pb.d != null ? Math.min(pb.d, 36) : pt.m)};
+  const set = {layout: s.w === 'full' ? 'full_width' : 'boxed', content_width: {unit: 'px', size: 1120, sizes: []}, padding: wpBox(pt.d, 0, bt.d, 0), padding_tablet: wpBox(pt.t, 0, bt.t, 0), padding_mobile: wpBox(pt.m, 0, bt.m, 0), gap: 'custom', gap_columns_custom: wpPx(s.gap && s.gap.d != null ? s.gap.d : 28)};
+  if (s.bg) Object.assign(set, {background_background: 'classic', background_color: s.bg}); else if (s.alt) Object.assign(set, {background_background: 'classic', background_color: soft});
+  if (s.bgImg) { const f = await wpImgFile(ctx, s.bgImg); if (f) Object.assign(set, {background_background: 'classic', background_image: {url: '{{THEME_URI}}/assets/img/' + f, id: '', source: 'library'}, background_position: 'center center', background_size: 'cover', background_repeat: 'no-repeat'}); }
+  if (s.hide && s.hide.t) set.hide_tablet = 'hidden-tablet'; if (s.hide && (s.hide.m || s.hide.l)) set.hide_mobile = 'hidden-phone';
+  const hasForm = s.cols.some(c => c.widgets.some(w => w.t === 'form')); if (hasForm && firstForm) set._element_id = 'form';
+  const cols = [];
+  for (const c of s.cols) {
+    const sp = c.span || {}, pct = n => Math.round(n / 12 * 10000) / 100, d = wpNum(sp.d, 12), cs = {_column_size: pct(d), _inline_size: pct(d), content_position: {top: 'top', center: 'center', bottom: 'bottom'}[c.v] || 'top'};
+    if (sp.t != null) cs._inline_size_tablet = pct(sp.t); if (sp.m != null) cs._inline_size_mobile = pct(sp.m); else if (sp.t != null && sp.t === 12) cs._inline_size_mobile = 100;
+    const els = []; for (const w of c.widgets) { const r = await wpWidget(w, sctx); if (!r) continue; if (r.widgetType === '__inner') els.push(...r.settings.rows.map(row => ({id: wpHex(), elType: 'section', settings: {structure: String(row.length) + '0', gap: 'custom', gap_columns_custom: wpPx(20)}, elements: row.map(q => ({id: wpHex(), elType: 'column', settings: {_column_size: Math.round(100 / row.length * 100) / 100, _inline_size: null}, elements: [q], isInner: true})), isInner: true}))); else els.push(r); }
+    cols.push({id: wpHex(), elType: 'column', settings: cs, elements: els, isInner: false});
+  }
+  return {id: wpHex(), elType: 'section', settings: set, elements: cols, isInner: false};
+}
+/* página (landing) → lista de seções do Elementor */
+async function wpPage(l, p, ctx) {
+  const V = l.vis || bxFromBlocks(l), out = []; ctx.l = l; let form = true;
+  for (const s of V.sections) { const sec = await wpSection(s, ctx, form); if (sec.settings._element_id === 'form') form = false; out.push(sec); }
+  return out;
+}
+
+/* ---------- tema completo ---------- */
+const wpSlug = s => String(s || 'tema').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'tema';
+const wpFill = (t, m) => Object.keys(m).reduce((a, k) => a.split('__' + k + '__').join(m[k]), t);
+async function wpThemeBuild(siteId, opt) {
+  const p = curProject(), site = p.sites.find(x => x.id === siteId); if (!site) throw new Error('Site não encontrado.');
+  const pages = p.landings.filter(l => l.siteId === site.id); if (!pages.length) throw new Error('O site não tem páginas.');
+  opt = Object.assign({name: site.name, slug: wpSlug(site.name), version: '1.0.0'}, opt || {}); const enc = new TextEncoder(), l0 = pages[0], T0 = l0.theme || {}, hx = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? v : d;
+  const th = {accent: hx(T0.accent, '#e4572e'), bg: T0.dark ? '#0e0e10' : hx(T0.bg, '#ffffff'), fg: T0.dark ? '#f5f5f5' : hx(T0.fg, '#141414'), head: String(T0.head || 'Poppins').replace(/[^\w \-]/g, ''), body: String(T0.body || 'Inter').replace(/[^\w \-]/g, '')};
+  th.soft = wpMix(th.bg, th.fg, .05); th.line = wpMix(th.bg, th.fg, .14); th.mut = wpMix(th.fg, th.bg, .38);
+  const ctx = {th: Object.assign({}, th, {line: th.line}), mut: th.mut, files: [], imgs: new Map(), dataImgs: new Map(), warn: [], l: l0}, slug = opt.slug, root = slug + '/', out = [];
+  const wp = [], templates = [];
+  for (const l of pages) {
+    const els = await wpPage(l, p, ctx), SO = lpSeoOf(l, p), og = SO.ogId ? await wpImgFile(ctx, SO.ogId, 1200) : '', home = (l.slug || 'index') === 'index', title = l.navLabel || l.name;
+    wp.push({slug: home ? 'inicio' : (l.slug || wpSlug(title)), title, home, menu: true, seo: {title: SO.title || (title + ' · ' + (site.brand || site.name)), desc: SO.desc || '', og}, elementor: els});
+    templates.push({name: wpSlug(l.slug || 'inicio') + '.json', data: {version: '0.4', title: site.name + ' · ' + title, type: 'page', content: els, page_settings: [], metadata: []}});
+  }
+  const fav = (SO => SO)(lpSeoOf(l0, p)).fav; let favFile = ''; if (fav) { try { const b = await lpCover(fav, 192, 192, 'image/png', 1); if (b) { out.push({name: root + 'assets/favicon.png', data: new Uint8Array(await b.arrayBuffer())}); favFile = 'ok'; } } catch (e) { /* sem favicon */ } }
+  const trk = l0.tracking || {}, defaults = {brand: site.brand || site.name, header_cta: site.headerCta || '', header_cta_url: '#form', footer_text: site.footer || '', contact_text: site.contact || '', wa_number: l0.whatsapp || '', wa_message: l0.waMsg || '', privacy_url: l0.privacyUrl || '', leads_url: state.workspace.leadsUrl || '', thanks_url: '/obrigado/', thanks_title: (l0.thanks && l0.thanks.title) || '', thanks_text: (l0.thanks && l0.thanks.text) || '', pixel: trk.metaPixel || '', ga4: trk.ga4 || '', fonts: [...new Set([th.head, th.body])]};
+  const meta = {NAME: opt.name.replace(/[\r\n*\/]/g, ' '), SLUG: slug, VER: opt.version, DATE: new Date().toLocaleDateString('pt-BR'), PAGES: pages.map(l => l.navLabel || l.name).join(', '), ACCENT: th.accent, BG: th.bg, FG: th.fg, SOFT: th.soft, LINE: th.line, MUT: th.mut, HEAD: th.head, BODY: th.body};
+  const css = `/*\nTheme Name: ${meta.NAME}\nTheme URI: ${(site.baseUrl || '').replace(/[\r\n]/g, '')}\nAuthor: Ampliação Studio\nDescription: Tema gerado pelo Ampliação Studio. As páginas são editadas no Elementor.\nVersion: ${opt.version}\nRequires at least: 5.8\nRequires PHP: 7.4\nLicense: GPL-2.0-or-later\nLicense URI: https://www.gnu.org/licenses/gpl-2.0.html\nText Domain: ${slug}\n*/\n` + wpFill(WPT.css, meta);
+  /* screenshot do tema */
+  { const c = document.createElement('canvas'); c.width = 1200; c.height = 900; const x = c.getContext('2d'); x.fillStyle = th.bg; x.fillRect(0, 0, 1200, 900); x.fillStyle = th.accent; x.fillRect(0, 0, 1200, 360); x.fillStyle = '#fff'; x.font = '700 72px sans-serif'; x.fillText(String(site.brand || site.name).slice(0, 22), 70, 210); x.fillStyle = th.fg; x.font = '600 36px sans-serif'; x.fillText('Tema WordPress · Elementor', 70, 470); x.font = '28px sans-serif'; x.fillStyle = th.mut; pages.slice(0, 6).forEach((l, i) => x.fillText('• ' + (l.navLabel || l.name), 70, 540 + i * 44)); const b = await new Promise(r => c.toBlob(r, 'image/png')); out.push({name: root + 'screenshot.png', data: new Uint8Array(await b.arrayBuffer())}); }
+  out.push({name: root + 'style.css', data: enc.encode(css)}, {name: root + 'functions.php', data: enc.encode(wpFill(WPT.functions, meta))}, {name: root + 'header.php', data: enc.encode(WPT.header)}, {name: root + 'footer.php', data: enc.encode(WPT.footer)}, {name: root + 'page.php', data: enc.encode(WPT.page)}, {name: root + 'index.php', data: enc.encode(WPT.index)}, {name: root + '404.php', data: enc.encode(WPT.notfound)}, {name: root + 'page-obrigado.php', data: enc.encode(WPT.thanks)},
+    {name: root + 'assets/js/theme.js', data: enc.encode(WPT.js)}, {name: root + 'inc/defaults.json', data: enc.encode(JSON.stringify(defaults))}, {name: root + 'inc/pages.json', data: enc.encode(JSON.stringify(wp))}, {name: root + 'readme.txt', data: enc.encode(wpFill(WPT.readme, meta).replace(/[#*`]/g, ''))});
+  ctx.files.forEach(f => out.push({name: root + f.name, data: f.data}));
+  const base = '/wp-content/themes/' + slug; const tpl = templates.map(t => ({name: 'elementor-templates/' + t.name, data: enc.encode(JSON.stringify(t.data).split('{{THEME_URI}}').join(base))}));
+  const warn = [...new Set(ctx.warn)]; if (!defaults.leads_url) warn.push('O endereço de captura de leads não está definido em Configurações; preencha em Aparência → Personalizar → Captura de leads.'); if (pages.some(l => l.status !== 'Aprovada')) warn.push('Há páginas do site que ainda não estão como "Aprovada".');
+  return {slug, name: opt.name, themeFiles: out, templates: tpl, readme: wpFill(WPT.readme, meta), warn, pages: wp.length, images: ctx.imgs.size + ctx.dataImgs.size, size: out.reduce((a, f) => a + f.data.length, 0)};
+}
+async function wpThemeZip(siteId, opt) { const r = await wpThemeBuild(siteId, opt); return Object.assign(r, {zip: makeZip(r.themeFiles)}); }
+
+/* ---------- pacote com tema, plugins e instruções ---------- */
+const wpPlugList = () => { if (!Array.isArray(state.workspace.wpPlugins)) state.workspace.wpPlugins = []; return state.workspace.wpPlugins; };
+async function wpBundle(siteId, opt) {
+  const r = await wpThemeBuild(siteId, opt), enc = new TextEncoder(), files = [{name: r.slug + '/' + r.slug + '.zip', data: makeZip(r.themeFiles)}, {name: r.slug + '/LEIA-ME.md', data: enc.encode(r.readme)}].concat(r.templates.map(t => ({name: r.slug + '/' + t.name, data: t.data})));
+  for (const pl of wpPlugList()) { try { const b = await imgGet(pl.imgId); if (b) files.push({name: r.slug + '/plugins/' + pl.file, data: new Uint8Array(await b.arrayBuffer())}); } catch (e) { /* plugin ausente */ } }
+  return Object.assign(r, {zip: makeZip(files)});
+}
+async function wpGenerate(siteId, mode) {
+  const s = curProject().sites.find(x => x.id === siteId); if (!s) return; toast('Montando o tema do WordPress…');
+  try {
+    const opt = {name: ($('wpName') || {}).value || s.name, slug: wpSlug(($('wpSlug') || {}).value || ($('wpName') || {}).value || s.name), version: (($('wpVer') || {}).value || '1.0.0').replace(/[^\w.\-]/g, '') || '1.0.0'};
+    const r = mode === 'bundle' ? await wpBundle(siteId, opt) : await wpThemeZip(siteId, opt);
+    download(r.slug + (mode === 'bundle' ? '-wordpress-pacote' : '') + '.zip', r.zip, 'application/zip'); curProject().landings.filter(l => l.siteId === siteId).forEach(l => { l.status = 'Exportada'; }); persist();
+    showModal('Tema gerado', `<p><b>${esc(r.name)}</b>: ${r.pages} página(s), ${r.images} imagem(ns), ${Math.round(r.size / 1024)} KB de arquivos do tema.</p>${r.warn.length ? `<div class="so-issue aviso">${r.warn.map(esc).join('<br>')}</div>` : ''}<ol style="font-size:13px;line-height:1.7"><li>No WordPress, instale e ative o <b>Elementor</b> (gratuito).</li><li><b>Aparência → Temas → Adicionar novo → Enviar tema</b> e escolha o arquivo baixado${mode === 'bundle' ? ' (dentro do pacote: <span class="mono">' + esc(r.slug) + '.zip</span>)' : ''}. Ative.</li><li>O tema cria as páginas, o menu, a página inicial e a página Obrigado. Abra uma página e clique em <b>Editar com Elementor</b>.</li><li>Ajuste marca, WhatsApp, leads e rastreamento em <b>Aparência → Personalizar</b>.</li></ol><p class="muted" style="font-size:12.5px">As instruções completas vão no arquivo <span class="mono">LEIA-ME</span> do pacote.</p><div class="modal-actions"><button class="btn dark" onclick="closeModal();renderLandings()">Fechar</button></div>`);
+  } catch (e) { toast('Não consegui gerar o tema: ' + e.message); }
+}
+function wpPanel(s, p) {
+  const pages = p.landings.filter(l => l.siteId === s.id), ok = pages.every(l => l.status === 'Aprovada'), pl = wpPlugList();
+  return `<div class="panel" style="margin-top:10px"><h3>Tema do WordPress</h3><p class="muted" style="font-size:12.5px;margin:0 0 8px">Transforma este site num tema instalável: cada página vira uma página do WordPress <b>editável no Elementor</b>, com menu, página inicial, página de Obrigado, formulário de leads, SEO básico e rastreamento.${ok ? '' : ' <b>Atenção:</b> há páginas que ainda não estão como “Aprovada”.'}</p>
+  <div class="field"><label>Nome do tema</label><input id="wpName" value="${siteA(s.name)}" oninput="if($('wpSlug'))$('wpSlug').placeholder=wpSlug(this.value)"></div><div class="form-grid"><div class="field"><label>Pasta (slug)</label><input id="wpSlug" placeholder="${siteA(wpSlug(s.name))}"></div><div class="field"><label>Versão</label><input id="wpVer" value="1.0.0"></div></div>
+  <div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" onclick="wpGenerate('${s.id}','theme')">⬇ Gerar tema (.zip)</button><button class="btn" onclick="wpGenerate('${s.id}','bundle')" title="Tema, plugins anexados, modelos do Elementor e instruções">⬇ Pacote completo</button></div>
+  <h4 style="margin:12px 0 4px;font-size:13px">Plugins que acompanham o tema</h4><small class="muted block">Anexe os plugins que você já produziu (arquivos .zip). Eles vão na pasta <span class="mono">plugins</span> do pacote completo.</small>
+  ${pl.map(x => `<div class="list-item" style="padding:6px 0"><div><strong style="font-size:13px">${siteA(x.name)}</strong><small>${Math.round(x.size / 1024)} KB</small></div><button class="btn sm" onclick="wpPlugDel('${x.id}')">×</button></div>`).join('')}<button class="btn sm" style="margin-top:6px" onclick="wpPlugAdd()">＋ Anexar plugin (.zip)</button></div>`;
+}
+function wpPlugAdd() {
+  const i = document.createElement('input'); i.type = 'file'; i.accept = '.zip,application/zip'; i.multiple = true;
+  i.onchange = async () => { for (const f of [...i.files].slice(0, 10)) { if (!/\.zip$/i.test(f.name) || f.size > 40e6) { toast(f.name + ': use um .zip de até 40 MB.'); continue; } const id = uid('wpl'), imgId = uid('wpz'); await imgPut(imgId, f); wpPlugList().push({id, imgId, name: f.name.replace(/\.zip$/i, ''), file: f.name.replace(/[^\w.\-]/g, '_'), size: f.size}); } persist(); renderLandings(); };
+  i.click();
+}
+async function wpPlugDel(id) { const L = wpPlugList(), i = L.findIndex(x => x.id === id); if (i < 0) return; try { await imgDel(L[i].imgId); } catch (e) { /* ok */ } L.splice(i, 1); persist(); renderLandings(); }
+
+</script>
+<script>
 /* ===== Menu por categorias (recolher categorias e menu) e página "Mapa do projeto": o fluxo de trabalho do começo ao fim, clicável ===== */
 /* Fluxo de trabalho real: cliente → pré-projeto → anúncios → site/landing → mostrar ao cliente → resultados e vendas.
    Status de cada item: ok = pronto, part = parcial, soon = ainda não existe (aparece sem link). */
@@ -19263,7 +19970,7 @@ const FLOW = [
     ['campaigns', 'Campanhas', 'Agrupa os anúncios por campanha e por produto.', 'part'],
     [null, 'Subir no Meta, Google e TikTok', 'Hoje você sobe nas plataformas; o envio direto ainda não existe.', 'soon']]},
   {n: '3', t: 'Site e landing page', c: '#2f6fcf', d: 'Para onde o anúncio leva. Sem site, cria o site; com site, uma landing page por produto. Ou vai direto ao WhatsApp.', items: [
-    ['landings', 'Sites e landing pages', 'Sites, landing pages por produto, templates importados, formulário e botão de WhatsApp.', 'ok']]},
+    ['landings', 'Sites e landing pages', 'Sites, landing pages por produto, templates importados, formulário, WhatsApp e tema do WordPress (Elementor).', 'ok']]},
   {n: '4', t: 'Conteúdo orgânico', c: '#2e7d4f', d: 'Posts que reforçam a autoridade do cliente nas redes e no blog.', items: [
     ['carrosseis', 'Carrosséis', 'De 3 a 20 slides, com legenda.', 'ok'],
     ['feed', 'Planejador de feed', 'Posts simples, stories, vídeos e grids.', 'ok'],
@@ -19748,7 +20455,7 @@ function siteEditor(b, p, s) {
   ${accSec('st', 'bs', '1 · BrandScript (StoryBrand)', 'a história que o site conta', `<div class="row-gap" style="margin-bottom:8px;flex-wrap:wrap"><button class="btn sm dark" onclick="siteFillBS()" ${aiReady() && !lpUI.busy ? '' : 'disabled'}>${lpUI.busy === 'bs' ? 'Pensando…' : '✦ Preencher com IA a partir do resumo'}</button></div><div class="field"><label>Resumo do negócio (o que vende, para quem, diferenciais reais)</label><textarea rows="5" oninput="siteCur().brief=this.value;persist()" placeholder="Cole aqui o que você sabe: produto, público, dores, números reais, garantias…">${siteA(s.brief)}</textarea></div>${BS_FIELDS.map(([t, fs]) => `<div class="okr-label" style="margin-top:10px">${t.toUpperCase()}</div>${fs.map(([k, l, ph]) => `<div class="field"><label>${l}</label><textarea rows="2" oninput="siteCur().bs.${k}=this.value;persist()" placeholder="${siteA(ph)}">${siteA(s.bs[k])}</textarea></div>`).join('')}`).join('')}`, true)}
   ${accSec('st', 'pg', '2 · Páginas do site', pages.length + ' páginas', `<small class="muted block" style="margin-bottom:6px">Cada página abre no editor (blocos, editor visual, estilo). O menu segue esta ordem.</small>${pages.map((l, i) => `<div class="list-item"><div><strong>${siteA(l.navLabel || l.name)}</strong><small>/${siteA(l.slug === 'index' ? '' : l.slug + '.html')} · ${(l.blocks || []).filter(x => x.on).length} blocos${lpPending(l) ? ` · <span class="so-warn">${lpPending(l)} a confirmar</span>` : ''}${l.vis ? ' · editor visual' : ''}</small></div><div class="row-gap"><button class="btn sm" onclick="siteMovePage('${l.id}',-1)" ${i === 0 ? 'disabled' : ''}>▲</button><button class="btn sm" onclick="siteMovePage('${l.id}',1)" ${i === pages.length - 1 ? 'disabled' : ''}>▼</button><button class="btn sm dark" onclick="lpUI.back='site';lpOpen('${l.id}')">Abrir</button><button class="btn sm" onclick="siteGenOne('${l.id}')" ${aiReady() && !lpUI.busy ? '' : 'disabled'} title="Reescreve esta página com o BrandScript">✦</button><button class="btn sm" onclick="sitePageDel('${l.id}')">×</button></div></div>`).join('')}<div class="row-gap" style="margin-top:8px"><button class="btn dark" onclick="siteGenAll()" ${aiReady() && !lpUI.busy ? '' : 'disabled'}>${lpUI.busy === 'all' ? 'Escrevendo as páginas…' : '✦ Gerar todas as páginas com o BrandScript'}</button><button class="btn" onclick="siteAddPage()">＋ Página</button></div><small class="muted block" style="margin-top:6px">A IA escreve só com o BrandScript e os fatos do produto. O que faltar fica como <b>[CONFIRMAR]</b>.</small>`, true)}</div>
   <div>${accSec('st', 'ch', 'Cabeçalho, menu e rodapé', '', `<div class="field"><label>Nome da marca (no cabeçalho)</label><input value="${siteA(s.brand)}" oninput="siteCur().brand=this.value;persist()"></div><div class="field"><label>Botão do cabeçalho (vazio = sem botão)</label><input value="${siteA(s.headerCta)}" oninput="siteCur().headerCta=this.value;persist()"></div><div class="field"><label>Texto do rodapé</label><textarea rows="2" oninput="siteCur().footer=this.value;persist()">${siteA(s.footer)}</textarea></div><div class="okr-label" style="margin-top:8px">COMPARTILHAMENTO E FAVICON</div><div class="field"><label>Descrição do site (aparece no Google e ao compartilhar o link)</label><textarea rows="2" oninput="siteCur().desc=this.value;persist()" placeholder="Uma ou duas frases sobre o que o site oferece">${siteA(s.desc)}</textarea></div><div class="field"><label>Endereço do site publicado (https://…)</label><input value="${siteA(s.baseUrl)}" onchange="siteCur().baseUrl=seoBase(this.value);persist();renderLandings()" placeholder="https://www.seudominio.com.br"></div><div class="row-gap" style="flex-wrap:wrap;margin-bottom:8px"><button class="btn sm" onclick="siteImg('ogImgId')">📚 Imagem de compartilhamento (${s.ogImgId ? '✓' : 'não definida'})</button>${s.ogImgId ? `<button class="btn sm" onclick="siteImg('ogImgId',1)">×</button>` : ''}<button class="btn sm" onclick="siteImg('faviconImgId')">📚 Favicon (${s.faviconImgId ? '✓' : 'não definido'})</button>${s.faviconImgId ? `<button class="btn sm" onclick="siteImg('faviconImgId',1)">×</button>` : ''}</div><small class="muted block" style="margin-bottom:8px">Imagem 1200×630 funciona melhor (cortada ao centro). Favicon: imagem quadrada. Cada página pode ter título, descrição e imagem próprios na aba Publicar.</small><div class="field"><label>Contato no rodapé (endereço, telefone, e-mail)</label><textarea rows="3" oninput="siteCur().contact=this.value;persist()">${siteA(s.contact)}</textarea></div>${p.products.length ? `<div class="field"><label>Produto principal</label><select onchange="siteSetProduct(this.value)"><option value="">— nenhum —</option>${p.products.map(x => `<option value="${x.id}" ${x.id === s.productId ? 'selected' : ''}>${siteA(x.name)}</option>`).join('')}</select></div>` : ''}`, true)}
-  <div class="panel" style="margin-top:10px"><h3>Publicar</h3><p class="muted" style="font-size:12.5px;margin:0">O ZIP traz uma página por arquivo (<span class="mono">index.html</span>, <span class="mono">servicos.html</span>…), com o menu ligando uma à outra e funcionando no celular. Suba tudo na raiz da hospedagem. O formulário usa a URL de leads de Configurações.</p></div></div></div>`;
+  <div class="panel" style="margin-top:10px"><h3>Publicar</h3><p class="muted" style="font-size:12.5px;margin:0">O ZIP traz uma página por arquivo (<span class="mono">index.html</span>, <span class="mono">servicos.html</span>…), com o menu ligando uma à outra e funcionando no celular. Suba tudo na raiz da hospedagem. O formulário usa a URL de leads de Configurações.</p></div>${typeof wpPanel === 'function' ? wpPanel(s, p) : ''}</div></div>`;
 }
 function siteImg(k, clear) { if (clear) { siteCur()[k] = ''; persist(); renderLandings(); return; } libPick(r => { siteCur()[k] = r.id; persist(); renderLandings(); }); }
 function siteSetProduct(id) { const p = curProject(), s = siteCur(); s.productId = id; const x = p.products.find(y => y.id === id); p.landings.filter(l => l.siteId === s.id).forEach(l => { l.productId = id; if (x) Object.assign(l.product, {nome: x.name, preco: x.price, publico: x.audience, checkout: x.checkout}); }); persist(); renderLandings(); }
