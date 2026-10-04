@@ -132,6 +132,8 @@ function confirmCreation(type) {
   if (!p) { toast('Escolha um projeto.'); return; }
   state.creatives.unshift({id: uid('c'), projectId: p.id, title: name, type: CREATION_NAMES[type], cls: 'a5', status: 'Rascunho', brief, created: new Date().toISOString()});
   persist(); closeModal(); renderHome();
+  /* carrossel: abre o Estúdio de Carrosséis (modelo por etapa do funil, texto, mídia, preview e exportação) */
+  if (type === 'carousel' && typeof carNew === 'function') { setActiveProject(p.id); const c = carNew(name.replace(/ — novo conceito$/, '') || 'Carrossel', '', ''); c.idea = brief === 'Criado a partir do contexto atual.' ? '' : brief; persist(); go('carrosseis'); carNewModal('change'); toast('Carrossel criado em ' + p.name + '. Escolha o modelo da capa.'); return; }
   /* anúncio/post/story abrem direto o Estúdio de Design (tela de composição já preenchida); vídeo vai ao Video Lab */
   const FMT = {ad: 'ad45', post: 'feed45', carousel: 'ig34', story: 'story', stories: 'story'};
   if (FMT[type] && typeof dzNew === 'function') { setActiveProject(p.id); dzNew(); dz.cmp.name = name; dz.cmp.text = brief === 'Criado a partir do contexto atual.' ? '' : brief; dz.cmp.fmt = FMT[type]; renderDesign(); toast(CREATION_NAMES[type] + ' criado em ' + p.name + '. Escolha o estilo e gere as peças.'); return; }

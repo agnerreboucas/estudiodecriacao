@@ -84,6 +84,7 @@ function soNova(b, S) {
     <div class="section-row"><h3>${d.id ? 'Editar publicação' : 'Nova publicação'}</h3>${d.id ? `<small class="muted">${soEsc(KS.format.FASE_LABELS[d.status] || '')}</small>` : ''}</div>
     <div class="field"><label>Título interno</label><input value="${soEsc(d.title)}" oninput="soUI.draft.title=this.value" placeholder="Ex.: Carrossel — antes de assinar"></div>
     <div class="field"><label>Contas de destino</label>${S.accounts.length ? `<div class="tchips" style="justify-content:flex-start">${S.accounts.map(a => `<button class="tchip ${d.accountIds.includes(a.id) ? 'on' : ''}" onclick="soTog('${a.id}')">${soCh([a.id])} ${soEsc(soNet(a.networkId).label)} ${soEsc(a.handle)}</button>`).join('')}</div>` : '<small class="muted">Nenhuma conta. <a href="#" onclick="soTab(\'contas\');return false">Cadastre uma conta</a>.</small>'}</div>
+    <div class="ins-row"><label class="ins">Trazer de Carrosséis<select onchange="soFromCarousel(this.value)"><option value="">— escolher carrossel —</option>${p.carousels.map(c => `<option value="${c.id}">${soEsc(c.name)} (${c.slides} slides)</option>`).join('')}</select></label></div>
     <div class="ins-row"><label class="ins">Trazer do Editor de Design<select onchange="soFromSet(this.value)"><option value="">— escolher peça —</option>${sets.map(s => `<option value="${s.id}" ${d.setId === s.id ? 'selected' : ''}>${soEsc(s.name)} (${s.slides.length} slide${s.slides.length > 1 ? 's' : ''})</option>`).join('')}</select></label>
     <label class="ins">Trazer texto de uma criação<select onchange="soFromCreative(this.value)"><option value="">— escolher —</option>${creatives.map(c => `<option value="${c.id}">${soEsc(c.title)}</option>`).join('')}</select></label></div>
     <div class="ins-row"><label class="ins">Formato<select onchange="soFmtSet(this.value)">${['imagem', 'carrossel', 'video', 'story', 'a_definir'].map(f => `<option value="${f}" ${d.format === f ? 'selected' : ''}>${soFmt(f)}</option>`).join('')}</select></label>
@@ -108,6 +109,15 @@ function soFromSet(id) {
   const d = soUI.draft; d.setId = id; const s = so() && curProject().design.sets.find(x => x.id === id); if (!s) { renderSocialPage(); return; }
   const r = s.format.w / s.format.h, ar = r > 1.3 ? '16:9' : r > 0.9 ? '1:1' : r > 0.7 ? '4:5' : '9:16'; d.media.aspectRatio = ar; d.media.count = s.slides.length;
   d.format = ar === '9:16' && s.slides.length <= 3 ? 'story' : s.slides.length > 1 ? 'carrossel' : 'imagem'; if (!d.title) d.title = s.name; renderSocialPage();
+}
+/* carrossel do estúdio → peça do Editor de Design (id estável, refeita a cada vez) → publicação */
+async function soFromCarousel(id) {
+  const p = curProject(), c = p.carousels.find(x => x.id === id); if (!c) return; toast('Montando o carrossel…');
+  try {
+    const {set} = carMake(c, {final: true}); await ensureFonts(lyFamilies(set.tk)); await brandFontsLoad(p); await ensureSetResources(set); set.id = 'ds_' + c.id; set.name = c.name + ' · carrossel';
+    const at = p.design.sets.findIndex(x => x.id === set.id); if (at >= 0) p.design.sets[at] = set; else p.design.sets.push(set); persist();
+    const d = soUI.draft; if (!d.caption) d.caption = (c.texts[0] || '').replace(/\*\*/g, '') + (c.texts[1] ? '\n\n' + c.texts[1] : ''); soFromSet(set.id);
+  } catch (e) { toast('Não consegui montar o carrossel: ' + e.message); }
 }
 function soFromCreative(id) { const c = (state.creatives || []).find(x => x.id === id); if (!c) return; const d = soUI.draft; d.creativeId = id; if (!d.title) d.title = c.title; if (!d.caption) d.caption = c.copy || c.brief || ''; renderSocialPage(); }
 async function soPaintCover() {

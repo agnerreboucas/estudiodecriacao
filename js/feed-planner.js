@@ -171,11 +171,12 @@ function feedLinkModal(i) {
 function feedLink(i, t, id) { const s = feedCur().slots[i]; s.ref = {t, id}; if (t === 'car') s.kind = 'carousel'; feedSave(); closeModal(); renderFeed(); }
 
 /* leva os espaços com peça para a Publicação como rascunhos, na ordem de postagem (do último espaço para o primeiro) */
-function feedToPublish() {
-  const p = curProject(), f = feedCur(), S = so(); if (!S) return; let n = 0;
+async function feedToPublish() {
+  const p = curProject(), f = feedCur(), S = so(); if (!S) return; let n = 0; toast('Preparando as publicações…');
   for (let i = f.slots.length - 1; i >= 0; i--) {
     const s = f.slots[i]; if (!s.ref.id || (s.postId && S.posts.some(x => x.id === s.postId))) continue;
     const po = soNewPost({title: s.label || (s.ref.t === 'car' ? (p.carousels.find(c => c.id === s.ref.id) || {}).name : (p.design.sets.find(x => x.id === s.ref.id) || {}).name) || 'Publicação do feed', format: s.kind === 'carousel' ? 'carrossel' : s.kind === 'video' ? 'video' : 'imagem', status: 'rascunho', setId: s.ref.t === 'set' ? s.ref.id : ''});
+    if (s.ref.t === 'car') { const c = p.carousels.find(x => x.id === s.ref.id); if (c) { try { const {set} = carMake(c, {final: true}); await ensureFonts(lyFamilies(set.tk)); await ensureSetResources(set); set.id = 'ds_' + c.id; set.name = c.name + ' · carrossel'; const at = p.design.sets.findIndex(x => x.id === set.id); if (at >= 0) p.design.sets[at] = set; else p.design.sets.push(set); po.setId = set.id; po.caption = (c.texts[0] || '').replace(/\*\*/g, '') + (c.texts[1] ? '\n\n' + c.texts[1] : ''); po.media = Object.assign({}, po.media, {count: set.slides.length, aspectRatio: c.ratio}); } catch (e) { /* segue sem a peça */ } } }
     s.postId = po.id; n++;
   }
   soSave(); feedSave(); toast(n ? `${n} rascunho(s) criado(s) na Publicação, na ordem de postagem.` : 'Esses espaços já foram levados para a Publicação.');
