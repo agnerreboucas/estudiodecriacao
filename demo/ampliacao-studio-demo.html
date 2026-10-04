@@ -773,6 +773,19 @@ textarea,input,select{max-width:100%}
   .fl-row{grid-template-columns:1fr}.fl-arrow{transform:rotate(90deg);height:20px}.fl-side{grid-template-columns:1fr}.fl-two{grid-template-columns:1fr}
 }
 
+.rail .rail-soon{opacity:.55;cursor:default}
+.rail .rail-lb em{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#eee;color:#666;border-radius:999px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+@media(min-width:1025px){.rail button.rail-soon{width:100%;display:flex;align-items:center;gap:10px;padding:6px 10px;min-height:34px;border-radius:9px;justify-content:flex-start;height:auto;background:transparent;border:0;text-align:left}body.rail-mini .rail button.rail-soon{width:42px;height:42px;padding:0;justify-content:center}body.rail-mini .rail .rail-soon .rail-lb{display:none!important}}
+
+.fl-line{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 12px;font-size:13px}.fl-line b{background:#111;color:#fff;border-radius:999px;padding:5px 12px;font-weight:700}.fl-line span{color:#999}
+.fl-steps small{color:#666;font-weight:700}
+.fl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.fl-st{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;background:var(--s);border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:1px;white-space:nowrap}
+.fl-box.soon{cursor:default;opacity:.75;border-style:dashed}.fl-box.soon:hover{background:#fafafa;box-shadow:none}
+.fl-leg{display:inline-block;margin-left:8px}
+@media(max-width:1024px){.fl-grid{grid-template-columns:1fr}}
+@media(min-width:1025px) and (max-width:1300px){.fl-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 </style>
 </head>
 <body>
@@ -783,28 +796,34 @@ textarea,input,select{max-width:100%}
   <nav class="rail-nav">
     <button class="active" data-page="home" title="Início"><span data-ico="home"></span><span class="rail-lb">Início</span></button>
     <button data-page="flow" title="Mapa do projeto"><span data-ico="webhook"></span><span class="rail-lb">Mapa do projeto</span></button>
-    <div class="rail-grp" data-g="Planejar"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">1 · Planejar</span><small>Entender o cliente e a marca</small><i aria-hidden="true">▾</i></button><div class="rail-items">
+    <div class="rail-grp" data-g="Cliente e pré-projeto"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">1 · Cliente e pré-projeto</span><small>Entender o cliente e o cliente dele</small><i aria-hidden="true">▾</i></button><div class="rail-items">
       <button data-page="projects" title="Projetos"><span data-ico="folder"></span><span class="rail-lb">Projetos</span></button>
-      <button data-page="brand" title="Brand Brain"><span data-ico="brain"></span><span class="rail-lb">Brand Brain</span></button>
       <button data-page="matrix" title="Matriz de Criação"><span data-ico="sparkles"></span><span class="rail-lb">Matriz de Criação</span></button>
+      <button data-page="brand" title="Brand Brain"><span data-ico="brain"></span><span class="rail-lb">Brand Brain</span></button>
       <button data-page="inspiration" title="Inspiração"><span data-ico="pin"></span><span class="rail-lb">Inspiração</span></button>
     </div></div>
-    <div class="rail-grp" data-g="Criar"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">2 · Criar</span><small>Produzir as peças</small><i aria-hidden="true">▾</i></button><div class="rail-items">
+    <div class="rail-grp" data-g="Anúncios"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">2 · Anúncios</span><small>Um criativo por dor e por produto</small><i aria-hidden="true">▾</i></button><div class="rail-items">
       <button data-page="editorial" title="Agente Editorial"><span data-ico="target"></span><span class="rail-lb">Agente Editorial</span></button>
+      <button data-page="design" title="Estúdio de Design"><span data-ico="palette"></span><span class="rail-lb">Estúdio de Design</span></button>
+      <button data-page="videoLab" title="Video Lab"><span data-ico="video"></span><span class="rail-lb">Video Lab</span></button>
+      <button data-page="campaigns" title="Campanhas"><span data-ico="megaphone"></span><span class="rail-lb">Campanhas</span></button>
+    </div></div>
+    <div class="rail-grp" data-g="Site e landing page"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">3 · Site e landing page</span><small>Para onde o anúncio leva</small><i aria-hidden="true">▾</i></button><div class="rail-items">
+      <button data-page="landings" title="Sites e landing pages"><span data-ico="globe"></span><span class="rail-lb">Sites e landing pages</span></button>
+    </div></div>
+    <div class="rail-grp" data-g="Conteúdo orgânico"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">4 · Conteúdo orgânico</span><small>Autoridade nas redes e no blog</small><i aria-hidden="true">▾</i></button><div class="rail-items">
       <button data-page="carrosseis" title="Carrosséis"><span data-ico="layout"></span><span class="rail-lb">Carrosséis</span></button>
       <button data-page="feed" title="Planejador de feed"><span data-ico="grid"></span><span class="rail-lb">Planejador de feed</span></button>
-      <button data-page="design" title="Estúdio de Design"><span data-ico="palette"></span><span class="rail-lb">Estúdio de Design</span></button>
-      <button data-page="landings" title="Sites e landing pages"><span data-ico="globe"></span><span class="rail-lb">Sites e landing pages</span></button>
       <button data-page="editora" title="Editora (e-books)"><span data-ico="book"></span><span class="rail-lb">Editora (e-books)</span></button>
-      <button data-page="videoLab" title="Video Lab"><span data-ico="video"></span><span class="rail-lb">Video Lab</span></button>
     </div></div>
-    <div class="rail-grp" data-g="Aprovar e publicar"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">3 · Aprovar e publicar</span><small>Revisar e colocar no ar</small><i aria-hidden="true">▾</i></button><div class="rail-items">
-      <button data-page="campaigns" title="Campanhas"><span data-ico="megaphone"></span><span class="rail-lb">Campanhas</span></button>
+    <div class="rail-grp" data-g="Mostrar ao cliente"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">5 · Mostrar ao cliente</span><small>Aprovar, publicar e apresentar</small><i aria-hidden="true">▾</i></button><div class="rail-items">
       <button data-page="approval" title="Aprovação"><span data-ico="check"></span><span class="rail-lb">Aprovação</span></button>
       <button data-page="publishingHub" title="Publicação"><span data-ico="send"></span><span class="rail-lb">Publicação</span></button>
+      <button type="button" class="rail-soon" disabled title="Vitrine do cliente (em breve)"><span data-ico="inbox"></span><span class="rail-lb">Vitrine do cliente<em>em breve</em></span></button>
     </div></div>
-    <div class="rail-grp" data-g="Medir"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">4 · Medir</span><small>Ver o resultado e aprender</small><i aria-hidden="true">▾</i></button><div class="rail-items">
+    <div class="rail-grp" data-g="Resultados e vendas"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">6 · Resultados e vendas</span><small>Dashboard e CRM</small><i aria-hidden="true">▾</i></button><div class="rail-items">
       <button data-page="analyticsHub" title="Performance"><span data-ico="chart"></span><span class="rail-lb">Performance</span></button>
+      <button type="button" class="rail-soon" disabled title="CRM de vendas (em breve)"><span data-ico="plug"></span><span class="rail-lb">CRM de vendas<em>em breve</em></span></button>
     </div></div>
     <div class="rail-grp" data-g="Acervo"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">Acervo</span><small>Tudo o que já existe</small><i aria-hidden="true">▾</i></button><div class="rail-items">
       <button data-page="biblioteca" title="Imagens"><span data-ico="image"></span><span class="rail-lb">Imagens</span></button>
@@ -19172,39 +19191,51 @@ async function tplBrandNow(id) {
 </script>
 <script>
 /* ===== Menu por categorias (recolher categorias e menu) e página "Mapa do projeto": o fluxo de trabalho do começo ao fim, clicável ===== */
+/* Fluxo de trabalho real: cliente → pré-projeto → anúncios → site/landing → mostrar ao cliente → resultados e vendas.
+   Status de cada item: ok = pronto, part = parcial, soon = ainda não existe (aparece sem link). */
 const FLOW = [
-  {n: '1', t: 'Planejar', c: '#3b3b46', d: 'Entender o cliente e a marca antes de criar qualquer coisa.', items: [
-    ['projects', 'Projetos', 'Um projeto por cliente ou marca. Tudo o que você criar fica dentro dele.'],
-    ['brand', 'Brand Brain', 'Cores, fontes, tom de voz, logo e produtos da marca.'],
-    ['matrix', 'Matriz de Criação', 'Públicos (ICP), jornada, hipóteses e diagnóstico.'],
-    ['inspiration', 'Inspiração', 'Referências e concorrentes para se basear.']]},
-  {n: '2', t: 'Criar', c: '#e4572e', d: 'Produzir as peças. Cada ferramenta usa a marca do projeto.', items: [
-    ['editorial', 'Agente Editorial', 'Da ideia aos ângulos, headlines e roteiros.'],
-    ['carrosseis', 'Carrosséis', '3 a 20 slides, textos, legenda e anúncio.'],
-    ['feed', 'Planejador de feed', '26 tipos de feed e grids com carrossel.'],
-    ['design', 'Estúdio de Design', 'Posts, stories e anúncios com editor.'],
-    ['landings', 'Sites e landing pages', 'Páginas de venda, sites e templates importados.'],
-    ['editora', 'Editora (e-books)', 'Capa, texto, diagramação e Amazon.'],
-    ['videoLab', 'Video Lab', 'Roteiros, storyboard e narração.']], two: true},
-  {n: '3', t: 'Aprovar e publicar', c: '#2f6fcf', d: 'Revisar com o cliente e colocar no ar.', items: [
-    ['campaigns', 'Campanhas', 'Agrupa as peças por campanha.'],
-    ['approval', 'Aprovação', 'Fila de revisão e aprovação das peças.'],
-    ['publishingHub', 'Publicação', 'Calendário, legenda e envio por rede.']]},
-  {n: '4', t: 'Medir', c: '#c9952a', d: 'Ver o que funcionou e aprender.', items: [
-    ['analyticsHub', 'Performance', 'Resultado, leads e o que repetir.']]}
+  {n: '1', t: 'Cliente e pré-projeto', c: '#3b3b46', d: 'O cliente entra em contato, você agenda a reunião, entende a necessidade e monta o pré-projeto.', items: [
+    [null, 'Contato e reunião', 'Primeiro contato e agenda da reunião. Entra junto com o CRM.', 'soon'],
+    ['projects', 'Projetos', 'Um projeto por cliente: produtos, pré-projeto e a apresentação para o cliente.', 'ok'],
+    ['matrix', 'Matriz de Criação', 'O cliente do cliente (ICP): dores, dúvidas, desejos e dores ocultas.', 'ok'],
+    ['brand', 'Brand Brain', 'Marca: cores, fontes, tom e logo. Tem logo, suba aqui; não tem, crie no Estúdio de Design (Logo Lab).', 'ok'],
+    ['inspiration', 'Inspiração', 'Referências e concorrentes.', 'ok']]},
+  {n: '2', t: 'Anúncios', c: '#e4572e', d: 'Muitos ângulos por produto, cada um falando com uma dor ou dúvida do ICP.', items: [
+    ['editorial', 'Agente Editorial', 'Da dor ao ângulo, à headline, ao texto e ao roteiro.', 'ok'],
+    ['design', 'Estúdio de Design', 'Os criativos dos anúncios, posts e stories, com editor.', 'ok'],
+    ['videoLab', 'Video Lab', 'Roteiros, storyboard e narração de vídeos.', 'part'],
+    ['campaigns', 'Campanhas', 'Agrupa os anúncios por campanha e por produto.', 'part'],
+    [null, 'Subir no Meta, Google e TikTok', 'Hoje você sobe nas plataformas; o envio direto ainda não existe.', 'soon']]},
+  {n: '3', t: 'Site e landing page', c: '#2f6fcf', d: 'Para onde o anúncio leva. Sem site, cria o site; com site, uma landing page por produto. Ou vai direto ao WhatsApp.', items: [
+    ['landings', 'Sites e landing pages', 'Sites, landing pages por produto, templates importados, formulário e botão de WhatsApp.', 'ok']]},
+  {n: '4', t: 'Conteúdo orgânico', c: '#2e7d4f', d: 'Posts que reforçam a autoridade do cliente nas redes e no blog.', items: [
+    ['carrosseis', 'Carrosséis', 'De 3 a 20 slides, com legenda.', 'ok'],
+    ['feed', 'Planejador de feed', 'Posts simples, stories, vídeos e grids.', 'ok'],
+    ['editora', 'Editora (e-books)', 'E-books e materiais ricos. Artigos saem do Agente Editorial.', 'part'],
+    [null, 'Blog do cliente', 'Publicar os artigos direto no blog.', 'soon']]},
+  {n: '5', t: 'Mostrar ao cliente', c: '#7c4dbd', d: 'Aprovar, publicar e mostrar os anúncios que estão no ar.', items: [
+    ['approval', 'Aprovação', 'Fila de revisão das peças.', 'ok'],
+    ['publishingHub', 'Publicação', 'Calendário, legenda e envio por rede.', 'part'],
+    [null, 'Vitrine do cliente', 'Uma página para mostrar ao cliente os anúncios no ar.', 'soon']]},
+  {n: '6', t: 'Resultados e vendas', c: '#c9952a', d: 'Alcance, cliques, de onde vêm e quem interage. Depois, o CRM.', items: [
+    ['analyticsHub', 'Performance', 'Alcance, cliques, leads, origem e público. Importa do Meta Ads.', 'part'],
+    [null, 'Dashboard para o cliente', 'O que hoje fica no Looker Studio, dentro do Studio e para compartilhar.', 'soon'],
+    [null, 'CRM de vendas', 'Conversa → CRM → vendas fechadas por campanha.', 'soon']]}
 ];
 const FLOW_SIDE = [
-  {t: 'Acervo (usado em todas as etapas)', c: '#2e7d4f', items: [['biblioteca', 'Imagens', 'Biblioteca de imagens: fotos geradas, enviadas e do produto.'], ['library', 'Peças criadas', 'Tudo o que já foi feito neste projeto.']]},
-  {t: 'Ajustes', c: '#7c4dbd', items: [['settings', 'Configurações', 'Chaves das APIs, conexões e dados da conta.']]}
+  {t: 'Acervo (usado em todas as etapas)', c: '#2e7d4f', items: [['biblioteca', 'Imagens', 'Fotos geradas, enviadas e do produto.', 'ok'], ['library', 'Peças criadas', 'Tudo o que já foi feito neste projeto.', 'ok']]},
+  {t: 'Ajustes', c: '#7c4dbd', items: [['settings', 'Configurações', 'Chaves das APIs, conexões e dados da conta.', 'ok']]}
 ];
+const FLOW_ST = {ok: ['pronto', '#2e7d4f'], part: ['parcial', '#c9952a'], soon: ['em breve', '#888']};
 function renderFlow() {
   const r = $('flowRoot'); if (!r) return; const p = typeof curProject === 'function' ? curProject() : null, has = !!p, br = has && p.brand && (p.brand.name || p.brand.colors && p.brand.colors.length);
-  const box = (c, [pg, t, d]) => `<button class="fl-box" style="--c:${c}" onclick="go('${pg}')"><b>${esc(t)}</b><small>${esc(d)}</small></button>`;
-  r.innerHTML = `<div class="fl-wrap"><div class="page-head"><div><h1>Mapa do projeto</h1><p>Como o Studio funciona, do começo ao fim. Cada caixa abre a ferramenta. O menu da esquerda segue a mesma ordem.</p></div></div>
-  <h3 style="margin:6px 0 0">Por onde começar</h3>
-  <div class="fl-steps"><button class="fl-step ${has ? 'done' : ''}" onclick="go('projects')"><b>1</b> Criar o projeto${has ? ' ✓' : ''}</button><span>→</span><button class="fl-step ${br ? 'done' : ''}" onclick="go('brand')"><b>2</b> Preencher a marca${br ? ' ✓' : ''}</button><span>→</span><button class="fl-step" onclick="go('editorial')"><b>3</b> Escolher o que criar</button><span>→</span><button class="fl-step" onclick="go('publishingHub')"><b>4</b> Publicar e medir</button></div>
-  <div class="fl-row">${FLOW.map((s, i) => `${i ? '<div class="fl-arrow">→</div>' : ''}<div class="fl-col" style="--c:${s.c}"><h3><span>${s.n}</span>${esc(s.t)}</h3><p>${esc(s.d)}</p><div class="${s.two ? 'fl-two' : ''}" style="display:${s.two ? 'grid' : 'flex'};${s.two ? '' : 'flex-direction:column;'}gap:8px">${s.items.map(it => box(s.c, it)).join('')}</div></div>`).join('')}</div>
-  <div class="fl-loop"><b>↺ O ciclo:</b> o que você aprende em <b>Medir</b> volta para <b>Planejar</b> (novos públicos e hipóteses na Matriz) e gera novas ideias no Agente Editorial. A marca, as cores, as fontes e os produtos do projeto são herdados por todas as ferramentas.</div>
+  const box = (c, [pg, t, d, st]) => { const [lb, col] = FLOW_ST[st || 'ok'], inner = `<b>${esc(t)} <em class="fl-st" style="--s:${col}">${lb}</em></b><small>${esc(d)}</small>`; return pg ? `<button class="fl-box" style="--c:${c}" onclick="go('${pg}')">${inner}</button>` : `<div class="fl-box soon" style="--c:${c}">${inner}</div>`; };
+  const chips = ['Contato', 'Reunião', 'Pré-projeto', 'Anúncios', 'Site ou landing', 'Mostrar ao cliente', 'Resultados', 'CRM e vendas'];
+  r.innerHTML = `<div class="fl-wrap"><div class="page-head"><div><h1>Mapa do projeto</h1><p>O seu fluxo de trabalho, do primeiro contato do cliente até as vendas. Cada caixa abre a ferramenta. O menu da esquerda segue a mesma ordem.</p></div></div>
+  <div class="fl-line">${chips.map((c, i) => `${i ? '<span>→</span>' : ''}<b>${c}</b>`).join('')}</div>
+  <div class="fl-steps"><small>Por onde começar:</small><button class="fl-step ${has ? 'done' : ''}" onclick="go('projects')"><b>1</b> Criar o projeto${has ? ' ✓' : ''}</button><span>→</span><button class="fl-step ${br ? 'done' : ''}" onclick="go('brand')"><b>2</b> Preencher a marca${br ? ' ✓' : ''}</button><span>→</span><button class="fl-step" onclick="go('matrix')"><b>3</b> Entender o cliente dele</button><span>→</span><button class="fl-step" onclick="go('editorial')"><b>4</b> Criar os anúncios</button></div>
+  <div class="fl-grid">${FLOW.map(s => `<div class="fl-col" style="--c:${s.c}"><h3><span>${s.n}</span>${esc(s.t)}</h3><p>${esc(s.d)}</p>${s.items.map(it => box(s.c, it)).join('')}</div>`).join('')}</div>
+  <div class="fl-loop"><b>↺ O ciclo:</b> o que você vê em <b>Resultados</b> (quais anúncios e públicos trazem cliente) volta para a <b>Matriz de Criação</b> e gera novos ângulos de anúncio. A marca, as cores, as fontes e os produtos do projeto são usados por todas as ferramentas. <span class="fl-leg"><em class="fl-st" style="--s:#2e7d4f">pronto</em> <em class="fl-st" style="--s:#c9952a">parcial</em> <em class="fl-st" style="--s:#888">em breve</em></span></div>
   <div class="fl-side">${FLOW_SIDE.map(s => `<div class="fl-col" style="--c:${s.c}"><h3>${esc(s.t)}</h3>${s.items.map(it => box(s.c, it)).join('')}</div>`).join('')}</div></div>`;
 }
 
