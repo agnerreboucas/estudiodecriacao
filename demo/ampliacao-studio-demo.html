@@ -623,6 +623,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .fd-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.fd-type{display:flex;flex-direction:column;gap:3px;border:2px solid transparent;border-radius:10px;padding:6px;cursor:pointer;align-items:flex-start}.fd-type input{position:absolute;opacity:0}.fd-type:has(input:checked){border-color:#e4572e;background:#fff7f3}.fd-type small{font-size:11px;line-height:1.25}.fd-type .fd-mini{margin:0 0 4px}
 @media(max-width:1100px){.fd-wrap{grid-template-columns:1fr}}
 .gd-cell{display:flex;align-items:center;gap:6px;margin:4px 0}.gd-cell>b{width:22px;height:22px;border-radius:50%;background:#111;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;flex:none}.gd-cell input[type=text],.gd-cell>input:not([type]){flex:1;min-width:0;border:1px solid #ddd;border-radius:6px;padding:5px 8px;font-size:12.5px}.gd-cell label{font-size:11px;white-space:nowrap}
+.gd-strip{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center;padding:8px 0;border-top:1px solid #eee}.gd-strip:first-child{border-top:0}.gd-sh{display:flex;flex-direction:column;gap:4px;align-items:flex-start}.gd-sh b{font-size:13px}.gd-sh span{font-size:12px;color:#666}.gd-fr{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.gd-slw{display:flex;flex-direction:column;gap:2px;flex:none}.gd-sl{border-radius:4px;cursor:pointer;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18)}.gd-slw small{font-size:10px;color:#777;max-width:108px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 
 </style>
 <style>
@@ -10247,7 +10248,7 @@ function carStudio(r, p, c) {
   const B = carBaseOf(c), styles = lyStyles(p), ready = aiReady(), has = c.texts.some(t => t.trim()), agentOK = !!(EDS().ideas && EDS().ideas[EDS().chosen] && EDS().brief), cov = B.covers.find(x => x.id === c.cover) || B.covers[0], cp = carCopyOf(c), nFrames = cp.blocks.length + 2;
   const fr = Math.min(carUI.frame, nFrames - 1), idx = fr === 0 ? [0, 1] : fr === nFrames - 1 ? [16, 17] : cp.blocks[fr - 1].idx, G = c.globals, S = G.show;
   const eye = k => `<button class="cs-eye ${S[k] ? '' : 'off'}" title="${S[k] ? 'Visível' : 'Oculto'}" onclick="carShow('${k}')">${S[k] ? '👁' : '◌'}</button>`;
-  r.innerHTML = `<div class="cs-top"><button class="btn sm" onclick="carBack()">← Carrosséis</button>${typeof feedUI !== 'undefined' && feedUI.from && feedUI.id ? '<button class="btn sm" onclick="feedUI.from=false;go(\'feed\')">← Feed</button>' : ''}<input class="cs-name" value="${esc(c.name)}" oninput="carRename(this.value)"><span style="flex:1"></span><button class="btn sm" onclick="carPreview()">📱 Preview</button><button class="btn sm" onclick="carVersionSave()">Salvar versão</button><button class="btn sm" onclick="carNewModal('change')">Trocar modelo</button><button class="btn dark sm" onclick="carExport('zip')">⬇ Exportar PNG</button><button class="btn sm" onclick="carExport('design')">Abrir no Editor de Design</button></div>
+  r.innerHTML = `<div class="cs-top"><button class="btn sm" onclick="carBack()">← Carrosséis</button>${typeof gridUI !== 'undefined' && gridUI.from && gridUI.id ? '<button class="btn sm" onclick="gridBack()">← Grid</button>' : ''}${typeof feedUI !== 'undefined' && feedUI.from && feedUI.id ? '<button class="btn sm" onclick="feedUI.from=false;go(\'feed\')">← Feed</button>' : ''}<input class="cs-name" value="${esc(c.name)}" oninput="carRename(this.value)"><span style="flex:1"></span><button class="btn sm" onclick="carPreview()">📱 Preview</button><button class="btn sm" onclick="carVersionSave()">Salvar versão</button><button class="btn sm" onclick="carNewModal('change')">Trocar modelo</button><button class="btn dark sm" onclick="carExport('zip')">⬇ Exportar PNG</button><button class="btn sm" onclick="carExport('design')">Abrir no Editor de Design</button></div>
   <div class="cs-wrap"><div class="cs-left">
     ${accSec('cs', 'cont', 'Conteúdo', has ? '18 textos' : 'vazio', `<div class="field"><label>Tema ou ideia</label><textarea rows="3" id="carIdea" oninput="carS().idea=this.value;carSave()" placeholder="Sobre o que é o carrossel? Cole um tema, tese ou texto.">${esc(c.idea)}</textarea></div>
       <label class="ins inl"><input type="checkbox" ${c.useAgent && agentOK ? 'checked' : ''} ${agentOK ? '' : 'disabled'} onchange="carS().useAgent=this.checked;carSave()"> usar a ideia e o briefing do Agente Editorial${agentOK ? '' : ' (escolha uma ideia no Agente)'}</label>
@@ -10586,8 +10587,9 @@ function renderGridEditor(r, p) {
   <div class="fd-right"><div class="panel"><div class="okr-label">COMO FICA NO PERFIL</div><canvas id="gdProf" style="width:100%;border-radius:8px;background:#fff"></canvas><small class="muted block">Cada célula mostra o centro 3:4 da capa, como o Instagram.</small></div>
     <div class="panel"><div class="okr-label">CRIAR</div><b>${done} de ${g.cells.length}</b> com carrossel<div class="fd-bar"><i style="width:${Math.round(done / g.cells.length * 100)}%"></i></div>
       <div class="row-gap" style="flex-wrap:wrap;margin-top:8px"><button class="btn dark" onclick="gridGenerate()" ${has && !gridUI.busy ? '' : 'disabled'}>${gridUI.busy ? 'Cortando…' : done ? '↻ Atualizar capas' : (g.mode === 'pan' ? '✂ Cortar e criar o carrossel' : '✂ Cortar e criar os carrosséis')}</button>${g.feedId ? '<button class="btn" onclick="gridToFeed()">Abrir no planejador de feed</button>' : ''}</div>
-      <small class="muted block" style="margin-top:6px">${g.mode === 'pan' ? 'Cria um carrossel com a imagem passando pelos slides.' : 'Cria um carrossel por pedaço (a capa é o pedaço), um feed no planejador com o grid montado e mantém os carrosséis já criados: “Atualizar capas” só troca a imagem das capas.'} Depois, cada carrossel abre no estúdio para escrever os slides (pesquisa, texto e design).</small></div></div></div>`;
-  gridPaint();
+      <small class="muted block" style="margin-top:6px">${g.mode === 'pan' ? 'Cria um carrossel com a imagem passando pelos slides.' : 'Cria um carrossel por pedaço (a capa é o pedaço), um feed no planejador com o grid montado e mantém os carrosséis já criados: “Atualizar capas” só troca a imagem das capas.'} Depois, cada carrossel abre no estúdio para escrever os slides (pesquisa, texto e design).</small></div></div></div>
+  <div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>${g.mode === 'pan' ? 'Slides do carrossel panorâmico' : 'Os carrosséis que saem desta imagem'}</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">${g.mode === 'pan' ? 'A imagem passa de um slide para o outro.' : 'Cada linha é um post do perfil: a capa é o pedaço da imagem, seguida dos slides de pesquisa, texto e design. Clique em um slide para abrir o carrossel.'}</p></div></div><div id="gdStrips"></div></div>`;
+  gridPaint(); gridStrips();
 }
 let gridTok = 0;
 async function gridPaint() {
@@ -10613,14 +10615,14 @@ async function gridGenerate() {
   try {
     const src = await gridSource(g, p);
     if (g.mode === 'pan') {
-      let c = p.carousels.find(x => x.id === (g.cells[0] || {}).carId); if (!c) { c = carNew(g.name, '', 'foto'); c.idea = g.name; c.grad = 35; g.cells.forEach(cl => { cl.carId = c.id; }); }
+      let c = p.carousels.find(x => x.id === (g.cells[0] || {}).carId); if (!c) { c = carNew(g.name, '', 'foto'); c.idea = g.name; c.grad = 35; g.cells.forEach(cl => { cl.carId = c.id; }); gridScaffold(c, g.name); }
       for (let i = 0; i < g.cols; i++) { const old = g.cells[i].pieceId, id = uid('img'); await imgPut(id, await gridBlob(gridPieceCanvas(src, g, i))); c.media[String(i)] = id; g.cells[i].pieceId = id; if (old) { try { await imgDel(old); } catch (e) { /* ok */ } } }
       if (g.cells[0].label && !c.texts[0]) c.texts[0] = g.cells[0].label; persist(); carUI.id = ''; toast('Carrossel panorâmico criado: a imagem passa pelos slides.');
     } else {
       for (let i = 0; i < g.cells.length; i++) {
         const cl = g.cells[i], old = cl.pieceId, id = uid('img'); await imgPut(id, await gridBlob(gridPieceCanvas(src, g, i))); cl.pieceId = id;
         let c = p.carousels.find(x => x.id === cl.carId); const tpl = cl.clean ? 'foto-limpa' : 'foto';
-        if (!c) { c = carNew(cl.label || (g.name + ' · ' + (i + 1)), '', tpl); c.idea = cl.label; c.grad = cl.clean ? 0 : 35; c.splitCover = true; if (cl.label) c.texts[0] = cl.label; cl.carId = c.id; }
+        if (!c) { c = carNew(cl.label || (g.name + ' · ' + (i + 1)), '', tpl); c.idea = cl.label; c.grad = cl.clean ? 0 : 35; c.splitCover = true; if (cl.label) c.texts[0] = cl.label; cl.carId = c.id; gridScaffold(c, cl.label); }
         else { c.tpl = tpl; if (cl.label && !c.texts[0]) c.texts[0] = cl.label; }
         c.media['0'] = id; c.splitCover = true; if (old) { try { await imgDel(old); } catch (e) { /* ok */ } }
       }
@@ -10632,6 +10634,40 @@ async function gridGenerate() {
   } catch (e) { toast('Não consegui cortar: ' + e.message); }
   gridUI.busy = false; renderFeed();
 }
+
+/* esqueleto de 6 slides (capa, 4 de miolo e fechamento) para o carrossel nascer completo; os textos entre [ ] são para você preencher */
+function gridScaffold(c, label) {
+  if (c.texts.slice(1).some(t => t.trim() && !/^\[/.test(t))) return; const L = label || 'Assunto';
+  const T = [L, '[Subtítulo: o que o público vai descobrir]'];
+  ['Pesquisa', 'Texto', 'Design', 'Conclusão'].forEach((h, k) => { const body = k === 3 ? ['[Fechamento do assunto]'] : ['[Escreva o que a pesquisa mostra]', '[Texto deste slide]', '[Detalhe]']; if (k === 0) T.push(h, '[Escreva o que a pesquisa mostra]', '[Dado ou fonte]', '[Detalhe]'); else if (k === 1) T.push(h, '[Texto do slide]', '[Texto do slide]', '[Detalhe]'); else if (k === 2) T.push(h, '[Texto + design]', '[Texto + design]'); else T.push(h, '[Fechamento do assunto]', '[Fechamento]'); });
+  T.push('[Chamada final]', '[Subtítulo da chamada]'); c.texts = T.concat(Array(18).fill('')).slice(0, 18).map(t => t.slice(0, 1200));
+}
+let gridStripTok = 0;
+async function gridStrips() {
+  const g = gridCur(), p = curProject(), box = $('gdStrips'); if (!g || !box) return; const tok = ++gridStripTok;
+  const rows = g.mode === 'pan' ? [0] : g.cells.map((c, i) => i); box.innerHTML = rows.map(i => `<div class="gd-strip"><div class="gd-sh"><b>${g.mode === 'pan' ? 'Carrossel' : 'Post ' + (i + 1)}</b><span>${esc(g.mode === 'pan' ? g.name : (g.cells[i].label || 'sem assunto'))}</span><button class="btn sm" id="gdOpen${i}" disabled>Abrir carrossel</button></div><div class="gd-fr" id="gdFr${i}"><small class="muted">carregando…</small></div></div>`).join('');
+  const has = gridHasSrc(g), src = has ? await gridSource(g, p) : null; if (tok !== gridStripTok) return; const tk = lyTokens(p, g.style || lyStyles(p)[0].id); await ensureFonts(lyFamilies(tk));
+  for (const i of rows) {
+    if (tok !== gridStripTok || !$('gdFr' + i)) return; const fr = $('gdFr' + i), cl = g.cells[i], c = p.carousels.find(x => x.id === cl.carId), cvs = [];
+    const mk = (w, h) => { const cv = document.createElement('canvas'); cv.width = w * 2; cv.height = h * 2; cv.style.width = w + 'px'; cv.style.height = h + 'px'; return cv; };
+    if (c) {
+      try {
+        const {set, labels} = carMake(c, {final: true}); await ensureFonts(lyFamilies(set.tk)); await ensureSetResources(set); const W = set.format.w, H = set.format.h, tw = 108, th = Math.round(tw * H / W);
+        set.slides.forEach((s, k) => { const cv = mk(tw, th); renderSlide(cv.getContext('2d'), s, W, H, cv.width / W); cv.className = 'gd-sl'; cv.onclick = () => gridOpenCar(c.id, k); cvs.push([cv, (k === 0 ? 'Capa' : k === set.slides.length - 1 ? 'CTA' : String(k + 1) + ' ' + (labels[k] || ''))]); });
+        const b = $('gdOpen' + i); if (b) { b.disabled = false; b.onclick = () => gridOpenCar(c.id, 0); }
+      } catch (e) { console.warn('strip', e); }
+    } else {
+      const tw = 108, th = 144, ph = ['Capa', '2 · pesquisa', '3 · texto + design', '4 · texto + design', '5 · texto + design', 'CTA'];
+      ph.forEach((n, k) => { const cv = mk(tw, th), x = cv.getContext('2d'); x.scale(2, 2);
+        if (k === 0 && src) { const cc = i % g.cols, rr = Math.floor(i / g.cols), cell = GRID_CELL(g), pad = GRID_PAD(g); if (g.mode === 'pan') x.drawImage(src, i * cell[0], 0, cell[0], cell[1], 0, 0, tw, th); else x.drawImage(src, pad + cc * cell[0], rr * cell[1], cell[0], cell[1], 0, 0, tw, th); }
+        else { x.fillStyle = '#f4f4f6'; x.fillRect(0, 0, tw, th); x.strokeStyle = '#c9c9d1'; x.setLineDash([5, 4]); x.strokeRect(1, 1, tw - 2, th - 2); x.fillStyle = '#9a9aa6'; x.font = '600 11px system-ui'; x.textAlign = 'center'; x.fillText(n.replace(/^\d · /, ''), tw / 2, th / 2); }
+        cv.className = 'gd-sl'; cvs.push([cv, n]); });
+    }
+    fr.innerHTML = ''; cvs.forEach(([cv, n]) => { const d = document.createElement('div'); d.className = 'gd-slw'; d.appendChild(cv); const s = document.createElement('small'); s.textContent = n; d.appendChild(s); fr.appendChild(d); });
+    await new Promise(r => setTimeout(r, 0));
+  }
+}
+function gridOpenCar(id, frame) { gridUI.from = true; feedUI.from = false; carUI.id = id; carUI.frame = frame || 0; go('carrosseis'); }
 
 </script>
 <script>
