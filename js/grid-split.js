@@ -10,13 +10,15 @@ const GRID_PAD = g => g.mode === 'pan' ? 0 : Math.round(720 * (33.75 / 1012.5));
 function gridNewModal() {
   showModal('Novo grid (split)', `<div class="field"><label>Nome</label><input id="gdName" placeholder="Ex.: Propostas da campanha" autofocus></div>
   <div class="okr-label">TIPO</div><div class="lp-types"><label class="lp-type"><input type="radio" name="gdM" value="grid" checked><b>Grid de carrosséis</b><small class="muted">A imagem cobre o perfil (3 colunas). Cada pedaço é a capa de um carrossel diferente.</small></label><label class="lp-type"><input type="radio" name="gdM" value="pan"><b>Carrossel panorâmico</b><small class="muted">Uma imagem larga que passa de um slide para o outro, em um só carrossel.</small></label></div>
+  <div id="gdModels"><div class="okr-label">MODELO DO GRID</div><div class="lp-types">${Object.entries(GRID_MODELS).map(([k, v], i) => `<label class="lp-type"><input type="radio" name="gdMod" value="${k}" ${i === 0 ? 'checked' : ''}><b>${v[0]}</b><small class="muted">${v[1]}</small></label>`).join('')}</div></div>
   <div class="ins-row"><label class="ins">Linhas (grid)<select id="gdR">${[1, 2, 3, 4, 5, 6].map(x => `<option value="${x}" ${x === 3 ? 'selected' : ''}>${x} (${x * 3} posts)</option>`).join('')}</select></label><label class="ins">Slides (panorâmico)<select id="gdC">${[3, 4, 5, 6].map(x => `<option value="${x}" ${x === 4 ? 'selected' : ''}>${x}</option>`).join('')}</select></label></div>
   <div class="okr-label">IMAGEM</div><div class="row-gap" style="flex-wrap:wrap"><label class="ins inl"><input type="radio" name="gdS" value="img" checked> já tenho a imagem pronta (Biblioteca ou envio)</label><label class="ins inl"><input type="radio" name="gdS" value="set"> criar a arte no Editor de Design, com as linhas de corte</label></div>
   <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="gridCreate()">Criar grid</button></div>`);
 }
 function gridCreate() {
   const p = curProject(), mode = (document.querySelector('input[name=gdM]:checked') || {}).value || 'grid', how = (document.querySelector('input[name=gdS]:checked') || {}).value || 'img';
-  const g = normalizeGrids([{id: '', name: ($('gdName').value || '').trim() || 'Grid', mode, cols: mode === 'pan' ? +$('gdC').value : 3, rows: mode === 'pan' ? 1 : +$('gdR').value}])[0]; p.grids.unshift(g); gridUI.id = g.id; persist(); closeModal();
+  const model = (document.querySelector('input[name=gdMod]:checked') || {}).value || 'continuo', g = normalizeGrids([{id: '', model, name: ($('gdName').value || '').trim() || 'Grid', mode, cols: mode === 'pan' ? +$('gdC').value : 3, rows: mode === 'pan' ? 1 : +$('gdR').value}])[0]; p.grids.unshift(g); gridUI.id = g.id; persist(); closeModal();
+  if (g.model === 'faixa') { g.src = {t: '', id: ''}; g.band = g.name.toUpperCase(); g.cells.forEach(c => { c.clean = true; }); gridSave(); feedUI.mode = 'grid'; go('feed'); return; }
   if (how === 'set') return gridCreateArt(); feedUI.mode = 'grid'; go('feed');
 }
 /* cria a arte no Editor de Design já com a tela do tamanho do grid e as linhas de corte (camadas “guia”, que não saem no corte) */
@@ -33,23 +35,62 @@ async function gridCreateArt() {
 function gridBack() { gridUI.from = false; feedUI.from = false; feedUI.mode = 'grid'; go('feed'); }
 
 /* ---------- imagem de trabalho e pedaços ---------- */
-async function gridSource(g, p) {
-  const cell = GRID_CELL(g), W = g.cols * cell[0], H = g.rows * cell[1], pad = GRID_PAD(g), iw = W + 2 * pad, c = document.createElement('canvas'); c.width = iw; c.height = H; const x = c.getContext('2d'); x.fillStyle = '#e9e9ee'; x.fillRect(0, 0, iw, H);
-  if (g.src.t === 'img' && g.src.id) {
-    const b = await imgGet(g.src.id); if (b) { const bm = await createImageBitmap(b), s = Math.max(iw / bm.width, H / bm.height) * g.fit.z, dw = bm.width * s, dh = bm.height * s; x.drawImage(bm, (iw - dw) * g.fit.fx, (H - dh) * g.fit.fy, dw, dh); }
-  } else if (g.src.t === 'set') {
-    const st = p.design.sets.find(y => y.id === g.src.id); if (st) {
-      await ensureFonts(lyFamilies(st.tk)); await ensureSetResources(st); const sl = {bg: st.slides[0].bg, layers: st.slides[0].layers.filter(L => L.role !== 'guide')}, t = document.createElement('canvas'); t.width = W; t.height = H; renderSlide(t.getContext('2d'), sl, st.format.w, st.format.h, W / st.format.w);
-      x.drawImage(t, pad, 0); if (pad) { x.drawImage(t, 0, 0, 1, H, 0, 0, pad, H); x.drawImage(t, W - 1, 0, 1, H, pad + W, 0, pad, H); }
-    }
+const GRID_MODELS = {
+  continuo: ['Imagem contínua', 'Uma imagem inteira atravessa os posts.'],
+  laterais: ['Laterais em cor', 'Cores sólidas nas pontas e a foto na coluna do meio (uma cor por linha).'],
+  espelho: ['Espelho (simetria)', 'A imagem se espelha nos quatro lados, como um caleidoscópio.'],
+  puzzle: ['Quebra-cabeça com margem', 'A imagem é cortada em quadros com margem arredondada e a marca embaixo.'],
+  faixa: ['Faixa tipográfica', 'Uma palavra grande corre pelas colunas, uma linha de texto por linha do perfil.']
+};
+const gridHasSrc = g => g.model === 'faixa' || !!(g.src.t && g.src.id);
+/* a imagem de origem (Biblioteca ou arte do Editor de Design) como bitmap/canvas, ou null */
+async function gridBitmap(g, p) {
+  if (g.src.t === 'img' && g.src.id) { const b = await imgGet(g.src.id); return b ? await createImageBitmap(b) : null; }
+  if (g.src.t === 'set') { const st = p.design.sets.find(y => y.id === g.src.id); if (!st) return null; await ensureFonts(lyFamilies(st.tk)); await ensureSetResources(st); const sl = {bg: st.slides[0].bg, layers: st.slides[0].layers.filter(L => L.role !== 'guide')}, t = document.createElement('canvas'); t.width = st.format.w; t.height = st.format.h; renderSlide(t.getContext('2d'), sl, st.format.w, st.format.h, 1); return t; }
+  return null;
+}
+function gridCover(x, bm, rx, ry, rw, rh, z, fx, fy, flipX, flipY) {
+  const s = Math.max(rw / bm.width, rh / bm.height) * (z || 1), dw = bm.width * s, dh = bm.height * s; x.save(); x.beginPath(); x.rect(rx, ry, rw, rh); x.clip();
+  x.translate(flipX ? rx + rw : rx, flipY ? ry + rh : ry); x.scale(flipX ? -1 : 1, flipY ? -1 : 1); x.drawImage(bm, (rw - dw) * fx, (rh - dh) * fy, dw, dh); x.restore();
+}
+function gridColors(g, p) {
+  const tk = lyTokens(p, g.style || lyStyles(p)[0].id), auto = [tk.accent, tk.second || mixHex(tk.accent, '#ffffff', 0.5), mixHex(tk.accent, tk.fg, 0.55), mixHex(tk.accent, '#ffffff', 0.75), tk.fg, tk.bg];
+  return Array.from({length: 6}, (_, i) => g.colors[i] || auto[i]);
+}
+async function gridInner(g, p, W, H) {
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d'), cell = GRID_CELL(g), cw = cell[0], ch = cell[1], F = g.fit; x.fillStyle = '#e9e9ee'; x.fillRect(0, 0, W, H);
+  const bm = g.model === 'faixa' ? null : await gridBitmap(g, p);
+  if (g.model === 'faixa') {
+    const tk = lyTokens(p, g.style || lyStyles(p)[0].id), dark = g.dark, bg = dark ? '#111214' : '#ffffff', fg = dark ? '#ffffff' : '#111111', lines = String(g.band || 'PALAVRA').split('\n').filter(Boolean); await ensureFonts([tk.head.family]); x.fillStyle = bg; x.fillRect(0, 0, W, H); x.fillStyle = fg; x.textBaseline = 'middle'; x.textAlign = 'center';
+    for (let r = 0; r < g.rows; r++) { const t = (lines[r % lines.length] || '').toUpperCase(); if (!t) continue; let sz = ch * 0.5; x.font = `700 ${sz}px '${tk.head.family}', sans-serif`; const wd = x.measureText(t).width; sz = Math.min(sz * (W * 0.92) / Math.max(1, wd), ch * 0.62); x.font = `700 ${sz}px '${tk.head.family}', sans-serif`; x.fillText(t, W / 2, r * ch + ch / 2); }
+    return c;
   }
-  return c;
+  if (!bm) return c;
+  if (g.model === 'laterais') {
+    const cols = gridColors(g, p); for (let r = 0; r < g.rows; r++) { x.fillStyle = cols[r % cols.length]; x.fillRect(0, r * ch, W, ch); }
+    gridCover(x, bm, cw, 0, cw, H, F.z, F.fx, F.fy); return c;
+  }
+  if (g.model === 'espelho') {
+    const hw = Math.ceil(W / 2), hh = Math.ceil(H / 2); gridCover(x, bm, 0, 0, hw, hh, F.z, F.fx, F.fy); const t = document.createElement('canvas'); t.width = hw; t.height = hh; t.getContext('2d').drawImage(c, 0, 0, hw, hh, 0, 0, hw, hh);
+    x.save(); x.translate(W, 0); x.scale(-1, 1); x.drawImage(t, 0, 0); x.restore(); x.save(); x.translate(0, H); x.scale(1, -1); x.drawImage(c, 0, 0, W, hh, 0, 0, W, hh); x.restore(); return c;
+  }
+  gridCover(x, bm, 0, 0, W, H, F.z, F.fx, F.fy); return c;
 }
-const gridHasSrc = g => !!(g.src.t && g.src.id);
+async function gridSource(g, p) {
+  const cell = GRID_CELL(g), W = g.cols * cell[0], H = g.rows * cell[1], pad = GRID_PAD(g), iw = W + 2 * pad, c = document.createElement('canvas'); c.width = iw; c.height = H; const x = c.getContext('2d'), inner = await gridInner(g, p, W, H);
+  x.drawImage(inner, pad, 0); if (pad) { x.drawImage(inner, 0, 0, 1, H, 0, 0, pad, H); x.drawImage(inner, W - 1, 0, 1, H, pad + W, 0, pad, H); } return c;
+}
 function gridPieceCanvas(src, g, i, out) {
-  const cell = GRID_CELL(g), pad = GRID_PAD(g), c = i % g.cols, r = Math.floor(i / g.cols), o = document.createElement('canvas'); o.width = out ? out[0] : 1080; o.height = out ? out[1] : 1350;
-  o.getContext('2d').drawImage(src, c * cell[0], r * cell[1], cell[0] + 2 * pad, cell[1], 0, 0, o.width, o.height); return o;
+  const cell = GRID_CELL(g), pad = GRID_PAD(g), c = i % g.cols, r = Math.floor(i / g.cols), o = document.createElement('canvas'); o.width = out ? out[0] : 1080; o.height = out ? out[1] : 1350; const x = o.getContext('2d');
+  x.drawImage(src, c * cell[0], r * cell[1], cell[0] + 2 * pad, cell[1], 0, 0, o.width, o.height);
+  if (g.model === 'puzzle' && g.mode === 'grid') {   // margem arredondada em volta do pedaço + marca embaixo
+    const w = o.width, h = o.height, m = Math.round(w * 0.062), rad = Math.round(w * 0.04), bg = g.dark ? '#111214' : '#f1f1f3', mx = (w - 1012.5 * w / 1080) / 2 + m * 0.4;
+    x.save(); x.fillStyle = bg; x.beginPath(); x.rect(0, 0, w, h); x.roundRect ? x.roundRect(m, m, w - 2 * m, h - 2 * m - m * 1.5, rad) : x.rect(m, m, w - 2 * m, h - 2 * m - m * 1.5); x.fill('evenodd');
+    x.fillStyle = g.dark ? '#ffffff' : '#111111'; x.font = `700 ${Math.round(w * 0.026)}px system-ui, sans-serif`; x.textBaseline = 'middle'; x.fillText((g.tag || p0name()) , m + 4, h - m * 0.95); x.restore();
+  }
+  return o;
 }
+const p0name = () => { const p = curProject(); return ((p && p.name) || 'MARCA').toUpperCase().slice(0, 18) + '®'; };
 const gridBlob = (cv, q) => new Promise(r => cv.toBlob(r, 'image/jpeg', q || 0.92));
 
 /* ---------- tela ---------- */
@@ -59,8 +100,8 @@ function renderGridEditor(r, p) {
   r.innerHTML = `<div class="page-head"><div><h1>Editor de grid</h1><p>${esc(g.mode === 'pan' ? 'Uma imagem larga cortada em slides de um carrossel (3 a 6).' : 'Uma imagem cortada em ' + g.cells.length + ' pedaços: cada um vira a capa de um carrossel.')} ${esc(p.name)}.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="feedUI.mode='';gridUI.id='';renderFeed()">← Planejador de feed</button></div></div>
   <div class="fd-wrap" style="grid-template-columns:330px minmax(0,1fr) 330px"><div class="fd-left">
     <div class="panel"><div class="field"><label>Grid</label><select onchange="gridUI.id=this.value;renderFeed()">${p.grids.map(x => `<option value="${x.id}" ${x.id === g.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div><div class="field"><label>Nome</label><input value="${esc(g.name)}" oninput="gridCur().name=this.value;gridSave()"></div>
-      <div class="field"><label>Imagem</label><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="gridPickImg()">📚 Biblioteca / enviar</button><button class="btn sm" onclick="${g.src.t === 'set' ? 'gridOpenArt()' : 'gridCreateArt()'}">${g.src.t === 'set' ? '✎ Abrir a arte no editor' : '＋ Criar a arte no editor'}</button></div><small class="muted block">${g.src.t === 'img' ? 'Imagem pronta.' : g.src.t === 'set' ? 'Arte criada no Editor de Design (as linhas “guia” não saem no corte).' : 'Escolha ou crie a imagem.'}</small></div>
-      ${g.src.t === 'img' ? `<div class="field"><label>Zoom da imagem <small class="muted">${Math.round(g.fit.z * 100)}%</small></label><input type="range" min="100" max="300" value="${Math.round(g.fit.z * 100)}" oninput="gridFit('z',this.value/100)"></div><div class="ins-row"><label class="ins">Posição X<input type="range" min="0" max="100" value="${Math.round(g.fit.fx * 100)}" oninput="gridFit('fx',this.value/100)"></label><label class="ins">Posição Y<input type="range" min="0" max="100" value="${Math.round(g.fit.fy * 100)}" oninput="gridFit('fy',this.value/100)"></label></div>` : ''}
+      ${g.mode === 'grid' ? gridModelPanel(g, p) : ''}${g.model === 'faixa' ? '' : `<div class="field"><label>Imagem</label><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="gridPickImg()">📚 Biblioteca / enviar</button><button class="btn sm" onclick="${g.src.t === 'set' ? 'gridOpenArt()' : 'gridCreateArt()'}">${g.src.t === 'set' ? '✎ Abrir a arte no editor' : '＋ Criar a arte no editor'}</button></div><small class="muted block">${g.src.t === 'img' ? 'Imagem pronta.' : g.src.t === 'set' ? 'Arte criada no Editor de Design (as linhas “guia” não saem no corte).' : 'Escolha ou crie a imagem.'}</small></div>`}
+      ${g.src.t === 'img' && g.model !== 'faixa' ? `<div class="field"><label>Zoom da imagem <small class="muted">${Math.round(g.fit.z * 100)}%</small></label><input type="range" min="100" max="300" value="${Math.round(g.fit.z * 100)}" oninput="gridFit('z',this.value/100)"></div><div class="ins-row"><label class="ins">Posição X<input type="range" min="0" max="100" value="${Math.round(g.fit.fx * 100)}" oninput="gridFit('fx',this.value/100)"></label><label class="ins">Posição Y<input type="range" min="0" max="100" value="${Math.round(g.fit.fy * 100)}" oninput="gridFit('fy',this.value/100)"></label></div>` : ''}
       <label class="ins inl"><input type="checkbox" ${g.lines ? 'checked' : ''} onchange="gridCur().lines=this.checked;gridSave();gridPaint()"> mostrar linhas de corte</label></div>
     <div class="panel"><div class="okr-label">${g.mode === 'pan' ? 'SLIDES' : 'CARROSSÉIS (um por pedaço)'}</div>${g.mode === 'grid' ? `<div class="field"><label>Slides em cada carrossel <small class="muted">(capa + miolo + fechamento)</small></label><div class="row-gap" style="flex-wrap:wrap">${[3, 4, 5, 6, 7, 8, 10, 12].map(k => `<button class="btn sm ${k === g.slides ? 'dark' : ''}" onclick="gridSlides(${k})">${k}</button>`).join('')}</div><small class="muted block">Defina pela copy da linha editorial; cada carrossel ainda pode ter o seu número no estúdio.</small></div>` : ''}<small class="muted block" style="margin-bottom:6px">Título do assunto de cada pedaço. “Sem título” deixa a capa só com a imagem.</small>${g.cells.map((c, i) => `<div class="gd-cell"><b>${i + 1}</b><input value="${esc(c.label)}" placeholder="${g.mode === 'pan' ? 'Slide ' + (i + 1) : 'Assunto do carrossel ' + (i + 1)}" oninput="gridCell(${i},'label',this.value)"><label title="Capa só com a imagem"><input type="checkbox" ${c.clean ? 'checked' : ''} onchange="gridCell(${i},'clean',this.checked)"> sem título</label>${c.carId ? '<span class="fd-ok" style="position:static;display:inline-block">✓</span>' : ''}</div>`).join('')}</div></div>
   <div class="fd-center" style="flex-direction:column;align-items:center;gap:8px"><canvas id="gdMain" class="cs-main" style="max-width:100%"></canvas><small class="muted">Imagem inteira com as linhas de corte. ${g.mode === 'grid' ? 'A capa 4:5 leva um pouco mais de cada lado do pedaço, para a imagem continuar nas pontas.' : ''}</small></div>
@@ -80,7 +121,7 @@ async function gridPaint() {
   if (g.lines) { x.strokeStyle = 'rgba(255,255,255,0.95)'; x.lineWidth = 2; x.setLineDash([]); for (let c = 1; c < g.cols; c++) { x.beginPath(); x.moveTo(c * cell[0] * k, 0); x.lineTo(c * cell[0] * k, cv.height); x.stroke(); } for (let r = 1; r < g.rows; r++) { x.beginPath(); x.moveTo(0, r * cell[1] * k); x.lineTo(cv.width, r * cell[1] * k); x.stroke(); }
     x.font = '700 15px system-ui'; g.cells.forEach((c, i) => { const px = (i % g.cols) * cell[0] * k + 8, py = Math.floor(i / g.cols) * cell[1] * k + 20; x.fillStyle = 'rgba(0,0,0,0.6)'; x.fillRect(px - 4, py - 15, 22, 20); x.fillStyle = '#fff'; x.fillText(String(i + 1), px, py); }); }
   const pr = $('gdProf'); if (pr) { const tw = 3 * 100 + 2 * 2, th = g.rows * 133 + (g.rows - 1) * 2; if (g.mode === 'pan') { pr.width = g.cols * 100 + (g.cols - 1) * 2; pr.height = 125; } else { pr.width = tw; pr.height = th; } const px = pr.getContext('2d'); px.fillStyle = '#fff'; px.fillRect(0, 0, pr.width, pr.height);
-    g.cells.forEach((c, i) => { const cc = i % g.cols, rr = Math.floor(i / g.cols); if (g.mode === 'pan') px.drawImage(src, cc * cell[0], 0, cell[0], cell[1], cc * 102, 0, 100, 125); else px.drawImage(src, pad + cc * cell[0], rr * cell[1], cell[0], cell[1], cc * 102, rr * 135, 100, 133); }); }
+    g.cells.forEach((c, i) => { const cc = i % g.cols, rr = Math.floor(i / g.cols), pc = gridPieceCanvas(src, g, i); if (g.mode === 'pan') px.drawImage(pc, 0, 0, pc.width, pc.height, cc * 102, 0, 100, 125); else px.drawImage(pc, 33.75, 0, 1012.5, 1350, cc * 102, rr * 135, 100, 133); }); }
 }
 const gridPaintSoon = debounce(() => gridPaint(), 120);
 function gridFit(k, v) { gridCur().fit[k] = +v; gridSave(); gridPaintSoon(); }
@@ -139,7 +180,7 @@ async function gridStrips() {
     } else {
       const tw = 108, th = 144, nn = g.mode === 'pan' ? g.cols : g.slides, ph = Array.from({length: nn}, (_, k) => k === 0 ? 'Capa' : k === nn - 1 ? 'CTA' : (k + 1) + ' · texto + design');
       ph.forEach((n, k) => { const cv = mk(tw, th), x = cv.getContext('2d'); x.scale(2, 2);
-        if (k === 0 && src) { const cc = i % g.cols, rr = Math.floor(i / g.cols), cell = GRID_CELL(g), pad = GRID_PAD(g); if (g.mode === 'pan') x.drawImage(src, i * cell[0], 0, cell[0], cell[1], 0, 0, tw, th); else x.drawImage(src, pad + cc * cell[0], rr * cell[1], cell[0], cell[1], 0, 0, tw, th); }
+        if (k === 0 && src) { const pc = gridPieceCanvas(src, g, i); x.drawImage(pc, 0, 0, pc.width, pc.height, 0, 0, tw, th); }
         else { x.fillStyle = '#f4f4f6'; x.fillRect(0, 0, tw, th); x.strokeStyle = '#c9c9d1'; x.setLineDash([5, 4]); x.strokeRect(1, 1, tw - 2, th - 2); x.fillStyle = '#9a9aa6'; x.font = '600 11px system-ui'; x.textAlign = 'center'; x.fillText(n.replace(/^\d · /, ''), tw / 2, th / 2); }
         cv.className = 'gd-sl'; cvs.push([cv, n]); });
     }
@@ -150,3 +191,17 @@ async function gridStrips() {
 function gridOpenCar(id, frame) { gridUI.from = true; feedUI.from = false; carUI.id = id; carUI.frame = frame || 0; go('carrosseis'); }
 
 function gridSlides(k) { const g = gridCur(); g.slides = carSlidesN(k); gridSave(); const p = curProject(); g.cells.forEach(cl => { const c = p.carousels.find(x => x.id === cl.carId); if (c && c.slides !== g.slides) carResize(c, g.slides); }); persist(); renderFeed(); }
+
+/* modelo do grid e opções de cada modelo */
+function gridModelPanel(g, p) {
+  const cols = gridColors(g, p);
+  return `<div class="field"><label>Modelo</label><div class="row-gap" style="flex-wrap:wrap">${Object.entries(GRID_MODELS).map(([k, v]) => `<button class="btn sm ${g.model === k ? 'dark' : ''}" onclick="gridModel('${k}')" title="${esc(v[1])}">${esc(v[0])}</button>`).join('')}</div><small class="muted block">${esc(GRID_MODELS[g.model][1])}</small></div>
+  ${g.model === 'laterais' ? `<div class="field"><label>Cor de cada linha (laterais)</label><div class="row-gap" style="flex-wrap:wrap">${Array.from({length: Math.min(g.rows, 6)}, (_, i) => `<input type="color" value="${cols[i]}" oninput="gridColor(${i},this.value)" title="Linha ${i + 1}">`).join('')}<button class="btn sm" onclick="gridColor(-1)">cores da marca</button></div></div>` : ''}
+  ${g.model === 'faixa' ? `<div class="field"><label>Texto da faixa (uma linha por linha do perfil)</label><textarea rows="${Math.min(g.rows, 4)}" oninput="gridBandSet(this.value)" placeholder="PROPOSTAS">${esc(g.band)}</textarea></div><label class="ins inl"><input type="checkbox" ${g.dark ? 'checked' : ''} onchange="gridDark(this.checked)"> fundo escuro</label>` : ''}
+  ${g.model === 'puzzle' ? `<div class="field"><label>Marca embaixo de cada quadro</label><input value="${esc(g.tag)}" oninput="gridTagSet(this.value)" placeholder="${esc(p0name())}"></div><label class="ins inl"><input type="checkbox" ${g.dark ? 'checked' : ''} onchange="gridDark(this.checked)"> margem escura</label>` : ''}`;
+}
+function gridModel(k) { const g = gridCur(); g.model = k; if (k === 'faixa') { if (!g.band) g.band = g.name.toUpperCase(); g.cells.forEach(c => { c.clean = true; }); } gridSave(); renderFeed(); }
+function gridColor(i, v) { const g = gridCur(); if (i < 0) g.colors = []; else { while (g.colors.length <= i) g.colors.push(''); g.colors[i] = v; } gridSave(); if (i < 0) renderFeed(); else gridPaintSoon(); }
+function gridBandSet(v) { gridCur().band = String(v).slice(0, 200); gridSave(); gridPaintSoon(); }
+function gridTagSet(v) { gridCur().tag = String(v).slice(0, 40); gridSave(); gridPaintSoon(); }
+function gridDark(v) { gridCur().dark = !!v; gridSave(); gridPaintSoon(); }
