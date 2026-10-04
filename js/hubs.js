@@ -34,6 +34,7 @@ function conceptScore(p, c, map) {
   return ws.reduce((a, b) => a + b, 0) / ws.length + Math.random() * 8;
 }
 function hookLine(p, c) {
+  if (c.line) return c.line;
   const pre = p.pre, ic = pre.icps[0] || {}, j = pre.journey;
   const dor = (j[1] && j[1].dor) || (j[0] && j[0].dor) || ic.need || '[dor do público]';
   const situ = ic.situation || '[situação do público]', duvida = (j[2] && j[2].duvida) || (j[1] && j[1].duvida) || '[dúvida do público]';
@@ -48,6 +49,7 @@ function renderMatrixPage() {
   const p = curProject(), r = $('matrixRoot'); if (!p) { r.innerHTML = noProject('Matriz de Criação'); return; }
   const sel = ensureSel(p), m = p.matrix, shown = shownConcepts(p), lw = learnWeights(p);
   r.innerHTML = `<div class="page-head"><div><h1>Matriz de Criação</h1><p>Combine contexto, hooks, ângulos, formatos e direção antes de gastar créditos. Primeiro o conceito, depois a produção.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="generateConcepts()">Gerar conceitos</button></div></div>
+  ${matrixDocPanel(p)}
   <div class="matrix-toolbar"><div class="matrix-tabs">${DURATIONS.map(d => `<button class="${d === m.duration ? 'active' : ''}" onclick="setDuration(${d})">${d}s</button>`).join('')}</div><span class="badge hot">${esc(p.name)}</span><span class="badge">Contexto herdado do projeto</span>${lw.rows.length ? '<span class="badge">Pesos aprendidos ativos</span>' : ''}</div>
   <div class="matrix-grid">${Object.keys(MATRIX).map(k => `<div class="matrix-card"><h3>${MATRIX_LABEL[k]}</h3><div class="matrix-options">${optionsOf(p, k).map((v, i) => `<button class="matrix-opt ${sel[k].includes(v) ? 'selected' : ''}" onclick="toggleMatrix('${k}',${i})">${esc(v)}</button>`).join('')}<button class="matrix-opt add" title="Adicionar opção" onclick="addMatrixOption('${k}')">＋</button></div></div>`).join('')}
     <div class="matrix-card"><h3>Potencial combinatório</h3><div class="matrix-count">${fmtNum(comboCount(p))}</div><div class="matrix-muted">combinações possíveis antes do filtro de conceito.</div><div style="margin-top:12px"><button class="btn" onclick="selectAllMatrix()">Selecionar tudo</button></div></div></div>

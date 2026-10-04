@@ -5,6 +5,8 @@ return [
        (ou, mais simples e menos seguro, use ADMIN_PASSWORD em texto). Sem nenhum dos dois, o app fica aberto. */
     'ADMIN_PASSWORD_HASH' => '',
     'ADMIN_PASSWORD'      => '',
+    /* Opcional: código exigido no primeiro acesso, quando a senha é criada pelo app (Configurações → Integrações). Evita que outra pessoa crie a senha antes de você. */
+    'SETUP_CODE'          => '',
 
     /* IA (Claude). Chave em https://console.anthropic.com */
     'ANTHROPIC_API_KEY' => '',

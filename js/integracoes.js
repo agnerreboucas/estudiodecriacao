@@ -17,11 +17,11 @@ const INT_CARDS = [
 function renderIntegracoes() {
   const r = $('integracoesRoot'); if (!r) return;
   const s = intSt(), ok = k => !!(s[k] && s[k].configured);
-  if (!API.available) { r.innerHTML = `<h2 style="margin:0 0 10px;font-size:18px">Integrações (APIs)</h2><div class="panel"><h3>Aqui você cola as chaves das APIs, mas isso só funciona no servidor</h3><p style="font-size:13px">Este arquivo está aberto direto no computador (modo demonstração, sem PHP), por isso o Studio não consegue guardar chaves. Para ligar GPT, ElevenLabs, Magnific e as outras APIs:</p><ol style="font-size:13px;line-height:1.7"><li>Envie a pasta inteira do projeto para a Hostinger (pasta <span class="mono">public_html</span>).</li><li>Copie <span class="mono">api/config.sample.php</span> para <span class="mono">api/config.php</span> e defina a senha do Studio (<span class="mono">ADMIN_PASSWORD_HASH</span>).</li><li>Abra o Studio no endereço do site, entre com a senha e volte a <b>Configurações → Integrações</b>: cada cartão terá o campo para colar a chave e o botão <b>Salvar</b>.</li></ol></div>${integrationsHTML()}`; return; }
+  if (!API.available) { r.innerHTML = intLocalPanel() + integrationsHTML(); return; }
   if (canUseApi() && !INT.keys && !INT.keysLoading) { INT.keysLoading = true; api('keys.php').then(j => { INT.keys = j; }, () => { INT.keys = {keys: {}, editable: false}; }).then(() => { INT.keysLoading = false; renderIntegracoes(); }); }
   const aiProv = s.ai && s.ai.provider === 'openai' ? 'GPT (OpenAI)' : 'Claude (Anthropic)';
   r.innerHTML = `<div class="section-row" style="margin-bottom:10px"><div><h2 style="margin:0;font-size:18px">Integrações (APIs)</h2><p class="muted" style="margin:2px 0 0">Onde você liga as APIs. Cada chave fica só no servidor, no arquivo <span class="mono">api/config.php</span>; aqui você vê o que está ligado e testa a conexão.</p></div><button class="btn" onclick="INT.keys=null;loadStatus().then(renderIntegracoes)">↻ Atualizar status</button></div>
-  ${INT.keys && !INT.keys.editable ? `<div class="panel" style="margin-bottom:12px"><b>Para colar as chaves aqui no app</b>, defina primeiro a senha do Studio (<span class="mono">ADMIN_PASSWORD_HASH</span> em <span class="mono">api/config.php</span>). Sem senha, qualquer pessoa com o link poderia trocar as chaves. Enquanto isso, as chaves vão direto no <span class="mono">config.php</span>.</div>` : ''}
+  ${INT.keys && !INT.keys.editable ? intSetupPanel() : ''}
   ${needsLogin() ? `<div class="panel" style="margin-bottom:12px"><div class="section-row"><div><h3>Entre no Studio</h3><p class="muted">Sem login o servidor não mostra o status das chaves.</p></div><button class="btn dark" onclick="showLogin()">Entrar</button></div></div>` : ''}
   <div class="integration-grid int-big">${INT_CARDS.map(c => {
     const on = ok(c.k), extra = c.k === 'ai' && on ? ` · ${aiProv}${s.ai.model ? ' · ' + esc(s.ai.model) : ''}` : '';
@@ -189,4 +189,32 @@ async function audZip() {
   const eb = ebCur(), A = audE(eb), files = []; let n = 0;
   for (const s of eb.sections) { const it = A.items[s.id]; if (!it || !it.ids.length) continue; n++; files.push({name: String(n).padStart(2, '0') + '-' + slug(s.title || 'secao') + '.mp3', data: new Uint8Array(await (await audBlob(it)).arrayBuffer())}); }
   if (!files.length) return; download(slug(eb.title || eb.name) + '-audio.zip', makeZip(files), 'application/zip');
+}
+
+/* Primeiro acesso no servidor: criar a senha do Studio pelo app (depois disso as chaves podem ser coladas nos cartões) */
+function intSetupPanel() {
+  return `<div class="panel" style="margin-bottom:12px;border:2px solid #111"><h3 style="margin-top:0">Primeiro acesso: crie a senha do Studio</h3><p style="font-size:13px;margin:4px 0 10px">Para colar as chaves das APIs aqui, o Studio precisa de uma senha. Sem ela, qualquer pessoa com o link do site poderia trocar as suas chaves. A senha fica só no servidor. <b>Faça isso logo depois de subir o site.</b></p>
+  <div class="form-grid"><div class="field"><label>Senha (mínimo 8 caracteres)</label><input id="suPw" type="password" autocomplete="new-password"></div><div class="field"><label>Repita a senha</label><input id="suPw2" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')intSetup()"></div><div class="field full"><label>Código de instalação <small class="muted">(só se você definiu SETUP_CODE em api/config.php)</small></label><input id="suCode" autocomplete="off"></div></div>
+  <button class="btn dark" onclick="intSetup()">Criar senha e liberar as chaves</button><small class="muted block" style="margin-top:8px">Prefere definir pelo arquivo? Use <span class="mono">ADMIN_PASSWORD_HASH</span> em <span class="mono">api/config.php</span>.</small></div>`;
+}
+async function intSetup() {
+  const a = $('suPw').value, b = $('suPw2').value; if (a.length < 8) { toast('Use uma senha com pelo menos 8 caracteres.'); return; } if (a !== b) { toast('As duas senhas não são iguais.'); return; }
+  try { await api('auth.php', {method: 'POST', body: {action: 'setup', password: a, code: ($('suCode').value || '').trim()}}); INT.keys = null; await loadStatus(); toast('Senha criada. Agora cole as chaves nos cartões abaixo.'); renderIntegracoes(); } catch (e) { toast(e.message); }
+}
+/* Modo local (arquivo aberto no computador, sem PHP): não há onde guardar chaves; o app gera o arquivo api/config.php pronto para subir na hospedagem */
+function intLocalPanel() {
+  const F = [['ANTHROPIC_API_KEY', 'Chave Claude (Anthropic)'], ['OPENAI_API_KEY', 'Chave OpenAI (GPT e imagens)'], ['ELEVENLABS_API_KEY', 'Chave ElevenLabs'], ['MAGNIFIC_API_KEY', 'Chave Magnific'], ['HIGGSFIELD_API_KEY', 'Chave Higgsfield']];
+  return `<h2 style="margin:0 0 10px;font-size:18px">Integrações (APIs)</h2><div class="panel" style="border:2px solid #111"><h3 style="margin-top:0">Você está no modo local: aqui as chaves não podem ficar guardadas</h3><p style="font-size:13px">Este arquivo está aberto direto no computador, sem servidor PHP, então não há onde guardar as chaves com segurança. Mas você <b>não precisa mexer em código</b>: preencha abaixo e eu gero o arquivo <span class="mono">config.php</span> pronto. As chaves não saem do seu computador.</p>
+  <ol style="font-size:13px;line-height:1.7;margin:6px 0 10px"><li>Preencha só as chaves que você tem e escolha uma senha para entrar no Studio.</li><li>Clique em <b>Baixar config.php</b>.</li><li>Na Hostinger, suba a pasta do projeto para <span class="mono">public_html</span> e coloque o <span class="mono">config.php</span> dentro da pasta <span class="mono">api</span>.</li><li>Abra o Studio pelo endereço do seu site e entre com a senha. As APIs passam a funcionar (veja o status em cada cartão).</li></ol>
+  <div class="form-grid">${F.map(([n, l]) => `<div class="field"><label>${esc(l)}</label><input type="password" id="cg_${n}" autocomplete="off" placeholder="cole aqui (opcional)"></div>`).join('')}
+  <div class="field"><label>Provedor da IA de texto</label><select id="cg_AI_PROVIDER"><option value="anthropic">Claude (Anthropic)</option><option value="openai">GPT (OpenAI)</option></select></div><div class="field"><label>Senha do Studio (mínimo 8 caracteres)</label><input type="password" id="cg_PW" autocomplete="new-password"></div></div>
+  <button class="btn dark" onclick="intCfgGen()">⬇ Baixar config.php</button><small class="muted block" style="margin-top:8px">Guarde o arquivo em local seguro e não envie para o GitHub nem por e-mail. A senha fica em texto dentro dele; se quiser, depois troque por <span class="mono">ADMIN_PASSWORD_HASH</span> (veja <span class="mono">api/config.sample.php</span>).</small></div>`;
+}
+function intCfgGen() {
+  const q = v => "'" + String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'", L = [], names = ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'ELEVENLABS_API_KEY', 'MAGNIFIC_API_KEY', 'HIGGSFIELD_API_KEY'], pw = ($('cg_PW').value || '');
+  if (pw.length < 8) { toast('Escolha uma senha do Studio com pelo menos 8 caracteres.'); return; }
+  for (const n of names) { const v = ($('cg_' + n).value || '').trim(); if (!v) continue; if (!/^[A-Za-z0-9._\-]{8,300}$/.test(v)) { toast('A chave ' + n + ' tem espaços ou caracteres estranhos. Cole só a chave, sem aspas.'); return; } L.push(`    ${q(n)} => ${q(v)},`); }
+  if (!L.length) { toast('Cole pelo menos uma chave.'); return; }
+  const txt = `<?php\n/* Gerado pelo Ampliação Studio. Coloque este arquivo em api/config.php na hospedagem. NUNCA envie para o GitHub. */\nreturn [\n    'ADMIN_PASSWORD' => ${q(pw)},\n    'AI_PROVIDER' => ${q($('cg_AI_PROVIDER').value)},\n${L.join('\n')}\n];\n`;
+  download('config.php', txt, 'text/x-php'); toast('config.php gerado. Suba em api/config.php na hospedagem.');
 }

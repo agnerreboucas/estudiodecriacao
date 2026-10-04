@@ -7,6 +7,10 @@ const APP_KEYS = ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'ELEVENLABS_API_KEY', '
 function keys_file(): string { return rtrim((string) ($GLOBALS['CFG']['DATA_DIR'] ?? __DIR__ . '/data'), '/') . '/keys.json'; }
 (function () { $f = keys_file(); if (!is_file($f)) return; $j = json_decode((string) @file_get_contents($f), true); if (!is_array($j)) return;
     foreach (APP_KEYS as $k) if (isset($j[$k]) && is_string($j[$k]) && $j[$k] !== '' && (($GLOBALS['CFG'][$k] ?? '') === '')) $GLOBALS['CFG'][$k] = $j[$k]; })();
+/* Senha do Studio criada pelo app no primeiro acesso: <DATA_DIR>/admin.json (só o hash). config.php sempre vence. */
+function admin_file(): string { return rtrim((string) ($GLOBALS['CFG']['DATA_DIR'] ?? __DIR__ . '/data'), '/') . '/admin.json'; }
+(function () { if (((string) ($GLOBALS['CFG']['ADMIN_PASSWORD_HASH'] ?? '')) !== '' || ((string) ($GLOBALS['CFG']['ADMIN_PASSWORD'] ?? '')) !== '') return; $f = admin_file(); if (!is_file($f)) return; $j = json_decode((string) @file_get_contents($f), true);
+    if (is_array($j) && isset($j['hash']) && is_string($j['hash']) && $j['hash'] !== '') $GLOBALS['CFG']['ADMIN_PASSWORD_HASH'] = $j['hash']; })();
 function cfg(string $k, $d = null) { $v = $GLOBALS['CFG'][$k] ?? null; return ($v === null || $v === '') ? $d : $v; }
 
 function json_out($data, int $code = 200): void {

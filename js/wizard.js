@@ -131,6 +131,7 @@ async function wizCreate() {
   refreshDrafts(p.pre);
   state.projects.push(p); state.activeProjectId = p.id; persist(); wiz = null; updateContextUI();
   ui.tab = 'preproject'; go('project'); toast('Projeto criado. Revise as hipóteses e siga o fluxo.');
+  if (typeof aiReady === 'function' && aiReady() && typeof preGenAll === 'function') setTimeout(() => { if (confirm('Gerar agora o pré-projeto completo com IA a partir das suas respostas? (ICPs, dores, dúvidas, produtos e linha editorial)')) preGenAll(true); }, 600);
 }
 
 /* ---- gravação ---- */
