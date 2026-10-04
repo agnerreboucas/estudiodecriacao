@@ -626,6 +626,8 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .gd-strip{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center;padding:8px 0;border-top:1px solid #eee}.gd-strip:first-child{border-top:0}.gd-sh{display:flex;flex-direction:column;gap:4px;align-items:flex-start}.gd-sh b{font-size:13px}.gd-sh span{font-size:12px;color:#666}.gd-fr{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.gd-slw{display:flex;flex-direction:column;gap:2px;flex:none}.gd-sl{border-radius:4px;cursor:pointer;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18)}.gd-slw small{font-size:10px;color:#777;max-width:108px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .fd-left input[type=color],.gd-cell input[type=color]{width:38px;height:30px;padding:0;border:1px solid #ccc;border-radius:6px;background:none;cursor:pointer}
 
+.tpl-th{height:170px}.sec-th.tpl-th iframe{width:1280px;height:900px;transform:scale(.185);transform-origin:0 0;pointer-events:none;background:#fff;border:0}
+
 </style>
 <style>
 /* ===== Responsivo: tablet (≤1024px) e celular (≤640px). Menu sanduíche = gaveta lateral com os nomes dos módulos. ===== */
@@ -988,7 +990,7 @@ function seedState() {
   const cd = newProject('Cartório Descomplicado', 'Conteúdo + geração de demanda', {cover: 'a6', icon: 'CD'});
   const se = newProject('Saber Ensinar', 'Educação criativa', {cover: 'a8', icon: 'SE'});
   return {
-    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], imglib: {items: []}, lpRefs: {items: [], seeded: false, seen: []}, inspo: {items: [], boards: [], cats: []}, myFonts: [],
+    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], imglib: {items: []}, tplbank: {items: []}, lpRefs: {items: [], seeded: false, seen: []}, inspo: {items: [], boards: [], cats: []}, myFonts: [],
     workspace: {name: 'Ampliação Marketing', instruction: 'Criar com clareza estratégica, consistência de marca e foco na jornada de compra.'},
     credits: 30, activeProjectId: mb.id, projects: [mb, cd, se], creatives
   };
@@ -1158,7 +1160,17 @@ function normalizeProducts(x) {
     benefits: lines(r.benefits, 300, 30), features: lines(r.features, 300, 40), objections: lines(r.objections, 300, 20), proofs: lines(r.proofs, 400, 20), images: (Array.isArray(r.images) ? r.images : []).filter(sid).slice(0, 8), created: str(r.created, 40) || new Date().toISOString()}));
 }
 /* Editor visual (estilo Elementor): seções → colunas (grade de 12, com largura por dispositivo) → widgets. Tudo com tipos e limites fixos. */
-const BX_WIDGETS = ['heading', 'text', 'image', 'video', 'button', 'list', 'feature', 'spacer', 'divider', 'form', 'faq', 'quote', 'countdown'];
+const BX_WIDGETS = ['heading', 'text', 'image', 'video', 'button', 'list', 'feature', 'spacer', 'divider', 'form', 'faq', 'quote', 'countdown', 'tpl'];
+function tplWidgetNorm(t) {
+  t = t && typeof t === 'object' ? t : {}; const ok = k => /^\d{1,3}$/.test(String(k)), obj = (o, f, max) => { const r = {}; Object.keys(o && typeof o === 'object' ? o : {}).filter(ok).slice(0, max).forEach(k => { const v = f(o[k]); if (v != null) r[k] = v; }); return r; };
+  const hexMap = o => { const r = {}; Object.keys(o && typeof o === 'object' ? o : {}).slice(0, 8).forEach(k => { if (/^#[0-9a-f]{6}$/i.test(k) && /^#[0-9a-f]{6}$/i.test(String(o[k]))) r[k.toLowerCase()] = String(o[k]).toLowerCase(); }); return r; };
+  const fonts = {}; Object.keys(t.fonts && typeof t.fonts === 'object' ? t.fonts : {}).slice(0, 4).forEach(k => { const a = String(k).replace(/[^\w \-]/g, '').slice(0, 60), b = String(t.fonts[k]).replace(/[^\w \-]/g, '').trim().slice(0, 60); if (a && b) fonts[a] = b; });
+  return {id: /^[\w-]{1,60}$/.test(String(t.id || '')) ? t.id : '', s: obj(t.s, v => String(v == null ? '' : v).slice(0, 600), 140), i: obj(t.i, v => /^[\w-]{1,60}$/.test(String(v || '')) ? v : null, 40), h: obj(t.h, v => /^(https?:\/\/[^\s"'<>]{1,500}|#[\w-]{1,60}|mailto:[^\s"'<>]{1,200}|tel:[+\d]{3,20})$/i.test(String(v || '')) ? String(v) : null, 60), map: hexMap(t.map), fonts};
+}
+function normalizeTplbank(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), items = x && Array.isArray(x.items) ? x.items : [];
+  return {items: items.filter(i => i && safeId(i.id)).slice(0, 600).map(i => ({id: i.id, tpl: str(i.tpl, 80) || 'Template', page: str(i.page, 120), name: str(i.name, 80) || 'Seção', kind: typeof TPL_KINDS === 'object' && TPL_KINDS[i.kind] ? i.kind : 'other', niche: str(i.niche, 60), order: Math.max(0, Math.round(+i.order) || 0), imgIds: (Array.isArray(i.imgIds) ? i.imgIds : []).filter(safeId).slice(0, 80), colors: (Array.isArray(i.colors) ? i.colors : []).filter(c => /^#[0-9a-f]{6}$/i.test(String(c))).slice(0, 4), fonts: (Array.isArray(i.fonts) ? i.fonts : []).map(f => str(f, 60)).slice(0, 2), license: str(i.license, 160), created: str(i.created, 40)}))};
+}
 function normalizeVis(v) {
   if (!v || typeof v !== 'object' || !Array.isArray(v.sections)) return null;
   const str = (x, n) => String(x == null ? '' : x).slice(0, n), sid = x => /^[\w-]{1,60}$/.test(String(x || '')) ? x : uid('bx'), hex = x => /^#[0-9a-f]{6}$/i.test(String(x)) ? String(x) : '', num = (x, lo, hi, d) => { x = +x; return isFinite(x) ? Math.min(hi, Math.max(lo, Math.round(x))) : d; };
@@ -1168,7 +1180,7 @@ function normalizeVis(v) {
   const widget = w => { if (!w || !BX_WIDGETS.includes(w.t)) return null; return {id: sid(w.id), t: w.t, hide: hide(w.hide), al: bp(w.al, al), size: bp(w.size, x => num(x, 10, 120, null)), wpct: bp(w.wpct, x => num(x, 10, 100, null)), h: bp(w.h, x => num(x, 0, 400, null)),
     text: str(w.text, 4000), title: str(w.title, 300), tag: ['h1', 'h2', 'h3'].includes(w.tag) ? w.tag : 'h2', color: hex(w.color), fw: [300, 400, 500, 600, 700, 800, 900].includes(+w.fw) ? +w.fw : 0, ff: str(w.ff, 60).replace(/[^\w \-]/g, '').trim(), muted: !!w.muted, imgId: /^[\w-]{1,60}$/.test(w.imgId || '') ? w.imgId : '', src: url(w.src), alt: str(w.alt, 200), rad: num(w.rad, 0, 60, 12),
     ratio: ['16:9', '9:16', '1:1', '4:5'].includes(w.ratio) ? w.ratio : '16:9', link: ['checkout', 'form', 'whatsapp', 'custom'].includes(w.link) ? w.link : 'checkout', href: /^(https?:\/\/[^\s"'<>]{1,600}|#[\w-]{1,60}|mailto:[^\s"'<>]{1,200}|tel:[+\d]{3,20})$/i.test(w.href || '') ? w.href : '', style: ['solid', 'outline'].includes(w.style) ? w.style : 'solid', full: !!w.full, icon: ['check', 'x', 'dot'].includes(w.icon) ? w.icon : 'check', emoji: str(w.emoji, 4), date: /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/.test(w.date || '') ? w.date : '',
-    items: (Array.isArray(w.items) ? w.items : []).slice(0, 30).map(i => (typeof i === 'string' ? {t: str(i, 400), d: ''} : {t: str(i && i.t, 400), d: str(i && i.d, 1200)}))}; };
+    items: (Array.isArray(w.items) ? w.items : []).slice(0, 30).map(i => (typeof i === 'string' ? {t: str(i, 400), d: ''} : {t: str(i && i.t, 400), d: str(i && i.d, 1200)})), ...(w.t === 'tpl' ? {tpl: tplWidgetNorm(w.tpl)} : {})}; };
   const sections = v.sections.slice(0, 40).map(s => s && typeof s === 'object' ? ({id: sid(s.id), name: str(s.name, 80), w: s.w === 'full' ? 'full' : 'box', bg: hex(s.bg), alt: !!s.alt, bgImg: /^[\w-]{1,60}$/.test(s.bgImg || '') ? s.bgImg : '', pad: bp(s.pad, x => num(x, 0, 240, null)), padB: bp(s.padB, x => num(x, 0, 240, null)), hide: hide(s.hide), gap: bp(s.gap, x => num(x, 0, 80, null)),
     cols: (Array.isArray(s.cols) ? s.cols : []).slice(0, 24).map(c => ({id: sid(c && c.id), span: bp(c && c.span, x => num(x, 1, 12, null)), v: ['top', 'center', 'bottom'].includes(c && c.v) ? c.v : 'top', widgets: (Array.isArray(c && c.widgets) ? c.widgets : []).slice(0, 30).map(widget).filter(Boolean)}))}) : null).filter(Boolean);
   return {sections};
@@ -1235,7 +1247,7 @@ function normalize(s) {
   s.workspace = mergeDefaults(s.workspace, base.workspace);
   s.credits = Number.isFinite(+s.credits) ? +s.credits : 30;
   s.inspo = normalizeInspo(s.inspo);
-  s.imglib = normalizeImglib(s.imglib); s.lpRefs = normalizeLpRefs(s.lpRefs); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills);
+  s.imglib = normalizeImglib(s.imglib); s.tplbank = normalizeTplbank(s.tplbank); s.lpRefs = normalizeLpRefs(s.lpRefs); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills);
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
@@ -18071,7 +18083,7 @@ async function lpHTML(l, p, opts) {
   if (l.vis) { const r = await bxRender(l, opts); sections.push(r.html); bxCssText = r.css; bxBtn = r.firstBtn; }
   else for (const b of blocks) { const img = b.imgId ? await lpImg(b.imgId) : ''; if (b.t === 'form') hasForm = true; sections.push(lpBlockHTML(l, b, {img, countdown: b.t === 'hero' ? countdown : ''})); }
   const SO = lpSeoOf(l, p), title = SO.title || ((hero && hero.title ? hero.title.replace(/\*\*/g, '') : l.name) + (l.product.nome ? ' · ' + l.product.nome : '')), desc = SO.desc || (hero && hero.text || l.sub || '').replace(/\*\*/g, '').slice(0, 160), cta = hero ? lpCta(l, hero) : null;
-  const waOn = !!l.whatsapp && l.waFloat !== false, fav = await lpFavURL(SO.fav), wf = [], ww = new Set([400, 600, 700, 800]); if (l.vis) l.vis.sections.forEach(s => s.cols.forEach(c => c.widgets.forEach(w => { if (w.ff) wf.push(w.ff); if (w.fw) ww.add(w.fw); })));
+  const waOn = !!l.whatsapp && l.waFloat !== false, fav = await lpFavURL(SO.fav), wf = [], ww = new Set([400, 600, 700, 800]); if (l.vis) l.vis.sections.forEach(s => s.cols.forEach(c => c.widgets.forEach(w => { if (w.ff) wf.push(w.ff); if (w.fw) ww.add(w.fw); if (w.t === 'tpl') tplFontList(w).forEach(f => wf.push(f)); })));
   const track = opts.preview ? '' : [TR.metaPixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${TR.metaPixel}');fbq('track','PageView');<\/script>` : '', TR.ga4 ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${TR.ga4}"><\/script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${TR.ga4}');<\/script>` : ''].join('');
   const trackUrl = !opts.preview && /leads\.php/.test(leadsUrl) ? leadsUrl.replace(/leads\.php.*$/, 'lp.php') : '', lpId = /^[\w-]{1,60}$/.test(l.id || '') ? l.id : '';
   const beacon = trackUrl && lpId ? `var T=${JSON.stringify(trackUrl).replace(/</g, '\\u003c')},I=${JSON.stringify(lpId)};function tk(e){try{navigator.sendBeacon(T,new Blob([JSON.stringify({e:e,lp:I})],{type:'text/plain'}))}catch(x){}}tk('view');document.addEventListener('click',function(ev){var a=ev.target.closest&&ev.target.closest('a.btn,a.wa-fab');if(a)tk('cta')});` : 'function tk(){}';
@@ -18406,12 +18418,12 @@ function lpBack() { lpUI.id = ''; if (lpUI.back === 'site') { lpUI.main = 'sites
    destaque, espaçador, divisor, formulário, perguntas, depoimentos, contagem). Cada propriedade pode ter valor por dispositivo: o de computador
    vale para todos até que tablet ou celular definam o seu (cascata, como nos construtores de página). */
 const BX_BP = {d: 'Computador', t: 'Tablet', l: 'Celular horizontal', m: 'Celular vertical'};
-const BX_W = {heading: ['Título', 'H'], text: ['Texto', '¶'], image: ['Imagem', '🖼'], video: ['Vídeo', '▶'], button: ['Botão', '⬭'], list: ['Lista', '☰'], feature: ['Destaque (cartão)', '◫'], spacer: ['Espaço', '↕'], divider: ['Divisor', '―'], form: ['Formulário', '✎'], faq: ['Perguntas (sanfona)', '?'], quote: ['Depoimentos', '❝'], countdown: ['Contagem regressiva', '⏱']};
+const BX_W = {heading: ['Título', 'H'], text: ['Texto', '¶'], image: ['Imagem', '🖼'], video: ['Vídeo', '▶'], button: ['Botão', '⬭'], list: ['Lista', '☰'], feature: ['Destaque (cartão)', '◫'], spacer: ['Espaço', '↕'], divider: ['Divisor', '―'], form: ['Formulário', '✎'], faq: ['Perguntas (sanfona)', '?'], quote: ['Depoimentos', '❝'], countdown: ['Contagem regressiva', '⏱'], tpl: ['Seção importada', '⬚']};
 const BX_LAYOUTS = {'1': [12], '2': [6, 6], '3': [4, 4, 4], '4': [3, 3, 3, 3], '1-2': [4, 8], '2-1': [8, 4]};
 const BX_LAYOUT_NAME = {'1': '1 coluna', '2': '2 colunas', '3': '3 colunas', '4': '4 colunas', '1-2': '⅓ + ⅔', '2-1': '⅔ + ⅓'};
 const bxId = () => uid('bx');
 const bxFontCss = w => (w.fw ? `font-weight:${+w.fw};` : '') + (w.ff ? `font-family:'${String(w.ff).replace(/[^\w \-]/g, '')}',sans-serif;` : '');
-function bxW(t, o) { return Object.assign({id: bxId(), t, hide: {t: false, l: false, m: false}, al: {}, size: {}, wpct: {}, h: {}, text: '', title: '', tag: 'h2', color: '', muted: false, imgId: '', src: '', alt: '', rad: 12, ratio: '16:9', link: 'checkout', href: '', style: 'solid', full: false, icon: 'check', emoji: '', date: '', items: []}, ({heading: {text: 'Seu título aqui'}, text: {text: 'Escreva o texto aqui.'}, button: {text: 'Quero agora'}, feature: {title: 'Título', text: 'Descrição'}, list: {items: [{t: 'Primeiro item', d: ''}]}, spacer: {h: {d: 32}}, faq: {items: [{t: 'Pergunta?', d: 'Resposta.'}]}, quote: {items: [{t: '[CONFIRMAR: depoimento real]', d: '[CONFIRMAR: nome]'}]}, form: {title: 'Receba contato', text: '', text2: ''}, video: {src: ''}, image: {}, divider: {}, countdown: {}})[t] || {}, o || {}); }
+function bxW(t, o) { return Object.assign({id: bxId(), t, hide: {t: false, l: false, m: false}, al: {}, size: {}, wpct: {}, h: {}, text: '', title: '', tag: 'h2', color: '', muted: false, imgId: '', src: '', alt: '', rad: 12, ratio: '16:9', link: 'checkout', href: '', style: 'solid', full: false, icon: 'check', emoji: '', date: '', items: []}, ({heading: {text: 'Seu título aqui'}, text: {text: 'Escreva o texto aqui.'}, button: {text: 'Quero agora'}, feature: {title: 'Título', text: 'Descrição'}, list: {items: [{t: 'Primeiro item', d: ''}]}, spacer: {h: {d: 32}}, faq: {items: [{t: 'Pergunta?', d: 'Resposta.'}]}, quote: {items: [{t: '[CONFIRMAR: depoimento real]', d: '[CONFIRMAR: nome]'}]}, form: {title: 'Receba contato', text: '', text2: ''}, video: {src: ''}, image: {}, divider: {}, countdown: {}, tpl: {tpl: {id: '', s: {}, i: {}, h: {}, map: {}, fonts: {}}}})[t] || {}, o || {}); }
 const bxCol = (span, widgets, o) => Object.assign({id: bxId(), span: {d: span, t: span <= 4 ? 6 : 12, m: 12}, v: 'top', widgets: widgets || []}, o || {});
 function bxSec(layout, o) { return Object.assign({id: bxId(), name: '', w: 'box', bg: '', alt: false, bgImg: '', pad: {}, padB: {}, hide: {t: false, l: false, m: false}, gap: {}, cols: (BX_LAYOUTS[layout] || [12]).map(n => bxCol(n))}, o || {}); }
 
@@ -18455,7 +18467,7 @@ function bxVideoEmbed(src) {
 }
 async function bxRender(l, opts) {
   const V = l.vis, P = !!opts.preview, css = {d: [], t: [], l: [], m: []}, rule = (bp, sel, decl) => { if (decl) css[bp].push(`${sel}{${decl}}`); };
-  const cta = lpCta(l), hasForm = [].concat(...V.sections.map(s => [].concat(...s.cols.map(c => c.widgets)))).some(w => w.t === 'form'); let formDone = false, imgN = 0, firstBtn = '', E = lpE, R = lpRich;
+  const cta = lpCta(l), hasForm = [].concat(...V.sections.map(s => [].concat(...s.cols.map(c => c.widgets)))).some(w => w.t === 'form'); let formDone = false, imgN = 0, firstBtn = '', E = lpE, R = lpRich; TPL_R.fonts = new Set(); TPL_R.css = []; TPL_R.form = hasForm; TPL_R.hf = false;
   const bpEach = (id, o, f) => ['d', 't', 'l', 'm'].forEach(bp => { if (o && o[bp] != null) rule(bp, '#' + bxSafe(id), f(o[bp])); });
   const attr = (id) => P ? ` data-bx="${bxSafe(id)}"` : '';
   const wHTML = async w => {
@@ -18475,6 +18487,7 @@ async function bxRender(l, opts) {
       case 'form': { const first = !formDone; formDone = true; h = `<div id="${first ? 'form' : id}"${a} class="bx-form">${w.title ? `<h2>${R(w.title)}</h2>` : ''}${w.text ? `<p class="mut">${R(w.text)}</p>` : ''}${lpFormBox(l, {cta: w.text2 || 'Enviar'})}</div>`; break; }
       case 'faq': h = `<div id="${id}"${a}>${w.items.filter(i => i.t).map(i => `<details><summary>${R(i.t)}</summary><p>${R(i.d)}</p></details>`).join('')}</div>`; break;
       case 'quote': h = `<div id="${id}"${a} class="grid">${w.items.filter(i => i.t).map(i => `<div class="card"><p class="q">“${R(i.t)}”</p><p><strong>${R(i.d)}</strong></p></div>`).join('')}</div>`; break;
+      case 'tpl': h = await tplWidgetHTML(w, id, a, P, l); break;
       case 'countdown': h = w.date ? `<div id="${id}"${a} class="cd" data-t="${E(w.date)}"><div><b class="cdd">0</b><small>dias</small></div><div><b class="cdh">0</b><small>horas</small></div><div><b class="cdm">0</b><small>min</small></div></div>` : `<div id="${id}"${a} class="bx-ph">Defina a data</div>`; break;
     }
     return h;
@@ -18493,8 +18506,8 @@ async function bxRender(l, opts) {
     html += `<section id="${sid}"${attr(sid)} class="bx-sec${s.alt ? ' alt' : ''}"${st ? ` style="${st}"` : ''}><div class="${s.w === 'full' ? 'wf' : 'w'}"><div class="bx-row">${cols}</div></div></section>\n`;
   }
   const extra = `.bx-vid .yt{all:unset;display:block;width:100%;height:100%;cursor:pointer;background:#000 center/cover no-repeat;position:relative}.bx-vid .yt i{position:absolute;left:50%;top:50%;width:68px;height:48px;margin:-24px 0 0 -34px;background:#e00;border-radius:12px}.bx-vid .yt i:after{content:'';position:absolute;left:27px;top:14px;border:10px solid transparent;border-left:18px solid #fff}.bx-row{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:28px}.bx-col{grid-column:span var(--sp,12);min-width:0}.bx-col.v-center{align-self:center}.bx-col.v-bottom{align-self:end}.bx-sec{padding:64px 0}.wf{padding:0}.bx-col>*+*{margin-top:16px}.bx-col h1,.bx-col h2,.bx-col h3,.bx-col p{margin-bottom:0}.bx-img{--wp:100%}.bx-img img{width:var(--wp);max-width:100%;display:inline-block;vertical-align:top}.bx-vid{width:100%;border-radius:14px;overflow:hidden;background:#000}.bx-vid iframe,.bx-vid video{width:100%;height:100%;border:0;display:block}.bx-ph{background:var(--soft);border:2px dashed var(--line);border-radius:12px;padding:28px;text-align:center;color:var(--mut);font-size:14px}.bx-hr{border:0;border-top:1px solid var(--line);width:100%}.bx-em{font-size:30px;margin-bottom:8px}.btn.out{background:transparent;color:var(--a);border:2px solid var(--a);box-shadow:none}.btn.fw{display:block;text-align:center}ul.ck.dot li::before{content:'•'}.bx-form{max-width:560px}.bx-form h2{margin-bottom:.3em}.bx-sec.alt{background:var(--soft)}`;
-  const css2 = extra + css.d.join('') + `@media(max-width:1024px){${css.t.join('')}}@media(max-width:880px) and (orientation:landscape){${css.l.join('')}}@media(max-width:640px){${css.m.join('')}}`;
-  return {html, css: css2, hasForm, firstBtn};
+  const css2 = extra + css.d.join('') + `@media(max-width:1024px){${css.t.join('')}}@media(max-width:880px) and (orientation:landscape){${css.l.join('')}}@media(max-width:640px){${css.m.join('')}}` + TPL_R.css.join('\n');
+  return {html, css: css2, hasForm: hasForm || TPL_R.hf, firstBtn};
 }
 function bxPreviewJS(opts) {
   return `<style>[data-bx]{cursor:pointer}[data-bx]:hover{outline:2px dashed #4c6ef5;outline-offset:-2px}.bx-sel{outline:3px solid #4c6ef5!important;outline-offset:-3px}.bx-empty{cursor:pointer}</style><script>(function(){var sel=${JSON.stringify(opts.sel || '')},y=${+opts.scroll || 0};function mark(id){document.querySelectorAll('.bx-sel').forEach(function(e){e.classList.remove('bx-sel')});var e=id&&document.getElementById(id);if(e)e.classList.add('bx-sel')}mark(sel);window.scrollTo(0,y);document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('[data-bx]');if(el){e.preventDefault();e.stopPropagation();parent.postMessage({bx:el.id},'*')}},true);var t;window.addEventListener('scroll',function(){clearTimeout(t);t=setTimeout(function(){parent.postMessage({bxScroll:window.scrollY},'*')},120)});window.addEventListener('message',function(e){if(e.data&&e.data.bxSel!==undefined)mark(e.data.bxSel)})})();<\/script>`;
@@ -18571,6 +18584,7 @@ function bxInspector(f, bp) {
     <div class="field"><label>Trocar o número de colunas</label><select onchange="bxRelayout('${id}',this.value)"><option value="">— escolher —</option>${Object.entries(BX_LAYOUT_NAME).map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select></div>${bxHideField(id, o)}`;
   if (f.kind === 'col') return `<h4>Coluna</h4>${bxBpField(id, 'Largura (de 12)', o.span, 'span', 'sel', Array.from({length: 12}, (_, i) => [i + 1, (i + 1) + '/12' + (i + 1 === 12 ? ' (inteira)' : i + 1 === 6 ? ' (metade)' : '')]))}<div class="field"><label>Alinhamento vertical</label><select onchange="bxSet('${id}','v',this.value,true)">${[['top', 'Topo'], ['center', 'Meio'], ['bottom', 'Base']].map(([v, t]) => `<option value="${v}" ${o.v === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div><small class="muted block">Ex.: 6/12 no computador e 12/12 no celular = duas colunas lado a lado que empilham no celular.</small>`;
   const t = o.t, L = (k, lab, ta) => bxLine(id, lab, k, o[k], ta), common = bxBpField(id, 'Alinhamento', o.al, 'al', 'sel', A) + (['heading', 'text', 'feature'].includes(t) ? bxBpField(id, 'Tamanho da fonte', o.size, 'size', 'num', [10, 120, 'px']) + bxFontField(id, o) : '') + bxHideField(id, o);
+  if (t === 'tpl') return `<h4>${BX_W[t][0]}</h4>${tplPanel(id)}${bxHideField(id, o)}`;
   let body = '';
   if (t === 'heading') body = L('text', 'Texto (use **negrito**)', 3) + `<div class="ins-row"><label class="ins">Nível<select onchange="bxSet('${id}','tag',this.value,false)">${['h1', 'h2', 'h3'].map(x => `<option ${o.tag === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label><label class="ins">Cor<input type="color" value="${o.color || '#141414'}" oninput="bxSet('${id}','color',this.value,false)"></label><button class="btn sm" onclick="bxSet('${id}','color','',true)">padrão</button></div>`;
   else if (t === 'text') body = L('text', 'Texto (use **negrito**)', 5) + `<label class="ins inl"><input type="checkbox" ${o.muted ? 'checked' : ''} onchange="bxSet('${id}','muted',this.checked,false)"> cor suave</label>`;
@@ -18671,8 +18685,8 @@ function secGallery() {
   showModal('Seções prontas', `<small class="muted block" style="margin-bottom:6px">Escolha uma seção e ela entra na página já com o nome, o preço, os benefícios e as características do produto do projeto. Onde faltar um fato real, fica <b>[CONFIRMAR]</b>. Depois é só editar no editor visual.</small>
   <label class="ins inl" style="margin-bottom:8px"><input type="checkbox" id="secBrand" ${secUI.brand ? 'checked' : ''} onchange="secUI.brand=this.checked;secThumbs()"> usar as cores e fontes da marca do projeto</label>
   <div class="row-gap" style="flex-wrap:wrap;margin-bottom:8px">${SEC_GROUPS.map(([k, n]) => `<button class="btn sm ${secUI.g === k ? 'dark' : ''}" onclick="secUI.g='${k}';secGallery()">${n}</button>`).join('')}</div>
-  <div class="sec-grid" id="secGrid">${SECTIONS.filter(s => s.g === secUI.g).map(s => `<div class="sec-card"><div class="sec-th" id="secTh_${s.k}"><small class="muted">carregando…</small></div><b>${esc(s.n)}</b><small class="muted">${esc(s.d)}</small><button class="btn sm dark" onclick="secInsert('${s.k}')">＋ Usar esta seção</button></div>`).join('')}</div>`);
-  document.getElementById('modalBox').classList.add('wide'); secThumbs();
+  <div class="sec-grid" id="secGrid">${secUI.g === 'importados' ? tplGridHTML() : SECTIONS.filter(s => s.g === secUI.g).map(s => `<div class="sec-card"><div class="sec-th" id="secTh_${s.k}"><small class="muted">carregando…</small></div><b>${esc(s.n)}</b><small class="muted">${esc(s.d)}</small><button class="btn sm dark" onclick="secInsert('${s.k}')">＋ Usar esta seção</button></div>`).join('')}</div>`);
+  document.getElementById('modalBox').classList.add('wide'); if (secUI.g === 'importados') tplFillThumbs(document.getElementById('secGrid')); else secThumbs();
 }
 async function secThumbs() {
   const l = lpCur(), p = curProject(), th = secUI.brand ? Object.assign({}, l.theme, lpTheme(p)) : l.theme;
@@ -18688,6 +18702,395 @@ function secInsert(k) {
   closeModal(); bxMut(() => { const V = l.vis, f = bxFind(bxUI.sel), at = f ? V.sections.indexOf(f.sec) + 1 : V.sections.length; V.sections.splice(at, 0, sec); bxUI.sel = sec.id; }); toast('Seção adicionada.' + (SECTIONS.find(x => x.k === k) && JSON.stringify(sec).includes('[CONFIRMAR') ? ' Complete os trechos em [CONFIRMAR].' : ''));
 }
 function secStart() { const l = lpCur(); if (!l.vis) { l.vis = {sections: []}; bxUI.undo = []; bxUI.redo = []; bxUI.sel = ''; l.blocks.forEach(b => { b.on = b.on; }); persist(); } lpUI.tab = 'editor'; renderLandings(); secGallery(); }
+
+</script>
+<script>
+/* ===== Importador de templates (ZIP com HTML ou PHP simples): lê o ZIP no navegador, separa as seções de cada página, limpa (sem scripts,
+   rastreadores, iframes) e guarda cada seção no banco global de templates. Nada é copiado do conteúdo do demo: textos, imagens e links viram
+   campos editáveis (slots) e podem ser trocados pelos do projeto. O CSS é filtrado (só o que a seção usa) e isolado dentro da seção. ===== */
+const TPL_KINDS = {header: 'Cabeçalho e menu', hero: 'Topo (hero)', about: 'Sobre', services: 'Serviços e áreas', team: 'Equipe', proof: 'Depoimentos', cases: 'Casos e portfólio', blog: 'Blog e notícias', contact: 'Contato e formulário', faq: 'Perguntas frequentes', price: 'Planos e preços', numbers: 'Números', cta: 'Chamada final', logos: 'Clientes e parceiros', footer: 'Rodapé', other: 'Outras seções'};
+const TPL_R = {cache: new Map(), fonts: new Set(), css: []};
+const tplStr = (s, n) => String(s == null ? '' : s).slice(0, n);
+const tplB64 = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+
+/* ---------- ZIP (leitura no navegador, sem biblioteca) ---------- */
+async function tplZipOpen(blob) {
+  const n = blob.size, tail = new Uint8Array(await blob.slice(Math.max(0, n - 66000), n).arrayBuffer()); let i = tail.length - 22;
+  for (; i >= 0; i--) if (tail[i] === 0x50 && tail[i + 1] === 0x4b && tail[i + 2] === 5 && tail[i + 3] === 6) break;
+  if (i < 0) throw new Error('Esse arquivo não é um ZIP válido.');
+  const dv = new DataView(tail.buffer), cnt = dv.getUint16(i + 10, true), csz = dv.getUint32(i + 12, true), coff = dv.getUint32(i + 16, true);
+  const cd = new DataView(await blob.slice(coff, coff + csz).arrayBuffer()), dec = new TextDecoder(), ents = new Map(); let p = 0;
+  for (let k = 0; k < cnt && p + 46 <= cd.byteLength; k++) {
+    if (cd.getUint32(p, true) !== 0x02014b50) break;
+    const meth = cd.getUint16(p + 10, true), cs = cd.getUint32(p + 20, true), us = cd.getUint32(p + 24, true), nl = cd.getUint16(p + 28, true), el = cd.getUint16(p + 30, true), cl = cd.getUint16(p + 32, true), off = cd.getUint32(p + 42, true);
+    const name = dec.decode(new Uint8Array(cd.buffer, cd.byteOffset + p + 46, nl)); p += 46 + nl + el + cl;
+    if (name.endsWith('/') || /^__MACOSX\//.test(name) || /(^|\/)\._|\.DS_Store$/.test(name)) continue; ents.set(name, {name, meth, cs, us, off});
+  }
+  const low = new Map([...ents.keys()].map(k => [k.toLowerCase(), k]));
+  const z = {blob, ents, low, cache: new Map(),
+    find(path) { if (!path) return null; if (ents.has(path)) return ents.get(path); const l = path.toLowerCase(); if (low.has(l)) return ents.get(low.get(l)); const suf = '/' + l.replace(/^\/+/, ''); for (const [k, v] of low) if (k.endsWith(suf)) return ents.get(v); return null; },
+    async read(name) {
+      const e = ents.get(name); if (!e) throw new Error('arquivo ausente: ' + name);
+      const h = new DataView(await blob.slice(e.off, e.off + 30).arrayBuffer()), start = e.off + 30 + h.getUint16(26, true) + h.getUint16(28, true), raw = blob.slice(start, start + e.cs);
+      if (e.meth === 0) return new Uint8Array(await raw.arrayBuffer());
+      if (e.meth !== 8) throw new Error('compressão não suportada');
+      return new Uint8Array(await new Response(raw.stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+    },
+    async text(name) { const k = 't:' + name; if (!z.cache.has(k)) z.cache.set(k, new TextDecoder('utf-8').decode(await z.read(name))); return z.cache.get(k); }};
+  return z;
+}
+/* páginas de site encontradas (a documentação do template fica de fora, a menos que peçam) */
+function tplPages(zip) {
+  const all = [...zip.ents.keys()].filter(k => /\.(html?|php)$/i.test(k) && !/(^|\/)(node_modules|vendor|parts?|includes?|inc|partials?|layouts?|components?|template-parts|assets?|plugins?|libs?|tests?|examples?|bower_components)\//i.test(k)).map(k => ({path: k, size: zip.ents.get(k).us, doc: /(^|[\/_-])(docs?|documentation|help|manual)\//i.test(k) || /(^|\/)(doc|documentation)\.html?$/i.test(k)}));
+  all.sort((a, b) => (a.doc - b.doc) || (/index/i.test(b.path) - /index/i.test(a.path)) || (a.path.split('/').length - b.path.split('/').length) || a.path.localeCompare(b.path)); return all;
+}
+const tplJoin = (base, rel) => { rel = String(rel || '').split('#')[0].split('?')[0].trim(); try { rel = decodeURIComponent(rel); } catch (e) { /* mantém */ } const root = rel.startsWith('/'), parts = (root ? [] : base.split('/').slice(0, -1)).concat(rel.split('/')), o = []; parts.forEach(s => { if (s === '..') o.pop(); else if (s && s !== '.') o.push(s); }); return o.join('/'); };
+
+/* PHP simples: resolve include/require com caminho fixo e remove o resto do código PHP */
+async function tplPhp(zip, path, depth, root) {
+  let t = await zip.text(path); if (depth > 6) return '';
+  const parts = []; let last = 0; const re = /<\?(?:php|=)?([\s\S]*?)(?:\?>|$)/g; let m;
+  while ((m = re.exec(t))) { parts.push(t.slice(last, m.index)); const inc = [...m[1].matchAll(/(?:include|require)(?:_once)?\s*\(?\s*['"]([^'"]+)['"]/g)]; for (const x of inc) { const e = zip.find(tplJoin(root, x[1])) || zip.find(tplJoin(path, x[1])); parts.push(e ? await tplPhp(zip, e.name, depth + 1, root) : ''); } last = re.lastIndex; }
+  parts.push(t.slice(last)); return parts.join('');
+}
+
+/* ---------- imagens e fontes do ZIP ---------- */
+async function tplImgData(zip, path, ctx) {
+  const e = zip.find(path); if (!e) { ctx.miss++; return ''; } if (ctx.imgs.has(e.name)) return ctx.imgs.get(e.name);
+  let out = ''; const ext = ((e.name.match(/\.(\w+)$/) || [])[1] || '').toLowerCase();
+  try {
+    const u8 = await zip.read(e.name);
+    if (ext === 'svg') out = u8.length <= 60000 ? 'data:image/svg+xml;base64,' + tplB64(u8) : '';
+    else if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp'].includes(ext)) {
+      const bm = await createImageBitmap(new Blob([u8], {type: 'image/' + (ext === 'jpg' ? 'jpeg' : ext)})), s = Math.min(1, 1600 / Math.max(bm.width, bm.height)), c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(bm.width * s)); c.height = Math.max(1, Math.round(bm.height * s)); c.getContext('2d').drawImage(bm, 0, 0, c.width, c.height);
+      const bl = await new Promise(r => c.toBlob(r, 'image/webp', 0.82)); if (bl) { const id = uid('img'); await imgPut(id, bl); ctx.created.add(id); out = 'tplimg:' + id; }
+    }
+  } catch (err) { ctx.miss++; }
+  ctx.imgs.set(e.name, out); return out;
+}
+async function tplFontData(zip, path, ctx) {
+  const e = zip.find(path); if (!e || e.us > 230000) return ''; if (ctx.fonts.has(e.name)) return ctx.fonts.get(e.name);
+  let out = ''; try { const ext = (e.name.match(/\.(\w+)$/) || [])[1].toLowerCase(), mt = {woff2: 'font/woff2', woff: 'font/woff', ttf: 'font/ttf', otf: 'font/otf'}[ext]; if (mt) out = 'data:' + mt + ';base64,' + tplB64(await zip.read(e.name)); } catch (err) { /* sem fonte */ }
+  ctx.fonts.set(e.name, out); return out;
+}
+async function tplAsyncReplace(str, re, fn) { const ms = [...str.matchAll(re)]; if (!ms.length) return str; const rs = await Promise.all(ms.map(m => fn(...m))); let o = '', i = 0; ms.forEach((m, k) => { o += str.slice(i, m.index) + rs[k]; i = m.index + m[0].length; }); return o + str.slice(i); }
+/* url() dentro do CSS: imagens locais viram tplimg:ID (ou data: se forem SVG pequenos); o que for externo é descartado */
+const tplUrlRe = /url\(\s*(['"]?)([^)'"]+)\1\s*\)/g;
+const tplUrls = (css, zip, base, ctx, found) => tplAsyncReplace(css, tplUrlRe, async (m, q, u) => { u = u.trim(); if (/^data:/i.test(u)) return m; if (/^(https?:)?\/\//i.test(u) || u[0] === '#') return 'none'; const r = await tplImgData(zip, tplJoin(base, u), ctx); if (r && found) found.push(r); return r ? `url("${r}")` : 'none'; });
+
+/* ---------- CSS: filtra e isola ---------- */
+const TPL_DYN = /::?(?:hover|focus|focus-within|focus-visible|active|visited|link|target|checked|disabled|enabled|before|after|first-line|first-letter|placeholder|selection|backdrop|-webkit-[\w-]+|-moz-[\w-]+|-ms-[\w-]+)(?:\([^)]*\))?/gi;
+function tplSplit(s) { const o = []; let d = 0, cur = ''; for (const ch of s) { if (ch === '(' || ch === '[') d++; else if (ch === ')' || ch === ']') d--; if (ch === ',' && !d) { o.push(cur); cur = ''; } else cur += ch; } if (cur.trim()) o.push(cur); return o.map(x => x.trim()).filter(Boolean); }
+function tplScopeSel(sel) { let s = sel.replace(/(^|[\s>+~(,])(html|body|:root)(?![\w-])/gi, '$1#__S__'); s = s.replace(/#__S__(\s*[>+~]?\s*#__S__)+/g, '#__S__'); return s.includes('#__S__') ? s : '#__S__ ' + s; }
+function tplMatcher(el) {
+  const chain = []; for (let a = el; a && a.nodeType === 1; a = a.parentElement) chain.push(a);
+  return sel => { let t = sel.replace(TPL_DYN, '').trim(); if (!t || /^(\*|html|body|:root)$/i.test(t)) return true; if (/[>+~]$/.test(t)) t += '*'; try { return chain.some(a => a.matches(t)) || !!el.querySelector(t); } catch (e) { return true; } };
+}
+async function tplRules(rules, ctx, o) {
+  let out = '';
+  for (const r of rules) {
+    if (r.type === 1) {   // estilo
+      const keep = tplSplit(r.selectorText).filter(o.match); if (!keep.length) continue;
+      const bgIds = []; const body = await tplUrls(r.style.cssText, o.zip, o.base, ctx, bgIds);
+      if (bgIds.length && /background/i.test(r.style.cssText)) { const id = bgIds[bgIds.length - 1]; keep.forEach(s => { let t = s.replace(TPL_DYN, '').trim(); if (!t || /[>+~]$/.test(t)) return; try { if (o.el.matches(t)) o.el.setAttribute('data-tpl-bg', id); o.el.querySelectorAll(t).forEach(x => x.setAttribute('data-tpl-bg', id)); } catch (e) { /* seletor estranho */ } }); }
+      out += keep.map(tplScopeSel).join(',') + '{' + body + '}\n';
+    } else if (r.type === 4 || r.type === 12) {   // @media, @supports
+      const inner = await tplRules([...r.cssRules], ctx, o); if (inner.trim()) out += (r.type === 4 ? '@media ' : '@supports ') + (r.conditionText || (r.media && r.media.mediaText) || '') + '{' + inner + '}\n';
+    } else if (r.type === 5) o.faces.push(r);
+    else if (r.type === 7) o.keys.push(r);
+  }
+  return out;
+}
+const TPL_NEUTRAL = `#__S__ .wow,#__S__ [data-wow-delay],#__S__ [data-wow-duration],#__S__ [data-aos],#__S__ [data-sal],#__S__ .aos-init,#__S__ .reveal,#__S__ .animated{visibility:visible!important;opacity:1!important;transform:none!important;animation-name:none!important}#__S__ .owl-carousel,#__S__ .slick-slider,#__S__ .swiper-wrapper{display:flex!important;overflow-x:auto;gap:16px;scroll-snap-type:x mandatory;transform:none!important}#__S__ .owl-carousel>*,#__S__ .slick-slider>*,#__S__ .swiper-slide{flex:0 0 min(86%,380px)!important;width:auto!important;scroll-snap-align:start}#__S__ img{max-width:100%;height:auto}#__S__ .tpl-ph{background:#e5e7eb}`;
+const TPL_NEUTRAL_HERO = `#__S__ .owl-carousel,#__S__ .slick-slider,#__S__ .swiper-wrapper{display:block!important;overflow:visible}#__S__ .owl-carousel>*:not(:first-child),#__S__ .slick-slider>*:not(:first-child),#__S__ .swiper-slide:not(:first-child){display:none!important}#__S__ .owl-carousel>*,#__S__ .slick-slider>*,#__S__ .swiper-slide{flex:none!important}`;
+const TPL_NEUTRAL_HEADER = `#__S__ header,#__S__ [class*=sticky],#__S__ [class*=fixed]{position:relative!important;top:auto!important;transform:none!important}`;
+
+/* ---------- classificação ---------- */
+function tplKind(el, idx, total) {
+  const tag = el.tagName.toLowerCase(), at = ((el.id || '') + ' ' + (el.className && el.className.baseVal != null ? el.className.baseVal : el.className || '')).toLowerCase(), hd = ((el.querySelector('h1,h2,h3') || {}).textContent || '').toLowerCase().slice(0, 120), all = at + ' ' + hd;
+  if (tag === 'footer' || /footer/.test(at)) return 'footer'; if (tag === 'header' || tag === 'nav' || /\b(header|navbar|topbar|menu-area|top-bar)\b/.test(at)) return 'header';
+  const T = [['hero', /banner|hero|slider|intro|jumbotron|main-slide|welcome|masthead/], ['faq', /faq|accordion|perguntas|question/], ['price', /pric|plan|package|tarif/], ['proof', /testimon|review|feedback|depoim|client-say|avalia/], ['team', /team|lawyer|attorney|staff|expert|member|advogad|doctor|gardener/], ['cases', /case|portfolio|project|work|gallery|result/], ['blog', /blog|news|article|post|noticia/], ['numbers', /counter|fun-?fact|stat|number|achiev/], ['logos', /brand|partner|logo|sponsor|client(?!-say)/], ['contact', /contact|appointment|consult|booking|schedule|form|quote/], ['cta', /cta|call-?to-?action|subscribe|newsletter|violence|emergency/], ['services', /service|practice|area|feature|what-we|offer|solution|choose|why/], ['about', /about|committed|who-we|story|mission|experience|how-?it/]];
+  const hit = T.find(([, re]) => re.test(all)); if (hit) return hit[0]; return idx === 0 && total > 2 ? 'hero' : 'other';
+}
+const tplNameOf = (el, kind) => { const h = ((el.querySelector('h1,h2,h3') || {}).textContent || '').replace(/\s+/g, ' ').trim(); return h ? h.slice(0, 48) : TPL_KINDS[kind] || 'Seção'; };
+
+/* ---------- análise de uma página ---------- */
+const TPL_INL = new Set(['A', 'B', 'STRONG', 'I', 'EM', 'SPAN', 'BR', 'U', 'SMALL', 'SUP', 'SUB', 'MARK', 'ABBR', 'CODE', 'FONT', 'LABEL', 'S', 'DEL', 'INS', 'BDI', 'IMG', 'SVG', 'svg', 'WBR']);
+const TPL_JUNK = '#preloader,.preloader,.loader-wrap,.page-loader,[class*=back-to-top],[class*=scroll-top],[class*=scrollup],[class*=scroll-to-top],[class*=cookie],.modal,.mfp-hide';
+async function tplAnalyze(zip, path, ctx) {
+  let html = /\.php$/i.test(path) ? await tplPhp(zip, path, 0, path) : await zip.text(path);
+  const doc = new DOMParser().parseFromString(html, 'text/html'), body = doc.body; if (!body) return [];
+  /* folhas de estilo locais, em ordem; fontes do Google ficam como referência (o app já carrega do Google Fonts) */
+  const sheets = [], gf = new Set();
+  for (const n of [...doc.querySelectorAll('link[rel~=stylesheet],style')]) {
+    if (n.tagName === 'STYLE') { sheets.push({text: n.textContent, base: path}); continue; }
+    const h = n.getAttribute('href') || ''; const g = h.match(/fonts\.googleapis\.com\/css2?\?(.+)/i); if (g) { [...g[1].matchAll(/family=([^&:;]+)/g)].forEach(f => gf.add(decodeURIComponent(f[1]).replace(/\+/g, ' '))); continue; } if (/^(https?:)?\/\//i.test(h)) { ctx.ext++; continue; }
+    const e = zip.find(tplJoin(path, h)); if (e) { try { sheets.push({text: await zip.text(e.name), base: e.name}); } catch (err) { /* ignora */ } }
+  }
+  const parsed = []; for (const s of sheets) { try { const cs = new CSSStyleSheet(); cs.replaceSync(s.text.replace(/@import[^;]+;/g, '')); parsed.push({rules: [...cs.cssRules], base: s.base}); } catch (err) { /* css inválido */ } }
+  /* seções: filhos diretos do corpo (desce por invólucros e <main>) */
+  const sig = e => [...e.children].filter(c => !/^(SCRIPT|STYLE|LINK|NOSCRIPT|TEMPLATE|META)$/i.test(c.tagName) && !c.matches(TPL_JUNK) && !(c.hidden));
+  let top = body; for (let k = 0; k < 4; k++) { let s = sig(top); const mn = s.filter(c => /^(MAIN)$/i.test(c.tagName)); if (mn.length === 1 && sig(mn[0]).length >= 2) { top = mn[0]; s = sig(top); break; } if (s.length === 1 && sig(s[0]).length >= 1) top = s[0]; else break; }
+  let list = sig(top); if (list.length === 1 && /^(MAIN|DIV)$/i.test(list[0].tagName)) list = sig(list[0]);
+  const expand = (e, d) => { if (d > 4 || e.outerHTML.length < 60000) return [e]; const k = sig(e); return k.length >= 3 ? k.flatMap(x => expand(x, d + 1)) : k.length === 1 ? expand(k[0], d + 1) : [e]; };
+  list = list.flatMap(e => /^(HEADER|FOOTER|NAV)$/i.test(e.tagName) ? [e] : expand(e, 0));
+  list = list.filter(c => (c.textContent || '').replace(/\s+/g, '').length > 30 || c.querySelector('img'));
+  const out = [], bodyCls = (body.className || '') + ' ' + (doc.documentElement.className || '');
+  for (let idx = 0; idx < list.length; idx++) {
+    const el = list[idx], match = tplMatcher(el), o = {zip, el, match, faces: [], keys: [], base: path};
+    let css = ''; for (const sh of parsed) { o.base = sh.base; css += await tplRules(sh.rules, ctx, o); }
+    const kind = tplKind(el, idx, list.length), nm = tplNameOf(el, kind);
+    /* marcação (da página original) fica na cópia: cada elemento com fundo vindo do CSS ganha data-tpl-bg */
+    const wrap = doc.createElement('div'); wrap.id = '__S__'; wrap.className = bodyCls.replace(/\s+/g, ' ').trim();
+    let inner = el.cloneNode(true); const chain = []; for (let a = el.parentElement; a && a !== body && a.nodeType === 1; a = a.parentElement) chain.unshift(a);
+    let host = wrap; chain.forEach(a => { const c = doc.createElement(a.tagName.toLowerCase()); if (a.className) c.className = a.className; if (a.id) c.id = a.id; host.appendChild(c); host = c; }); host.appendChild(inner);
+    const info = await tplClean(wrap, inner, doc, zip, path, ctx);
+    /* @font-face usadas, @keyframes usados */
+    const fontCss = []; for (const f of o.faces) { const fam = f.style.getPropertyValue('font-family').replace(/['"]/g, '').trim(); if (!fam || !(css + wrap.outerHTML).includes(fam)) continue; const src = f.style.getPropertyValue('src'), urls = [...src.matchAll(/url\(\s*['"]?([^)'"]+)['"]?\s*\)\s*(?:format\(\s*['"]?([\w-]+)['"]?\s*\))?/g)].sort((a, b) => (/woff2/.test(b[2] || b[1]) ? 1 : 0) - (/woff2/.test(a[2] || a[1]) ? 1 : 0)); let data = ''; for (const u of urls) { if (/^data:/.test(u[1])) { data = u[1]; break; } data = await tplFontData(zip, tplJoin(o.base, u[1]), ctx); if (data) break; } if (!data) continue; fontCss.push(`@font-face{font-family:"${fam.replace(/"/g, '')}";src:url(${data});font-weight:${f.style.getPropertyValue('font-weight') || 'normal'};font-style:${f.style.getPropertyValue('font-style') || 'normal'};font-display:swap}`); }
+    const keys = o.keys.filter(k => new RegExp('animation[^;{}]*\\b' + k.name.replace(/[^\w-]/g, '') + '\\b').test(css)).map(k => k.cssText).join('\n');
+    css += keys; css += TPL_NEUTRAL + (kind === 'hero' ? TPL_NEUTRAL_HERO : '') + (kind === 'header' ? TPL_NEUTRAL_HEADER : '');
+    if (css.length > 700000) css = css.slice(0, 700000);
+    const pl = {html: wrap.outerHTML, css, ff: fontCss, gf: [...gf].slice(0, 6), slots: info.slots, imgs: [...new Set([...css.matchAll(/tplimg:([\w-]+)/g), ...wrap.outerHTML.matchAll(/tplimg:([\w-]+)/g)].map(m => m[1]))], colors: tplColors(css + ' ' + wrap.outerHTML), fonts: tplFonts(css), ver: 1};
+    out.push({kind, name: nm, payload: pl, order: idx, pending: info.forms, size: pl.html.length + pl.css.length});
+  }
+  return out;
+}
+
+/* limpeza + campos editáveis */
+async function tplClean(wrap, inner, doc, zip, path, ctx) {
+  wrap.querySelectorAll('script,noscript,iframe,object,embed,link,meta,base,style,template,video,audio,source,dialog,' + TPL_JUNK).forEach(e => e.remove());
+  wrap.querySelectorAll('[style*="display:none"],[style*="display: none"],[hidden]').forEach(e => e.remove());
+  let forms = 0; wrap.querySelectorAll('form').forEach(f => { const real = f.querySelector('textarea') || f.querySelectorAll('input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=search])').length >= 2; if (!real) { f.remove(); return; } const d = doc.createElement('div'); d.setAttribute('data-tpl-form', ''); d.setAttribute('data-cta', ((f.querySelector('button,input[type=submit]') || {}).textContent || (f.querySelector('input[type=submit]') || {}).value || '').trim().slice(0, 40)); f.replaceWith(d); forms++; });
+  wrap.querySelectorAll('form').forEach(f => f.remove());
+  for (const e of [...wrap.querySelectorAll('*')]) {
+    [...e.attributes].forEach(a => { const n = a.name.toLowerCase(); if (n.startsWith('on') || n === 'srcdoc' || n === 'formaction' || (/^(href|src|xlink:href)$/.test(n) && /^\s*javascript:/i.test(a.value))) e.removeAttribute(a.name); });
+    const st = e.getAttribute && e.getAttribute('style'); if (st && /url\(/i.test(st)) { const f = []; const ns = await tplUrls(st, zip, path, ctx, f); e.setAttribute('style', ns); if (f.length && /background/i.test(st)) e.setAttribute('data-tpl-bg', f[f.length - 1]); }
+    if (e.tagName === 'A') { const h = (e.getAttribute('href') || '').trim(); if (!/^(#|mailto:|tel:|https?:\/\/)/i.test(h)) e.setAttribute('href', '#'); else if (/^https?:/i.test(h)) { e.setAttribute('rel', 'noopener'); } e.removeAttribute('target'); }
+  }
+  for (const im of [...wrap.querySelectorAll('img')]) {
+    const src = im.getAttribute('src') || im.getAttribute('data-src') || im.getAttribute('data-lazy-src') || im.getAttribute('data-original') || ''; let r = '';
+    if (/^data:image\//i.test(src)) r = src; else if (src && !/^(https?:)?\/\//i.test(src)) r = await tplImgData(zip, tplJoin(path, src), ctx); else ctx.ext++;
+    ['srcset', 'data-src', 'data-lazy-src', 'data-original', 'data-srcset', 'sizes', 'loading'].forEach(a => im.removeAttribute(a)); im.parentElement && im.parentElement.tagName === 'PICTURE' && [...im.parentElement.querySelectorAll('source')].forEach(s => s.remove());
+    if (r) im.setAttribute('src', r); else { im.setAttribute('src', 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="#e5e7eb"/></svg>')); im.classList.add('tpl-ph'); }
+  }
+  /* campos editáveis */
+  const slots = {s: {}, i: {}, h: {}}; let ns = 0, ni = 0, nh = 0;
+  const walk = e => { for (const c of [...e.children]) {
+    if (/^svg$/i.test(c.tagName) || c.hasAttribute('data-tpl-form')) continue;
+    const kids = [...c.children], leaf = kids.every(k => TPL_INL.has(k.tagName)), txt = (c.textContent || '').replace(/\s+/g, ' ').trim();
+    if (leaf && txt.length >= 2 && ns < 140 && !/^(IMG|SCRIPT)$/i.test(c.tagName)) { ns++; c.setAttribute('data-s', ns); slots.s[ns] = {t: txt.slice(0, 600), g: c.tagName.toLowerCase()}; } else walk(c);
+  } };
+  walk(wrap);
+  wrap.querySelectorAll('img,[data-tpl-bg]').forEach(e => { if (ni >= 40) return; ni++; e.setAttribute('data-i', ni); const isImg = e.tagName === 'IMG'; slots.i[ni] = {k: isImg ? 'img' : 'bg', v: isImg ? e.getAttribute('src') : e.getAttribute('data-tpl-bg'), a: (e.getAttribute('alt') || '').slice(0, 80)}; });
+  wrap.querySelectorAll('a[href]').forEach(a => { if (nh >= 60) return; nh++; a.setAttribute('data-h', nh); slots.h[nh] = {h: a.getAttribute('href').slice(0, 300), t: (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40)}; });
+  return {slots, forms};
+}
+/* cores e fontes mais usadas (para trocar pelas da marca do projeto) */
+function tplHexNorm(c) { c = c.toLowerCase(); return c.length === 4 ? '#' + c[1] + c[1] + c[2] + c[2] + c[3] + c[3] : c; }
+function tplColors(txt) {
+  const cnt = new Map(), add = h => { h = tplHexNorm(h); cnt.set(h, (cnt.get(h) || 0) + 1); };
+  (txt.match(/#[0-9a-f]{6}\b|#[0-9a-f]{3}\b/gi) || []).forEach(add); [...txt.matchAll(/rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/gi)].forEach(m => add('#' + [m[1], m[2], m[3]].map(v => Math.min(255, +v).toString(16).padStart(2, '0')).join('')));
+  const sat = h => { const n = parseInt(h.slice(1), 16), r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b); return {s: mx === 0 ? 0 : (mx - mn) / mx, l: (mx + mn) / 2}; };
+  const BS = ['#007bff', '#dc3545', '#28a745', '#ffc107', '#6c757d', '#17a2b8', '#0d6efd', '#198754', '#0dcaf0', '#fd7e14', '#6f42c1', '#e83e8c', '#20c997', '#6610f2', '#d63384', '#212529', '#343a40'];
+  const all = [...cnt.entries()].filter(([h]) => { const x = sat(h); return x.s > 0.25 && x.l > 0.12 && x.l < 0.92; }).sort((a, b) => b[1] - a[1]), own = all.filter(([h]) => !BS.includes(h));
+  return (own.length ? own : all).slice(0, 4).map(x => x[0]);
+}
+function tplFonts(css) {
+  const cnt = new Map(); [...css.matchAll(/font-family\s*:\s*([^;}]+)/gi)].forEach(m => { const f = m[1].split(',')[0].replace(/!important|['"]/g, '').trim(); if (f && !/var\(|awesome|icon|material|glyph|dashicons|themify|linearicons|ionicons|flaticon|elegant|feather|fontello|swiper|slick|owl|inherit|initial|sans-serif|serif|monospace|system-ui/i.test(f)) cnt.set(f, (cnt.get(f) || 0) + 1); });
+  return [...cnt.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2).map(x => x[0]);
+}
+
+/* ---------- payload no banco (IndexedDB) e renderização ---------- */
+async function tplPayloadPut(id, pl) { await imgPut('tplp_' + id, new Blob([JSON.stringify(pl)], {type: 'application/json'})); TPL_R.cache.set(id, pl); }
+async function tplPayload(id) {
+  if (TPL_R.cache.has(id)) return TPL_R.cache.get(id); let pl = null; try { const b = await imgGet('tplp_' + id); if (b) pl = JSON.parse(await b.text()); } catch (e) { /* sem dado */ } TPL_R.cache.set(id, pl); return pl;
+}
+const tplTokCache = new Map();
+async function tplTok(str, max) {
+  const ids = [...new Set([...str.matchAll(/tplimg:([\w-]+)/g)].map(m => m[1]))], map = {};
+  for (const id of ids) { const k = id + ':' + (max || 1400); if (!tplTokCache.has(k)) tplTokCache.set(k, await lpImg(id, max || 1400)); map[id] = tplTokCache.get(k); }
+  return str.replace(/tplimg:([\w-]+)/g, (m, id) => map[id] || 'data:image/gif;base64,R0lGODlhAQABAAAAACw=');
+}
+const tplEsc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+function tplRecolor(css, map) { Object.entries(map || {}).forEach(([from, to]) => { if (!/^#[0-9a-f]{6}$/i.test(from) || !/^#[0-9a-f]{6}$/i.test(to)) return; const n = parseInt(from.slice(1), 16), rgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255], m = parseInt(to.slice(1), 16), nr = [(m >> 16) & 255, (m >> 8) & 255, m & 255], short = /^#(.)\1(.)\2(.)\3$/i.exec(from); css = css.replace(new RegExp(from.replace('#', '#') + '(?![0-9a-f])', 'gi'), to); if (short) css = css.replace(new RegExp('#' + short[1] + short[2] + short[3] + '(?![0-9a-f])', 'gi'), to); css = css.replace(new RegExp('(rgba?)\\(\\s*' + rgb[0] + '\\s*,\\s*' + rgb[1] + '\\s*,\\s*' + rgb[2] + '(\\s*[,)])', 'gi'), (x, fn, e) => fn + '(' + nr.join(',') + e.replace(/^\s+/, '')); }); return css; }
+function tplRefont(css, map) { Object.entries(map || {}).forEach(([from, to]) => { if (!from || !to) return; const f = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); css = css.replace(/font-family\s*:[^;}]+/gi, d => d.replace(new RegExp('([\'"]?)' + f + '\\1(?=\\s*(,|$|!))', 'i'), `"${to.replace(/[^\w \-]/g, '')}"`)); }); return css; }
+/* HTML final de uma seção importada (já com os textos, imagens e links trocados) */
+async function tplWidgetHTML(w, id, a, P, l, max) {
+  const t = w.tpl || {}, pl = await tplPayload(t.id); if (!pl) return `<div id="${id}"${a} class="bx-ph">Template removido do banco.</div>`;
+  const doc = new DOMParser().parseFromString(pl.html, 'text/html'), root = doc.body.firstElementChild; if (!root) return '';
+  root.querySelectorAll('[data-s]').forEach(e => { const v = (t.s || {})[e.getAttribute('data-s')]; if (v == null) return; const tn = []; const wk = doc.createTreeWalker(e, 4); let n; while ((n = wk.nextNode())) if (n.nodeValue.trim() && !(n.parentElement && n.parentElement.closest('svg'))) tn.push(n); if (tn.length) { tn[0].nodeValue = v; tn.slice(1).forEach(x => { x.nodeValue = ''; }); } else e.textContent = v; });
+  for (const e of [...root.querySelectorAll('[data-i]')]) { const n = e.getAttribute('data-i'), ov = (t.i || {})[n]; if (!ov) continue; const u = await lpImg(ov, max || 1400); if (!u) continue; if (e.tagName === 'IMG') { e.setAttribute('src', u); e.classList.remove('tpl-ph'); e.removeAttribute('width'); e.removeAttribute('height'); } else e.setAttribute('style', (e.getAttribute('style') || '') + `;background-image:url('${u}')!important;background-size:cover;background-position:center`); }
+  root.querySelectorAll('[data-h]').forEach(e => { const v = (t.h || {})[e.getAttribute('data-h')]; if (v && /^(https?:\/\/[^\s"'<>]{1,500}|#[\w-]{1,60}|mailto:[^\s"'<>]{1,200}|tel:[+\d]{3,20})$/i.test(v)) e.setAttribute('href', v); });
+  if (!P) root.querySelectorAll('[data-s],[data-i],[data-h],[data-tpl-bg]').forEach(e => ['data-s', 'data-i', 'data-h', 'data-tpl-bg'].forEach(k => e.removeAttribute(k)));
+  root.id = id; if (P) root.setAttribute('data-bx', id); root.classList.add('tpl-root');
+  let h = root.outerHTML.replace(/<div data-tpl-form=""(?: data-cta="([^"]*)")?><\/div>/g, (m, c) => { if (TPL_R.form) return '<p style="text-align:center"><a class="btn" href="#form">Falar com a gente</a></p>'; TPL_R.form = TPL_R.hf = true; return `<div id="form" class="bx-form">${lpFormBox(l, {cta: tplUnesc(c) || 'Enviar'})}</div>`; });
+  let css = pl.css.split('#__S__').join('#' + id); css = tplRecolor(css, t.map); css = tplRefont(css, t.fonts);
+  h = await tplTok(h, max); css = await tplTok(css, max);
+  (pl.ff || []).forEach(f => { if (!TPL_R.fonts.has(f)) { TPL_R.fonts.add(f); TPL_R.css.push(f); } }); TPL_R.css.push(css);
+  return h;
+}
+const tplUnesc = s => String(s || '').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+/* fontes do Google que a seção usa (para o <link> da página) */
+function tplFontList(w) { const t = w.tpl || {}, pl = TPL_R.cache.get(t.id); return [...(pl && pl.gf || []), ...Object.values(t.fonts || {})].filter(Boolean); }
+
+</script>
+<script>
+/* ===== Banco de templates importados: assistente de importação (ZIP), banco global, uso nas páginas/sites e painel de edição da seção ===== */
+const tplUI = {zip: null, file: '', pages: [], sel: new Set(), docs: false, secs: [], busy: '', ctx: null, name: '', niche: '', kindF: '', tplF: '', brand: true, nested: []};
+const tplA = s => esc(String(s == null ? '' : s));
+const tplBankList = () => state.tplbank.items;
+SEC_GROUPS.push(['importados', 'Importados']);
+
+/* miniatura (iframe) de uma seção importada */
+let tplFake = null;
+async function tplSrcdoc(pl, id) {
+  TPL_R.cache.set(id, pl); if (!tplFake) tplFake = normalizeLandings([{id: 'tplprev', name: 'prévia'}])[0];
+  TPL_R.fonts = new Set(); TPL_R.css = []; TPL_R.form = true; TPL_R.hf = false;
+  const sid = 'tp_' + String(id).replace(/[^\w]/g, '').slice(-10), h = await tplWidgetHTML({tpl: {id, s: {}, i: {}, h: {}, map: {}, fonts: {}}}, sid, '', false, tplFake, 800);
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=1280"><style>body{margin:0;font-family:system-ui,sans-serif;background:#fff}*{animation:none!important}</style>${lpFontsLink({head: '', body: ''}, pl.gf || [], [400, 700])}<style>${TPL_R.css.join('\n')}</style></head><body>${h}</body></html>`;
+}
+async function tplFillThumbs(root) {
+  for (const box of [...(root || document).querySelectorAll('[data-tplth]')]) {
+    const id = box.dataset.tplth; try { const pl = tplUI.tmp && tplUI.tmp.get(id) || await tplPayload(id); if (!pl) { box.innerHTML = '<small class="muted">sem prévia</small>'; continue; } box.innerHTML = `<iframe sandbox="" tabindex="-1" srcdoc="${esc(await tplSrcdoc(pl, id))}"></iframe>`; } catch (e) { box.innerHTML = '<small class="muted">sem prévia</small>'; }
+  }
+}
+
+/* ---------- importação ---------- */
+function tplGuess(name) {
+  const base = name.replace(/^[0-9a-f]{8}-/i, '').replace(/\.zip$/i, '').replace(/-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}-utc$/i, '').replace(/^themeforest-\d+-/i, '').replace(/-(html|php|wordpress)?-?(template|theme).*$/i, '').replace(/[-_]+/g, ' ').trim();
+  const nm = base.replace(/\b\w/g, c => c.toUpperCase()).slice(0, 60) || 'Template', t = name.toLowerCase();
+  return {name: nm, niche: /law|attorney|lawyer|advog/.test(t) ? 'Advocacia' : /garden|lawn|landscap/.test(t) ? 'Jardinagem' : /dent|clinic|medic|health/.test(t) ? 'Saúde' : /restaurant|food/.test(t) ? 'Restaurante' : ''};
+}
+function tplImportOpen() {
+  Object.assign(tplUI, {zip: null, file: '', pages: [], sel: new Set(), secs: [], busy: '', ctx: null, tmp: new Map(), nested: []}); tplStep1();
+}
+function tplStep1(msg) {
+  showModal('Importar template (ZIP)', `<p style="font-size:13px;margin:0 0 8px">Suba o ZIP do template (HTML estático ou PHP simples, como vem da Envato). O arquivo é lido aqui no navegador. Eu separo as seções de cada página, tiro scripts e rastreadores e deixo textos, imagens e links editáveis. Nada do demo é publicado: o conteúdo é trocado pelo do seu projeto.</p>
+  <label class="ins inl" style="margin-bottom:8px"><input type="checkbox" id="tplLic"> Tenho licença de uso deste template e vou usá-lo só em projetos permitidos por ela.</label>
+  <input type="file" id="tplFile" accept=".zip,application/zip" onchange="tplOnFile(this.files[0])"><div class="muted" style="font-size:12.5px;margin-top:8px">${msg || ''}</div>
+  <small class="muted block" style="margin-top:8px">Limites: sliders, menus que abrem e animações dependem de JavaScript e não são trazidos (o slider vira rolagem lateral, e a animação de entrada some). Templates WordPress (tema PHP) não rodam aqui: exporte o demo em HTML estático ou envie o template HTML equivalente.</small>`);
+  $('modalBox').classList.add('wide');
+}
+async function tplOnFile(f) {
+  if (!f) return; if (!$('tplLic').checked) { tplStep1('Marque a confirmação de licença para continuar.'); return; }
+  tplStep1('Lendo o ZIP…'); $('modalBox').classList.add('wide');
+  try {
+    let z = await tplZipOpen(f), pages = tplPages(z), nested = [...z.ents.keys()].filter(k => /\.zip$/i.test(k));
+    if (!pages.length && nested.length) { const e = nested.sort((a, b) => z.ents.get(b).us - z.ents.get(a).us)[0]; z = await tplZipOpen(new Blob([await z.read(e)])); pages = tplPages(z); }
+    if (!pages.length) { tplStep1('Não achei páginas .html ou .php dentro do ZIP. Se for um tema WordPress, exporte o demo em HTML ou envie o template HTML.'); return; }
+    const g = tplGuess(f.name); Object.assign(tplUI, {zip: z, file: f.name, pages, sel: new Set(pages.filter(p => !p.doc).slice(0, 3).map(p => p.path)), name: g.name, niche: g.niche, secs: []}); tplStep2();
+  } catch (e) { tplStep1('Não consegui abrir: ' + esc(e.message || e)); }
+}
+function tplStep2(msg) {
+  const U = tplUI, shown = U.pages.filter(p => U.docs || !p.doc);
+  showModal('Importar template — escolha as páginas', `<small class="muted block" style="margin-bottom:6px">${tplA(U.file)} · ${U.pages.length} página(s) encontradas. Marque as que quer analisar (até 8 por vez; a página inicial costuma trazer quase todas as seções).</small>
+  <div class="field"><label>Nome do template</label><input value="${tplA(U.name)}" oninput="tplUI.name=this.value"></div><div class="field"><label>Nicho (opcional, ajuda a achar depois)</label><input value="${tplA(U.niche)}" placeholder="Ex.: Advocacia, Jardinagem" oninput="tplUI.niche=this.value"></div>
+  <div style="max-height:260px;overflow:auto;border:1px solid var(--line,#ddd);border-radius:8px;padding:6px">${shown.map(p => `<label class="ins inl" style="display:flex;gap:6px;padding:2px 0"><input type="checkbox" ${U.sel.has(p.path) ? 'checked' : ''} onchange="tplTogglePage('${tplA(p.path).replace(/'/g, '&#39;')}',this.checked)"> <span class="mono" style="font-size:12px">${tplA(p.path)}</span> <small class="muted">${Math.round(p.size / 1024)} KB${/\.php$/i.test(p.path) ? ' · PHP' : ''}</small></label>`).join('')}</div>
+  <label class="ins inl" style="margin-top:6px"><input type="checkbox" ${U.docs ? 'checked' : ''} onchange="tplUI.docs=this.checked;tplStep2()"> mostrar também a documentação do template</label>
+  <div class="row-gap" style="margin-top:10px"><button class="btn dark" id="tplGo" onclick="tplAnalyzeSel()" ${U.busy ? 'disabled' : ''}>${U.busy ? esc(U.busy) : 'Analisar páginas marcadas (' + U.sel.size + ')'}</button><button class="btn" onclick="tplStep1()">Trocar arquivo</button></div><div class="muted" style="font-size:12.5px;margin-top:6px">${msg || ''}</div>`);
+  $('modalBox').classList.add('wide');
+}
+function tplTogglePage(p, on) { if (on) tplUI.sel.add(p); else tplUI.sel.delete(p); const b = $('tplGo'); if (b) b.textContent = 'Analisar páginas marcadas (' + tplUI.sel.size + ')'; }
+async function tplAnalyzeSel() {
+  const U = tplUI, pages = [...U.sel].slice(0, 8); if (!pages.length) { tplStep2('Marque pelo menos uma página.'); return; }
+  U.ctx = {imgs: new Map(), fonts: new Map(), created: new Set(), miss: 0, ext: 0}; U.secs = []; U.tmp = new Map();
+  for (let i = 0; i < pages.length; i++) {
+    U.busy = `Analisando ${i + 1}/${pages.length}: ${pages[i].split('/').pop()}…`; const b = $('tplGo'); if (b) { b.disabled = true; b.textContent = U.busy; }
+    try { const r = await tplAnalyze(U.zip, pages[i], U.ctx); r.forEach(s => { s.page = pages[i].split('/').pop().replace(/\.(html?|php)$/i, ''); s.key = 's' + U.secs.length; s.on = !['header', 'footer'].includes(s.kind); U.secs.push(s); }); } catch (e) { console.warn('tpl', pages[i], e); }
+  }
+  U.busy = ''; if (!U.secs.length) { tplStep2('Não encontrei seções nessas páginas. Tente outra página (a inicial costuma funcionar).'); return; } tplStep3();
+}
+function tplStep3() {
+  const U = tplUI, byPage = {}; U.secs.forEach(s => { (byPage[s.page] = byPage[s.page] || []).push(s); });
+  showModal('Importar template — escolha as seções', `<small class="muted block" style="margin-bottom:6px">${U.secs.length} seção(ões) em ${Object.keys(byPage).length} página(s). Desmarque o que não quiser guardar. Cabeçalho e rodapé vêm desmarcados, porque o Site já tem os dele.${U.ctx.miss ? ` ${U.ctx.miss} arquivo(s) de imagem/fonte não puderam ser lidos.` : ''}${U.ctx.ext ? ` ${U.ctx.ext} recurso(s) externo(s) (imagens ou CSS de CDN) foram ignorados.` : ''}</small>
+  ${Object.entries(byPage).map(([pg, ss]) => `<h4 style="margin:10px 0 4px">${tplA(pg)}</h4><div class="sec-grid">${ss.map(s => `<div class="sec-card"><div class="sec-th tpl-th" data-tplth="tpx_${s.key}"><small class="muted">carregando…</small></div><label class="ins inl"><input type="checkbox" ${s.on ? 'checked' : ''} onchange="tplSecOn('${s.key}',this.checked)"> guardar</label><input value="${tplA(s.name)}" oninput="tplSecSet('${s.key}','name',this.value)"><select onchange="tplSecSet('${s.key}','kind',this.value)">${Object.entries(TPL_KINDS).map(([k, n]) => `<option value="${k}" ${s.kind === k ? 'selected' : ''}>${n}</option>`).join('')}</select><small class="muted">${Math.round(s.size / 1024)} KB · ${Object.keys(s.payload.slots.s).length} textos · ${Object.keys(s.payload.slots.i).length} imagens${s.pending ? ' · formulário' : ''}</small></div>`).join('')}</div>`).join('')}
+  <div class="row-gap" style="margin-top:12px;flex-wrap:wrap"><button class="btn dark" onclick="tplSave()">Salvar no banco de templates</button><button class="btn" onclick="tplStep2()">← Páginas</button></div>`);
+  $('modalBox').classList.add('wide'); U.secs.forEach(s => U.tmp.set('tpx_' + s.key, s.payload)); tplFillThumbs($('modalBox'));
+}
+const tplSecOn = (k, v) => { const s = tplUI.secs.find(x => x.key === k); if (s) s.on = v; };
+const tplSecSet = (k, f, v) => { const s = tplUI.secs.find(x => x.key === k); if (s) s[f] = v; };
+async function tplSave() {
+  const U = tplUI, pick = U.secs.filter(s => s.on); if (!pick.length) { toast('Marque pelo menos uma seção.'); return; }
+  const keep = new Set(), now = new Date().toISOString().slice(0, 10), nm = (U.name || 'Template').trim().slice(0, 80);
+  for (const s of pick) { const id = uid('tp'); await tplPayloadPut(id, s.payload); s.payload.imgs.forEach(x => keep.add(x)); tplBankList().push({id, tpl: nm, page: s.page, name: (s.name || '').trim().slice(0, 80) || TPL_KINDS[s.kind], kind: s.kind, niche: (U.niche || '').trim().slice(0, 60), order: s.order, imgIds: s.payload.imgs.slice(0, 80), colors: s.payload.colors, fonts: s.payload.fonts, license: 'Licença informada pelo usuário em ' + now, created: now}); }
+  for (const id of U.ctx.created) if (!keep.has(id)) { try { await imgDel(id); } catch (e) { /* ok */ } }
+  state.tplbank = normalizeTplbank(state.tplbank); persist(); closeModal(); toast(pick.length + ' seção(ões) guardadas no banco de templates.'); tplBankOpen();
+}
+
+/* ---------- banco ---------- */
+function tplCards(items) {
+  return items.map(i => `<div class="sec-card"><div class="sec-th tpl-th" data-tplth="${i.id}"><small class="muted">carregando…</small></div><b>${tplA(i.name)}</b><small class="muted">${tplA(TPL_KINDS[i.kind])} · ${tplA(i.tpl)}${i.niche ? ' · ' + tplA(i.niche) : ''}</small><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm dark" onclick="tplInsert('${i.id}')">＋ Usar na página</button><button class="btn sm" onclick="tplDelete('${i.id}')" title="Remover do banco">×</button></div></div>`).join('');
+}
+function tplBankOpen() {
+  const U = tplUI, all = tplBankList(), tpls = [...new Set(all.map(i => i.tpl))], items = all.filter(i => (!U.tplF || i.tpl === U.tplF) && (!U.kindF || i.kind === U.kindF)).sort((a, b) => a.tpl.localeCompare(b.tpl) || a.page.localeCompare(b.page) || a.order - b.order);
+  const groups = {}; items.forEach(i => { (groups[i.tpl + '||' + i.page] = groups[i.tpl + '||' + i.page] || []).push(i); });
+  showModal('Banco de templates', `<small class="muted block" style="margin-bottom:6px">Seções importadas de templates que você tem licença para usar. Valem para qualquer projeto: ao usar uma, os textos, imagens e links ficam editáveis e as cores e fontes podem seguir a marca do projeto.</small>
+  <div class="row-gap" style="flex-wrap:wrap;margin-bottom:8px"><button class="btn sm dark" onclick="tplImportOpen()">📥 Importar template (ZIP)</button><select class="an-sel" onchange="tplUI.tplF=this.value;tplBankOpen()"><option value="">Todos os templates</option>${tpls.map(t => `<option ${U.tplF === t ? 'selected' : ''}>${tplA(t)}</option>`).join('')}</select><select class="an-sel" onchange="tplUI.kindF=this.value;tplBankOpen()"><option value="">Todos os tipos</option>${Object.entries(TPL_KINDS).map(([k, n]) => `<option value="${k}" ${U.kindF === k ? 'selected' : ''}>${n}</option>`).join('')}</select><label class="ins inl"><input type="checkbox" ${U.brand ? 'checked' : ''} onchange="tplUI.brand=this.checked"> usar cores e fontes da marca do projeto</label></div>
+  ${all.length ? Object.entries(groups).map(([k, ss]) => { const [t, pg] = k.split('||'); return `<div class="section-row" style="margin:12px 0 4px"><h4 style="margin:0">${tplA(t)} · ${tplA(pg || 'página')} <small class="muted">(${ss.length})</small></h4><button class="btn sm" onclick="tplNewPage('${ss[0].id}')" title="Cria uma página nova com todas as seções desta página do template">＋ Criar página com estas seções</button></div><div class="sec-grid">${tplCards(ss)}</div>`; }).join('') : '<p class="muted">O banco está vazio. Importe um ZIP de template para começar.</p>'}`);
+  $('modalBox').classList.add('wide'); tplFillThumbs($('modalBox'));
+}
+async function tplDelete(id) {
+  if (!confirm('Remover esta seção do banco de templates?')) return; const i = tplBankList().findIndex(x => x.id === id); if (i < 0) return; const it = tplBankList().splice(i, 1)[0], used = new Set(tplBankList().flatMap(x => x.imgIds));
+  try { await imgDel('tplp_' + id); } catch (e) { /* ok */ } TPL_R.cache.delete(id); for (const m of it.imgIds) if (!used.has(m)) { try { await imgDel(m); } catch (e) { /* ok */ } } persist(); tplBankOpen();
+}
+/* seção pronta para o editor visual (com as cores e fontes da marca, se pedido) */
+async function tplBuildSec(it, brand) {
+  const pl = await tplPayload(it.id); if (!pl) return null; const th = brand ? lpTheme(curProject()) : {}, map = {}, fonts = {};
+  if (brand && th.accent && pl.colors[0]) map[pl.colors[0]] = th.accent;
+  if (brand && pl.fonts[0] && th.head) fonts[pl.fonts[0]] = th.head; if (brand && pl.fonts[1] && th.body) fonts[pl.fonts[1]] = th.body; else if (brand && pl.fonts[0] && th.body && !pl.fonts[1]) { /* uma só fonte: segue a de títulos */ }
+  const w = bxW('tpl', {tpl: {id: it.id, s: {}, i: {}, h: {}, map, fonts}});
+  return normalizeVis({sections: [Object.assign(bxSec('1', {name: it.name, w: 'full', pad: {d: 0}, padB: {d: 0}}), {cols: [bxCol(12, [w])]})]}).sections[0];
+}
+async function tplInsert(id) {
+  const l = lpCur(), it = tplBankList().find(x => x.id === id); if (!it) return; if (!l || !l.vis) { toast('Abra uma página no editor visual para inserir a seção (ou use “Criar página com estas seções”).'); return; }
+  const sec = await tplBuildSec(it, tplUI.brand); if (!sec) { toast('Não achei os dados desta seção.'); return; } closeModal();
+  bxMut(() => { const V = l.vis, f = bxFind(bxUI.sel), at = f ? V.sections.indexOf(f.sec) + 1 : V.sections.length; V.sections.splice(at, 0, sec); bxUI.sel = sec.id; }); toast('Seção importada adicionada. Clique nela para trocar textos, imagens e links.');
+}
+async function tplNewPage(anyId) {
+  const first = tplBankList().find(x => x.id === anyId); if (!first) return; const items = tplBankList().filter(x => x.tpl === first.tpl && x.page === first.page).sort((a, b) => a.order - b.order), p = curProject();
+  const secs = []; for (const it of items) { const s = await tplBuildSec(it, tplUI.brand); if (s) secs.push(s); } if (!secs.length) { toast('Nada para criar.'); return; }
+  const inSite = lpUI.site && siteCur() ? siteCur() : null, nm = first.page === 'index' ? 'Início' : first.page.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), base = slug(nm) || 'pagina', ex = p.landings.filter(l => (l.siteId || '') === (inSite ? inSite.id : '')).map(l => l.slug);
+  let sl = base; for (let i = 2; ex.includes(sl); i++) sl = base + '-' + i;
+  const l = normalizeLandings([{id: uid('lp'), name: (inSite ? inSite.name + ' — ' : '') + nm, siteId: inSite ? inSite.id : '', slug: sl.slice(0, 40), navLabel: nm, type: 'generico', productId: inSite ? inSite.productId : '', theme: lpTheme(p), blocks: [], vis: {sections: secs}, status: 'Rascunho'}])[0];
+  l.vis = normalizeVis({sections: secs}); p.landings.push(l); persist(); closeModal(); lpUI.main = inSite ? 'sites' : 'paginas'; lpOpen(l.id); lpUI.tab = 'editor'; renderLandings(); toast('Página criada a partir do template. Troque os textos e as imagens clicando em cada seção.');
+}
+
+/* ---------- galeria "Seções prontas" ---------- */
+function tplGridHTML() {
+  const all = tplBankList(); if (!all.length) return `<p class="muted" style="grid-column:1/-1">Nenhum template importado ainda. <button class="btn sm dark" onclick="tplImportOpen()">📥 Importar template (ZIP)</button></p>`;
+  const U = tplUI; return `<div style="grid-column:1/-1" class="row-gap"><select class="an-sel" onchange="tplUI.kindF=this.value;secGallery()"><option value="">Todos os tipos</option>${Object.entries(TPL_KINDS).map(([k, n]) => `<option value="${k}" ${U.kindF === k ? 'selected' : ''}>${n}</option>`).join('')}</select><label class="ins inl"><input type="checkbox" ${U.brand ? 'checked' : ''} onchange="tplUI.brand=this.checked"> cores e fontes da marca</label><button class="btn sm" onclick="tplImportOpen()">📥 Importar outro</button></div>` + tplCards(all.filter(i => !U.kindF || i.kind === U.kindF).sort((a, b) => a.tpl.localeCompare(b.tpl) || a.order - b.order));
+}
+
+/* ---------- painel da seção importada (editor visual) ---------- */
+function tplPanel(id) { return `<div id="tplP_${id}"><small class="muted">carregando campos…</small></div><img alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" style="display:none" onload="tplPanelFill('${id}')">`; }
+async function tplPanelFill(id) {
+  const box = $('tplP_' + id), f = box && bxFind(id); if (!box || !f) return; const o = f.o, t = o.tpl, pl = await tplPayload(t.id); if (!pl) { box.innerHTML = '<small class="muted">Esta seção foi removida do banco de templates.</small>'; return; }
+  const S = pl.slots, cur = (k, n, d) => (t[k] && t[k][n] != null ? t[k][n] : d);
+  const colors = pl.colors.map(c => `<label class="ins" title="Cor original ${c}"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${c};vertical-align:middle;border:1px solid #0003"></span> → <input type="color" value="${t.map[c] || c}" onchange="tplMap('${id}','${c}',this.value)"></label>`).join(' ');
+  const fonts = pl.fonts.map(fn => `<div class="row-gap"><small>${tplA(fn)} →</small><button class="btn sm" onclick="tplFontPick('${id}','${tplA(fn).replace(/'/g, '&#39;')}')">${tplA(t.fonts[fn] || 'manter')}</button>${t.fonts[fn] ? `<button class="btn sm" onclick="tplFontClear('${id}','${tplA(fn).replace(/'/g, '&#39;')}')">×</button>` : ''}</div>`).join('');
+  const texts = Object.entries(S.s).map(([n, x]) => `<div class="field"><label>${tplA(x.g)} · ${tplA(x.t.slice(0, 36))}</label><textarea rows="${x.t.length > 90 ? 3 : 1}" oninput="tplSet('${id}','s','${n}',this.value)">${tplA(cur('s', n, x.t))}</textarea></div>`).join('');
+  const imgs = Object.entries(S.i).map(([n, x]) => { const ov = t.i[n], src = ov ? '' : (x.k === 'img' ? x.v : x.v); const th = ov ? `<img data-lib="${ov}" alt="" style="width:56px;height:42px;object-fit:cover;border-radius:6px">` : /^tplimg:/.test(src || '') ? `<img data-lib="${src.slice(7)}" alt="" style="width:56px;height:42px;object-fit:cover;border-radius:6px">` : src ? `<img src="${tplA(src)}" alt="" style="width:56px;height:42px;object-fit:cover;border-radius:6px">` : ''; return `<div class="row-gap" style="margin-bottom:4px">${th}<small>${x.k === 'bg' ? 'fundo' : 'imagem'} ${n}${x.a ? ' · ' + tplA(x.a) : ''}</small><button class="btn sm" onclick="tplImgPick('${id}','${n}')">📚 Trocar</button>${ov ? `<button class="btn sm" onclick="tplImgClear('${id}','${n}')">Original</button>` : ''}</div>`; }).join('');
+  const links = Object.entries(S.h).map(([n, x]) => `<div class="field"><label>${tplA(x.t || 'link ' + n)}</label><input value="${tplA(cur('h', n, x.h === '#' ? '' : x.h))}" placeholder="https://… · #form · tel: · mailto:" oninput="tplSet('${id}','h','${n}',this.value)"></div>`).join('');
+  box.innerHTML = `<small class="muted block" style="margin-bottom:6px">Importada de <b>${tplA((tplBankList().find(x => x.id === t.id) || {}).tpl || 'template')}</b>. Troque os textos, as imagens e os links; as cores e fontes podem seguir a marca.</small>
+  <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm dark" onclick="tplBrandNow('${id}')">🎨 Usar a marca do projeto</button><button class="btn sm" onclick="tplResetAll('${id}')">Restaurar original</button></div>
+  ${colors || fonts ? `<div style="margin:8px 0"><b style="font-size:12.5px">Cores e fontes</b><div class="row-gap" style="flex-wrap:wrap;margin:4px 0">${colors}</div>${fonts}</div>` : ''}
+  <details style="margin-top:6px"><summary><b>Textos (${Object.keys(S.s).length})</b></summary>${texts}</details>
+  <details style="margin-top:6px"><summary><b>Imagens (${Object.keys(S.i).length})</b></summary>${imgs}</details>
+  <details style="margin-top:6px"><summary><b>Links (${Object.keys(S.h).length})</b></summary>${links}</details>`;
+  libFill(box);
+}
+function tplSet(id, k, n, v) { bxMut(() => { const t = bxFind(id).o.tpl; if (v === '') delete t[k][n]; else t[k][n] = v; }, false); }
+function tplMap(id, c, v) { bxMut(() => { const t = bxFind(id).o.tpl; if (v.toLowerCase() === c) delete t.map[c]; else t.map[c] = v; }, false); }
+function tplFontPick(id, from) { fbOpen(fam => { closeModal(); bxMut(() => { bxFind(id).o.tpl.fonts[from] = String(fam).replace(/[^\w \-]/g, '').slice(0, 60); }); }, ''); }
+function tplFontClear(id, from) { bxMut(() => { delete bxFind(id).o.tpl.fonts[from]; }); }
+function tplImgPick(id, n) { libPick(r => bxMut(() => { bxFind(id).o.tpl.i[n] = r.id; })); }
+function tplImgClear(id, n) { bxMut(() => { delete bxFind(id).o.tpl.i[n]; }); }
+function tplResetAll(id) { if (!confirm('Voltar esta seção ao conteúdo original do template?')) return; bxMut(() => { const t = bxFind(id).o.tpl; t.s = {}; t.i = {}; t.h = {}; t.map = {}; t.fonts = {}; }); }
+async function tplBrandNow(id) {
+  const o = bxFind(id).o, pl = await tplPayload(o.tpl.id), th = lpTheme(curProject()); if (!pl) return;
+  bxMut(() => { const t = bxFind(id).o.tpl; if (pl.colors[0] && th.accent) t.map[pl.colors[0]] = th.accent; if (pl.fonts[0] && th.head) t.fonts[pl.fonts[0]] = th.head; if (pl.fonts[1] && th.body) t.fonts[pl.fonts[1]] = th.body; }); toast('Cor e fontes da marca aplicadas.');
+}
 
 </script>
 <script>
@@ -18751,7 +19154,7 @@ const siteA = esc;
 /* ---------- lista ---------- */
 function lpMainSites(b, p) {
   if (lpUI.site && siteCur()) return siteEditor(b, p, siteCur());
-  b.innerHTML = `<div class="panel"><div class="section-row"><div><h3>Sites</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">Vários páginas com o mesmo cabeçalho, menu e rodapé, escritas a partir do BrandScript do StoryBrand. Escolha um modelo, preencha (ou peça para a IA preencher) o BrandScript e gere as páginas; cada página abre no editor visual.</p></div><button class="btn dark sm" onclick="siteNewModal()">＋ Novo site</button></div>
+  b.innerHTML = `<div class="panel"><div class="section-row"><div><h3>Sites</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">Vários páginas com o mesmo cabeçalho, menu e rodapé, escritas a partir do BrandScript do StoryBrand. Escolha um modelo, preencha (ou peça para a IA preencher) o BrandScript e gere as páginas; cada página abre no editor visual.</p></div><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="tplImportOpen()" title="Traz seções de templates HTML (Envato etc.) para o banco">📥 Importar template</button><button class="btn sm" onclick="tplBankOpen()">🗂 Banco de templates</button><button class="btn dark sm" onclick="siteNewModal()">＋ Novo site</button></div></div>
   ${p.sites.length ? p.sites.map(s => { const pg = p.landings.filter(l => l.siteId === s.id); return `<div class="list-item"><div><strong>${siteA(s.name)}</strong><small>${siteA((SITE_TPL[s.tpl] || {label: 'Site'}).label)} · ${pg.length} página(s): ${siteA(pg.map(l => l.navLabel || l.name).join(', '))}</small></div><div class="row-gap"><button class="btn sm dark" onclick="lpUI.site='${s.id}';renderLandings()">Abrir</button><button class="btn sm" onclick="siteExport('${s.id}')">⬇ ZIP</button><button class="btn sm" onclick="siteDel('${s.id}')">×</button></div></div>`; }).join('') : '<p class="muted" style="margin-top:10px">Nenhum site ainda.</p>'}</div>`;
 }
 function siteNewModal() {

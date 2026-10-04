@@ -66,8 +66,8 @@ function secGallery() {
   showModal('Seções prontas', `<small class="muted block" style="margin-bottom:6px">Escolha uma seção e ela entra na página já com o nome, o preço, os benefícios e as características do produto do projeto. Onde faltar um fato real, fica <b>[CONFIRMAR]</b>. Depois é só editar no editor visual.</small>
   <label class="ins inl" style="margin-bottom:8px"><input type="checkbox" id="secBrand" ${secUI.brand ? 'checked' : ''} onchange="secUI.brand=this.checked;secThumbs()"> usar as cores e fontes da marca do projeto</label>
   <div class="row-gap" style="flex-wrap:wrap;margin-bottom:8px">${SEC_GROUPS.map(([k, n]) => `<button class="btn sm ${secUI.g === k ? 'dark' : ''}" onclick="secUI.g='${k}';secGallery()">${n}</button>`).join('')}</div>
-  <div class="sec-grid" id="secGrid">${SECTIONS.filter(s => s.g === secUI.g).map(s => `<div class="sec-card"><div class="sec-th" id="secTh_${s.k}"><small class="muted">carregando…</small></div><b>${esc(s.n)}</b><small class="muted">${esc(s.d)}</small><button class="btn sm dark" onclick="secInsert('${s.k}')">＋ Usar esta seção</button></div>`).join('')}</div>`);
-  document.getElementById('modalBox').classList.add('wide'); secThumbs();
+  <div class="sec-grid" id="secGrid">${secUI.g === 'importados' ? tplGridHTML() : SECTIONS.filter(s => s.g === secUI.g).map(s => `<div class="sec-card"><div class="sec-th" id="secTh_${s.k}"><small class="muted">carregando…</small></div><b>${esc(s.n)}</b><small class="muted">${esc(s.d)}</small><button class="btn sm dark" onclick="secInsert('${s.k}')">＋ Usar esta seção</button></div>`).join('')}</div>`);
+  document.getElementById('modalBox').classList.add('wide'); if (secUI.g === 'importados') tplFillThumbs(document.getElementById('secGrid')); else secThumbs();
 }
 async function secThumbs() {
   const l = lpCur(), p = curProject(), th = secUI.brand ? Object.assign({}, l.theme, lpTheme(p)) : l.theme;

@@ -44,7 +44,7 @@ function seedState() {
   const cd = newProject('Cartório Descomplicado', 'Conteúdo + geração de demanda', {cover: 'a6', icon: 'CD'});
   const se = newProject('Saber Ensinar', 'Educação criativa', {cover: 'a8', icon: 'SE'});
   return {
-    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], imglib: {items: []}, lpRefs: {items: [], seeded: false, seen: []}, inspo: {items: [], boards: [], cats: []}, myFonts: [],
+    schema: SCHEMA, meta: {rev: 0, dirty: false, updatedAt: 0, syncedAt: 0}, templates: [], skills: [], imglib: {items: []}, tplbank: {items: []}, lpRefs: {items: [], seeded: false, seen: []}, inspo: {items: [], boards: [], cats: []}, myFonts: [],
     workspace: {name: 'Ampliação Marketing', instruction: 'Criar com clareza estratégica, consistência de marca e foco na jornada de compra.'},
     credits: 30, activeProjectId: mb.id, projects: [mb, cd, se], creatives
   };
@@ -214,7 +214,17 @@ function normalizeProducts(x) {
     benefits: lines(r.benefits, 300, 30), features: lines(r.features, 300, 40), objections: lines(r.objections, 300, 20), proofs: lines(r.proofs, 400, 20), images: (Array.isArray(r.images) ? r.images : []).filter(sid).slice(0, 8), created: str(r.created, 40) || new Date().toISOString()}));
 }
 /* Editor visual (estilo Elementor): seções → colunas (grade de 12, com largura por dispositivo) → widgets. Tudo com tipos e limites fixos. */
-const BX_WIDGETS = ['heading', 'text', 'image', 'video', 'button', 'list', 'feature', 'spacer', 'divider', 'form', 'faq', 'quote', 'countdown'];
+const BX_WIDGETS = ['heading', 'text', 'image', 'video', 'button', 'list', 'feature', 'spacer', 'divider', 'form', 'faq', 'quote', 'countdown', 'tpl'];
+function tplWidgetNorm(t) {
+  t = t && typeof t === 'object' ? t : {}; const ok = k => /^\d{1,3}$/.test(String(k)), obj = (o, f, max) => { const r = {}; Object.keys(o && typeof o === 'object' ? o : {}).filter(ok).slice(0, max).forEach(k => { const v = f(o[k]); if (v != null) r[k] = v; }); return r; };
+  const hexMap = o => { const r = {}; Object.keys(o && typeof o === 'object' ? o : {}).slice(0, 8).forEach(k => { if (/^#[0-9a-f]{6}$/i.test(k) && /^#[0-9a-f]{6}$/i.test(String(o[k]))) r[k.toLowerCase()] = String(o[k]).toLowerCase(); }); return r; };
+  const fonts = {}; Object.keys(t.fonts && typeof t.fonts === 'object' ? t.fonts : {}).slice(0, 4).forEach(k => { const a = String(k).replace(/[^\w \-]/g, '').slice(0, 60), b = String(t.fonts[k]).replace(/[^\w \-]/g, '').trim().slice(0, 60); if (a && b) fonts[a] = b; });
+  return {id: /^[\w-]{1,60}$/.test(String(t.id || '')) ? t.id : '', s: obj(t.s, v => String(v == null ? '' : v).slice(0, 600), 140), i: obj(t.i, v => /^[\w-]{1,60}$/.test(String(v || '')) ? v : null, 40), h: obj(t.h, v => /^(https?:\/\/[^\s"'<>]{1,500}|#[\w-]{1,60}|mailto:[^\s"'<>]{1,200}|tel:[+\d]{3,20})$/i.test(String(v || '')) ? String(v) : null, 60), map: hexMap(t.map), fonts};
+}
+function normalizeTplbank(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), items = x && Array.isArray(x.items) ? x.items : [];
+  return {items: items.filter(i => i && safeId(i.id)).slice(0, 600).map(i => ({id: i.id, tpl: str(i.tpl, 80) || 'Template', page: str(i.page, 120), name: str(i.name, 80) || 'Seção', kind: typeof TPL_KINDS === 'object' && TPL_KINDS[i.kind] ? i.kind : 'other', niche: str(i.niche, 60), order: Math.max(0, Math.round(+i.order) || 0), imgIds: (Array.isArray(i.imgIds) ? i.imgIds : []).filter(safeId).slice(0, 80), colors: (Array.isArray(i.colors) ? i.colors : []).filter(c => /^#[0-9a-f]{6}$/i.test(String(c))).slice(0, 4), fonts: (Array.isArray(i.fonts) ? i.fonts : []).map(f => str(f, 60)).slice(0, 2), license: str(i.license, 160), created: str(i.created, 40)}))};
+}
 function normalizeVis(v) {
   if (!v || typeof v !== 'object' || !Array.isArray(v.sections)) return null;
   const str = (x, n) => String(x == null ? '' : x).slice(0, n), sid = x => /^[\w-]{1,60}$/.test(String(x || '')) ? x : uid('bx'), hex = x => /^#[0-9a-f]{6}$/i.test(String(x)) ? String(x) : '', num = (x, lo, hi, d) => { x = +x; return isFinite(x) ? Math.min(hi, Math.max(lo, Math.round(x))) : d; };
@@ -224,7 +234,7 @@ function normalizeVis(v) {
   const widget = w => { if (!w || !BX_WIDGETS.includes(w.t)) return null; return {id: sid(w.id), t: w.t, hide: hide(w.hide), al: bp(w.al, al), size: bp(w.size, x => num(x, 10, 120, null)), wpct: bp(w.wpct, x => num(x, 10, 100, null)), h: bp(w.h, x => num(x, 0, 400, null)),
     text: str(w.text, 4000), title: str(w.title, 300), tag: ['h1', 'h2', 'h3'].includes(w.tag) ? w.tag : 'h2', color: hex(w.color), fw: [300, 400, 500, 600, 700, 800, 900].includes(+w.fw) ? +w.fw : 0, ff: str(w.ff, 60).replace(/[^\w \-]/g, '').trim(), muted: !!w.muted, imgId: /^[\w-]{1,60}$/.test(w.imgId || '') ? w.imgId : '', src: url(w.src), alt: str(w.alt, 200), rad: num(w.rad, 0, 60, 12),
     ratio: ['16:9', '9:16', '1:1', '4:5'].includes(w.ratio) ? w.ratio : '16:9', link: ['checkout', 'form', 'whatsapp', 'custom'].includes(w.link) ? w.link : 'checkout', href: /^(https?:\/\/[^\s"'<>]{1,600}|#[\w-]{1,60}|mailto:[^\s"'<>]{1,200}|tel:[+\d]{3,20})$/i.test(w.href || '') ? w.href : '', style: ['solid', 'outline'].includes(w.style) ? w.style : 'solid', full: !!w.full, icon: ['check', 'x', 'dot'].includes(w.icon) ? w.icon : 'check', emoji: str(w.emoji, 4), date: /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/.test(w.date || '') ? w.date : '',
-    items: (Array.isArray(w.items) ? w.items : []).slice(0, 30).map(i => (typeof i === 'string' ? {t: str(i, 400), d: ''} : {t: str(i && i.t, 400), d: str(i && i.d, 1200)}))}; };
+    items: (Array.isArray(w.items) ? w.items : []).slice(0, 30).map(i => (typeof i === 'string' ? {t: str(i, 400), d: ''} : {t: str(i && i.t, 400), d: str(i && i.d, 1200)})), ...(w.t === 'tpl' ? {tpl: tplWidgetNorm(w.tpl)} : {})}; };
   const sections = v.sections.slice(0, 40).map(s => s && typeof s === 'object' ? ({id: sid(s.id), name: str(s.name, 80), w: s.w === 'full' ? 'full' : 'box', bg: hex(s.bg), alt: !!s.alt, bgImg: /^[\w-]{1,60}$/.test(s.bgImg || '') ? s.bgImg : '', pad: bp(s.pad, x => num(x, 0, 240, null)), padB: bp(s.padB, x => num(x, 0, 240, null)), hide: hide(s.hide), gap: bp(s.gap, x => num(x, 0, 80, null)),
     cols: (Array.isArray(s.cols) ? s.cols : []).slice(0, 24).map(c => ({id: sid(c && c.id), span: bp(c && c.span, x => num(x, 1, 12, null)), v: ['top', 'center', 'bottom'].includes(c && c.v) ? c.v : 'top', widgets: (Array.isArray(c && c.widgets) ? c.widgets : []).slice(0, 30).map(widget).filter(Boolean)}))}) : null).filter(Boolean);
   return {sections};
@@ -291,7 +301,7 @@ function normalize(s) {
   s.workspace = mergeDefaults(s.workspace, base.workspace);
   s.credits = Number.isFinite(+s.credits) ? +s.credits : 30;
   s.inspo = normalizeInspo(s.inspo);
-  s.imglib = normalizeImglib(s.imglib); s.lpRefs = normalizeLpRefs(s.lpRefs); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills);
+  s.imglib = normalizeImglib(s.imglib); s.tplbank = normalizeTplbank(s.tplbank); s.lpRefs = normalizeLpRefs(s.lpRefs); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills);
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
