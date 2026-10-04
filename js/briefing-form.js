@@ -42,12 +42,14 @@ function bfText(a, name) {
     if (s.repeat) { const items = (Array.isArray(a[s.k]) ? a[s.k] : []).filter(x => x && bfStr(x.nome)); if (!items.length) return; L.push(`\n## ${s.t}`); items.forEach((it, i) => { L.push(`\n${s.item} ${i + 1}: ${bfStr(it.nome)}`); s.f.slice(1).forEach(([k, l]) => { const v = bfStr(it[k]); if (v) L.push(`- ${l}: ${v}`); }); }); return; }
     const x = a[s.k] || {}, rows = s.f.map(([k, l]) => [l, bfStr(x[k])]).filter(r => r[1]); if (!rows.length) return; L.push(`\n## ${s.t}`); rows.forEach(([l, v]) => L.push(`- ${l}: ${v}`));
   });
+  const ex = (Array.isArray(a.extras) ? a.extras : []).filter(x => x && x.r); if (ex.length) { L.push('\n## Outras respostas'); ex.forEach(x => L.push(`- ${x.q}: ${x.r}`)); }
   return L.join('\n');
 }
 /* planilha: uma linha por pergunta respondida */
 function bfRows(a) {
   a = a || {}; const R = [['Seção', 'Item', 'Pergunta', 'Resposta']];
   BF_SECTIONS.forEach(s => { if (s.repeat) (Array.isArray(a[s.k]) ? a[s.k] : []).forEach((it, i) => { if (!it || !bfStr(it.nome)) return; s.f.forEach(([k, l]) => { const v = bfStr(it[k]); if (v) R.push([s.t, (s.item + ' ' + (i + 1)), l, v]); }); }); else { const x = a[s.k] || {}; s.f.forEach(([k, l]) => { const v = bfStr(x[k]); if (v) R.push([s.t, '', l, v]); }); } });
+  (Array.isArray(a.extras) ? a.extras : []).forEach(x => { if (x && x.r) R.push(['Outras respostas', '', x.q, x.r]); });
   return R;
 }
 /* o que falta para poder enviar */
