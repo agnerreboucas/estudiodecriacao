@@ -116,7 +116,7 @@ async function soFromCarousel(id) {
   try {
     const {set} = carMake(c, {final: true}); await ensureFonts(lyFamilies(set.tk)); await brandFontsLoad(p); await ensureSetResources(set); set.id = 'ds_' + c.id; set.name = c.name + ' · carrossel';
     const at = p.design.sets.findIndex(x => x.id === set.id); if (at >= 0) p.design.sets[at] = set; else p.design.sets.push(set); persist();
-    const d = soUI.draft; if (!d.caption) d.caption = (c.texts[0] || '').replace(/\*\*/g, '') + (c.texts[1] ? '\n\n' + c.texts[1] : ''); soFromSet(set.id);
+    const d = soUI.draft; if (!d.caption) d.caption = carPubText(c); soFromSet(set.id);
   } catch (e) { toast('Não consegui montar o carrossel: ' + e.message); }
 }
 function soFromCreative(id) { const c = (state.creatives || []).find(x => x.id === id); if (!c) return; const d = soUI.draft; d.creativeId = id; if (!d.title) d.title = c.title; if (!d.caption) d.caption = c.copy || c.brief || ''; renderSocialPage(); }
