@@ -39,10 +39,11 @@ const FEED_TYPES = [
   {id: 'gradiente', g: 3, n: 'Gradiente', d: 'Do mais escuro no topo ao mais claro embaixo.', f: (i, r, c, R) => ['D', 'D', 'M', 'S', 'L', 'L', 'L', 'L'][Math.min(7, Math.floor(r * 6 / Math.max(1, R)))]},
   {id: 'aleatorio', g: 4, n: 'Aleatório', d: 'Tons espalhados, sem repetir dois iguais seguidos.', f: i => { const a = ['D', 'M', 'L', 'B', 'S']; let prev = -1, v = 0; for (let k = 0; k <= i; k++) { v = Math.floor(rnd(k) * 5); if (v === prev) v = (v + 1) % 5; prev = v; } return a[v]; }},
   {id: 'ritmo', g: 4, n: 'Foto + frase com marca', d: 'Foto e frase alternadas; a cada 5 posts, um da marca.', f: i => i % 5 === 4 ? 'B' : (i % 2 ? 'S' : 'M')},
+  {id: 'grid', g: 4, n: 'Grid de carrosséis (imagem contínua)', d: 'Uma imagem cortada: cada pedaço é a capa de um carrossel (use o editor de Grid).', f: () => 'M'},
   {id: 'mix', g: 4, n: 'Mix de conteúdo', d: 'Seis tipos de assunto em ciclo (produto, citação, inspiração, dica, comunidade, bastidores).', f: i => cyc(['D', 'S', 'M', 'L', 'M', 'B'], i), lab: i => cyc(['Produto', 'Citação', 'Inspiração', 'Dica', 'Comunidade', 'Bastidores'], i)}
 ];
 const feedType = id => FEED_TYPES.find(t => t.id === id) || FEED_TYPES[8];
-const feedUI = {id: '', sel: -1, from: false};
+const feedUI = {id: '', sel: -1, from: false, mode: ''};
 const feedCur = () => { const p = curProject(); return p && p.feeds.find(f => f.id === feedUI.id); };
 const feedSave = () => persist();
 
@@ -63,10 +64,12 @@ function feedNew(name, typeId, rows) {
 function renderFeed() {
   const r = $('feedRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Planejador de feed'); return; }
   if (!feedCur() && p.feeds.length) feedUI.id = p.feeds[0].id;
+  if (feedUI.mode === 'grid' && gridCur()) return renderGridEditor(r, p);
   const f = feedCur();
-  if (!f) { r.innerHTML = `<div class="page-head"><div><h1>Planejador de feed</h1><p>Escolha o tipo de feed do perfil e a composição de cada espaço antes de criar os posts.</p></div><div class="actions">${projectSelect()}</div></div><div class="panel"><p class="muted">Nenhum feed planejado em ${esc(p.name)}.</p><button class="btn dark" onclick="feedNewModal()">＋ Novo feed</button></div>`; return; }
+  if (!f) { r.innerHTML = `<div class="page-head"><div><h1>Planejador de feed</h1><p>Escolha o tipo de feed do perfil e a composição de cada espaço antes de criar os posts.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="gridNewModal()">✂ Grid (split)</button></div></div>${p.grids.length ? `<div class="panel" style="margin-bottom:10px"><small class="muted">Grids (imagem cortada):</small> ${p.grids.map(x => `<button class="btn sm" onclick="gridUI.id='${x.id}';feedUI.mode='grid';renderFeed()">✂ ${esc(x.name)}</button>`).join(' ')}</div>` : ''}<div class="panel"><p class="muted">Nenhum feed planejado em ${esc(p.name)}.</p><button class="btn dark" onclick="feedNewModal()">＋ Novo feed</button></div>`; return; }
   const T = feedType(f.type), styles = lyStyles(p), n = f.slots.length, sel = feedUI.sel >= 0 && feedUI.sel < n ? feedUI.sel : -1, done = f.slots.filter(s => s.ref.id).length;
-  r.innerHTML = `<div class="page-head"><div><h1>Planejador de feed</h1><p>${esc(p.name)}: o padrão de tons e a composição de cada post, definidos antes de criar. Cada espaço pode ser carrossel, vídeo ou post simples.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="feedNewModal()">＋ Novo feed</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>Planejador de feed</h1><p>${esc(p.name)}: o padrão de tons e a composição de cada post, definidos antes de criar. Cada espaço pode ser carrossel, vídeo ou post simples.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="gridNewModal()">✂ Grid (split)</button><button class="btn dark" onclick="feedNewModal()">＋ Novo feed</button></div></div>
+  ${p.grids.length ? `<div class="panel" style="margin-bottom:10px"><small class="muted">Grids (imagem cortada):</small> ${p.grids.map(x => `<button class="btn sm" onclick="gridUI.id='${x.id}';feedUI.mode='grid';renderFeed()">✂ ${esc(x.name)}</button>`).join(' ')}</div>` : ''}
   <div class="fd-wrap"><div class="fd-left">
     <div class="panel"><div class="field"><label>Feed</label><select onchange="feedUI.id=this.value;feedUI.sel=-1;renderFeed()">${p.feeds.map(x => `<option value="${x.id}" ${x.id === f.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>
       <div class="field"><label>Nome</label><input value="${esc(f.name)}" oninput="feedCur().name=this.value;feedSave()"></div>
@@ -78,7 +81,7 @@ function renderFeed() {
     <div class="panel"><div class="okr-label">LEGENDA DOS TONS</div>${Object.entries(FEED_TONES).map(([k, v]) => `<div class="fd-leg"><i style="background:${feedTones(p, f)[k]}"></i><b>${v[0]}</b><small>${esc(v[1])}</small></div>`).join('')}<small class="muted block" style="margin-top:6px">As cores vêm da paleta do estilo. “Postar nº” segue a ordem de publicação: o último espaço da grade (embaixo à direita) é o primeiro a ir ao ar, porque o Instagram mostra o mais novo no topo.</small></div>
     <div class="panel"><div class="okr-label">PROGRESSO</div><b>${done} de ${n}</b> espaços com peça<div class="fd-bar"><i style="width:${Math.round(done / n * 100)}%"></i></div><button class="btn sm dark" style="margin-top:8px" onclick="feedToPublish()" ${done ? '' : 'disabled'}>Levar para a Publicação</button><small class="muted block">Cria um rascunho por espaço com peça, na ordem de postagem.</small></div>
   </div>
-  <div class="fd-center"><div class="fd-phone"><div class="fd-ph-h"><b>${esc(p.name)}</b><span>⋮</span></div><div class="fd-tabs"><span class="on">▦</span><span>▶</span><span>👤</span></div><div class="fd-grid" id="fdGrid">${f.slots.map((s, i) => `<div class="fd-cell ${i === sel ? 'sel' : ''}" onclick="feedPick(${i})" style="background:${feedTones(p, f)[s.tone]}"><canvas data-fd="${i}" width="240" height="320"></canvas><span class="fd-k">${FEED_KINDS[s.kind][1]}</span><span class="fd-n">${n - i}</span>${s.label ? `<span class="fd-l">${esc(s.label)}</span>` : ''}${s.ref.id ? '<span class="fd-ok">✓</span>' : ''}</div>`).join('')}</div></div></div>
+  <div class="fd-center"><div class="fd-phone"><div class="fd-ph-h"><b>${esc(p.name)}</b><span>⋮</span></div><div class="fd-tabs"><span class="on">▦</span><span>▶</span><span>👤</span></div><div class="fd-grid" id="fdGrid">${f.slots.map((s, i) => `<div class="fd-cell ${i === sel ? 'sel' : ''}" onclick="feedPick(${i})" style="background:${feedTones(p, f)[s.tone]}"><canvas data-fd="${i}" width="240" height="320"></canvas><span class="fd-k">${FEED_KINDS[s.kind][1]}</span><span class="fd-n">${n - i}</span>${s.label && !(f.view === 'pecas' && s.ref.id) ? `<span class="fd-l">${esc(s.label)}</span>` : ''}${s.ref.id ? '<span class="fd-ok">✓</span>' : ''}</div>`).join('')}</div></div></div>
   <div class="fd-right">${sel >= 0 ? feedInspector(p, f, sel) : '<div class="panel"><div class="okr-label">ESPAÇO</div><p class="muted" style="font-size:13px">Clique em um espaço da grade para escolher o tipo de peça, o tom e o assunto, e criar a peça com o modelo certo.</p></div>'}</div></div>`;
   feedPaint();
 }
@@ -94,6 +97,7 @@ function feedInspector(p, f, i) {
   <div class="field"><label>Tom / composição</label><div class="row-gap" style="flex-wrap:wrap">${Object.entries(FEED_TONES).map(([k, v]) => `<button class="btn sm ${s.tone === k ? 'dark' : ''}" onclick="feedSlot(${i},'tone','${k}')"><i class="fd-dot" style="background:${T[k]}"></i> ${v[0]}</button>`).join('')}</div></div>
   <div class="field"><label>Assunto / título provisório</label><input value="${esc(s.label)}" oninput="feedSlot(${i},'label',this.value,true)" placeholder="Ex.: Mito sobre juros"></div>
   <small class="muted block" style="margin-bottom:8px">Modelo: <b>${esc(tpl.name)}</b></small>
+  ${feedQuick(p, s, i)}
   ${s.ref.id ? `<div class="row-gap" style="flex-wrap:wrap"><button class="btn dark sm" onclick="feedOpen(${i})">Abrir a peça</button><button class="btn sm" onclick="feedUnlink(${i})">Desvincular</button></div>` : `<div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" onclick="feedCreate(${i})">＋ Criar ${FEED_KINDS[s.kind][0].toLowerCase()}</button><button class="btn sm" onclick="feedLinkModal(${i})">Vincular existente</button></div>`}</div>`;
 }
 function feedLayoutOf(s) {
@@ -158,7 +162,7 @@ async function feedCreate(i) {
     p.design.sets.push(set); s.ref = {t: 'set', id: set.id}; feedSave(); feedUI.from = true; go('design'); dzOpen(set.id); toast('Peça criada no espaço ' + (i + 1) + '. Para voltar ao feed, use o ícone de grade no menu.');
   } catch (e) { toast('Não consegui criar: ' + e.message); }
 }
-function feedOpen(i) { const s = feedCur().slots[i]; if (s.ref.t === 'car') { carUI.id = s.ref.id; carUI.frame = 0; go('carrosseis'); } else if (s.ref.t === 'set') { go('design'); dzOpen(s.ref.id); } }
+function feedOpen(i) { const s = feedCur().slots[i]; feedUI.from = true; gridUI.from = false; if (s.ref.t === 'car') { carUI.id = s.ref.id; carUI.frame = 0; go('carrosseis'); } else if (s.ref.t === 'set') { go('design'); dzOpen(s.ref.id); } }
 function feedUnlink(i) { feedCur().slots[i].ref = {t: '', id: ''}; feedSave(); renderFeed(); }
 function feedLinkModal(i) {
   const p = curProject(), used = new Set(feedCur().slots.map(s => s.ref.id)), cars = p.carousels.filter(c => !used.has(c.id)), sets = p.design.sets.filter(x => !used.has(x.id));
@@ -176,3 +180,17 @@ function feedToPublish() {
   }
   soSave(); feedSave(); toast(n ? `${n} rascunho(s) criado(s) na Publicação, na ordem de postagem.` : 'Esses espaços já foram levados para a Publicação.');
 }
+
+/* ajuste rápido do post (carrosséis): fonte, cor, fundo e foto da capa, sem sair do feed */
+function feedQuick(p, s, i) {
+  if (s.ref.t !== 'car') return ''; const c = p.carousels.find(x => x.id === s.ref.id); if (!c) return '';
+  return `<div class="okr-label" style="margin-top:6px">AJUSTE RÁPIDO DESTE POST</div><div class="row-gap" style="flex-wrap:wrap;margin-bottom:6px"><button class="btn sm" onclick="feedQFont(${i})">Aa ${esc(c.fontHead || 'fonte do estilo')}</button>${c.fontHead ? `<button class="btn sm" onclick="feedQSet(${i},'fontHead','')">×</button>` : ''}<label class="ins inl" title="Cor de destaque">cor <input type="color" value="${c.accent || '#e4572e'}" oninput="feedQSet(${i},'accent',this.value,true)"></label>${c.accent ? `<button class="btn sm" onclick="feedQSet(${i},'accent','')">×</button>` : ''}</div>
+  <div class="row-gap" style="flex-wrap:wrap;margin-bottom:6px"><label class="ins inl"><input type="checkbox" ${c.dark ? 'checked' : ''} onchange="feedQSet(${i},'dark',this.checked)"> fundo escuro nos miolos</label><button class="btn sm" onclick="feedQPhoto(${i})">📚 Foto da capa</button></div>
+  <button class="btn sm" onclick="feedQAll(${i})" title="Copia a fonte e a cor deste post para todos os carrosséis do feed">Aplicar fonte e cor a todos os carrosséis do feed</button>`;
+}
+function feedQCar(i) { return curProject().carousels.find(c => c.id === feedCur().slots[i].ref.id); }
+function feedQSet(i, k, v, quiet) { const c = feedQCar(i); if (!c) return; c[k] = v; c.updated = new Date().toISOString(); persist(); if (quiet) feedPaintSoon(); else renderFeed(); }
+function feedQFont(i) { fbOpen(fam => { closeModal(); feedQSet(i, 'fontHead', String(fam).replace(/[^\w \-]/g, '').slice(0, 60)); }, (feedQCar(i) || {}).fontHead); }
+function feedQPhoto(i) { libPick(r => { const c = feedQCar(i); if (c) { c.media['0'] = r.id; persist(); renderFeed(); } }); }
+function feedQAll(i) { const p = curProject(), f = feedCur(), me = feedQCar(i); if (!me) return; f.slots.forEach(s => { const c = s.ref.t === 'car' && p.carousels.find(x => x.id === s.ref.id); if (c) { c.fontHead = me.fontHead; c.accent = me.accent; } }); persist(); renderFeed(); toast('Fonte e cor aplicadas aos carrosséis do feed.'); }
+const feedPaintSoon = debounce(() => feedPaint(), 250);

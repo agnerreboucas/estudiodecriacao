@@ -9,7 +9,7 @@ const COND = ['Anton', 'Bebas Neue', 'Oswald', 'Barlow Condensed', 'Fjalla One',
 const SERIF = ['DM Serif Display', 'Playfair Display', 'Abril Fatface', 'Lora', 'Merriweather', 'Source Serif 4', 'Instrument Serif', 'Cormorant Garamond'];
 function kindFamily(tk, kind) {
   const h = tk.head.family;
-  if (/^Marca /.test(h) && !['script', 'body', 'mono'].includes(kind)) return h;     // fonte própria da marca manda
+  if ((/^Marca /.test(h) || tk.headForce) && !['script', 'body', 'mono'].includes(kind)) return h;     // fonte própria da marca manda
   switch (kind) {
     case 'cond': return COND.includes(h) ? h : 'Anton';
     case 'serif': return SERIF.includes(h) ? h : 'DM Serif Display';

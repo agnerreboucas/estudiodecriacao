@@ -29,7 +29,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -185,6 +185,14 @@ function lpSeoNorm(o) {
   o = o && typeof o === 'object' ? o : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')) ? v : '';
   return {title: str(o.title, 120), desc: str(o.desc, 320), keyword: str(o.keyword, 80), baseUrl: seoBase(o.baseUrl), ogImgId: sid(o.ogImgId), faviconImgId: sid(o.faviconImgId)};
 }
+function normalizeGrids(arr) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')) ? String(v) : '', num = (v, lo, hi, d) => { v = +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+  return (Array.isArray(arr) ? arr : []).filter(g => g && typeof g === 'object').slice(0, 30).map(g => {
+    const mode = g.mode === 'pan' ? 'pan' : 'grid', cols = mode === 'pan' ? Math.round(num(g.cols, 2, 6, 3)) : 3, rows = mode === 'pan' ? 1 : Math.round(num(g.rows, 1, 6, 3)), src = g.src && typeof g.src === 'object' ? g.src : {}, ft = g.fit && typeof g.fit === 'object' ? g.fit : {}, cl = Array.isArray(g.cells) ? g.cells : [];
+    return {id: sid(g.id) || uid('gr'), name: str(g.name, 80) || 'Grid', mode, cols, rows, src: {t: ['img', 'set'].includes(src.t) ? src.t : '', id: sid(src.id)}, fit: {z: num(ft.z, 1, 3, 1), fx: num(ft.fx, 0, 1, 0.5), fy: num(ft.fy, 0, 1, 0.5)}, lines: g.lines !== false, feedId: sid(g.feedId), style: /^[\w-]{0,40}$/.test(g.style || '') ? (g.style || '') : '',
+      cells: Array.from({length: cols * rows}, (_, i) => { const c = cl[i] && typeof cl[i] === 'object' ? cl[i] : {}; return {label: str(c.label, 80), clean: !!c.clean, carId: sid(c.carId), pieceId: sid(c.pieceId)}; }), created: str(g.created, 40) || new Date().toISOString()};
+  });
+}
 function normalizeFeeds(arr) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')) ? String(v) : '';
   return (Array.isArray(arr) ? arr : []).filter(f => f && typeof f === 'object').slice(0, 30).map(f => {
@@ -241,7 +249,7 @@ function normalizeCarousel(c) {
   return {id: sid(c.id) || uid('car'), name: str(c.name, 80) || 'Carrossel', stage: ['topo', 'meio', 'fundo'].includes(c.stage) ? c.stage : 'topo', tpl: /^[\w-]{1,40}$/.test(c.tpl || '') ? c.tpl : 'foto', ratio: c.ratio === '9:16' ? '9:16' : '4:5', grad: Math.max(0, Math.min(100, Math.round(+c.grad >= 0 ? +c.grad : 70))),
     media: map(c.media, sid), bgs: map(c.bgs, hex), fx: map(c.fx, v => (v && typeof v === 'object' ? {x: Math.max(0, Math.min(1, +v.x || 0.5)), y: Math.max(0, Math.min(1, +v.y || 0.5))} : null)),
     globals: {handle: str(g.handle, 60), name: str(g.name, 60), copyright: str(g.copyright, 80), verified: g.verified !== false, avatarId: sid(g.avatarId), show: {handle: !(g.show && g.show.handle === false), name: !(g.show && g.show.name === false), copyright: !(g.show && g.show.copyright === false), avatar: !(g.show && g.show.avatar === false)}},
-    cta: {on: ct.on !== false, text: str(ct.text, 40), style: ['solid', 'outline', 'glass'].includes(ct.style) ? ct.style : 'solid', align: ['left', 'center', 'right'].includes(ct.align) ? ct.align : 'left', icon: ['', 'arrow', 'send', 'play', 'heart', 'star', 'bookmark'].includes(ct.icon) ? ct.icon : 'arrow', color: hex(ct.color), textColor: hex(ct.textColor)},
+    splitCover: !!c.splitCover, fontHead: str(c.fontHead, 60).replace(/[^\w \-]/g, '').trim(), accent: hex(c.accent), cta: {on: ct.on !== false, text: str(ct.text, 40), style: ['solid', 'outline', 'glass'].includes(ct.style) ? ct.style : 'solid', align: ['left', 'center', 'right'].includes(ct.align) ? ct.align : 'left', icon: ['', 'arrow', 'send', 'play', 'heart', 'star', 'bookmark'].includes(ct.icon) ? ct.icon : 'arrow', color: hex(ct.color), textColor: hex(ct.textColor)},
     versions: (Array.isArray(c.versions) ? c.versions : []).slice(0, 12).map(v => ({at: str(v && v.at, 40), label: str(v && v.label, 60), texts: (Array.isArray(v && v.texts) ? v.texts : []).slice(0, 18).map(t => str(t, 1200))})).filter(v => v.texts.length),
     base: /^[\w-]{1,30}$/.test(c.base || '') ? c.base : 'brandsdecoded', cover: /^[\w-]{1,30}$/.test(c.cover || '') ? c.cover : 'tese', style: /^[\w-]{0,40}$/.test(c.style || '') ? (c.style || '') : '', dark: !!c.dark, idea: str(c.idea, 4000), useAgent: c.useAgent !== false, texts: T,
     covers: (Array.isArray(c.covers) ? c.covers : []).slice(0, 8).map(o => ({titulo: str(o && o.titulo, 300), subtitulo: str(o && o.subtitulo, 500)})).filter(o => o.titulo), created: str(c.created, 40) || new Date().toISOString(), updated: str(c.updated, 40) || new Date().toISOString()};
@@ -281,7 +289,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');

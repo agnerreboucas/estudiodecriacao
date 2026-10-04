@@ -622,6 +622,7 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 .fd-mini{display:inline-grid;gap:1px;vertical-align:middle;margin-right:8px}.fd-mini i{display:block}
 .fd-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.fd-type{display:flex;flex-direction:column;gap:3px;border:2px solid transparent;border-radius:10px;padding:6px;cursor:pointer;align-items:flex-start}.fd-type input{position:absolute;opacity:0}.fd-type:has(input:checked){border-color:#e4572e;background:#fff7f3}.fd-type small{font-size:11px;line-height:1.25}.fd-type .fd-mini{margin:0 0 4px}
 @media(max-width:1100px){.fd-wrap{grid-template-columns:1fr}}
+.gd-cell{display:flex;align-items:center;gap:6px;margin:4px 0}.gd-cell>b{width:22px;height:22px;border-radius:50%;background:#111;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;flex:none}.gd-cell input[type=text],.gd-cell>input:not([type]){flex:1;min-width:0;border:1px solid #ddd;border-radius:6px;padding:5px 8px;font-size:12.5px}.gd-cell label{font-size:11px;white-space:nowrap}
 
 </style>
 <style>
@@ -967,7 +968,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -1123,6 +1124,14 @@ function lpSeoNorm(o) {
   o = o && typeof o === 'object' ? o : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')) ? v : '';
   return {title: str(o.title, 120), desc: str(o.desc, 320), keyword: str(o.keyword, 80), baseUrl: seoBase(o.baseUrl), ogImgId: sid(o.ogImgId), faviconImgId: sid(o.faviconImgId)};
 }
+function normalizeGrids(arr) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')) ? String(v) : '', num = (v, lo, hi, d) => { v = +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+  return (Array.isArray(arr) ? arr : []).filter(g => g && typeof g === 'object').slice(0, 30).map(g => {
+    const mode = g.mode === 'pan' ? 'pan' : 'grid', cols = mode === 'pan' ? Math.round(num(g.cols, 2, 6, 3)) : 3, rows = mode === 'pan' ? 1 : Math.round(num(g.rows, 1, 6, 3)), src = g.src && typeof g.src === 'object' ? g.src : {}, ft = g.fit && typeof g.fit === 'object' ? g.fit : {}, cl = Array.isArray(g.cells) ? g.cells : [];
+    return {id: sid(g.id) || uid('gr'), name: str(g.name, 80) || 'Grid', mode, cols, rows, src: {t: ['img', 'set'].includes(src.t) ? src.t : '', id: sid(src.id)}, fit: {z: num(ft.z, 1, 3, 1), fx: num(ft.fx, 0, 1, 0.5), fy: num(ft.fy, 0, 1, 0.5)}, lines: g.lines !== false, feedId: sid(g.feedId), style: /^[\w-]{0,40}$/.test(g.style || '') ? (g.style || '') : '',
+      cells: Array.from({length: cols * rows}, (_, i) => { const c = cl[i] && typeof cl[i] === 'object' ? cl[i] : {}; return {label: str(c.label, 80), clean: !!c.clean, carId: sid(c.carId), pieceId: sid(c.pieceId)}; }), created: str(g.created, 40) || new Date().toISOString()};
+  });
+}
 function normalizeFeeds(arr) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')) ? String(v) : '';
   return (Array.isArray(arr) ? arr : []).filter(f => f && typeof f === 'object').slice(0, 30).map(f => {
@@ -1179,7 +1188,7 @@ function normalizeCarousel(c) {
   return {id: sid(c.id) || uid('car'), name: str(c.name, 80) || 'Carrossel', stage: ['topo', 'meio', 'fundo'].includes(c.stage) ? c.stage : 'topo', tpl: /^[\w-]{1,40}$/.test(c.tpl || '') ? c.tpl : 'foto', ratio: c.ratio === '9:16' ? '9:16' : '4:5', grad: Math.max(0, Math.min(100, Math.round(+c.grad >= 0 ? +c.grad : 70))),
     media: map(c.media, sid), bgs: map(c.bgs, hex), fx: map(c.fx, v => (v && typeof v === 'object' ? {x: Math.max(0, Math.min(1, +v.x || 0.5)), y: Math.max(0, Math.min(1, +v.y || 0.5))} : null)),
     globals: {handle: str(g.handle, 60), name: str(g.name, 60), copyright: str(g.copyright, 80), verified: g.verified !== false, avatarId: sid(g.avatarId), show: {handle: !(g.show && g.show.handle === false), name: !(g.show && g.show.name === false), copyright: !(g.show && g.show.copyright === false), avatar: !(g.show && g.show.avatar === false)}},
-    cta: {on: ct.on !== false, text: str(ct.text, 40), style: ['solid', 'outline', 'glass'].includes(ct.style) ? ct.style : 'solid', align: ['left', 'center', 'right'].includes(ct.align) ? ct.align : 'left', icon: ['', 'arrow', 'send', 'play', 'heart', 'star', 'bookmark'].includes(ct.icon) ? ct.icon : 'arrow', color: hex(ct.color), textColor: hex(ct.textColor)},
+    splitCover: !!c.splitCover, fontHead: str(c.fontHead, 60).replace(/[^\w \-]/g, '').trim(), accent: hex(c.accent), cta: {on: ct.on !== false, text: str(ct.text, 40), style: ['solid', 'outline', 'glass'].includes(ct.style) ? ct.style : 'solid', align: ['left', 'center', 'right'].includes(ct.align) ? ct.align : 'left', icon: ['', 'arrow', 'send', 'play', 'heart', 'star', 'bookmark'].includes(ct.icon) ? ct.icon : 'arrow', color: hex(ct.color), textColor: hex(ct.textColor)},
     versions: (Array.isArray(c.versions) ? c.versions : []).slice(0, 12).map(v => ({at: str(v && v.at, 40), label: str(v && v.label, 60), texts: (Array.isArray(v && v.texts) ? v.texts : []).slice(0, 18).map(t => str(t, 1200))})).filter(v => v.texts.length),
     base: /^[\w-]{1,30}$/.test(c.base || '') ? c.base : 'brandsdecoded', cover: /^[\w-]{1,30}$/.test(c.cover || '') ? c.cover : 'tese', style: /^[\w-]{0,40}$/.test(c.style || '') ? (c.style || '') : '', dark: !!c.dark, idea: str(c.idea, 4000), useAgent: c.useAgent !== false, texts: T,
     covers: (Array.isArray(c.covers) ? c.covers : []).slice(0, 8).map(o => ({titulo: str(o && o.titulo, 300), subtitulo: str(o && o.subtitulo, 500)})).filter(o => o.titulo), created: str(c.created, 40) || new Date().toISOString(), updated: str(c.updated, 40) || new Date().toISOString()};
@@ -1219,7 +1228,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
@@ -3485,7 +3494,7 @@ const COND = ['Anton', 'Bebas Neue', 'Oswald', 'Barlow Condensed', 'Fjalla One',
 const SERIF = ['DM Serif Display', 'Playfair Display', 'Abril Fatface', 'Lora', 'Merriweather', 'Source Serif 4', 'Instrument Serif', 'Cormorant Garamond'];
 function kindFamily(tk, kind) {
   const h = tk.head.family;
-  if (/^Marca /.test(h) && !['script', 'body', 'mono'].includes(kind)) return h;     // fonte própria da marca manda
+  if ((/^Marca /.test(h) || tk.headForce) && !['script', 'body', 'mono'].includes(kind)) return h;     // fonte própria da marca manda
   switch (kind) {
     case 'cond': return COND.includes(h) ? h : 'Anton';
     case 'serif': return SERIF.includes(h) ? h : 'DM Serif Display';
@@ -8047,7 +8056,7 @@ async function dzGenerate() {
 /* ================= EDITOR ================= */
 function dzEditorShell(p, r) {
   const s = dzSet();
-  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">${dz.fromBook ? '← Voltar ao e-book' : '← Estúdio'}</button><input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="dzAuto"></span>
+  r.innerHTML = `<div class="dz-top"><button class="btn sm" onclick="dzBack()">${dz.fromBook ? '← Voltar ao e-book' : '← Estúdio'}</button>${typeof gridUI !== 'undefined' && gridUI.from ? '<button class="btn sm" onclick="gridBack()">← Grid</button>' : ''}${typeof feedUI !== 'undefined' && feedUI.from && feedUI.id ? '<button class="btn sm" onclick="feedUI.from=false;go(\'feed\')">← Feed</button>' : ''}<input class="dz-name" value="${esc(s.name)}" onchange="dzSet().name=this.value;persist()"><div class="row-gap"><button class="btn sm" onclick="dzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="btn sm" onclick="dzRedo()" title="Refazer (Ctrl+Y)">↷</button>${histSelect()}<span class="dz-auto" id="dzAuto"></span>
     <button class="btn sm ${dz.mode === 'emphasis' ? 'dark' : ''}" onclick="dzModeEm()" title="Clique em palavras do texto para destacar">✦ Destacar por clique</button><button class="btn sm ${dz.mode === 'fmt' ? 'dark' : ''}" onclick="dzModeFmt()" title="Clique numa palavra do slide para formatar só ela (Shift estende)">✎ Formatar palavra</button>
     ${dzSet().deck ? '<button class="btn sm dark" onclick="dzPresentDeck()" title="Apresentar e baixar em HTML">▶ Apresentar</button>' : ''}<button class="btn sm" onclick="dzResizeOpen(dz.setId)" title="Adaptar esta arte para outras medidas">⤢ Tamanhos</button>
     <button class="btn sm" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta peça">⚡ Variações</button><button class="btn sm" onclick="dzAddText()">＋ Texto</button><button class="btn sm" onclick="dzAddRect()">＋ Forma</button><button class="btn sm" onclick="dzAddLogo()">＋ Logo</button><button class="btn sm" onclick="dzAddImage()" title="Inserir imagem do seu computador">＋ Imagem</button><button class="btn sm" onclick="dzAddVideo()" title="Inserir vídeo: link do YouTube/Vimeo/mp4 ou arquivo">＋ Vídeo</button><button class="btn sm" onclick="dzAddPhoto()" title="Quadro de foto para enviar ou gerar com IA">＋ Foto</button><button class="btn sm" onclick="dzLayerDup()" title="Duplicar o elemento selecionado: texto, imagem, forma ou logo (Ctrl+D)">⧉ Duplicar</button>
@@ -10078,6 +10087,7 @@ const CAR_STAGES = [
   ['fundo', 'Fundo de funil', 'Para quem está perto de decidir: prova, oferta e chamada para ação. Foco em converter.']];
 const CAR_TPL = [
   {id: 'foto', stage: 'topo', name: 'Foto + título condensado', cover: 'cap-foto-condensado', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left', photo: true}},
+  {id: 'foto-limpa', stage: 'topo', name: 'Foto limpa (split)', cover: 'cap-foto-limpa', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left', photo: true}},
   {id: 'foto-esq', stage: 'topo', name: 'Foto + título à esquerda', cover: 'cap-foto-condensado-esq', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left', photo: true}},
   {id: 'serifado', stage: 'topo', name: 'Foto + título serifado', cover: 'cap-foto-serifado', inner: {bg: 'dark', head: 'serif', upper: false, align: 'left', photo: true}},
   {id: 'circulo', stage: 'topo', name: 'Sujeito sobre círculo', cover: 'cap-circulo-grande', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left', photo: true}},
@@ -10123,7 +10133,8 @@ function carTk(c, tpl) {
   if (I.bg === 'accent') { tk.bg = acc; tk.fg = readable(acc); tk.muted = mixHex(acc, tk.fg, 0.7); tk.accent = '#e7e1d3'; }
   else if (I.bg === 'light' && !c.dark) { tk.bg = '#f6f3ec'; tk.fg = '#141414'; tk.muted = '#6b6b6b'; }
   else { tk.bg = '#111214'; tk.fg = '#ffffff'; tk.muted = '#a6a6ad'; }
-  const fam = I.head === 'serif' ? 'DM Serif Display' : I.head === 'cond' ? 'Anton' : null; if (fam) tk.head = {family: fam, weight: 400};
+  if (c.accent) tk.accent = c.accent;
+  const fam = I.head === 'serif' ? 'DM Serif Display' : I.head === 'cond' ? 'Anton' : null; if (fam) tk.head = {family: fam, weight: 400}; if (c.fontHead) { tk.head = {family: c.fontHead, weight: 700}; tk.headForce = true; }
   return tk;
 }
 const carWrap = (txt, n) => { const out = []; let cur = ''; String(txt).split(/\s+/).forEach(w => { if ((cur + ' ' + w).trim().length > n && cur) { out.push(cur); cur = w; } else cur = (cur + ' ' + w).trim(); }); if (cur) out.push(cur); return out; };
@@ -10134,6 +10145,8 @@ function carCoverCopy(c, tpl, cp, total) {
   if (id === 'cap-halftone-etiquetas') { const w = String(cp.cover.title).replace(/[.?!]+$/, '').split(/\s+/); o.kicker = (w.pop() || '').toUpperCase(); o.title = carWrap(w.join(' '), 24).join('\n'); }
   if (id === 'ed-indice' || id === 'ed-numero-lista') { o.items = cp.blocks.map(b => b.title).filter(Boolean).slice(0, 14).join('\n') || '∅'; o.num = String(cp.blocks.length || ''); if (id === 'ed-indice') o.sub = cp.cover.sub || '∅'; }
   if (id === 'cap-editorial-claro' || id === 'cap-editorial-escuro') { o.tag = 'CAPA'; o.num = carPad(1) + '/' + carPad(total); }
+  if (id === 'cap-foto-limpa') o.button = 'ARRASTE →';
+  if (c.splitCover && id === 'cap-foto-condensado') o.button = 'Arraste pro lado →';
   if (id === 'cap-notas') { o.kicker = '∅'; o.date = '∅'; }
   if (id === 'ed-cartao-recortes') { o.num = '//  ' + carPad(1); o.sub = cp.cover.sub || '∅'; }
   if (tpl.short && /\s/.test(cp.cover.title) && cp.cover.title.length > 22) { /* modelos de palavra única: usa a última palavra forte como destaque */ }
@@ -10346,10 +10359,11 @@ const FEED_TYPES = [
   {id: 'gradiente', g: 3, n: 'Gradiente', d: 'Do mais escuro no topo ao mais claro embaixo.', f: (i, r, c, R) => ['D', 'D', 'M', 'S', 'L', 'L', 'L', 'L'][Math.min(7, Math.floor(r * 6 / Math.max(1, R)))]},
   {id: 'aleatorio', g: 4, n: 'Aleatório', d: 'Tons espalhados, sem repetir dois iguais seguidos.', f: i => { const a = ['D', 'M', 'L', 'B', 'S']; let prev = -1, v = 0; for (let k = 0; k <= i; k++) { v = Math.floor(rnd(k) * 5); if (v === prev) v = (v + 1) % 5; prev = v; } return a[v]; }},
   {id: 'ritmo', g: 4, n: 'Foto + frase com marca', d: 'Foto e frase alternadas; a cada 5 posts, um da marca.', f: i => i % 5 === 4 ? 'B' : (i % 2 ? 'S' : 'M')},
+  {id: 'grid', g: 4, n: 'Grid de carrosséis (imagem contínua)', d: 'Uma imagem cortada: cada pedaço é a capa de um carrossel (use o editor de Grid).', f: () => 'M'},
   {id: 'mix', g: 4, n: 'Mix de conteúdo', d: 'Seis tipos de assunto em ciclo (produto, citação, inspiração, dica, comunidade, bastidores).', f: i => cyc(['D', 'S', 'M', 'L', 'M', 'B'], i), lab: i => cyc(['Produto', 'Citação', 'Inspiração', 'Dica', 'Comunidade', 'Bastidores'], i)}
 ];
 const feedType = id => FEED_TYPES.find(t => t.id === id) || FEED_TYPES[8];
-const feedUI = {id: '', sel: -1, from: false};
+const feedUI = {id: '', sel: -1, from: false, mode: ''};
 const feedCur = () => { const p = curProject(); return p && p.feeds.find(f => f.id === feedUI.id); };
 const feedSave = () => persist();
 
@@ -10370,10 +10384,12 @@ function feedNew(name, typeId, rows) {
 function renderFeed() {
   const r = $('feedRoot'), p = curProject(); if (!r) return; if (!p) { r.innerHTML = noProject('Planejador de feed'); return; }
   if (!feedCur() && p.feeds.length) feedUI.id = p.feeds[0].id;
+  if (feedUI.mode === 'grid' && gridCur()) return renderGridEditor(r, p);
   const f = feedCur();
-  if (!f) { r.innerHTML = `<div class="page-head"><div><h1>Planejador de feed</h1><p>Escolha o tipo de feed do perfil e a composição de cada espaço antes de criar os posts.</p></div><div class="actions">${projectSelect()}</div></div><div class="panel"><p class="muted">Nenhum feed planejado em ${esc(p.name)}.</p><button class="btn dark" onclick="feedNewModal()">＋ Novo feed</button></div>`; return; }
+  if (!f) { r.innerHTML = `<div class="page-head"><div><h1>Planejador de feed</h1><p>Escolha o tipo de feed do perfil e a composição de cada espaço antes de criar os posts.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="gridNewModal()">✂ Grid (split)</button></div></div>${p.grids.length ? `<div class="panel" style="margin-bottom:10px"><small class="muted">Grids (imagem cortada):</small> ${p.grids.map(x => `<button class="btn sm" onclick="gridUI.id='${x.id}';feedUI.mode='grid';renderFeed()">✂ ${esc(x.name)}</button>`).join(' ')}</div>` : ''}<div class="panel"><p class="muted">Nenhum feed planejado em ${esc(p.name)}.</p><button class="btn dark" onclick="feedNewModal()">＋ Novo feed</button></div>`; return; }
   const T = feedType(f.type), styles = lyStyles(p), n = f.slots.length, sel = feedUI.sel >= 0 && feedUI.sel < n ? feedUI.sel : -1, done = f.slots.filter(s => s.ref.id).length;
-  r.innerHTML = `<div class="page-head"><div><h1>Planejador de feed</h1><p>${esc(p.name)}: o padrão de tons e a composição de cada post, definidos antes de criar. Cada espaço pode ser carrossel, vídeo ou post simples.</p></div><div class="actions">${projectSelect()}<button class="btn dark" onclick="feedNewModal()">＋ Novo feed</button></div></div>
+  r.innerHTML = `<div class="page-head"><div><h1>Planejador de feed</h1><p>${esc(p.name)}: o padrão de tons e a composição de cada post, definidos antes de criar. Cada espaço pode ser carrossel, vídeo ou post simples.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="gridNewModal()">✂ Grid (split)</button><button class="btn dark" onclick="feedNewModal()">＋ Novo feed</button></div></div>
+  ${p.grids.length ? `<div class="panel" style="margin-bottom:10px"><small class="muted">Grids (imagem cortada):</small> ${p.grids.map(x => `<button class="btn sm" onclick="gridUI.id='${x.id}';feedUI.mode='grid';renderFeed()">✂ ${esc(x.name)}</button>`).join(' ')}</div>` : ''}
   <div class="fd-wrap"><div class="fd-left">
     <div class="panel"><div class="field"><label>Feed</label><select onchange="feedUI.id=this.value;feedUI.sel=-1;renderFeed()">${p.feeds.map(x => `<option value="${x.id}" ${x.id === f.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>
       <div class="field"><label>Nome</label><input value="${esc(f.name)}" oninput="feedCur().name=this.value;feedSave()"></div>
@@ -10385,7 +10401,7 @@ function renderFeed() {
     <div class="panel"><div class="okr-label">LEGENDA DOS TONS</div>${Object.entries(FEED_TONES).map(([k, v]) => `<div class="fd-leg"><i style="background:${feedTones(p, f)[k]}"></i><b>${v[0]}</b><small>${esc(v[1])}</small></div>`).join('')}<small class="muted block" style="margin-top:6px">As cores vêm da paleta do estilo. “Postar nº” segue a ordem de publicação: o último espaço da grade (embaixo à direita) é o primeiro a ir ao ar, porque o Instagram mostra o mais novo no topo.</small></div>
     <div class="panel"><div class="okr-label">PROGRESSO</div><b>${done} de ${n}</b> espaços com peça<div class="fd-bar"><i style="width:${Math.round(done / n * 100)}%"></i></div><button class="btn sm dark" style="margin-top:8px" onclick="feedToPublish()" ${done ? '' : 'disabled'}>Levar para a Publicação</button><small class="muted block">Cria um rascunho por espaço com peça, na ordem de postagem.</small></div>
   </div>
-  <div class="fd-center"><div class="fd-phone"><div class="fd-ph-h"><b>${esc(p.name)}</b><span>⋮</span></div><div class="fd-tabs"><span class="on">▦</span><span>▶</span><span>👤</span></div><div class="fd-grid" id="fdGrid">${f.slots.map((s, i) => `<div class="fd-cell ${i === sel ? 'sel' : ''}" onclick="feedPick(${i})" style="background:${feedTones(p, f)[s.tone]}"><canvas data-fd="${i}" width="240" height="320"></canvas><span class="fd-k">${FEED_KINDS[s.kind][1]}</span><span class="fd-n">${n - i}</span>${s.label ? `<span class="fd-l">${esc(s.label)}</span>` : ''}${s.ref.id ? '<span class="fd-ok">✓</span>' : ''}</div>`).join('')}</div></div></div>
+  <div class="fd-center"><div class="fd-phone"><div class="fd-ph-h"><b>${esc(p.name)}</b><span>⋮</span></div><div class="fd-tabs"><span class="on">▦</span><span>▶</span><span>👤</span></div><div class="fd-grid" id="fdGrid">${f.slots.map((s, i) => `<div class="fd-cell ${i === sel ? 'sel' : ''}" onclick="feedPick(${i})" style="background:${feedTones(p, f)[s.tone]}"><canvas data-fd="${i}" width="240" height="320"></canvas><span class="fd-k">${FEED_KINDS[s.kind][1]}</span><span class="fd-n">${n - i}</span>${s.label && !(f.view === 'pecas' && s.ref.id) ? `<span class="fd-l">${esc(s.label)}</span>` : ''}${s.ref.id ? '<span class="fd-ok">✓</span>' : ''}</div>`).join('')}</div></div></div>
   <div class="fd-right">${sel >= 0 ? feedInspector(p, f, sel) : '<div class="panel"><div class="okr-label">ESPAÇO</div><p class="muted" style="font-size:13px">Clique em um espaço da grade para escolher o tipo de peça, o tom e o assunto, e criar a peça com o modelo certo.</p></div>'}</div></div>`;
   feedPaint();
 }
@@ -10401,6 +10417,7 @@ function feedInspector(p, f, i) {
   <div class="field"><label>Tom / composição</label><div class="row-gap" style="flex-wrap:wrap">${Object.entries(FEED_TONES).map(([k, v]) => `<button class="btn sm ${s.tone === k ? 'dark' : ''}" onclick="feedSlot(${i},'tone','${k}')"><i class="fd-dot" style="background:${T[k]}"></i> ${v[0]}</button>`).join('')}</div></div>
   <div class="field"><label>Assunto / título provisório</label><input value="${esc(s.label)}" oninput="feedSlot(${i},'label',this.value,true)" placeholder="Ex.: Mito sobre juros"></div>
   <small class="muted block" style="margin-bottom:8px">Modelo: <b>${esc(tpl.name)}</b></small>
+  ${feedQuick(p, s, i)}
   ${s.ref.id ? `<div class="row-gap" style="flex-wrap:wrap"><button class="btn dark sm" onclick="feedOpen(${i})">Abrir a peça</button><button class="btn sm" onclick="feedUnlink(${i})">Desvincular</button></div>` : `<div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" onclick="feedCreate(${i})">＋ Criar ${FEED_KINDS[s.kind][0].toLowerCase()}</button><button class="btn sm" onclick="feedLinkModal(${i})">Vincular existente</button></div>`}</div>`;
 }
 function feedLayoutOf(s) {
@@ -10465,7 +10482,7 @@ async function feedCreate(i) {
     p.design.sets.push(set); s.ref = {t: 'set', id: set.id}; feedSave(); feedUI.from = true; go('design'); dzOpen(set.id); toast('Peça criada no espaço ' + (i + 1) + '. Para voltar ao feed, use o ícone de grade no menu.');
   } catch (e) { toast('Não consegui criar: ' + e.message); }
 }
-function feedOpen(i) { const s = feedCur().slots[i]; if (s.ref.t === 'car') { carUI.id = s.ref.id; carUI.frame = 0; go('carrosseis'); } else if (s.ref.t === 'set') { go('design'); dzOpen(s.ref.id); } }
+function feedOpen(i) { const s = feedCur().slots[i]; feedUI.from = true; gridUI.from = false; if (s.ref.t === 'car') { carUI.id = s.ref.id; carUI.frame = 0; go('carrosseis'); } else if (s.ref.t === 'set') { go('design'); dzOpen(s.ref.id); } }
 function feedUnlink(i) { feedCur().slots[i].ref = {t: '', id: ''}; feedSave(); renderFeed(); }
 function feedLinkModal(i) {
   const p = curProject(), used = new Set(feedCur().slots.map(s => s.ref.id)), cars = p.carousels.filter(c => !used.has(c.id)), sets = p.design.sets.filter(x => !used.has(x.id));
@@ -10482,6 +10499,138 @@ function feedToPublish() {
     s.postId = po.id; n++;
   }
   soSave(); feedSave(); toast(n ? `${n} rascunho(s) criado(s) na Publicação, na ordem de postagem.` : 'Esses espaços já foram levados para a Publicação.');
+}
+
+/* ajuste rápido do post (carrosséis): fonte, cor, fundo e foto da capa, sem sair do feed */
+function feedQuick(p, s, i) {
+  if (s.ref.t !== 'car') return ''; const c = p.carousels.find(x => x.id === s.ref.id); if (!c) return '';
+  return `<div class="okr-label" style="margin-top:6px">AJUSTE RÁPIDO DESTE POST</div><div class="row-gap" style="flex-wrap:wrap;margin-bottom:6px"><button class="btn sm" onclick="feedQFont(${i})">Aa ${esc(c.fontHead || 'fonte do estilo')}</button>${c.fontHead ? `<button class="btn sm" onclick="feedQSet(${i},'fontHead','')">×</button>` : ''}<label class="ins inl" title="Cor de destaque">cor <input type="color" value="${c.accent || '#e4572e'}" oninput="feedQSet(${i},'accent',this.value,true)"></label>${c.accent ? `<button class="btn sm" onclick="feedQSet(${i},'accent','')">×</button>` : ''}</div>
+  <div class="row-gap" style="flex-wrap:wrap;margin-bottom:6px"><label class="ins inl"><input type="checkbox" ${c.dark ? 'checked' : ''} onchange="feedQSet(${i},'dark',this.checked)"> fundo escuro nos miolos</label><button class="btn sm" onclick="feedQPhoto(${i})">📚 Foto da capa</button></div>
+  <button class="btn sm" onclick="feedQAll(${i})" title="Copia a fonte e a cor deste post para todos os carrosséis do feed">Aplicar fonte e cor a todos os carrosséis do feed</button>`;
+}
+function feedQCar(i) { return curProject().carousels.find(c => c.id === feedCur().slots[i].ref.id); }
+function feedQSet(i, k, v, quiet) { const c = feedQCar(i); if (!c) return; c[k] = v; c.updated = new Date().toISOString(); persist(); if (quiet) feedPaintSoon(); else renderFeed(); }
+function feedQFont(i) { fbOpen(fam => { closeModal(); feedQSet(i, 'fontHead', String(fam).replace(/[^\w \-]/g, '').slice(0, 60)); }, (feedQCar(i) || {}).fontHead); }
+function feedQPhoto(i) { libPick(r => { const c = feedQCar(i); if (c) { c.media['0'] = r.id; persist(); renderFeed(); } }); }
+function feedQAll(i) { const p = curProject(), f = feedCur(), me = feedQCar(i); if (!me) return; f.slots.forEach(s => { const c = s.ref.t === 'car' && p.carousels.find(x => x.id === s.ref.id); if (c) { c.fontHead = me.fontHead; c.accent = me.accent; } }); persist(); renderFeed(); toast('Fonte e cor aplicadas aos carrosséis do feed.'); }
+const feedPaintSoon = debounce(() => feedPaint(), 250);
+
+</script>
+<script>
+/* ===== Editor de Grid (split): uma imagem grande cortada em pedaços que viram a capa de cada carrossel (grid 3 colunas) ou os fundos dos slides de um carrossel panorâmico.
+   A imagem pode vir pronta (Biblioteca / envio) ou ser criada no Editor de Design com as linhas de corte já desenhadas.
+   No grid do perfil o Instagram mostra o centro 3:4 de cada capa 4:5; por isso cada pedaço é cortado em 3:4 e a capa leva 3,3% a mais de cada lado (a imagem continua nas pontas). ===== */
+const gridUI = {id: '', from: false, busy: false};
+const gridCur = () => { const p = curProject(); return p && p.grids.find(g => g.id === gridUI.id); };
+const gridSave = () => persist();
+const GRID_CELL = g => g.mode === 'pan' ? [1080, 1350] : [720, 960];
+const GRID_PAD = g => g.mode === 'pan' ? 0 : Math.round(720 * (33.75 / 1012.5));   // continuação lateral da capa 4:5 (px do trabalho)
+
+function gridNewModal() {
+  showModal('Novo grid (split)', `<div class="field"><label>Nome</label><input id="gdName" placeholder="Ex.: Propostas da campanha" autofocus></div>
+  <div class="okr-label">TIPO</div><div class="lp-types"><label class="lp-type"><input type="radio" name="gdM" value="grid" checked><b>Grid de carrosséis</b><small class="muted">A imagem cobre o perfil (3 colunas). Cada pedaço é a capa de um carrossel diferente.</small></label><label class="lp-type"><input type="radio" name="gdM" value="pan"><b>Carrossel panorâmico</b><small class="muted">Uma imagem larga que passa de um slide para o outro, em um só carrossel.</small></label></div>
+  <div class="ins-row"><label class="ins">Linhas (grid)<select id="gdR">${[1, 2, 3, 4, 5, 6].map(x => `<option value="${x}" ${x === 3 ? 'selected' : ''}>${x} (${x * 3} posts)</option>`).join('')}</select></label><label class="ins">Slides (panorâmico)<select id="gdC">${[2, 3, 4, 5, 6].map(x => `<option value="${x}" ${x === 4 ? 'selected' : ''}>${x}</option>`).join('')}</select></label></div>
+  <div class="okr-label">IMAGEM</div><div class="row-gap" style="flex-wrap:wrap"><label class="ins inl"><input type="radio" name="gdS" value="img" checked> já tenho a imagem pronta (Biblioteca ou envio)</label><label class="ins inl"><input type="radio" name="gdS" value="set"> criar a arte no Editor de Design, com as linhas de corte</label></div>
+  <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="gridCreate()">Criar grid</button></div>`);
+}
+function gridCreate() {
+  const p = curProject(), mode = (document.querySelector('input[name=gdM]:checked') || {}).value || 'grid', how = (document.querySelector('input[name=gdS]:checked') || {}).value || 'img';
+  const g = normalizeGrids([{id: '', name: ($('gdName').value || '').trim() || 'Grid', mode, cols: mode === 'pan' ? +$('gdC').value : 3, rows: mode === 'pan' ? 1 : +$('gdR').value}])[0]; p.grids.unshift(g); gridUI.id = g.id; persist(); closeModal();
+  if (how === 'set') return gridCreateArt(); feedUI.mode = 'grid'; go('feed');
+}
+/* cria a arte no Editor de Design já com a tela do tamanho do grid e as linhas de corte (camadas “guia”, que não saem no corte) */
+async function gridCreateArt() {
+  const g = gridCur(), p = curProject(), cell = GRID_CELL(g), W = g.cols * cell[0], H = g.rows * cell[1], tk = JSON.parse(JSON.stringify(lyTokens(p, g.style || lyStyles(p)[0].id)));
+  const layers = [IM('photo', {x: 0, y: 0, w: W, h: H, brief: 'Imagem inteira do grid (uma foto ou arte; ela será cortada em ' + g.cells.length + ' pedaços)'})]; themeLayer(layers[0], tk);
+  const gl = (o) => { const L = RC('guide', Object.assign({fill: 'rgba(255,255,255,0.9)', stroke: 'rgba(228,87,46,0.9)', strokeW: 2}, o)); return L; };
+  for (let c = 1; c < g.cols; c++) layers.push(gl({x: c * cell[0] - 2, y: 0, w: 4, h: H}));
+  for (let r = 1; r < g.rows; r++) layers.push(gl({x: 0, y: r * cell[1] - 2, w: W, h: 4}));
+  g.cells.forEach((cl, i) => { const t = T('guide', {content: String(i + 1), x: (i % g.cols) * cell[0] + 14, y: Math.floor(i / g.cols) * cell[1] + 10, w: 160, size: 54, weight: 800, color: '#ffffff', opacity: 0.9}); layers.push(t); });
+  const set = {id: uid('ds'), name: 'Arte do grid · ' + g.name, format: {id: 'custom', w: W, h: H}, tk, slides: [{id: sid(), bg: '#e9e9ee', layers}], grid: {id: g.id}, created: new Date().toISOString(), updated: new Date().toISOString()};
+  p.design.sets.push(set); g.src = {t: 'set', id: set.id}; gridSave(); gridUI.from = true; go('design'); dzOpen(set.id); toast('Arte criada com as linhas de corte (camadas “guia”; elas não saem no corte). Use “← Grid” para cortar.');
+}
+function gridBack() { gridUI.from = false; feedUI.from = false; feedUI.mode = 'grid'; go('feed'); }
+
+/* ---------- imagem de trabalho e pedaços ---------- */
+async function gridSource(g, p) {
+  const cell = GRID_CELL(g), W = g.cols * cell[0], H = g.rows * cell[1], pad = GRID_PAD(g), iw = W + 2 * pad, c = document.createElement('canvas'); c.width = iw; c.height = H; const x = c.getContext('2d'); x.fillStyle = '#e9e9ee'; x.fillRect(0, 0, iw, H);
+  if (g.src.t === 'img' && g.src.id) {
+    const b = await imgGet(g.src.id); if (b) { const bm = await createImageBitmap(b), s = Math.max(iw / bm.width, H / bm.height) * g.fit.z, dw = bm.width * s, dh = bm.height * s; x.drawImage(bm, (iw - dw) * g.fit.fx, (H - dh) * g.fit.fy, dw, dh); }
+  } else if (g.src.t === 'set') {
+    const st = p.design.sets.find(y => y.id === g.src.id); if (st) {
+      await ensureFonts(lyFamilies(st.tk)); await ensureSetResources(st); const sl = {bg: st.slides[0].bg, layers: st.slides[0].layers.filter(L => L.role !== 'guide')}, t = document.createElement('canvas'); t.width = W; t.height = H; renderSlide(t.getContext('2d'), sl, st.format.w, st.format.h, W / st.format.w);
+      x.drawImage(t, pad, 0); if (pad) { x.drawImage(t, 0, 0, 1, H, 0, 0, pad, H); x.drawImage(t, W - 1, 0, 1, H, pad + W, 0, pad, H); }
+    }
+  }
+  return c;
+}
+const gridHasSrc = g => !!(g.src.t && g.src.id);
+function gridPieceCanvas(src, g, i, out) {
+  const cell = GRID_CELL(g), pad = GRID_PAD(g), c = i % g.cols, r = Math.floor(i / g.cols), o = document.createElement('canvas'); o.width = out ? out[0] : 1080; o.height = out ? out[1] : 1350;
+  o.getContext('2d').drawImage(src, c * cell[0], r * cell[1], cell[0] + 2 * pad, cell[1], 0, 0, o.width, o.height); return o;
+}
+const gridBlob = (cv, q) => new Promise(r => cv.toBlob(r, 'image/jpeg', q || 0.92));
+
+/* ---------- tela ---------- */
+function renderGridEditor(r, p) {
+  const g = gridCur(); if (!g) { feedUI.mode = ''; return renderFeed(); }
+  const has = gridHasSrc(g), done = g.cells.filter(c => c.carId && p.carousels.some(x => x.id === c.carId)).length;
+  r.innerHTML = `<div class="page-head"><div><h1>Editor de grid</h1><p>${esc(g.mode === 'pan' ? 'Uma imagem larga cortada em slides de um carrossel.' : 'Uma imagem cortada em ' + g.cells.length + ' pedaços: cada um vira a capa de um carrossel.')} ${esc(p.name)}.</p></div><div class="actions">${projectSelect()}<button class="btn" onclick="feedUI.mode='';gridUI.id='';renderFeed()">← Planejador de feed</button></div></div>
+  <div class="fd-wrap" style="grid-template-columns:330px minmax(0,1fr) 330px"><div class="fd-left">
+    <div class="panel"><div class="field"><label>Grid</label><select onchange="gridUI.id=this.value;renderFeed()">${p.grids.map(x => `<option value="${x.id}" ${x.id === g.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div><div class="field"><label>Nome</label><input value="${esc(g.name)}" oninput="gridCur().name=this.value;gridSave()"></div>
+      <div class="field"><label>Imagem</label><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="gridPickImg()">📚 Biblioteca / enviar</button><button class="btn sm" onclick="${g.src.t === 'set' ? 'gridOpenArt()' : 'gridCreateArt()'}">${g.src.t === 'set' ? '✎ Abrir a arte no editor' : '＋ Criar a arte no editor'}</button></div><small class="muted block">${g.src.t === 'img' ? 'Imagem pronta.' : g.src.t === 'set' ? 'Arte criada no Editor de Design (as linhas “guia” não saem no corte).' : 'Escolha ou crie a imagem.'}</small></div>
+      ${g.src.t === 'img' ? `<div class="field"><label>Zoom da imagem <small class="muted">${Math.round(g.fit.z * 100)}%</small></label><input type="range" min="100" max="300" value="${Math.round(g.fit.z * 100)}" oninput="gridFit('z',this.value/100)"></div><div class="ins-row"><label class="ins">Posição X<input type="range" min="0" max="100" value="${Math.round(g.fit.fx * 100)}" oninput="gridFit('fx',this.value/100)"></label><label class="ins">Posição Y<input type="range" min="0" max="100" value="${Math.round(g.fit.fy * 100)}" oninput="gridFit('fy',this.value/100)"></label></div>` : ''}
+      <label class="ins inl"><input type="checkbox" ${g.lines ? 'checked' : ''} onchange="gridCur().lines=this.checked;gridSave();gridPaint()"> mostrar linhas de corte</label></div>
+    <div class="panel"><div class="okr-label">${g.mode === 'pan' ? 'SLIDES' : 'CARROSSÉIS (um por pedaço)'}</div><small class="muted block" style="margin-bottom:6px">Título do assunto de cada pedaço. “Sem título” deixa a capa só com a imagem.</small>${g.cells.map((c, i) => `<div class="gd-cell"><b>${i + 1}</b><input value="${esc(c.label)}" placeholder="${g.mode === 'pan' ? 'Slide ' + (i + 1) : 'Assunto do carrossel ' + (i + 1)}" oninput="gridCell(${i},'label',this.value)"><label title="Capa só com a imagem"><input type="checkbox" ${c.clean ? 'checked' : ''} onchange="gridCell(${i},'clean',this.checked)"> sem título</label>${c.carId ? '<span class="fd-ok" style="position:static;display:inline-block">✓</span>' : ''}</div>`).join('')}</div></div>
+  <div class="fd-center" style="flex-direction:column;align-items:center;gap:8px"><canvas id="gdMain" class="cs-main" style="max-width:100%"></canvas><small class="muted">Imagem inteira com as linhas de corte. ${g.mode === 'grid' ? 'A capa 4:5 leva um pouco mais de cada lado do pedaço, para a imagem continuar nas pontas.' : ''}</small></div>
+  <div class="fd-right"><div class="panel"><div class="okr-label">COMO FICA NO PERFIL</div><canvas id="gdProf" style="width:100%;border-radius:8px;background:#fff"></canvas><small class="muted block">Cada célula mostra o centro 3:4 da capa, como o Instagram.</small></div>
+    <div class="panel"><div class="okr-label">CRIAR</div><b>${done} de ${g.cells.length}</b> com carrossel<div class="fd-bar"><i style="width:${Math.round(done / g.cells.length * 100)}%"></i></div>
+      <div class="row-gap" style="flex-wrap:wrap;margin-top:8px"><button class="btn dark" onclick="gridGenerate()" ${has && !gridUI.busy ? '' : 'disabled'}>${gridUI.busy ? 'Cortando…' : done ? '↻ Atualizar capas' : (g.mode === 'pan' ? '✂ Cortar e criar o carrossel' : '✂ Cortar e criar os carrosséis')}</button>${g.feedId ? '<button class="btn" onclick="gridToFeed()">Abrir no planejador de feed</button>' : ''}</div>
+      <small class="muted block" style="margin-top:6px">${g.mode === 'pan' ? 'Cria um carrossel com a imagem passando pelos slides.' : 'Cria um carrossel por pedaço (a capa é o pedaço), um feed no planejador com o grid montado e mantém os carrosséis já criados: “Atualizar capas” só troca a imagem das capas.'} Depois, cada carrossel abre no estúdio para escrever os slides (pesquisa, texto e design).</small></div></div></div>`;
+  gridPaint();
+}
+let gridTok = 0;
+async function gridPaint() {
+  const g = gridCur(), p = curProject(); if (!g) return; const tok = ++gridTok; if (!$('gdMain')) return;
+  const src = await gridSource(g, p); if (tok !== gridTok || !$('gdMain')) return;
+  const cell = GRID_CELL(g), pad = GRID_PAD(g), W = g.cols * cell[0], H = g.rows * cell[1], k = Math.min(1, 560 / W, 640 / H), cv = $('gdMain'); cv.width = Math.round(W * k); cv.height = Math.round(H * k); cv.style.width = cv.width + 'px';
+  const x = cv.getContext('2d'); x.drawImage(src, pad, 0, W, H, 0, 0, cv.width, cv.height);
+  if (g.lines) { x.strokeStyle = 'rgba(255,255,255,0.95)'; x.lineWidth = 2; x.setLineDash([]); for (let c = 1; c < g.cols; c++) { x.beginPath(); x.moveTo(c * cell[0] * k, 0); x.lineTo(c * cell[0] * k, cv.height); x.stroke(); } for (let r = 1; r < g.rows; r++) { x.beginPath(); x.moveTo(0, r * cell[1] * k); x.lineTo(cv.width, r * cell[1] * k); x.stroke(); }
+    x.font = '700 15px system-ui'; g.cells.forEach((c, i) => { const px = (i % g.cols) * cell[0] * k + 8, py = Math.floor(i / g.cols) * cell[1] * k + 20; x.fillStyle = 'rgba(0,0,0,0.6)'; x.fillRect(px - 4, py - 15, 22, 20); x.fillStyle = '#fff'; x.fillText(String(i + 1), px, py); }); }
+  const pr = $('gdProf'); if (pr) { const tw = 3 * 100 + 2 * 2, th = g.rows * 133 + (g.rows - 1) * 2; if (g.mode === 'pan') { pr.width = g.cols * 100 + (g.cols - 1) * 2; pr.height = 125; } else { pr.width = tw; pr.height = th; } const px = pr.getContext('2d'); px.fillStyle = '#fff'; px.fillRect(0, 0, pr.width, pr.height);
+    g.cells.forEach((c, i) => { const cc = i % g.cols, rr = Math.floor(i / g.cols); if (g.mode === 'pan') px.drawImage(src, cc * cell[0], 0, cell[0], cell[1], cc * 102, 0, 100, 125); else px.drawImage(src, pad + cc * cell[0], rr * cell[1], cell[0], cell[1], cc * 102, rr * 135, 100, 133); }); }
+}
+const gridPaintSoon = debounce(() => gridPaint(), 120);
+function gridFit(k, v) { gridCur().fit[k] = +v; gridSave(); gridPaintSoon(); }
+function gridCell(i, k, v) { const c = gridCur().cells[i]; c[k] = k === 'label' ? String(v).slice(0, 80) : v; gridSave(); }
+function gridPickImg() { libPick(r => { const g = gridCur(); g.src = {t: 'img', id: r.id}; gridSave(); renderFeed(); }); }
+function gridOpenArt() { feedUI.from = false; const g = gridCur(), st = curProject().design.sets.find(x => x.id === g.src.id); if (!st) { toast('A arte não existe mais.'); return; } gridUI.from = true; go('design'); dzOpen(st.id); }
+function gridToFeed() { const g = gridCur(); if (g && g.feedId) { feedUI.id = g.feedId; feedUI.mode = ''; renderFeed(); } }
+
+/* corta e cria/atualiza os carrosséis (ou o carrossel panorâmico) e liga tudo ao planejador de feed */
+async function gridGenerate() {
+  const g = gridCur(), p = curProject(); if (!g || !gridHasSrc(g) || gridUI.busy) return; gridUI.busy = true; renderFeed();
+  try {
+    const src = await gridSource(g, p);
+    if (g.mode === 'pan') {
+      let c = p.carousels.find(x => x.id === (g.cells[0] || {}).carId); if (!c) { c = carNew(g.name, '', 'foto'); c.idea = g.name; c.grad = 35; g.cells.forEach(cl => { cl.carId = c.id; }); }
+      for (let i = 0; i < g.cols; i++) { const old = g.cells[i].pieceId, id = uid('img'); await imgPut(id, await gridBlob(gridPieceCanvas(src, g, i))); c.media[String(i)] = id; g.cells[i].pieceId = id; if (old) { try { await imgDel(old); } catch (e) { /* ok */ } } }
+      if (g.cells[0].label && !c.texts[0]) c.texts[0] = g.cells[0].label; persist(); carUI.id = ''; toast('Carrossel panorâmico criado: a imagem passa pelos slides.');
+    } else {
+      for (let i = 0; i < g.cells.length; i++) {
+        const cl = g.cells[i], old = cl.pieceId, id = uid('img'); await imgPut(id, await gridBlob(gridPieceCanvas(src, g, i))); cl.pieceId = id;
+        let c = p.carousels.find(x => x.id === cl.carId); const tpl = cl.clean ? 'foto-limpa' : 'foto';
+        if (!c) { c = carNew(cl.label || (g.name + ' · ' + (i + 1)), '', tpl); c.idea = cl.label; c.grad = cl.clean ? 0 : 35; c.splitCover = true; if (cl.label) c.texts[0] = cl.label; cl.carId = c.id; }
+        else { c.tpl = tpl; if (cl.label && !c.texts[0]) c.texts[0] = cl.label; }
+        c.media['0'] = id; c.splitCover = true; if (old) { try { await imgDel(old); } catch (e) { /* ok */ } }
+      }
+      let f = p.feeds.find(x => x.id === g.feedId); if (!f) { f = feedNew('Grid · ' + g.name, 'grid', g.rows); g.feedId = f.id; }
+      f.rows = g.rows; f.defKind = 'carousel'; f.view = 'pecas'; f.slots = normalizeFeeds([{rows: g.rows, slots: f.slots}])[0].slots; g.cells.forEach((cl, i) => { const s = f.slots[i]; s.kind = 'carousel'; s.tone = 'M'; s.label = cl.label; s.ref = {t: 'car', id: cl.carId}; });
+      persist(); toast(`${g.cells.length} capas cortadas e ligadas ao feed. Abra cada carrossel para escrever os slides.`);
+    }
+    gridSave();
+  } catch (e) { toast('Não consegui cortar: ' + e.message); }
+  gridUI.busy = false; renderFeed();
 }
 
 </script>

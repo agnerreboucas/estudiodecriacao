@@ -6,6 +6,7 @@ const CAR_STAGES = [
   ['fundo', 'Fundo de funil', 'Para quem está perto de decidir: prova, oferta e chamada para ação. Foco em converter.']];
 const CAR_TPL = [
   {id: 'foto', stage: 'topo', name: 'Foto + título condensado', cover: 'cap-foto-condensado', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left', photo: true}},
+  {id: 'foto-limpa', stage: 'topo', name: 'Foto limpa (split)', cover: 'cap-foto-limpa', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left', photo: true}},
   {id: 'foto-esq', stage: 'topo', name: 'Foto + título à esquerda', cover: 'cap-foto-condensado-esq', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left', photo: true}},
   {id: 'serifado', stage: 'topo', name: 'Foto + título serifado', cover: 'cap-foto-serifado', inner: {bg: 'dark', head: 'serif', upper: false, align: 'left', photo: true}},
   {id: 'circulo', stage: 'topo', name: 'Sujeito sobre círculo', cover: 'cap-circulo-grande', inner: {bg: 'dark', head: 'cond', upper: true, align: 'left', photo: true}},
@@ -51,7 +52,8 @@ function carTk(c, tpl) {
   if (I.bg === 'accent') { tk.bg = acc; tk.fg = readable(acc); tk.muted = mixHex(acc, tk.fg, 0.7); tk.accent = '#e7e1d3'; }
   else if (I.bg === 'light' && !c.dark) { tk.bg = '#f6f3ec'; tk.fg = '#141414'; tk.muted = '#6b6b6b'; }
   else { tk.bg = '#111214'; tk.fg = '#ffffff'; tk.muted = '#a6a6ad'; }
-  const fam = I.head === 'serif' ? 'DM Serif Display' : I.head === 'cond' ? 'Anton' : null; if (fam) tk.head = {family: fam, weight: 400};
+  if (c.accent) tk.accent = c.accent;
+  const fam = I.head === 'serif' ? 'DM Serif Display' : I.head === 'cond' ? 'Anton' : null; if (fam) tk.head = {family: fam, weight: 400}; if (c.fontHead) { tk.head = {family: c.fontHead, weight: 700}; tk.headForce = true; }
   return tk;
 }
 const carWrap = (txt, n) => { const out = []; let cur = ''; String(txt).split(/\s+/).forEach(w => { if ((cur + ' ' + w).trim().length > n && cur) { out.push(cur); cur = w; } else cur = (cur + ' ' + w).trim(); }); if (cur) out.push(cur); return out; };
@@ -62,6 +64,8 @@ function carCoverCopy(c, tpl, cp, total) {
   if (id === 'cap-halftone-etiquetas') { const w = String(cp.cover.title).replace(/[.?!]+$/, '').split(/\s+/); o.kicker = (w.pop() || '').toUpperCase(); o.title = carWrap(w.join(' '), 24).join('\n'); }
   if (id === 'ed-indice' || id === 'ed-numero-lista') { o.items = cp.blocks.map(b => b.title).filter(Boolean).slice(0, 14).join('\n') || '∅'; o.num = String(cp.blocks.length || ''); if (id === 'ed-indice') o.sub = cp.cover.sub || '∅'; }
   if (id === 'cap-editorial-claro' || id === 'cap-editorial-escuro') { o.tag = 'CAPA'; o.num = carPad(1) + '/' + carPad(total); }
+  if (id === 'cap-foto-limpa') o.button = 'ARRASTE →';
+  if (c.splitCover && id === 'cap-foto-condensado') o.button = 'Arraste pro lado →';
   if (id === 'cap-notas') { o.kicker = '∅'; o.date = '∅'; }
   if (id === 'ed-cartao-recortes') { o.num = '//  ' + carPad(1); o.sub = cp.cover.sub || '∅'; }
   if (tpl.short && /\s/.test(cp.cover.title) && cp.cover.title.length > 22) { /* modelos de palavra única: usa a última palavra forte como destaque */ }
