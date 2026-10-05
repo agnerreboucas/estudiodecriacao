@@ -36,7 +36,7 @@ function newProject(name, desc, extra = {}) {
     voice: {personality: '', principles: '', vocabulary: '', antivocab: '', rules: '', channels: '', examples: '', checklist: ''},
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
-    video: {conceptId: '', scenes: [], steps: {}},
+    video: {conceptId: '', scenes: [], steps: {}, scripts: []},
     ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
@@ -234,6 +234,14 @@ function normalizeCampaigns(x) {
       test: {macro: str(c.test && c.test.macro, 400), micro: str(c.test && c.test.micro, 400), format: str(c.test && c.test.format, 400), notes: str(c.test && c.test.notes, 1500)}, pieces, created: str(c.created, 40) || new Date().toISOString()};
   });
 }
+/* Roteiros do Video Lab: 4 tipos (literário, técnico, de gravação e de edição) por ângulo de anúncio, post ou ideia */
+const VS_KINDS = ['literario', 'tecnico', 'gravacao', 'edicao'], VS_DURS = [6, 10, 15, 20, 30, 60];
+function normalizeVideoScripts(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || ''));
+  return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 60).map(r => { const s = r.src || {}, t = r.t || {};
+    return {id: r.id, src: {type: ['concept', 'piece', 'carousel', 'free'].includes(s.type) ? s.type : 'free', id: sid(s.id) ? s.id : '', title: str(s.title, 160) || 'Roteiro', hook: str(s.hook, 300), angle: str(s.angle, 300), cta: str(s.cta, 120), stage: CMP_STAGES.includes(s.stage) ? s.stage : '', base: str(s.base, 3000)},
+      dur: VS_DURS.includes(+r.dur) ? +r.dur : 15, t: Object.fromEntries(VS_KINDS.map(k => [k, str(t[k], 14000)])), created: str(r.created, 40) || new Date().toISOString(), updated: str(r.updated, 40)}; });
+}
 function normalizeProducts(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), lines = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(t => str(t, n)).filter(Boolean), TY = ['curso', 'ebook', 'servico', 'evento', 'produto', 'cadastro'];
   return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 200).map(r => ({id: r.id, name: str(r.name, 160) || 'Produto', type: TY.includes(r.type) ? r.type : 'produto', summary: str(r.summary, 2000), price: str(r.price, 80), audience: str(r.audience, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(r.checkout || '') ? r.checkout : '',
@@ -331,7 +339,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.campaigns = normalizeCampaigns(q.campaigns); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.campaigns = normalizeCampaigns(q.campaigns); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
