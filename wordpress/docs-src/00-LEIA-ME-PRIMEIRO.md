@@ -17,7 +17,7 @@ Este pacote instala o **Ampliação Studio** (estúdio de marketing: campanhas, 
 4. Clique em **Criar as páginas base**.
 5. Clique em **Ir para o Ampliação Studio**. Pronto.
 
-Detalhes, problemas e instalação manual: `01-INSTALACAO`.
+Detalhes, problemas e instalação manual: `01-INSTALACAO`. Para compartilhar com o cliente (portal e área de membros): `06-AREA-DE-MEMBROS`.
 
 ## O que você precisa saber antes
 - **Elementor grátis é suficiente.** Nada do pacote exige o Elementor Pro (ver `04-ELEMENTOR-GRATIS`).

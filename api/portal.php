@@ -29,12 +29,26 @@ function pt_leads(string $project): array {
     return ['total' => $tot, 'd7' => $d7, 'd30' => $d30, 'days' => $days, 'campaigns' => $top($camp), 'sources' => $top($src), 'ads' => $top($cont)];
 }
 
+/* Área de membros (só no WordPress): com "exigir login" ligado, o portal só abre para quem entrou na conta e tem este portal liberado (ou é da equipe) */
+function pt_gate(array $m, string $t): void {
+    if (empty($m['requireLogin']) || !defined('AMPLIA_WP')) return;
+    if (is_user_logged_in()) {
+        if (amp_wp_can()) return;
+        $codes = get_user_meta(get_current_user_id(), 'amplia_portal_codes', true);
+        if (is_array($codes) && in_array($t, $codes, true)) return;
+        fail('Esta conta não tem acesso a este portal. Peça à equipe para liberar.', 403);
+    }
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http'; $host = preg_replace('/[^a-z0-9.\-:]/i', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
+    $back = $https . '://' . $host . rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/api/portal.php'), '/\\') . '/../cliente.html?t=' . $t;
+    fail('Entre na sua conta para ver este portal.', 401, ['login' => wp_login_url($back)]);
+}
+
 /* ---------- público ---------- */
 if ($method === 'GET') {
     $t = (string) ($_GET['t'] ?? ''); if (!pt_ok($t)) fail('Link inválido.', 404);
     if (!rate_limit('ptget:' . client_ip(), 600, 3600)) fail('Muitos acessos. Tente mais tarde.', 429);
     $m = pt_meta($t); if (!$m) fail('Este link não está mais ativo. Peça um novo ao seu contato.', 404);
-    $dir = pt_dir($t);
+    $dir = pt_dir($t); pt_gate($m, $t);
     if (isset($_GET['img'])) { $id = pt_id($_GET['img']); foreach (['webp' => 'image/webp', 'jpg' => 'image/jpeg', 'png' => 'image/png'] as $ext => $ct) { $f = "$dir/img_$id.$ext"; if ($id !== '' && is_file($f)) { header('Content-Type: ' . $ct); header('X-Content-Type-Options: nosniff'); header('Cache-Control: private, max-age=300'); readfile($f); exit; } } http_response_code(404); exit; }
     if (isset($_GET['page'])) { $id = pt_id($_GET['page']); $f = "$dir/page_$id.html"; if ($id === '' || !is_file($f)) { http_response_code(404); exit; }
         header('Content-Type: text/html; charset=utf-8'); header('X-Content-Type-Options: nosniff'); header("Content-Security-Policy: sandbox; default-src 'none'; img-src data: https:; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src data: https://fonts.gstatic.com; media-src data:; form-action 'none'; base-uri 'none'"); readfile($f); exit; }
@@ -48,7 +62,7 @@ require_json_write();
 $b = body_json(4_500_000); $action = (string) ($b['action'] ?? '');
 
 if ($action === 'decide') {
-    $t = (string) ($b['t'] ?? ''); if (!pt_ok($t)) fail('Link inválido.', 404); $m = pt_meta($t); if (!$m) fail('Este link não está mais ativo.', 404);
+    $t = (string) ($b['t'] ?? ''); if (!pt_ok($t)) fail('Link inválido.', 404); $m = pt_meta($t); if (!$m) fail('Este link não está mais ativo.', 404); pt_gate($m, $t);
     if (!rate_limit('ptdec:' . client_ip() . $t, 60, 3600)) fail('Muitas ações. Tente mais tarde.', 429);
     $item = pt_id($b['item'] ?? ''); $dec = (string) ($b['decision'] ?? ''); if (!in_array($dec, ['approve', 'changes', 'comment'], true)) fail('Ação inválida.', 422);
     $snap = pt_json(pt_dir($t) . '/snapshot.json') ?: ['items' => []]; $found = null; foreach ($snap['items'] ?? [] as $it) if (($it['id'] ?? '') === $item) $found = $it; if (!$found) fail('Peça não encontrada.', 404);
@@ -93,7 +107,7 @@ if ($action === 'publish') {
     $met = is_array($s['metrics'] ?? null) ? $s['metrics'] : []; $metrics = []; foreach (['spend', 'impressions', 'clicks', 'leads', 'conversions'] as $k) $metrics[$k] = is_numeric($met[$k] ?? null) ? (float) $met[$k] : null;
     $snap = ['name' => pt_s($s['name'] ?? ($m['name'] ?? ''), 120), 'client' => pt_s($s['client'] ?? '', 120), 'brand' => ['accent' => preg_match('/^#[0-9a-f]{6}$/i', (string) ($s['brand']['accent'] ?? '')) ? $s['brand']['accent'] : '#111111', 'logo' => pt_id($s['brand']['logo'] ?? '')], 'items' => $items, 'news' => $news, 'campaigns' => $camps, 'metrics' => $metrics, 'publishedAt' => date('c')];
     if (!pt_put("$dir/snapshot.json", $snap)) fail('Não consegui gravar no servidor.', 500);
-    $m['clientEmails'] = implode(', ', pt_emails($b['clientEmails'] ?? '')); $m['notify'] = implode(', ', pt_emails($b['notifyEmails'] ?? '')); pt_put("$dir/meta.json", $m);
+    $m['requireLogin'] = !empty($b['requireLogin']); $m['clientEmails'] = implode(', ', pt_emails($b['clientEmails'] ?? '')); $m['notify'] = implode(', ', pt_emails($b['notifyEmails'] ?? '')); pt_put("$dir/meta.json", $m);
     $mail = 'não'; $wait = array_values(array_filter($items, fn($i) => $i['status'] === 'Em aprovação'));
     if (!empty($b['notify']) && $m['clientEmails'] !== '') {
         $host = preg_replace('/[^a-z0-9.\-:]/i', '', $_SERVER['HTTP_HOST'] ?? 'localhost'); $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http'; $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/api/portal.php'), '/'); $base = preg_replace('#/api$#', '', $base);

@@ -22,7 +22,7 @@
 1. **Plugins → Adicionar novo → Enviar plugin** → `2-PLUGINS/ampliacao-studio-plugin.zip` → Ativar.
 2. **Plugins → Adicionar novo** → pesquise **Elementor** (autor Elementor.com) → Instalar → Ativar. (Não instale o Pro.)
 3. **Aparência → Temas → Enviar tema** com `1-TEMA/ampliacao-studio-tema.zip` → Ativar.
-4. Crie as páginas à mão: **Páginas → Adicionar nova** (*Início*, *Obrigado*). Em *Atributos da página → Modelo*, escolha **Elementor Canvas**.
+4. Crie as páginas à mão: **Páginas → Adicionar nova** (*Início*, *Obrigado*, e *Área do cliente* com o shortcode `[amp_area_cliente]`). Em *Atributos da página → Modelo*, escolha **Elementor Canvas**.
 
 ## Caminho C — por FTP/Gerenciador de arquivos
 Descompacte `ampliacao-studio-plugin.zip` em `wp-content/plugins/` (fica `wp-content/plugins/ampliacao-studio/`) e o tema em `wp-content/themes/`. Depois ative no painel.

@@ -35,7 +35,7 @@ O fluxo do projeto do briefing ao aprendizado, com o que já foi feito e o que f
 ## 5 · Mostrar ao cliente
 - **Aprovação:** só criações aprovadas seguem.
 - **Publicação:** agenda e publica o que foi aprovado (Kit social).
-- **Portal do cliente:** *em breve* neste menu (o link de aprovação do cliente já existe pelo endereço do Portal).
+- **Portal do cliente:** você escolhe as peças que o cliente vê (anúncios, artes, páginas, roteiros, Stories), define status, data e recado, publica e copia o link. O cliente aprova ou pede ajustes, e você busca as respostas. No WordPress, dá para exigir login (área de membros). Veja `06-AREA-DE-MEMBROS`.
 
 ## 6 · Resultados e vendas
 - **Performance:** métricas (manuais ou do Meta Ads), CPL, CTR, CAC e os **pesos aprendidos** que reordenam as próximas ideias.

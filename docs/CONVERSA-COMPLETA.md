@@ -43,9 +43,12 @@ Projeto → pré-projeto (resumo executivo, elevator pitch, apresentação em 10
 ## 5b. Honestidade sobre limites
 IA só com respostas simuladas · DOCX não aberto em Word/Google Docs reais · números do Instagram lançados à mão · sem busca na web dentro do Studio · publicação direta no Meta ainda não existe.
 
+## 5c. Portal do cliente e área de membros (feito)
+O cliente vê só o que você escolher (peças, cronograma, resultados em números), aprova ou pede ajustes; no WordPress há login com conta de cliente (menu Clientes, shortcode `[amp_area_cliente]`). Ver `wordpress/docs-src/06-AREA-DE-MEMBROS.md`.
+
 ## 6. Pendente
 1. HTML completo do fluxo para sua aprovação (campanha → anúncios → roteiros → Stories → landing → logo).
 2. Modelo de landing de cadastro (lp.arr.academy/imersao está bloqueado aqui): mandar print ou HTML/zip; usar só a estrutura.
 3. Teste do plugin num WordPress real e ajustes.
-4. Portal do cliente (lado Studio), módulo de apresentação, Produtos e serviços, CRM/Dashboard, inspetor de plugins (aguarda os arquivos), Biblioteca de anúncios de referência, publicação direta no Meta (OAuth), skills 'post', 'landing' e 'pré' sem ligação.
+4. Módulo de apresentação, Produtos e serviços, CRM/Dashboard, inspetor de plugins (aguarda os arquivos), Biblioteca de anúncios de referência, publicação direta no Meta (OAuth), skills 'post', 'landing' e 'pré' sem ligação.
 5. Testes antigos `eb2` e `ad1` falhando desde antes (não investigados).

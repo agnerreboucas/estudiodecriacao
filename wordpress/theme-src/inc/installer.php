@@ -90,6 +90,7 @@ add_action('admin_post_ampt_pages', function () {
     $defs = [
         'inicio' => ['Início', '', 'elementor_canvas'],
         'obrigado' => ['Obrigado', '<h1>Recebemos o seu contato!</h1><p>Em breve falaremos com você. [CONFIRMAR o texto e o prazo de resposta]</p>', 'elementor_canvas'],
+        'area-do-cliente' => ['Área do cliente', '[amp_area_cliente]', ''],
         'privacidade' => ['Política de privacidade', '<p>[CONFIRMAR: texto da política de privacidade, revisado por quem entende de LGPD]</p>', ''],
     ];
     $made = get_option('ampt_pages', []); if (!is_array($made)) $made = [];
@@ -101,8 +102,9 @@ add_action('admin_post_ampt_pages', function () {
         $made[$k] = $id;
     }
     update_option('ampt_pages', $made, false);
+    if (!empty($made['area-do-cliente'])) update_option('amplia_members_page_id', (int) $made['area-do-cliente']);
     if (!empty($made['inicio']) && !empty($_POST['frontpage'])) { update_option('show_on_front', 'page'); update_option('page_on_front', (int) $made['inicio']); }
-    ampt_back('Páginas base criadas: Início, Obrigado e Política de privacidade.');
+    ampt_back('Páginas base criadas: Início, Obrigado, Área do cliente e Política de privacidade.');
 });
 
 function ampt_setup_page(): void {
@@ -122,7 +124,7 @@ function ampt_setup_page(): void {
     $btn('ampt_studio', $s['studio_active'] ? 'Reinstalar/ativar de novo' : 'Instalar e ativar o Studio', $s['studio_active']);
     echo '<h2>3 · Elementor (versão grátis)</h2><ul>' . $row($s['el_active'], $s['el_active'] ? 'Elementor ativo' : ($s['el_installed'] ? 'Instalado, falta ativar' : 'Ainda não instalado'), 'O Elementor Pro não é necessário.') . '</ul>';
     $btn('ampt_elementor', $s['el_active'] ? 'Verificar de novo' : 'Baixar e ativar o Elementor grátis', $s['el_active']);
-    echo '<h2>4 · Páginas base</h2><ul>' . $row(!empty($s['pages']), !empty($s['pages']) ? 'Criadas: ' . implode(', ', array_keys($s['pages'])) : 'Início, Obrigado e Política de privacidade (Início e Obrigado em tela livre para o Elementor)') . '</ul>';
+    echo '<h2>4 · Páginas base</h2><ul>' . $row(!empty($s['pages']), !empty($s['pages']) ? 'Criadas: ' . implode(', ', array_keys($s['pages'])) : 'Início, Obrigado, Área do cliente (login + portal) e Política de privacidade') . '</ul>';
     $btn('ampt_pages', 'Criar as páginas base', !empty($s['pages']), '<label style="margin-right:10px"><input type="checkbox" name="frontpage" value="1" checked> Usar "Início" como página inicial</label>');
     echo '<h2>5 · Abrir</h2><p>';
     if ($s['studio_active']) echo '<a class="button button-primary" href="' . esc_url(admin_url('admin.php?page=ampliacao-studio')) . '">Ir para o Ampliação Studio</a> ';

@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/_lib.php';
 $in = logged_in();
-json_out(['ok' => true,
+json_out(['ok' => true, 'wp' => defined('AMPLIA_WP'),
   'auth' => ['required' => auth_required(), 'loggedIn' => $in],
   'ai' => ['configured' => $in && cfg(strtolower((string) cfg('AI_PROVIDER', 'anthropic')) === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY') !== null,
            'provider' => strtolower((string) cfg('AI_PROVIDER', 'anthropic')) === 'openai' ? 'openai' : 'anthropic',
