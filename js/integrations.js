@@ -86,6 +86,7 @@ async function pullWorkspace(force) {
 
 /* ---- IA ---- */
 async function aiText(system, user, max = 1500) {
+  if (typeof AI_CTX !== 'undefined' && AI_CTX) { const c = AI_CTX; AI_CTX = null; system = skillSystem(c.fn, c.stage, system); }   // skills de texto da função (tela Skills de texto)
   const j = await api('ai.php', {method: 'POST', body: {system, messages: [{role: 'user', content: user}], max_tokens: max}});
   return j.text || '';
 }

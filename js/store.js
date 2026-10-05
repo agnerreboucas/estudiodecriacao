@@ -151,8 +151,11 @@ function normalizeEditorial(e) {
   };
 }
 /* Motor de e-book: skills (workspace) e rascunho de produção (projeto) */
+/* Skills de texto: instruções que valem para uma função (campanha, carrossel, vídeo...) e, se quiser, só para certas fases da jornada */
+const SK_FNS = ['campanha', 'carrossel', 'post', 'video', 'stories', 'landing', 'pre', 'editorial'];
 function normalizeSkills(x) {
-  return (Array.isArray(x) ? x : []).filter(k => k && safeId(k.id) && typeof k.text === 'string').slice(0, 30).map(k => ({id: k.id, name: String(k.name || 'Skill').slice(0, 80), text: k.text.slice(0, 30000)}));
+  return (Array.isArray(x) ? x : []).filter(k => k && safeId(k.id) && typeof k.text === 'string').slice(0, 30).map(k => ({id: k.id, name: String(k.name || 'Skill').slice(0, 80), text: k.text.slice(0, 30000), desc: String(k.desc || '').slice(0, 300),
+    auto: !!k.auto, on: k.on !== false, prio: Math.max(0, Math.min(99, Math.round(+k.prio) || 50)), fns: (Array.isArray(k.fns) ? k.fns : []).filter(f => SK_FNS.includes(f)), stages: (Array.isArray(k.stages) ? k.stages : []).filter(f => CMP_STAGES.includes(f)), draft: !!k.draft}));
 }
 function normalizeMotor(m) {
   m = m && typeof m === 'object' ? m : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n);

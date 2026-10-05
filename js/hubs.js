@@ -164,7 +164,7 @@ async function aiScript() {
   const p = curProject(), c = activeConcept(p), sc = p.video.scenes;
   try {
     toast('Escrevendo roteiro…');
-    const j = await aiJSON(`Escreva o roteiro de um vídeo de ${p.matrix.duration}s. Responda só JSON: um array com ${sc.length} objetos {"action","text"} na ordem das cenas: ${sc.map(s => s.stage).join(', ')}. "action" descreve o que se vê/ouve; "text" é o texto curto na tela. Sem promessas absolutas, sem inventar dados.`,
+    skCtx('video'); const j = await aiJSON(`Escreva o roteiro de um vídeo de ${p.matrix.duration}s. Responda só JSON: um array com ${sc.length} objetos {"action","text"} na ordem das cenas: ${sc.map(s => s.stage).join(', ')}. "action" descreve o que se vê/ouve; "text" é o texto curto na tela. Sem promessas absolutas, sem inventar dados.`,
       projectContext(p) + `\nConceito: hook ${c.hook}, ângulo ${c.angle}, formato ${c.format}, CTA ${c.cta}.`);
     (Array.isArray(j) ? j : []).slice(0, sc.length).forEach((x, i) => { sc[i].action = String(x.action || ''); sc[i].text = String(x.text || ''); });
     spendCredits(1); persist(); renderVideoLab(); toast('Roteiro sugerido: revise cena a cena.');

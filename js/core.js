@@ -1,5 +1,5 @@
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'feed', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project', 'flow'];
+const PAGES = ['home', 'skills', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'feed', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project', 'flow'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -25,7 +25,7 @@ function go(page) {
 }
 function renderPage(page) {
   ({feed: renderFeed, home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
-    videoLab: renderVideoLab, campaigns: renderCampaignsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
+    videoLab: renderVideoLab, campaigns: renderCampaignsPage, skills: renderSkillsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
     analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, flow: renderFlow, editorial: renderEditorial, biblioteca: renderBiblioteca, carrosseis: renderCarrosseis, landings: renderLandings}[page] || (() => {}))();
 }
 function refreshCurrentView() { renderSyncBadge(); renderHome(); renderPage(ui.page); updateContextUI(); }
@@ -65,7 +65,7 @@ async function generate() {
   if (aiReady()) {
     toast('Briefing recebido. Gerando sugestão com a IA…');
     try {
-      c.copy = await aiText('Você é um redator de performance. Dê 1 headline, 1 texto curto e 1 CTA, sem promessas absolutas e sem inventar dados.', projectContext(p) + '\nBriefing: ' + text, 600);
+      skCtx('campanha'); c.copy = await aiText('Você é um redator de performance. Dê 1 headline, 1 texto curto e 1 CTA, sem promessas absolutas e sem inventar dados.', projectContext(p) + '\nBriefing: ' + text, 600);
       spendCredits(1); persist(); toast('Sugestão da IA salva na criação.');
     } catch (e) { toast('Briefing salvo. IA: ' + e.message); }
   } else toast('Briefing salvo no projeto ' + p.name + '.');
@@ -93,7 +93,7 @@ function creativeToApproval(id) {
 async function creativeAICopy(id) {
   if (!aiReady()) { toast('IA não configurada. Veja Integrações.'); return; }
   const c = state.creatives.find(x => x.id === id), p = projectById(c.projectId);
-  try { toast('Gerando…'); c.copy = await aiText('Você é um redator de performance. Dê 1 headline, 1 texto curto e 1 CTA, sem promessas absolutas e sem inventar dados.', projectContext(p) + `\nPeça: ${c.title} (${c.type}). ${c.brief || ''}`, 600); spendCredits(1); persist(); openCreative(id); }
+  try { toast('Gerando…'); skCtx('campanha'); c.copy = await aiText('Você é um redator de performance. Dê 1 headline, 1 texto curto e 1 CTA, sem promessas absolutas e sem inventar dados.', projectContext(p) + `\nPeça: ${c.title} (${c.type}). ${c.brief || ''}`, 600); spendCredits(1); persist(); openCreative(id); }
   catch (e) { toast('IA: ' + e.message); }
 }
 function creativeDelete(id) { if (!confirm('Excluir esta criação?')) return; state.creatives = state.creatives.filter(c => c.id !== id); persist(); closeModal(); renderHome(); if (ui.page === 'library') renderLibrary(); if (ui.page === 'project') renderProjectTab(); }

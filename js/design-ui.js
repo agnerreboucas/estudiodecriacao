@@ -126,7 +126,7 @@ async function dzAICopy() {
   const p = dzP();
   try {
     toast('Escrevendo…');
-    const j = await aiJSON('Escreva os textos de um carrossel de Instagram em PT-BR, curtos e diretos, seguindo o Voice Brain. Sem promessas absolutas, sem inventar dados. Responda só JSON: {"cover":{"title","sub"},"slides":[{"title","body"}],"cta":{"title","button"}} com 3 a 5 slides.', projectContext(p) + '\nTema/ideia: ' + (dz.cmp.text || p.pre.objective || p.desc));
+    skCtx('carrossel'); const j = await aiJSON('Escreva os textos de um carrossel de Instagram em PT-BR, curtos e diretos, seguindo o Voice Brain. Sem promessas absolutas, sem inventar dados. Responda só JSON: {"cover":{"title","sub"},"slides":[{"title","body"}],"cta":{"title","button"}} com 3 a 5 slides.', projectContext(p) + '\nTema/ideia: ' + (dz.cmp.text || p.pre.objective || p.desc));
     dz.cmp.text = `${j.cover.title} | ${j.cover.sub || ''}\n` + (j.slides || []).map(s => `${s.title}: ${s.body}`).join('\n') + `\n${j.cta.title} | ${j.cta.button || 'Fale com a gente'}`; spendCredits(1); renderDesign(); toast('Textos sugeridos. Edite à vontade.');
   } catch (e) { toast('IA: ' + e.message); }
 }

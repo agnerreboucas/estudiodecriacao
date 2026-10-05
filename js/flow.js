@@ -33,7 +33,7 @@ const FLOW = [
 ];
 const FLOW_SIDE = [
   {t: 'Acervo (usado em todas as etapas)', c: '#2e7d4f', items: [['biblioteca', 'Imagens', 'Fotos geradas, enviadas e do produto.', 'ok'], ['library', 'Peças criadas', 'Tudo o que já foi feito neste projeto.', 'ok']]},
-  {t: 'Ajustes', c: '#7c4dbd', items: [['settings', 'Configurações', 'Chaves das APIs, conexões e dados da conta.', 'ok']]}
+  {t: 'Ajustes', c: '#7c4dbd', items: [['skills', 'Skills de texto', 'Instruções suas que a IA segue ao escrever, por função e fase da jornada.', 'ok'], ['settings', 'Configurações', 'Chaves das APIs, conexões e dados da conta.', 'ok']]}
 ];
 const FLOW_ST = {ok: ['pronto', '#2e7d4f'], part: ['parcial', '#c9952a'], soon: ['em breve', '#888']};
 function renderFlow() {

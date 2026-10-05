@@ -68,7 +68,7 @@ async function vfAI() {
   const p = dzP(), seed = lineList(dz.vf.h)[0] || (vfBaseSlide(p) ? (vfBaseSlide(p).slide.layers.find(l => l.role === 'title') || {content: ''}).content.replace(/\*\*/g, '') : '') || p.pre.objective;
   try {
     toast('Criando variações…');
-    const j = await aiJSON('Crie variações de um anúncio em PT-BR seguindo o Voice Brain. Varie o ângulo (pergunta, alerta, número, prova, benefício, urgência) sem inventar dados nem fazer promessas absolutas. Headlines até 12 palavras. Responda só JSON: {"headlines":["..."],"subs":["..."],"ctas":["..."]} com 10 headlines, 4 subs e 4 ctas.', projectContext(p) + '\nAnúncio base (headline): ' + seed);
+    skCtx('campanha'); const j = await aiJSON('Crie variações de um anúncio em PT-BR seguindo o Voice Brain. Varie o ângulo (pergunta, alerta, número, prova, benefício, urgência) sem inventar dados nem fazer promessas absolutas. Headlines até 12 palavras. Responda só JSON: {"headlines":["..."],"subs":["..."],"ctas":["..."]} com 10 headlines, 4 subs e 4 ctas.', projectContext(p) + '\nAnúncio base (headline): ' + seed);
     const add = (k, arr) => { dz.vf[k] = lineList(dz.vf[k] + '\n' + (arr || []).map(String).join('\n')).join('\n'); }; add('h', j.headlines); add('s', j.subs); add('c', j.ctas); spendCredits(1); renderDesign(); toast('Variações de texto adicionadas. Revise.');
   } catch (e) { toast('IA: ' + e.message); }
 }

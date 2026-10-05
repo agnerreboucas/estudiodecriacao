@@ -852,6 +852,7 @@ textarea,input,select{max-width:100%}
     </div></div>
   </nav>
   <div class="rail-bottom">
+    <button data-page="skills" title="Skills de texto"><span data-ico="brain"></span><span class="rail-lb">Skills de texto</span></button>
     <button data-page="settings" title="Configurações"><span data-ico="settings"></span><span class="rail-lb">Configurações</span></button>
     <button type="button" class="rail-mini-btn" id="railMini" title="Recolher o menu" onclick="railMini()">◀ <span class="rail-lb2">Recolher</span></button>
   </div>
@@ -937,6 +938,7 @@ textarea,input,select{max-width:100%}
 <section id="page-diagram" class="page"><div class="subpage dz-wide" id="diagramRoot"></div></section>
 <section id="page-videoLab" class="page"><div class="subpage" id="videoRoot"></div></section>
 <section id="page-campaigns" class="page"><div class="subpage" id="campaignsRoot"></div></section>
+<section id="page-skills" class="page"><div class="subpage" id="skillsRoot"></div></section>
 <section id="page-approval" class="page"><div class="subpage" id="approvalRoot"></div></section>
 <section id="page-publishingHub" class="page"><div class="subpage" id="publishingRoot"></div></section>
 <section id="page-analyticsHub" class="page"><div class="subpage" id="analyticsRoot"></div></section>
@@ -1214,8 +1216,11 @@ function normalizeEditorial(e) {
   };
 }
 /* Motor de e-book: skills (workspace) e rascunho de produção (projeto) */
+/* Skills de texto: instruções que valem para uma função (campanha, carrossel, vídeo...) e, se quiser, só para certas fases da jornada */
+const SK_FNS = ['campanha', 'carrossel', 'post', 'video', 'stories', 'landing', 'pre', 'editorial'];
 function normalizeSkills(x) {
-  return (Array.isArray(x) ? x : []).filter(k => k && safeId(k.id) && typeof k.text === 'string').slice(0, 30).map(k => ({id: k.id, name: String(k.name || 'Skill').slice(0, 80), text: k.text.slice(0, 30000)}));
+  return (Array.isArray(x) ? x : []).filter(k => k && safeId(k.id) && typeof k.text === 'string').slice(0, 30).map(k => ({id: k.id, name: String(k.name || 'Skill').slice(0, 80), text: k.text.slice(0, 30000), desc: String(k.desc || '').slice(0, 300),
+    auto: !!k.auto, on: k.on !== false, prio: Math.max(0, Math.min(99, Math.round(+k.prio) || 50)), fns: (Array.isArray(k.fns) ? k.fns : []).filter(f => SK_FNS.includes(f)), stages: (Array.isArray(k.stages) ? k.stages : []).filter(f => CMP_STAGES.includes(f)), draft: !!k.draft}));
 }
 function normalizeMotor(m) {
   m = m && typeof m === 'object' ? m : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n);
@@ -1554,6 +1559,7 @@ async function pullWorkspace(force) {
 
 /* ---- IA ---- */
 async function aiText(system, user, max = 1500) {
+  if (typeof AI_CTX !== 'undefined' && AI_CTX) { const c = AI_CTX; AI_CTX = null; system = skillSystem(c.fn, c.stage, system); }   // skills de texto da função (tela Skills de texto)
   const j = await api('ai.php', {method: 'POST', body: {system, messages: [{role: 'user', content: user}], max_tokens: max}});
   return j.text || '';
 }
@@ -1604,7 +1610,7 @@ async function testWebhook() { try { await sendWebhook('teste', {from: 'Ampliaç
 </script>
 <script>
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'feed', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project', 'flow'];
+const PAGES = ['home', 'skills', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'feed', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project', 'flow'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -1630,7 +1636,7 @@ function go(page) {
 }
 function renderPage(page) {
   ({feed: renderFeed, home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
-    videoLab: renderVideoLab, campaigns: renderCampaignsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
+    videoLab: renderVideoLab, campaigns: renderCampaignsPage, skills: renderSkillsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
     analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, flow: renderFlow, editorial: renderEditorial, biblioteca: renderBiblioteca, carrosseis: renderCarrosseis, landings: renderLandings}[page] || (() => {}))();
 }
 function refreshCurrentView() { renderSyncBadge(); renderHome(); renderPage(ui.page); updateContextUI(); }
@@ -1670,7 +1676,7 @@ async function generate() {
   if (aiReady()) {
     toast('Briefing recebido. Gerando sugestão com a IA…');
     try {
-      c.copy = await aiText('Você é um redator de performance. Dê 1 headline, 1 texto curto e 1 CTA, sem promessas absolutas e sem inventar dados.', projectContext(p) + '\nBriefing: ' + text, 600);
+      skCtx('campanha'); c.copy = await aiText('Você é um redator de performance. Dê 1 headline, 1 texto curto e 1 CTA, sem promessas absolutas e sem inventar dados.', projectContext(p) + '\nBriefing: ' + text, 600);
       spendCredits(1); persist(); toast('Sugestão da IA salva na criação.');
     } catch (e) { toast('Briefing salvo. IA: ' + e.message); }
   } else toast('Briefing salvo no projeto ' + p.name + '.');
@@ -1698,7 +1704,7 @@ function creativeToApproval(id) {
 async function creativeAICopy(id) {
   if (!aiReady()) { toast('IA não configurada. Veja Integrações.'); return; }
   const c = state.creatives.find(x => x.id === id), p = projectById(c.projectId);
-  try { toast('Gerando…'); c.copy = await aiText('Você é um redator de performance. Dê 1 headline, 1 texto curto e 1 CTA, sem promessas absolutas e sem inventar dados.', projectContext(p) + `\nPeça: ${c.title} (${c.type}). ${c.brief || ''}`, 600); spendCredits(1); persist(); openCreative(id); }
+  try { toast('Gerando…'); skCtx('campanha'); c.copy = await aiText('Você é um redator de performance. Dê 1 headline, 1 texto curto e 1 CTA, sem promessas absolutas e sem inventar dados.', projectContext(p) + `\nPeça: ${c.title} (${c.type}). ${c.brief || ''}`, 600); spendCredits(1); persist(); openCreative(id); }
   catch (e) { toast('IA: ' + e.message); }
 }
 function creativeDelete(id) { if (!confirm('Excluir esta criação?')) return; state.creatives = state.creatives.filter(c => c.id !== id); persist(); closeModal(); renderHome(); if (ui.page === 'library') renderLibrary(); if (ui.page === 'project') renderProjectTab(); }
@@ -8383,7 +8389,7 @@ async function dzAICopy() {
   const p = dzP();
   try {
     toast('Escrevendo…');
-    const j = await aiJSON('Escreva os textos de um carrossel de Instagram em PT-BR, curtos e diretos, seguindo o Voice Brain. Sem promessas absolutas, sem inventar dados. Responda só JSON: {"cover":{"title","sub"},"slides":[{"title","body"}],"cta":{"title","button"}} com 3 a 5 slides.', projectContext(p) + '\nTema/ideia: ' + (dz.cmp.text || p.pre.objective || p.desc));
+    skCtx('carrossel'); const j = await aiJSON('Escreva os textos de um carrossel de Instagram em PT-BR, curtos e diretos, seguindo o Voice Brain. Sem promessas absolutas, sem inventar dados. Responda só JSON: {"cover":{"title","sub"},"slides":[{"title","body"}],"cta":{"title","button"}} com 3 a 5 slides.', projectContext(p) + '\nTema/ideia: ' + (dz.cmp.text || p.pre.objective || p.desc));
     dz.cmp.text = `${j.cover.title} | ${j.cover.sub || ''}\n` + (j.slides || []).map(s => `${s.title}: ${s.body}`).join('\n') + `\n${j.cta.title} | ${j.cta.button || 'Fale com a gente'}`; spendCredits(1); renderDesign(); toast('Textos sugeridos. Edite à vontade.');
   } catch (e) { toast('IA: ' + e.message); }
 }
@@ -8738,7 +8744,7 @@ async function vfAI() {
   const p = dzP(), seed = lineList(dz.vf.h)[0] || (vfBaseSlide(p) ? (vfBaseSlide(p).slide.layers.find(l => l.role === 'title') || {content: ''}).content.replace(/\*\*/g, '') : '') || p.pre.objective;
   try {
     toast('Criando variações…');
-    const j = await aiJSON('Crie variações de um anúncio em PT-BR seguindo o Voice Brain. Varie o ângulo (pergunta, alerta, número, prova, benefício, urgência) sem inventar dados nem fazer promessas absolutas. Headlines até 12 palavras. Responda só JSON: {"headlines":["..."],"subs":["..."],"ctas":["..."]} com 10 headlines, 4 subs e 4 ctas.', projectContext(p) + '\nAnúncio base (headline): ' + seed);
+    skCtx('campanha'); const j = await aiJSON('Crie variações de um anúncio em PT-BR seguindo o Voice Brain. Varie o ângulo (pergunta, alerta, número, prova, benefício, urgência) sem inventar dados nem fazer promessas absolutas. Headlines até 12 palavras. Responda só JSON: {"headlines":["..."],"subs":["..."],"ctas":["..."]} com 10 headlines, 4 subs e 4 ctas.', projectContext(p) + '\nAnúncio base (headline): ' + seed);
     const add = (k, arr) => { dz.vf[k] = lineList(dz.vf[k] + '\n' + (arr || []).map(String).join('\n')).join('\n'); }; add('h', j.headlines); add('s', j.subs); add('c', j.ctas); spendCredits(1); renderDesign(); toast('Variações de texto adicionadas. Revise.');
   } catch (e) { toast('IA: ' + e.message); }
 }
@@ -9165,7 +9171,7 @@ async function aiScript() {
   const p = curProject(), c = activeConcept(p), sc = p.video.scenes;
   try {
     toast('Escrevendo roteiro…');
-    const j = await aiJSON(`Escreva o roteiro de um vídeo de ${p.matrix.duration}s. Responda só JSON: um array com ${sc.length} objetos {"action","text"} na ordem das cenas: ${sc.map(s => s.stage).join(', ')}. "action" descreve o que se vê/ouve; "text" é o texto curto na tela. Sem promessas absolutas, sem inventar dados.`,
+    skCtx('video'); const j = await aiJSON(`Escreva o roteiro de um vídeo de ${p.matrix.duration}s. Responda só JSON: um array com ${sc.length} objetos {"action","text"} na ordem das cenas: ${sc.map(s => s.stage).join(', ')}. "action" descreve o que se vê/ouve; "text" é o texto curto na tela. Sem promessas absolutas, sem inventar dados.`,
       projectContext(p) + `\nConceito: hook ${c.hook}, ângulo ${c.angle}, formato ${c.format}, CTA ${c.cta}.`);
     (Array.isArray(j) ? j : []).slice(0, sc.length).forEach((x, i) => { sc[i].action = String(x.action || ''); sc[i].text = String(x.text || ''); });
     spendCredits(1); persist(); renderVideoLab(); toast('Roteiro sugerido: revise cena a cena.');
@@ -20522,7 +20528,7 @@ function cmpImgSave(cid) { const c = cmpOf(curProject(), cid); c.bank.img = [...
 async function cmpAI(cid) {
   if (!aiReady()) { toast('IA não configurada. Veja Integrações. Os textos atuais continuam editáveis.'); return; }
   const p = curProject(), c = cmpOf(p, cid), nt = c.notes.slice(0, 20).map(n => `[${CMP_KIND_LABEL[n.kind]}] ${n.text}`).join('\n');
-  try { toast('Escrevendo…'); const j = await aiJSON('Escreva textos de anúncios do Meta em PT-BR, curtos e diretos, seguindo o Voice Brain. Sem promessas absolutas, sem inventar dados, preço ou resultado: use [CONFIRMAR] quando faltar informação. Parta de dores, dúvidas, desejos e urgências ocultas do público. As fases da jornada e seus gatilhos: Descoberta (identificação), Atração (aspiração), Consideração (segurança), Ação (momento uau), Apologia (identidade). Responda só JSON: {"h":[{"t":"dor|duvida|desejo|urgencia","x":"headline (até 60 caracteres)"}],"s":["frase de apoio"],"c":["CTA curto"]} com 8 headlines (2 de cada tipo), 3 apoios e 3 CTAs.', projectContext(p) + '\nObjetivo da campanha: ' + c.objective + '\nPúblico: ' + c.audience + (nt ? '\nNotas e comentários reais do público:\n' + nt : ''));
+  try { toast('Escrevendo…'); skCtx('campanha', cmpUI.phase); const j = await aiJSON('Escreva textos de anúncios do Meta em PT-BR, curtos e diretos, seguindo o Voice Brain. Sem promessas absolutas, sem inventar dados, preço ou resultado: use [CONFIRMAR] quando faltar informação. Parta de dores, dúvidas, desejos e urgências ocultas do público. As fases da jornada e seus gatilhos: Descoberta (identificação), Atração (aspiração), Consideração (segurança), Ação (momento uau), Apologia (identidade). Responda só JSON: {"h":[{"t":"dor|duvida|desejo|urgencia","x":"headline (até 60 caracteres)"}],"s":["frase de apoio"],"c":["CTA curto"]} com 8 headlines (2 de cada tipo), 3 apoios e 3 CTAs.', projectContext(p) + '\nObjetivo da campanha: ' + c.objective + '\nPúblico: ' + c.audience + (nt ? '\nNotas e comentários reais do público:\n' + nt : ''));
     const take = (a, m, len) => (Array.isArray(a) ? a : []).map(x => String(x).trim()).filter(x => x && x.length <= len).slice(0, m);
     const hs = (Array.isArray(j.h) ? j.h : []).map(x => typeof x === 'string' ? {t: '', x} : {t: CMP_KINDS.includes(x && x.t) ? x.t : '', x: String((x && x.x) || '').trim()}).filter(x => x.x && x.x.length <= 120).slice(0, 8);
     const seen = new Set(c.bank.h), nh = [], nk = []; hs.forEach(x => { if (!seen.has(x.x)) { seen.add(x.x); nh.push(x.x); nk.push(x.t); } });
@@ -20653,6 +20659,255 @@ async function cmpAfter(p, root) {
 
 </script>
 <script>
+/* Textos das skills prontas que a tela "Skills de texto" oferece para adicionar. */
+const SKT_EDITORIAL = `BrandsDecoded Editorial Engine
+
+FUNÇÃO
+Atuar como estrategista editorial, pesquisador, editor e roteirista.
+Transformar informação, hipótese ou insight em narrativa de conteúdo com tensão, evidência, contexto e clareza.
+Nunca começar pela redação quando ainda existir um problema editorial não resolvido.
+
+PRINCÍPIO-MESTRE
+Encontrar a história antes de escrever a história.
+Antes de produzir:
+1. entender o material;
+2. identificar a transformação;
+3. encontrar a fricção;
+4. pesquisar quando necessário;
+5. separar fato de interpretação;
+6. definir o ângulo;
+7. escolher a estrutura;
+8. escrever;
+9. auditar.
+
+MODOS
+MODO 1 — TRANSFORMAÇÃO
+Usar quando existe conteúdo de origem.
+Entrada: texto, link, print, notícia, artigo, estudo, transcrição ou material equivalente.
+Processo: material → extração → triagem → ângulos → escolha → produção.
+
+MODO 2 — INSIGHT
+Usar quando existe uma hipótese editorial.
+Antes da triagem, pesquisar. Buscar: fontes primárias; dados; estudos; notícias; exemplos; contexto; contrapontos.
+A pesquisa deve validar, tensionar, qualificar ou restringir a hipótese.
+Nunca transformar uma hipótese em fato apenas porque ela produz uma narrativa interessante.
+
+TRIAGEM
+Extrair:
+Transformação: o que mudou?
+Fricção central: qual conflito torna o assunto interessante?
+Ângulo narrativo dominante: qual leitura organiza melhor a história?
+Evidências: quais fatos, números e exemplos sustentam a leitura?
+A fricção deve ser um conflito real. Não confundir: tema ≠ fricção.
+
+ÂNGULOS
+Gerar dez caminhos narrativos diferentes.
+Priorizar quando aplicável: contraste; investigação; geracional; crise; novidade; Brasil; comportamento; status; identidade; cultura; referência pop; nome próprio.
+Cada opção precisa conter: captura; reenquadramento; stake; mecanismo; âncora concreta.
+Eliminar opções mornas. Não produzir dez versões da mesma ideia.
+
+REGRAS DE HEADLINE
+Evitar: "quando X vira Y"; "a ascensão de"; "o impacto de"; "por que X está mudando"; "não é X, é Y".
+Evitar também: clichês; abstrações; slogans genéricos; linguagem corporativa; perguntas sem tensão; afirmações sem stake.
+Priorizar: especificidade; contraste; curiosidade; identidade; conflito; consequência; mecanismo.
+
+CAPA DE CARROSSEL
+O texto 1 deve: funcionar isoladamente; abrir tensão; gerar curiosidade; ter força editorial; conter entre 14 e 18 palavras.
+O texto 2 deve: aprofundar a tensão; funcionar isoladamente; conter entre 8 e 12 palavras; não entregar a resolução; não depender sintaticamente do texto 1.
+
+CARROSSEL
+Produzir exatamente 18 textos.
+1–2 capa
+3 título
+4–5 parágrafos
+6 curto
+7 título
+8–9 parágrafos
+10 curto
+11 título
+12–13 parágrafos
+14 título
+15–16 parágrafos
+17 fechamento
+18 assinatura
+Cada bloco deve empurrar o raciocínio adiante. Nunca repetir a informação apenas para preencher espaço.
+
+POST
+Estrutura padrão: HOOK, CONTEXTO, TENSÃO, EVIDÊNCIA, REENQUADRAMENTO, FECHAMENTO.
+Não comprimir mecanicamente uma estrutura de carrossel em um único texto.
+
+VÍDEO
+Estrutura padrão: HOOK, PROMESSA, CONTEXTO, TENSÃO, MECANISMO, EXEMPLO, REENQUADRAMENTO, FECHAMENTO.
+O roteiro deve ser falável. Preferir frases que funcionem na oralidade.
+Quando apropriado, incluir: fala; texto de tela; apoio visual; B-roll; ritmo; cortes.
+
+PESQUISA
+Nunca inventar: fatos; dados; estudos; citações; pesquisas; datas; empresas; acontecimentos; fontes.
+Quando pesquisar: 1. procurar fonte primária; 2. confirmar informações relevantes; 3. procurar contexto; 4. procurar contrapontos; 5. distinguir fato de interpretação.
+Se a evidência não sustentar a tese, reduzir a tese.
+
+HIERARQUIA
+Distinguir: FATO (informação verificável); DADO (métrica documentada); EXEMPLO (caso concreto); INTERPRETAÇÃO (leitura baseada nas evidências); HIPÓTESE (possibilidade ainda não comprovada).
+Nunca apresentar interpretação ou hipótese como fato.
+
+ANTI-AI-SLOP
+Revisar e eliminar: "Em um mundo cada vez mais..."; "não é apenas..."; "é mais do que..."; "isso muda tudo"; "a pergunta que fica"; "no fim das contas"; "uma nova era"; "o impacto disso"; "o futuro chegou"; "o ponto é"; "menos X, mais Y"; abstração vaga; corporativês; frases simétricas artificiais; slogans quebrados; linguagem de tradução.
+Regra: se qualquer página poderia publicar, reescrever.
+
+AUDITORIA
+Antes de entregar: Fatos (confirmar evidências); Narrativa (confirmar progressão); Hook (confirmar tensão); Linguagem (eliminar artificialidade); Formato (confirmar estrutura); Densidade (eliminar excesso); Originalidade (eliminar formulações genéricas); Proporcionalidade (a força da tese não pode ultrapassar a força das evidências).
+
+COMANDOS
+reiniciar: voltar ao início.
+refazer ângulos: descartar os caminhos anteriores e produzir novos.
+refazer headlines: reformular as headlines com caminhos diferentes.
+aprofundar: adicionar pesquisa, contexto e mecanismo.
+mudar formato: adaptar a narrativa para outro formato sem simplesmente copiar a estrutura anterior.
+pesquisar novamente: reabrir a etapa de investigação e procurar evidências adicionais.
+
+PRINCÍPIO EDITORIAL FINAL
+Não tratar marca apenas como marca, produto apenas como produto, campanha apenas como campanha, tendência apenas como tendência.
+Sempre procurar: comportamento; identidade; status; hábito; conflito; mudança cultural; contexto histórico; sinal de época.
+A função do agente é descobrir o significado por trás do acontecimento.
+Conteúdo é a saída. Narrativa é o produto.`;
+
+/* Rascunho escrito a partir da descrição enviada. Precisa de revisão antes de valer. */
+const SKT_STORIES = `Motor editorial universal de Stories (RASCUNHO para revisão)
+
+FUNÇÃO
+Transformar qualquer coisa que o cliente queira comunicar (produto, serviço, causa, evento, igreja, profissional, influenciador, curso, e-book, ONG, loja, marca pessoal) em sequências estratégicas de Stories prontas para executar. A lógica da sequência é: atenção → interação → consciência → desejo → ação → aprendizado.
+
+ENTRADAS ACEITAS
+Produto ou serviço; foto, vídeo, áudio ou print; link ou site; catálogo; texto ou briefing; perfil do Instagram; concorrente ou referência; objetivo da campanha; métricas anteriores, quando existirem.
+
+PROCESSAMENTO (nesta ordem)
+1. Entender o que está sendo comunicado.
+2. Identificar ou construir o ICP.
+3. Encontrar dores, dúvidas, desejos, urgências ocultas, objeções e gatilhos.
+4. Definir o tema central.
+5. Escolher o objetivo da sequência.
+6. Escolher o melhor mecanismo de interação.
+7. Construir uma sequência aditiva: cada Story prepara o próximo.
+8. Adaptar o formato à personalidade de quem comunica.
+9. Definir o sinal que cada Story pretende gerar.
+10. Criar o conteúdo pronto para publicar.
+11. Depois, receber os resultados e aprender com eles.
+
+REGRA DE SAÍDA
+Nunca responder com sugestões vagas ("você poderia fazer uma enquete perguntando..."). Entregar o Story pronto, para o cliente apenas executar. Formato de cada Story:
+STORY [número] — [TIPO]
+O que gravar ou mostrar: [descrição objetiva da cena]
+Fale exatamente: "[texto da fala]"
+Elemento de interação: [enquete, caixa de pergunta, quiz, controle deslizante, link ou botão, com as opções escritas]
+Sinal esperado: [o que a resposta ou o comportamento revela]
+Objetivo: [por que este Story existe e como prepara o próximo]
+
+SEQUÊNCIAS
+De 3 a 15 Stories por sequência. Até 3 sequências por dia. Gerar calendário de 30 dias quando pedido. Cada sequência tem um objetivo único e um mecanismo de interação principal. Todo Story precisa acrescentar algo ao anterior.
+
+BIBLIOTECAS (usar conforme o objetivo)
+Mecanismos de interação: enquete, caixa de pergunta, quiz, controle deslizante, reação por emoji, link, resposta por mensagem, contagem regressiva.
+Formatos: fala direta para a câmera, bastidores, demonstração, antes e depois, prova social, resposta a perguntas, tutorial curto, convite.
+Sequências: aquecimento, descoberta de preferência, educação, quebra de objeção, prova, oferta, urgência, pós-venda e indicação.
+
+ADAPTAÇÃO
+Adaptar linguagem, ritmo e formato à personalidade de quem comunica (mais tímido, mais expansivo, institucional, técnico, popular). Funcionar para qualquer nicho.
+
+APRENDIZADO
+Quando houver resultados (alcance, respostas, cliques, mensagens, saídas), diagnosticar o que funcionou, o que não funcionou e por quê, e propor a próxima sequência. Transformar os melhores Stories em roteiros de anúncio.
+
+REGRAS DE SEGURANÇA
+Não inventar fatos, números, resultados, depoimentos, preços ou prazos: usar [CONFIRMAR] quando faltar informação. Em setores regulados (saúde, direito, finanças), respeitar as regras do conselho ou órgão do setor e não prometer resultado.`;
+
+</script>
+<script>
+/* ===== Skills de texto: instruções (suas) que a IA segue ao escrever, por função e por fase da jornada. =====
+   Ficam guardadas no Studio e entram no pedido enviado à IA. Sem a IA configurada nada é enviado: use "Ver o pedido" para conferir ou copiar. */
+const SK_FN_INFO = {
+  campanha: ['Campanha: headlines, apoio e CTA dos anúncios', true], carrossel: ['Carrossel: textos dos slides', true], video: ['Vídeo: roteiro', true],
+  post: ['Post e legenda', false], stories: ['Stories', false], landing: ['Landing page', false], pre: ['Pré-projeto', false], editorial: ['Agente Editorial (já tem a sua skill própria)', false]
+};
+const skUI = {id: '', fn: 'campanha', stage: ''};
+let AI_CTX = null;   // contexto de uma chamada: {fn, stage}. Vale só para o próximo pedido à IA.
+const skList = () => (state.skills = Array.isArray(state.skills) ? state.skills : []);
+const skCtx = (fn, stage) => { AI_CTX = {fn, stage: stage || ''}; };
+function skillsFor(fn, stage) {
+  return skList().filter(k => k.auto && k.on !== false && (k.fns || []).includes(fn) && (!(k.stages || []).length || !stage || k.stages.includes(stage))).sort((a, b) => (b.prio || 50) - (a.prio || 50));
+}
+/* monta o texto de sistema: skills primeiro (maior prioridade primeiro), depois o pedido da função */
+function skillSystem(fn, stage, base) {
+  const L = skillsFor(fn, stage); if (!L.length) return base;
+  let txt = L.map(k => `### SKILL: ${k.name}\n${k.text}`).join('\n\n'); if (txt.length > 40000) txt = txt.slice(0, 40000);
+  return `INSTRUÇÕES DE SKILL. Siga em toda a resposta, sem contrariar a regra de nunca inventar dados e sem mudar o formato de resposta pedido no PEDIDO abaixo:\n\n${txt}\n\n=== PEDIDO ===\n${base}`;
+}
+const skSize = t => { const n = String(t || '').length; return `${n.toLocaleString('pt-BR')} caracteres (~${Math.round(n / 4).toLocaleString('pt-BR')} tokens)`; };
+
+/* ---------- ações ---------- */
+function skAddReady(kind) {
+  const L = skList(); if (L.length >= 30) { toast('Limite de 30 skills.'); return; }
+  const k = kind === 'editorial' ? {id: 'sk_editorial_engine', name: 'BrandsDecoded Editorial Engine', desc: 'Agente editorial: encontra a história antes de escrever (triagem, ângulos, carrossel de 18 textos, post, vídeo, auditoria).', text: SKT_EDITORIAL, auto: true, on: true, prio: 50, fns: ['campanha', 'carrossel', 'post', 'video'], stages: [], draft: false}
+    : {id: 'sk_stories_engine', name: 'Motor de Stories (rascunho)', desc: 'Rascunho escrito a partir da sua descrição. Revise antes de ligar.', text: SKT_STORIES, auto: false, on: true, prio: 50, fns: ['stories'], stages: [], draft: true};
+  if (L.some(x => x.id === k.id)) { toast('Essa skill já está na lista.'); return; }
+  L.push(k); persist(); skUI.id = k.id; renderSkillsPage(); toast('Skill adicionada. Confira onde ela vale e ligue o uso automático.');
+}
+function skNew() { const L = skList(); if (L.length >= 30) { toast('Limite de 30 skills.'); return; } const k = {id: uid('sk'), name: 'Nova skill', desc: '', text: '', auto: false, on: true, prio: 50, fns: [], stages: [], draft: false}; L.push(k); persist(); skUI.id = k.id; renderSkillsPage(); }
+function skUpload() {
+  const i = document.createElement('input'); i.type = 'file'; i.accept = '.md,.txt,text/plain,text/markdown';
+  i.onchange = async () => { const f = i.files[0]; if (!f) return; if (f.size > 200000) { toast('Arquivo grande demais (máximo 200 KB).'); return; } const t = (await f.text()).slice(0, 30000), L = skList(); if (L.length >= 30) { toast('Limite de 30 skills.'); return; }
+    const k = {id: uid('sk'), name: f.name.replace(/\.[^.]+$/, '').slice(0, 80), desc: '', text: t, auto: false, on: true, prio: 50, fns: [], stages: [], draft: false}; L.push(k); persist(); skUI.id = k.id; renderSkillsPage(); toast('Skill carregada' + (f.size > 30000 ? ' (cortada em 30 mil caracteres)' : '') + '.'); };
+  i.click();
+}
+function skSel(id) { skUI.id = skUI.id === id ? '' : id; renderSkillsPage(); }
+function skSave() {
+  const k = skList().find(x => x.id === skUI.id); if (!k) return;
+  k.name = ($('skName').value.trim() || 'Skill').slice(0, 80); k.desc = $('skDesc').value.slice(0, 300); k.text = $('skText').value.slice(0, 30000); k.prio = Math.max(0, Math.min(99, Math.round(+$('skPrio').value) || 50));
+  k.auto = $('skAuto').checked; k.on = $('skOn').checked; k.draft = $('skDraft').checked;
+  k.fns = [...document.querySelectorAll('.skFn:checked')].map(x => x.value); k.stages = [...document.querySelectorAll('.skSt:checked')].map(x => x.value);
+  persist(); renderSkillsPage(); toast('Skill salva.');
+}
+function skToggle(id) { const k = skList().find(x => x.id === id); if (!k) return; k.on = k.on === false; persist(); renderSkillsPage(); }
+function skDel(id) { const k = skList().find(x => x.id === id); if (!k || !confirm('Excluir a skill “' + k.name + '”?')) return; state.skills = skList().filter(x => x.id !== id); if (skUI.id === id) skUI.id = ''; persist(); renderSkillsPage(); }
+function skDup(id) { const k = skList().find(x => x.id === id); if (!k || skList().length >= 30) return; const c = JSON.parse(JSON.stringify(k)); c.id = uid('sk'); c.name = (k.name + ' (cópia)').slice(0, 80); c.auto = false; skList().push(c); persist(); skUI.id = c.id; renderSkillsPage(); }
+function skPreviewOpen() {
+  const fns = Object.keys(SK_FN_INFO);
+  showModal('Ver o pedido que será enviado', `<p class="muted" style="font-size:12.5px;margin-top:0">É o texto de instruções que vai antes do pedido de cada função. Você pode copiar e colar na sua IA.</p>
+  <div class="ins-row"><label class="ins">Função<select id="skPvFn" onchange="skPreviewDraw()">${fns.map(f => `<option value="${f}" ${f === skUI.fn ? 'selected' : ''}>${esc(SK_FN_INFO[f][0])}</option>`).join('')}</select></label>
+  <label class="ins">Fase da jornada<select id="skPvSt" onchange="skPreviewDraw()"><option value="">Qualquer</option>${CMP_STAGES5.map(k => `<option value="${k}">${CMP_STAGE_LABEL[k]}</option>`).join('')}</select></label></div>
+  <p id="skPvInfo" class="muted" style="font-size:12px"></p><textarea id="skPvTxt" readonly rows="14" style="width:100%;font-size:12px"></textarea>
+  <div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button><button class="btn dark" onclick="skPreviewCopy()">Copiar</button></div>`);
+  $('modalBox').classList.add('wide'); skPreviewDraw();
+}
+function skPreviewDraw() {
+  const fn = $('skPvFn').value, st = $('skPvSt').value, L = skillsFor(fn, st), txt = skillSystem(fn, st, '[aqui entra o pedido da função, com o contexto do projeto, as dores, dúvidas, desejos e urgências ocultas, e o gatilho da fase]');
+  $('skPvTxt').value = txt; $('skPvInfo').textContent = L.length ? `${L.length} skill(s) valem aqui: ${L.map(k => k.name).join(', ')} · ${skSize(txt)}` : 'Nenhuma skill vale para esta função e fase. O pedido sai sem instruções extras.';
+}
+async function skPreviewCopy() { const t = $('skPvTxt').value; try { await navigator.clipboard.writeText(t); toast('Copiado.'); } catch (e) { $('skPvTxt').select(); toast('Selecione e copie com Ctrl+C.'); } }
+
+/* ---------- tela ---------- */
+function skEditHTML(k) {
+  return `<div class="panel" style="margin-top:12px"><div class="form-grid"><div class="field"><label>Nome</label><input id="skName" value="${esc(k.name)}"></div><div class="field"><label>Prioridade (0 a 99, maior vale primeiro)</label><input id="skPrio" type="number" min="0" max="99" value="${k.prio || 50}"></div>
+  <div class="field full"><label>Para que serve (uma frase)</label><input id="skDesc" value="${esc(k.desc || '')}"></div>
+  <div class="field full"><label>Texto da skill <small class="muted">· ${skSize(k.text)} · máximo 30 mil caracteres</small></label><textarea id="skText" rows="14" style="font-size:12.5px">${esc(k.text)}</textarea></div></div>
+  <h4 style="margin:10px 0 4px">Onde vale</h4><p class="muted" style="font-size:12px;margin:0 0 6px">Marque as funções. Sem nenhuma fase marcada, vale em todas as fases da jornada.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:6px 18px">${Object.entries(SK_FN_INFO).map(([f, [l, w]]) => `<label style="font-size:12.5px"><input type="checkbox" class="skFn" value="${f}" ${(k.fns || []).includes(f) ? 'checked' : ''}> ${esc(l)}${w ? '' : ' <small class="muted">(ainda sem ligação)</small>'}</label>`).join('')}</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px">${CMP_STAGES5.map(s => `<label style="font-size:12.5px"><input type="checkbox" class="skSt" value="${s}" ${(k.stages || []).includes(s) ? 'checked' : ''}> ${CMP_STAGE_LABEL[s]}</label>`).join('')}</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px 22px;margin:12px 0"><label style="font-size:13px"><input type="checkbox" id="skAuto" ${k.auto ? 'checked' : ''}> <b>Usar automaticamente</b> nas funções marcadas</label><label style="font-size:13px"><input type="checkbox" id="skOn" ${k.on !== false ? 'checked' : ''}> ligada</label><label style="font-size:13px"><input type="checkbox" id="skDraft" ${k.draft ? 'checked' : ''}> rascunho (ainda em revisão)</label></div>
+  <div class="row-gap"><button class="btn dark" onclick="skSave()">Salvar</button><button class="btn" onclick="skDup('${k.id}')">Duplicar</button><button class="btn" onclick="skDel('${k.id}')">Excluir</button></div></div>`;
+}
+function renderSkillsPage() {
+  const r = $('skillsRoot'); if (!r) return; const L = skList(), ids = new Set(L.map(k => k.id));
+  const ready = [['editorial', 'BrandsDecoded Editorial Engine', 'O texto que você enviou: encontra a história antes de escrever.'], ['stories', 'Motor de Stories (rascunho)', 'Escrito a partir da sua descrição. Precisa da sua revisão.']].filter(([k]) => !ids.has(k === 'editorial' ? 'sk_editorial_engine' : 'sk_stories_engine'));
+  const sel = L.find(k => k.id === skUI.id);
+  r.innerHTML = `<div class="page-head"><div><h1>Skills de texto</h1><p>Instruções suas que a IA segue ao escrever. Cada skill vale para certas funções e, se quiser, certas fases da jornada. Quando a IA estiver configurada elas entram no pedido sozinhas.</p></div><div class="row-gap"><button class="btn" onclick="skPreviewOpen()">Ver o pedido que será enviado</button><button class="btn" onclick="skUpload()">⬆ Subir arquivo</button><button class="btn dark" onclick="skNew()">＋ Nova skill</button></div></div>
+  ${ready.length ? `<div class="panel"><h3 style="margin-top:0">Prontas para adicionar</h3>${ready.map(([k, n, d]) => `<div class="list-item"><div><strong>${esc(n)}</strong><small>${esc(d)}</small></div><button class="btn sm dark" onclick="skAddReady('${k}')">Adicionar</button></div>`).join('')}</div>` : ''}
+  <div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Suas skills (${L.length})</h3>${L.length ? `<div class="list">${L.map(k => `<div class="list-item"><div><strong>${esc(k.name)}</strong> ${k.draft ? '<span class="cmp-tag">rascunho</span>' : ''}<small>${esc(k.desc || 'Sem descrição')} · ${skSize(k.text)}</small><small>${k.auto && k.on !== false ? 'Uso automático em: ' + ((k.fns || []).map(f => SK_FN_INFO[f][0].split(':')[0]).join(', ') || 'nenhuma função marcada') + ((k.stages || []).length ? ' · fases: ' + k.stages.map(s => CMP_STAGE_NAME[s]).join(', ') : ' · todas as fases') : 'Sem uso automático (só manual)'}</small></div><div class="row-gap"><button class="btn sm" onclick="skToggle('${k.id}')">${k.on === false ? '○ desligada' : '● ligada'}</button><button class="btn sm dark" onclick="skSel('${k.id}')">${skUI.id === k.id ? 'Fechar' : 'Abrir'}</button></div></div>`).join('')}</div>` : '<p class="muted">Nenhuma skill ainda. Adicione uma pronta, suba um arquivo `.md` ou `.txt`, ou crie uma e cole o texto.</p>'}</div>
+  ${sel ? skEditHTML(sel) : ''}
+  <div class="panel" style="margin-top:12px"><h4 style="margin:0 0 4px">Skill 3</h4><p class="muted" style="font-size:12.5px;margin:0">Ainda não enviada. Quando mandar, suba o arquivo ou cole o texto em "Nova skill".</p></div>
+  <p class="muted" style="font-size:12px;margin-top:10px">Skills longas aumentam o custo de cada geração. Se duas valem para a mesma função e fase, entram juntas, a de maior prioridade primeiro. A qualidade real do texto só dá para avaliar com a sua chave de IA ativa.</p>`;
+}
+
+</script>
+<script>
 /* ===== Menu por categorias (recolher categorias e menu) e página "Mapa do projeto": o fluxo de trabalho do começo ao fim, clicável ===== */
 /* Fluxo de trabalho real: cliente → pré-projeto → anúncios → site/landing → mostrar ao cliente → resultados e vendas.
    Status de cada item: ok = pronto, part = parcial, soon = ainda não existe (aparece sem link). */
@@ -20688,7 +20943,7 @@ const FLOW = [
 ];
 const FLOW_SIDE = [
   {t: 'Acervo (usado em todas as etapas)', c: '#2e7d4f', items: [['biblioteca', 'Imagens', 'Fotos geradas, enviadas e do produto.', 'ok'], ['library', 'Peças criadas', 'Tudo o que já foi feito neste projeto.', 'ok']]},
-  {t: 'Ajustes', c: '#7c4dbd', items: [['settings', 'Configurações', 'Chaves das APIs, conexões e dados da conta.', 'ok']]}
+  {t: 'Ajustes', c: '#7c4dbd', items: [['skills', 'Skills de texto', 'Instruções suas que a IA segue ao escrever, por função e fase da jornada.', 'ok'], ['settings', 'Configurações', 'Chaves das APIs, conexões e dados da conta.', 'ok']]}
 ];
 const FLOW_ST = {ok: ['pronto', '#2e7d4f'], part: ['parcial', '#c9952a'], soon: ['em breve', '#888']};
 function renderFlow() {
