@@ -17,10 +17,11 @@ const INT_CARDS = [
 function renderIntegracoes() {
   const r = $('integracoesRoot'); if (!r) return;
   const s = intSt(), ok = k => !!(s[k] && s[k].configured);
-  if (!API.available) { r.innerHTML = intLocalPanel() + integrationsHTML(); return; }
+  if (!API.available) { r.innerHTML = intDemoPanel() + intLocalPanel() + integrationsHTML(); return; }
   if (canUseApi() && !INT.keys && !INT.keysLoading) { INT.keysLoading = true; api('keys.php').then(j => { INT.keys = j; }, () => { INT.keys = {keys: {}, editable: false}; }).then(() => { INT.keysLoading = false; renderIntegracoes(); }); }
   const aiProv = s.ai && s.ai.provider === 'openai' ? 'GPT (OpenAI)' : 'Claude (Anthropic)';
   r.innerHTML = `<div class="section-row" style="margin-bottom:10px"><div><h2 style="margin:0;font-size:18px">Integrações (APIs)</h2><p class="muted" style="margin:2px 0 0">Onde você liga as APIs. Cada chave fica só no servidor, no arquivo <span class="mono">api/config.php</span>; aqui você vê o que está ligado e testa a conexão.</p></div><button class="btn" onclick="INT.keys=null;loadStatus().then(renderIntegracoes)">↻ Atualizar status</button></div>
+  ${intDemoPanel()}
   ${INT.keys && !INT.keys.editable ? intSetupPanel() : ''}
   ${needsLogin() ? `<div class="panel" style="margin-bottom:12px"><div class="section-row"><div><h3>Entre no Studio</h3><p class="muted">Sem login o servidor não mostra o status das chaves.</p></div><button class="btn dark" onclick="showLogin()">Entrar</button></div></div>` : ''}
   <div class="integration-grid int-big">${INT_CARDS.map(c => {
@@ -40,6 +41,15 @@ function renderIntegracoes() {
   <div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>Como ligar</h3><p class="muted" style="margin:2px 0 0">No servidor (Hostinger), copie <span class="mono">api/config.sample.php</span> para <span class="mono">api/config.php</span> e preencha as chaves. Nunca suba <span class="mono">config.php</span> para o GitHub.</p></div><button class="btn sm" onclick="intCopyCfg()">Copiar trecho do config</button></div>
   <small class="muted block" style="margin-top:8px">Os endereços da Magnific e os campos de upscale seguem a API pública como eu a conheço e ainda não foram validados com chave real: use “Testar conexão” e me mande o erro, se aparecer. A conta do GPT e a de imagens usam a mesma chave OpenAI.</small></div>
   <h2 style="margin:22px 0 10px;font-size:18px">Outras conexões</h2>${integrationsHTML()}`;
+}
+/* Teste de exemplo: mostra onde a chave entra e como fica o resultado de cada teste, SEM chamar nenhuma API */
+const INT_DEMO = [['Texto (IA)', 'Resposta recebida: “ok”', 'Escolha o provedor e cole a chave Claude ou GPT.'], ['Imagens (IA)', '1 imagem de exemplo gerada', 'Usa a mesma chave OpenAI do GPT.'], ['Banco de imagens', '24 resultados para “flores”', 'Cole a chave Magnific.'], ['Narração', '12 vozes disponíveis na conta', 'Cole a chave ElevenLabs.']];
+function intDemo() { INT.demoOut = true; renderIntegracoes(); }
+function intDemoPanel() {
+  return `<div class="panel" style="margin-bottom:12px;border:1px dashed #8886"><div class="section-row"><div><h3 style="margin:0">Teste de exemplo: onde a chave entra</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">Para ver como funciona antes de ter as chaves. Não chama nenhuma API e não gasta nada.</p></div><button class="btn sm" onclick="intDemo()">Simular o teste</button></div>
+  <ol style="font-size:13px;margin:10px 0 6px 18px;line-height:1.6"><li>Em cada cartão abaixo há um campo <b>Chave</b>: é ali que você cola a chave da API.</li><li>Clique em <b>Salvar</b>. A chave vai para o servidor e nunca volta para o navegador (o campo mostra só "configurada").</li><li>Clique em <b>Testar conexão</b>. O resultado aparece embaixo do botão.</li></ol>
+  <div class="row-gap" style="flex-wrap:wrap;margin-top:6px"><input disabled value="sk-ant-••••••••••••" style="width:200px" aria-label="campo de chave de exemplo"><button class="btn sm" disabled>Salvar</button><button class="btn sm" disabled>Testar conexão</button><span class="mono" style="font-size:11px;color:#888">← assim é o campo de cada cartão</span></div>
+  ${INT.demoOut ? `<div class="list" style="margin-top:10px">${INT_DEMO.map(([n, out, how]) => `<div class="list-item"><div><strong>${esc(n)}</strong><small>${esc(how)}</small></div><span class="cmp-tag" style="background:#2e7d4f22;color:#2e7d4f">EXEMPLO · ${esc(out)}</span></div>`).join('')}</div><p class="muted" style="font-size:11.5px;margin:6px 0 0">Resultados de exemplo. O teste de verdade só aparece depois de salvar uma chave real.</p>` : ''}</div>`;
 }
 /* campo de chave: salva no servidor (keys.php), nunca volta para o navegador */
 function intKeyRow(name, label) {

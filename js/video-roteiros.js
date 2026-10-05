@@ -67,6 +67,13 @@ function vsCreate() {
   const r = {id: uid('vs'), src, dur: vlUI.dur, t: vsSkeleton(p, src, vlUI.dur), resp: '', ap: Object.fromEntries(VS_KINDS6.map(k => [k, {s: 'Rascunho', at: ''}])), created: new Date().toISOString(), updated: ''};
   p.video.scripts.unshift(r); vlUI.id = r.id; vlUI.kind = 'ficha'; persist(); renderVideoLab(); toast('Os 6 documentos foram montados, na ordem da Skill Mestre. Revise e, se quiser, reescreva com a IA.');
 }
+/* a partir da campanha: cria os 6 documentos de um anúncio e abre no Video Lab */
+function vsCreateFor(cid, pid) {
+  const p = curProject(), c = p.campaigns.find(x => x.id === cid), q = c && c.pieces.find(x => x.id === pid); if (!q) return;
+  const have = p.video.scripts.find(r => r.src.type === 'piece' && r.src.id === pid); vlUI.tab = 'roteiros';
+  if (have) { vlUI.id = have.id; vlUI.kind = 'ficha'; go('videoLab'); return; }
+  vlUI.src = 'piece'; vlUI.cmp = cid; vlUI.piece = pid; vsCreate(); go('videoLab');
+}
 function vsLoadExample() {
   const p = curProject(), ex = p.video.scripts.find(x => x.ex); if (ex) { vlUI.id = ex.id; vlUI.kind = 'ficha'; renderVideoLab(); return; }
   if (p.video.scripts.length >= 60) { toast('Limite de 60 roteiros.'); return; }

@@ -76,11 +76,11 @@ function stBuild(p, plan, perDay, nStories) {
 }
 
 /* ---------- criar e editar ---------- */
-function stNewModal() {
+function stNewModal(cid) {
   const p = curProject(); if (!p) { toast('Abra um projeto primeiro.'); return; }
   showModal('Planejar a semana de Stories', `<p style="font-size:13px;margin-top:0">O Studio monta <b>7 dias de sequências</b>, cada uma pronta para gravar, com o que falar palavra por palavra, a enquete ou a caixa de pergunta e o sinal que cada Story busca. Nasce sem IA e sem gastar crédito.</p>
   <div class="form-grid"><div class="field full"><label>Nome do plano</label><input id="snN" placeholder="Ex.: Semana de lançamento"></div>
-  <div class="field"><label>Campanha (opcional)</label><select id="snC"><option value="">Sem campanha</option>${p.campaigns.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
+  <div class="field"><label>Campanha (opcional)</label><select id="snC"><option value="">Sem campanha</option>${p.campaigns.map(c => `<option value="${c.id}" ${c.id === cid ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
   <div class="field"><label>Início da semana (opcional)</label><input id="snS" type="date"></div>
   <div class="field"><label>Personalidade de quem comunica</label><select id="snP">${Object.entries(ST_PERS_L).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select></div>
   <div class="field"><label>Objetivo</label><select id="snO">${['Gerar conversas', 'Captar leads', 'Vender', 'Educar', 'Relacionamento'].map(o => `<option>${o}</option>`).join('')}</select></div>

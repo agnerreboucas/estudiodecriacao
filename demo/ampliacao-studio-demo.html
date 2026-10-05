@@ -1304,7 +1304,7 @@ function normalizeCampaigns(x) {
     return {id: c.id, name: str(c.name, 120) || 'Campanha', objective: str(c.objective, 120), budget: Math.max(0, +c.budget || 0), channel: str(c.channel, 60) || 'Meta Ads', status: ['Rascunho', 'Ativa', 'Pausada'].includes(c.status) ? c.status : 'Rascunho', period: str(c.period, 80), audience: str(c.audience, 300),
       feedFmt: c.feedFmt === 'square' ? 'square' : 'feed45', layout: ['auto', 'full', 'top', 'bottom', 'none'].includes(c.layout) ? c.layout : 'auto', align: c.align === 'center' ? 'center' : 'left', bank: {dor: lines(bank.dor, 200, 20), duvida: lines(bank.duvida, 200, 20), desejo: lines(bank.desejo, 200, 20), urgencia: lines(bank.urgencia, 200, 20), h: lines(bank.h, 200, 30), ht: (Array.isArray(bank.ht) ? bank.ht : []).slice(0, 30).map(t => CMP_KINDS.includes(t) ? t : ''), s: lines(bank.s, 300, 20), c: lines(bank.c, 60, 20), img: (Array.isArray(bank.img) ? bank.img : []).filter(sid).slice(0, 12), col: (Array.isArray(bank.col) ? bank.col : []).filter(v => v && hex(v.bg) && hex(v.accent)).slice(0, 6).map(v => ({name: str(v.name, 30), bg: v.bg, accent: v.accent, fg: hex(v.fg) ? v.fg : '#ffffff'}))},
       notes: (Array.isArray(c.notes) ? c.notes : []).filter(n => n && sid(n.id) && str(n.text, 1500).trim()).slice(0, 300).map(n => ({id: n.id, kind: CMP_NOTE_KINDS.includes(n.kind) ? n.kind : 'ideia', text: str(n.text, 1500), src: str(n.src, 200), pin: !!n.pin, created: str(n.created, 40) || new Date().toISOString()})),
-      test: {macro: str(c.test && c.test.macro, 400), micro: str(c.test && c.test.micro, 400), format: str(c.test && c.test.format, 400), notes: str(c.test && c.test.notes, 1500)}, pieces, created: str(c.created, 40) || new Date().toISOString()};
+      landings: (Array.isArray(c.landings) ? c.landings : []).filter(sid).slice(0, 20), test: {macro: str(c.test && c.test.macro, 400), micro: str(c.test && c.test.micro, 400), format: str(c.test && c.test.format, 400), notes: str(c.test && c.test.notes, 1500)}, pieces, created: str(c.created, 40) || new Date().toISOString()};
   });
 }
 /* Roteiros do Video Lab: ficha estratégica, literário, gravação, técnico, edição e glossário (nessa ordem) por ângulo de anúncio, post ou ideia */
@@ -9341,10 +9341,11 @@ const INT_CARDS = [
 function renderIntegracoes() {
   const r = $('integracoesRoot'); if (!r) return;
   const s = intSt(), ok = k => !!(s[k] && s[k].configured);
-  if (!API.available) { r.innerHTML = intLocalPanel() + integrationsHTML(); return; }
+  if (!API.available) { r.innerHTML = intDemoPanel() + intLocalPanel() + integrationsHTML(); return; }
   if (canUseApi() && !INT.keys && !INT.keysLoading) { INT.keysLoading = true; api('keys.php').then(j => { INT.keys = j; }, () => { INT.keys = {keys: {}, editable: false}; }).then(() => { INT.keysLoading = false; renderIntegracoes(); }); }
   const aiProv = s.ai && s.ai.provider === 'openai' ? 'GPT (OpenAI)' : 'Claude (Anthropic)';
   r.innerHTML = `<div class="section-row" style="margin-bottom:10px"><div><h2 style="margin:0;font-size:18px">Integrações (APIs)</h2><p class="muted" style="margin:2px 0 0">Onde você liga as APIs. Cada chave fica só no servidor, no arquivo <span class="mono">api/config.php</span>; aqui você vê o que está ligado e testa a conexão.</p></div><button class="btn" onclick="INT.keys=null;loadStatus().then(renderIntegracoes)">↻ Atualizar status</button></div>
+  ${intDemoPanel()}
   ${INT.keys && !INT.keys.editable ? intSetupPanel() : ''}
   ${needsLogin() ? `<div class="panel" style="margin-bottom:12px"><div class="section-row"><div><h3>Entre no Studio</h3><p class="muted">Sem login o servidor não mostra o status das chaves.</p></div><button class="btn dark" onclick="showLogin()">Entrar</button></div></div>` : ''}
   <div class="integration-grid int-big">${INT_CARDS.map(c => {
@@ -9364,6 +9365,15 @@ function renderIntegracoes() {
   <div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>Como ligar</h3><p class="muted" style="margin:2px 0 0">No servidor (Hostinger), copie <span class="mono">api/config.sample.php</span> para <span class="mono">api/config.php</span> e preencha as chaves. Nunca suba <span class="mono">config.php</span> para o GitHub.</p></div><button class="btn sm" onclick="intCopyCfg()">Copiar trecho do config</button></div>
   <small class="muted block" style="margin-top:8px">Os endereços da Magnific e os campos de upscale seguem a API pública como eu a conheço e ainda não foram validados com chave real: use “Testar conexão” e me mande o erro, se aparecer. A conta do GPT e a de imagens usam a mesma chave OpenAI.</small></div>
   <h2 style="margin:22px 0 10px;font-size:18px">Outras conexões</h2>${integrationsHTML()}`;
+}
+/* Teste de exemplo: mostra onde a chave entra e como fica o resultado de cada teste, SEM chamar nenhuma API */
+const INT_DEMO = [['Texto (IA)', 'Resposta recebida: “ok”', 'Escolha o provedor e cole a chave Claude ou GPT.'], ['Imagens (IA)', '1 imagem de exemplo gerada', 'Usa a mesma chave OpenAI do GPT.'], ['Banco de imagens', '24 resultados para “flores”', 'Cole a chave Magnific.'], ['Narração', '12 vozes disponíveis na conta', 'Cole a chave ElevenLabs.']];
+function intDemo() { INT.demoOut = true; renderIntegracoes(); }
+function intDemoPanel() {
+  return `<div class="panel" style="margin-bottom:12px;border:1px dashed #8886"><div class="section-row"><div><h3 style="margin:0">Teste de exemplo: onde a chave entra</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">Para ver como funciona antes de ter as chaves. Não chama nenhuma API e não gasta nada.</p></div><button class="btn sm" onclick="intDemo()">Simular o teste</button></div>
+  <ol style="font-size:13px;margin:10px 0 6px 18px;line-height:1.6"><li>Em cada cartão abaixo há um campo <b>Chave</b>: é ali que você cola a chave da API.</li><li>Clique em <b>Salvar</b>. A chave vai para o servidor e nunca volta para o navegador (o campo mostra só "configurada").</li><li>Clique em <b>Testar conexão</b>. O resultado aparece embaixo do botão.</li></ol>
+  <div class="row-gap" style="flex-wrap:wrap;margin-top:6px"><input disabled value="sk-ant-••••••••••••" style="width:200px" aria-label="campo de chave de exemplo"><button class="btn sm" disabled>Salvar</button><button class="btn sm" disabled>Testar conexão</button><span class="mono" style="font-size:11px;color:#888">← assim é o campo de cada cartão</span></div>
+  ${INT.demoOut ? `<div class="list" style="margin-top:10px">${INT_DEMO.map(([n, out, how]) => `<div class="list-item"><div><strong>${esc(n)}</strong><small>${esc(how)}</small></div><span class="cmp-tag" style="background:#2e7d4f22;color:#2e7d4f">EXEMPLO · ${esc(out)}</span></div>`).join('')}</div><p class="muted" style="font-size:11.5px;margin:6px 0 0">Resultados de exemplo. O teste de verdade só aparece depois de salvar uma chave real.</p>` : ''}</div>`;
 }
 /* campo de chave: salva no servidor (keys.php), nunca volta para o navegador */
 function intKeyRow(name, label) {
@@ -20411,7 +20421,7 @@ const CMP_GENERIC = ['Entenda antes de decidir', 'Fale com quem entende do assun
 const CMP_MLABEL = {feed: 'Feed', vertical: 'Vertical', horizontal: 'Horizontal'};
 const CMP_MFMT = c => ({feed: FORMATS[c.feedFmt === 'square' ? 'adsquare' : 'ad45'], vertical: FORMATS.adstory, horizontal: FORMATS.adlink});
 const CMP_SAFE = {top: 250, bottom: 340};   // zonas que o Meta cobre no vertical (regra prática, editável aqui)
-const cmpUI = {id: '', tab: 'pecas', phase: 'descoberta', busy: false};
+const cmpUI = {id: '', tab: 'geral', phase: 'descoberta', busy: false};
 const cmpOf = (p, id) => p.campaigns.find(x => x.id === id);
 const cmpSetOf = (p, id) => p.design.sets.find(s => s.id === id);
 function cmpRender() { if (ui.page === 'project') { renderProjectTab(); cmpAfter(curProject(), document); } else renderCampaignsPage(); }
@@ -20514,9 +20524,9 @@ function cmpCount() { const n = Math.max(1, Math.min(10, +$('cmQ').value || 1));
 async function cmpCreate() {
   const p = curProject(), name = $('cmN').value.trim(); if (!name) { toast('Dê um nome à campanha.'); return; }
   const n = Math.max(1, Math.min(10, +$('cmQ').value || 5)), ff = (document.querySelector('input[name=cmF]:checked') || {}).value || 'feed45';
-  const c = {id: uid('cm'), name, objective: $('cmO').value, budget: 0, channel: 'Meta Ads', status: 'Rascunho', period: '', audience: ((p.pre.icps[0] || {}).name || ''), feedFmt: ff, layout: 'auto', align: 'left', bank: cmpDraftBank(p, n), test: {macro: '', micro: '', format: '', notes: ''}, notes: [], pieces: [], created: new Date().toISOString()};
+  const c = {id: uid('cm'), name, objective: $('cmO').value, budget: 0, channel: 'Meta Ads', status: 'Rascunho', period: '', audience: ((p.pre.icps[0] || {}).name || ''), feedFmt: ff, layout: 'auto', align: 'left', bank: cmpDraftBank(p, n), test: {macro: '', micro: '', format: '', notes: ''}, notes: [], landings: [], pieces: [], created: new Date().toISOString()};
   c.test = {macro: `Teste de ângulo: dentro de cada fase, compare os ${n} anúncios (headlines de tipos diferentes: dor, dúvida, desejo, urgência oculta), mesmo público e mesmo orçamento. (sugestão, edite)`, micro: 'Com o ângulo vencedor de cada fase, troque uma coisa por vez: imagem, cor ou CTA, usando a faixa de variações.', format: 'Compare feed, vertical e horizontal do mesmo anúncio para ver qual medida rende mais.', notes: ''};
-  p.campaigns.push(c); closeModal(); cmpUI.id = c.id; cmpUI.phase = 'descoberta'; cmpUI.tab = 'pecas'; cmpUI.busy = true; const used = new Set(), total = n * 5; let gi = 0;
+  p.campaigns.push(c); closeModal(); cmpUI.id = c.id; cmpUI.phase = 'descoberta'; cmpUI.tab = 'geral'; cmpUI.busy = true; const used = new Set(), total = n * 5; let gi = 0;
   try { for (const st of CMP_STAGES5) for (let k = 0; k < n; k++) { toast(`Montando as artes… ${gi + 1}/${total}`); const q = cmpNewPiece(c, st, k, cmpPickHead(c, st, k, used), gi++); c.pieces.push(q); await cmpBuildPiece(p, c, q); } } finally { cmpUI.busy = false; }
   persist(); cmpRender(); toast(`Campanha criada: ${total} anúncios, ${total * 3} artes. Troque o que quiser na faixa de variações.`);
 }
@@ -20656,10 +20666,14 @@ function cmpPieceHTML(p, c, q) {
 }
 function cmpDetailHTML(p, c) {
   const on = c.pieces.reduce((n, q) => n + CMP_MEASURES.filter(k => q.on[k]).length, 0), tab = cmpUI.tab;
-  const tabs = [['pecas', 'Peças'], ['bancos', 'Bancos de variações'], ['caderno', `Caderno de ideias (${c.notes.length})`], ['teste', 'Plano de teste']];
+  const tabs = [['geral', 'Visão geral'], ['pecas', 'Anúncios'], ['bancos', 'Bancos de variações'], ['caderno', `Caderno (${c.notes.length})`], ['roteiros', 'Roteiros de vídeo'], ['stories', 'Stories'], ['landing', 'Landing page'], ['teste', 'Plano de teste']];
   const comb = Math.max(1, c.bank.h.length) * Math.max(1, c.bank.img.length) * Math.max(1, c.bank.col.length) * Math.max(1, c.bank.c.length);
   let body = '';
-  if (tab === 'pecas') body = `<div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Layout da campanha</h3><div class="row-gap" style="flex-wrap:wrap;align-items:center"><label class="muted" style="font-size:12.5px">Foto <select onchange="cmpField('${c.id}','layout',this.value)">${[['auto', 'Automático'], ['full', 'Foto no fundo'], ['top', 'Foto no topo'], ['bottom', 'Foto embaixo'], ['none', 'Sem foto']].map(([v, l]) => `<option value="${v}" ${c.layout === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label><label class="muted" style="font-size:12.5px">Texto <select onchange="cmpField('${c.id}','align',this.value)"><option value="left" ${c.align === 'left' ? 'selected' : ''}>À esquerda</option><option value="center" ${c.align === 'center' ? 'selected' : ''}>Centralizado</option></select></label><button class="btn sm dark" onclick="cmpRelayout('${c.id}')">Aplicar a todas as peças</button></div><p class="muted" style="font-size:11.5px;margin:8px 0 0">Mudou o texto, a foto ou a cor da matriz (feed) no editor? As outras medidas se refazem sozinhas ao voltar aqui. Posições arrastadas à mão numa medida não passam para as outras; para isso o Studio refaz o layout a partir do texto e da foto.</p></div><div class="edh-tabs" style="margin-top:12px">${CMP_STAGES5.map(k => `<button class="edh-tab ${cmpUI.phase === k ? 'on' : ''}" onclick="cmpUI.phase='${k}';cmpRender()">${CMP_STAGE_LABEL[k]} (${c.pieces.filter(q => q.stage === k).length})</button>`).join('')}</div><p class="muted" style="font-size:12.5px;margin:8px 0 0"><b>${CMP_STAGE_NAME[cmpUI.phase]} · "${CMP_STAGE_EU[cmpUI.phase]}"</b> · gatilho fixo: <b>${CMP_STAGE_GATILHO[cmpUI.phase]}</b>. ${CMP_STAGE_DESC[cmpUI.phase]} Foco em ${CMP_STAGE_KINDS[cmpUI.phase].map(k => CMP_KIND_PL[k].toLowerCase()).join(' e ')}.</p>${c.pieces.filter(q => q.stage === cmpUI.phase).map(q => cmpPieceHTML(p, c, q)).join('') || '<p class="muted">Nenhum anúncio nesta fase.</p>'}<div style="margin:12px 0"><button class="btn" onclick="cmpAddPiece('${c.id}')">＋ Adicionar anúncio nesta fase (+3 medidas)</button></div>`;
+  if (tab === 'geral') body = cmpGeralHTML(p, c);
+  else if (tab === 'roteiros') body = cmpRoteirosHTML(p, c);
+  else if (tab === 'stories') body = cmpStoriesHTML(p, c);
+  else if (tab === 'landing') body = cmpLandingHTML(p, c);
+  else if (tab === 'pecas') body = `<div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Layout da campanha</h3><div class="row-gap" style="flex-wrap:wrap;align-items:center"><label class="muted" style="font-size:12.5px">Foto <select onchange="cmpField('${c.id}','layout',this.value)">${[['auto', 'Automático'], ['full', 'Foto no fundo'], ['top', 'Foto no topo'], ['bottom', 'Foto embaixo'], ['none', 'Sem foto']].map(([v, l]) => `<option value="${v}" ${c.layout === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label><label class="muted" style="font-size:12.5px">Texto <select onchange="cmpField('${c.id}','align',this.value)"><option value="left" ${c.align === 'left' ? 'selected' : ''}>À esquerda</option><option value="center" ${c.align === 'center' ? 'selected' : ''}>Centralizado</option></select></label><button class="btn sm dark" onclick="cmpRelayout('${c.id}')">Aplicar a todas as peças</button></div><p class="muted" style="font-size:11.5px;margin:8px 0 0">Mudou o texto, a foto ou a cor da matriz (feed) no editor? As outras medidas se refazem sozinhas ao voltar aqui. Posições arrastadas à mão numa medida não passam para as outras; para isso o Studio refaz o layout a partir do texto e da foto.</p></div><div class="edh-tabs" style="margin-top:12px">${CMP_STAGES5.map(k => `<button class="edh-tab ${cmpUI.phase === k ? 'on' : ''}" onclick="cmpUI.phase='${k}';cmpRender()">${CMP_STAGE_LABEL[k]} (${c.pieces.filter(q => q.stage === k).length})</button>`).join('')}</div><p class="muted" style="font-size:12.5px;margin:8px 0 0"><b>${CMP_STAGE_NAME[cmpUI.phase]} · "${CMP_STAGE_EU[cmpUI.phase]}"</b> · gatilho fixo: <b>${CMP_STAGE_GATILHO[cmpUI.phase]}</b>. ${CMP_STAGE_DESC[cmpUI.phase]} Foco em ${CMP_STAGE_KINDS[cmpUI.phase].map(k => CMP_KIND_PL[k].toLowerCase()).join(' e ')}.</p>${c.pieces.filter(q => q.stage === cmpUI.phase).map(q => cmpPieceHTML(p, c, q)).join('') || '<p class="muted">Nenhum anúncio nesta fase.</p>'}<div style="margin:12px 0"><button class="btn" onclick="cmpAddPiece('${c.id}')">＋ Adicionar anúncio nesta fase (+3 medidas)</button></div>`;
   else if (tab === 'bancos') body = `<div class="panel" style="margin-top:12px"><p class="muted" style="font-size:12.5px;margin-top:0">Uma opção por linha. Estas listas alimentam a faixa de variações de cada peça. Hoje: <b>${comb}</b> combinações possíveis (headlines × imagens × cores × CTAs).</p>
     <h4 style="margin:6px 0">Matéria-prima do público</h4><p class="muted" style="font-size:12px;margin:0 0 6px">Vem do pré-projeto e do caderno. Dê um clique em "Montar headlines" para gerar as headlines a partir destas quatro listas.</p><div class="form-grid">${CMP_KINDS.map(k => `<div class="field"><label><i class="cmp-dot" style="background:${CMP_KIND_COLOR[k]}"></i>${CMP_KIND_PL[k]} <small class="muted">· ${CMP_KIND_HINT[k]}</small></label><textarea rows="4" onchange="cmpBank('${c.id}','${k}',this.value)">${esc(c.bank[k].join('\n'))}</textarea></div>`).join('')}</div><div class="row-gap" style="margin:6px 0 12px"><button class="btn sm dark" onclick="cmpRebuildHeads('${c.id}')">Montar headlines a partir destas listas</button></div>
     <div class="form-grid"><div class="field full"><label>Headlines (uma por linha)</label><textarea rows="5" onchange="cmpBank('${c.id}','h',this.value)">${esc(c.bank.h.join('\n'))}</textarea></div><div class="field full"><label>Frases de apoio</label><textarea rows="4" onchange="cmpBank('${c.id}','s',this.value)">${esc(c.bank.s.join('\n'))}</textarea></div><div class="field full"><label>CTAs (texto do botão)</label><textarea rows="3" onchange="cmpBank('${c.id}','c',this.value)">${esc(c.bank.c.join('\n'))}</textarea></div></div>
@@ -20677,7 +20691,7 @@ function campaignsHTML(p) {
   const c = cmpUI.id && cmpOf(p, cmpUI.id);
   if (c) return `<div id="cmpDetail">${cmpDetailHTML(p, c)}</div>`;
   return `<div class="panel"><div class="section-row"><div><h2 style="margin:0">Campanhas</h2><small class="muted">Cada peça sai em 3 medidas do Meta: feed, vertical e horizontal.</small></div><button class="btn dark" onclick="cmpNewModal()">＋ Nova campanha</button></div>
-  ${p.campaigns.length ? `<div class="list" style="margin-top:10px">${p.campaigns.map(x => { const n = x.pieces.reduce((a, q) => a + CMP_MEASURES.filter(k => q.on[k]).length, 0); return `<div class="list-item"><div><strong>${esc(x.name)}</strong><small>${esc(x.channel)} · ${esc(x.objective)} · ${x.pieces.length} peça(s) · ${n} arte(s)${x.budget ? ' · ' + fmtMoney(x.budget) + '/dia' : ''}</small></div><div class="row-gap"><button class="btn sm dark" onclick="cmpUI.id='${x.id}';cmpUI.tab='pecas';cmpRender()">${x.pieces.length ? 'Abrir' : 'Gerar peças'}</button><button class="btn sm" onclick="deleteCampaign('${x.id}')">Excluir</button></div></div>`; }).join('')}</div>` : '<p class="muted" style="margin-top:12px">Nenhuma campanha ainda. Crie uma: ela já nasce preenchida com o que o pré-projeto sabe, e cada peça sai nas 3 medidas.</p>'}</div>`;
+  ${p.campaigns.length ? `<div class="list" style="margin-top:10px">${p.campaigns.map(x => { const n = x.pieces.reduce((a, q) => a + CMP_MEASURES.filter(k => q.on[k]).length, 0); return `<div class="list-item"><div><strong>${esc(x.name)}</strong><small>${esc(x.channel)} · ${esc(x.objective)} · ${x.pieces.length} peça(s) · ${n} arte(s)${x.budget ? ' · ' + fmtMoney(x.budget) + '/dia' : ''}</small></div><div class="row-gap"><button class="btn sm dark" onclick="cmpUI.id='${x.id}';cmpUI.tab='geral';cmpRender()">${x.pieces.length ? 'Abrir' : 'Gerar peças'}</button><button class="btn sm" onclick="deleteCampaign('${x.id}')">Excluir</button></div></div>`; }).join('')}</div>` : '<p class="muted" style="margin-top:12px">Nenhuma campanha ainda. Crie uma: ela já nasce preenchida com o que o pré-projeto sabe, e cada peça sai nas 3 medidas.</p>'}</div>`;
 }
 function renderCampaignsPage() {
   const p = curProject(), r = $('campaignsRoot'); if (!p) { r.innerHTML = noProject('Campanhas'); return; }
@@ -21747,6 +21761,13 @@ function vsCreate() {
   const r = {id: uid('vs'), src, dur: vlUI.dur, t: vsSkeleton(p, src, vlUI.dur), resp: '', ap: Object.fromEntries(VS_KINDS6.map(k => [k, {s: 'Rascunho', at: ''}])), created: new Date().toISOString(), updated: ''};
   p.video.scripts.unshift(r); vlUI.id = r.id; vlUI.kind = 'ficha'; persist(); renderVideoLab(); toast('Os 6 documentos foram montados, na ordem da Skill Mestre. Revise e, se quiser, reescreva com a IA.');
 }
+/* a partir da campanha: cria os 6 documentos de um anúncio e abre no Video Lab */
+function vsCreateFor(cid, pid) {
+  const p = curProject(), c = p.campaigns.find(x => x.id === cid), q = c && c.pieces.find(x => x.id === pid); if (!q) return;
+  const have = p.video.scripts.find(r => r.src.type === 'piece' && r.src.id === pid); vlUI.tab = 'roteiros';
+  if (have) { vlUI.id = have.id; vlUI.kind = 'ficha'; go('videoLab'); return; }
+  vlUI.src = 'piece'; vlUI.cmp = cid; vlUI.piece = pid; vsCreate(); go('videoLab');
+}
 function vsLoadExample() {
   const p = curProject(), ex = p.video.scripts.find(x => x.ex); if (ex) { vlUI.id = ex.id; vlUI.kind = 'ficha'; renderVideoLab(); return; }
   if (p.video.scripts.length >= 60) { toast('Limite de 60 roteiros.'); return; }
@@ -21939,11 +21960,11 @@ function stBuild(p, plan, perDay, nStories) {
 }
 
 /* ---------- criar e editar ---------- */
-function stNewModal() {
+function stNewModal(cid) {
   const p = curProject(); if (!p) { toast('Abra um projeto primeiro.'); return; }
   showModal('Planejar a semana de Stories', `<p style="font-size:13px;margin-top:0">O Studio monta <b>7 dias de sequências</b>, cada uma pronta para gravar, com o que falar palavra por palavra, a enquete ou a caixa de pergunta e o sinal que cada Story busca. Nasce sem IA e sem gastar crédito.</p>
   <div class="form-grid"><div class="field full"><label>Nome do plano</label><input id="snN" placeholder="Ex.: Semana de lançamento"></div>
-  <div class="field"><label>Campanha (opcional)</label><select id="snC"><option value="">Sem campanha</option>${p.campaigns.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
+  <div class="field"><label>Campanha (opcional)</label><select id="snC"><option value="">Sem campanha</option>${p.campaigns.map(c => `<option value="${c.id}" ${c.id === cid ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
   <div class="field"><label>Início da semana (opcional)</label><input id="snS" type="date"></div>
   <div class="field"><label>Personalidade de quem comunica</label><select id="snP">${Object.entries(ST_PERS_L).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select></div>
   <div class="field"><label>Objetivo</label><select id="snO">${['Gerar conversas', 'Captar leads', 'Vender', 'Educar', 'Relacionamento'].map(o => `<option>${o}</option>`).join('')}</select></div>
@@ -22047,6 +22068,61 @@ function renderStories() {
   const pl = stUI.id && stPlan(p, stUI.id);
   r.innerHTML = hubHead('Stories', 'Planeje a semana: sequências de 3 a 15 Stories por dia, prontas para gravar, com interação e aprendizado.', pl ? '' : '<button class="btn dark" onclick="stNewModal()">＋ Planejar a semana</button>') +
     (pl ? stPlanHTML(p, pl) : `<div class="panel">${p.stories.length ? `<div class="list">${p.stories.map(x => `<div class="list-item"><div><strong>${esc(x.name)}</strong><small>${x.seqs.length} sequências · ${x.seqs.reduce((a, q) => a + q.items.length, 0)} Stories · ${x.status}${x.cid && p.campaigns.find(c => c.id === x.cid) ? ' · campanha ' + esc(p.campaigns.find(c => c.id === x.cid).name) : ''}</small></div><button class="btn sm dark" onclick="stOpen('${x.id}')">Abrir</button></div>`).join('')}</div>` : '<p class="muted">Nenhum plano ainda. Clique em "Planejar a semana": o Studio monta 7 dias de sequências com o que gravar e o que falar em cada Story.</p>'}</div>`);
+}
+
+</script>
+<script>
+/* ===== Campanha completa: a visão geral do fluxo e as abas de roteiros de vídeo, Stories e landing page =====
+   Reúne no mesmo lugar tudo o que a campanha precisa: textos, anúncios nas 3 medidas, roteiros, Stories, landing page, logo e teste. */
+const cmpGo = t => { cmpUI.tab = t; cmpRender(); };
+const cmpScripts = (p, c) => p.video.scripts.filter(r => r.src.type === 'piece' && c.pieces.some(q => q.id === r.src.id));
+const cmpPlans = (p, c) => p.stories.filter(x => x.cid === c.id);
+const cmpLands = (p, c) => (c.landings || []).map(id => p.landings.find(l => l.id === id)).filter(Boolean);
+function cmpGeralHTML(p, c) {
+  const lists = CMP_KINDS.reduce((a, k) => a + c.bank[k].length, 0), artes = c.pieces.reduce((a, q) => a + CMP_MEASURES.filter(k => q.on[k] && q.sets[k]).length, 0), apr = c.pieces.filter(q => q.status === 'Aprovada' || q.status === 'No ar').length;
+  const sc = cmpScripts(p, c), docsOk = sc.reduce((a, r) => a + VS_KINDS6.filter(k => vsSt(r, k) === 'Aprovado').length, 0), pl = cmpPlans(p, c), seqs = pl.reduce((a, x) => a + x.seqs.length, 0), ld = cmpLands(p, c), logos = (p.design.logos || []).length;
+  const steps = [
+    ['Pré-projeto: público, dores, desejos e urgências', p.pre.icps.length > 0, p.pre.icps.length ? `${p.pre.icps.length} público(s) descrito(s)` : 'Ainda sem público descrito', "go('preproject')", 'Abrir pré-projeto'],
+    ['Bancos de textos da campanha', lists > 0, `${lists} itens do público · ${c.bank.h.length} headlines · ${c.bank.c.length} CTAs`, "cmpGo('bancos')", 'Ver bancos'],
+    ['Anúncios nas 3 medidas do Meta', c.pieces.length > 0, `${c.pieces.length} anúncios · ${artes} artes · ${apr} aprovados`, "cmpGo('pecas')", 'Ver anúncios'],
+    ['Roteiros de vídeo (6 documentos)', sc.length > 0, `${sc.length} de ${c.pieces.length} anúncios com roteiro · ${docsOk} de ${sc.length * 6} documentos aprovados`, "cmpGo('roteiros')", 'Ver roteiros'],
+    ['Stories da semana', pl.length > 0, pl.length ? `${pl.length} plano(s) · ${seqs} sequências` : 'Nenhum plano ligado a esta campanha', "cmpGo('stories')", 'Ver Stories'],
+    ['Landing page', ld.length > 0, ld.length ? `${ld.length} página(s)` : 'Nenhuma página criada', "cmpGo('landing')", 'Ver landing'],
+    ['Logo e identidade visual', logos > 0, logos ? `${logos} logo(s) no projeto` : 'Sem logo no projeto (cores e fontes vêm do Brand Brain)', "go('design');setTimeout(()=>{if(typeof dzLogoOpen==='function')dzLogoOpen()},60)", 'Abrir logos'],
+    ['Plano de teste e exportação', !!(c.test.macro || c.test.micro), c.test.macro ? 'Plano de teste escrito' : 'Plano de teste ainda vazio', "cmpGo('teste')", 'Ver plano']
+  ], done = steps.filter(s => s[1]).length, next = steps.find(s => !s[1]);
+  return `<div class="panel" style="margin-top:12px"><div class="section-row"><div><h3 style="margin:0">Fluxo da campanha</h3><small class="muted">Do público ao teste, tudo ligado nesta campanha.</small></div><b>${done} de ${steps.length}</b></div>
+  <div style="height:8px;background:#8882;border-radius:99px;margin:10px 0"><div style="height:8px;width:${Math.round(done / steps.length * 100)}%;background:#2e7d4f;border-radius:99px"></div></div>
+  <div class="list">${steps.map((s, i) => `<div class="list-item"><div><strong>${s[1] ? '✓' : '○'} ${i + 1}. ${esc(s[0])}</strong><small>${esc(s[2])}</small></div><button class="btn sm ${s[1] ? '' : 'dark'}" onclick="${s[3]}">${s[4]}</button></div>`).join('')}</div>
+  ${next ? `<p class="muted" style="font-size:12.5px;margin:10px 0 0"><b>Próximo passo:</b> ${esc(next[0])}.</p>` : '<p style="margin:10px 0 0;font-size:13px"><b>Fluxo completo.</b> Exporte as artes ou salve a campanha como pacote.</p>'}</div>`;
+}
+function cmpRoteirosHTML(p, c) {
+  if (!c.pieces.length) return '<div class="panel" style="margin-top:12px"><p class="muted">Crie anúncios na aba Anúncios primeiro. Cada anúncio pode ganhar os 6 roteiros: ficha, literário, gravação, técnico, edição e glossário.</p></div>';
+  return `<div class="panel" style="margin-top:12px"><p class="muted" style="font-size:12.5px;margin-top:0">Cada anúncio vira um vídeo com 6 documentos, na ordem da Skill Mestre. Eles nascem do esqueleto (sem crédito) e abrem no Video Lab, onde você aprova e baixa em PDF e Docs.</p><div class="list">${CMP_STAGES5.map(st => c.pieces.filter(q => q.stage === st).map(q => { const r = p.video.scripts.find(x => x.src.type === 'piece' && x.src.id === q.id), n = r ? VS_KINDS6.filter(k => vsSt(r, k) === 'Aprovado').length : 0;
+    return `<div class="list-item"><div><strong>${esc(q.name)}</strong><small>${CMP_STAGE_NAME[st]} · ${esc(String(q.h).slice(0, 70))}${r ? ` · ${n} de 6 documentos aprovados` : ' · sem roteiro'}</small></div><button class="btn sm ${r ? '' : 'dark'}" onclick="vsCreateFor('${c.id}','${q.id}')">${r ? 'Abrir no Video Lab' : 'Criar os 6 roteiros'}</button></div>`; }).join('')).join('')}</div></div>`;
+}
+function cmpStoriesHTML(p, c) {
+  const pl = cmpPlans(p, c);
+  return `<div class="panel" style="margin-top:12px"><div class="section-row"><div><h3 style="margin:0">Stories da campanha</h3><small class="muted">A semana de sequências usa os bancos desta campanha (dores, dúvidas, desejos e urgências).</small></div><button class="btn dark" onclick="stNewModal('${c.id}')">＋ Planejar a semana de Stories</button></div>
+  ${pl.length ? `<div class="list" style="margin-top:10px">${pl.map(x => `<div class="list-item"><div><strong>${esc(x.name)}</strong><small>${x.seqs.length} sequências · ${x.seqs.reduce((a, q) => a + q.items.length, 0)} Stories · ${x.status}</small></div><button class="btn sm dark" onclick="go('stories');stOpen('${x.id}')">Abrir</button></div>`).join('')}</div>` : '<p class="muted" style="margin-top:10px">Nenhum plano ainda.</p>'}</div>`;
+}
+function cmpLandingHTML(p, c) {
+  const ld = cmpLands(p, c);
+  return `<div class="panel" style="margin-top:12px"><div class="section-row"><div><h3 style="margin:0">Landing page da campanha</h3><small class="muted">A página para onde os anúncios levam. O que é criado aqui aparece também em Sites e landing pages.</small></div><button class="btn dark" onclick="cmpLandingModal('${c.id}')">＋ Criar landing page</button></div>
+  ${ld.length ? `<div class="list" style="margin-top:10px">${ld.map(l => `<div class="list-item"><div><strong>${esc(l.name)}</strong><small>${esc((LP_TYPE_INFO[l.type] || {label: l.type}).label)} · ${esc(l.status || 'Rascunho')}</small></div><button class="btn sm dark" onclick="go('landings');lpOpen('${l.id}')">Abrir</button></div>`).join('')}</div>` : '<p class="muted" style="margin-top:10px">Nenhuma página criada para esta campanha.</p>'}</div>`;
+}
+function cmpLandingModal(cid) {
+  const p = curProject(), c = cmpOf(p, cid); if (!c) return;
+  showModal('Criar landing page da campanha', `<div class="form-grid"><div class="field full"><label>Nome interno</label><input id="clN" value="${esc('LP · ' + c.name)}"></div><div class="field"><label>Tipo de página</label><select id="clT">${Object.entries(LP_TYPE_INFO).map(([k, v]) => `<option value="${k}" ${k === 'cadastro' ? 'selected' : ''}>${esc(v.label)}</option>`).join('')}</select></div><div class="field"><label>Produto ou serviço (opcional)</label><select id="clP"><option value="">Nenhum</option>${(p.products || []).map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select></div></div>
+  <p class="muted" style="font-size:12.5px">A página já recebe as dores, dúvidas e desejos desta campanha como material de base. Você edita no editor visual, que abre na visão do celular.</p>
+  <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="cmpLandingCreate('${cid}')">Criar e abrir</button></div>`);
+}
+function cmpLandingCreate(cid) {
+  const p = curProject(), c = cmpOf(p, cid); if (!c) return; c.landings = c.landings || []; if (c.landings.length >= 20) return;
+  const l = lpCreate({type: $('clT').value, name: ($('clN').value.trim() || 'LP · ' + c.name), productId: $('clP').value});
+  const base = ['Dores', 'Dúvidas', 'Desejos', 'Urgências ocultas'].map((t, i) => { const L = c.bank[CMP_KINDS[i]]; return L.length ? `${t}: ${L.slice(0, 5).join('; ')}` : ''; }).filter(Boolean).join('\n');
+  if (base) l.input = ((l.input || '') + (l.input ? '\n' : '') + 'Campanha ' + c.name + '\n' + base).slice(0, 4000);
+  c.landings.push(l.id); persist();
 }
 
 </script>
