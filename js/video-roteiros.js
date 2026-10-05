@@ -64,23 +64,46 @@ function vsGlossary(docs, plan) {
 function vsCreate() {
   const p = curProject(), src = vsSource(p); if (!src) { toast('Escolha o ângulo, o anúncio ou escreva a ideia.'); return; }
   if (p.video.scripts.length >= 60) { toast('Limite de 60 roteiros.'); return; }
-  const r = {id: uid('vs'), src, dur: vlUI.dur, t: vsSkeleton(p, src, vlUI.dur), created: new Date().toISOString(), updated: ''};
+  const r = {id: uid('vs'), src, dur: vlUI.dur, t: vsSkeleton(p, src, vlUI.dur), resp: '', ap: Object.fromEntries(VS_KINDS6.map(k => [k, {s: 'Rascunho', at: ''}])), created: new Date().toISOString(), updated: ''};
   p.video.scripts.unshift(r); vlUI.id = r.id; vlUI.kind = 'ficha'; persist(); renderVideoLab(); toast('Os 6 documentos foram montados, na ordem da Skill Mestre. Revise e, se quiser, reescreva com a IA.');
 }
 function vsLoadExample() {
   const p = curProject(), ex = p.video.scripts.find(x => x.ex); if (ex) { vlUI.id = ex.id; vlUI.kind = 'ficha'; renderVideoLab(); return; }
   if (p.video.scripts.length >= 60) { toast('Limite de 60 roteiros.'); return; }
-  const E = VS_EXAMPLE, r = {id: uid('vs'), ex: true, src: {type: 'free', id: '', title: E.title + ' (exemplo)', hook: 'Todos os dias, às seis da tarde, ele colocava uma cadeira na janela.', angle: 'A esperança pode permanecer mesmo quando o tempo passa.', cta: 'Quem você ainda espera?', stage: '', base: 'Curta vertical de storytelling emocional sobre saudade, espera e esperança.'}, dur: E.dur, t: {ficha: E.ficha, literario: E.literario, gravacao: E.gravacao, tecnico: E.tecnico, edicao: E.edicao, glossario: E.glossario}, created: new Date().toISOString(), updated: ''};
+  const E = VS_EXAMPLE, r = {id: uid('vs'), ex: true, resp: '', ap: Object.fromEntries(VS_KINDS6.map(k => [k, {s: 'Rascunho', at: ''}])), src: {type: 'free', id: '', title: E.title + ' (exemplo)', hook: 'Todos os dias, às seis da tarde, ele colocava uma cadeira na janela.', angle: 'A esperança pode permanecer mesmo quando o tempo passa.', cta: 'Quem você ainda espera?', stage: '', base: 'Curta vertical de storytelling emocional sobre saudade, espera e esperança.'}, dur: E.dur, t: {ficha: E.ficha, literario: E.literario, gravacao: E.gravacao, tecnico: E.tecnico, edicao: E.edicao, glossario: E.glossario}, created: new Date().toISOString(), updated: ''};
   p.video.scripts.unshift(r); vlUI.id = r.id; vlUI.kind = 'ficha'; persist(); renderVideoLab(); toast('Exemplo carregado. É só para consulta e referência: crie os seus acima.');
+}
+const VS_DOCNAME = {ficha: 'Ficha estratégica', literario: 'Roteiro literário', gravacao: 'Roteiro de gravação', tecnico: 'Roteiro técnico', edicao: 'Roteiro de edição', glossario: 'Glossário'};
+const vsSt = (r, k) => ((r.ap || {})[k] || {}).s || 'Rascunho';
+const vsResp = (p, r) => (r.resp || (p.workspaceResp) || state.workspace.responsible || '').trim();
+function vsSetResp(v) { const p = curProject(), r = vsOf(p, vlUI.id); if (!r) return; r.resp = String(v).trim().slice(0, 80); if (r.resp && !(state.workspace.responsible || '').trim()) state.workspace.responsible = r.resp; persist(); renderVideoLab(); }
+function vsSetStatus(id, k, st) {
+  vsKeep(); const p = curProject(), r = vsOf(p, id); if (!r) return;
+  if (st === 'Aprovado' && !vsResp(p, r)) { toast('Preencha o nome do responsável antes de aprovar: ele vai no cabeçalho do documento.'); return; }
+  (r.ap = r.ap || {})[k] = {s: st, at: st === 'Rascunho' ? '' : new Date().toISOString()}; persist(); renderVideoLab(); toast(st === 'Aprovado' ? VS_DOCNAME[k] + ' aprovado. Já dá para baixar em PDF e em Docs.' : VS_DOCNAME[k] + ': ' + st.toLowerCase() + '.');
+}
+const vsDocData = (r, k) => ({label: VS_DOCNAME[k], title: r.src.title, text: r.t[k], status: vsSt(r, k), approvedAt: ((r.ap || {})[k] || {}).at || ''});
+function vsDownloadDoc(id, k, fmt) {
+  vsKeep(); const p = curProject(), r = vsOf(p, id); if (!r) return;
+  if (vsSt(r, k) !== 'Aprovado') { toast('Aprove o documento para baixar.'); return; }
+  const meta = {project: p.name, resp: vsResp(p, r), title: r.src.title}, d = vsDocData(r, k), name = `${slug(p.name)}-${slug(VS_DOCNAME[k])}-${slug(r.src.title)}`;
+  if (fmt === 'pdf') download(name + '.pdf', dxPdf([d], meta), 'application/pdf'); else download(name + '.docx', dxDocx([d], meta), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+  toast('Baixando ' + VS_DOCNAME[k] + ' em ' + (fmt === 'pdf' ? 'PDF' : 'Docs (.docx)') + '.');
+}
+function vsDownloadSet(id, fmt) {
+  vsKeep(); const p = curProject(), r = vsOf(p, id); if (!r) return;
+  if (!VS_KINDS6.every(k => vsSt(r, k) === 'Aprovado')) { toast('Aprove os 6 documentos para baixar o conjunto.'); return; }
+  const meta = {project: p.name, resp: vsResp(p, r), title: r.src.title}, docs = VS_KINDS6.map(k => vsDocData(r, k)), name = `${slug(p.name)}-roteiros-${slug(r.src.title)}`;
+  if (fmt === 'pdf') download(name + '.pdf', dxPdf(docs, meta), 'application/pdf'); else download(name + '.docx', dxDocx(docs, meta), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 }
 function vsOpen(id) { vlUI.id = vlUI.id === id ? '' : id; vlUI.kind = 'ficha'; renderVideoLab(); }
 function vsKind(k) { vsKeep(); vlUI.kind = k; renderVideoLab(); }
-function vsKeep() { const r = vsOf(curProject(), vlUI.id), ta = $('vsText'); if (r && ta) { r.t[vlUI.kind] = ta.value.slice(0, 14000); } }
-function vsSave() { vsKeep(); const r = vsOf(curProject(), vlUI.id); if (r) r.updated = new Date().toISOString(); persist(); toast('Roteiro salvo.'); }
+function vsKeep() { const r = vsOf(curProject(), vlUI.id), ta = $('vsText'); if (r && ta) { const nv = ta.value.slice(0, 14000); if (nv !== r.t[vlUI.kind] && vsSt(r, vlUI.kind) !== 'Rascunho') { (r.ap = r.ap || {})[vlUI.kind] = {s: 'Rascunho', at: ''}; toast('Você editou o documento: ele voltou para rascunho e precisa ser aprovado de novo.'); } r.t[vlUI.kind] = nv; } }
+function vsSave() { const r0 = vsOf(curProject(), vlUI.id), was = r0 && vsSt(r0, vlUI.kind); vsKeep(); const r = vsOf(curProject(), vlUI.id); if (r) r.updated = new Date().toISOString(); persist(); if (r && was !== vsSt(r, vlUI.kind)) renderVideoLab(); else toast('Roteiro salvo.'); }
 function vsDel(id) { const p = curProject(), r = vsOf(p, id); if (!r || !confirm('Excluir este conjunto de roteiros?')) return; p.video.scripts = p.video.scripts.filter(x => x.id !== id); if (vlUI.id === id) vlUI.id = ''; persist(); renderVideoLab(); }
-function vsReset(id, k) { const p = curProject(), r = vsOf(p, id); if (!r || !confirm(k === 'glossario' ? 'Refazer o glossário a partir dos roteiros atuais?' : 'Voltar este roteiro ao esqueleto original? O que você escreveu nele se perde.')) return; r.t[k] = k === 'glossario' ? vsGlossary(r.t, vsPlan(r.dur)) : vsSkeleton(p, r.src, r.dur)[k]; persist(); renderVideoLab(); }
+function vsReset(id, k) { const p = curProject(), r = vsOf(p, id); if (!r || !confirm(k === 'glossario' ? 'Refazer o glossário a partir dos roteiros atuais?' : 'Voltar este roteiro ao esqueleto original? O que você escreveu nele se perde.')) return; r.t[k] = k === 'glossario' ? vsGlossary(r.t, vsPlan(r.dur)) : vsSkeleton(p, r.src, r.dur)[k]; (r.ap = r.ap || {})[k] = {s: 'Rascunho', at: ''}; persist(); renderVideoLab(); }
 async function vsCopy() { vsKeep(); try { await navigator.clipboard.writeText($('vsText').value); toast('Copiado.'); } catch (e) { $('vsText').select(); toast('Selecione e copie com Ctrl+C.'); } }
-function vsDownload(id) {
+function vsDownloadMd(id) {
   vsKeep(); const p = curProject(), r = vsOf(p, id); if (!r) return;
   download(`roteiros-${slug(r.src.title)}.md`, `# Roteiros · ${r.src.title}\n\nProjeto: ${p.name} · ${r.dur} s\n\n` + VS_KINDS6.map(k => `${r.t[k]}\n`).join('\n* * *\n\n'), 'text/markdown');
 }
@@ -103,7 +126,7 @@ async function vsAI(id, k, quiet) {
     const t = await aiText(`Você é roteirista e diretor de vídeos curtos para redes sociais. ${VS_AI[k]} Mantenha a cadeia de consistência: ficha, literário, gravação, técnico, edição e glossário não podem se contradizer. Não invente fatos, números, preços, depoimentos nem resultados: use [CONFIRMAR] quando faltar informação. Em setores regulados, não prometa resultado. Responda só com o documento, em texto simples (tabelas em markdown quando pedido).`,
       `${projectContext(p)}\nÂngulo ou post: ${r.src.title}\nHook: ${r.src.hook}\nÂngulo: ${r.src.angle}\nCTA: ${r.src.cta}\nIdeia de base: ${r.src.base}\nDuração: ${r.dur} s\n\nOUTROS DOCUMENTOS (para manter a consistência):\n${others}\n\nESQUELETO ATUAL DESTE DOCUMENTO (use como base):\n${r.t[k]}${vlUI.useEx && VS_EXAMPLE[k] ? `\n\nEXEMPLO DE FORMATO PARA ESTE DOCUMENTO (referência de estrutura e nível de detalhe de outra história; NÃO copie o conteúdo):\n${VS_EXAMPLE[k]}` : ''}`, 2600);
     if (!t.trim()) throw new Error('a IA devolveu um texto vazio.');
-    r.t[k] = t.trim().slice(0, 14000); r.updated = new Date().toISOString(); spendCredits(1); persist(); if (!quiet) { renderVideoLab(); toast('Documento ' + VS_LABEL[k].toLowerCase() + ' reescrito. Revise.'); } return true;
+    r.t[k] = t.trim().slice(0, 14000); (r.ap = r.ap || {})[k] = {s: 'Rascunho', at: ''}; r.updated = new Date().toISOString(); spendCredits(1); persist(); if (!quiet) { renderVideoLab(); toast('Documento ' + VS_LABEL[k].toLowerCase() + ' reescrito. Revise.'); } return true;
   } catch (e) { toast('IA: ' + e.message); return false; }
 }
 async function vsAIAll(id) {
@@ -126,10 +149,17 @@ function vsPickHTML(p) {
   <div style="margin-top:8px"><button class="btn sm" onclick="vsLoadExample()">Ver um exemplo completo: A cadeira na janela</button></div><p class="muted" style="font-size:12px;margin:8px 0 0">Os 6 documentos (ficha estratégica, literário, gravação, técnico, edição e glossário) nascem do esqueleto do projeto, na ordem da Skill Mestre, sem gastar crédito. Depois você reescreve cada um com a IA (1 crédito cada), e as skills de vídeo entram no pedido.</p></div>`;
 }
 function vsEnsure(p, r) { const sk = vsSkeleton(p, r.src, r.dur); VS_KINDS6.forEach(k => { if (!String(r.t[k] || '').trim()) r.t[k] = sk[k]; }); }
+function vsApprovalHTML(r, k) {
+  const p = curProject(), st = vsSt(r, k), ok = st === 'Aprovado', col = {Rascunho: '#888', Pronto: '#c9952a', Aprovado: '#2e7d4f'}[st], all = VS_KINDS6.every(x => vsSt(r, x) === 'Aprovado'), n = VS_KINDS6.filter(x => vsSt(r, x) === 'Aprovado').length;
+  return `<div class="panel" style="margin:0 0 8px;background:transparent"><div class="row-gap" style="flex-wrap:wrap;align-items:center"><label class="muted" style="font-size:12.5px">Responsável (vai no cabeçalho) <input value="${esc(vsResp(p, r))}" placeholder="Nome de quem responde por este roteiro" style="min-width:230px" onchange="vsSetResp(this.value)"></label><span class="cmp-tag" style="background:${col}22;color:${col}">${st}${ok && ((r.ap[k] || {}).at) ? ' em ' + fmtDate(r.ap[k].at) : ''}</span>
+  ${ok ? `<button class="btn sm" onclick="vsSetStatus('${r.id}','${k}','Rascunho')">Reabrir para editar</button>` : `<button class="btn sm" onclick="vsSetStatus('${r.id}','${k}','Pronto')" ${st === 'Pronto' ? 'disabled' : ''}>Marcar como pronto</button><button class="btn sm dark" onclick="vsSetStatus('${r.id}','${k}','Aprovado')">Aprovar</button>`}</div>
+  <div class="row-gap" style="margin-top:8px;flex-wrap:wrap;align-items:center"><button class="btn sm" onclick="vsDownloadDoc('${r.id}','${k}','pdf')" ${ok ? '' : 'disabled'} title="${ok ? 'Baixar em PDF' : 'Aprove para baixar'}">⬇ PDF</button><button class="btn sm" onclick="vsDownloadDoc('${r.id}','${k}','docx')" ${ok ? '' : 'disabled'} title="${ok ? 'Abre no Word e no Google Docs' : 'Aprove para baixar'}">⬇ Docs (.docx)</button>
+  <span class="muted" style="font-size:12px">|</span><button class="btn sm" onclick="vsDownloadSet('${r.id}','pdf')" ${all ? '' : 'disabled'} title="${all ? '' : 'Aprove os 6 documentos'}">⬇ PDF dos 6</button><button class="btn sm" onclick="vsDownloadSet('${r.id}','docx')" ${all ? '' : 'disabled'} title="${all ? '' : 'Aprove os 6 documentos'}">⬇ Docs dos 6</button><small class="muted">${n} de 6 aprovados</small></div>${ok ? '' : '<p class="muted" style="font-size:12px;margin:6px 0 0">O PDF e o Docs saem depois de aprovado, com o nome do projeto e do responsável no cabeçalho.</p>'}</div>`;
+}
 function vsEditHTML(r) {
   vsEnsure(curProject(), r); const k = vlUI.kind, aiOk = typeof aiReady === 'function' && aiReady();
-  return `<div class="panel" style="margin-top:12px"><div class="section-row"><div><strong>${esc(r.src.title)}</strong> <small class="muted">${r.dur} s${r.src.stage ? ' · ' + CMP_STAGE_NAME[r.src.stage] : ''}</small></div><div class="row-gap"><button class="btn sm" onclick="vsDownload('${r.id}')">⬇ Baixar os 6 (.md)</button><button class="btn sm" onclick="vsAIAll('${r.id}')" ${vlUI.busy ? 'disabled' : ''} title="Gasta 6 créditos">✨ Reescrever os 6 com IA</button><button class="btn sm" onclick="vsDel('${r.id}')">Excluir</button></div></div>
-  <div class="edh-tabs" style="margin:10px 0">${VS_KINDS6.map(x => `<button class="edh-tab ${k === x ? 'on' : ''}" onclick="vsKind('${x}')">${VS_LABEL[x]}</button>`).join('')}</div><p class="muted" style="font-size:12.5px;margin:0 0 6px">${VS_DESC[k]}</p>
+  return `<div class="panel" style="margin-top:12px"><div class="section-row"><div><strong>${esc(r.src.title)}</strong> <small class="muted">${r.dur} s${r.src.stage ? ' · ' + CMP_STAGE_NAME[r.src.stage] : ''}</small></div><div class="row-gap"><button class="btn sm" onclick="vsDownloadMd('${r.id}')" title="Rascunho de trabalho, sem cabeçalho">⬇ Rascunho .md</button><button class="btn sm" onclick="vsAIAll('${r.id}')" ${vlUI.busy ? 'disabled' : ''} title="Gasta 6 créditos">✨ Reescrever os 6 com IA</button><button class="btn sm" onclick="vsDel('${r.id}')">Excluir</button></div></div>
+  <div class="edh-tabs" style="margin:10px 0">${VS_KINDS6.map(x => `<button class="edh-tab ${k === x ? 'on' : ''}" onclick="vsKind('${x}')">${VS_LABEL[x]}</button>`).join('')}</div><p class="muted" style="font-size:12.5px;margin:0 0 6px">${VS_DESC[k]}</p>${vsApprovalHTML(r, k)}
   <textarea id="vsText" rows="22" style="width:100%;font-size:12.5px;font-family:ui-monospace,monospace">${esc(r.t[k])}</textarea>
   <div class="row-gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn dark" onclick="vsSave()">Salvar</button><button class="btn" onclick="vsCopy()">Copiar</button><button class="btn" onclick="vsAI('${r.id}','${k}')" ${vlUI.busy ? 'disabled' : ''}>✨ Reescrever este com IA</button><label style="font-size:12.5px;display:flex;align-items:center;gap:5px" title="Envia junto um exemplo do formato deste documento (mais tokens)"><input type="checkbox" ${vlUI.useEx ? 'checked' : ''} onchange="vlUI.useEx=this.checked"> usar o exemplo como referência de formato</label><button class="btn" onclick="vsReset('${r.id}','${k}')">${k === 'glossario' ? 'Atualizar a partir dos roteiros' : 'Voltar ao esqueleto'}</button></div>
   ${aiOk ? '' : '<p class="muted" style="font-size:12px;margin:8px 0 0">A IA ainda não está configurada: o esqueleto é seu para editar e copiar.</p>'}</div>`;
