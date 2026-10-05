@@ -16,3 +16,9 @@
 @media(max-width:640px){.cmp-arts{gap:10px}}
 .cmp-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
 .cmp-note{margin-top:8px}
+.st-week{display:grid;grid-template-columns:repeat(7,minmax(130px,1fr));gap:8px;margin-top:12px;overflow-x:auto}
+.st-day{border:1px solid #8883;border-radius:10px;padding:8px;min-width:130px}
+.st-dh{margin-bottom:6px;font-size:13px}
+.st-card{display:block;width:100%;text-align:left;border:1px solid #8886;background:transparent;color:inherit;border-radius:8px;padding:6px 8px;margin-bottom:6px;cursor:pointer;font-size:12px}
+.st-card b{display:block;font-size:12.5px}.st-card small{display:block;color:#888}.st-card span{display:block;color:#888;font-size:11px}
+.st-card.on{outline:2px solid #e4572e;border-color:#e4572e}

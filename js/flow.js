@@ -19,7 +19,7 @@ const FLOW = [
     ['landings', 'Sites e landing pages', 'Sites, landing pages por produto, templates importados, formulário, WhatsApp e tema do WordPress (Elementor).', 'ok']]},
   {n: '4', t: 'Conteúdo orgânico', c: '#2e7d4f', d: 'Posts que reforçam a autoridade do cliente nas redes e no blog.', items: [
     ['carrosseis', 'Carrosséis', 'De 3 a 20 slides, com legenda.', 'ok'],
-    ['feed', 'Planejador de feed', 'Posts simples, stories, vídeos e grids.', 'ok'],
+    ['stories', 'Stories', 'Plano da semana: sequências de 3 a 15 Stories por dia, prontas para gravar, com aprovação e download.', 'ok'], ['feed', 'Planejador de feed', 'Posts simples, stories, vídeos e grids.', 'ok'],
     ['editora', 'Editora (e-books)', 'E-books e materiais ricos. Artigos saem do Agente Editorial.', 'part'],
     [null, 'Blog do cliente', 'Publicar os artigos direto no blog.', 'soon']]},
   {n: '5', t: 'Mostrar ao cliente', c: '#7c4dbd', d: 'Aprovar, publicar e mostrar os anúncios que estão no ar.', items: [

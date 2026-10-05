@@ -1,5 +1,5 @@
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'skills', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'feed', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project', 'flow'];
+const PAGES = ['home', 'skills', 'stories', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'feed', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project', 'flow'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -25,7 +25,7 @@ function go(page) {
 }
 function renderPage(page) {
   ({feed: renderFeed, home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
-    videoLab: renderVideoLab, campaigns: renderCampaignsPage, skills: renderSkillsPage, approval: renderApprovalPage, publishingHub: renderPublishingPage,
+    videoLab: renderVideoLab, campaigns: renderCampaignsPage, skills: renderSkillsPage, stories: renderStories, approval: renderApprovalPage, publishingHub: renderPublishingPage,
     analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, flow: renderFlow, editorial: renderEditorial, biblioteca: renderBiblioteca, carrosseis: renderCarrosseis, landings: renderLandings}[page] || (() => {}))();
 }
 function refreshCurrentView() { renderSyncBadge(); renderHome(); renderPage(ui.page); updateContextUI(); }

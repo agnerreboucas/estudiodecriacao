@@ -2,7 +2,7 @@
    Ficam guardadas no Studio e entram no pedido enviado à IA. Sem a IA configurada nada é enviado: use "Ver o pedido" para conferir ou copiar. */
 const SK_FN_INFO = {
   campanha: ['Campanha: headlines, apoio e CTA dos anúncios', true], carrossel: ['Carrossel: textos dos slides', true], video: ['Vídeo: roteiro', true],
-  post: ['Post e legenda', false], stories: ['Stories', false], landing: ['Landing page', false], pre: ['Pré-projeto', false], editorial: ['Agente Editorial (já tem a sua skill própria)', false]
+  post: ['Post e legenda', false], stories: ['Stories', true], landing: ['Landing page', false], pre: ['Pré-projeto', false], editorial: ['Agente Editorial (já tem a sua skill própria)', false]
 };
 const skUI = {id: '', fn: 'campanha', stage: '', tab: 'skills'};
 let AI_CTX = null;   // contexto de uma chamada: {fn, stage}. Vale só para o próximo pedido à IA.

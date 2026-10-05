@@ -1,6 +1,6 @@
 /* ===== Editor visual: estrutura (árvore), inspetor por dispositivo, prévia clicável com 5 dispositivos e desfazer ===== */
 const BX_DEV = {desktop: ['Computador', 1280, 800, 'd'], 'tablet-p': ['Tablet vertical', 768, 1024, 't'], 'tablet-l': ['Tablet horizontal', 1024, 768, 't'], 'mobile-p': ['Celular vertical', 390, 844, 'm'], 'mobile-l': ['Celular horizontal', 844, 390, 'l']};
-const bxUI = {sel: '', undo: [], redo: [], scroll: 0, drag: ''};
+const bxUI = {sel: '', undo: [], redo: [], scroll: 0, drag: '', scope: 'all'};   // scope: 'all' = o ajuste vale para todos os dispositivos (celular primeiro); 'one' = só o dispositivo em edição
 const bxA = esc, bxBp = () => (BX_DEV[lpUI.device] || BX_DEV.desktop)[3];
 const bxV = () => lpCur() && lpCur().vis;
 
@@ -33,7 +33,7 @@ function bxTab(b, l, p) {
   const V = l.vis, bp = bxBp(), sel = bxFind(bxUI.sel) || null;
   const tr = V.sections.map((s, si) => `<div class="bx-t-sec ${bxUI.sel === s.id ? 'on' : ''}"><div class="bx-t-row" onclick="bxPick('${s.id}')"><b>▾ ${bxA(s.name || 'Seção ' + (si + 1))}</b><span class="bx-t-act">${bxActs(s.id, si === 0, si === V.sections.length - 1)}</span></div>${s.cols.map((c, ci) => `<div class="bx-t-col ${bxUI.sel === c.id ? 'on' : ''}" ondragover="event.preventDefault()" ondrop="bxDrop('${c.id}','')"><div class="bx-t-row" onclick="bxPick('${c.id}')"><span>Coluna ${ci + 1} <small class="muted">${bxGet(c.span, bp) || 12}/12</small></span><span class="bx-t-act"><button class="btn sm" onclick="event.stopPropagation();bxAddWidget('${c.id}')" title="Adicionar widget nesta coluna">＋</button></span></div>${c.widgets.map((w, wi) => `<div class="bx-t-w ${bxUI.sel === w.id ? 'on' : ''}" draggable="true" ondragstart="bxUI.drag='${w.id}'" ondragover="event.preventDefault()" ondrop="event.stopPropagation();bxDrop('${c.id}','${w.id}')" onclick="bxPick('${w.id}')"><span>${BX_W[w.t][1]} ${bxA((w.text || w.title || (w.items[0] && w.items[0].t) || BX_W[w.t][0]).replace(/\*\*/g, '').slice(0, 26))}</span><span class="bx-t-act">${bxActs(w.id, wi === 0, wi === c.widgets.length - 1)}</span></div>`).join('')}</div>`).join('')}</div>`).join('');
   b.innerHTML = `<div class="row-gap" style="margin-bottom:8px;flex-wrap:wrap"><button class="btn sm" onclick="bxUndo()" ${bxUI.undo.length ? '' : 'disabled'}>↶ Desfazer</button><button class="btn sm" onclick="bxRedo()" ${bxUI.redo.length ? '' : 'disabled'}>↷ Refazer</button><select id="bxLay" class="an-sel">${Object.entries(BX_LAYOUT_NAME).map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select><button class="btn sm dark" onclick="bxAddSection()">＋ Seção</button><button class="btn sm dark" onclick="secGallery()" title="Modelos prontos preenchidos com os dados do projeto">📦 Seções prontas</button><button class="btn sm" onclick="lpToBlocks()" title="Descarta o layout do editor visual">Voltar aos blocos</button></div>
-  <div class="bx-edit-note">Editando para: <b>${BX_BP[bp]}</b>${bp !== 'd' ? ' — o que você mudar aqui vale só deste dispositivo' : ' — vale para todos, até que tablet ou celular tenham ajuste próprio'}</div>
+  <div class="bx-edit-note">Editando para: <b>${BX_BP[bp]}</b>${bp === 'm' ? ' <small class="muted">(a visão do celular vem primeiro)</small>' : ''}<div style="margin-top:4px"><label class="ins inl"><input type="radio" name="bxScope" ${bxUI.scope !== 'one' ? 'checked' : ''} onchange="bxUI.scope='all'"> o ajuste vale para <b>todos os dispositivos</b></label> <label class="ins inl"><input type="radio" name="bxScope" ${bxUI.scope === 'one' ? 'checked' : ''} onchange="bxUI.scope='one'"> só para <b>${BX_BP[bp]}</b></label></div><small class="muted block">Dispositivos que já têm ajuste próprio não mudam. A largura das colunas e "ocultar" são sempre por dispositivo.</small></div>
   ${sel ? `<div class="panel bx-insp">${bxInspector(sel, bp)}</div>` : '<small class="muted block" style="margin:6px 0">Clique em qualquer parte da página (ao lado) ou na estrutura abaixo para editar.</small>'}
   <div class="bx-tree">${tr || '<p class="muted">Página vazia. Adicione uma seção.</p>'}</div>`;
 }
@@ -57,7 +57,14 @@ function bxBpField(id, label, obj, key, kind, opts) {
   if (kind === 'sel') return `<div class="field"><label>${label} — ${BX_BP[bp]}${tag}</label><select onchange="bxBpSet('${id}','${key}','${bp}',this.value)"><option value="">${own ? '↺ voltar a herdar' : 'automático / herdado'}</option>${opts.map(([v, t]) => `<option value="${v}" ${own && obj[bp] == v ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`;
   return `<div class="field"><label>${label} — ${BX_BP[bp]}${tag}</label><div class="row-gap"><input type="number" min="${opts[0]}" max="${opts[1]}" value="${own ? obj[bp] : ''}" placeholder="${eff != null ? eff : 'auto'}" onchange="bxBpSet('${id}','${key}','${bp}',this.value)" style="width:90px"><small class="muted">${opts[2] || ''}</small></div></div>`;
 }
-function bxBpSet(id, key, bp, v) { bxMut(() => { const f = bxFind(id); if (!f.o[key] || typeof f.o[key] !== 'object') f.o[key] = {}; if (v === '' || v == null) delete f.o[key][bp]; else f.o[key][bp] = isNaN(+v) ? v : +v; }); }
+function bxBpSet(id, key, bp, v) {
+  bxMut(() => {
+    const f = bxFind(id); if (!f.o[key] || typeof f.o[key] !== 'object') f.o[key] = {}; const o = f.o[key], val = isNaN(+v) ? v : +v;
+    if (v === '' || v == null) delete o[bp];
+    else if (bxUI.scope !== 'one' && bp !== 'd' && key !== 'span') { delete o[bp]; o.d = val; }   // vale para todos: vira o valor base e este dispositivo deixa de ter ajuste próprio
+    else o[bp] = val;
+  });
+}
 function bxHideField(id, o) { const bp = bxBp(); if (bp === 'd') return ''; return `<label class="ins inl"><input type="checkbox" ${o.hide[bp] ? 'checked' : ''} onchange="bxSet('${id}','hide.${bp}',this.checked,true)"> ocultar neste dispositivo (${BX_BP[bp]})</label>`; }
 function bxInspector(f, bp) {
   const o = f.o, id = o.id, A = [['left', 'Esquerda'], ['center', 'Centro'], ['right', 'Direita']];

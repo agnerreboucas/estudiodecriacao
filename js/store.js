@@ -36,7 +36,7 @@ function newProject(name, desc, extra = {}) {
     voice: {personality: '', principles: '', vocabulary: '', antivocab: '', rules: '', channels: '', examples: '', checklist: ''},
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
-    video: {conceptId: '', scenes: [], steps: {}, scripts: []},
+    video: {conceptId: '', scenes: [], steps: {}, scripts: []}, stories: [],
     ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
@@ -242,6 +242,16 @@ function normalizeVideoScripts(x) {
     return {id: r.id, src: {type: ['concept', 'piece', 'carousel', 'free'].includes(s.type) ? s.type : 'free', id: sid(s.id) ? s.id : '', title: str(s.title, 160) || 'Roteiro', hook: str(s.hook, 300), angle: str(s.angle, 300), cta: str(s.cta, 120), stage: CMP_STAGES.includes(s.stage) ? s.stage : '', base: str(s.base, 3000)},
       dur: VS_DURS.includes(+r.dur) ? +r.dur : 15, ex: !!r.ex, resp: str(r.resp, 80), ap: Object.fromEntries(VS_KINDS.map(k => { const a = (r.ap || {})[k] || {}; return [k, {s: ['Rascunho', 'Pronto', 'Aprovado'].includes(a.s) ? a.s : 'Rascunho', at: str(a.at, 40)}]; })), t: Object.fromEntries(VS_KINDS.map(k => [k, str(t[k], 14000)])), created: str(r.created, 40) || new Date().toISOString(), updated: str(r.updated, 40)}; });
 }
+/* Stories: planos de semana com sequências (3 a 15 stories) por dia, cada story pronto para executar */
+const ST_TYPES = ['video', 'foto', 'texto', 'enquete', 'caixa', 'quiz', 'slider', 'reacao', 'link', 'contagem'], ST_PERS = ['direta', 'expansiva', 'timida', 'institucional', 'tecnica', 'popular'];
+function normalizeStories(x) {
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), num = v => Math.max(0, Math.min(10000000, Math.round(+v) || 0));
+  return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 40).map(r => ({
+    id: r.id, name: str(r.name, 120) || 'Plano de stories', cid: sid(r.cid) ? r.cid : '', objective: str(r.objective, 120), pers: ST_PERS.includes(r.pers) ? r.pers : 'direta', start: /^\d{4}-\d{2}-\d{2}$/.test(r.start || '') ? r.start : '', resp: str(r.resp, 80),
+    status: ['Rascunho', 'Pronto', 'Aprovado'].includes(r.status) ? r.status : 'Rascunho', approvedAt: str(r.approvedAt, 40), created: str(r.created, 40) || new Date().toISOString(), updated: str(r.updated, 40),
+    seqs: (Array.isArray(r.seqs) ? r.seqs : []).filter(q => q && sid(q.id)).slice(0, 21).map(q => ({id: q.id, day: Math.max(0, Math.min(6, Math.round(+q.day) || 0)), slot: Math.max(1, Math.min(3, Math.round(+q.slot) || 1)), title: str(q.title, 140) || 'Sequência', goal: str(q.goal, 300), kind: str(q.kind, 30), stage: CMP_STAGES.includes(q.stage) ? q.stage : '',
+      items: (Array.isArray(q.items) ? q.items : []).slice(0, 15).map(i => { i = i || {}; const res = i.res || {}; return {type: ST_TYPES.includes(i.type) ? i.type : 'video', scene: str(i.scene, 700), say: str(i.say, 900), el: str(i.el, 500), signal: str(i.signal, 300), goal: str(i.goal, 300), res: {views: num(res.views), replies: num(res.replies), taps: num(res.taps), exits: num(res.exits), msgs: num(res.msgs)}}; })}))}));
+}
 function normalizeProducts(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), lines = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(t => str(t, n)).filter(Boolean), TY = ['curso', 'ebook', 'servico', 'evento', 'produto', 'cadastro'];
   return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 200).map(r => ({id: r.id, name: str(r.name, 160) || 'Produto', type: TY.includes(r.type) ? r.type : 'produto', summary: str(r.summary, 2000), price: str(r.price, 80), audience: str(r.audience, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(r.checkout || '') ? r.checkout : '',
@@ -339,7 +349,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.campaigns = normalizeCampaigns(q.campaigns); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.campaigns = normalizeCampaigns(q.campaigns); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');

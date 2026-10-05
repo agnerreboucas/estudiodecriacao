@@ -1,5 +1,5 @@
 /* ===== Landing pages (tela): lista → novo (tipo de produto) → editor com insumos, blocos, visual e publicar; prévia ao vivo (desktop/celular) ===== */
-const lpUI = {id: '', tab: 'produto', open: {}, device: 'desktop', busy: '', useAgent: true};
+const lpUI = {id: '', tab: 'produto', open: {}, device: 'mobile-p', busy: '', useAgent: true};
 const lpCur = () => { const p = curProject(); return p && p.landings.find(x => x.id === lpUI.id); };
 const lpA = esc;
 
