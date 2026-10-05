@@ -13,7 +13,7 @@ const FLOW = [
     ['editorial', 'Agente Editorial', 'Da dor ao ângulo, à headline, ao texto e ao roteiro.', 'ok'],
     ['design', 'Estúdio de Design', 'Os criativos dos anúncios, posts e stories, com editor.', 'ok'],
     ['videoLab', 'Video Lab', 'Roteiros, storyboard e narração de vídeos.', 'part'],
-    ['campaigns', 'Campanhas', 'Agrupa os anúncios por campanha e por produto.', 'part'],
+    ['campaigns', 'Campanhas', 'Cada campanha tem N peças em 3 medidas do Meta (feed, vertical, horizontal), bancos de variações e plano de teste.', 'ok'],
     [null, 'Subir no Meta, Google e TikTok', 'Hoje você sobe nas plataformas; o envio direto ainda não existe.', 'soon']]},
   {n: '3', t: 'Site e landing page', c: '#2f6fcf', d: 'Para onde o anúncio leva. Sem site, cria o site; com site, uma landing page por produto. Ou vai direto ao WhatsApp.', items: [
     ['landings', 'Sites e landing pages', 'Sites, landing pages por produto, templates importados, formulário, WhatsApp e tema do WordPress (Elementor).', 'ok']]},

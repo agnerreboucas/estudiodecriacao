@@ -1,0 +1,16 @@
+.cmp-piece{margin-top:12px}
+.cmp-arts{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;margin:10px 0}
+.cmp-art canvas{display:block;border-radius:6px;box-shadow:0 1px 6px #0003;cursor:pointer;background:#fff}
+.cmp-top{display:flex;gap:8px;align-items:center;font-size:12.5px;margin-bottom:4px;flex-wrap:wrap}
+.cmp-tag{background:#e4572e22;color:#e4572e;border-radius:99px;padding:1px 8px;font-size:11px}
+.cmp-off{display:flex;align-items:center;justify-content:center;border:1px dashed #8886;border-radius:6px;font-size:12px;color:#888}
+.cmp-lock{display:block;font-size:11.5px;margin-top:4px;color:#888}
+.cmp-var{border-top:1px solid #8883;padding-top:8px}
+.cmp-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:5px 0}
+.cmp-lb{font-size:11.5px;color:#888;width:58px;flex:none}
+.cmp-chip{border:1px solid #8886;background:transparent;color:inherit;border-radius:99px;padding:3px 10px;font-size:12px;cursor:pointer}
+.cmp-chip.on,.cmp-sw.on,.cmp-im.on{outline:2px solid #e4572e;outline-offset:1px;border-color:#e4572e}
+.cmp-sw{width:26px;height:26px;border-radius:50%;border:1px solid #8886;cursor:pointer}
+.cmp-im{width:38px;height:38px;border-radius:6px;border:1px solid #8886;padding:0;overflow:hidden;cursor:pointer;background:none}
+.cmp-im img{width:100%;height:100%;object-fit:cover;display:block}
+@media(max-width:640px){.cmp-arts{gap:10px}}
