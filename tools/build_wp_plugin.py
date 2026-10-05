@@ -5,6 +5,7 @@ R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(R, 'wordpress', 'plugin-src'); OUT = os.path.join(R, 'wordpress', 'ampliacao-studio')
 shutil.rmtree(OUT, ignore_errors=True); os.makedirs(OUT + '/app')
 for f in ('ampliacao-studio.php', 'readme.txt'): shutil.copy(os.path.join(SRC, f), OUT)
+shutil.copytree(os.path.join(SRC, 'assets'), OUT + '/assets')
 shutil.copy(os.path.join(SRC, 'app-index.php'), OUT + '/app/index.php')
 for f in ('index.html', 'cliente.html', 'briefing.html'): shutil.copy(os.path.join(R, f), OUT + '/app/' + f)
 for d in ('css', 'js', 'fonts', 'vendor', 'assets'):
@@ -23,6 +24,11 @@ b = "function auth_required(): bool { return"; assert b in s
 s = s.replace(b, "function auth_required(): bool { if (defined('AMPLIA_WP')) return true; return")
 c = "function logged_in(): bool { if (!auth_required()) return true;"; assert c in s
 s = s.replace(c, "function logged_in(): bool { if (defined('AMPLIA_WP')) return amp_wp_can(); if (!auth_required()) return true;")
+open(lib, 'w', encoding='utf-8').write(s)
+s = open(lib, encoding='utf-8').read()
+d = "elseif (is_file(__DIR__ . '/config.php')) $GLOBALS['CFG'] = (require __DIR__ . '/config.php');"
+assert d in s
+s = s.replace(d, d + "\nif (defined('AMPLIA_WP') && empty($GLOBALS['CFG']['LEADS_TOKEN'])) { $__t = get_option('amplia_studio_leads_token'); if ($__t) $GLOBALS['CFG']['LEADS_TOKEN'] = (string) $__t; }")
 open(lib, 'w', encoding='utf-8').write(s)
 au = OUT + '/app/api/auth.php'; t = open(au, encoding='utf-8').read()
 t = t.replace("require __DIR__ . '/_lib.php';", "require __DIR__ . '/_lib.php';\nif (defined('AMPLIA_WP')) json_out(['ok' => amp_wp_can()], amp_wp_can() ? 200 : 401);   // no WordPress o login é o do WP", 1)

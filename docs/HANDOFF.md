@@ -29,3 +29,5 @@ Playwright com Chromium em `/opt/pw-browsers/chromium`, servidor estático `pyth
 3. Plugin de WordPress JÁ GERADO (`python3 tools/build_wp_plugin.py` → `wordpress/ampliacao-studio-plugin.zip`; fontes em `wordpress/plugin-src/`; app em `app/`, API com ponte `wp-bridge.php`, dados em uploads). Testado só com WordPress simulado; falta teste em WordPress real. Ver `docs/CONVERSA-COMPLETA.md`.
 4. Backlog: Portal do cliente (lado Studio), módulo de apresentação, "Produtos e serviços", CRM/Dashboard, inspetor de plugins (aguarda arquivos), Biblioteca de anúncios de referência (dor/dúvida/desejo/urgência), publicação direta no Meta (OAuth), skills 'post', 'landing', 'pre' ainda sem ligação, sem busca na web no Studio.
 5. Testes que já falhavam antes (não investigados): eb2 e ad1.
+
+6. Pacote de venda: `python3 tools/build_wp_package.py` → `wordpress/ampliacao-studio-pacote.zip` (tema com instalador + plugin + documentação + licença modelo). Fontes: `wordpress/theme-src`, `plugin-src`, `docs-src`. Requisito dela: **Elementor GRÁTIS, nunca Pro**. Pendente: teste em WordPress real; licença final (campos [CONFIRMAR]); servidor de licenças só se ela pedir.

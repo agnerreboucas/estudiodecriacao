@@ -1,0 +1,1 @@
+(function(){var b=document.querySelector('.ampt-burger'),n=document.getElementById('ampt-nav');if(!b||!n)return;b.addEventListener('click',function(){var o=n.classList.toggle('open');b.setAttribute('aria-expanded',o?'true':'false')})})();
