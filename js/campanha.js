@@ -1,17 +1,25 @@
 /* ===== Campanhas: cada campanha tem N peças e cada peça nasce em 3 medidas do Meta (feed, vertical, horizontal).
    A medida "feed" é a matriz: o que muda nela (texto, foto, cor, layout) é refeito nas outras duas, a não ser que você tenha
    ajustado aquela medida à mão. Bancos de variações (headlines, apoios, CTAs, imagens, cores) trocam tudo em um clique. ===== */
-const CMP_STAGE_LABEL = {topo: 'Topo · conhecer', meio: 'Meio · considerar', fundo: 'Fundo · decidir', pos: 'Pós · relacionar'};
+/* as 5 fases da jornada de compra (as mesmas do pré-projeto). Uma campanha reúne as 5 fases. */
+const CMP_STAGES5 = ['reconhecer', 'entender', 'avaliar', 'agir', 'continuar'];
+const CMP_STAGE_NAME = {reconhecer: 'Reconhecer', entender: 'Entender', avaliar: 'Avaliar', agir: 'Agir', continuar: 'Continuar'};
+const CMP_STAGE_LABEL = {reconhecer: '1 · Reconhecer', entender: '2 · Entender', avaliar: '3 · Avaliar', agir: '4 · Agir', continuar: '5 · Continuar'};
+const CMP_STAGE_DESC = {reconhecer: 'a pessoa percebe o problema', entender: 'entende o que está acontecendo e quais são as saídas', avaliar: 'compara opções e tem dúvidas', agir: 'decide e entra em contato', continuar: 'depois do contato: confiança, indicação e volta'};
+const CMP_STAGE_KINDS = {reconhecer: ['dor', 'urgencia'], entender: ['duvida', 'dor'], avaliar: ['duvida', 'desejo'], agir: ['desejo', 'urgencia'], continuar: ['desejo', 'duvida']};
+const CMP_STAGE_CTA = {reconhecer: 'Saiba mais', entender: 'Entenda como funciona', avaliar: 'Tire suas dúvidas', agir: '', continuar: 'Continue com a gente'};
+const CMP_GENERIC = ['Entenda antes de decidir', 'Fale com quem entende do assunto', 'Tire suas dúvidas sem compromisso'];
 const CMP_MLABEL = {feed: 'Feed', vertical: 'Vertical', horizontal: 'Horizontal'};
 const CMP_MFMT = c => ({feed: FORMATS[c.feedFmt === 'square' ? 'adsquare' : 'ad45'], vertical: FORMATS.adstory, horizontal: FORMATS.adlink});
 const CMP_SAFE = {top: 250, bottom: 340};   // zonas que o Meta cobre no vertical (regra prática, editável aqui)
-const cmpUI = {id: '', tab: 'pecas', busy: false};
+const cmpUI = {id: '', tab: 'pecas', phase: 'reconhecer', busy: false};
 const cmpOf = (p, id) => p.campaigns.find(x => x.id === id);
 const cmpSetOf = (p, id) => p.design.sets.find(s => s.id === id);
 function cmpRender() { if (ui.page === 'project') { renderProjectTab(); cmpAfter(curProject(), document); } else renderCampaignsPage(); }
 
 /* ---------- textos e cores iniciais, vindos do pré-projeto (sem IA, sem gastar crédito) ---------- */
 const CMP_KIND_LABEL = {dor: 'Dor', duvida: 'Dúvida', desejo: 'Desejo', urgencia: 'Urgência oculta', ideia: 'Ideia', comentario: 'Comentário'};
+const CMP_KIND_PL = {dor: 'Dores', duvida: 'Dúvidas', desejo: 'Desejos', urgencia: 'Urgências ocultas'};
 const CMP_KIND_COLOR = {dor: '#d64545', duvida: '#3b82c4', desejo: '#2e9e5b', urgencia: '#b7791f', ideia: '#7c5cc4', comentario: '#6b7280'};
 const CMP_KIND_FIELD = {dor: 'pains', duvida: 'doubts', desejo: 'desires', urgencia: 'hidden'};
 const CMP_KIND_HINT = {dor: 'o que incomoda hoje', duvida: 'o que perguntam antes de decidir', desejo: 'o que querem alcançar', urgencia: 'o que sentem e não dizem'};
@@ -19,23 +27,30 @@ const CMP_KIND_HINT = {dor: 'o que incomoda hoje', duvida: 'o que perguntam ante
 function cmpDraftBank(p, n) {
   const icps = (p.pre && p.pre.icps) || [], lines = k => [...new Set(icps.flatMap(i => String(i[k] || '').split('\n').map(t => t.replace(/\s+/g, ' ').trim()).filter(Boolean)))].slice(0, 12);
   const bank = {}; CMP_KINDS.forEach(k => { bank[k] = lines(CMP_KIND_FIELD[k]); });
-  const prods = p.products || [], q = t => /[?.!…]$/.test(t) ? t : t + '?', uniq = (a, m, len) => [...new Set(a.map(t => String(t).trim()).filter(t => t && t.length <= len))].slice(0, m);
-  const heads = cmpMakeHeads(bank, Math.max(3, Math.min(12, n)), q);
-  if (heads.h.length < 3) { const fb = prods.slice(0, 2).map(x => x.name + ': entenda como funciona').concat(p.brand && p.brand.positioning ? [p.brand.positioning] : [], ['Entenda antes de decidir', 'Fale com quem entende do assunto', 'Tire suas dúvidas sem compromisso']); fb.forEach(t => { if (heads.h.length < Math.max(3, Math.min(12, n)) && !heads.h.includes(t)) { heads.h.push(t); heads.ht.push(''); } }); }
+  const prods = p.products || [], uniq = (a, m, len) => [...new Set(a.map(t => String(t).trim()).filter(t => t && t.length <= len))].slice(0, m);
   const sub = []; prods.forEach(x => { if (x.summary) sub.push(x.summary.split(/(?<=[.!?])\s/)[0]); (x.benefits || []).slice(0, 2).forEach(b => sub.push(b)); });
   if (p.brief && p.brief.offer) sub.push(p.brief.offer.split(/(?<=[.!?])\s/)[0]); if (p.desc) sub.push(p.desc);
   const tk = brandTokens(p), col = [{name: 'Marca', bg: tk.bg, accent: tk.accent, fg: tk.fg}, {name: 'Contraste', bg: tk.accent, accent: tk.bg, fg: readable(tk.accent)}];
-  return Object.assign(bank, heads, {s: uniq(sub, 6, 160), c: ['Fale no WhatsApp', 'Agende uma conversa', 'Peça um orçamento'], img: libList().slice(0, 3).map(i => i.imgId), col});
+  return Object.assign(bank, {h: [], ht: [], s: uniq(sub, 8, 160), c: ['Fale no WhatsApp', 'Agende uma conversa', 'Peça um orçamento'], img: libList().slice(0, 3).map(i => i.imgId), col});
+}
+const cmpFmt = (k, t) => { t = String(t).replace(/\s+/g, ' ').trim(); if (k === 'desejo') return t.replace(/[.!]+$/, ''); if (k === 'dor' || k === 'duvida') return /[?.!…]$/.test(t) ? t : t + '?'; return t; };
+/* escolhe a headline de uma peça pela fase: reconhecer parte da dor e da urgência oculta, entender e avaliar das dúvidas, agir do desejo */
+function cmpPickHead(c, stage, k, used) {
+  const kinds = CMP_STAGE_KINDS[stage], order = []; for (let i = 0; i < kinds.length; i++) order.push(kinds[(k + i) % kinds.length]); CMP_KINDS.forEach(x => { if (!order.includes(x)) order.push(x); });
+  for (const kd of order) { const t = c.bank[kd].map(x => cmpFmt(kd, x)).find(x => x.length <= 120 && !used.has(x)); if (t) { used.add(t); return {h: t, t: kd}; } }
+  const g = CMP_GENERIC.concat(c.bank.h).find(x => !used.has(x)); if (g) { used.add(g); return {h: g, t: ''}; } return {h: CMP_GENERIC[k % 3], t: ''};
 }
 /* uma headline de cada tipo por rodada: dor, dúvida, desejo, urgência oculta */
 function cmpMakeHeads(bank, n, q) {
   const h = [], ht = [], seen = new Set(); q = q || (t => /[?.!…]$/.test(t) ? t : t + '?');
-  for (let r = 0; r < 12 && h.length < n; r++) CMP_KINDS.forEach(k => { const t = bank[k][r]; if (!t || h.length >= n) return; const x = (k === 'desejo' ? t.replace(/[.!]+$/, '') : (k === 'dor' || k === 'duvida') ? q(t) : t); if (x.length <= 120 && !seen.has(x)) { seen.add(x); h.push(x); ht.push(k); } });
+  for (let r = 0; r < 20 && h.length < n; r++) CMP_KINDS.forEach(k => { const t = bank[k][r]; if (!t || h.length >= n) return; const x = (k === 'desejo' ? t.replace(/[.!]+$/, '') : (k === 'dor' || k === 'duvida') ? q(t) : t); if (x.length <= 120 && !seen.has(x)) { seen.add(x); h.push(x); ht.push(k); } });
   return {h, ht};
 }
-function cmpNewPiece(c, i) {
-  const st = ['topo', 'meio', 'fundo', 'fundo', 'pos'][i % 5], b = c.bank, at = (a, k) => (a.length ? a[k % a.length] : '');
-  return {id: uid('pc'), name: `Peça ${i + 1} · ${st}`, stage: st, h: at(b.h, i), s: at(b.s, i), btn: at(b.c, i), imgId: at(b.img, i), col: b.col.length ? i % b.col.length : 0, on: {feed: true, vertical: true, horizontal: true}, sets: {feed: '', vertical: '', horizontal: ''}, lock: {feed: false, vertical: false, horizontal: false}, status: 'Rascunho', syncedAt: ''};
+function cmpNewPiece(c, stage, k, head, gi) {
+  const b = c.bank, at = (a, i) => (a.length ? a[i % a.length] : ''), cta = stage === 'agir' ? at(b.c, k) : (CMP_STAGE_CTA[stage] || at(b.c, k));
+  if (cta && !b.c.includes(cta) && b.c.length < 20) b.c.push(cta);
+  if (head.h && !b.h.includes(head.h) && b.h.length < 30) { b.h.push(head.h); b.ht.length = b.h.length - 1; b.ht.push(head.t || ''); }
+  return {id: uid('pc'), name: `${CMP_STAGE_NAME[stage]} · Anúncio ${k + 1}`, stage, h: head.h, s: at(b.s, gi), btn: cta, imgId: at(b.img, gi), col: b.col.length ? gi % b.col.length : 0, on: {feed: true, vertical: true, horizontal: true}, sets: {feed: '', vertical: '', horizontal: ''}, lock: {feed: false, vertical: false, horizontal: false}, status: 'Rascunho', syncedAt: ''};
 }
 
 /* ---------- construção das artes ---------- */
@@ -88,23 +103,23 @@ async function cmpAutoSync(p, c) {
 /* ---------- criar ---------- */
 function cmpNewModal() {
   const p = curProject(); if (!p) { toast('Abra um projeto primeiro.'); return; }
-  showModal('Nova campanha', `<p style="font-size:13px;margin-top:0">A campanha já nasce <b>preenchida</b> com o que o pré-projeto sabe (dores, desejos, produtos). Cada peça sai em 3 medidas. Tudo continua editável.</p>
+  showModal('Nova campanha', `<p style="font-size:13px;margin-top:0">Uma campanha reúne as <b>5 fases da jornada de compra</b> (reconhecer, entender, avaliar, agir, continuar). Ela já nasce <b>preenchida</b> com as dores, dúvidas, desejos e urgências ocultas do pré-projeto, e cada anúncio sai em 3 medidas. Tudo continua editável.</p>
   <div class="form-grid"><div class="field full"><label>Nome da campanha</label><input id="cmN" placeholder="Ex.: Lançamento de março"></div>
   <div class="field"><label>Objetivo</label><select id="cmO">${['Leads', 'Mensagens no WhatsApp', 'Agendamentos', 'Vendas', 'Reconhecimento'].map(o => `<option>${o}</option>`).join('')}</select></div>
-  <div class="field"><label>Quantas peças?</label><input id="cmQ" type="number" min="1" max="12" value="5" oninput="cmpCount()"></div>
+  <div class="field"><label>Anúncios por fase</label><input id="cmQ" type="number" min="1" max="10" value="5" oninput="cmpCount()"></div>
   <div class="field full"><label>Medida do feed</label><label style="display:flex;gap:6px;font-size:13px"><input type="radio" name="cmF" value="feed45" checked> 4:5 · 1080×1350 (recomendado)</label><label style="display:flex;gap:6px;font-size:13px"><input type="radio" name="cmF" value="square"> Quadrado 1:1 · 1080×1080</label></div></div>
-  <p id="cmCt" class="muted" style="font-size:12.5px">5 peças × 3 medidas = <b>15 artes</b>. Gerar não gasta crédito de IA.</p>
+  <p id="cmCt" class="muted" style="font-size:12.5px">5 fases × 5 anúncios = 25 anúncios × 3 medidas = <b>75 artes</b>. Gerar não gasta crédito de IA e leva alguns segundos.</p>
   <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="cmpCreate()">Gerar campanha</button></div>`);
 }
-function cmpCount() { const n = Math.max(1, Math.min(12, +$('cmQ').value || 1)); $('cmCt').innerHTML = `${n} peça${n > 1 ? 's' : ''} × 3 medidas = <b>${n * 3} artes</b>. Gerar não gasta crédito de IA.`; }
+function cmpCount() { const n = Math.max(1, Math.min(10, +$('cmQ').value || 1)); $('cmCt').innerHTML = `5 fases × ${n} anúncio${n > 1 ? 's' : ''} = ${n * 5} anúncios × 3 medidas = <b>${n * 15} artes</b>. Gerar não gasta crédito de IA e leva alguns segundos.`; }
 async function cmpCreate() {
   const p = curProject(), name = $('cmN').value.trim(); if (!name) { toast('Dê um nome à campanha.'); return; }
-  const n = Math.max(1, Math.min(12, +$('cmQ').value || 5)), ff = (document.querySelector('input[name=cmF]:checked') || {}).value || 'feed45';
+  const n = Math.max(1, Math.min(10, +$('cmQ').value || 5)), ff = (document.querySelector('input[name=cmF]:checked') || {}).value || 'feed45';
   const c = {id: uid('cm'), name, objective: $('cmO').value, budget: 0, channel: 'Meta Ads', status: 'Rascunho', period: '', audience: ((p.pre.icps[0] || {}).name || ''), feedFmt: ff, layout: 'auto', align: 'left', bank: cmpDraftBank(p, n), test: {macro: '', micro: '', format: '', notes: ''}, notes: [], pieces: [], created: new Date().toISOString()};
-  c.test = {macro: `Compare ângulos: use as peças 1 a ${n} com headlines diferentes, mesmo público e mesmo orçamento. (sugestão, edite)`, micro: 'Depois de achar o ângulo vencedor, troque uma coisa por vez: imagem, cor ou CTA, usando a faixa de variações.', format: 'Compare feed, vertical e horizontal do mesmo anúncio para ver qual medida rende mais.', notes: ''};
-  p.campaigns.push(c); closeModal(); toast('Montando as artes…'); cmpUI.id = c.id; cmpUI.busy = true;
-  try { for (let i = 0; i < n; i++) { const q = cmpNewPiece(c, i); c.pieces.push(q); await cmpBuildPiece(p, c, q); } } finally { cmpUI.busy = false; }
-  persist(); cmpRender(); toast(`Campanha criada: ${n * 3} artes. Troque o que quiser na faixa de variações.`);
+  c.test = {macro: `Teste de ângulo: dentro de cada fase, compare os ${n} anúncios (headlines de tipos diferentes: dor, dúvida, desejo, urgência oculta), mesmo público e mesmo orçamento. (sugestão, edite)`, micro: 'Com o ângulo vencedor de cada fase, troque uma coisa por vez: imagem, cor ou CTA, usando a faixa de variações.', format: 'Compare feed, vertical e horizontal do mesmo anúncio para ver qual medida rende mais.', notes: ''};
+  p.campaigns.push(c); closeModal(); cmpUI.id = c.id; cmpUI.phase = 'reconhecer'; cmpUI.tab = 'pecas'; cmpUI.busy = true; const used = new Set(), total = n * 5; let gi = 0;
+  try { for (const st of CMP_STAGES5) for (let k = 0; k < n; k++) { toast(`Montando as artes… ${gi + 1}/${total}`); const q = cmpNewPiece(c, st, k, cmpPickHead(c, st, k, used), gi++); c.pieces.push(q); await cmpBuildPiece(p, c, q); } } finally { cmpUI.busy = false; }
+  persist(); cmpRender(); toast(`Campanha criada: ${total} anúncios, ${total * 3} artes. Troque o que quiser na faixa de variações.`);
 }
 
 /* ---------- variações em um clique ---------- */
@@ -126,12 +141,12 @@ async function cmpRelayout(cid) {
 function cmpField(cid, k, v) { const c = cmpOf(curProject(), cid); if (!c) return; c[k] = k === 'budget' ? Math.max(0, +v || 0) : String(v).slice(0, 300); persist(); }
 function cmpTest(cid, k, v) { const c = cmpOf(curProject(), cid); if (c) { c.test[k] = String(v).slice(0, 1500); persist(); } }
 function cmpBank(cid, k, v) {
-  const p = curProject(), c = cmpOf(p, cid); if (!c) return; const L = String(v).split('\n').map(t => t.trim()).filter(Boolean).slice(0, 12);
+  const p = curProject(), c = cmpOf(p, cid); if (!c) return; const L = String(v).split('\n').map(t => t.trim()).filter(Boolean).slice(0, k === 'h' ? 30 : 20);
   if (k === 'h') { const m = {}; c.bank.h.forEach((t, i) => { m[t] = c.bank.ht[i] || ''; }); c.bank.ht = L.map(t => m[t] || ''); }
   c.bank[k] = L; persist(); cmpRender();
 }
 function cmpRebuildHeads(cid) {
-  const c = cmpOf(curProject(), cid), n = Math.max(3, Math.min(12, c.pieces.length || 5)), r = cmpMakeHeads(c.bank, n);
+  const c = cmpOf(curProject(), cid), n = Math.max(3, Math.min(30, c.pieces.length || 5)), r = cmpMakeHeads(c.bank, n);
   if (!r.h.length) { toast('Preencha dores, dúvidas, desejos ou urgências ocultas primeiro.'); return; }
   c.bank.h = r.h; c.bank.ht = r.ht; persist(); cmpRender(); toast('Headlines remontadas: uma de cada tipo por rodada. As peças já criadas não mudam sozinhas.');
 }
@@ -168,16 +183,15 @@ function cmpNoteSet(cid, nid, k, v) { const n = cmpOf(curProject(), cid).notes.f
 function cmpNoteDel(cid, nid) { const c = cmpOf(curProject(), cid); c.notes = c.notes.filter(x => x.id !== nid); persist(); cmpRender(); }
 function cmpNoteTo(cid, nid, to) {
   const p = curProject(), c = cmpOf(p, cid), n = c.notes.find(x => x.id === nid); if (!n) return; const t = n.text.trim();
-  if (to === 'bank' && CMP_KINDS.includes(n.kind)) { if (!c.bank[n.kind].includes(t) && c.bank[n.kind].length < 12) c.bank[n.kind].push(t); toast('Foi para o banco de ' + CMP_KIND_LABEL[n.kind].toLowerCase() + 's.'); }
-  else if (to === 'head') { if (t.length > 120) { toast('Para headline o texto precisa ter até 120 caracteres.'); return; } if (!c.bank.h.includes(t) && c.bank.h.length < 12) { c.bank.h.push(t); c.bank.ht.length = c.bank.h.length - 1; c.bank.ht.push(CMP_KINDS.includes(n.kind) ? n.kind : ''); } toast('Entrou nas headlines. Use a faixa de variações da peça.'); }
+  if (to === 'bank' && CMP_KINDS.includes(n.kind)) { if (!c.bank[n.kind].includes(t) && c.bank[n.kind].length < 20) c.bank[n.kind].push(t); toast('Foi para o banco de ' + CMP_KIND_PL[n.kind].toLowerCase() + '.'); }
+  else if (to === 'head') { if (t.length > 120) { toast('Para headline o texto precisa ter até 120 caracteres.'); return; } if (!c.bank.h.includes(t) && c.bank.h.length < 30) { c.bank.h.push(t); c.bank.ht.length = c.bank.h.length - 1; c.bank.ht.push(CMP_KINDS.includes(n.kind) ? n.kind : ''); } toast('Entrou nas headlines. Use a faixa de variações da peça.'); }
   else if (to === 'piece') { cmpNotePiece(cid, nid); return; }
   persist(); cmpRender();
 }
 async function cmpNotePiece(cid, nid) {
-  const p = curProject(), c = cmpOf(p, cid), n = c.notes.find(x => x.id === nid); if (!n || c.pieces.length >= 60) return; const t = n.text.trim().slice(0, 120);
-  if (!c.bank.h.includes(t) && c.bank.h.length < 12) { c.bank.h.push(t); c.bank.ht.length = c.bank.h.length - 1; c.bank.ht.push(CMP_KINDS.includes(n.kind) ? n.kind : ''); }
-  const q = cmpNewPiece(c, c.pieces.length); q.h = t; q.name = `Peça ${c.pieces.length + 1} · da nota`; c.pieces.push(q); cmpUI.busy = true; cmpUI.tab = 'pecas'; cmpRender();
-  try { await cmpBuildPiece(p, c, q); } finally { cmpUI.busy = false; } persist(); cmpRender(); toast('Peça criada a partir da nota, nas 3 medidas.');
+  const p = curProject(), c = cmpOf(p, cid), n = c.notes.find(x => x.id === nid); if (!n || c.pieces.length >= 100) return; const t = n.text.trim().slice(0, 120), st = cmpUI.phase, k = c.pieces.filter(x => x.stage === st).length;
+  const q = cmpNewPiece(c, st, k, {h: t, t: CMP_KINDS.includes(n.kind) ? n.kind : ''}, c.pieces.length); q.name = `${CMP_STAGE_NAME[st]} · Anúncio ${k + 1} (da nota)`; c.pieces.push(q); cmpUI.busy = true; cmpUI.tab = 'pecas'; cmpRender();
+  try { await cmpBuildPiece(p, c, q); } finally { cmpUI.busy = false; } persist(); cmpRender(); toast('Anúncio criado a partir da nota, nas 3 medidas, na fase ' + CMP_STAGE_NAME[st] + '.');
 }
 function cmpNotesHTML(c) {
   const f = cmpNoteUI.filter, kinds = ['todas', ...CMP_NOTE_KINDS], list = c.notes.filter(n => f === 'todas' || n.kind === f).sort((a, b) => (b.pin - a.pin) || (b.created > a.created ? 1 : -1));
@@ -190,14 +204,16 @@ function cmpNotesHTML(c) {
   <div class="edh-tabs" style="margin-top:10px">${kinds.map(k => `<button class="edh-tab ${f === k ? 'on' : ''}" onclick="cmpNoteUI.filter='${k}';cmpRender()">${k === 'todas' ? 'Todas' : CMP_KIND_LABEL[k]}${k === 'todas' ? '' : ' (' + c.notes.filter(n => n.kind === k).length + ')'}</button>`).join('')}</div>
   ${list.length ? list.map(n => `<div class="panel cmp-note"><div class="row-gap" style="align-items:center;flex-wrap:wrap"><i class="cmp-dot" style="background:${CMP_KIND_COLOR[n.kind]}"></i><select onchange="cmpNoteSet('${c.id}','${n.id}','kind',this.value)">${kopt(n.kind)}</select><input style="flex:1;min-width:140px" value="${esc(n.src)}" placeholder="origem" onchange="cmpNoteSet('${c.id}','${n.id}','src',this.value)"><button class="btn sm" title="Fixar no topo" onclick="cmpNoteSet('${c.id}','${n.id}','pin')">${n.pin ? '★' : '☆'}</button><button class="btn sm" onclick="cmpNoteDel('${c.id}','${n.id}')">×</button></div>
   <textarea rows="2" style="width:100%;margin-top:6px" onchange="cmpNoteSet('${c.id}','${n.id}','text',this.value)">${esc(n.text)}</textarea>
-  <div class="row-gap" style="margin-top:6px;flex-wrap:wrap">${CMP_KINDS.includes(n.kind) ? `<button class="btn sm" onclick="cmpNoteTo('${c.id}','${n.id}','bank')">→ banco de ${CMP_KIND_LABEL[n.kind].toLowerCase()}s</button>` : ''}<button class="btn sm" onclick="cmpNoteTo('${c.id}','${n.id}','head')">→ headline</button><button class="btn sm" onclick="cmpNoteTo('${c.id}','${n.id}','piece')">→ nova peça</button></div></div>`).join('') : '<p class="muted" style="margin-top:12px">Nenhuma nota aqui ainda.</p>'}`;
+  <div class="row-gap" style="margin-top:6px;flex-wrap:wrap">${CMP_KINDS.includes(n.kind) ? `<button class="btn sm" onclick="cmpNoteTo('${c.id}','${n.id}','bank')">→ banco de ${CMP_KIND_PL[n.kind].toLowerCase()}</button>` : ''}<button class="btn sm" onclick="cmpNoteTo('${c.id}','${n.id}','head')">→ headline</button><button class="btn sm" onclick="cmpNoteTo('${c.id}','${n.id}','piece')">→ nova peça</button></div></div>`).join('') : '<p class="muted" style="margin-top:12px">Nenhuma nota aqui ainda.</p>'}`;
 }
 
 /* ---------- peças ---------- */
 async function cmpAddPiece(cid) {
-  const p = curProject(), c = cmpOf(p, cid); if (c.pieces.length >= 60) return; const q = cmpNewPiece(c, c.pieces.length); c.pieces.push(q); cmpUI.busy = true; cmpRender();
+  const p = curProject(), c = cmpOf(p, cid); if (c.pieces.length >= 100) return; const st = cmpUI.phase, k = c.pieces.filter(x => x.stage === st).length;
+  const q = cmpNewPiece(c, st, k, cmpPickHead(c, st, k, new Set(c.pieces.map(x => x.h))), c.pieces.length); c.pieces.push(q); cmpUI.busy = true; cmpRender();
   try { await cmpBuildPiece(p, c, q); } finally { cmpUI.busy = false; } persist(); cmpRender();
 }
+function cmpStage(cid, pid, v) { const q = cmpOf(curProject(), cid).pieces.find(x => x.id === pid); if (!CMP_STAGES5.includes(v)) return; q.stage = v; persist(); cmpRender(); }
 function cmpDelPiece(cid, pid) {
   const p = curProject(), c = cmpOf(p, cid), q = c.pieces.find(x => x.id === pid); if (!q || !confirm('Excluir esta peça e as suas medidas?')) return;
   const ids = new Set(Object.values(q.sets)); p.design.sets = p.design.sets.filter(s => !ids.has(s.id)); c.pieces = c.pieces.filter(x => x.id !== pid); persist(); cmpRender();
@@ -215,9 +231,9 @@ function cmpDel(cid) { const p = curProject(), c = cmpOf(p, cid); if (!c || !con
 function cmpPkg(cid) { const p = curProject(), c = cmpOf(p, cid); pkgOpen({sets: c.pieces.flatMap(q => Object.values(q.sets)).filter(Boolean)}); }
 async function cmpZip(cid) {
   const p = curProject(), c = cmpOf(p, cid), files = [], enc = new TextEncoder(); toast('Gerando as artes…');
-  for (const q of c.pieces) for (const k of CMP_MEASURES) { const s = cmpSetOf(p, q.sets[k]); if (!q.on[k] || !s) continue; await ensureSetResources(s); files.push({name: `${k}/${slug(q.name)}-${s.format.w}x${s.format.h}.png`, data: new Uint8Array(await (await slideBlob(s, s.slides[0])).arrayBuffer())}); }
+  for (const q of c.pieces) for (const k of CMP_MEASURES) { const s = cmpSetOf(p, q.sets[k]); if (!q.on[k] || !s) continue; await ensureSetResources(s); files.push({name: `${CMP_STAGE_LABEL[q.stage].replace(/ · /, '-').toLowerCase()}/${k}/${slug(q.name)}-${s.format.w}x${s.format.h}.png`, data: new Uint8Array(await (await slideBlob(s, s.slides[0])).arrayBuffer())}); }
   if (!files.length) { toast('Nenhuma arte para exportar.'); return; }
-  files.push({name: 'LEIA-ME.txt', data: enc.encode(`Campanha: ${c.name}\nPastas: feed (${CMP_MFMT(c).feed.w}x${CMP_MFMT(c).feed.h}), vertical (1080x1920) e horizontal (1200x628).\nNo vertical o texto fica fora das faixas que o Meta cobre (topo e rodapé). Confira as medidas atuais no Gerenciador de Anúncios antes de subir.\n`)});
+  files.push({name: 'LEIA-ME.txt', data: enc.encode(`Campanha: ${c.name}\nPastas por fase da jornada e, dentro, por medida: feed (${CMP_MFMT(c).feed.w}x${CMP_MFMT(c).feed.h}), vertical (1080x1920) e horizontal (1200x628).\nNo vertical o texto fica fora das faixas que o Meta cobre (topo e rodapé). Confira as medidas atuais no Gerenciador de Anúncios antes de subir.\n`)});
   download(`${slug(c.name)}-artes.zip`, makeZip(files), 'application/zip'); toast(`${files.length - 1} arte(s) exportadas, separadas por medida.`);
 }
 
@@ -235,7 +251,7 @@ function cmpPieceHTML(p, c, q) {
     ${k !== 'feed' && q.on[k] && s ? `<label class="cmp-lock"><input type="checkbox" ${q.lock[k] ? 'checked' : ''} onchange="cmpLock('${c.id}','${q.id}','${k}',this.checked)"> ${q.lock[k] ? 'travada: ajustada à mão, não refaz' : 'travar (segue a matriz até você ajustar)'}</label>` : ''}</div>`; }).join('');
   const cols = b.col.length ? `<div class="cmp-row"><span class="cmp-lb">Cor</span>${b.col.map((v, i) => `<button class="cmp-sw ${q.col === i ? 'on' : ''}" title="${esc(v.name)}" style="background:linear-gradient(135deg,${v.bg} 55%,${v.accent} 55%)" onclick="cmpPick('${c.id}','${q.id}','col',${i})"></button>`).join('')}</div>` : '';
   const imgs = b.img.length ? `<div class="cmp-row"><span class="cmp-lb">Imagem</span>${b.img.map((id, i) => `<button class="cmp-im ${q.imgId === id ? 'on' : ''}" onclick="cmpPick('${c.id}','${q.id}','img',${i})"><img data-lib="${esc(id)}" alt=""></button>`).join('')}</div>` : '';
-  return `<div class="panel cmp-piece"><div class="section-row"><div><strong>${esc(q.name)}</strong> <small class="muted">${CMP_STAGE_LABEL[q.stage]}</small></div><div class="row-gap"><select onchange="cmpStatus('${c.id}','${q.id}',this.value)">${['Rascunho', 'Em revisão', 'Aprovada', 'No ar'].map(s => `<option ${s === q.status ? 'selected' : ''}>${s}</option>`).join('')}</select><button class="btn sm" onclick="cmpDelPiece('${c.id}','${q.id}')">Excluir</button></div></div>
+  return `<div class="panel cmp-piece"><div class="section-row"><div><strong>${esc(q.name)}</strong></div><div class="row-gap"><select title="Fase da jornada" onchange="cmpStage('${c.id}','${q.id}',this.value)">${CMP_STAGES5.map(k => `<option value="${k}" ${k === q.stage ? 'selected' : ''}>${CMP_STAGE_LABEL[k]}</option>`).join('')}</select><select onchange="cmpStatus('${c.id}','${q.id}',this.value)">${['Rascunho', 'Em revisão', 'Aprovada', 'No ar'].map(s => `<option ${s === q.status ? 'selected' : ''}>${s}</option>`).join('')}</select><button class="btn sm" onclick="cmpDelPiece('${c.id}','${q.id}')">Excluir</button></div></div>
     <div class="cmp-arts">${arts}</div>
     <div class="cmp-var"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Faixa de variações: um clique troca nas 3 medidas</div>${chips('h', b.h, q.h, ['Headline'])}${chips('s', b.s, q.s, ['Apoio'])}${chips('btn', b.c, q.btn, ['CTA'])}${imgs}${cols}</div></div>`;
 }
@@ -244,9 +260,9 @@ function cmpDetailHTML(p, c) {
   const tabs = [['pecas', 'Peças'], ['bancos', 'Bancos de variações'], ['caderno', `Caderno de ideias (${c.notes.length})`], ['teste', 'Plano de teste']];
   const comb = Math.max(1, c.bank.h.length) * Math.max(1, c.bank.img.length) * Math.max(1, c.bank.col.length) * Math.max(1, c.bank.c.length);
   let body = '';
-  if (tab === 'pecas') body = `<div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Layout da campanha</h3><div class="row-gap" style="flex-wrap:wrap;align-items:center"><label class="muted" style="font-size:12.5px">Foto <select onchange="cmpField('${c.id}','layout',this.value)">${[['auto', 'Automático'], ['full', 'Foto no fundo'], ['top', 'Foto no topo'], ['bottom', 'Foto embaixo'], ['none', 'Sem foto']].map(([v, l]) => `<option value="${v}" ${c.layout === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label><label class="muted" style="font-size:12.5px">Texto <select onchange="cmpField('${c.id}','align',this.value)"><option value="left" ${c.align === 'left' ? 'selected' : ''}>À esquerda</option><option value="center" ${c.align === 'center' ? 'selected' : ''}>Centralizado</option></select></label><button class="btn sm dark" onclick="cmpRelayout('${c.id}')">Aplicar a todas as peças</button></div><p class="muted" style="font-size:11.5px;margin:8px 0 0">Mudou o texto, a foto ou a cor da matriz (feed) no editor? As outras medidas se refazem sozinhas ao voltar aqui. Posições arrastadas à mão numa medida não passam para as outras; para isso o Studio refaz o layout a partir do texto e da foto.</p></div>${c.pieces.map(q => cmpPieceHTML(p, c, q)).join('')}<div style="margin:12px 0"><button class="btn" onclick="cmpAddPiece('${c.id}')">＋ Adicionar peça (+3 medidas)</button></div>`;
+  if (tab === 'pecas') body = `<div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Layout da campanha</h3><div class="row-gap" style="flex-wrap:wrap;align-items:center"><label class="muted" style="font-size:12.5px">Foto <select onchange="cmpField('${c.id}','layout',this.value)">${[['auto', 'Automático'], ['full', 'Foto no fundo'], ['top', 'Foto no topo'], ['bottom', 'Foto embaixo'], ['none', 'Sem foto']].map(([v, l]) => `<option value="${v}" ${c.layout === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label><label class="muted" style="font-size:12.5px">Texto <select onchange="cmpField('${c.id}','align',this.value)"><option value="left" ${c.align === 'left' ? 'selected' : ''}>À esquerda</option><option value="center" ${c.align === 'center' ? 'selected' : ''}>Centralizado</option></select></label><button class="btn sm dark" onclick="cmpRelayout('${c.id}')">Aplicar a todas as peças</button></div><p class="muted" style="font-size:11.5px;margin:8px 0 0">Mudou o texto, a foto ou a cor da matriz (feed) no editor? As outras medidas se refazem sozinhas ao voltar aqui. Posições arrastadas à mão numa medida não passam para as outras; para isso o Studio refaz o layout a partir do texto e da foto.</p></div><div class="edh-tabs" style="margin-top:12px">${CMP_STAGES5.map(k => `<button class="edh-tab ${cmpUI.phase === k ? 'on' : ''}" onclick="cmpUI.phase='${k}';cmpRender()">${CMP_STAGE_LABEL[k]} (${c.pieces.filter(q => q.stage === k).length})</button>`).join('')}</div><p class="muted" style="font-size:12.5px;margin:8px 0 0"><b>${CMP_STAGE_NAME[cmpUI.phase]}:</b> ${CMP_STAGE_DESC[cmpUI.phase]}. Foco em ${CMP_STAGE_KINDS[cmpUI.phase].map(k => CMP_KIND_PL[k].toLowerCase()).join(' e ')}.</p>${c.pieces.filter(q => q.stage === cmpUI.phase).map(q => cmpPieceHTML(p, c, q)).join('') || '<p class="muted">Nenhum anúncio nesta fase.</p>'}<div style="margin:12px 0"><button class="btn" onclick="cmpAddPiece('${c.id}')">＋ Adicionar anúncio nesta fase (+3 medidas)</button></div>`;
   else if (tab === 'bancos') body = `<div class="panel" style="margin-top:12px"><p class="muted" style="font-size:12.5px;margin-top:0">Uma opção por linha. Estas listas alimentam a faixa de variações de cada peça. Hoje: <b>${comb}</b> combinações possíveis (headlines × imagens × cores × CTAs).</p>
-    <h4 style="margin:6px 0">Matéria-prima do público</h4><p class="muted" style="font-size:12px;margin:0 0 6px">Vem do pré-projeto e do caderno. Dê um clique em "Montar headlines" para gerar as headlines a partir destas quatro listas.</p><div class="form-grid">${CMP_KINDS.map(k => `<div class="field"><label><i class="cmp-dot" style="background:${CMP_KIND_COLOR[k]}"></i>${CMP_KIND_LABEL[k]}s <small class="muted">· ${CMP_KIND_HINT[k]}</small></label><textarea rows="4" onchange="cmpBank('${c.id}','${k}',this.value)">${esc(c.bank[k].join('\n'))}</textarea></div>`).join('')}</div><div class="row-gap" style="margin:6px 0 12px"><button class="btn sm dark" onclick="cmpRebuildHeads('${c.id}')">Montar headlines a partir destas listas</button></div>
+    <h4 style="margin:6px 0">Matéria-prima do público</h4><p class="muted" style="font-size:12px;margin:0 0 6px">Vem do pré-projeto e do caderno. Dê um clique em "Montar headlines" para gerar as headlines a partir destas quatro listas.</p><div class="form-grid">${CMP_KINDS.map(k => `<div class="field"><label><i class="cmp-dot" style="background:${CMP_KIND_COLOR[k]}"></i>${CMP_KIND_PL[k]} <small class="muted">· ${CMP_KIND_HINT[k]}</small></label><textarea rows="4" onchange="cmpBank('${c.id}','${k}',this.value)">${esc(c.bank[k].join('\n'))}</textarea></div>`).join('')}</div><div class="row-gap" style="margin:6px 0 12px"><button class="btn sm dark" onclick="cmpRebuildHeads('${c.id}')">Montar headlines a partir destas listas</button></div>
     <div class="form-grid"><div class="field full"><label>Headlines (uma por linha)</label><textarea rows="5" onchange="cmpBank('${c.id}','h',this.value)">${esc(c.bank.h.join('\n'))}</textarea></div><div class="field full"><label>Frases de apoio</label><textarea rows="4" onchange="cmpBank('${c.id}','s',this.value)">${esc(c.bank.s.join('\n'))}</textarea></div><div class="field full"><label>CTAs (texto do botão)</label><textarea rows="3" onchange="cmpBank('${c.id}','c',this.value)">${esc(c.bank.c.join('\n'))}</textarea></div></div>
     <div class="row-gap" style="margin:8px 0"><button class="btn sm" onclick="cmpImgModal('${c.id}')">Escolher imagens da Biblioteca (${c.bank.img.length})</button><button class="btn sm" onclick="cmpAI('${c.id}')" title="Usa 1 crédito">✨ Escrever com IA</button></div>
     <h4 style="margin:12px 0 6px">Cores</h4>${c.bank.col.map((v, i) => `<div class="row-gap" style="margin:4px 0;align-items:center"><input value="${esc(v.name)}" style="width:110px" onchange="cmpColor('${c.id}',${i},'name',this.value)"><label class="muted" style="font-size:12px">Fundo <input type="color" value="${v.bg}" onchange="cmpColor('${c.id}',${i},'bg',this.value)"></label><label class="muted" style="font-size:12px">Destaque <input type="color" value="${v.accent}" onchange="cmpColor('${c.id}',${i},'accent',this.value)"></label><label class="muted" style="font-size:12px">Texto <input type="color" value="${v.fg}" onchange="cmpColor('${c.id}',${i},'fg',this.value)"></label><button class="btn sm" onclick="cmpDelColor('${c.id}',${i})">×</button></div>`).join('')}<button class="btn sm" onclick="cmpAddColor('${c.id}')">＋ Cor</button>
@@ -255,7 +271,7 @@ function cmpDetailHTML(p, c) {
   else body = `<div class="panel" style="margin-top:12px"><p class="muted" style="font-size:12.5px;margin-top:0">Sugestões em 3 camadas. Edite à vontade.</p><div class="form-grid">${[['macro', 'Macroteste (ângulo)'], ['micro', 'Microteste (imagem, cor, CTA)'], ['format', 'Teste de formato'], ['notes', 'Anotações e resultados']].map(([k, l]) => `<div class="field full"><label>${l}</label><textarea rows="3" onchange="cmpTest('${c.id}','${k}',this.value)">${esc(c.test[k])}</textarea></div>`).join('')}</div></div>`;
   return `<div class="section-row" style="margin-bottom:6px"><button class="btn sm" onclick="cmpUI.id='';cmpRender()">← Campanhas</button><div class="row-gap"><button class="btn sm" onclick="cmpZip('${c.id}')">⬇ Baixar artes (por medida)</button><button class="btn sm" onclick="cmpPkg('${c.id}')">📦 Pacote</button><button class="btn sm" onclick="cmpDel('${c.id}')">Excluir</button></div></div>
   <div class="panel"><div class="form-grid"><div class="field"><label>Nome</label><input value="${esc(c.name)}" onchange="cmpField('${c.id}','name',this.value)"></div><div class="field"><label>Objetivo</label><input value="${esc(c.objective)}" onchange="cmpField('${c.id}','objective',this.value)"></div><div class="field"><label>Período</label><input value="${esc(c.period)}" placeholder="Ex.: 01/03 a 31/03" onchange="cmpField('${c.id}','period',this.value)"></div><div class="field"><label>Orçamento por dia (R$)</label><input type="number" min="0" value="${c.budget || ''}" onchange="cmpField('${c.id}','budget',this.value)"></div><div class="field full"><label>Público</label><input value="${esc(c.audience)}" onchange="cmpField('${c.id}','audience',this.value)"></div></div>
-  <div class="cards" style="margin-top:12px"><div class="card"><div class="label">Peças</div><div class="metric">${c.pieces.length}</div></div><div class="card"><div class="label">Artes (peças × medidas)</div><div class="metric">${on}</div></div><div class="card"><div class="label">Aprovadas</div><div class="metric">${c.pieces.filter(q => q.status === 'Aprovada' || q.status === 'No ar').length}</div></div></div></div>
+  <div class="cards" style="margin-top:12px"><div class="card"><div class="label">Anúncios (5 fases)</div><div class="metric">${c.pieces.length}</div></div><div class="card"><div class="label">Artes (peças × medidas)</div><div class="metric">${on}</div></div><div class="card"><div class="label">Aprovadas</div><div class="metric">${c.pieces.filter(q => q.status === 'Aprovada' || q.status === 'No ar').length}</div></div></div></div>
   <div class="edh-tabs" style="margin-top:12px">${tabs.map(([k, l]) => `<button class="edh-tab ${tab === k ? 'on' : ''}" onclick="cmpUI.tab='${k}';cmpRender()">${l}</button>`).join('')}</div>${cmpUI.busy ? '<p class="muted">Montando as artes…</p>' : ''}${body}`;
 }
 function campaignsHTML(p) {
