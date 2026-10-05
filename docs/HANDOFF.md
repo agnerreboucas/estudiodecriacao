@@ -1,0 +1,31 @@
+# Ampliação Studio — pacote de continuidade
+
+Leia este arquivo primeiro numa conversa nova. A memória de verdade é este repositório (código + README + este documento).
+
+## O que é
+Plataforma de produção e inteligência de marketing. JavaScript puro no navegador (`js/`, `css/`, `index.html`) + API em PHP para Hostinger (`api/`). Dados do projeto em `js/store.js` (estado) e IndexedDB (imagens). Demo de arquivo único: `demo/ampliacao-studio-demo.html`, gerada por `python3 tools/build_demo.py`.
+
+## Combinados fixos (não quebrar)
+- Responder em português do Brasil, linguagem simples.
+- Chaves de API só no servidor; sanitizar dados guardados; não guardar parâmetros de rastreio (fbclid, utm).
+- Nunca inventar fato clínico, financeiro ou jurídico: usar `[CONFIRMAR]`.
+- Caminhos de IA só foram testados com resposta simulada; dizer isso com honestidade.
+- Imagens vêm do app/Biblioteca. De referências e templates, reproduzir só a estrutura (sem textos, logos ou fotos copiados).
+- Sem identificador de modelo em arquivos do repositório.
+- Depois de cada entrega: atualizar README, `python3 tools/build_demo.py`, rodar testes, commit, push, enviar o demo.
+- Commit/push só na branch `claude/gallant-knuth-fmaynr`. Não abrir PR sem pedido.
+
+## Mapa do fluxo
+Projeto → pré-projeto → Campanha (5 fases da jornada: Descoberta, Atração, Consideração, Ação, Apologia; gatilhos Identificação, Aspiração, Segurança, Momento Uau, Identidade; anúncios nas 3 medidas) → Roteiros de vídeo (6 documentos, `js/video-roteiros.js`) → Stories da semana (`js/stories.js`) → Landing (mobile first, `js/landing-ui.js`, `js/builder-ui.js`) → Logo (`js/logo-lab.js`).
+Skills de texto: `js/skills-text.js` (editorial, stories, audiovisual, exemplo "A cadeira na janela") e `js/skills-ui.js`.
+Exportação de PDF/Docs dos roteiros: `js/doc-export.js` (rótulo em negrito, destaque em Hook/CTA/Big Idea/Promessa/Objetivo/Ângulo).
+
+## Testes
+Playwright com Chromium em `/opt/pw-browsers/chromium`, servidor estático `python3 -m http.server 8093`, bloqueando `**/status.php` e `**/fonts.googleapis.com/**`, simulando `**/ai.php`. PDF conferido com pdftotext/pdftoppm; DOCX com python-docx. Não abre num Word real.
+
+## Pendente (ordem)
+1. Revisar o fluxo inteiro e mandar um HTML completo (campanha → anúncios → roteiros → Stories → landing → logo) para aprovação.
+2. Ela vai mandar outro modelo de landing de cadastro (o link lp.arr.academy/imersao é bloqueado aqui: pedir print ou HTML/zip salvo). Usar só a estrutura.
+3. SÓ DEPOIS da aprovação: empacotar tudo como plugin de WordPress (app + api, dados em uploads, login pelo WP, menu no admin), mantendo o campo de teste de API. Nunca testado em WordPress real.
+4. Backlog: Portal do cliente (lado Studio), módulo de apresentação, "Produtos e serviços", CRM/Dashboard, inspetor de plugins (aguarda arquivos), Biblioteca de anúncios de referência (dor/dúvida/desejo/urgência), publicação direta no Meta (OAuth), skills 'post', 'landing', 'pre' ainda sem ligação, sem busca na web no Studio.
+5. Testes que já falhavam antes (não investigados): eb2 e ad1.

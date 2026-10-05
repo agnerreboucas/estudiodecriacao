@@ -17,7 +17,7 @@ function dxBlocks(text) {
       i--; B.push({t: 'table', rows}); continue;
     }
     if (first) { first = false; B.push({t: 'h1', text: tl}); continue; }
-    if (/^Cena \d+/.test(tl) || (tl === tl.toUpperCase() && /^[A-ZÀ-Ú][A-ZÀ-Ú0-9\s/—–:.,()%-]{3,}$/.test(tl) && tl.length < 90)) { flush(); B.push({t: 'h2', text: tl}); continue; }
+    if (/^Cena \d+/.test(tl) || (!/:$/.test(tl) && tl === tl.toUpperCase() && /^[A-ZÀ-Ú][A-ZÀ-Ú0-9\s/—–:.,()%-]{3,}$/.test(tl) && tl.length < 90)) { flush(); B.push({t: 'h2', text: tl}); continue; }
     para.push(tl);
   }
   flush(); return B;
@@ -54,6 +54,20 @@ function dxWrap(s, size, bold, maxW) {
   }
   return out;
 }
+/* "Rótulo: texto" (rótulo curto, sem número) e rótulos que merecem destaque */
+const dxLabel = l => { const m = /^([A-Za-zÀ-ÿ][^:\n]{1,34}):\s+(\S.*)$/.exec(l); return m && !/\d:/.test(m[1]) ? m : null; };
+/* rótulo sozinho na linha ("Qual Hook?" + valor) vira "Hook: valor"; tira "Qual/Quais/Em qual" do início */
+const dxClean = l => l.replace(/^(?:Em qual|Qual|Quais|Quem)\s+/i, m => '').replace(/^./, c => c.toUpperCase());
+function dxLines(lines) {
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i], m = /^([^:?\n]{2,40})[:?]$/.exec(l);
+    if (m && i + 1 < lines.length && !/^([A-Za-zÀ-ÿ][^:\n]{1,34}):\s/.test(lines[i + 1]) || m && i + 1 < lines.length && lines[i + 1].length > 40) { out.push(dxClean(m[1]) + ': ' + lines[i + 1]); i++; }
+    else { const k = dxLabel(l); out.push(k ? dxClean(k[1]) + ': ' + k[2] : l); }
+  }
+  return out;
+}
+const DX_HL = /^(Hook|CTA|Big Idea|Promessa|Objetivo|Ângulo)\b/i;
 const dxEsc = s => s.replace(/[\\()]/g, m => '\\' + m);
 /* docs: [{label, title, text, status, approvedAt}] → Uint8Array do PDF. meta: {project, resp, title} */
 function dxPdf(docs, meta) {
@@ -69,13 +83,22 @@ function dxPdf(docs, meta) {
   };
   const need = h => { if (y + h > H - BOT) newPage(); };
   const text = (t, x, yy, sz, bold, gray) => ops.push(`${gray ? '0.35 g ' : ''}BT /${bold ? 'F2' : 'F1'} ${sz} Tf ${x.toFixed(2)} ${(H - yy).toFixed(2)} Td (${dxEsc(dxLatin(t))}) Tj ET${gray ? ' 0 g' : ''}`);
-  const para = (t, size, bold, gap, indent) => { const lh = size * 1.32; for (const ln of dxWrap(t, size, bold, CW - (indent || 0))) { need(lh); y += lh; text(ln, ML + (indent || 0), y - size * 0.25, size, bold); } y += gap || 0; };
+  const para = (t, size, bold, gap, indent) => { const lh = size * 1.5; for (const ln of dxWrap(t, size, bold, CW - (indent || 0))) { need(lh); y += lh; text(ln, ML + (indent || 0), y - size * 0.3, size, bold); } y += gap || 0; };
+  /* linha "Rótulo: texto" → rótulo em negrito; destaque = fundo sombreado e barra lateral */
+  const labelPara = (lab, val, size, hl) => {
+    const lh = size * 1.55, pad = hl ? 5 : 0, lw = dxWidth(lab + ': ', size, true), inner = CW - 2 * pad;
+    const first = dxWrap(val, size, false, inner - lw)[0] || '', rest = val.slice(first.length).trim(), lines = rest ? dxWrap(rest, size, false, inner) : [], n = 1 + lines.length, h = n * lh + 2 * pad;
+    need(h + 2); const top = y;
+    if (hl) ops.push(`1 0.95 0.72 rg ${ML} ${(H - top - h).toFixed(2)} ${CW.toFixed(2)} ${h.toFixed(2)} re f 0.85 0.55 0 rg ${ML} ${(H - top - h).toFixed(2)} 2.4 ${h.toFixed(2)} re f 0 g`);
+    y += pad + lh; text(lab + ':', ML + pad + (hl ? 3 : 0), y - size * 0.3, size, true); text(first, ML + pad + (hl ? 3 : 0) + lw, y - size * 0.3, size, false);
+    lines.forEach(l => { y += lh; text(l, ML + pad + (hl ? 3 : 0), y - size * 0.3, size, false); }); y += pad + (hl ? 4 : 1);
+  };
   docs.forEach((d, di) => {
     cur = d; if (di === 0) newPage(); else { newPage(); }
     for (const b of dxBlocks(d.text)) {
       if (b.t === 'h1') { y += 4; para(b.text, 16, true, 8); }
       else if (b.t === 'h2') { y += 6; need(30); para(b.text, 11.5, true, 3); }
-      else if (b.t === 'p') { const term = d.label === 'Glossário' && b.lines.length >= 2 && b.lines[0].length <= 40; b.lines.forEach((l, li) => para(l, 10, term && li === 0, 1)); y += 5; }
+      else if (b.t === 'p') { const term = d.label === 'Glossário' && b.lines.length >= 2 && b.lines[0].length <= 40; (term ? b.lines : dxLines(b.lines)).forEach((l, li) => { const m = !term && dxLabel(l); if (m) labelPara(m[1], m[2], 10, DX_HL.test(m[1])); else para(l, 10, term && li === 0, 2); }); y += 7; }
       else if (b.t === 'hr') { need(14); y += 7; ops.push(`0.75 G 0.4 w ${ML} ${(H - y).toFixed(2)} m ${(W - MR).toFixed(2)} ${(H - y).toFixed(2)} l S 0 G`); y += 7; }
       else if (b.t === 'table' && b.rows.length) {
         const n = Math.max(...b.rows.map(r => r.length)), size = 7.8, pad = 3, lh = size * 1.3;
@@ -119,7 +142,7 @@ function dxDocx(docs, meta) {
     for (const b of dxBlocks(d.text)) {
       if (b.t === 'h1') body += `<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr>${dxRun(b.text)}</w:p>`;
       else if (b.t === 'h2') body += `<w:p><w:pPr><w:pStyle w:val="Heading2"/></w:pPr>${dxRun(b.text)}</w:p>`;
-      else if (b.t === 'p') { const term = d.label === 'Glossário' && b.lines.length >= 2 && b.lines[0].length <= 40; body += `<w:p>${b.lines.map((l, i) => (i ? '<w:r><w:br/></w:r>' : '') + dxRun(l, term && i === 0 ? {b: 1} : null)).join('')}</w:p>`; }
+      else if (b.t === 'p') { const term = d.label === 'Glossário' && b.lines.length >= 2 && b.lines[0].length <= 40; (term ? b.lines : dxLines(b.lines)).forEach(l => { const m = !term && dxLabel(l), hl = m && DX_HL.test(m[1]); body += `<w:p><w:pPr>${hl ? '<w:pBdr><w:left w:val="single" w:sz="18" w:space="6" w:color="D98C00"/></w:pBdr><w:shd w:val="clear" w:color="auto" w:fill="FFF2B8"/>' : ''}<w:spacing w:after="${hl ? 80 : 60}" w:line="${hl ? 336 : 324}" w:lineRule="auto"/></w:pPr>${m ? dxRun(m[1] + ': ', {b: 1}) + dxRun(m[2]) : dxRun(l, term && l === b.lines[0] ? {b: 1} : null)}</w:p>`; }); }
       else if (b.t === 'hr') body += '<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="4" w:space="1" w:color="999999"/></w:pBdr></w:pPr></w:p>';
       else if (b.t === 'table' && b.rows.length) {
         const n = Math.max(...b.rows.map(r => r.length)), wt = Array.from({length: n}, (_, c) => Math.max(...b.rows.map(r => Math.min(String(r[c] || '').length, 42))) + 6), tot = wt.reduce((a, x) => a + x, 0), tw = 9638, cw = wt.map(x => Math.max(560, Math.round(x / tot * tw)));
@@ -133,7 +156,7 @@ function dxDocx(docs, meta) {
   const l2 = [`Responsável: ${meta.resp || '—'}`, docs.length === 1 && docs[0].label, docs.length === 1 && DX_STATUS_LINE(docs[0]), docs.length > 1 && meta.title].filter(Boolean).join('   ·   ');
   const hdr = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:hdr ${W}><w:p>${dxRun('Projeto: ' + (meta.project || ''), {b: 1, sz: 20})}</w:p><w:p>${dxRun(l2, {sz: 18})}</w:p><w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="4" w:space="1" w:color="999999"/></w:pBdr></w:pPr>${dxRun(docs.length === 1 ? (docs[0].title || meta.title || '') : '', {sz: 18, color: '666666'})}</w:p></w:hdr>`;
   const ftr = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr ${W}><w:p><w:pPr><w:jc w:val="center"/></w:pPr>${dxRun('Ampliação Studio  ·  página ', {sz: 16})}<w:r><w:rPr><w:sz w:val="16"/></w:rPr><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:rPr><w:sz w:val="16"/></w:rPr><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r><w:rPr><w:sz w:val="16"/></w:rPr><w:fldChar w:fldCharType="separate"/></w:r>${dxRun('1', {sz: 16})}<w:r><w:rPr><w:sz w:val="16"/></w:rPr><w:fldChar w:fldCharType="end"/></w:r></w:p></w:ftr>`;
-  const sty = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ${W}><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="20"/><w:lang w:val="pt-BR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="264" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style><w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="120" w:after="160"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:b/><w:sz w:val="32"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="60"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="23"/></w:rPr></w:style><w:style w:type="paragraph" w:customStyle="1" w:styleId="Rotulo"><w:name w:val="Rotulo"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="40"/></w:pPr></w:style></w:styles>`;
+  const sty = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ${W}><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="20"/><w:lang w:val="pt-BR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="312" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style><w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="120" w:after="160"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:b/><w:sz w:val="32"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="60"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="23"/></w:rPr></w:style><w:style w:type="paragraph" w:customStyle="1" w:styleId="Rotulo"><w:name w:val="Rotulo"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="40"/></w:pPr></w:style></w:styles>`;
   const ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>';
   const rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>';
   const drels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/></Relationships>';
