@@ -234,8 +234,8 @@ function normalizeCampaigns(x) {
       test: {macro: str(c.test && c.test.macro, 400), micro: str(c.test && c.test.micro, 400), format: str(c.test && c.test.format, 400), notes: str(c.test && c.test.notes, 1500)}, pieces, created: str(c.created, 40) || new Date().toISOString()};
   });
 }
-/* Roteiros do Video Lab: 4 tipos (literário, técnico, de gravação e de edição) por ângulo de anúncio, post ou ideia */
-const VS_KINDS = ['literario', 'tecnico', 'gravacao', 'edicao'], VS_DURS = [6, 10, 15, 20, 30, 60];
+/* Roteiros do Video Lab: ficha estratégica, literário, gravação, técnico, edição e glossário (nessa ordem) por ângulo de anúncio, post ou ideia */
+const VS_KINDS = ['ficha', 'literario', 'gravacao', 'tecnico', 'edicao', 'glossario'], VS_DURS = [6, 10, 15, 20, 30, 60];
 function normalizeVideoScripts(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || ''));
   return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 60).map(r => { const s = r.src || {}, t = r.t || {};

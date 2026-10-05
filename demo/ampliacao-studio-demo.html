@@ -1299,8 +1299,8 @@ function normalizeCampaigns(x) {
       test: {macro: str(c.test && c.test.macro, 400), micro: str(c.test && c.test.micro, 400), format: str(c.test && c.test.format, 400), notes: str(c.test && c.test.notes, 1500)}, pieces, created: str(c.created, 40) || new Date().toISOString()};
   });
 }
-/* Roteiros do Video Lab: 4 tipos (literário, técnico, de gravação e de edição) por ângulo de anúncio, post ou ideia */
-const VS_KINDS = ['literario', 'tecnico', 'gravacao', 'edicao'], VS_DURS = [6, 10, 15, 20, 30, 60];
+/* Roteiros do Video Lab: ficha estratégica, literário, gravação, técnico, edição e glossário (nessa ordem) por ângulo de anúncio, post ou ideia */
+const VS_KINDS = ['ficha', 'literario', 'gravacao', 'tecnico', 'edicao', 'glossario'], VS_DURS = [6, 10, 15, 20, 30, 60];
 function normalizeVideoScripts(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || ''));
   return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 60).map(r => { const s = r.src || {}, t = r.t || {};
@@ -20827,6 +20827,171 @@ Quando houver resultados (alcance, respostas, cliques, mensagens, saídas), diag
 REGRAS DE SEGURANÇA
 Não inventar fatos, números, resultados, depoimentos, preços ou prazos: usar [CONFIRMAR] quando faltar informação. Em setores regulados (saúde, direito, finanças), respeitar as regras do conselho ou órgão do setor e não prometer resultado.`;
 
+/* Skill Mestre: Sistema de Inteligência Editorial e Roteiros Audiovisuais (texto enviado pela usuária) */
+const SKT_AUDIOVISUAL = `SKILL MESTRE
+SISTEMA DE INTELIGÊNCIA EDITORIAL E ROTEIROS AUDIOVISUAIS
+
+1. IDENTIDADE DA SKILL
+Você é um Especialista em Inteligência Editorial, Storytelling, Roteirização Audiovisual e Direção de Conteúdo.
+Sua função é transformar informações brutas, dados, pesquisas, documentos, comentários, avaliações, perguntas, métricas, entrevistas, campanhas, tendências e conhecimentos sobre determinado público em conteúdo audiovisual estratégico e executável.
+Você não é apenas um gerador de ideias. Você funciona como uma combinação de: estrategista de conteúdo; pesquisador; analista de audiência; estrategista editorial; roteirista; diretor de conteúdo; diretor audiovisual; produtor; diretor de fotografia; orientador de gravação; editor; especialista em comunicação persuasiva.
+Seu trabalho deve conectar:
+DADOS → INSIGHTS → OPORTUNIDADES → IDEIAS → ESTRATÉGIA → HISTÓRIA → GRAVAÇÃO → CINEMATOGRAFIA → EDIÇÃO → PUBLICAÇÃO
+O resultado final deve permitir que uma pessoa compreenda: 1. por que aquele conteúdo deve existir; 2. qual história será contada; 3. como ela deve ser gravada; 4. quais planos precisam ser captados; 5. como o material deve ser editado; 6. quais termos técnicos estão sendo utilizados.
+
+2. MISSÃO PRINCIPAL
+Transformar Big Data e conhecimento estratégico em conteúdo audiovisual de alta relevância.
+Procurar constantemente: dores; desejos; necessidades; dúvidas; objeções; medos; frustrações; sonhos; comportamentos; padrões; perguntas recorrentes; linguagem utilizada pelo público; tendências; acontecimentos; oportunidades; diferenciais; provas; histórias; transformações; comparações; conflitos; crenças; contradições; oportunidades comerciais; oportunidades de autoridade; oportunidades de identificação.
+A partir disso, descobrir: "O que vale a pena transformar em conteúdo?"
+Somente depois decidir: "Qual é a melhor maneira de transformar isso em vídeo?"
+
+3. O QUE VOCÊ PODE RECEBER
+Qualquer combinação de informações.
+Dados sobre o negócio: produto; serviço; empresa; marca; profissional; especialista; influenciador; instituição; ONG; causa; evento; curso; e-book; infoproduto; projeto; campanha.
+Dados sobre o público: persona; ICP; idade; profissão; localização; comportamento; desejos; dores; objeções; dúvidas; linguagem; comentários; mensagens; avaliações; reclamações; depoimentos.
+Big Data: planilhas; pesquisas; comentários; avaliações; reviews; perguntas; métricas; anúncios; campanhas; concorrentes; entrevistas; documentos; transcrições; pesquisas de mercado; tendências; dados de redes sociais; dados de vendas; dados de atendimento; dados de CRM; dados qualitativos; dados quantitativos.
+Informações criativas: referências; estilo visual; identidade da marca; tom de voz; campanhas anteriores; vídeos; roteiros; slogans; conceitos; restrições; orçamento; equipamentos; locações disponíveis; elenco; tempo de gravação.
+
+4. REGRA FUNDAMENTAL: NÃO INVENTAR DADOS
+Nunca apresente uma informação como fato quando ela não estiver presente nos dados fornecidos ou em uma fonte confiável disponível.
+Diferencie claramente:
+DADO OBSERVADO: informação diretamente encontrada no material recebido.
+INSIGHT: interpretação estratégica derivada dos dados.
+HIPÓTESE: possibilidade que precisa ser validada.
+INFERÊNCIA CRIATIVA: construção narrativa criada para transformar uma informação em conteúdo.
+Quando necessário, identifique essas categorias.
+
+5. PRIMEIRA ETAPA — LEITURA E DIAGNÓSTICO
+Antes de criar um roteiro, analise o material recebido.
+Contexto: o que está sendo comunicado? Para quem? Em qual contexto? Qual problema existe? Qual oportunidade existe?
+Produto ou tema: o que é? O que faz? Para quem serve? Qual transformação proporciona? Qual diferencial possui?
+Público: quem é; o que quer; o que teme; o que pergunta; o que reclama; o que deseja evitar; o que deseja conquistar; como fala; quais palavras utiliza.
+Comunicação: tom; personalidade; posicionamento; promessa; diferenciais; provas; argumentos; linguagem.
+
+6. SEGUNDA ETAPA — MINERAÇÃO DE INSIGHTS
+Transforme os dados em inteligência editorial. Procure especialmente:
+DORES: o que incomoda o público?
+DESEJOS: o que ele gostaria de conquistar?
+OBJEÇÕES: por que ele ainda não compra, acredita ou age?
+DÚVIDAS: o que ele ainda não entende?
+MEDOS: o que ele teme perder, errar ou sofrer?
+CURIOSIDADES: o que pode gerar atenção?
+CONTRADIÇÕES: existe algo que o público acredita, mas os dados mostram de maneira diferente?
+PADRÕES: algo aparece repetidamente?
+LINGUAGEM: quais expressões reais o público utiliza?
+PROVAS: quais fatos, resultados, depoimentos ou demonstrações podem sustentar a comunicação?
+HISTÓRIAS: existem acontecimentos que podem virar narrativa?
+TRANSFORMAÇÕES: existe uma mudança clara de ANTES → DEPOIS?
+
+7. TERCEIRA ETAPA — GERAÇÃO DE OPORTUNIDADES
+Antes de escrever o roteiro final, gere possibilidades de conteúdo. Cada oportunidade deve conter: título provisório; insight de origem; problema ou desejo; público; ângulo; Big Idea; Hook; promessa; objetivo; formato recomendado; duração sugerida; CTA; potencial estratégico.
+Não gere ideias aleatórias. Cada ideia deve possuir uma razão estratégica para existir.
+
+8. CATEGORIAS DE CONTEÚDO
+Considere, quando apropriado: Educação (ensinar algo); Demonstração (mostrar algo funcionando); Prova (comprovar uma afirmação); Transformação (antes e depois); Identificação (fazer o público pensar "Isso sou eu."); Objeção (responder uma resistência); Comparação (mostrar diferenças); História (contar uma narrativa); Bastidores (mostrar o que normalmente não é visto); Autoridade (demonstrar conhecimento); Entretenimento (gerar atenção e retenção); Curiosidade (explorar algo inesperado); Produto (apresentar ou demonstrar uma oferta); Serviço (mostrar como o serviço resolve um problema); Causa (gerar consciência e mobilização); Evento (gerar interesse ou participação); Pessoa (construir percepção e conexão); Marca (construir posicionamento).
+
+9. PRIORIZAÇÃO
+Quando houver várias oportunidades, classifique-as considerando: relevância para o público; força do insight; potencial de atenção; potencial de retenção; potencial de compartilhamento; potencial de autoridade; potencial comercial; facilidade de produção; diferenciação; adequação à plataforma.
+Quando apropriado, classifique como ALTA, MÉDIA ou BAIXA PRIORIDADE e explique brevemente o motivo.
+
+10. ESCOLHA DO FORMATO
+Adapte o conteúdo à plataforma e ao objetivo. Exemplos: Instagram Reels; Instagram Stories; TikTok; YouTube Shorts; YouTube; anúncio; vídeo institucional; vídeo de venda; vídeo educativo; depoimento; entrevista; documentário; conteúdo de marca.
+Considere: proporção; duração; comportamento da audiência; velocidade narrativa; necessidade de legenda; CTA; retenção; contexto de consumo.
+
+11. FICHA ESTRATÉGICA
+A primeira parte do roteiro final deve ser a Ficha Estratégica. Ela deve responder: O que estamos produzindo? Por que estamos produzindo? Para quem? Em qual plataforma? Qual formato? Qual duração? Qual objetivo? Qual ângulo? Qual Big Idea? Qual promessa? Qual Hook? Qual emoção principal? Qual CTA? Quem participa? Onde será gravado? Qual estética? Quais referências? Quais restrições?
+A Ficha Estratégica é o mapa do projeto.
+
+12. ROTEIRO LITERÁRIO
+Depois da Ficha Estratégica, escreva o Roteiro Literário. O Roteiro Literário é a história completa. Ele deve ser compreensível sozinho.
+Não transforme o roteiro literário em uma tabela técnica. Não sobrecarregue o texto com tipos de plano, movimentos de câmera, especificações técnicas ou códigos de edição. O leitor deve conseguir imaginar a história.
+Descreva: contexto; personagens; ambiente; situação inicial; conflito; desenvolvimento; descoberta; transformação; diálogos; narração; ações; conclusão; CTA.
+O texto deve possuir fluidez narrativa. Não é obrigatório escrever "Cena 1", "Cena 2", "Cena 3". As cenas serão estruturadas posteriormente no Roteiro de Gravação.
+
+13. ROTEIRO DE GRAVAÇÃO
+O Roteiro de Gravação transforma a história em algo que pode ser efetivamente filmado. Organize: Cena 01, Cena 02, Cena 03, etc.
+Para cada cena, indique quando relevante: local; personagem; ação; diálogo; narração; figurino; objetos; props; cenário; comportamento; expressão; B-roll; material necessário; observações de produção.
+O objetivo é responder: "O que precisamos gravar?" Esse roteiro deve ser executável pela equipe de produção.
+
+14. ROTEIRO TÉCNICO
+O Roteiro Técnico transforma as cenas em planos audiovisuais. Deve ser apresentado SEMPRE EM TABELA.
+A primeira coluna deve ser obrigatoriamente Tempo. O tempo deve ser escrito exclusivamente como intervalo: 00–03s, 03–06s, 06–09s. Nunca utilize apenas "3 segundos".
+A tabela deve conter, quando aplicável: | Tempo | Cena | Plano | Movimento | Ação | Áudio | Observações | e outras colunas quando forem necessárias.
+
+15. LINGUAGEM CINEMATOGRÁFICA
+Utilize corretamente.
+Planos: Plano Geral; Plano Conjunto; Plano Médio; Plano Americano; Primeiro Plano; Close; Super Close / ECU; Plano Detalhe.
+Movimentos: Pan; Tilt; Push-in; Pull-out; Dolly; Travelling; Rack Focus; Zoom.
+Não utilize movimentos apenas para parecer sofisticado. Cada escolha deve ter uma função narrativa.
+
+16. ÁUDIO
+O roteiro técnico deve indicar quando relevante: diálogo; narração; VO; trilha; ambiente; SFX; silêncio; Room Tone; efeitos de transição. O áudio deve participar da narrativa.
+
+17. ROTEIRO DE EDIÇÃO
+O Roteiro de Edição explica como transformar o material gravado no vídeo final. Ele deve responder: "Como esse material deve ser montado?"
+Quando apropriado, use tabela com: | Tempo | Material | Corte | Lettering | Legenda | Áudio | Efeito | Observações |
+Inclua: ordem dos cortes; ritmo; B-roll; A-roll; jump cuts; cutaways; lettering; legendas; motion graphics; trilha; SFX; transições; efeitos; correção de cor; CTA; logo; tela final; safe area; versões.
+
+18. REGRAS DE EDIÇÃO
+O editor não deve precisar adivinhar a intenção. Indique claramente: quando cortar; onde inserir B-roll; quando acelerar; quando desacelerar; onde colocar texto; qual informação deve aparecer na tela; quando usar música; quando reduzir música; onde inserir CTA; como terminar.
+
+19. ESPECIFICAÇÕES DE EXPORTAÇÃO
+Quando aplicável, indique: Vertical 9:16 1080 × 1920; Feed vertical 4:5 1080 × 1350; Quadrado 1:1 1080 × 1080; Horizontal 16:9 1920 × 1080. Considere também: duração; resolução; frame rate; codec; formato; versão com legenda; versão sem legenda; versão com CTA; versão limpa; safe area.
+Não invente especificações quando o projeto exigir um padrão diferente.
+
+20. GLOSSÁRIO / VOCABULÁRIO DA PRODUÇÃO
+O Glossário deve ser SEMPRE a última seção do documento. Explique os termos técnicos utilizados no roteiro. Cada termo deve possuir: Termo; Significado; Aplicação neste projeto, quando relevante.
+Inclua, quando utilizados: Hook; CTA; A-roll; B-roll; Plano Geral; Plano Conjunto; Plano Médio; Plano Americano; Primeiro Plano; Close; Super Close; ECU; Plano Detalhe; Pan; Tilt; Push-in; Pull-out; Dolly; Travelling; Rack Focus; Zoom; Jump Cut; Cutaway; Match Cut; J-Cut; L-Cut; Lettering; Lower Third; Motion Graphics; Supers; VO; SFX; Sound Design; Trilha; Room Tone; Key Light; Fill Light; Back Light; Rim Light; temperatura de cor; profundidade de campo; 9:16; 4:5; 1:1; 16:9.
+Não coloque termos desnecessários apenas para aumentar o glossário. Explique os termos efetivamente utilizados.
+
+21. CADEIA DE CONSISTÊNCIA
+Os documentos precisam funcionar como uma cadeia fechada: FICHA ESTRATÉGICA → ROTEIRO LITERÁRIO → ROTEIRO DE GRAVAÇÃO → ROTEIRO TÉCNICO → ROTEIRO DE EDIÇÃO → GLOSSÁRIO.
+Não permita contradições. O Roteiro Técnico não pode inventar uma cena que não esteja prevista no Roteiro de Gravação. O Roteiro de Edição deve utilizar materiais que foram previstos na gravação. Se for necessário utilizar banco de imagens, arquivo, stock, material antigo, captura de tela ou animação, identifique explicitamente.
+
+22. REGRA DE TRANSFORMAÇÃO
+Sempre pense: DADO (o que sabemos?) → INSIGHT (o que isso significa?) → OPORTUNIDADE (que conteúdo pode nascer disso?) → ÂNGULO (qual perspectiva torna isso interessante?) → BIG IDEA (qual é a grande ideia?) → HOOK (como fazemos alguém parar?) → HISTÓRIA (o que acontece?) → GRAVAÇÃO (o que precisamos filmar?) → TÉCNICO (quais planos captam isso?) → EDIÇÃO (como transformamos os planos em experiência?).
+
+23. SISTEMA DE HOOK
+Nunca gere apenas um Hook genérico quando houver oportunidade de explorar diferentes abordagens. Considere: Curiosidade ("Você provavelmente está fazendo isso errado."); Contradição ("O problema não é falta de espaço."); Pergunta ("Você realmente precisa de mais espaço?"); Identificação ("Se sua casa é pequena, você provavelmente conhece esse problema."); Resultado ("Olha o que aconteceu depois dessa mudança."); Demonstração ("Veja o que acontece quando..."); Afirmação forte ("Você não precisa de uma casa maior."); História ("Ela achava que precisava se mudar."); Erro ("Esse é o erro que quase todo mundo comete."). Escolha o tipo adequado ao conteúdo.
+
+24. RETENÇÃO
+Sempre que apropriado, construa progressão narrativa: ATENÇÃO → CURIOSIDADE → DESENVOLVIMENTO → REVELAÇÃO → TRANSFORMAÇÃO → CTA. Evite entregar toda a conclusão imediatamente quando isso destruir a curiosidade. Mas nunca esconda informações essenciais apenas para criar retenção artificial.
+
+25. ADAPTAÇÃO AO OBJETIVO
+Venda: problema; desejo; demonstração; benefício; prova; objeção; CTA.
+Autoridade: conhecimento; contexto; análise; prova; clareza.
+Engajamento: identificação; opinião; conflito; curiosidade; participação.
+Alcance: Hook; identificação; novidade; surpresa; compartilhamento.
+Educação: problema; explicação; demonstração; conclusão.
+Marca: identidade; posicionamento; valores; narrativa; percepção.
+
+26. ADAPTAÇÃO PARA QUALQUER NICHO
+O sistema deve funcionar para: varejo; indústria; serviços; profissionais liberais; advocacia; saúde; educação; tecnologia; alimentação; móveis; construção; arquitetura; moda; beleza; turismo; religião; terceiro setor; ONG; causas sociais; política, quando permitido; eventos; cursos; infoprodutos; livros; e-books; marcas pessoais; influenciadores; artistas; especialistas; empresas.
+Não presuma que todo conteúdo precisa vender. Primeiro determine o objetivo.
+
+27. COMPORTAMENTO QUANDO FALTAM INFORMAÇÕES
+Se faltarem informações essenciais, não invente. Faça perguntas objetivas. Priorize perguntas que realmente alterem o resultado. Exemplo: 1. Qual é o produto? 2. Para quem é? 3. Qual objetivo do vídeo? 4. Onde será publicado? 5. Qual duração? 6. Existe alguém disponível para aparecer? 7. Quais recursos de gravação existem?
+Se for possível continuar sem prejudicar o resultado, faça uma suposição explícita e continue.
+
+28. MODOS DE OPERAÇÃO
+MODO 1 — ANALISAR BIG DATA: recebe dados e produz diagnóstico, padrões, dores, desejos, objeções, oportunidades e insights.
+MODO 2 — GERAR IDEIAS: transforma insights em oportunidades de conteúdo.
+MODO 3 — DESENVOLVER IDEIA: escolhe uma oportunidade e desenvolve a estratégia.
+MODO 4 — ROTEIRO COMPLETO: entrega o documento completo.
+MODO 5 — ROTEIRO LITERÁRIO: entrega apenas a história.
+MODO 6 — GRAVAÇÃO: transforma o roteiro em cenas executáveis.
+MODO 7 — TÉCNICO: transforma as cenas em planos.
+MODO 8 — EDIÇÃO: transforma os planos em instruções de montagem.
+MODO 9 — REVISÃO: audita o material procurando inconsistências; cenas ausentes; informações inventadas; problemas de duração; problemas de narrativa; problemas técnicos; CTAs fracos; excesso de informação; termos técnicos não explicados.
+
+29. FORMATO PADRÃO DE ENTREGA COMPLETA
+Quando o usuário solicitar um roteiro completo, entregue obrigatoriamente nesta ordem: 1. FICHA ESTRATÉGICA; 2. ROTEIRO LITERÁRIO; 3. ROTEIRO DE GRAVAÇÃO; 4. ROTEIRO TÉCNICO; 5. ROTEIRO DE EDIÇÃO; 6. GLOSSÁRIO / VOCABULÁRIO DA PRODUÇÃO. Nunca altere essa ordem.
+
+30. PRINCÍPIO FINAL
+Você não está apenas escrevendo roteiros. Você está construindo uma ponte entre: INFORMAÇÃO → ESTRATÉGIA → CRIATIVIDADE → PRODUÇÃO → EDIÇÃO → RESULTADO.
+Um bom roteiro não é apenas bonito. Ele precisa ser: estratégico; interessante; compreensível; gravável; tecnicamente executável; editável; coerente; adequado ao público; adequado à plataforma; adequado ao objetivo.
+Sempre procure transformar informação em uma experiência audiovisual que tenha motivo para existir.`;
+
 </script>
 <script>
 /* ===== Skills de texto: instruções (suas) que a IA segue ao escrever, por função e por fase da jornada. =====
@@ -20851,12 +21016,16 @@ function skillSystem(fn, stage, base) {
 const skSize = t => { const n = String(t || '').length; return `${n.toLocaleString('pt-BR')} caracteres (~${Math.round(n / 4).toLocaleString('pt-BR')} tokens)`; };
 
 /* ---------- ações ---------- */
+const SK_READY = {
+  editorial: {id: 'sk_editorial_engine', name: 'BrandsDecoded Editorial Engine', desc: 'Agente editorial: encontra a história antes de escrever (triagem, ângulos, carrossel de 18 textos, post, vídeo, auditoria).', text: () => SKT_EDITORIAL, auto: true, prio: 50, fns: ['campanha', 'carrossel'], draft: false},
+  audiovisual: {id: 'sk_audiovisual', name: 'Skill Mestre: Inteligência Editorial e Roteiros Audiovisuais', desc: 'Da informação ao vídeo: ficha estratégica, roteiro literário, de gravação, técnico (em tabela), de edição e glossário.', text: () => SKT_AUDIOVISUAL, auto: true, prio: 70, fns: ['video'], draft: false},
+  stories: {id: 'sk_stories_engine', name: 'Motor de Stories (rascunho)', desc: 'Rascunho escrito a partir da sua descrição. Revise antes de ligar.', text: () => SKT_STORIES, auto: false, prio: 50, fns: ['stories'], draft: true}
+};
 function skAddReady(kind) {
   const L = skList(); if (L.length >= 30) { toast('Limite de 30 skills.'); return; }
-  const k = kind === 'editorial' ? {id: 'sk_editorial_engine', name: 'BrandsDecoded Editorial Engine', desc: 'Agente editorial: encontra a história antes de escrever (triagem, ângulos, carrossel de 18 textos, post, vídeo, auditoria).', text: SKT_EDITORIAL, auto: true, on: true, prio: 50, fns: ['campanha', 'carrossel', 'video'], stages: [], draft: false}
-    : {id: 'sk_stories_engine', name: 'Motor de Stories (rascunho)', desc: 'Rascunho escrito a partir da sua descrição. Revise antes de ligar.', text: SKT_STORIES, auto: false, on: true, prio: 50, fns: ['stories'], stages: [], draft: true};
+  const d = SK_READY[kind]; if (!d) return; const k = {id: d.id, name: d.name, desc: d.desc, text: d.text(), auto: d.auto, on: true, prio: d.prio, fns: d.fns.slice(), stages: [], draft: d.draft};
   if (L.some(x => x.id === k.id)) { toast('Essa skill já está na lista.'); return; }
-  L.push(k); persist(); skUI.id = k.id; renderSkillsPage(); toast('Skill adicionada. Confira onde ela vale e ligue o uso automático.');
+  L.push(k); persist(); skUI.id = k.id; renderSkillsPage(); toast('Skill adicionada. Confira onde ela vale' + (k.auto ? '.' : ' e ligue o uso automático.'));
 }
 function skNew() { const L = skList(); if (L.length >= 30) { toast('Limite de 30 skills.'); return; } const k = {id: uid('sk'), name: 'Nova skill', desc: '', text: '', auto: false, on: true, prio: 50, fns: [], stages: [], draft: false}; L.push(k); persist(); skUI.id = k.id; renderSkillsPage(); }
 function skUpload() {
@@ -20904,7 +21073,7 @@ function skEditHTML(k) {
 }
 function renderSkillsPage() {
   const r = $('skillsRoot'); if (!r) return; const L = skList(), ids = new Set(L.map(k => k.id));
-  const ready = [['editorial', 'BrandsDecoded Editorial Engine', 'O texto que você enviou: encontra a história antes de escrever.'], ['stories', 'Motor de Stories (rascunho)', 'Escrito a partir da sua descrição. Precisa da sua revisão.']].filter(([k]) => !ids.has(k === 'editorial' ? 'sk_editorial_engine' : 'sk_stories_engine'));
+  const ready = [['editorial', SK_READY.editorial.name, 'O texto que você enviou: encontra a história antes de escrever (campanha e carrossel).'], ['audiovisual', SK_READY.audiovisual.name, 'A Skill 3 que você enviou: ficha, roteiro literário, de gravação, técnico, de edição e glossário (Video Lab).'], ['stories', SK_READY.stories.name, 'Escrito a partir da sua descrição. Precisa da sua revisão.']].filter(([k]) => !ids.has(SK_READY[k].id));
   const sel = L.find(k => k.id === skUI.id);
   const tabs = `<div class="edh-tabs" style="margin:10px 0">${[['skills', 'Skills'], ['potencial', 'Potencial de criação']].map(([k, l]) => `<button class="edh-tab ${skUI.tab === k ? 'on' : ''}" onclick="skUI.tab='${k}';renderSkillsPage()">${l}</button>`).join('')}</div>`;
   r.innerHTML = `<div class="page-head"><div><h1>Skills de texto</h1><p>Instruções suas que a IA segue ao escrever. Cada skill vale para certas funções e, se quiser, certas fases da jornada. Quando a IA estiver configurada elas entram no pedido sozinhas.</p></div><div class="row-gap"><button class="btn" onclick="skPreviewOpen()">Ver o pedido que será enviado</button><button class="btn" onclick="skUpload()">⬆ Subir arquivo</button><button class="btn dark" onclick="skNew()">＋ Nova skill</button></div></div>
@@ -20913,7 +21082,6 @@ function renderSkillsPage() {
   <div ${skUI.tab === 'skills' ? '' : 'hidden'}>${ready.length ? `<div class="panel"><h3 style="margin-top:0">Prontas para adicionar</h3>${ready.map(([k, n, d]) => `<div class="list-item"><div><strong>${esc(n)}</strong><small>${esc(d)}</small></div><button class="btn sm dark" onclick="skAddReady('${k}')">Adicionar</button></div>`).join('')}</div>` : ''}
   <div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Suas skills (${L.length})</h3>${L.length ? `<div class="list">${L.map(k => `<div class="list-item"><div><strong>${esc(k.name)}</strong> ${k.draft ? '<span class="cmp-tag">rascunho</span>' : ''}<small>${esc(k.desc || 'Sem descrição')} · ${skSize(k.text)}</small><small>${k.auto && k.on !== false ? 'Uso automático em: ' + ((k.fns || []).map(f => SK_FN_INFO[f][0].split(':')[0]).join(', ') || 'nenhuma função marcada') + ((k.stages || []).length ? ' · fases: ' + k.stages.map(s => CMP_STAGE_NAME[s]).join(', ') : ' · todas as fases') : 'Sem uso automático (só manual)'}</small></div><div class="row-gap"><button class="btn sm" onclick="skToggle('${k.id}')">${k.on === false ? '○ desligada' : '● ligada'}</button><button class="btn sm dark" onclick="skSel('${k.id}')">${skUI.id === k.id ? 'Fechar' : 'Abrir'}</button></div></div>`).join('')}</div>` : '<p class="muted">Nenhuma skill ainda. Adicione uma pronta, suba um arquivo `.md` ou `.txt`, ou crie uma e cole o texto.</p>'}</div>
   ${sel ? skEditHTML(sel) : ''}
-  <div class="panel" style="margin-top:12px"><h4 style="margin:0 0 4px">Skill 3</h4><p class="muted" style="font-size:12.5px;margin:0">Ainda não enviada. Quando mandar, suba o arquivo ou cole o texto em "Nova skill".</p></div>
   <p class="muted" style="font-size:12px;margin-top:10px">Skills longas aumentam o custo de cada geração. Se duas valem para a mesma função e fase, entram juntas, a de maior prioridade primeiro. A qualidade real do texto só dá para avaliar com a sua chave de IA ativa.</p></div>`;
 }
 
@@ -20927,6 +21095,7 @@ const SK_CAPS = [
   ['Revisão', [['Remove clichês, abstrações vagas, corporativês, frases artificiais e padrões de texto genérico', 'texto'], ['Audita fatos, progressão narrativa, hook, densidade, formato, originalidade e proporcionalidade da tese', 'texto']]],
   ['Comandos', [['Obedece "reiniciar", "refazer ângulos", "refazer headlines", "aprofundar", "mudar formato" e "pesquisar novamente"', 'comando']]]
 ];
+const skOn = (id, fn) => { const k = skList().find(x => x.id === id); return !!(k && k.auto && k.on !== false && (!fn || (k.fns || []).includes(fn))); };
 function skEditorialOn(fn) { const k = skList().find(x => x.id === 'sk_editorial_engine'); return !!(k && k.auto && k.on !== false && (!fn || (k.fns || []).includes(fn))); }
 /* [rótulo, cor, explicação] do que dá para esperar hoje */
 function skCapStatus(kind) {
@@ -20935,7 +21104,7 @@ function skCapStatus(kind) {
   const lig = skEditorialOn(); if (!lig) return ['skill desligada', R, 'Ligue o uso automático para ela entrar nos pedidos.'];
   const tail = ai ? '' : ' Só funciona quando a IA de texto estiver configurada.';
   if (kind === 'texto') return [ai ? 'ativo' : 'pronto, falta a IA', ai ? G : Y, 'Vai como instrução em campanha, carrossel e vídeo.' + tail];
-  if (kind === 'video') return skEditorialOn('video') ? [ai ? 'ativo' : 'pronto, falta a IA', ai ? G : Y, 'Entra no roteiro de vídeo do Studio.' + tail] : ['sem ligação', R, 'Marque "Vídeo" nas funções da skill.'];
+  if (kind === 'video') return skillsFor('video', '').length ? [ai ? 'ativo' : 'pronto, falta a IA', ai ? G : Y, 'Os roteiros do Video Lab já saem com estrutura própria (4 tipos + ficha e glossário); com a IA, a skill de vídeo entra no pedido.' + tail] : ['sem ligação', R, 'Nenhuma skill ligada à função Vídeo. Adicione a Skill Mestre de roteiros.'];
   if (kind === 'post') return ['ainda sem ligação', R, 'O Studio ainda não tem geração de post com skill. Hoje vale em campanha, carrossel e vídeo.'];
   if (kind === 'carrossel18') return ['parcial', Y, 'O carrossel de 18 textos está no Agente Editorial (que tem a skill própria). Nos carrosséis de slides do Studio a skill orienta, mas o formato pedido é o do Studio.'];
   if (kind === 'pesquisa') return ['depende de pesquisa na web', R, 'O Studio ainda não busca fontes na web: ele lê o link que você colar, mas não pesquisa sozinho. Sem isso, a IA só trabalha com o material que você der.'];
@@ -20952,11 +21121,34 @@ function skPotentialHTML() {
     ${row('IA de texto configurada', ai, ai ? 'As skills entram nos pedidos automaticamente.' : 'Sem a IA, nada é gerado. Use "Ver o pedido que será enviado" para copiar o texto.')}
     ${row('Pesquisa na web', false, 'Ainda não existe no Studio. Cole o texto ou o link da fonte para a IA usar.')}
     ${row('Funções com skill ativa (' + covered.length + ' de ' + wired.length + ' ligadas)', covered.length > 0, covered.length ? covered.map(f => SK_FN_INFO[f][0].split(':')[0]).join(', ') : 'Nenhuma ainda.')}
-    ${row('Skills 2 e 3', L.some(k => k.id === 'sk_stories_engine') && false, 'Stories está em rascunho (sem módulo ainda) e a Skill 3 não foi enviada.')}</div>
+    ${row('Skill Mestre de roteiros audiovisuais ligada ao Video Lab', skOn('sk_audiovisual', 'video'), skOn('sk_audiovisual', 'video') ? 'Entra nos roteiros do Video Lab.' : 'Adicione na aba Skills e ligue o uso automático.')}
+    ${row('Motor de Stories', false, 'Está em rascunho e o módulo de Stories ainda não existe.')}</div>
     <p class="muted" style="font-size:12.5px;margin:10px 0 0"><b>${okN}</b> de ${all.length} capacidades ativas agora · <b>${midN}</b> prontas ou parciais · <b>${all.length - okN - midN}</b> dependem de algo que ainda falta.</p></div>
   <div class="panel" style="margin-top:12px"><h3 style="margin-top:0">O que esperar da Editorial Engine</h3><p class="muted" style="font-size:12.5px;margin-top:0">Cada linha mostra o estado real no Studio, não só o que a skill promete.</p>
   ${SK_CAPS.map(([g, a]) => `<h4 style="margin:12px 0 4px">${esc(g)}</h4>${a.map(([t, k]) => { const [lb, col, nt] = skCapStatus(k); return `<div class="list-item"><div><strong style="font-weight:600">${esc(t)}</strong><small>${esc(nt)}</small></div><span class="cmp-tag" style="background:${col}22;color:${col};white-space:nowrap">${esc(lb)}</span></div>`; }).join('')}`).join('')}
-  <p class="muted" style="font-size:12px;margin:12px 0 0">A skill não serve só para escrever um texto: ela organiza o raciocínio editorial antes da redação. Ela também impõe limites: não inventa dados, fontes ou acontecimentos, e reduz a tese quando a evidência é fraca.</p></div>`;
+  </div>${skAudioPanel()}<div class="panel" style="margin-top:12px"><p class="muted" style="font-size:12px;margin:0">A skill não serve só para escrever um texto: ela organiza o raciocínio editorial antes da redação. Ela também impõe limites: não inventa dados, fontes ou acontecimentos, e reduz a tese quando a evidência é fraca.</p></div>`;
+}
+
+/* ---- o que esperar da Skill Mestre de roteiros audiovisuais ---- */
+const SK_CAPS_AV = [
+  ['Entrega no Video Lab', [['Ficha estratégica, roteiro literário, de gravação, técnico, de edição e glossário, nessa ordem', 'av_doc'], ['Roteiro técnico sempre em tabela, com o tempo em intervalos (00–03s) e vocabulário de planos e movimentos', 'av_doc'], ['Cadeia de consistência: o técnico só usa as cenas da gravação e a edição só usa o material previsto', 'av_chain'], ['Glossário só com os termos que aparecem nos roteiros, sempre na última seção', 'av_doc']]],
+  ['Inteligência editorial', [['Lê o material e transforma dados, insights e oportunidades em ideias com razão para existir', 'av_ia'], ['Mineração de dores, desejos, objeções, dúvidas, medos, padrões e linguagem do público', 'av_data'], ['Diferencia dado observado, insight, hipótese e inferência criativa e não inventa dados', 'av_ia'], ['Vários tipos de hook (curiosidade, contradição, pergunta, identificação, resultado...)', 'av_ia'], ['Prioriza oportunidades (alta, média, baixa) e escolhe o formato pela plataforma e pelo objetivo', 'av_ia']]],
+  ['Modos de operação', [['Faz perguntas objetivas quando faltam informações essenciais', 'av_chat'], ['Modo revisão: audita inconsistências, cenas ausentes, dados inventados, duração e CTA fraco', 'av_review']]]
+];
+function skAvStatus(kind) {
+  const G = '#2e7d4f', Y = '#c9952a', R = '#b04040', ai = typeof aiReady === 'function' && aiReady(), has = skList().some(x => x.id === 'sk_audiovisual');
+  if (!has) return ['adicione a skill', R, 'A Skill Mestre ainda não está na sua lista.'];
+  if (!skOn('sk_audiovisual', 'video')) return ['skill desligada', R, 'Ligue o uso automático na função Vídeo.'];
+  if (kind === 'av_doc') return ['pronto no Video Lab', G, 'Os 6 documentos já nascem do esqueleto, sem IA e sem crédito. Com a IA, cada um pode ser reescrito.'];
+  if (kind === 'av_chain') return [ai ? 'ativo com a IA' : 'pronto, falta a IA', ai ? G : Y, 'Os esqueletos já seguem as mesmas cenas; na reescrita com IA os outros documentos vão junto no pedido para manter a cadeia.'];
+  if (kind === 'av_ia') return [ai ? 'ativo' : 'pronto, falta a IA', ai ? G : Y, 'Vale como instrução na reescrita com IA do Video Lab.' + (ai ? '' : ' Só funciona com a IA de texto configurada.')];
+  if (kind === 'av_data') return ['parcial', Y, 'O Studio usa o que está no projeto (pré-projeto, caderno de ideias, briefing, campanha). Planilhas, métricas e comentários em lote ainda não entram sozinhos.'];
+  if (kind === 'av_chat') return ['ainda sem chat', Y, 'Não há conversa para perguntas. O esqueleto marca com [CONFIRMAR] o que falta e você completa.'];
+  if (kind === 'av_review') return ['ainda não existe', R, 'Não há botão de revisão. Hoje dá para pedir a reescrita com IA ou revisar à mão.'];
+  return ['?', Y, ''];
+}
+function skAudioPanel() {
+  return `<div class="panel" style="margin-top:12px"><h3 style="margin-top:0">O que esperar da Skill Mestre de roteiros audiovisuais</h3><p class="muted" style="font-size:12.5px;margin-top:0">Também com o estado real no Studio.</p>${SK_CAPS_AV.map(([g, a]) => `<h4 style="margin:12px 0 4px">${esc(g)}</h4>${a.map(([t, k]) => { const [lb, col, nt] = skAvStatus(k); return `<div class="list-item"><div><strong style="font-weight:600">${esc(t)}</strong><small>${esc(nt)}</small></div><span class="cmp-tag" style="background:${col}22;color:${col};white-space:nowrap">${esc(lb)}</span></div>`; }).join('')}`).join('')}</div>`;
 }
 
 </script>
@@ -20964,9 +21156,10 @@ function skPotentialHTML() {
 /* ===== Video Lab · Roteiros em 4 tipos para cada ângulo de anúncio ou post escolhido =====
    Literário (a fala e a narrativa), técnico (planos, lentes, luz), de gravação (o que fazer na hora de gravar) e de edição (cortes, legendas, trilha).
    Nascem de um esqueleto com os dados do projeto (sem IA, sem crédito) e dá para reescrever cada um com a IA, usando as skills de vídeo. */
-const VS_LABEL = {literario: 'Literário', tecnico: 'Técnico', gravacao: 'Gravação', edicao: 'Edição'};
-const VS_DESC = {literario: 'A narrativa e a fala, cena a cena.', tecnico: 'Planos, movimentos, lentes, luz e áudio por cena.', gravacao: 'O que preparar e como gravar, na ordem certa.', edicao: 'Cortes, legendas, B-roll, trilha, transições e exportação.'};
-const vlUI = {tab: 'prod', src: 'concept', cid: '', cmp: '', piece: '', car: '', ftitle: '', fbase: '', dur: 15, id: '', kind: 'literario', busy: false};
+const VS_KINDS6 = ['ficha', 'literario', 'gravacao', 'tecnico', 'edicao', 'glossario'];   // ordem fixa da Skill Mestre
+const VS_LABEL = {ficha: 'Ficha estratégica', literario: 'Literário', gravacao: 'Gravação', tecnico: 'Técnico', edicao: 'Edição', glossario: 'Glossário'};
+const VS_DESC = {ficha: 'O mapa do projeto: por que existe, para quem, onde, como.', literario: 'A história completa, sem termos técnicos.', gravacao: 'Cena a cena, o que precisa ser gravado.', tecnico: 'Tabela de planos com o tempo em intervalos.', edicao: 'Tabela de montagem: cortes, lettering, áudio, efeitos.', glossario: 'Os termos técnicos usados nos roteiros (sempre por último).'};
+const vlUI = {tab: 'prod', src: 'concept', cid: '', cmp: '', piece: '', car: '', ftitle: '', fbase: '', dur: 15, id: '', kind: 'ficha', busy: false};
 const vsOf = (p, id) => p.video.scripts.find(x => x.id === id);
 
 /* ---------- origem do roteiro ---------- */
@@ -20995,16 +21188,30 @@ function vsFala(p, src, stage) {
   }
 }
 const vsShort = t => String(t).replace(/^(Fale|Apresente|Mostre|Responda)[^:]*:\s*/, '').replace(/^"|"$/g, '').split(/\s+/).slice(0, 7).join(' ');
-/* esqueletos: dados do projeto organizados, sem texto inventado (o que falta fica entre colchetes) */
+/* vocabulário da Skill Mestre: um plano e um movimento por tipo de cena, cada um com função narrativa */
+const VS_TEC = {Hook: ['Primeiro Plano', 'Push-in'], Problema: ['Plano Médio', 'Câmera fixa'], Ideia: ['Close', 'Câmera fixa'], 'Solução': ['Plano Detalhe', 'Tilt'], Prova: ['Plano Americano', 'Câmera fixa'], 'Objeção': ['Primeiro Plano', 'Câmera fixa'], 'Demonstração': ['Plano Detalhe', 'Travelling'], CTA: ['Plano Médio', 'Push-in']};
+const VS_WHY = {Hook: 'prende a atenção no rosto', Problema: 'mostra a pessoa dentro da situação', Ideia: 'aproxima para destacar a ideia', 'Solução': 'detalha o que resolve', Prova: 'mostra o corpo e o contexto da prova', 'Objeção': 'aproxima para responder com sinceridade', 'Demonstração': 'acompanha o passo a passo', CTA: 'aproxima na chamada final'};
+const vsT = n => String(Math.round(n)).padStart(2, '0');
+const vsRange = s => `${vsT(s.a)}–${vsT(s.b)}s`;
+const vsCena = s => 'Cena ' + String(s.i + 1).padStart(2, '0');
+/* esqueletos: dados do projeto organizados na ordem da Skill Mestre, sem texto inventado (o que falta fica entre colchetes) */
 function vsSkeleton(p, src, dur) {
-  const plan = vsPlan(dur), head = `Título: ${src.title}\nÂngulo: ${src.angle || '[defina o ângulo]'}\nDuração: ${dur} s · Formato: vertical 9:16 (1080×1920)\n`;
-  const lit = `ROTEIRO LITERÁRIO\n${head}${src.base ? 'Ideia de base: ' + src.base + '\n' : ''}\n` + plan.map(s => { const f = vsFala(p, src, s.stage); return `[${s.a}–${s.b} s] ${s.stage.toUpperCase()}\nFala: ${/^\[|^(Fale|Apresente|Mostre|Responda)/.test(f) ? f : '"' + f + '"'}\nTexto na tela: ${vsShort(f)}\n`; }).join('\n');
-  const tec = `ROTEIRO TÉCNICO\n${head}\n` + plan.map(s => `CENA ${String(s.i + 1).padStart(2, '0')} · ${s.a}–${s.b} s · ${s.stage}\n- Plano: ${FRAMES[s.i % 8]}\n- Movimento: ${MOVES[s.i % 8]}\n- Lente: natural, 35 mm\n- Luz: ${LIGHTS[s.i % 3]}\n- Áudio: ${s.stage === 'CTA' ? 'fala direta e trilha baixa' : 'fala direta'}\n- Elementos em cena: [liste o que aparece]\n- Texto na tela: ${vsShort(vsFala(p, src, s.stage))}\n`).join('\n') + '\nObservação: mantenha o rosto e o texto fora das faixas que o Reels e os Stories cobrem (cerca de 250 px no topo e 340 px no rodapé). Confira as medidas atuais antes de publicar.\n';
-  const gr = `ROTEIRO DE GRAVAÇÃO\n${head}\nANTES DE GRAVAR\n- [ ] Local com pouco ruído e luz que bate no rosto (de frente ou de lado)\n- [ ] Celular na vertical, lente limpa, modo avião ligado\n- [ ] Microfone ou fone com microfone, se tiver\n- [ ] Fundo limpo e roupa que combine com a marca\n- [ ] Falas lidas em voz alta pelo menos uma vez\n- [ ] Itens de cena separados: [liste]\n\nORDEM DE GRAVAÇÃO (agrupe por local e por plano, não pela ordem do vídeo)\n` +
-    plan.map(s => `${s.i + 1}. ${s.stage} (${s.a}–${s.b} s) · ${FRAMES[s.i % 8]}, ${MOVES[s.i % 8].toLowerCase()}\n   Fale: ${vsShort(vsFala(p, src, s.stage))}…\n   Faça 2 ou 3 takes. Pause 1 segundo antes e depois da fala para facilitar o corte.`).join('\n') + '\n\nDICAS\n- Olhe para a lente, não para a tela\n- Comece o Hook com energia e sem cumprimento longo\n- Regrave o Hook e o CTA por último, quando estiver mais solto\n- Em setores regulados, não prometa resultado e confira as regras do conselho\n';
-  const ed = `ROTEIRO DE EDIÇÃO\n${head}\nRITMO\n- Corte nas pausas; evite cena parada por mais de 3 segundos\n- Legendas grandes e legíveis, dentro da área segura\n\nLINHA DO TEMPO\n` +
-    plan.map(s => `${s.a}–${s.b} s · ${s.stage}\n   Corte: ${s.i === 0 ? 'abrir direto no Hook, sem vinheta' : 'corte seco na pausa'}\n   Legenda: ${vsShort(vsFala(p, src, s.stage))}\n   B-roll: [sugira o que cobrir]\n   Trilha e SFX: ${s.stage === 'Hook' ? 'efeito curto de entrada' : s.stage === 'CTA' ? 'trilha sobe levemente' : 'trilha baixa constante'}\n   Transição: ${s.i === 0 ? 'nenhuma' : 'corte direto'}`).join('\n') + '\n\nFECHAMENTO\n- Selo ou logo no CTA\n- Capa do vídeo com o texto do Hook\n- Exportar em 1080×1920, MP4, com legenda queimada e uma versão sem legenda\n';
-  return {literario: lit, tecnico: tec, gravacao: gr, edicao: ed};
+  const plan = vsPlan(dur), ic = (p.pre.icps || [])[0] || {}, pr = (p.products || [])[0] || {}, pain = vsLines(ic.pains)[0], des = vsLines(ic.desires)[0], doubt = vsLines(ic.doubts)[0];
+  const ficha = `FICHA ESTRATÉGICA\n\nO que estamos produzindo: vídeo de ${dur} s sobre "${src.title}"\nPor que estamos produzindo: ${src.angle || '[explique o motivo estratégico: qual dor, desejo, dúvida ou urgência oculta do público este vídeo toca]'}\nPara quem: ${ic.name ? ic.name + (ic.profile ? ' · ' + ic.profile : '') : '[defina o público]'}\nEm qual plataforma: [Instagram Reels, Stories, TikTok, YouTube Shorts ou anúncio]\nQual formato: vertical 9:16 (1080 × 1920)\nQual duração: ${dur} s\nQual objetivo: [venda, autoridade, engajamento, alcance, educação ou marca]\nQual ângulo: ${src.angle || '[defina o ângulo]'}\nQual Big Idea: ${src.base || '[a grande ideia em uma frase]'}\nQual promessa: [o que o público leva ao assistir. Não prometa resultado]\nQual Hook: ${src.hook || '[escreva o hook]'}\nQual emoção principal: ${pain ? 'identificação com a dor "' + pain + '"' : '[defina a emoção]'}\nQual CTA: ${src.cta || '[defina a chamada final]'}\nQuem participa: [pessoas que aparecem]\nOnde será gravado: [locação]\nQual estética: ${p.brand && p.brand.visual ? p.brand.visual : '[defina a estética]'}\nQuais referências: [liste]\nQuais restrições: ${p.brand && p.brand.rule ? p.brand.rule : '[orçamento, equipamentos, regras do setor]'}\n\nEsta ficha é o mapa do projeto: os documentos seguintes devem obedecê-la.\n\nObservação de origem: dado observado vem do pré-projeto e do briefing; o que está entre colchetes é decisão sua (hipótese ou inferência criativa).\n`;
+  const lit = `ROTEIRO LITERÁRIO\n\nEste texto conta a história inteira, sem termos técnicos. Escreva como prosa corrida.\n\nContexto: ${pain ? 'A pessoa vive esta situação: ' + pain + '.' : '[descreva a situação do público]'}\nPersonagens: [quem aparece e quem é para o público]\nAmbiente: [onde acontece]\nSituação inicial: [como o dia começa]\nConflito: ${src.angle ? 'O que torna isto interessante: ' + src.angle + '.' : '[qual é o conflito]'}${doubt ? '\nA dúvida que trava a pessoa: "' + doubt + '"' : ''}\nDesenvolvimento: [o que acontece em seguida]\nDescoberta: ${pr.summary ? pr.summary.split(/(?<=[.!?])\s/)[0] : '[CONFIRMAR] o que a pessoa descobre sobre o serviço ou produto'}\nTransformação: ${des ? 'Do "' + pain + '" a "' + des + '".' : '[mostre o antes e o depois, sem prometer resultado]'}\nDiálogos e narração: [escreva as falas entre aspas]\nConclusão: [feche a história]\nCTA: ${src.cta || '[chamada final]'}\n\nAbertura sugerida (Hook): "${src.hook || '[escreva]'}"\n`;
+  const gr = `ROTEIRO DE GRAVAÇÃO\n\nPara gravar com o celular: lente limpa, vertical, luz no rosto, ambiente sem ruído.\n\n` + plan.map(s => { const f = vsFala(p, src, s.stage), dial = /^\[|^(Fale|Apresente|Mostre|Responda)/.test(f) ? f : '"' + f + '"'; return `${vsCena(s)} · ${s.stage}\n- Local: [onde]\n- Personagem: [quem aparece]\n- Ação: [o que a pessoa faz]\n- Diálogo ou narração: ${dial}\n- Figurino: [roupa]\n- Objetos e props: [liste]\n- Cenário: [como deve estar]\n- Comportamento e expressão: [tom e intenção]\n- B-roll: [imagens de apoio a captar]\n- Material necessário: [equipamento]\n- Observações de produção: grave 2 ou 3 takes e deixe 1 segundo de pausa antes e depois da fala.\n`; }).join('\n') + '\nSe precisar de banco de imagens, arquivo, captura de tela ou animação, escreva aqui qual cena usa e de onde vem.\n';
+  const tec = `ROTEIRO TÉCNICO\n\nSó existem aqui as cenas previstas no Roteiro de Gravação.\n\n| Tempo | Cena | Plano | Movimento | Ação | Áudio | Observações |\n|---|---|---|---|---|---|---|\n` + plan.map(s => { const [pl, mv] = VS_TEC[s.stage] || ['Plano Médio', 'Câmera fixa']; return `| ${vsRange(s)} | ${vsCena(s)} | ${pl} | ${mv} | ${vsShort(vsFala(p, src, s.stage))} | ${s.stage === 'CTA' ? 'Diálogo e trilha baixa' : 'Diálogo'} | ${VS_WHY[s.stage] || ''} |`; }).join('\n') + '\n\nMantenha rosto e texto dentro da área segura do vertical (fora dos cerca de 250 px do topo e 340 px do rodapé que o Reels e os Stories cobrem). Confira as medidas atuais antes de publicar.\n';
+  const ed = `ROTEIRO DE EDIÇÃO\n\nUse só o material previsto na gravação.\n\n| Tempo | Material | Corte | Lettering | Legenda | Áudio | Efeito | Observações |\n|---|---|---|---|---|---|---|---|\n` + plan.map(s => `| ${vsRange(s)} | A-roll ${vsCena(s)} (${s.stage}) | ${s.i === 0 ? 'abrir direto no Hook' : 'corte seco na pausa'} | ${vsShort(vsFala(p, src, s.stage))} | legenda da fala | ${s.stage === 'Hook' ? 'efeito curto de entrada' : s.stage === 'CTA' ? 'trilha sobe levemente' : 'trilha baixa'} | ${s.i === 0 ? 'nenhum' : 'sem efeito'} | [B-roll de apoio, se houver] |`).join('\n') + `\n\nRITMO: cortes nas pausas, sem cena parada por mais de 3 segundos.\nCTA: texto e logo na tela final, trilha reduzida para a fala.\nSafe area: legendas e lettering dentro da área segura.\nCorreção de cor: [defina o padrão da marca].\n\nVERSÕES E EXPORTAÇÃO\n- Vertical 9:16, 1080 × 1920, ${dur} s\n- Com legenda e sem legenda; versão limpa e versão com CTA\n- Outros formatos só se o projeto pedir: 4:5 (1080 × 1350), 1:1 (1080 × 1080), 16:9 (1920 × 1080)\n- Frame rate, codec e formato: [defina conforme a plataforma]\n`;
+  const r = {ficha, literario: lit, gravacao: gr, tecnico: tec, edicao: ed}; r.glossario = vsGlossary(r, plan); return r;
+}
+/* glossário: só os termos que aparecem nos outros documentos, sempre por último */
+const VS_TERMS = [['Hook', 'Abertura do vídeo, pensada para fazer a pessoa parar de rolar a tela.'], ['CTA', 'Chamada para ação: o que a pessoa deve fazer depois de assistir.'], ['A-roll', 'Imagem principal, em geral a pessoa falando para a câmera.'], ['B-roll', 'Imagens de apoio que cobrem a fala (mãos, objetos, ambiente).'], ['Plano Geral', 'Mostra o ambiente inteiro e a pessoa pequena dentro dele.'], ['Plano Conjunto', 'Mostra um grupo de pessoas e o espaço ao redor.'], ['Plano Médio', 'Enquadra a pessoa da cintura para cima.'], ['Plano Americano', 'Enquadra a pessoa dos joelhos para cima.'], ['Primeiro Plano', 'Enquadra o rosto e os ombros.'], ['Super Close', 'Aproximação extrema de um detalhe do rosto ou de um objeto (também chamado ECU).'], ['Close', 'Enquadra só o rosto, de perto.'], ['Plano Detalhe', 'Mostra um detalhe pequeno: mãos, objeto, tela.'], ['Pan', 'Câmera gira no próprio eixo na horizontal.'], ['Tilt', 'Câmera gira no próprio eixo na vertical.'], ['Push-in', 'A câmera se aproxima do assunto.'], ['Pull-out', 'A câmera se afasta do assunto.'], ['Dolly', 'Câmera sobre trilho ou base que anda para a frente ou para trás.'], ['Travelling', 'A câmera acompanha o assunto andando ao lado.'], ['Rack Focus', 'Troca o foco de um ponto para outro dentro do mesmo plano.'], ['Zoom', 'Aproximação feita pela lente, sem mover a câmera.'], ['Jump Cut', 'Corte seco que pula um pedaço da mesma tomada.'], ['Cutaway', 'Corte para uma imagem de apoio e volta.'], ['Match Cut', 'Corte que liga duas imagens parecidas na forma ou no movimento.'], ['J-Cut', 'O áudio da próxima cena entra antes da imagem.'], ['L-Cut', 'O áudio da cena anterior continua sobre a imagem seguinte.'], ['Lettering', 'Texto que aparece na tela como elemento gráfico.'], ['Lower Third', 'Faixa de texto no terço inferior da tela (nome, cargo).'], ['Motion Graphics', 'Elementos gráficos animados.'], ['Supers', 'Textos sobrepostos à imagem.'], ['VO', 'Voz em off: narração sem a pessoa aparecer falando.'], ['SFX', 'Efeitos sonoros.'], ['Sound Design', 'Construção do som do vídeo (efeitos, ambiente, transições).'], ['Trilha', 'Música de fundo.'], ['Room Tone', 'O som de ambiente do local, gravado em silêncio, para cobrir cortes.'], ['Key Light', 'Luz principal da cena.'], ['Fill Light', 'Luz de preenchimento que suaviza as sombras.'], ['Back Light', 'Luz por trás do assunto, separa do fundo.'], ['Rim Light', 'Luz de contorno nas bordas do assunto.'], ['temperatura de cor', 'Tom da luz, mais quente (amarelado) ou mais frio (azulado).'], ['profundidade de campo', 'O quanto da imagem fica nítido, do primeiro plano ao fundo.'], ['9:16', 'Proporção vertical de tela cheia (1080 × 1920).'], ['4:5', 'Proporção vertical de feed (1080 × 1350).'], ['1:1', 'Proporção quadrada (1080 × 1080).'], ['16:9', 'Proporção horizontal (1920 × 1080).']];
+function vsGlossary(docs, plan) {
+  const body = [docs.ficha, docs.literario, docs.gravacao, docs.tecnico, docs.edicao].join('\n'), tecRows = String(docs.tecnico || '').split('\n').filter(l => /^\| \d/.test(l));
+  const esc2 = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), re = t => t === 'Close' ? /(?<!super )(?<![\wÀ-ú])close(?![\wÀ-ú])/i : new RegExp('(?<![\\wÀ-ú])' + esc2(t) + '(?![\\wÀ-ú])', 'i');
+  const used = VS_TERMS.filter(([t]) => re(t).test(body));
+  const app = t => { const rows = tecRows.filter(l => l.toLowerCase().includes('| ' + t.toLowerCase() + ' |')).map(l => l.split('|')[2].trim() + ' (' + l.split('|')[1].trim() + ')'); return rows.length ? 'Neste projeto: ' + rows.join(', ') + '.' : ''; };
+  return 'GLOSSÁRIO / VOCABULÁRIO DA PRODUÇÃO\n\nSó entram os termos usados nos roteiros acima.\n\n' + (used.length ? used.map(([t, m]) => `${t}\n  Significado: ${m}${app(t) ? '\n  Aplicação: ' + app(t) : ''}`).join('\n\n') : 'Nenhum termo técnico foi usado ainda.') + '\n';
 }
 
 /* ---------- ações ---------- */
@@ -21012,41 +21219,45 @@ function vsCreate() {
   const p = curProject(), src = vsSource(p); if (!src) { toast('Escolha o ângulo, o anúncio ou escreva a ideia.'); return; }
   if (p.video.scripts.length >= 60) { toast('Limite de 60 roteiros.'); return; }
   const r = {id: uid('vs'), src, dur: vlUI.dur, t: vsSkeleton(p, src, vlUI.dur), created: new Date().toISOString(), updated: ''};
-  p.video.scripts.unshift(r); vlUI.id = r.id; vlUI.kind = 'literario'; persist(); renderVideoLab(); toast('Os 4 roteiros foram montados. Revise e, se quiser, reescreva com a IA.');
+  p.video.scripts.unshift(r); vlUI.id = r.id; vlUI.kind = 'ficha'; persist(); renderVideoLab(); toast('Os 6 documentos foram montados, na ordem da Skill Mestre. Revise e, se quiser, reescreva com a IA.');
 }
-function vsOpen(id) { vlUI.id = vlUI.id === id ? '' : id; vlUI.kind = 'literario'; renderVideoLab(); }
+function vsOpen(id) { vlUI.id = vlUI.id === id ? '' : id; vlUI.kind = 'ficha'; renderVideoLab(); }
 function vsKind(k) { vsKeep(); vlUI.kind = k; renderVideoLab(); }
 function vsKeep() { const r = vsOf(curProject(), vlUI.id), ta = $('vsText'); if (r && ta) { r.t[vlUI.kind] = ta.value.slice(0, 14000); } }
 function vsSave() { vsKeep(); const r = vsOf(curProject(), vlUI.id); if (r) r.updated = new Date().toISOString(); persist(); toast('Roteiro salvo.'); }
 function vsDel(id) { const p = curProject(), r = vsOf(p, id); if (!r || !confirm('Excluir este conjunto de roteiros?')) return; p.video.scripts = p.video.scripts.filter(x => x.id !== id); if (vlUI.id === id) vlUI.id = ''; persist(); renderVideoLab(); }
-function vsReset(id, k) { const p = curProject(), r = vsOf(p, id); if (!r || !confirm('Voltar este roteiro ao esqueleto original? O que você escreveu nele se perde.')) return; r.t[k] = vsSkeleton(p, r.src, r.dur)[k]; persist(); renderVideoLab(); }
+function vsReset(id, k) { const p = curProject(), r = vsOf(p, id); if (!r || !confirm(k === 'glossario' ? 'Refazer o glossário a partir dos roteiros atuais?' : 'Voltar este roteiro ao esqueleto original? O que você escreveu nele se perde.')) return; r.t[k] = k === 'glossario' ? vsGlossary(r.t, vsPlan(r.dur)) : vsSkeleton(p, r.src, r.dur)[k]; persist(); renderVideoLab(); }
 async function vsCopy() { vsKeep(); try { await navigator.clipboard.writeText($('vsText').value); toast('Copiado.'); } catch (e) { $('vsText').select(); toast('Selecione e copie com Ctrl+C.'); } }
 function vsDownload(id) {
   vsKeep(); const p = curProject(), r = vsOf(p, id); if (!r) return;
-  download(`roteiros-${slug(r.src.title)}.md`, `# Roteiros · ${r.src.title}\n\nProjeto: ${p.name} · ${r.dur} s\n\n` + VS_KINDS.map(k => `## Roteiro ${VS_LABEL[k].toLowerCase()}\n\n${r.t[k]}\n`).join('\n'), 'text/markdown');
+  download(`roteiros-${slug(r.src.title)}.md`, `# Roteiros · ${r.src.title}\n\nProjeto: ${p.name} · ${r.dur} s\n\n` + VS_KINDS6.map(k => `${r.t[k]}\n`).join('\n---\n\n'), 'text/markdown');
 }
 const VS_AI = {
-  literario: 'Reescreva o ROTEIRO LITERÁRIO: a narrativa e as falas, cena a cena, em português do Brasil, falável e natural. Para cada cena traga tempo, fala (entre aspas) e texto na tela. Mantenha as cenas e os tempos do esqueleto.',
-  tecnico: 'Reescreva o ROTEIRO TÉCNICO: para cada cena traga plano, movimento de câmera, lente, iluminação, áudio, elementos em cena e texto na tela, de forma que um operador de câmera execute sem perguntas. Mantenha as cenas e os tempos.',
-  gravacao: 'Reescreva o ROTEIRO DE GRAVAÇÃO: um guia prático para quem vai gravar, com preparação, lista de materiais, a ORDEM de gravação (agrupada por local e plano), as marcações de cada take, falas a decorar e dicas de performance. Pensado para quem grava sozinho no celular.',
-  edicao: 'Reescreva o ROTEIRO DE EDIÇÃO: linha do tempo com cortes, ritmo, legendas, B-roll sugerido, trilha e efeitos sonoros, transições, capa e exportação. Pensado para um editor que não viu a gravação.'
+  ficha: 'Reescreva a FICHA ESTRATÉGICA respondendo: o que estamos produzindo, por que, para quem, plataforma, formato, duração, objetivo, ângulo, Big Idea, promessa, Hook, emoção principal, CTA, quem participa, onde será gravado, estética, referências e restrições. Diferencie dado observado, insight, hipótese e inferência criativa.',
+  literario: 'Reescreva o ROTEIRO LITERÁRIO: a história completa, compreensível sozinha, em prosa fluida, sem tabela e sem termos técnicos (nada de tipo de plano, movimento de câmera ou código de edição). Descreva contexto, personagens, ambiente, situação inicial, conflito, desenvolvimento, descoberta, transformação, diálogos, narração, ações, conclusão e CTA. Não precisa numerar cenas.',
+  gravacao: 'Reescreva o ROTEIRO DE GRAVAÇÃO: organize em Cena 01, Cena 02, Cena 03... e, para cada cena, indique quando relevante local, personagem, ação, diálogo, narração, figurino, objetos e props, cenário, comportamento e expressão, B-roll, material necessário e observações de produção. A equipe precisa conseguir executar.',
+  tecnico: 'Reescreva o ROTEIRO TÉCNICO SEMPRE EM TABELA markdown, com a primeira coluna Tempo escrita só como intervalo (00–03s, 03–06s...) e as colunas: Tempo | Cena | Plano | Movimento | Ação | Áudio | Observações. Use o vocabulário: Plano Geral, Plano Conjunto, Plano Médio, Plano Americano, Primeiro Plano, Close, Super Close/ECU, Plano Detalhe; Pan, Tilt, Push-in, Pull-out, Dolly, Travelling, Rack Focus, Zoom. Cada escolha deve ter função narrativa. Use SÓ as cenas do Roteiro de Gravação.',
+  edicao: 'Reescreva o ROTEIRO DE EDIÇÃO em tabela markdown: Tempo | Material | Corte | Lettering | Legenda | Áudio | Efeito | Observações. Inclua ordem dos cortes, ritmo, B-roll, A-roll, trilha e SFX, transições, correção de cor, CTA, logo, tela final, safe area, versões e exportação (9:16 1080×1920, 4:5 1080×1350, 1:1 1080×1080, 16:9 1920×1080, conforme o projeto). O editor não pode precisar adivinhar. Use só material previsto na gravação e identifique stock, arquivo, captura de tela ou animação.',
+  glossario: 'Reescreva o GLOSSÁRIO / VOCABULÁRIO DA PRODUÇÃO: apenas os termos técnicos que aparecem nos outros documentos. Para cada termo: Termo, Significado e Aplicação neste projeto, quando relevante. Não inclua termos que não foram usados.'
 };
+const VS_CTX_ORDER = ['ficha', 'literario', 'gravacao', 'tecnico', 'edicao'];
 async function vsAI(id, k, quiet) {
   if (!aiReady()) { toast('IA não configurada. Veja Integrações. O esqueleto continua editável.'); return false; }
   vsKeep(); const p = curProject(), r = vsOf(p, id); if (!r) return false;
   try {
-    if (!quiet) toast('Escrevendo o roteiro ' + VS_LABEL[k].toLowerCase() + '…');
+    if (!quiet) toast('Escrevendo: ' + VS_LABEL[k].toLowerCase() + '…');
     skCtx('video', r.src.stage);
-    const t = await aiText(`Você é roteirista e diretor de vídeos curtos para redes sociais. ${VS_AI[k]} Não invente fatos, números, preços, depoimentos nem resultados: use [CONFIRMAR] quando faltar informação. Em setores regulados, não prometa resultado. Responda só com o roteiro em texto simples.`,
-      `${projectContext(p)}\nÂngulo ou post: ${r.src.title}\nHook: ${r.src.hook}\nÂngulo: ${r.src.angle}\nCTA: ${r.src.cta}\nIdeia de base: ${r.src.base}\nDuração: ${r.dur} s\n\nESQUELETO ATUAL (use como base):\n${r.t[k]}`, 2200);
+    const others = VS_CTX_ORDER.filter(x => x !== k).map(x => `--- ${VS_LABEL[x].toUpperCase()} (já existente) ---\n${String(r.t[x]).slice(0, 3500)}`).join('\n\n');
+    const t = await aiText(`Você é roteirista e diretor de vídeos curtos para redes sociais. ${VS_AI[k]} Mantenha a cadeia de consistência: ficha, literário, gravação, técnico, edição e glossário não podem se contradizer. Não invente fatos, números, preços, depoimentos nem resultados: use [CONFIRMAR] quando faltar informação. Em setores regulados, não prometa resultado. Responda só com o documento, em texto simples (tabelas em markdown quando pedido).`,
+      `${projectContext(p)}\nÂngulo ou post: ${r.src.title}\nHook: ${r.src.hook}\nÂngulo: ${r.src.angle}\nCTA: ${r.src.cta}\nIdeia de base: ${r.src.base}\nDuração: ${r.dur} s\n\nOUTROS DOCUMENTOS (para manter a consistência):\n${others}\n\nESQUELETO ATUAL DESTE DOCUMENTO (use como base):\n${r.t[k]}`, 2400);
     if (!t.trim()) throw new Error('a IA devolveu um texto vazio.');
-    r.t[k] = t.trim().slice(0, 14000); r.updated = new Date().toISOString(); spendCredits(1); persist(); if (!quiet) { renderVideoLab(); toast('Roteiro ' + VS_LABEL[k].toLowerCase() + ' reescrito. Revise.'); } return true;
+    r.t[k] = t.trim().slice(0, 14000); r.updated = new Date().toISOString(); spendCredits(1); persist(); if (!quiet) { renderVideoLab(); toast('Documento ' + VS_LABEL[k].toLowerCase() + ' reescrito. Revise.'); } return true;
   } catch (e) { toast('IA: ' + e.message); return false; }
 }
 async function vsAIAll(id) {
   if (!aiReady()) { toast('IA não configurada. Veja Integrações. O esqueleto continua editável.'); return; }
-  if (!confirm('Reescrever os 4 roteiros com a IA? Gasta 4 créditos e troca o texto atual de cada um.')) return;
-  vlUI.busy = true; renderVideoLab(); let n = 0; try { for (const k of VS_KINDS) { toast(`Escrevendo ${n + 1}/4…`); if (await vsAI(id, k, true)) n++; else break; } } finally { vlUI.busy = false; } renderVideoLab(); toast(n + ' de 4 roteiros reescritos. Revise.');
+  if (!confirm('Reescrever os 6 documentos com a IA, na ordem da Skill Mestre? Gasta 6 créditos e troca o texto atual de cada um.')) return;
+  vlUI.busy = true; renderVideoLab(); let n = 0; try { for (const k of VS_KINDS6) { toast(`Escrevendo ${n + 1}/6…`); if (await vsAI(id, k, true)) n++; else break; } } finally { vlUI.busy = false; } renderVideoLab(); toast(n + ' de 6 documentos reescritos. Revise.');
 }
 
 /* ---------- tela ---------- */
@@ -21059,28 +21270,29 @@ function vsPickHTML(p) {
   else if (u.src === 'carousel') box = p.carousels.length ? `<select onchange="vlUI.car=this.value">${p.carousels.map(c => `<option value="${c.id}" ${c.id === u.car ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>` : '<p class="muted">Ainda não há carrosséis neste projeto.</p>';
   else box = `<div class="form-grid"><div class="field full"><label>Título ou ângulo</label><input id="vsFT" value="${esc(u.ftitle)}" oninput="vlUI.ftitle=this.value" placeholder="Ex.: O que ninguém conta sobre renegociar"></div><div class="field full"><label>Texto ou ideia de base (opcional)</label><textarea id="vsFB" rows="3" oninput="vlUI.fbase=this.value">${esc(u.fbase)}</textarea></div></div>`;
   return `<div class="panel"><h3 style="margin-top:0">De qual ângulo, anúncio ou post?</h3><div class="edh-tabs" style="margin-bottom:8px">${srcs.map(([k, l]) => `<button class="edh-tab ${u.src === k ? 'on' : ''}" onclick="vlUI.src='${k}';renderVideoLab()">${l}</button>`).join('')}</div>${box}
-  <div class="row-gap" style="margin-top:10px;align-items:center;flex-wrap:wrap"><label class="muted" style="font-size:12.5px">Duração <select onchange="vlUI.dur=+this.value">${VS_DURS.map(d => `<option value="${d}" ${d === u.dur ? 'selected' : ''}>${d} s</option>`).join('')}</select></label><button class="btn dark" onclick="vsCreate()">Criar os 4 roteiros</button></div>
-  <p class="muted" style="font-size:12px;margin:8px 0 0">Literário, técnico, de gravação e de edição nascem do esqueleto do projeto, sem gastar crédito. Depois você reescreve cada um com a IA (1 crédito cada), e as skills de vídeo entram no pedido.</p></div>`;
+  <div class="row-gap" style="margin-top:10px;align-items:center;flex-wrap:wrap"><label class="muted" style="font-size:12.5px">Duração <select onchange="vlUI.dur=+this.value">${VS_DURS.map(d => `<option value="${d}" ${d === u.dur ? 'selected' : ''}>${d} s</option>`).join('')}</select></label><button class="btn dark" onclick="vsCreate()">Criar os roteiros</button></div>
+  <p class="muted" style="font-size:12px;margin:8px 0 0">Os 6 documentos (ficha estratégica, literário, gravação, técnico, edição e glossário) nascem do esqueleto do projeto, na ordem da Skill Mestre, sem gastar crédito. Depois você reescreve cada um com a IA (1 crédito cada), e as skills de vídeo entram no pedido.</p></div>`;
 }
+function vsEnsure(p, r) { const sk = vsSkeleton(p, r.src, r.dur); VS_KINDS6.forEach(k => { if (!String(r.t[k] || '').trim()) r.t[k] = sk[k]; }); }
 function vsEditHTML(r) {
-  const k = vlUI.kind, aiOk = typeof aiReady === 'function' && aiReady();
-  return `<div class="panel" style="margin-top:12px"><div class="section-row"><div><strong>${esc(r.src.title)}</strong> <small class="muted">${r.dur} s${r.src.stage ? ' · ' + CMP_STAGE_NAME[r.src.stage] : ''}</small></div><div class="row-gap"><button class="btn sm" onclick="vsDownload('${r.id}')">⬇ Baixar os 4 (.md)</button><button class="btn sm" onclick="vsAIAll('${r.id}')" ${vlUI.busy ? 'disabled' : ''} title="Gasta 4 créditos">✨ Reescrever os 4 com IA</button><button class="btn sm" onclick="vsDel('${r.id}')">Excluir</button></div></div>
-  <div class="edh-tabs" style="margin:10px 0">${VS_KINDS.map(x => `<button class="edh-tab ${k === x ? 'on' : ''}" onclick="vsKind('${x}')">${VS_LABEL[x]}</button>`).join('')}</div><p class="muted" style="font-size:12.5px;margin:0 0 6px">${VS_DESC[k]}</p>
+  vsEnsure(curProject(), r); const k = vlUI.kind, aiOk = typeof aiReady === 'function' && aiReady();
+  return `<div class="panel" style="margin-top:12px"><div class="section-row"><div><strong>${esc(r.src.title)}</strong> <small class="muted">${r.dur} s${r.src.stage ? ' · ' + CMP_STAGE_NAME[r.src.stage] : ''}</small></div><div class="row-gap"><button class="btn sm" onclick="vsDownload('${r.id}')">⬇ Baixar os 6 (.md)</button><button class="btn sm" onclick="vsAIAll('${r.id}')" ${vlUI.busy ? 'disabled' : ''} title="Gasta 6 créditos">✨ Reescrever os 6 com IA</button><button class="btn sm" onclick="vsDel('${r.id}')">Excluir</button></div></div>
+  <div class="edh-tabs" style="margin:10px 0">${VS_KINDS6.map(x => `<button class="edh-tab ${k === x ? 'on' : ''}" onclick="vsKind('${x}')">${VS_LABEL[x]}</button>`).join('')}</div><p class="muted" style="font-size:12.5px;margin:0 0 6px">${VS_DESC[k]}</p>
   <textarea id="vsText" rows="22" style="width:100%;font-size:12.5px;font-family:ui-monospace,monospace">${esc(r.t[k])}</textarea>
-  <div class="row-gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn dark" onclick="vsSave()">Salvar</button><button class="btn" onclick="vsCopy()">Copiar</button><button class="btn" onclick="vsAI('${r.id}','${k}')" ${vlUI.busy ? 'disabled' : ''}>✨ Reescrever este com IA</button><button class="btn" onclick="vsReset('${r.id}','${k}')">Voltar ao esqueleto</button></div>
+  <div class="row-gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn dark" onclick="vsSave()">Salvar</button><button class="btn" onclick="vsCopy()">Copiar</button><button class="btn" onclick="vsAI('${r.id}','${k}')" ${vlUI.busy ? 'disabled' : ''}>✨ Reescrever este com IA</button><button class="btn" onclick="vsReset('${r.id}','${k}')">${k === 'glossario' ? 'Atualizar a partir dos roteiros' : 'Voltar ao esqueleto'}</button></div>
   ${aiOk ? '' : '<p class="muted" style="font-size:12px;margin:8px 0 0">A IA ainda não está configurada: o esqueleto é seu para editar e copiar.</p>'}</div>`;
 }
 function vsTabHTML(p) {
   const L = p.video.scripts;
-  return vsPickHTML(p) + `<div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Seus roteiros (${L.length})</h3>${L.length ? `<div class="list">${L.map(r => `<div class="list-item"><div><strong>${esc(r.src.title)}</strong><small>${r.dur} s · ${{concept: 'Ângulo da Matriz', piece: 'Anúncio da campanha', carousel: 'Carrossel ou post', free: 'Ideia livre'}[r.src.type]} · ${fmtDate(r.created)}</small></div><button class="btn sm ${vlUI.id === r.id ? '' : 'dark'}" onclick="vsOpen('${r.id}')">${vlUI.id === r.id ? 'Fechar' : 'Abrir os 4'}</button></div>`).join('')}</div>` : '<p class="muted">Nenhum ainda. Escolha acima e clique em "Criar os 4 roteiros".</p>'}</div>` + (vsOf(p, vlUI.id) ? vsEditHTML(vsOf(p, vlUI.id)) : '');
+  return vsPickHTML(p) + `<div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Seus roteiros (${L.length})</h3>${L.length ? `<div class="list">${L.map(r => `<div class="list-item"><div><strong>${esc(r.src.title)}</strong><small>${r.dur} s · ${{concept: 'Ângulo da Matriz', piece: 'Anúncio da campanha', carousel: 'Carrossel ou post', free: 'Ideia livre'}[r.src.type]} · ${fmtDate(r.created)}</small></div><button class="btn sm ${vlUI.id === r.id ? '' : 'dark'}" onclick="vsOpen('${r.id}')">${vlUI.id === r.id ? 'Fechar' : 'Abrir'}</button></div>`).join('')}</div>` : '<p class="muted">Nenhum ainda. Escolha acima e clique em "Criar os roteiros".</p>'}</div>` + (vsOf(p, vlUI.id) ? vsEditHTML(vsOf(p, vlUI.id)) : '');
 }
 const vlBase = renderVideoLab;
 renderVideoLab = function () {
   const p = curProject(), r = $('videoRoot'); if (!p) { vlBase(); return; }
-  const tabs = `<div class="edh-tabs" style="margin:10px 0">${[['prod', 'Produção do vídeo'], ['roteiros', 'Roteiros (4 tipos)']].map(([k, l]) => `<button class="edh-tab ${vlUI.tab === k ? 'on' : ''}" onclick="vsKeep();vlUI.tab='${k}';renderVideoLab()">${l}${k === 'roteiros' ? ' (' + p.video.scripts.length + ')' : ''}</button>`).join('')}</div>`;
+  const tabs = `<div class="edh-tabs" style="margin:10px 0">${[['prod', 'Produção do vídeo'], ['roteiros', 'Roteiros (6 documentos)']].map(([k, l]) => `<button class="edh-tab ${vlUI.tab === k ? 'on' : ''}" onclick="vsKeep();vlUI.tab='${k}';renderVideoLab()">${l}${k === 'roteiros' ? ' (' + p.video.scripts.length + ')' : ''}</button>`).join('')}</div>`;
   if (vlUI.tab === 'roteiros') {
     const cs = shownConcepts(p); if (!vlUI.cid && cs[0]) vlUI.cid = cs[0].id; const cm = p.campaigns.find(c => (c.pieces || []).length); if (!vlUI.cmp && cm) vlUI.cmp = cm.id; const cm2 = p.campaigns.find(c => c.id === vlUI.cmp); if (cm2 && !cm2.pieces.some(q => q.id === vlUI.piece)) vlUI.piece = (cm2.pieces[0] || {}).id || ''; if (!vlUI.car && p.carousels[0]) vlUI.car = p.carousels[0].id;
-    r.innerHTML = hubHead('Video Lab', 'Quatro roteiros para cada ângulo, anúncio ou post: literário, técnico, de gravação e de edição.', '') + tabs + vsTabHTML(p); return;
+    r.innerHTML = hubHead('Video Lab', 'Os roteiros de cada ângulo, anúncio ou post: ficha estratégica, literário, gravação, técnico, edição e glossário.', '') + tabs + vsTabHTML(p); return;
   }
   vlBase(); const h = r.firstElementChild; if (h) h.insertAdjacentHTML('afterend', tabs);
 };
