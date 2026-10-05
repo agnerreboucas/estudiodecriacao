@@ -322,3 +322,357 @@ Quando o usuário solicitar um roteiro completo, entregue obrigatoriamente nesta
 Você não está apenas escrevendo roteiros. Você está construindo uma ponte entre: INFORMAÇÃO → ESTRATÉGIA → CRIATIVIDADE → PRODUÇÃO → EDIÇÃO → RESULTADO.
 Um bom roteiro não é apenas bonito. Ele precisa ser: estratégico; interessante; compreensível; gravável; tecnicamente executável; editável; coerente; adequado ao público; adequado à plataforma; adequado ao objetivo.
 Sempre procure transformar informação em uma experiência audiovisual que tenha motivo para existir.`;
+
+/* Exemplo de referência enviado pela usuária (seis documentos). Serve de modelo de formato e nível de detalhe; o conteúdo não deve ser copiado. */
+const VS_EXAMPLE = {
+title: 'A CADEIRA NA JANELA', dur: 45,
+ficha: `FICHA ESTRATÉGICA
+
+O que estamos produzindo?
+Um curta-metragem vertical de storytelling emocional.
+
+Por que estamos produzindo?
+Criar identificação e emoção através de uma história simples sobre saudade, espera e esperança.
+
+Público:
+Pessoas que já sentiram saudade de alguém ou viveram uma espera importante.
+
+Plataforma:
+Instagram Reels / TikTok / YouTube Shorts.
+
+Formato:
+Vídeo narrativo cinematográfico vertical.
+
+Duração:
+45 segundos.
+
+Objetivo:
+Emocionar e gerar identificação.
+
+Ângulo:
+A esperança pode permanecer mesmo quando o tempo passa.
+
+Big Idea:
+"Algumas pessoas vão embora. Outras continuam presentes nos lugares onde deixaram amor."
+
+Promessa:
+Contar uma pequena história capaz de provocar uma reflexão sobre saudade.
+
+Hook:
+"Todos os dias, às seis da tarde, ele colocava uma cadeira na janela."
+
+Emoção principal:
+Saudade → esperança.
+
+CTA:
+"Quem você ainda espera?"
+
+Personagens:
+Menino de aproximadamente 10 anos e pai.
+
+Local:
+Casa simples, principalmente sala próxima à janela.
+
+Estética:
+Realista, cinematográfica, íntima, luz natural, poucos elementos.
+
+Referência narrativa:
+História curta com revelação emocional no final.
+
+Restrições:
+Poucos personagens, uma única locação e produção simples.`,
+literario: `ROTEIRO LITERÁRIO
+
+Todos os dias, exatamente às seis da tarde, um menino arrastava uma cadeira até a janela da sala.
+
+Ele subia nela e olhava para a rua.
+
+Às vezes passavam carros.
+
+Às vezes passavam pessoas.
+
+Às vezes não passava ninguém.
+
+Mas ele sempre esperava.
+
+Sua mãe observava de longe, em silêncio.
+
+Um dia, ela perguntou:
+
+— Filho, você ainda espera seu pai?
+
+O menino não respondeu.
+
+Apenas continuou olhando pela janela.
+
+Naquele mesmo instante, ouviu-se o barulho de um carro parando em frente à casa.
+
+O menino desceu da cadeira e correu até a porta.
+
+Mas era apenas o vizinho.
+
+Ele voltou para a janela.
+
+No dia seguinte, às seis da tarde, colocou novamente a cadeira no mesmo lugar.
+
+E no outro dia também.
+
+Até que, numa tarde de chuva, sua mãe encontrou a cadeira vazia.
+
+Ela olhou para a janela e percebeu que o menino havia deixado sobre a cadeira um pequeno desenho.
+
+Era o desenho de uma família.
+
+Três pessoas de mãos dadas.
+
+No canto do papel estava escrito:
+
+"Para quando ele voltar."
+
+A mãe segurou o desenho contra o peito.
+
+E, pela primeira vez, sentou-se naquela cadeira.
+
+A câmera se afasta lentamente da janela.
+
+A casa permanece em silêncio.
+
+E a voz do menino surge:
+
+— Enquanto eu esperar, ele ainda vai saber o caminho de casa.
+
+Tela preta.
+
+"Quem você ainda espera?"`,
+gravacao: `ROTEIRO DE GRAVAÇÃO
+
+Cena 01 — A cadeira
+
+Local: Sala.
+Personagem: Menino.
+Ação: O menino arrasta uma cadeira até a janela.
+Objetos: Cadeira.
+Atuação: Movimento cotidiano, sem pressa.
+Material necessário: Cadeira, janela, ambiente doméstico.
+Áudio: Som da cadeira arrastando no chão + ambiente natural.
+
+---
+
+Cena 02 — A espera
+
+Local: Janela.
+Personagem: Menino.
+Ação: Ele sobe na cadeira e observa a rua.
+Atuação: Expressão de expectativa.
+Material necessário: Janela com visão da rua.
+Áudio: Ambiente externo + trilha começando suavemente.
+
+---
+
+Cena 03 — A pergunta
+
+Local: Sala.
+Personagens: Menino e mãe.
+Ação: A mãe observa o menino e pergunta se ele ainda espera o pai.
+Diálogo:
+Mãe: — Filho, você ainda espera seu pai?
+O menino permanece em silêncio.
+Atuação: A mãe demonstra carinho e tristeza. O menino não olha para ela.
+
+---
+
+Cena 04 — O falso retorno
+
+Local: Janela / porta.
+Ação: Um carro para na frente da casa. O menino percebe e corre para a porta.
+Material: Carro passando ou imagem externa compatível.
+Áudio: Som de carro parando.
+
+---
+
+Cena 05 — A frustração
+
+Local: Porta.
+Ação: O menino percebe que não é seu pai. Ele volta lentamente para a sala.
+Atuação: Pequena frustração, sem exagero.
+
+---
+
+Cena 06 — A passagem do tempo
+
+Local: Sala.
+Ação: Repetir a rotina do menino colocando a cadeira na janela em diferentes dias.
+Possibilidades de gravação: roupa diferente; iluminação diferente; chuva; sol; passagem de dias.
+Objetivo: Mostrar que o tempo passou.
+
+---
+
+Cena 07 — A cadeira vazia
+
+Local: Sala.
+Ação: A mãe entra e encontra a cadeira vazia. Sobre ela existe um desenho.
+Objeto: Desenho da família.
+
+---
+
+Cena 08 — A descoberta
+
+Local: Sala.
+Ação: A mãe pega o desenho. Ela lê: "Para quando ele voltar."
+Atuação: Emoção contida.
+
+---
+
+Cena 09 — A cadeira
+
+Local: Janela.
+Ação: A mãe se senta na cadeira. Ela olha para a rua.
+Áudio: Trilha emocional.
+
+---
+
+Cena 10 — Final
+
+Local: Sala / janela.
+Ação: A câmera se afasta lentamente. A voz do menino entra em off:
+— Enquanto eu esperar, ele ainda vai saber o caminho de casa.
+Tela preta.
+Texto: QUEM VOCÊ AINDA ESPERA?`,
+tecnico: `ROTEIRO TÉCNICO
+
+| Tempo | Cena | Plano | Movimento | Ação | Áudio | Observações |
+|---|---|---|---|---|---|---|
+| 00–04s | 01 | Plano Geral | Estática | Menino arrasta cadeira até janela | Som da cadeira | Começar imediatamente com o Hook |
+| 04–08s | 02 | Plano Médio | Push-in | Menino sobe na cadeira | Trilha suave + ambiente | Criar sensação de expectativa |
+| 08–12s | 02 | Primeiro Plano | Estática | Menino olha para a rua | Ambiente | Segurar o olhar |
+| 12–16s | 03 | Plano Conjunto | Estática | Mãe observa o menino | Ambiente | Mãe entra no quadro |
+| 16–19s | 03 | Primeiro Plano | Estática | Mãe pergunta se ele ainda espera o pai | Diálogo | Fala baixa e natural |
+| 19–22s | 04 | Plano Geral | Pan | Carro aparece na rua | Som de carro | Criar falsa expectativa |
+| 22–25s | 04 | Plano Médio | Travelling | Menino corre para a porta | Trilha aumenta | Acelerar ritmo |
+| 25–28s | 05 | Primeiro Plano | Estática | Menino percebe que não é o pai | Trilha reduz | Expressão contida |
+| 28–32s | 06 | Montagem / Plano Médio | Jump Cuts | Menino repete a rotina em dias diferentes | Trilha | Mostrar passagem do tempo |
+| 32–35s | 07 | Plano Geral | Estática | Mãe encontra cadeira vazia | Trilha | Criar silêncio emocional |
+| 35–38s | 08 | Plano Detalhe | Push-in | Mãe pega o desenho | Som do papel | Revelação |
+| 38–41s | 09 | Primeiro Plano | Estática | Mãe se senta na cadeira | Trilha emocional | Pausa antes do final |
+| 41–44s | 10 | Plano Geral | Pull-out | Mãe permanece diante da janela | VO | Afastamento gradual |
+| 44–45s | 10 | Tela preta | — | Texto aparece | VO termina | "Quem você ainda espera?" |`,
+edicao: `ROTEIRO DE EDIÇÃO
+
+| Tempo | Material | Corte | Lettering | Legenda | Áudio | Efeito | Observações |
+|---|---|---|---|---|---|---|---|
+| 00–04s | Cena 01 | Corte seco | "Todos os dias..." | Sim | Cadeira + ambiente | — | Entrar direto na história |
+| 04–08s | Cena 02 | Corte | — | Sim | Trilha começa | Fade in | Criar expectativa |
+| 08–12s | Cena 02 | Corte sustentado | — | Sim | Ambiente | — | Valorizar o olhar |
+| 12–16s | Cena 03 | Corte | — | Sim | Ambiente | — | Introduzir mãe |
+| 16–19s | Cena 03 | Corte | — | Sim | Diálogo | — | Manter voz natural |
+| 19–22s | Cena 04 | Cutaway | "Será que é ele?" | Sim | Carro | Pequeno aumento de volume | Criar falsa expectativa |
+| 22–25s | Cena 04 | Jump Cut | — | Sim | Trilha cresce | Speed ramp leve | Acelerar corrida |
+| 25–28s | Cena 05 | Corte seco | — | Sim | Trilha reduz | — | Deixar a frustração respirar |
+| 28–32s | Cena 06 | Jump Cuts | "Todos os dias." | Sim | Música | Montagem | Mostrar passagem do tempo |
+| 32–35s | Cena 07 | Corte lento | — | Sim | Trilha baixa | Fade | Preparar revelação |
+| 35–38s | Cena 08 | Close + detalhe | "Para quando ele voltar." | Sim | Papel + trilha | Push-in digital sutil | Dar importância ao desenho |
+| 38–41s | Cena 09 | Corte | — | Sim | Trilha emocional | — | Silêncio visual |
+| 41–44s | Cena 10 | Pull-out | — | Sim | VO | Fade gradual | Ampliar sentimento |
+| 44–45s | Final | Fade to black | "QUEM VOCÊ AINDA ESPERA?" | — | Última nota da trilha | Fade out | Final aberto |`,
+glossario: `GLOSSÁRIO / VOCABULÁRIO DA PRODUÇÃO
+
+Hook
+Gancho inicial utilizado para chamar a atenção.
+Neste projeto: "Todos os dias, exatamente às seis da tarde, um menino arrastava uma cadeira até a janela."
+
+---
+
+VO — Voice Over
+Voz ou narração ouvida enquanto vemos imagens diferentes do personagem falando.
+Neste projeto: a frase final do menino.
+
+---
+
+Plano Geral
+Enquadramento que mostra uma área ampla do ambiente.
+Neste projeto: utilizado para mostrar a sala e a relação da cadeira com a janela.
+
+---
+
+Plano Médio
+Mostra aproximadamente o personagem da cintura ou peito para cima.
+Neste projeto: utilizado para mostrar o menino realizando ações.
+
+---
+
+Primeiro Plano
+Enquadramento mais fechado, geralmente valorizando rosto e expressão.
+Neste projeto: utilizado para mostrar a expectativa e a frustração do menino.
+
+---
+
+Plano Detalhe
+Enquadramento dedicado a um objeto ou pequena ação.
+Neste projeto: o desenho deixado sobre a cadeira.
+
+---
+
+Push-in
+Movimento de aproximação da câmera em direção ao personagem ou objeto.
+Neste projeto: usado para aumentar a importância emocional do desenho.
+
+---
+
+Pull-out
+Movimento de afastamento da câmera.
+Neste projeto: utilizado no final para ampliar a sensação de solidão e espaço.
+
+---
+
+Pan
+Movimento horizontal da câmera.
+Neste projeto: utilizado para acompanhar a presença do carro na rua.
+
+---
+
+Travelling
+Deslocamento físico da câmera pelo espaço.
+Neste projeto: utilizado para acompanhar o menino correndo até a porta.
+
+---
+
+Jump Cut
+Corte rápido que elimina parte do tempo ou da ação.
+Neste projeto: utilizado para representar a passagem de vários dias.
+
+---
+
+Cutaway
+Corte para uma imagem complementar à ação principal.
+Neste projeto: a imagem do carro funciona como elemento de expectativa.
+
+---
+
+Lettering
+Texto inserido visualmente no vídeo.
+Neste projeto: "Todos os dias." e "QUEM VOCÊ AINDA ESPERA?"
+
+---
+
+Trilha
+Música utilizada para contribuir com o clima emocional.
+Neste projeto: começa discretamente, cresce durante a expectativa e ganha força na revelação.
+
+---
+
+SFX — Sound Effects
+Efeitos sonoros adicionados ou captados para reforçar ações.
+Neste projeto: som da cadeira, carro e papel.
+
+---
+
+Fade
+Transição gradual entre imagem ou áudio e outra imagem ou silêncio.
+Neste projeto: utilizado na entrada e saída da trilha e no encerramento.
+
+---
+
+9:16
+Proporção vertical utilizada em plataformas como Reels, TikTok e Shorts.
+Neste projeto: vídeo planejado para formato vertical.`
+};

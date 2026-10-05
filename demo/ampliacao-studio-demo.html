@@ -1300,12 +1300,12 @@ function normalizeCampaigns(x) {
   });
 }
 /* Roteiros do Video Lab: ficha estratégica, literário, gravação, técnico, edição e glossário (nessa ordem) por ângulo de anúncio, post ou ideia */
-const VS_KINDS = ['ficha', 'literario', 'gravacao', 'tecnico', 'edicao', 'glossario'], VS_DURS = [6, 10, 15, 20, 30, 60];
+const VS_KINDS = ['ficha', 'literario', 'gravacao', 'tecnico', 'edicao', 'glossario'], VS_DURS = [6, 10, 15, 20, 30, 45, 60];
 function normalizeVideoScripts(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || ''));
   return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 60).map(r => { const s = r.src || {}, t = r.t || {};
     return {id: r.id, src: {type: ['concept', 'piece', 'carousel', 'free'].includes(s.type) ? s.type : 'free', id: sid(s.id) ? s.id : '', title: str(s.title, 160) || 'Roteiro', hook: str(s.hook, 300), angle: str(s.angle, 300), cta: str(s.cta, 120), stage: CMP_STAGES.includes(s.stage) ? s.stage : '', base: str(s.base, 3000)},
-      dur: VS_DURS.includes(+r.dur) ? +r.dur : 15, t: Object.fromEntries(VS_KINDS.map(k => [k, str(t[k], 14000)])), created: str(r.created, 40) || new Date().toISOString(), updated: str(r.updated, 40)}; });
+      dur: VS_DURS.includes(+r.dur) ? +r.dur : 15, ex: !!r.ex, t: Object.fromEntries(VS_KINDS.map(k => [k, str(t[k], 14000)])), created: str(r.created, 40) || new Date().toISOString(), updated: str(r.updated, 40)}; });
 }
 function normalizeProducts(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), lines = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(t => str(t, n)).filter(Boolean), TY = ['curso', 'ebook', 'servico', 'evento', 'produto', 'cadastro'];
@@ -20992,6 +20992,360 @@ Você não está apenas escrevendo roteiros. Você está construindo uma ponte e
 Um bom roteiro não é apenas bonito. Ele precisa ser: estratégico; interessante; compreensível; gravável; tecnicamente executável; editável; coerente; adequado ao público; adequado à plataforma; adequado ao objetivo.
 Sempre procure transformar informação em uma experiência audiovisual que tenha motivo para existir.`;
 
+/* Exemplo de referência enviado pela usuária (seis documentos). Serve de modelo de formato e nível de detalhe; o conteúdo não deve ser copiado. */
+const VS_EXAMPLE = {
+title: 'A CADEIRA NA JANELA', dur: 45,
+ficha: `FICHA ESTRATÉGICA
+
+O que estamos produzindo?
+Um curta-metragem vertical de storytelling emocional.
+
+Por que estamos produzindo?
+Criar identificação e emoção através de uma história simples sobre saudade, espera e esperança.
+
+Público:
+Pessoas que já sentiram saudade de alguém ou viveram uma espera importante.
+
+Plataforma:
+Instagram Reels / TikTok / YouTube Shorts.
+
+Formato:
+Vídeo narrativo cinematográfico vertical.
+
+Duração:
+45 segundos.
+
+Objetivo:
+Emocionar e gerar identificação.
+
+Ângulo:
+A esperança pode permanecer mesmo quando o tempo passa.
+
+Big Idea:
+"Algumas pessoas vão embora. Outras continuam presentes nos lugares onde deixaram amor."
+
+Promessa:
+Contar uma pequena história capaz de provocar uma reflexão sobre saudade.
+
+Hook:
+"Todos os dias, às seis da tarde, ele colocava uma cadeira na janela."
+
+Emoção principal:
+Saudade → esperança.
+
+CTA:
+"Quem você ainda espera?"
+
+Personagens:
+Menino de aproximadamente 10 anos e pai.
+
+Local:
+Casa simples, principalmente sala próxima à janela.
+
+Estética:
+Realista, cinematográfica, íntima, luz natural, poucos elementos.
+
+Referência narrativa:
+História curta com revelação emocional no final.
+
+Restrições:
+Poucos personagens, uma única locação e produção simples.`,
+literario: `ROTEIRO LITERÁRIO
+
+Todos os dias, exatamente às seis da tarde, um menino arrastava uma cadeira até a janela da sala.
+
+Ele subia nela e olhava para a rua.
+
+Às vezes passavam carros.
+
+Às vezes passavam pessoas.
+
+Às vezes não passava ninguém.
+
+Mas ele sempre esperava.
+
+Sua mãe observava de longe, em silêncio.
+
+Um dia, ela perguntou:
+
+— Filho, você ainda espera seu pai?
+
+O menino não respondeu.
+
+Apenas continuou olhando pela janela.
+
+Naquele mesmo instante, ouviu-se o barulho de um carro parando em frente à casa.
+
+O menino desceu da cadeira e correu até a porta.
+
+Mas era apenas o vizinho.
+
+Ele voltou para a janela.
+
+No dia seguinte, às seis da tarde, colocou novamente a cadeira no mesmo lugar.
+
+E no outro dia também.
+
+Até que, numa tarde de chuva, sua mãe encontrou a cadeira vazia.
+
+Ela olhou para a janela e percebeu que o menino havia deixado sobre a cadeira um pequeno desenho.
+
+Era o desenho de uma família.
+
+Três pessoas de mãos dadas.
+
+No canto do papel estava escrito:
+
+"Para quando ele voltar."
+
+A mãe segurou o desenho contra o peito.
+
+E, pela primeira vez, sentou-se naquela cadeira.
+
+A câmera se afasta lentamente da janela.
+
+A casa permanece em silêncio.
+
+E a voz do menino surge:
+
+— Enquanto eu esperar, ele ainda vai saber o caminho de casa.
+
+Tela preta.
+
+"Quem você ainda espera?"`,
+gravacao: `ROTEIRO DE GRAVAÇÃO
+
+Cena 01 — A cadeira
+
+Local: Sala.
+Personagem: Menino.
+Ação: O menino arrasta uma cadeira até a janela.
+Objetos: Cadeira.
+Atuação: Movimento cotidiano, sem pressa.
+Material necessário: Cadeira, janela, ambiente doméstico.
+Áudio: Som da cadeira arrastando no chão + ambiente natural.
+
+---
+
+Cena 02 — A espera
+
+Local: Janela.
+Personagem: Menino.
+Ação: Ele sobe na cadeira e observa a rua.
+Atuação: Expressão de expectativa.
+Material necessário: Janela com visão da rua.
+Áudio: Ambiente externo + trilha começando suavemente.
+
+---
+
+Cena 03 — A pergunta
+
+Local: Sala.
+Personagens: Menino e mãe.
+Ação: A mãe observa o menino e pergunta se ele ainda espera o pai.
+Diálogo:
+Mãe: — Filho, você ainda espera seu pai?
+O menino permanece em silêncio.
+Atuação: A mãe demonstra carinho e tristeza. O menino não olha para ela.
+
+---
+
+Cena 04 — O falso retorno
+
+Local: Janela / porta.
+Ação: Um carro para na frente da casa. O menino percebe e corre para a porta.
+Material: Carro passando ou imagem externa compatível.
+Áudio: Som de carro parando.
+
+---
+
+Cena 05 — A frustração
+
+Local: Porta.
+Ação: O menino percebe que não é seu pai. Ele volta lentamente para a sala.
+Atuação: Pequena frustração, sem exagero.
+
+---
+
+Cena 06 — A passagem do tempo
+
+Local: Sala.
+Ação: Repetir a rotina do menino colocando a cadeira na janela em diferentes dias.
+Possibilidades de gravação: roupa diferente; iluminação diferente; chuva; sol; passagem de dias.
+Objetivo: Mostrar que o tempo passou.
+
+---
+
+Cena 07 — A cadeira vazia
+
+Local: Sala.
+Ação: A mãe entra e encontra a cadeira vazia. Sobre ela existe um desenho.
+Objeto: Desenho da família.
+
+---
+
+Cena 08 — A descoberta
+
+Local: Sala.
+Ação: A mãe pega o desenho. Ela lê: "Para quando ele voltar."
+Atuação: Emoção contida.
+
+---
+
+Cena 09 — A cadeira
+
+Local: Janela.
+Ação: A mãe se senta na cadeira. Ela olha para a rua.
+Áudio: Trilha emocional.
+
+---
+
+Cena 10 — Final
+
+Local: Sala / janela.
+Ação: A câmera se afasta lentamente. A voz do menino entra em off:
+— Enquanto eu esperar, ele ainda vai saber o caminho de casa.
+Tela preta.
+Texto: QUEM VOCÊ AINDA ESPERA?`,
+tecnico: `ROTEIRO TÉCNICO
+
+| Tempo | Cena | Plano | Movimento | Ação | Áudio | Observações |
+|---|---|---|---|---|---|---|
+| 00–04s | 01 | Plano Geral | Estática | Menino arrasta cadeira até janela | Som da cadeira | Começar imediatamente com o Hook |
+| 04–08s | 02 | Plano Médio | Push-in | Menino sobe na cadeira | Trilha suave + ambiente | Criar sensação de expectativa |
+| 08–12s | 02 | Primeiro Plano | Estática | Menino olha para a rua | Ambiente | Segurar o olhar |
+| 12–16s | 03 | Plano Conjunto | Estática | Mãe observa o menino | Ambiente | Mãe entra no quadro |
+| 16–19s | 03 | Primeiro Plano | Estática | Mãe pergunta se ele ainda espera o pai | Diálogo | Fala baixa e natural |
+| 19–22s | 04 | Plano Geral | Pan | Carro aparece na rua | Som de carro | Criar falsa expectativa |
+| 22–25s | 04 | Plano Médio | Travelling | Menino corre para a porta | Trilha aumenta | Acelerar ritmo |
+| 25–28s | 05 | Primeiro Plano | Estática | Menino percebe que não é o pai | Trilha reduz | Expressão contida |
+| 28–32s | 06 | Montagem / Plano Médio | Jump Cuts | Menino repete a rotina em dias diferentes | Trilha | Mostrar passagem do tempo |
+| 32–35s | 07 | Plano Geral | Estática | Mãe encontra cadeira vazia | Trilha | Criar silêncio emocional |
+| 35–38s | 08 | Plano Detalhe | Push-in | Mãe pega o desenho | Som do papel | Revelação |
+| 38–41s | 09 | Primeiro Plano | Estática | Mãe se senta na cadeira | Trilha emocional | Pausa antes do final |
+| 41–44s | 10 | Plano Geral | Pull-out | Mãe permanece diante da janela | VO | Afastamento gradual |
+| 44–45s | 10 | Tela preta | — | Texto aparece | VO termina | "Quem você ainda espera?" |`,
+edicao: `ROTEIRO DE EDIÇÃO
+
+| Tempo | Material | Corte | Lettering | Legenda | Áudio | Efeito | Observações |
+|---|---|---|---|---|---|---|---|
+| 00–04s | Cena 01 | Corte seco | "Todos os dias..." | Sim | Cadeira + ambiente | — | Entrar direto na história |
+| 04–08s | Cena 02 | Corte | — | Sim | Trilha começa | Fade in | Criar expectativa |
+| 08–12s | Cena 02 | Corte sustentado | — | Sim | Ambiente | — | Valorizar o olhar |
+| 12–16s | Cena 03 | Corte | — | Sim | Ambiente | — | Introduzir mãe |
+| 16–19s | Cena 03 | Corte | — | Sim | Diálogo | — | Manter voz natural |
+| 19–22s | Cena 04 | Cutaway | "Será que é ele?" | Sim | Carro | Pequeno aumento de volume | Criar falsa expectativa |
+| 22–25s | Cena 04 | Jump Cut | — | Sim | Trilha cresce | Speed ramp leve | Acelerar corrida |
+| 25–28s | Cena 05 | Corte seco | — | Sim | Trilha reduz | — | Deixar a frustração respirar |
+| 28–32s | Cena 06 | Jump Cuts | "Todos os dias." | Sim | Música | Montagem | Mostrar passagem do tempo |
+| 32–35s | Cena 07 | Corte lento | — | Sim | Trilha baixa | Fade | Preparar revelação |
+| 35–38s | Cena 08 | Close + detalhe | "Para quando ele voltar." | Sim | Papel + trilha | Push-in digital sutil | Dar importância ao desenho |
+| 38–41s | Cena 09 | Corte | — | Sim | Trilha emocional | — | Silêncio visual |
+| 41–44s | Cena 10 | Pull-out | — | Sim | VO | Fade gradual | Ampliar sentimento |
+| 44–45s | Final | Fade to black | "QUEM VOCÊ AINDA ESPERA?" | — | Última nota da trilha | Fade out | Final aberto |`,
+glossario: `GLOSSÁRIO / VOCABULÁRIO DA PRODUÇÃO
+
+Hook
+Gancho inicial utilizado para chamar a atenção.
+Neste projeto: "Todos os dias, exatamente às seis da tarde, um menino arrastava uma cadeira até a janela."
+
+---
+
+VO — Voice Over
+Voz ou narração ouvida enquanto vemos imagens diferentes do personagem falando.
+Neste projeto: a frase final do menino.
+
+---
+
+Plano Geral
+Enquadramento que mostra uma área ampla do ambiente.
+Neste projeto: utilizado para mostrar a sala e a relação da cadeira com a janela.
+
+---
+
+Plano Médio
+Mostra aproximadamente o personagem da cintura ou peito para cima.
+Neste projeto: utilizado para mostrar o menino realizando ações.
+
+---
+
+Primeiro Plano
+Enquadramento mais fechado, geralmente valorizando rosto e expressão.
+Neste projeto: utilizado para mostrar a expectativa e a frustração do menino.
+
+---
+
+Plano Detalhe
+Enquadramento dedicado a um objeto ou pequena ação.
+Neste projeto: o desenho deixado sobre a cadeira.
+
+---
+
+Push-in
+Movimento de aproximação da câmera em direção ao personagem ou objeto.
+Neste projeto: usado para aumentar a importância emocional do desenho.
+
+---
+
+Pull-out
+Movimento de afastamento da câmera.
+Neste projeto: utilizado no final para ampliar a sensação de solidão e espaço.
+
+---
+
+Pan
+Movimento horizontal da câmera.
+Neste projeto: utilizado para acompanhar a presença do carro na rua.
+
+---
+
+Travelling
+Deslocamento físico da câmera pelo espaço.
+Neste projeto: utilizado para acompanhar o menino correndo até a porta.
+
+---
+
+Jump Cut
+Corte rápido que elimina parte do tempo ou da ação.
+Neste projeto: utilizado para representar a passagem de vários dias.
+
+---
+
+Cutaway
+Corte para uma imagem complementar à ação principal.
+Neste projeto: a imagem do carro funciona como elemento de expectativa.
+
+---
+
+Lettering
+Texto inserido visualmente no vídeo.
+Neste projeto: "Todos os dias." e "QUEM VOCÊ AINDA ESPERA?"
+
+---
+
+Trilha
+Música utilizada para contribuir com o clima emocional.
+Neste projeto: começa discretamente, cresce durante a expectativa e ganha força na revelação.
+
+---
+
+SFX — Sound Effects
+Efeitos sonoros adicionados ou captados para reforçar ações.
+Neste projeto: som da cadeira, carro e papel.
+
+---
+
+Fade
+Transição gradual entre imagem ou áudio e outra imagem ou silêncio.
+Neste projeto: utilizado na entrada e saída da trilha e no encerramento.
+
+---
+
+9:16
+Proporção vertical utilizada em plataformas como Reels, TikTok e Shorts.
+Neste projeto: vídeo planejado para formato vertical.`
+};
+
 </script>
 <script>
 /* ===== Skills de texto: instruções (suas) que a IA segue ao escrever, por função e por fase da jornada. =====
@@ -21159,7 +21513,7 @@ function skAudioPanel() {
 const VS_KINDS6 = ['ficha', 'literario', 'gravacao', 'tecnico', 'edicao', 'glossario'];   // ordem fixa da Skill Mestre
 const VS_LABEL = {ficha: 'Ficha estratégica', literario: 'Literário', gravacao: 'Gravação', tecnico: 'Técnico', edicao: 'Edição', glossario: 'Glossário'};
 const VS_DESC = {ficha: 'O mapa do projeto: por que existe, para quem, onde, como.', literario: 'A história completa, sem termos técnicos.', gravacao: 'Cena a cena, o que precisa ser gravado.', tecnico: 'Tabela de planos com o tempo em intervalos.', edicao: 'Tabela de montagem: cortes, lettering, áudio, efeitos.', glossario: 'Os termos técnicos usados nos roteiros (sempre por último).'};
-const vlUI = {tab: 'prod', src: 'concept', cid: '', cmp: '', piece: '', car: '', ftitle: '', fbase: '', dur: 15, id: '', kind: 'ficha', busy: false};
+const vlUI = {useEx: true, tab: 'prod', src: 'concept', cid: '', cmp: '', piece: '', car: '', ftitle: '', fbase: '', dur: 15, id: '', kind: 'ficha', busy: false};
 const vsOf = (p, id) => p.video.scripts.find(x => x.id === id);
 
 /* ---------- origem do roteiro ---------- */
@@ -21171,7 +21525,8 @@ function vsSource(p) {
   const t = u.ftitle.trim(); if (!t) return null; return {type: 'free', id: '', title: t.slice(0, 160), hook: t.slice(0, 300), angle: '', cta: '', stage: '', base: u.fbase.trim().slice(0, 3000)};
 }
 const vsLines = v => String(v || '').split('\n').map(s => s.trim()).filter(Boolean);
-function vsPlan(dur) { const plan = SCENE_PLAN[dur] || SCENE_PLAN[15]; let t = 0; return plan.map(([stage, d], i) => { const r = {stage, a: t, b: t + d, i}; t += d; return r; }); }
+const VS_PLAN45 = [['Hook', 4], ['Problema', 6], ['Ideia', 6], ['Solução', 7], ['Prova', 8], ['Objeção', 8], ['CTA', 6]];
+function vsPlan(dur) { const plan = dur === 45 ? VS_PLAN45 : (SCENE_PLAN[dur] || SCENE_PLAN[15]); let t = 0; return plan.map(([stage, d], i) => { const r = {stage, a: t, b: t + d, i}; t += d; return r; }); }
 function vsFala(p, src, stage) {
   const ic = (p.pre.icps || [])[0] || {}, pr = (p.products || [])[0] || {};
   const pain = vsLines(ic.pains)[0], doubt = vsLines(ic.doubts)[0], des = vsLines(ic.desires)[0];
@@ -21189,7 +21544,7 @@ function vsFala(p, src, stage) {
 }
 const vsShort = t => String(t).replace(/^(Fale|Apresente|Mostre|Responda)[^:]*:\s*/, '').replace(/^"|"$/g, '').split(/\s+/).slice(0, 7).join(' ');
 /* vocabulário da Skill Mestre: um plano e um movimento por tipo de cena, cada um com função narrativa */
-const VS_TEC = {Hook: ['Primeiro Plano', 'Push-in'], Problema: ['Plano Médio', 'Câmera fixa'], Ideia: ['Close', 'Câmera fixa'], 'Solução': ['Plano Detalhe', 'Tilt'], Prova: ['Plano Americano', 'Câmera fixa'], 'Objeção': ['Primeiro Plano', 'Câmera fixa'], 'Demonstração': ['Plano Detalhe', 'Travelling'], CTA: ['Plano Médio', 'Push-in']};
+const VS_TEC = {Hook: ['Primeiro Plano', 'Push-in'], Problema: ['Plano Médio', 'Estática'], Ideia: ['Close', 'Estática'], 'Solução': ['Plano Detalhe', 'Tilt'], Prova: ['Plano Americano', 'Estática'], 'Objeção': ['Primeiro Plano', 'Estática'], 'Demonstração': ['Plano Detalhe', 'Travelling'], CTA: ['Plano Médio', 'Push-in']};
 const VS_WHY = {Hook: 'prende a atenção no rosto', Problema: 'mostra a pessoa dentro da situação', Ideia: 'aproxima para destacar a ideia', 'Solução': 'detalha o que resolve', Prova: 'mostra o corpo e o contexto da prova', 'Objeção': 'aproxima para responder com sinceridade', 'Demonstração': 'acompanha o passo a passo', CTA: 'aproxima na chamada final'};
 const vsT = n => String(Math.round(n)).padStart(2, '0');
 const vsRange = s => `${vsT(s.a)}–${vsT(s.b)}s`;
@@ -21200,18 +21555,18 @@ function vsSkeleton(p, src, dur) {
   const ficha = `FICHA ESTRATÉGICA\n\nO que estamos produzindo: vídeo de ${dur} s sobre "${src.title}"\nPor que estamos produzindo: ${src.angle || '[explique o motivo estratégico: qual dor, desejo, dúvida ou urgência oculta do público este vídeo toca]'}\nPara quem: ${ic.name ? ic.name + (ic.profile ? ' · ' + ic.profile : '') : '[defina o público]'}\nEm qual plataforma: [Instagram Reels, Stories, TikTok, YouTube Shorts ou anúncio]\nQual formato: vertical 9:16 (1080 × 1920)\nQual duração: ${dur} s\nQual objetivo: [venda, autoridade, engajamento, alcance, educação ou marca]\nQual ângulo: ${src.angle || '[defina o ângulo]'}\nQual Big Idea: ${src.base || '[a grande ideia em uma frase]'}\nQual promessa: [o que o público leva ao assistir. Não prometa resultado]\nQual Hook: ${src.hook || '[escreva o hook]'}\nQual emoção principal: ${pain ? 'identificação com a dor "' + pain + '"' : '[defina a emoção]'}\nQual CTA: ${src.cta || '[defina a chamada final]'}\nQuem participa: [pessoas que aparecem]\nOnde será gravado: [locação]\nQual estética: ${p.brand && p.brand.visual ? p.brand.visual : '[defina a estética]'}\nQuais referências: [liste]\nQuais restrições: ${p.brand && p.brand.rule ? p.brand.rule : '[orçamento, equipamentos, regras do setor]'}\n\nEsta ficha é o mapa do projeto: os documentos seguintes devem obedecê-la.\n\nObservação de origem: dado observado vem do pré-projeto e do briefing; o que está entre colchetes é decisão sua (hipótese ou inferência criativa).\n`;
   const lit = `ROTEIRO LITERÁRIO\n\nEste texto conta a história inteira, sem termos técnicos. Escreva como prosa corrida.\n\nContexto: ${pain ? 'A pessoa vive esta situação: ' + pain + '.' : '[descreva a situação do público]'}\nPersonagens: [quem aparece e quem é para o público]\nAmbiente: [onde acontece]\nSituação inicial: [como o dia começa]\nConflito: ${src.angle ? 'O que torna isto interessante: ' + src.angle + '.' : '[qual é o conflito]'}${doubt ? '\nA dúvida que trava a pessoa: "' + doubt + '"' : ''}\nDesenvolvimento: [o que acontece em seguida]\nDescoberta: ${pr.summary ? pr.summary.split(/(?<=[.!?])\s/)[0] : '[CONFIRMAR] o que a pessoa descobre sobre o serviço ou produto'}\nTransformação: ${des ? 'Do "' + pain + '" a "' + des + '".' : '[mostre o antes e o depois, sem prometer resultado]'}\nDiálogos e narração: [escreva as falas entre aspas]\nConclusão: [feche a história]\nCTA: ${src.cta || '[chamada final]'}\n\nAbertura sugerida (Hook): "${src.hook || '[escreva]'}"\n`;
   const gr = `ROTEIRO DE GRAVAÇÃO\n\nPara gravar com o celular: lente limpa, vertical, luz no rosto, ambiente sem ruído.\n\n` + plan.map(s => { const f = vsFala(p, src, s.stage), dial = /^\[|^(Fale|Apresente|Mostre|Responda)/.test(f) ? f : '"' + f + '"'; return `${vsCena(s)} · ${s.stage}\n- Local: [onde]\n- Personagem: [quem aparece]\n- Ação: [o que a pessoa faz]\n- Diálogo ou narração: ${dial}\n- Figurino: [roupa]\n- Objetos e props: [liste]\n- Cenário: [como deve estar]\n- Comportamento e expressão: [tom e intenção]\n- B-roll: [imagens de apoio a captar]\n- Material necessário: [equipamento]\n- Observações de produção: grave 2 ou 3 takes e deixe 1 segundo de pausa antes e depois da fala.\n`; }).join('\n') + '\nSe precisar de banco de imagens, arquivo, captura de tela ou animação, escreva aqui qual cena usa e de onde vem.\n';
-  const tec = `ROTEIRO TÉCNICO\n\nSó existem aqui as cenas previstas no Roteiro de Gravação.\n\n| Tempo | Cena | Plano | Movimento | Ação | Áudio | Observações |\n|---|---|---|---|---|---|---|\n` + plan.map(s => { const [pl, mv] = VS_TEC[s.stage] || ['Plano Médio', 'Câmera fixa']; return `| ${vsRange(s)} | ${vsCena(s)} | ${pl} | ${mv} | ${vsShort(vsFala(p, src, s.stage))} | ${s.stage === 'CTA' ? 'Diálogo e trilha baixa' : 'Diálogo'} | ${VS_WHY[s.stage] || ''} |`; }).join('\n') + '\n\nMantenha rosto e texto dentro da área segura do vertical (fora dos cerca de 250 px do topo e 340 px do rodapé que o Reels e os Stories cobrem). Confira as medidas atuais antes de publicar.\n';
+  const tec = `ROTEIRO TÉCNICO\n\nSó existem aqui as cenas previstas no Roteiro de Gravação.\n\n| Tempo | Cena | Plano | Movimento | Ação | Áudio | Observações |\n|---|---|---|---|---|---|---|\n` + plan.map(s => { const [pl, mv] = VS_TEC[s.stage] || ['Plano Médio', 'Estática']; return `| ${vsRange(s)} | ${vsCena(s)} | ${pl} | ${mv} | ${vsShort(vsFala(p, src, s.stage))} | ${s.stage === 'CTA' ? 'Diálogo e trilha baixa' : 'Diálogo'} | ${VS_WHY[s.stage] || ''} |`; }).join('\n') + '\n\nMantenha rosto e texto dentro da área segura do vertical (fora dos cerca de 250 px do topo e 340 px do rodapé que o Reels e os Stories cobrem). Confira as medidas atuais antes de publicar.\n';
   const ed = `ROTEIRO DE EDIÇÃO\n\nUse só o material previsto na gravação.\n\n| Tempo | Material | Corte | Lettering | Legenda | Áudio | Efeito | Observações |\n|---|---|---|---|---|---|---|---|\n` + plan.map(s => `| ${vsRange(s)} | A-roll ${vsCena(s)} (${s.stage}) | ${s.i === 0 ? 'abrir direto no Hook' : 'corte seco na pausa'} | ${vsShort(vsFala(p, src, s.stage))} | legenda da fala | ${s.stage === 'Hook' ? 'efeito curto de entrada' : s.stage === 'CTA' ? 'trilha sobe levemente' : 'trilha baixa'} | ${s.i === 0 ? 'nenhum' : 'sem efeito'} | [B-roll de apoio, se houver] |`).join('\n') + `\n\nRITMO: cortes nas pausas, sem cena parada por mais de 3 segundos.\nCTA: texto e logo na tela final, trilha reduzida para a fala.\nSafe area: legendas e lettering dentro da área segura.\nCorreção de cor: [defina o padrão da marca].\n\nVERSÕES E EXPORTAÇÃO\n- Vertical 9:16, 1080 × 1920, ${dur} s\n- Com legenda e sem legenda; versão limpa e versão com CTA\n- Outros formatos só se o projeto pedir: 4:5 (1080 × 1350), 1:1 (1080 × 1080), 16:9 (1920 × 1080)\n- Frame rate, codec e formato: [defina conforme a plataforma]\n`;
   const r = {ficha, literario: lit, gravacao: gr, tecnico: tec, edicao: ed}; r.glossario = vsGlossary(r, plan); return r;
 }
 /* glossário: só os termos que aparecem nos outros documentos, sempre por último */
-const VS_TERMS = [['Hook', 'Abertura do vídeo, pensada para fazer a pessoa parar de rolar a tela.'], ['CTA', 'Chamada para ação: o que a pessoa deve fazer depois de assistir.'], ['A-roll', 'Imagem principal, em geral a pessoa falando para a câmera.'], ['B-roll', 'Imagens de apoio que cobrem a fala (mãos, objetos, ambiente).'], ['Plano Geral', 'Mostra o ambiente inteiro e a pessoa pequena dentro dele.'], ['Plano Conjunto', 'Mostra um grupo de pessoas e o espaço ao redor.'], ['Plano Médio', 'Enquadra a pessoa da cintura para cima.'], ['Plano Americano', 'Enquadra a pessoa dos joelhos para cima.'], ['Primeiro Plano', 'Enquadra o rosto e os ombros.'], ['Super Close', 'Aproximação extrema de um detalhe do rosto ou de um objeto (também chamado ECU).'], ['Close', 'Enquadra só o rosto, de perto.'], ['Plano Detalhe', 'Mostra um detalhe pequeno: mãos, objeto, tela.'], ['Pan', 'Câmera gira no próprio eixo na horizontal.'], ['Tilt', 'Câmera gira no próprio eixo na vertical.'], ['Push-in', 'A câmera se aproxima do assunto.'], ['Pull-out', 'A câmera se afasta do assunto.'], ['Dolly', 'Câmera sobre trilho ou base que anda para a frente ou para trás.'], ['Travelling', 'A câmera acompanha o assunto andando ao lado.'], ['Rack Focus', 'Troca o foco de um ponto para outro dentro do mesmo plano.'], ['Zoom', 'Aproximação feita pela lente, sem mover a câmera.'], ['Jump Cut', 'Corte seco que pula um pedaço da mesma tomada.'], ['Cutaway', 'Corte para uma imagem de apoio e volta.'], ['Match Cut', 'Corte que liga duas imagens parecidas na forma ou no movimento.'], ['J-Cut', 'O áudio da próxima cena entra antes da imagem.'], ['L-Cut', 'O áudio da cena anterior continua sobre a imagem seguinte.'], ['Lettering', 'Texto que aparece na tela como elemento gráfico.'], ['Lower Third', 'Faixa de texto no terço inferior da tela (nome, cargo).'], ['Motion Graphics', 'Elementos gráficos animados.'], ['Supers', 'Textos sobrepostos à imagem.'], ['VO', 'Voz em off: narração sem a pessoa aparecer falando.'], ['SFX', 'Efeitos sonoros.'], ['Sound Design', 'Construção do som do vídeo (efeitos, ambiente, transições).'], ['Trilha', 'Música de fundo.'], ['Room Tone', 'O som de ambiente do local, gravado em silêncio, para cobrir cortes.'], ['Key Light', 'Luz principal da cena.'], ['Fill Light', 'Luz de preenchimento que suaviza as sombras.'], ['Back Light', 'Luz por trás do assunto, separa do fundo.'], ['Rim Light', 'Luz de contorno nas bordas do assunto.'], ['temperatura de cor', 'Tom da luz, mais quente (amarelado) ou mais frio (azulado).'], ['profundidade de campo', 'O quanto da imagem fica nítido, do primeiro plano ao fundo.'], ['9:16', 'Proporção vertical de tela cheia (1080 × 1920).'], ['4:5', 'Proporção vertical de feed (1080 × 1350).'], ['1:1', 'Proporção quadrada (1080 × 1080).'], ['16:9', 'Proporção horizontal (1920 × 1080).']];
+const VS_TERMS = [['Hook', 'Gancho inicial utilizado para chamar a atenção.'], ['CTA', 'Chamada para ação: o que a pessoa deve fazer depois de assistir.'], ['A-roll', 'Imagem principal, em geral a pessoa falando para a câmera.'], ['B-roll', 'Imagens de apoio que cobrem a fala (mãos, objetos, ambiente).'], ['Plano Geral', 'Mostra o ambiente inteiro e a pessoa pequena dentro dele.'], ['Plano Conjunto', 'Mostra um grupo de pessoas e o espaço ao redor.'], ['Plano Médio', 'Enquadra a pessoa da cintura para cima.'], ['Plano Americano', 'Enquadra a pessoa dos joelhos para cima.'], ['Primeiro Plano', 'Enquadra o rosto e os ombros.'], ['Super Close', 'Aproximação extrema de um detalhe do rosto ou de um objeto (também chamado ECU).'], ['Close', 'Enquadra só o rosto, de perto.'], ['Plano Detalhe', 'Mostra um detalhe pequeno: mãos, objeto, tela.'], ['Pan', 'Câmera gira no próprio eixo na horizontal.'], ['Tilt', 'Câmera gira no próprio eixo na vertical.'], ['Push-in', 'A câmera se aproxima do assunto.'], ['Pull-out', 'A câmera se afasta do assunto.'], ['Dolly', 'Câmera sobre trilho ou base que anda para a frente ou para trás.'], ['Travelling', 'A câmera acompanha o assunto andando ao lado.'], ['Rack Focus', 'Troca o foco de um ponto para outro dentro do mesmo plano.'], ['Zoom', 'Aproximação feita pela lente, sem mover a câmera.'], ['Jump Cut', 'Corte seco que pula um pedaço da mesma tomada.'], ['Cutaway', 'Corte para uma imagem de apoio e volta.'], ['Match Cut', 'Corte que liga duas imagens parecidas na forma ou no movimento.'], ['J-Cut', 'O áudio da próxima cena entra antes da imagem.'], ['L-Cut', 'O áudio da cena anterior continua sobre a imagem seguinte.'], ['Lettering', 'Texto que aparece na tela como elemento gráfico.'], ['Lower Third', 'Faixa de texto no terço inferior da tela (nome, cargo).'], ['Motion Graphics', 'Elementos gráficos animados.'], ['Supers', 'Textos sobrepostos à imagem.'], ['VO', 'Voice Over: voz ou narração ouvida enquanto vemos outras imagens.'], ['SFX', 'Efeitos sonoros.'], ['Sound Design', 'Construção do som do vídeo (efeitos, ambiente, transições).'], ['Fade', 'Transição gradual entre imagem ou áudio e outra imagem ou silêncio.'], ['Speed ramp', 'Aceleração ou desaceleração gradual da imagem.'], ['Trilha', 'Música utilizada para contribuir com o clima emocional.'], ['Room Tone', 'O som de ambiente do local, gravado em silêncio, para cobrir cortes.'], ['Key Light', 'Luz principal da cena.'], ['Fill Light', 'Luz de preenchimento que suaviza as sombras.'], ['Back Light', 'Luz por trás do assunto, separa do fundo.'], ['Rim Light', 'Luz de contorno nas bordas do assunto.'], ['temperatura de cor', 'Tom da luz, mais quente (amarelado) ou mais frio (azulado).'], ['profundidade de campo', 'O quanto da imagem fica nítido, do primeiro plano ao fundo.'], ['9:16', 'Proporção vertical de tela cheia (1080 × 1920).'], ['4:5', 'Proporção vertical de feed (1080 × 1350).'], ['1:1', 'Proporção quadrada (1080 × 1080).'], ['16:9', 'Proporção horizontal (1920 × 1080).']];
 function vsGlossary(docs, plan) {
   const body = [docs.ficha, docs.literario, docs.gravacao, docs.tecnico, docs.edicao].join('\n'), tecRows = String(docs.tecnico || '').split('\n').filter(l => /^\| \d/.test(l));
   const esc2 = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), re = t => t === 'Close' ? /(?<!super )(?<![\wÀ-ú])close(?![\wÀ-ú])/i : new RegExp('(?<![\\wÀ-ú])' + esc2(t) + '(?![\\wÀ-ú])', 'i');
   const used = VS_TERMS.filter(([t]) => re(t).test(body));
-  const app = t => { const rows = tecRows.filter(l => l.toLowerCase().includes('| ' + t.toLowerCase() + ' |')).map(l => l.split('|')[2].trim() + ' (' + l.split('|')[1].trim() + ')'); return rows.length ? 'Neste projeto: ' + rows.join(', ') + '.' : ''; };
-  return 'GLOSSÁRIO / VOCABULÁRIO DA PRODUÇÃO\n\nSó entram os termos usados nos roteiros acima.\n\n' + (used.length ? used.map(([t, m]) => `${t}\n  Significado: ${m}${app(t) ? '\n  Aplicação: ' + app(t) : ''}`).join('\n\n') : 'Nenhum termo técnico foi usado ainda.') + '\n';
+  const app = t => { const rows = tecRows.filter(l => l.toLowerCase().includes('| ' + t.toLowerCase() + ' |')).map(l => l.split('|')[2].trim() + ' (' + l.split('|')[1].trim() + ')'); return rows.length ? 'usado em ' + rows.join(', ') + '.' : ''; };
+  return 'GLOSSÁRIO / VOCABULÁRIO DA PRODUÇÃO\n\nSó entram os termos usados nos roteiros acima.\n\n' + (used.length ? used.map(([t, m]) => `${t}\n${m}${app(t) ? '\nNeste projeto: ' + app(t) : ''}`).join('\n\n---\n\n') : 'Nenhum termo técnico foi usado ainda.') + '\n';
 }
 
 /* ---------- ações ---------- */
@@ -21220,6 +21575,12 @@ function vsCreate() {
   if (p.video.scripts.length >= 60) { toast('Limite de 60 roteiros.'); return; }
   const r = {id: uid('vs'), src, dur: vlUI.dur, t: vsSkeleton(p, src, vlUI.dur), created: new Date().toISOString(), updated: ''};
   p.video.scripts.unshift(r); vlUI.id = r.id; vlUI.kind = 'ficha'; persist(); renderVideoLab(); toast('Os 6 documentos foram montados, na ordem da Skill Mestre. Revise e, se quiser, reescreva com a IA.');
+}
+function vsLoadExample() {
+  const p = curProject(), ex = p.video.scripts.find(x => x.ex); if (ex) { vlUI.id = ex.id; vlUI.kind = 'ficha'; renderVideoLab(); return; }
+  if (p.video.scripts.length >= 60) { toast('Limite de 60 roteiros.'); return; }
+  const E = VS_EXAMPLE, r = {id: uid('vs'), ex: true, src: {type: 'free', id: '', title: E.title + ' (exemplo)', hook: 'Todos os dias, às seis da tarde, ele colocava uma cadeira na janela.', angle: 'A esperança pode permanecer mesmo quando o tempo passa.', cta: 'Quem você ainda espera?', stage: '', base: 'Curta vertical de storytelling emocional sobre saudade, espera e esperança.'}, dur: E.dur, t: {ficha: E.ficha, literario: E.literario, gravacao: E.gravacao, tecnico: E.tecnico, edicao: E.edicao, glossario: E.glossario}, created: new Date().toISOString(), updated: ''};
+  p.video.scripts.unshift(r); vlUI.id = r.id; vlUI.kind = 'ficha'; persist(); renderVideoLab(); toast('Exemplo carregado. É só para consulta e referência: crie os seus acima.');
 }
 function vsOpen(id) { vlUI.id = vlUI.id === id ? '' : id; vlUI.kind = 'ficha'; renderVideoLab(); }
 function vsKind(k) { vsKeep(); vlUI.kind = k; renderVideoLab(); }
@@ -21230,7 +21591,7 @@ function vsReset(id, k) { const p = curProject(), r = vsOf(p, id); if (!r || !co
 async function vsCopy() { vsKeep(); try { await navigator.clipboard.writeText($('vsText').value); toast('Copiado.'); } catch (e) { $('vsText').select(); toast('Selecione e copie com Ctrl+C.'); } }
 function vsDownload(id) {
   vsKeep(); const p = curProject(), r = vsOf(p, id); if (!r) return;
-  download(`roteiros-${slug(r.src.title)}.md`, `# Roteiros · ${r.src.title}\n\nProjeto: ${p.name} · ${r.dur} s\n\n` + VS_KINDS6.map(k => `${r.t[k]}\n`).join('\n---\n\n'), 'text/markdown');
+  download(`roteiros-${slug(r.src.title)}.md`, `# Roteiros · ${r.src.title}\n\nProjeto: ${p.name} · ${r.dur} s\n\n` + VS_KINDS6.map(k => `${r.t[k]}\n`).join('\n* * *\n\n'), 'text/markdown');
 }
 const VS_AI = {
   ficha: 'Reescreva a FICHA ESTRATÉGICA respondendo: o que estamos produzindo, por que, para quem, plataforma, formato, duração, objetivo, ângulo, Big Idea, promessa, Hook, emoção principal, CTA, quem participa, onde será gravado, estética, referências e restrições. Diferencie dado observado, insight, hipótese e inferência criativa.',
@@ -21249,7 +21610,7 @@ async function vsAI(id, k, quiet) {
     skCtx('video', r.src.stage);
     const others = VS_CTX_ORDER.filter(x => x !== k).map(x => `--- ${VS_LABEL[x].toUpperCase()} (já existente) ---\n${String(r.t[x]).slice(0, 3500)}`).join('\n\n');
     const t = await aiText(`Você é roteirista e diretor de vídeos curtos para redes sociais. ${VS_AI[k]} Mantenha a cadeia de consistência: ficha, literário, gravação, técnico, edição e glossário não podem se contradizer. Não invente fatos, números, preços, depoimentos nem resultados: use [CONFIRMAR] quando faltar informação. Em setores regulados, não prometa resultado. Responda só com o documento, em texto simples (tabelas em markdown quando pedido).`,
-      `${projectContext(p)}\nÂngulo ou post: ${r.src.title}\nHook: ${r.src.hook}\nÂngulo: ${r.src.angle}\nCTA: ${r.src.cta}\nIdeia de base: ${r.src.base}\nDuração: ${r.dur} s\n\nOUTROS DOCUMENTOS (para manter a consistência):\n${others}\n\nESQUELETO ATUAL DESTE DOCUMENTO (use como base):\n${r.t[k]}`, 2400);
+      `${projectContext(p)}\nÂngulo ou post: ${r.src.title}\nHook: ${r.src.hook}\nÂngulo: ${r.src.angle}\nCTA: ${r.src.cta}\nIdeia de base: ${r.src.base}\nDuração: ${r.dur} s\n\nOUTROS DOCUMENTOS (para manter a consistência):\n${others}\n\nESQUELETO ATUAL DESTE DOCUMENTO (use como base):\n${r.t[k]}${vlUI.useEx && VS_EXAMPLE[k] ? `\n\nEXEMPLO DE FORMATO PARA ESTE DOCUMENTO (referência de estrutura e nível de detalhe de outra história; NÃO copie o conteúdo):\n${VS_EXAMPLE[k]}` : ''}`, 2600);
     if (!t.trim()) throw new Error('a IA devolveu um texto vazio.');
     r.t[k] = t.trim().slice(0, 14000); r.updated = new Date().toISOString(); spendCredits(1); persist(); if (!quiet) { renderVideoLab(); toast('Documento ' + VS_LABEL[k].toLowerCase() + ' reescrito. Revise.'); } return true;
   } catch (e) { toast('IA: ' + e.message); return false; }
@@ -21271,7 +21632,7 @@ function vsPickHTML(p) {
   else box = `<div class="form-grid"><div class="field full"><label>Título ou ângulo</label><input id="vsFT" value="${esc(u.ftitle)}" oninput="vlUI.ftitle=this.value" placeholder="Ex.: O que ninguém conta sobre renegociar"></div><div class="field full"><label>Texto ou ideia de base (opcional)</label><textarea id="vsFB" rows="3" oninput="vlUI.fbase=this.value">${esc(u.fbase)}</textarea></div></div>`;
   return `<div class="panel"><h3 style="margin-top:0">De qual ângulo, anúncio ou post?</h3><div class="edh-tabs" style="margin-bottom:8px">${srcs.map(([k, l]) => `<button class="edh-tab ${u.src === k ? 'on' : ''}" onclick="vlUI.src='${k}';renderVideoLab()">${l}</button>`).join('')}</div>${box}
   <div class="row-gap" style="margin-top:10px;align-items:center;flex-wrap:wrap"><label class="muted" style="font-size:12.5px">Duração <select onchange="vlUI.dur=+this.value">${VS_DURS.map(d => `<option value="${d}" ${d === u.dur ? 'selected' : ''}>${d} s</option>`).join('')}</select></label><button class="btn dark" onclick="vsCreate()">Criar os roteiros</button></div>
-  <p class="muted" style="font-size:12px;margin:8px 0 0">Os 6 documentos (ficha estratégica, literário, gravação, técnico, edição e glossário) nascem do esqueleto do projeto, na ordem da Skill Mestre, sem gastar crédito. Depois você reescreve cada um com a IA (1 crédito cada), e as skills de vídeo entram no pedido.</p></div>`;
+  <div style="margin-top:8px"><button class="btn sm" onclick="vsLoadExample()">Ver um exemplo completo: A cadeira na janela</button></div><p class="muted" style="font-size:12px;margin:8px 0 0">Os 6 documentos (ficha estratégica, literário, gravação, técnico, edição e glossário) nascem do esqueleto do projeto, na ordem da Skill Mestre, sem gastar crédito. Depois você reescreve cada um com a IA (1 crédito cada), e as skills de vídeo entram no pedido.</p></div>`;
 }
 function vsEnsure(p, r) { const sk = vsSkeleton(p, r.src, r.dur); VS_KINDS6.forEach(k => { if (!String(r.t[k] || '').trim()) r.t[k] = sk[k]; }); }
 function vsEditHTML(r) {
@@ -21279,12 +21640,12 @@ function vsEditHTML(r) {
   return `<div class="panel" style="margin-top:12px"><div class="section-row"><div><strong>${esc(r.src.title)}</strong> <small class="muted">${r.dur} s${r.src.stage ? ' · ' + CMP_STAGE_NAME[r.src.stage] : ''}</small></div><div class="row-gap"><button class="btn sm" onclick="vsDownload('${r.id}')">⬇ Baixar os 6 (.md)</button><button class="btn sm" onclick="vsAIAll('${r.id}')" ${vlUI.busy ? 'disabled' : ''} title="Gasta 6 créditos">✨ Reescrever os 6 com IA</button><button class="btn sm" onclick="vsDel('${r.id}')">Excluir</button></div></div>
   <div class="edh-tabs" style="margin:10px 0">${VS_KINDS6.map(x => `<button class="edh-tab ${k === x ? 'on' : ''}" onclick="vsKind('${x}')">${VS_LABEL[x]}</button>`).join('')}</div><p class="muted" style="font-size:12.5px;margin:0 0 6px">${VS_DESC[k]}</p>
   <textarea id="vsText" rows="22" style="width:100%;font-size:12.5px;font-family:ui-monospace,monospace">${esc(r.t[k])}</textarea>
-  <div class="row-gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn dark" onclick="vsSave()">Salvar</button><button class="btn" onclick="vsCopy()">Copiar</button><button class="btn" onclick="vsAI('${r.id}','${k}')" ${vlUI.busy ? 'disabled' : ''}>✨ Reescrever este com IA</button><button class="btn" onclick="vsReset('${r.id}','${k}')">${k === 'glossario' ? 'Atualizar a partir dos roteiros' : 'Voltar ao esqueleto'}</button></div>
+  <div class="row-gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn dark" onclick="vsSave()">Salvar</button><button class="btn" onclick="vsCopy()">Copiar</button><button class="btn" onclick="vsAI('${r.id}','${k}')" ${vlUI.busy ? 'disabled' : ''}>✨ Reescrever este com IA</button><label style="font-size:12.5px;display:flex;align-items:center;gap:5px" title="Envia junto um exemplo do formato deste documento (mais tokens)"><input type="checkbox" ${vlUI.useEx ? 'checked' : ''} onchange="vlUI.useEx=this.checked"> usar o exemplo como referência de formato</label><button class="btn" onclick="vsReset('${r.id}','${k}')">${k === 'glossario' ? 'Atualizar a partir dos roteiros' : 'Voltar ao esqueleto'}</button></div>
   ${aiOk ? '' : '<p class="muted" style="font-size:12px;margin:8px 0 0">A IA ainda não está configurada: o esqueleto é seu para editar e copiar.</p>'}</div>`;
 }
 function vsTabHTML(p) {
   const L = p.video.scripts;
-  return vsPickHTML(p) + `<div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Seus roteiros (${L.length})</h3>${L.length ? `<div class="list">${L.map(r => `<div class="list-item"><div><strong>${esc(r.src.title)}</strong><small>${r.dur} s · ${{concept: 'Ângulo da Matriz', piece: 'Anúncio da campanha', carousel: 'Carrossel ou post', free: 'Ideia livre'}[r.src.type]} · ${fmtDate(r.created)}</small></div><button class="btn sm ${vlUI.id === r.id ? '' : 'dark'}" onclick="vsOpen('${r.id}')">${vlUI.id === r.id ? 'Fechar' : 'Abrir'}</button></div>`).join('')}</div>` : '<p class="muted">Nenhum ainda. Escolha acima e clique em "Criar os roteiros".</p>'}</div>` + (vsOf(p, vlUI.id) ? vsEditHTML(vsOf(p, vlUI.id)) : '');
+  return vsPickHTML(p) + `<div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Seus roteiros (${L.length})</h3>${L.length ? `<div class="list">${L.map(r => `<div class="list-item"><div><strong>${esc(r.src.title)}</strong><small>${r.ex ? '<b>exemplo</b> · ' : ''}${r.dur} s · ${{concept: 'Ângulo da Matriz', piece: 'Anúncio da campanha', carousel: 'Carrossel ou post', free: 'Ideia livre'}[r.src.type]} · ${fmtDate(r.created)}</small></div><button class="btn sm ${vlUI.id === r.id ? '' : 'dark'}" onclick="vsOpen('${r.id}')">${vlUI.id === r.id ? 'Fechar' : 'Abrir'}</button></div>`).join('')}</div>` : '<p class="muted">Nenhum ainda. Escolha acima e clique em "Criar os roteiros".</p>'}</div>` + (vsOf(p, vlUI.id) ? vsEditHTML(vsOf(p, vlUI.id)) : '');
 }
 const vlBase = renderVideoLab;
 renderVideoLab = function () {

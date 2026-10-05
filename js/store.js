@@ -235,12 +235,12 @@ function normalizeCampaigns(x) {
   });
 }
 /* Roteiros do Video Lab: ficha estratégica, literário, gravação, técnico, edição e glossário (nessa ordem) por ângulo de anúncio, post ou ideia */
-const VS_KINDS = ['ficha', 'literario', 'gravacao', 'tecnico', 'edicao', 'glossario'], VS_DURS = [6, 10, 15, 20, 30, 60];
+const VS_KINDS = ['ficha', 'literario', 'gravacao', 'tecnico', 'edicao', 'glossario'], VS_DURS = [6, 10, 15, 20, 30, 45, 60];
 function normalizeVideoScripts(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || ''));
   return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 60).map(r => { const s = r.src || {}, t = r.t || {};
     return {id: r.id, src: {type: ['concept', 'piece', 'carousel', 'free'].includes(s.type) ? s.type : 'free', id: sid(s.id) ? s.id : '', title: str(s.title, 160) || 'Roteiro', hook: str(s.hook, 300), angle: str(s.angle, 300), cta: str(s.cta, 120), stage: CMP_STAGES.includes(s.stage) ? s.stage : '', base: str(s.base, 3000)},
-      dur: VS_DURS.includes(+r.dur) ? +r.dur : 15, t: Object.fromEntries(VS_KINDS.map(k => [k, str(t[k], 14000)])), created: str(r.created, 40) || new Date().toISOString(), updated: str(r.updated, 40)}; });
+      dur: VS_DURS.includes(+r.dur) ? +r.dur : 15, ex: !!r.ex, t: Object.fromEntries(VS_KINDS.map(k => [k, str(t[k], 14000)])), created: str(r.created, 40) || new Date().toISOString(), updated: str(r.updated, 40)}; });
 }
 function normalizeProducts(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), lines = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(t => str(t, n)).filter(Boolean), TY = ['curso', 'ebook', 'servico', 'evento', 'produto', 'cadastro'];
