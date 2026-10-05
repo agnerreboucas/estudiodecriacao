@@ -176,7 +176,7 @@
 
 <div class="modal-back" id="modalBack" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalBox"></div></div>
 <div class="overlay" id="overlay"><div class="overlay-bar"><strong id="overlayTitle"></strong><div class="row-gap"><button class="btn sm" onclick="overlayDownload()">⬇ Baixar HTML</button><button class="btn sm" onclick="overlayPrint()">Imprimir / PDF</button><button class="btn sm dark" onclick="closeOverlay()">Fechar</button></div></div><iframe id="overlayFrame" title="Pré-visualização" allow="fullscreen"></iframe></div>
-<input type="file" id="importFile" accept="application/json,.json" hidden onchange="if(this.files[0])importFile(this.files[0]);this.value=''">
+<input type="file" id="importFile" accept="application/json,.json,.ampliacao,.zip" hidden onchange="if(this.files[0])importFile(this.files[0]);this.value=''">
 <div class="toast" id="toast"></div>
 
 <script src="js/util.js"></script>
@@ -252,6 +252,7 @@
 <script src="js/wp-theme-php.js"></script>
 <script src="js/wp-theme.js"></script>
 <script src="js/wp-elementor.js"></script>
+<script src="js/pacote.js"></script>
 <script src="js/flow.js"></script>
 <script src="js/leads-ui.js"></script>
 <script src="js/briefing-form.js"></script>

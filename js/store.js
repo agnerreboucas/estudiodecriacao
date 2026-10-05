@@ -353,6 +353,7 @@ function exportProject(id) {
   toast('Projeto exportado.');
 }
 function importFile(file) {
+  if (/\.(ampliacao|zip)$/i.test(file.name || '')) { pkgImportFile(file); return; }
   const r = new FileReader();
   r.onload = () => {
     try {
