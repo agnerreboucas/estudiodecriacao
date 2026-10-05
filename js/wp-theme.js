@@ -99,13 +99,17 @@ async function wpPage(l, p, ctx) {
 /* ---------- tema completo ---------- */
 const wpSlug = s => String(s || 'tema').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'tema';
 const wpFill = (t, m) => Object.keys(m).reduce((a, k) => a.split('__' + k + '__').join(m[k]), t);
+/* cores, fontes e contexto de conversão do site (ou da página) */
+function wpCtx(pages) {
+  const l0 = pages[0], T0 = l0.theme || {}, hx = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? v : d;
+  const th = {accent: hx(T0.accent, '#e4572e'), bg: T0.dark ? '#0e0e10' : hx(T0.bg, '#ffffff'), fg: T0.dark ? '#f5f5f5' : hx(T0.fg, '#141414'), head: String(T0.head || 'Poppins').replace(/[^\w \-]/g, ''), body: String(T0.body || 'Inter').replace(/[^\w \-]/g, '')};
+  th.soft = wpMix(th.bg, th.fg, .05); th.line = wpMix(th.bg, th.fg, .14); th.mut = wpMix(th.fg, th.bg, .38);
+  return {th, ctx: {th: Object.assign({}, th, {line: th.line}), mut: th.mut, files: [], imgs: new Map(), dataImgs: new Map(), warn: [], l: l0}};
+}
 async function wpThemeBuild(siteId, opt) {
   const p = curProject(), site = p.sites.find(x => x.id === siteId); if (!site) throw new Error('Site não encontrado.');
   const pages = p.landings.filter(l => l.siteId === site.id); if (!pages.length) throw new Error('O site não tem páginas.');
-  opt = Object.assign({name: site.name, slug: wpSlug(site.name), version: '1.0.0'}, opt || {}); const enc = new TextEncoder(), l0 = pages[0], T0 = l0.theme || {}, hx = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? v : d;
-  const th = {accent: hx(T0.accent, '#e4572e'), bg: T0.dark ? '#0e0e10' : hx(T0.bg, '#ffffff'), fg: T0.dark ? '#f5f5f5' : hx(T0.fg, '#141414'), head: String(T0.head || 'Poppins').replace(/[^\w \-]/g, ''), body: String(T0.body || 'Inter').replace(/[^\w \-]/g, '')};
-  th.soft = wpMix(th.bg, th.fg, .05); th.line = wpMix(th.bg, th.fg, .14); th.mut = wpMix(th.fg, th.bg, .38);
-  const ctx = {th: Object.assign({}, th, {line: th.line}), mut: th.mut, files: [], imgs: new Map(), dataImgs: new Map(), warn: [], l: l0}, slug = opt.slug, root = slug + '/', out = [];
+  opt = Object.assign({name: site.name, slug: wpSlug(site.name), version: '1.0.0'}, opt || {}); const enc = new TextEncoder(), l0 = pages[0], {th, ctx} = wpCtx(pages), slug = opt.slug, root = slug + '/', out = [];
   const wp = [], templates = [];
   for (const l of pages) {
     const els = await wpPage(l, p, ctx), SO = lpSeoOf(l, p), og = SO.ogId ? await wpImgFile(ctx, SO.ogId, 1200) : '', home = (l.slug || 'index') === 'index', title = l.navLabel || l.name;
@@ -131,29 +135,6 @@ async function wpThemeZip(siteId, opt) { const r = await wpThemeBuild(siteId, op
 const wpPlugList = () => { if (!Array.isArray(state.workspace.wpPlugins)) state.workspace.wpPlugins = []; return state.workspace.wpPlugins; };
 async function wpBundle(siteId, opt) {
   const r = await wpThemeBuild(siteId, opt), enc = new TextEncoder(), files = [{name: r.slug + '/' + r.slug + '.zip', data: makeZip(r.themeFiles)}, {name: r.slug + '/LEIA-ME.md', data: enc.encode(r.readme)}].concat(r.templates.map(t => ({name: r.slug + '/' + t.name, data: t.data})));
-  for (const pl of wpPlugList()) { try { const b = await imgGet(pl.imgId); if (b) files.push({name: r.slug + '/plugins/' + pl.file, data: new Uint8Array(await b.arrayBuffer())}); } catch (e) { /* plugin ausente */ } }
+  for (const pl of wpPlugList().filter(x => x.use !== false)) { try { const b = await imgGet(pl.imgId); if (b) files.push({name: r.slug + '/plugins/' + pl.file, data: new Uint8Array(await b.arrayBuffer())}); } catch (e) { /* plugin ausente */ } }
   return Object.assign(r, {zip: makeZip(files)});
 }
-async function wpGenerate(siteId, mode) {
-  const s = curProject().sites.find(x => x.id === siteId); if (!s) return; toast('Montando o tema do WordPress…');
-  try {
-    const opt = {name: ($('wpName') || {}).value || s.name, slug: wpSlug(($('wpSlug') || {}).value || ($('wpName') || {}).value || s.name), version: (($('wpVer') || {}).value || '1.0.0').replace(/[^\w.\-]/g, '') || '1.0.0'};
-    const r = mode === 'bundle' ? await wpBundle(siteId, opt) : await wpThemeZip(siteId, opt);
-    download(r.slug + (mode === 'bundle' ? '-wordpress-pacote' : '') + '.zip', r.zip, 'application/zip'); curProject().landings.filter(l => l.siteId === siteId).forEach(l => { l.status = 'Exportada'; }); persist();
-    showModal('Tema gerado', `<p><b>${esc(r.name)}</b>: ${r.pages} página(s), ${r.images} imagem(ns), ${Math.round(r.size / 1024)} KB de arquivos do tema.</p>${r.warn.length ? `<div class="so-issue aviso">${r.warn.map(esc).join('<br>')}</div>` : ''}<ol style="font-size:13px;line-height:1.7"><li>No WordPress, instale e ative o <b>Elementor</b> (gratuito).</li><li><b>Aparência → Temas → Adicionar novo → Enviar tema</b> e escolha o arquivo baixado${mode === 'bundle' ? ' (dentro do pacote: <span class="mono">' + esc(r.slug) + '.zip</span>)' : ''}. Ative.</li><li>O tema cria as páginas, o menu, a página inicial e a página Obrigado. Abra uma página e clique em <b>Editar com Elementor</b>.</li><li>Ajuste marca, WhatsApp, leads e rastreamento em <b>Aparência → Personalizar</b>.</li></ol><p class="muted" style="font-size:12.5px">As instruções completas vão no arquivo <span class="mono">LEIA-ME</span> do pacote.</p><div class="modal-actions"><button class="btn dark" onclick="closeModal();renderLandings()">Fechar</button></div>`);
-  } catch (e) { toast('Não consegui gerar o tema: ' + e.message); }
-}
-function wpPanel(s, p) {
-  const pages = p.landings.filter(l => l.siteId === s.id), ok = pages.every(l => l.status === 'Aprovada'), pl = wpPlugList();
-  return `<div class="panel" style="margin-top:10px"><h3>Tema do WordPress</h3><p class="muted" style="font-size:12.5px;margin:0 0 8px">Transforma este site num tema instalável: cada página vira uma página do WordPress <b>editável no Elementor</b>, com menu, página inicial, página de Obrigado, formulário de leads, SEO básico e rastreamento.${ok ? '' : ' <b>Atenção:</b> há páginas que ainda não estão como “Aprovada”.'}</p>
-  <div class="field"><label>Nome do tema</label><input id="wpName" value="${siteA(s.name)}" oninput="if($('wpSlug'))$('wpSlug').placeholder=wpSlug(this.value)"></div><div class="form-grid"><div class="field"><label>Pasta (slug)</label><input id="wpSlug" placeholder="${siteA(wpSlug(s.name))}"></div><div class="field"><label>Versão</label><input id="wpVer" value="1.0.0"></div></div>
-  <div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" onclick="wpGenerate('${s.id}','theme')">⬇ Gerar tema (.zip)</button><button class="btn" onclick="wpGenerate('${s.id}','bundle')" title="Tema, plugins anexados, modelos do Elementor e instruções">⬇ Pacote completo</button></div>
-  <h4 style="margin:12px 0 4px;font-size:13px">Plugins que acompanham o tema</h4><small class="muted block">Anexe os plugins que você já produziu (arquivos .zip). Eles vão na pasta <span class="mono">plugins</span> do pacote completo.</small>
-  ${pl.map(x => `<div class="list-item" style="padding:6px 0"><div><strong style="font-size:13px">${siteA(x.name)}</strong><small>${Math.round(x.size / 1024)} KB</small></div><button class="btn sm" onclick="wpPlugDel('${x.id}')">×</button></div>`).join('')}<button class="btn sm" style="margin-top:6px" onclick="wpPlugAdd()">＋ Anexar plugin (.zip)</button></div>`;
-}
-function wpPlugAdd() {
-  const i = document.createElement('input'); i.type = 'file'; i.accept = '.zip,application/zip'; i.multiple = true;
-  i.onchange = async () => { for (const f of [...i.files].slice(0, 10)) { if (!/\.zip$/i.test(f.name) || f.size > 40e6) { toast(f.name + ': use um .zip de até 40 MB.'); continue; } const id = uid('wpl'), imgId = uid('wpz'); await imgPut(imgId, f); wpPlugList().push({id, imgId, name: f.name.replace(/\.zip$/i, ''), file: f.name.replace(/[^\w.\-]/g, '_'), size: f.size}); } persist(); renderLandings(); };
-  i.click();
-}
-async function wpPlugDel(id) { const L = wpPlugList(), i = L.findIndex(x => x.id === id); if (i < 0) return; try { await imgDel(L[i].imgId); } catch (e) { /* ok */ } L.splice(i, 1); persist(); renderLandings(); }
