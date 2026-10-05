@@ -26,6 +26,6 @@ Playwright com Chromium em `/opt/pw-browsers/chromium`, servidor estático `pyth
 ## Pendente (ordem)
 1. Revisar o fluxo inteiro e mandar um HTML completo (campanha → anúncios → roteiros → Stories → landing → logo) para aprovação.
 2. Ela vai mandar outro modelo de landing de cadastro (o link lp.arr.academy/imersao é bloqueado aqui: pedir print ou HTML/zip salvo). Usar só a estrutura.
-3. SÓ DEPOIS da aprovação: empacotar tudo como plugin de WordPress (app + api, dados em uploads, login pelo WP, menu no admin), mantendo o campo de teste de API. Nunca testado em WordPress real.
+3. Plugin de WordPress JÁ GERADO (`python3 tools/build_wp_plugin.py` → `wordpress/ampliacao-studio-plugin.zip`; fontes em `wordpress/plugin-src/`; app em `app/`, API com ponte `wp-bridge.php`, dados em uploads). Testado só com WordPress simulado; falta teste em WordPress real. Ver `docs/CONVERSA-COMPLETA.md`.
 4. Backlog: Portal do cliente (lado Studio), módulo de apresentação, "Produtos e serviços", CRM/Dashboard, inspetor de plugins (aguarda arquivos), Biblioteca de anúncios de referência (dor/dúvida/desejo/urgência), publicação direta no Meta (OAuth), skills 'post', 'landing', 'pre' ainda sem ligação, sem busca na web no Studio.
 5. Testes que já falhavam antes (não investigados): eb2 e ad1.
