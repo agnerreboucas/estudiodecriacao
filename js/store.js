@@ -1,6 +1,14 @@
 /* Estado do workspace: modelo de dados, persistência local, exportação/importação */
 const STORE_KEY = window.DEMO_MODE ? 'ampliacao_studio_demo' : 'ampliacao_studio_v1';
 const SCHEMA = 1;
+/* As 5 fases da jornada de compra e o gatilho psicológico fixo de cada uma */
+const JOURNEY_NAMES = ['Descoberta', 'Atração', 'Consideração', 'Ação', 'Apologia'], JOURNEY_TRIGGERS = ['Identificação', 'Aspiração', 'Segurança', 'Momento Uau', 'Identidade'];
+const JOURNEY_OLD = ['Descoberta', 'Atenção', 'Consideração', 'Decisão', 'Pós-compra'];
+function migrateJourney(j) {   // projetos antigos: troca só os nomes padrão antigos e completa o gatilho quando está vazio
+  if (!Array.isArray(j)) return j;
+  j.forEach((st, i) => { if (!st || i > 4) return; if (st.name === JOURNEY_OLD[i]) st.name = JOURNEY_NAMES[i]; if (!String(st.gatilho || '').trim()) st.gatilho = JOURNEY_TRIGGERS[i]; });
+  return j;
+}
 const ui = {page: 'home', tab: 'overview'};   // estado de tela, não persistido
 
 function newPre() {
@@ -10,7 +18,7 @@ function newPre() {
     justification: '', justEdited: false, objective: '', objEdited: false,
     okr: {objective: '', tr: [], st: [], edited: false},
     icps: [],
-    journey: ['Descoberta', 'Atenção', 'Consideração', 'Decisão', 'Pós-compra'].map(name => ({name, situacao: '', duvida: '', dor: '', desejo: '', gatilho: '', objecao: '', confianca: ''})),
+    journey: JOURNEY_NAMES.map((name, i) => ({name, situacao: '', duvida: '', dor: '', desejo: '', gatilho: JOURNEY_TRIGGERS[i], objecao: '', confianca: ''})),
     summary: {blocks: [], edited: false}, pitch: {text: '', short: '', edited: false}, hiddenRels: [],
     positioning: '', positioningApproved: false,
     status: 'RASCUNHO', history: [], approvedAt: null
@@ -209,13 +217,13 @@ function normalizeSites(x) {
       bs: {who: o('who', 800), wants: o('wants', 800), external: o('external', 800), internal: o('internal', 800), philosophical: o('philosophical', 800), empathy: o('empathy', 800), authority: o('authority', 1200), step1: o('step1', 400), step2: o('step2', 400), step3: o('step3', 400), agreement: o('agreement', 800), direct: o('direct', 200), transitional: o('transitional', 300), failure: o('failure', 1000), success: o('success', 1000), identity: o('identity', 600)}, created: str(s.created, 40) || new Date().toISOString()}; });
 }
 /* Campanhas: peças × medidas (feed, vertical, horizontal), bancos de variações e plano de teste, tudo com limites fixos */
-const CMP_KINDS = ['dor', 'duvida', 'desejo', 'urgencia'], CMP_NOTE_KINDS = ['ideia', 'comentario', 'dor', 'duvida', 'desejo', 'urgencia'], CMP_MEASURES = ['feed', 'vertical', 'horizontal'], CMP_STAGES = ['reconhecer', 'entender', 'avaliar', 'agir', 'continuar'], CMP_STAGE_OLD = {topo: 'reconhecer', meio: 'avaliar', fundo: 'agir', pos: 'continuar'};
+const CMP_KINDS = ['dor', 'duvida', 'desejo', 'urgencia'], CMP_NOTE_KINDS = ['ideia', 'comentario', 'dor', 'duvida', 'desejo', 'urgencia'], CMP_MEASURES = ['feed', 'vertical', 'horizontal'], CMP_STAGES = ['descoberta', 'atracao', 'consideracao', 'acao', 'apologia'], CMP_STAGE_OLD = {topo: 'descoberta', meio: 'consideracao', fundo: 'acao', pos: 'apologia', reconhecer: 'descoberta', entender: 'atracao', avaliar: 'consideracao', agir: 'acao', continuar: 'apologia'}, CMP_NAME_OLD = {'Reconhecer': 'Descoberta', 'Entender': 'Atração', 'Avaliar': 'Consideração', 'Agir': 'Ação', 'Continuar': 'Apologia'};
 function normalizeCampaigns(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), hex = v => /^#[0-9a-f]{6}$/i.test(String(v || '')), lines = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(t => str(t, n).trim()).filter(Boolean);
   return (Array.isArray(x) ? x : []).filter(c => c && typeof c === 'object' && sid(c.id)).slice(0, 100).map(c => {
     const bank = c.bank || {}, pieces = (Array.isArray(c.pieces) ? c.pieces : []).filter(q => q && sid(q.id)).slice(0, 100).map(q => {
       const on = {}, sets = {}, lock = {}; CMP_MEASURES.forEach(m => { on[m] = !(q.on && q.on[m] === false); sets[m] = q.sets && sid(q.sets[m]) ? q.sets[m] : ''; lock[m] = !!(q.lock && q.lock[m]); });
-      return {id: q.id, name: str(q.name, 100) || 'Peça', stage: CMP_STAGES.includes(q.stage) ? q.stage : (CMP_STAGE_OLD[q.stage] || 'avaliar'), h: str(q.h, 200), s: str(q.s, 300), btn: str(q.btn, 60), imgId: sid(q.imgId) ? q.imgId : '', col: Math.max(0, Math.min(9, +q.col || 0)), on, sets, lock, status: ['Rascunho', 'Em revisão', 'Aprovada', 'No ar'].includes(q.status) ? q.status : 'Rascunho', syncedAt: str(q.syncedAt, 40)};
+      return {id: q.id, name: str(q.name, 100).replace(/^(Reconhecer|Entender|Avaliar|Agir|Continuar)( · )/, (m, a, b) => CMP_NAME_OLD[a] + b) || 'Peça', stage: CMP_STAGES.includes(q.stage) ? q.stage : (CMP_STAGE_OLD[q.stage] || 'avaliar'), h: str(q.h, 200), s: str(q.s, 300), btn: str(q.btn, 60), imgId: sid(q.imgId) ? q.imgId : '', col: Math.max(0, Math.min(9, +q.col || 0)), on, sets, lock, status: ['Rascunho', 'Em revisão', 'Aprovada', 'No ar'].includes(q.status) ? q.status : 'Rascunho', syncedAt: str(q.syncedAt, 40)};
     });
     return {id: c.id, name: str(c.name, 120) || 'Campanha', objective: str(c.objective, 120), budget: Math.max(0, +c.budget || 0), channel: str(c.channel, 60) || 'Meta Ads', status: ['Rascunho', 'Ativa', 'Pausada'].includes(c.status) ? c.status : 'Rascunho', period: str(c.period, 80), audience: str(c.audience, 300),
       feedFmt: c.feedFmt === 'square' ? 'square' : 'feed45', layout: ['auto', 'full', 'top', 'bottom', 'none'].includes(c.layout) ? c.layout : 'auto', align: c.align === 'center' ? 'center' : 'left', bank: {dor: lines(bank.dor, 200, 20), duvida: lines(bank.duvida, 200, 20), desejo: lines(bank.desejo, 200, 20), urgencia: lines(bank.urgencia, 200, 20), h: lines(bank.h, 200, 30), ht: (Array.isArray(bank.ht) ? bank.ht : []).slice(0, 30).map(t => CMP_KINDS.includes(t) ? t : ''), s: lines(bank.s, 300, 20), c: lines(bank.c, 60, 20), img: (Array.isArray(bank.img) ? bank.img : []).filter(sid).slice(0, 12), col: (Array.isArray(bank.col) ? bank.col : []).filter(v => v && hex(v.bg) && hex(v.accent)).slice(0, 6).map(v => ({name: str(v.name, 30), bg: v.bg, accent: v.accent, fg: hex(v.fg) ? v.fg : '#ffffff'}))},
@@ -320,7 +328,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.campaigns = normalizeCampaigns(q.campaigns); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.campaigns = normalizeCampaigns(q.campaigns); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');

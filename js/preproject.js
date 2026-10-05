@@ -42,9 +42,10 @@ const RELATIONS = [
   ['d6', 'd8', 'consequência', 'Donos sobrecarregados e sem sistema de vendas tendem a perder o follow-up de oportunidades.']
 ];
 const JOURNEY_FIELDS = [['situacao', 'Situação'], ['duvida', 'Dúvida'], ['dor', 'Dor'], ['desejo', 'Desejo'], ['gatilho', 'Gatilho'], ['objecao', 'Objeção'], ['confianca', 'Fator de confiança']];
-const ICP_FIELDS = [['name', 'Nome do ICP'], ['profile', 'Perfil'], ['situation', 'Situação'], ['need', 'Necessidade'], ['behavior', 'Comportamento'], ['intent', 'Intenção'], ['pains', 'Dores (uma por linha, na fala da pessoa)'], ['doubts', 'Dúvidas (uma por linha)'], ['desires', 'Desejos (um por linha)'], ['hidden', 'Dores ocultas (o que sente e não diz)'], ['triggers', 'O que faz procurar ajuda agora'], ['objections', 'Objeções (uma por linha)'], ['where', 'Onde descobre (canais)'], ['voice', 'Como fala (expressões dela)']];
+const ICP_FIELDS = [['name', 'Nome do ICP'], ['profile', 'Perfil'], ['situation', 'Situação'], ['need', 'Necessidade'], ['behavior', 'Comportamento'], ['intent', 'Intenção'], ['pains', 'Dores (uma por linha, na fala da pessoa)'], ['doubts', 'Dúvidas (uma por linha)'], ['desires', 'Desejos (um por linha)'], ['hidden', 'Urgências ocultas (o que sente e não diz)'], ['triggers', 'O que faz procurar ajuda agora'], ['objections', 'Objeções (uma por linha)'], ['where', 'Onde descobre (canais)'], ['voice', 'Como fala (expressões dela)']];
 const ICP_LIST = ['pains', 'doubts', 'desires', 'hidden', 'objections'];
-const JOURNEY_HINT = ['Reconhecer', 'Entender', 'Avaliar', 'Agir', 'Continuar'];
+const JOURNEY_HINT = ['Eu sei', 'Eu gosto', 'Quero saber mais', 'Vou comprar ou experimentar', 'Eu recomendo'];
+const JOURNEY_DESC = ['O cliente é exposto à marca pela primeira vez, por conteúdo, anúncio ou indicação.', 'Você desperta interesse suficiente para ele prestar atenção e continuar te acompanhando.', 'Ele pesquisa, compara, lê e tira dúvidas. É a fase mais crítica do ciclo.', 'Ele decide: assina, compra, agenda, o "sim" acontece.', 'Ele vira defensor da marca: renova, indica, compartilha. A jornada não termina na venda.'];
 
 const preP = () => curProject();
 const preOf = () => curProject().pre;
@@ -225,7 +226,7 @@ function preIcpModal(i) {
   if (i < 0 && pre.icps.length >= 6) { toast('O Pré-Projeto aceita no máximo 6 ICPs.'); return; }
   const v = i >= 0 ? pre.icps[i] : {};
   showModal(i >= 0 ? 'Editar ICP' : 'Novo ICP', `<div class="form-grid">${ICP_FIELDS.map(([k, l]) => `<div class="field ${k === 'name' ? 'full' : ''}"><label>${l}</label>${k === 'name' ? `<input id="icp_${k}" value="${esc(v[k] || '')}">` : `<textarea id="icp_${k}" rows="${ICP_LIST.includes(k) ? 4 : 2}">${esc(v[k] || '')}</textarea>`}</div>`).join('')}</div>
-    <p class="muted" style="font-size:11px">Dores, dúvidas, desejos e dores ocultas alimentam a Matriz de conteúdo, os anúncios, o conteúdo orgânico e a landing page. Escreva como a pessoa falaria.</p>
+    <p class="muted" style="font-size:11px">Dores, dúvidas, desejos e urgências ocultas alimentam a Matriz de conteúdo, os anúncios, o conteúdo orgânico e a landing page. Escreva como a pessoa falaria.</p>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="preIcpSave(${i})">Salvar ICP</button></div>`);
 }
 function preIcpSave(i) {
@@ -283,7 +284,7 @@ function renderPre() {
   c.innerHTML = `
   <div class="jp-wrap">
     ${typeof briefingPanel === 'function' ? briefingPanel(p) : ''}
-    <div class="jp-panel" style="border:2px solid #111"><div class="section-row"><div><h3 style="margin:0">✦ Gerar o pré-projeto completo com IA</h3><p class="sub" style="margin:2px 0 0">A IA lê todas as respostas do projeto e monta o briefing do projeto inteiro: diagnóstico, objetivo, resumo, pitch, <b>ICPs com dores, dúvidas, desejos e dores ocultas</b>, jornada, <b>produtos e serviços</b>, pilares da linha editorial e a matriz de conteúdo. Tudo fica editável e alimenta anúncios, conteúdo e landing pages.</p></div><div class="row-gap"><button class="btn dark" onclick="preGenAll()">✦ Gerar pré-projeto</button><button class="btn" onclick="go('matrix')">Ver matriz de conteúdo</button></div></div>${pre.gen && pre.gen.at ? `<small class="muted">Última geração: ${fmtDateTime(pre.gen.at)}. ${(pre.pillars || []).length} pilar(es) de conteúdo.</small>` : ''}</div>
+    <div class="jp-panel" style="border:2px solid #111"><div class="section-row"><div><h3 style="margin:0">✦ Gerar o pré-projeto completo com IA</h3><p class="sub" style="margin:2px 0 0">A IA lê todas as respostas do projeto e monta o briefing do projeto inteiro: diagnóstico, objetivo, resumo, pitch, <b>ICPs com dores, dúvidas, desejos e urgências ocultas</b>, jornada, <b>produtos e serviços</b>, pilares da linha editorial e a matriz de conteúdo. Tudo fica editável e alimenta anúncios, conteúdo e landing pages.</p></div><div class="row-gap"><button class="btn dark" onclick="preGenAll()">✦ Gerar pré-projeto</button><button class="btn" onclick="go('matrix')">Ver matriz de conteúdo</button></div></div>${pre.gen && pre.gen.at ? `<small class="muted">Última geração: ${fmtDateTime(pre.gen.at)}. ${(pre.pillars || []).length} pilar(es) de conteúdo.</small>` : ''}</div>
     <div class="jp-head"><div><div class="eyebrow">JOURNEY ARCHITECT · MOTOR DO PROJETO</div><h2>Diagnóstico & Pré-Projeto</h2><p>Transforme desafios em hipóteses, diagnóstico, justificativa e objetivo mensurável. O pré-projeto define onde começar sem antecipar decisões que dependem do posicionamento.</p></div>
       <div class="jp-actions"><span class="jp-status st-${pre.status.replace(/\s/g, '').toLowerCase()}" id="jpStatus">${pre.status}</span><button class="btn dark" onclick="preDeckOpen()" title="Abre os slides no Editor de Design">▣ Apresentação</button><button class="btn" onclick="preDeckOpen(true)" title="Refaz os slides a partir do Pré-Projeto">↻ Slides</button><button class="btn" onclick="prePresent()" title="Documento completo em HTML">▤ Documento</button><button class="btn" onclick="prePDF()">PDF</button><button class="btn" onclick="exportProject('${p.id}')" title="Baixar o projeto em JSON">⬇ JSON</button>${flow}</div></div>
     <div class="jp-progress">${steps.map((s, i) => `<span class="jp-step ${done[i] ? 'done' : ''} ${i === 0 ? 'active' : ''}">${pad(i + 1, 2)} ${s}</span>`).join('')}</div>
@@ -336,7 +337,7 @@ function renderPre() {
       <div class="jp-grid">${pre.icps.map((x, i) => `<article class="jp-card"><div class="n">ICP ${i + 1} ${tag('hipotese')}</div><h4>${esc(x.name)}</h4>${ICP_FIELDS.slice(1).map(([k, l]) => x[k] ? `<p><b>${l}:</b> ${esc(x[k])}</p>` : '').join('')}<div class="row-gap"><button class="btn sm" onclick="preIcpModal(${i})">Editar</button><button class="btn sm" onclick="preIcpDel(${i})">Remover</button></div></article>`).join('') || emptyState('Nenhum ICP definido', 'Defina de 1 a 3 perfis prioritários para orientar a jornada.')}</div>
     </div>
 
-    <div class="jp-panel"><div class="section-row"><div><h3>9. Jornada inicial</h3><p class="sub">Hipótese de comportamento: descoberta → atenção → consideração → decisão → pós-compra.</p></div><button class="btn sm" onclick="preAI('journey')">✦ Sugerir com IA</button></div>
+    <div class="jp-panel"><div class="section-row"><div><h3>9. Jornada inicial</h3><p class="sub">Hipótese de comportamento: descoberta → atração → consideração → ação → apologia. Cada fase tem um gatilho psicológico fixo: identificação, aspiração, segurança, momento uau e identidade.</p></div><button class="btn sm" onclick="preAI('journey')">✦ Sugerir com IA</button></div>
       <div class="jp-journey-edit">${pre.journey.map((s, i) => { const n = JOURNEY_FIELDS.filter(([k]) => s[k]).length; return `<button class="jn-card" onclick="preJourneyModal(${i})"><b>${pad(i + 1, 2)} ${esc(s.name)}</b><small>${JOURNEY_HINT[i]}</small><span class="jp-mini-badge">${n}/7 campos</span>${s.situacao ? `<p>${esc(s.situacao)}</p>` : ''}</button>`; }).join('')}</div>
     </div>
 
@@ -395,8 +396,8 @@ async function preAI(kind) {
       pre.icps = (Array.isArray(j) ? j : []).slice(0, 3).map(x => Object.fromEntries(ICP_FIELDS.map(([k]) => [k, Array.isArray(x[k]) ? x[k].join('\n') : String(x[k] || '')])));
       toast('ICPs sugeridos. São hipóteses: valide com o cliente.');
     } else if (kind === 'journey') {
-      const j = await aiJSON('Escreva a jornada inicial (hipótese) nas 5 etapas Descoberta, Atenção, Consideração, Decisão, Pós-compra. Responda só JSON: [{"situacao","duvida","dor","desejo","gatilho","objecao","confianca"}] com 5 itens.', ctx);
-      (Array.isArray(j) ? j : []).slice(0, 5).forEach((x, i) => JOURNEY_FIELDS.forEach(([k]) => { pre.journey[i][k] = String(x[k] || ''); }));
+      const j = await aiJSON('Escreva a jornada inicial (hipótese) nas 5 etapas Descoberta (eu sei, gatilho Identificação), Atração (eu gosto, gatilho Aspiração), Consideração (quero saber mais, gatilho Segurança), Ação (vou comprar ou experimentar, gatilho Momento Uau), Apologia (eu recomendo, gatilho Identidade). O campo gatilho de cada etapa é fixo, use exatamente o gatilho dessa etapa. Responda só JSON: [{"situacao","duvida","dor","desejo","gatilho","objecao","confianca"}] com 5 itens.', ctx);
+      (Array.isArray(j) ? j : []).slice(0, 5).forEach((x, i) => JOURNEY_FIELDS.forEach(([k]) => { pre.journey[i][k] = k === 'gatilho' ? JOURNEY_TRIGGERS[i] : String(x[k] || ''); }));
       toast('Jornada sugerida. É uma hipótese: revise.');
     }
     preTouch(); keepScroll(renderPre);

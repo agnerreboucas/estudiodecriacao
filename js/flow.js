@@ -6,7 +6,7 @@ const FLOW = [
     [null, 'Contato e reunião', 'Primeiro contato e agenda da reunião. Entra junto com o CRM.', 'soon'],
     ['projects', 'Projetos', 'Um projeto por cliente. A IA lê as respostas e gera o pré-projeto completo: ICPs, produtos e serviços, linha editorial.', 'ok'],
     ['projects', 'Briefing do cliente', 'Formulário que o cliente preenche por link (empresa, público, produtos e serviços). As respostas viram a base do pré-projeto.', 'ok'],
-    ['matrix', 'Matriz de Criação', 'ICPs com dores, dúvidas, desejos e dores ocultas, cruzados com os serviços. Gera a matriz de conteúdo.', 'ok'],
+    ['matrix', 'Matriz de Criação', 'ICPs com dores, dúvidas, desejos e urgências ocultas, cruzados com os serviços. Gera a matriz de conteúdo.', 'ok'],
     ['brand', 'Brand Brain', 'Marca: cores, fontes, tom e logo. Tem logo, suba aqui; não tem, crie no Estúdio de Design (Logo Lab).', 'ok'],
     ['inspiration', 'Inspiração', 'Referências e concorrentes.', 'ok']]},
   {n: '2', t: 'Anúncios', c: '#e4572e', d: 'Muitos ângulos por produto, cada um falando com uma dor ou dúvida do ICP.', items: [
