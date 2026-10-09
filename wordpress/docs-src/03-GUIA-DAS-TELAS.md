@@ -21,6 +21,12 @@ Para subir um planejamento inteiro de uma vez, **no formato das suas planilhas**
 - **Depois de importar:** *Aplicar a todos…* (carrossel; origem pode ser o brand book) e *Aplicar a cor e a imagem desta peça a todas* (anúncio) atualizam o resto sem mexer nos textos. *Trocar modelo* → *Aplicar este modelo* (marque "todos" para o projeto inteiro).
 - As **imagens não vão na planilha**: suba antes em *Imagens*. Só aceita .xlsx (no Google Planilhas: Arquivo → Fazer download → Excel).
 
+## Entrar
+A página de entrada (`entrar.html`; no WordPress, `seusite.com/studio/`) apresenta a plataforma e pede o login. Depois de entrar, você cai direto em **Projetos**. Se o Studio tem senha e você não entrou, ele leva a essa página.
+
+## Documento do projeto
+Em **Projetos → 📄 Subir documento do projeto** (e na aba Pré-projeto) você sobe o briefing completo (Word, PDF, texto, Markdown, HTML, CSV) ou cola o texto. O Studio mostra o que entendeu (produtos, públicos, dores, dúvidas, desejos, urgências, tom de voz, regras e cores) e, ao aplicar, leva para o projeto e para as campanhas, Stories, roteiros, carrosséis e a IA. **Nada que você já fez é apagado**: só completa o que está vazio e acrescenta o que falta. No topo de cada tela de criação, uma faixa mostra de onde vêm as informações.
+
 ## 1 · Cliente e pré-projeto
 - **Projetos:** cada cliente/produto é um projeto, com marca (Brand Brain), voz (Voice Brain), arquivos e tudo ligado a ele. O assistente *Novo projeto* aceita briefing escrito, em áudio ou por formulário enviado ao cliente (link, Google Forms ou planilha).
 - **Pré-projeto:** do briefing ao diagnóstico: desafios → hipóteses (marcadas como DADO ou HIPÓTESE) → cruzamento → diagnóstico → resumo executivo, elevator pitch e **apresentação em slides**. O Radar de concorrentes e o dossiê do Google Meu Negócio ficam aqui.
@@ -30,7 +36,7 @@ Para subir um planejamento inteiro de uma vez, **no formato das suas planilhas**
 
 ## 2 · Anúncios
 - **Agente Editorial:** do insumo (texto, link, documento) até as entregas (posts, carrosséis, roteiros, textos), seguindo as suas skills de texto.
-- **Estúdio de Design:** onde as peças ganham forma. Modelos de layout, fontes e combinações, estilos, fotos, camadas e exportação (PNG, PDF, PSD em camadas). **Fábrica de variações** gera até 100 versões de um anúncio. **Laboratório do Logo** cria o logo.
+- **Estúdio de Design:** onde as peças ganham forma. **Logo por peça:** selecione o logo na arte e escolha qual logo, a cor (original, branco, preto) e um fundo atrás dele; dá para aplicar em todas as peças ou deixar o Studio escolher pelo fundo de cada uma, com Desfazer. Modelos de layout, fontes e combinações, estilos, fotos, camadas e exportação (PNG, PDF, PSD em camadas). **Fábrica de variações** gera até 100 versões de um anúncio. **Laboratório do Logo** cria o logo.
 - **Video Lab:** cenas por duração e **Roteiros em 6 documentos** (ficha estratégica, literário, gravação, técnico, edição e glossário), com aprovação, responsável e download em **PDF e Docs**.
 - **Campanhas:** a campanha percorre as **5 fases da jornada** (Descoberta, Atração, Consideração, Ação, Apologia), com 5 anúncios por fase, cada um **nas 3 medidas** (horizontal, vertical e feed). Muda o layout da primeira peça e as variações acompanham. Tem **Visão geral do fluxo**, banco de dores/dúvidas/desejos/urgências ocultas e bloco de notas.
 

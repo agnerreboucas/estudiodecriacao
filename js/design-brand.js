@@ -172,12 +172,55 @@ function brandSwatches(L) {
   const key = L.type === 'text' ? 'color' : 'fill', cs = [b.pal.c60, b.pal.c30, b.pal.c10, ...b.grays];
   return `<div class="okr-label" style="margin-top:10px">CORES DA MARCA</div><div class="bk-chips">${cs.map(c => `<button class="bk-chip" style="background:${esc(c)}" title="${esc(c)}" onclick="dzProp('${key}','${esc(c)}');dzInspector()"></button>`).join('')}</div>`;
 }
-/* logo na peça: escolhe a versão certa para o fundo */
-async function dzAddLogo() {
+/* ---- logo por peça: escolher qual logo, a cor (original/branco/preto) e um fundo atrás dele ---- */
+const LOGO_TINT = {'': '', w: 'brightness(0) invert(1)', k: 'brightness(0)'};
+const LOGO_UNDO = {list: []};
+const logoDark = s => lum((s && s.bg) || '#ffffff') < 0.35;
+const logoTone = (b, dark) => b.logos.find(l => l.tone === (dark ? 'dark' : 'light')) || b.logos.find(l => l.tone === 'any') || b.logos[0];
+async function logoFit(L, lg) { await loadImage(lg.imgId); const bm = IMGS.get(lg.imgId); if (!bm) return false; const w = L.w || 200; L.imgId = lg.imgId; L.h = Math.round(w * bm.height / bm.width); L.fit = 'contain'; return true; }
+function logoSnap(L, s, set) { return {setId: set.id, slideId: s.id, id: L.id, prev: {imgId: L.imgId, w: L.w, h: L.h, filter: L.filter, plate: L.plate, platePad: L.platePad, plateR: L.plateR}}; }
+/* adiciona o logo na peça: com mais de um logo, pergunta qual (e mostra cada um sobre fundo claro, escuro e cinza) */
+async function dzAddLogo(id) {
   const p = dzP(), b = brandOf(p); if (!b.logos.length) { toast('Envie um logo no Brand Kit primeiro.'); dzBrandOpen(); return; }
-  const s = dzSlide(), f = dzSet().format, dark = lum(s.bg || '#ffffff') < 0.35;
-  const lg = b.logos.find(l => l.tone === (dark ? 'dark' : 'light')) || b.logos.find(l => l.tone === 'any') || b.logos[0];
+  if (!id && b.logos.length > 1) { dzLogoChooser(); return; }
+  const s = dzSlide(), f = dzSet().format, lg = id ? b.logos.find(l => l.id === id) || b.logos[0] : logoTone(b, logoDark(s));
   await loadImage(lg.imgId); const bm = IMGS.get(lg.imgId); if (!bm) { toast('Logo indisponível.'); return; }
   const m = Math.round(Math.min(f.w, f.h) * 0.06), hh = Math.round(f.h * 0.07), ww = Math.min(Math.round(hh * bm.width / bm.height), Math.round(f.w * 0.4)), h2 = Math.round(ww * bm.height / bm.width);
-  const L = IM('logo', {imgId: lg.imgId, x: m, y: f.h - m - h2, w: ww, h: h2}); s.layers.push(L); dz.sel = L.id; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel();
+  const L = IM('logo', {imgId: lg.imgId, x: m, y: f.h - m - h2, w: ww, h: h2, fit: 'contain'}); s.layers.push(L); dz.sel = L.id; closeModal(); dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel();
+}
+function dzLogoChooser() {
+  const b = brandOf(dzP()), BG = [['#ffffff', 'claro'], ['#1a1a1a', 'escuro'], ['#8a8f98', 'cinza']];
+  showModal('Qual logo usar nesta peça?', `<p class="muted" style="margin-top:0">Veja cada logo sobre fundo claro, escuro e cinza e escolha o que fica melhor nesta peça. Depois dá para trocar, mudar a cor e pôr um fundo atrás do logo.</p><div class="list">${b.logos.map((l, i) => `<div class="list-item" style="align-items:center;gap:10px;flex-wrap:wrap"><div style="display:flex;gap:6px">${BG.map(([c, n]) => `<canvas data-logo="${esc(l.imgId)}" data-bg="${c}" width="110" height="64" title="Sobre fundo ${n}" style="background:${c};border-radius:8px;border:1px solid #ddd"></canvas>`).join('')}</div><div style="flex:1;min-width:120px"><strong>${esc(l.name)}</strong><small>${l.tone === 'dark' ? 'para fundo escuro' : l.tone === 'light' ? 'para fundo claro' : 'qualquer fundo'}</small></div><button class="btn sm dark" onclick="dzAddLogo('${l.id}')">Usar este</button></div>`).join('')}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn" onclick="closeModal();dzAddLogo(logoTone(brandOf(dzP()), logoDark(dzSlide())).id)">Escolher sozinho pelo fundo</button></div>`);
+  $('modalBox').querySelectorAll('canvas[data-logo]').forEach(async cv => { await loadImage(cv.dataset.logo); const bm = IMGS.get(cv.dataset.logo); if (!bm) return; const k = Math.min((cv.width - 12) / bm.width, (cv.height - 12) / bm.height), w = bm.width * k, h = bm.height * k; cv.getContext('2d').drawImage(bm, (cv.width - w) / 2, (cv.height - h) / 2, w, h); });
+}
+function dzLogoInspector(L, geo, acts, rg) {
+  const b = brandOf(dzP()), tint = Object.keys(LOGO_TINT).find(k => LOGO_TINT[k] === (L.filter || '')) || '', pc = L.plate || '', tk = (typeof brandTokens === 'function' && dzP()) ? brandTokens(dzP()) : {accent: '#e4572e'};
+  const sw = (c, n) => `<button class="btn sm ${pc === c ? 'dark' : ''}" onclick="dzLogoPlate('${c}')" style="${c ? 'border-left:14px solid ' + c : ''}">${n}</button>`;
+  return `<h3>Logo</h3><small class="muted block">Arraste e use as alças para redimensionar.</small>
+    <h4>Qual logo</h4>${b.logos.length > 1 ? `<select onchange="dzLogoPick(this.value)">${b.logos.map(l => `<option value="${l.id}" ${l.imgId === L.imgId ? 'selected' : ''}>${esc(l.name)} · ${l.tone === 'dark' ? 'fundo escuro' : l.tone === 'light' ? 'fundo claro' : 'qualquer fundo'}</option>`).join('')}</select>` : '<small class="muted">Só há um logo no Brand Kit. Envie outras versões (branca, preta) para escolher aqui.</small>'}
+    <h4>Cor do logo</h4><div class="row-gap"><button class="btn sm ${tint === '' ? 'dark' : ''}" onclick="dzLogoTint('')">Original</button><button class="btn sm ${tint === 'w' ? 'dark' : ''}" onclick="dzLogoTint('w')">Tudo branco</button><button class="btn sm ${tint === 'k' ? 'dark' : ''}" onclick="dzLogoTint('k')">Tudo preto</button></div><small class="muted block">Útil para logo sem fundo (PNG transparente) em fundo claro ou escuro.</small>
+    <h4>Fundo atrás do logo</h4><div class="row-gap" style="flex-wrap:wrap">${sw('', 'Nenhum')}${sw('#ffffff', 'Branco')}${sw('#111111', 'Preto')}${sw('#e9e9ee', 'Cinza claro')}${sw(tk.accent, 'Cor da marca')}<input type="color" value="${esc(pc || '#ffffff')}" oninput="dzLogoPlate(this.value)" title="Outra cor"></div>
+    ${pc ? rg('platePad', 'Margem do fundo', 0, 0.5, 0.02) + rg('plateR', 'Cantos do fundo', 0, 0.5, 0.02) : ''}
+    ${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Nos outros slides e peças</h4><div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="dzLogoAll('set')">Aplicar nos slides desta peça</button><button class="btn sm" onclick="dzLogoAll('project')">Aplicar em todas as peças</button><button class="btn sm" onclick="dzLogoAll('auto')" title="Cada peça recebe o logo marcado para o fundo dela">Escolher sozinho pelo fundo, em todas</button></div>
+    <h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
+}
+async function dzLogoPick(id) { const L = dzLayer(), lg = brandOf(dzP()).logos.find(l => l.id === id); if (!L || !lg) return; if (await logoFit(L, lg)) { dzDraw(); dzCommitSoon(); dzInspector(); } else toast('Logo indisponível.'); }
+function dzLogoTint(m) { const L = dzLayer(); if (!L) return; L.filter = LOGO_TINT[m] || ''; dzDraw(); dzCommitSoon(); dzInspector(); }
+function dzLogoPlate(c) { const L = dzLayer(); if (!L) return; L.plate = c || ''; if (c && L.platePad == null) { L.platePad = 0.14; L.plateR = 0.2; } dzDraw(); dzCommitSoon(); dzInspector(); }
+async function dzLogoAll(scope) {
+  const p = dzP(), b = brandOf(p), src = dzLayer(); if (!src && scope !== 'auto') return;
+  const sets = scope === 'set' ? [dzSet()] : p.design.sets, undo = []; let n = 0;
+  for (const set of sets) for (const s of set.slides) for (const L of s.layers) {
+    if (L.type !== 'image' || L.role !== 'logo') continue;
+    undo.push(logoSnap(L, s, set));
+    if (scope === 'auto') { const lg = logoTone(b, logoDark(s)); if (lg) { await logoFit(L, lg); L.filter = ''; L.plate = ''; n++; } }
+    else { const lg = b.logos.find(l => l.imgId === src.imgId); if (lg) await logoFit(L, lg); else { L.imgId = src.imgId; } L.filter = src.filter || ''; L.plate = src.plate || ''; L.platePad = src.platePad; L.plateR = src.plateR; n++; }
+  }
+  LOGO_UNDO.list = undo; persist(); dzDraw(); dzSlidesPanel(); dzInspector();
+  showModal('Logo atualizado', `<p style="margin-top:0">O logo foi trocado em <b>${n}</b> camada(s) de logo${scope === 'set' ? ' desta peça' : ' do projeto'}. Só os logos mudaram; textos, fotos e layouts ficaram como estavam.</p><div class="modal-actions"><button class="btn" onclick="dzLogoUndo()">↩ Desfazer</button><button class="btn dark" onclick="closeModal()">Ok</button></div>`);
+}
+function dzLogoUndo() {
+  const p = dzP(); let n = 0;
+  LOGO_UNDO.list.forEach(u => { const set = p.design.sets.find(s => s.id === u.setId), s = set && set.slides.find(x => x.id === u.slideId), L = s && s.layers.find(x => x.id === u.id); if (L) { Object.assign(L, u.prev); n++; } });
+  LOGO_UNDO.list = []; persist(); closeModal(); dzDraw(); dzSlidesPanel(); dzInspector(); toast(n ? 'Troca de logo desfeita.' : 'Nada para desfazer.');
 }

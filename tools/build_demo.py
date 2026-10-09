@@ -3,11 +3,11 @@
 import re, pathlib
 root = pathlib.Path(__file__).resolve().parent.parent
 html = (root / 'index.html').read_text()
-def css(m): return '<style>\n' + (root / m.group(1)).read_text() + '\n</style>'
+def css(m): return '<style>\n' + (root / m.group(1).split('?')[0]).read_text() + '\n</style>'
 html = re.sub(r'<link rel="stylesheet" href="([^"]+)">', css, html)
 def js(path): return '<script>\n' + (root / path).read_text().replace('</script>', '<\\/script>') + '\n</script>'
 def scripts(m):
-    path = m.group(1)
+    path = m.group(1).split('?')[0]
     out = ''
     if path == 'js/util.js': out += '<script>window.DEMO_MODE=true</script>\n'
     if path == 'js/app.js': out += js('demo/demo.js') + '\n'

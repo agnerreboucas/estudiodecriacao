@@ -48,13 +48,16 @@ function carResize(c, n) {
   nd.groups.forEach((ix, k) => { const b = blocks[k]; if (!b) return; out[ix[0]] = b.title || ''; ix.slice(1).forEach((pos, j) => { out[pos] = b.paras[j] || ''; }); });
   c.slides = n; c.texts = out.map(t => t.slice(0, 1200));
 }
-function carCtx() {
+function carCtx(core) {
   const c = carS(), s = EDS(), ag = c.useAgent && s.ideas && s.ideas[s.chosen] && s.brief;
-  return (ag ? eCtx() + '\n' : '') + (c.idea.trim() ? `TEMA / IDEIA DO USUÁRIO:\n${c.idea.trim()}\n` : '') + (eProdTxt() ? 'PRODUTO/CAMPANHA: ' + eProdTxt() + '\n' : '');
+  const own = (ag ? eCtx() + '\n' : '') + (c.idea.trim() ? `TEMA / IDEIA DO USUÁRIO:\n${c.idea.trim()}\n` : '') + (eProdTxt() ? 'PRODUTO/CAMPANHA: ' + eProdTxt() + '\n' : '');
+  /* o carrossel também parte do projeto: público, dores, produtos, tom de voz e regras (documento do projeto incluído) */
+  let proj = ''; if (!core && own.trim() && typeof projectContext === 'function') { try { const p = curProject(); if (p) proj = 'PROJETO (use só o que está escrito aqui):\n' + projectContext(p).slice(0, 4500) + '\n'; } catch (e) { /* sem projeto */ } }
+  return own + proj;
 }
 async function carGenCover() {
   const c = carS(), B = carBase(), cov = B.covers.find(x => x.id === c.cover) || B.covers[0], SZ = EDX().sizes; if (carState.busy) return;
-  if (!carCtx().trim()) { toast('Escreva o tema/ideia ou use a ideia do Agente.'); return; }
+  if (!carCtx(true).trim()) { toast('Escreva o tema/ideia ou use a ideia do Agente.'); return; }
   carState.busy = 'cover'; renderCarrosseis();
   try {
     const j = await motJSON(eSystem(), `${carCtx()}\nEscreva 5 OPÇÕES de capa de carrossel na estrutura “${cov.name}”: ${cov.how}\nTítulo: ${SZ.capa1.join('-')} caracteres. Subtítulo: ${SZ.capa2.join('-')} caracteres. As 5 opções devem ser diferentes entre si, curtas, diretas e com curiosidade (sem entregar a resposta).\n${ENT_RULES}\nJSON: {"capas":[{"titulo":"","subtitulo":""}]}`, 2500);
@@ -66,7 +69,7 @@ async function carGenCover() {
 function carPickCover(i, quiet) { const c = carS(), o = c.covers[i]; if (!o) return; c.texts[0] = o.titulo; c.texts[1] = o.subtitulo; carSave(); if (!quiet) renderCarrosseis(); }
 async function carGenAll() {
   const c = carS(), B = carBase(), cov = B.covers.find(x => x.id === c.cover) || B.covers[0]; if (carState.busy) return;
-  if (!carCtx().trim()) { toast('Escreva o tema/ideia ou use a ideia do Agente.'); return; }
+  if (!carCtx(true).trim()) { toast('Escreva o tema/ideia ou use a ideia do Agente.'); return; }
   carState.busy = 'all'; renderCarrosseis();
   try {
     const keep = c.texts[0] && c.texts[1] ? [c.texts[0], c.texts[1]] : null;

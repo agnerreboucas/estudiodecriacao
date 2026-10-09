@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Entrar · Ampliação Studio</title>
+<style>
+:root{--ink:#111;--mut:#5d6068;--line:#e4e4ea;--bg:#f6f6f8;--acc:#111;--ok:#176b30;--bad:#b3261e}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:inherit}
+.top{max-width:1120px;margin:0 auto;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.01em}.brand i{width:34px;height:34px;border-radius:50%;background:#111;color:#fff;display:grid;place-items:center;font-style:normal;font-size:15px}
+.top a.btn{font-size:14px}
+.btn{display:inline-block;border:1.5px solid #111;background:#fff;color:#111;border-radius:12px;padding:11px 18px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+.btn.dark{background:#111;color:#fff}.btn:disabled{opacity:.6;cursor:default}
+.hero{max-width:1120px;margin:0 auto;padding:18px 20px 40px;display:grid;gap:28px;grid-template-columns:1fr}
+.hero h1{font-size:clamp(32px,6vw,56px);line-height:1.04;letter-spacing:-.03em;margin:0 0 14px}
+.hero p.lead{font-size:clamp(16px,2.2vw,19px);color:var(--mut);margin:0 0 18px;max-width:560px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 6px;padding:0;list-style:none}
+.chips li{background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 13px;font-size:14px;font-weight:600}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 18px 50px -28px rgba(0,0,0,.35)}
+.card h2{margin:0 0 4px;font-size:22px}.card p{margin:0 0 14px;color:var(--mut);font-size:14.5px}
+label{display:block;font-size:13px;font-weight:700;margin:12px 0 5px}
+input[type=text],input[type=password]{width:100%;font:inherit;font-size:16px;padding:13px 14px;border:1.5px solid #cfd0d6;border-radius:12px;background:#fff}
+input:focus{outline:2px solid #111;outline-offset:1px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;font-size:14px}
+.msg{margin:12px 0 0;font-size:14px;min-height:20px}.msg.bad{color:var(--bad)}.msg.ok{color:var(--ok)}
+.go{width:100%;margin-top:16px}
+.sec{max-width:1120px;margin:0 auto;padding:10px 20px 60px}
+.sec h2{font-size:clamp(22px,3.5vw,32px);letter-spacing:-.02em;margin:0 0 6px}.sec>p{color:var(--mut);margin:0 0 22px;max-width:640px}
+.grid{display:grid;gap:12px;grid-template-columns:1fr}
+.f{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px}.f b{display:block;margin-bottom:4px}.f span{color:var(--mut);font-size:14.5px}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 22px;padding:0;list-style:none;font-weight:700;font-size:14px}
+.flow li:not(:last-child)::after{content:"→";margin-left:6px;color:#999;font-weight:400}
+footer{border-top:1px solid var(--line);padding:22px 20px;text-align:center;color:var(--mut);font-size:13px}
+@media(min-width:880px){.hero{grid-template-columns:1.15fr .85fr;align-items:center;padding-top:36px}.grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><i>A</i>Ampliação Studio</div><a class="btn" href="#entrar">Entrar</a></header>
+<main>
+<section class="hero">
+  <div>
+    <h1>Do briefing à campanha pronta, num só lugar.</h1>
+    <p class="lead">Sua central de marketing: entenda o cliente, crie os anúncios nas 3 medidas, os roteiros de vídeo, os Stories da semana, a landing page e o logo. O cliente aprova tudo pelo portal dele.</p>
+    <ul class="chips"><li>Pré-projeto</li><li>Campanhas</li><li>Anúncios em 3 medidas</li><li>Roteiros de vídeo</li><li>Stories</li><li>Landing page</li><li>Logo</li><li>Portal do cliente</li></ul>
+  </div>
+  <div class="card" id="entrar">
+    <h2 id="cTitle">Entrar nos seus projetos</h2>
+    <p id="cSub">Acesse a sua conta para abrir e editar os projetos.</p>
+    <div id="form"></div>
+    <div class="msg" id="msg" role="status"></div>
+  </div>
+</section>
+<section class="sec">
+  <h2>O caminho de cada projeto</h2>
+  <p>Tudo começa no documento do projeto e segue até o cliente aprovar. Cada etapa usa o que você já preencheu na anterior.</p>
+  <ol class="flow"><li>Documento do projeto</li><li>Pré-projeto</li><li>Campanha</li><li>Anúncios, vídeos e Stories</li><li>Landing page</li><li>Aprovação do cliente</li></ol>
+  <div class="grid">
+    <div class="f"><b>Documento do projeto</b><span>Suba o briefing completo. Produtos, públicos, dores, dúvidas, desejos e tom de voz vão para todas as peças.</span></div>
+    <div class="f"><b>Campanhas por fase da jornada</b><span>Cinco fases, anúncios nas 3 medidas (feed, vertical e horizontal) que acompanham o layout da primeira peça.</span></div>
+    <div class="f"><b>Vídeo e Stories</b><span>Roteiros em 6 documentos com PDF e Docs, e a semana de Stories pronta para gravar.</span></div>
+    <div class="f"><b>Landing pages</b><span>Celular primeiro, com formulário de contatos e exportação para o WordPress e o Elementor.</span></div>
+    <div class="f"><b>Logo e marca</b><span>Escolha qual logo vai em cada peça, com versão clara, escura e fundo atrás do logo.</span></div>
+    <div class="f"><b>Portal do cliente</b><span>Ele vê só o que você escolher, aprova ou pede ajustes, e acompanha os números.</span></div>
+  </div>
+</section>
+</main>
+<footer>Ampliação Studio · acesso restrito a quem tem conta</footer>
+<script type="application/json" id="amp-cfg">null</script>
+<script>
+(function () {
+  var CFG = null; try { CFG = JSON.parse(document.getElementById('amp-cfg').textContent); } catch (e) { CFG = null; }
+  var form = document.getElementById('form'), msg = document.getElementById('msg');
+  var say = function (t, k) { msg.textContent = t || ''; msg.className = 'msg' + (k ? ' ' + k : ''); };
+  var APP = (CFG && CFG.appUrl) || 'index.html', DEST = APP + (APP.indexOf('#') < 0 ? '#projetos' : '');
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]; }); };
+  function openBtn(t) { form.innerHTML = '<a class="btn dark go" style="text-align:center" href="' + esc(DEST) + '">' + t + '</a>'; }
+  // 1) WordPress: o login é o do WordPress (conta de administrador)
+  if (CFG && CFG.wp) {
+    if (CFG.err) say('Não foi possível entrar. Confira o usuário e a senha.', 'bad');
+    form.innerHTML = '<form method="post" action="' + esc(CFG.loginUrl) + '"><label for="u">E-mail ou usuário</label><input type="text" id="u" name="log" autocomplete="username" required><label for="p">Senha</label><input type="password" id="p" name="pwd" autocomplete="current-password" required><input type="hidden" name="redirect_to" value="' + esc(DEST) + '"><input type="hidden" name="rememberme" value="forever"><button class="btn dark go" type="submit">Entrar</button><div class="row"><a href="' + esc(CFG.lostUrl) + '">Esqueci minha senha</a></div></form>';
+    return;
+  }
+  // 2) Studio com senha própria (servidor com PHP) ou arquivo local
+  fetch('api/status.php', {credentials: 'same-origin'}).then(function (r) { return r.json(); }).then(function (s) {
+    if (s.wp) { location.replace('entrar.php'); return; }
+    if (!s.auth || !s.auth.required) { document.getElementById('cSub').textContent = 'Este Studio ainda não tem senha. Defina uma em Configurações → Integrações para proteger seus projetos.'; openBtn('Abrir o Studio'); return; }
+    if (s.auth.loggedIn) { location.replace(DEST); return; }
+    form.innerHTML = '<form id="f"><label for="p">Senha do Studio</label><input type="password" id="p" autocomplete="current-password" required><button class="btn dark go" type="submit">Entrar</button></form>';
+    document.getElementById('f').addEventListener('submit', function (e) {
+      e.preventDefault(); var b = form.querySelector('button'); b.disabled = true; say('Entrando…');
+      fetch('api/auth.php', {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({password: document.getElementById('p').value})})
+        .then(function (r) { return r.json().then(function (j) { return [r.ok, j]; }); })
+        .then(function (x) { if (x[0] && x[1].ok) { say('Pronto! Abrindo…', 'ok'); location.href = DEST; } else { b.disabled = false; say(x[1].error || 'Senha incorreta.', 'bad'); } })
+        .catch(function () { b.disabled = false; say('Não consegui falar com o servidor.', 'bad'); });
+    });
+  }).catch(function () {
+    document.getElementById('cSub').textContent = 'Modo local: sem servidor, os projetos ficam só neste navegador.'; openBtn('Abrir o Studio');
+  });
+})();
+</script>
+</body>
+</html>

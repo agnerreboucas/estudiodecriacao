@@ -1,5 +1,13 @@
 # Histórico de versões
 
+## 1.5.0
+- **Documento do projeto (briefing completo).** Em *Projetos → 📄 Subir documento do projeto* (e na aba Pré-projeto) você sobe um arquivo Word (.docx), PDF, texto, Markdown, HTML, RTF, CSV ou JSON, ou cola o texto. O Studio reconhece empresa, produtos e serviços, públicos (ICP), dores, dúvidas, desejos, urgências ocultas, objetivo, canais, orçamento, concorrentes, tom de voz, vocabulário, regras, posicionamento, visual e cores. Com a IA ligada ela extrai; sem IA, um leitor de seções faz o trabalho. Mostra o que entendeu antes de aplicar.
+- **Nada se perde.** Só completa campos vazios e acrescenta o que falta (produtos e públicos com o mesmo nome são completados, não duplicados). Subir o mesmo documento de novo não repete nada. Campanhas que já existem ganham as linhas novas nos bancos de dores, dúvidas, desejos e urgências; as peças prontas não mudam.
+- **Tudo ligado ao projeto.** Campanhas, Stories, roteiros de vídeo, carrosséis, Motor de Ofertas e a IA passam a puxar do projeto (público, dores, produtos, documento). Sem público no Pré-projeto, usam o que o briefing diz. Uma faixa no topo de cada tela mostra de onde vêm as informações e avisa quando o projeto está vazio.
+- **Logo por peça.** No editor de design, o logo ganhou: escolher qual logo (versão clara, escura, colorida), cor (original, tudo branco, tudo preto), fundo atrás do logo (nenhum, branco, preto, cinza, cor da marca ou outra) e aplicar nos slides da peça, em todas as peças ou "escolher sozinho pelo fundo", com Desfazer. Ao adicionar um logo com vários no Brand Kit, abre a escolha com prévia em fundo claro, escuro e cinza.
+- **Página de entrada (landing + login).** `entrar.html` (e `entrar.php` no WordPress, também em `seusite.com/studio/`): apresenta a plataforma e pede o login. Depois de entrar, abre direto em *Projetos*. Com senha ativa e sem login, o Studio leva para essa página; sair também.
+- **Atualização com a versão 1.4.1 enviada** (selecionar e excluir em lote, Motor de Ofertas, planilha matriz, Aprovação de Arte) integrada.
+
 ## 1.4.1
 - **Selecionar e excluir em lote**, com **Desfazer** por 30 segundos: projetos, peças do Estúdio de Design, anúncios de uma campanha (com as 3 medidas), peças da Biblioteca, carrosséis e anúncios do Motor de Ofertas. Botão "☑ Selecionar" em cada lista.
 - **Excluir projeto** direto na página Projetos (também pelo modo seleção); a exclusão pelas configurações do projeto passou a oferecer Desfazer.

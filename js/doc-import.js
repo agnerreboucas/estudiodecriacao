@@ -58,37 +58,53 @@ function docHtmlText(h) {
 function docCsv(t) { const rows = typeof bfParseCSV === 'function' ? bfParseCSV(t) : t.split(/\n/).map(l => l.split(',')); if (rows.length < 2) return t; const h = rows[0]; return rows.slice(1).map(r => r.map((v, i) => (h[i] ? h[i] + ': ' : '') + v).filter(x => String(x).trim()).join('\n')).join('\n\n'); }
 /* PDF (melhor esforço): descomprime os trechos, lê o mapa de letras (ToUnicode) e junta o texto. PDF escaneado ou muito especial pode falhar. */
 async function docPdfText(buf) {
-  const u = new Uint8Array(buf), lat = new TextDecoder('latin1').decode(u), objs = {}, cmaps = [];
+  const u = new Uint8Array(buf), lat = new TextDecoder('latin1').decode(u), objs = {};
   const re = /(\d+) 0 obj([\s\S]*?)endobj/g; let m;
   while ((m = re.exec(lat))) {
-    const body = m[2], s = body.indexOf('stream'); let data = null;
-    if (s >= 0) { let a = s + 6; if (body[a] === '\r') a++; if (body[a] === '\n') a++; const e = body.lastIndexOf('endstream'); const start = m.index + m[0].indexOf(body) + a, len = e - a;
-      const raw = u.subarray(start, start + len); data = /FlateDecode/.test(body.slice(0, s)) ? await docInflate(raw, false).catch(() => null) : raw; }
-    objs[m[1]] = {dict: s >= 0 ? body.slice(0, s) : body, data};
+    const body = m[2], s = body.indexOf('stream'); let data = null, dict = s >= 0 ? body.slice(0, s) : body;
+    if (s >= 0 && /^\s*(\r?\n)/.test(body.slice(s + 6, s + 8)) || (s >= 0 && body[s + 6] === '\r')) {
+      let a = s + 6; if (body[a] === '\r') a++; if (body[a] === '\n') a++;
+      const base = m.index + m[0].indexOf(body) + a, lm = /\/Length\s+(\d+)(?!\s+\d+\s+R)/.exec(dict), e = body.lastIndexOf('endstream');
+      let len = lm ? +lm[1] : e - a; if (!lm || base + len > u.length) len = e - a; while (!lm && len > 0 && (u[base + len - 1] === 10 || u[base + len - 1] === 13)) len--;
+      const raw = u.subarray(base, base + len); data = /FlateDecode/.test(dict) ? await docInflate(raw, false).catch(() => null) : raw;
+    }
+    objs[m[1]] = {dict, data};
   }
-  const maps = {};   // fonte → mapa de código→texto
+  // objetos dentro de fluxos de objetos (PDF 1.5 em diante)
+  for (const id of Object.keys(objs)) { const o = objs[id]; if (!o.data || !/\/Type\s*\/ObjStm/.test(o.dict)) continue;
+    const n = +((/\/N\s+(\d+)/.exec(o.dict) || [])[1] || 0), first = +((/\/First\s+(\d+)/.exec(o.dict) || [])[1] || 0), t = new TextDecoder('latin1').decode(o.data), nums = t.slice(0, first).trim().split(/\s+/).map(Number);
+    for (let i = 0; i < n; i++) { const num = nums[2 * i], off = nums[2 * i + 1], end = i + 1 < n ? nums[2 * i + 3] : t.length - first; if (!isNaN(num) && !objs[num]) objs[num] = {dict: t.slice(first + off, first + end), data: null}; } }
   const parseCMap = d => { const mp = {}, t = new TextDecoder('latin1').decode(d);
     (t.match(/beginbfchar[\s\S]*?endbfchar/g) || []).forEach(b => b.replace(/<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>/g, (x, a, c) => { mp[parseInt(a, 16)] = String.fromCharCode(...(c.match(/.{4}/g) || []).map(h => parseInt(h, 16))); }));
-    (t.match(/beginbfrange[\s\S]*?endbfrange/g) || []).forEach(b => b.replace(/<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>/g, (x, a, z, c) => { let lo = parseInt(a, 16), hi = parseInt(z, 16), base = parseInt(c, 16); for (let k = lo; k <= hi && k - lo < 70000; k++) mp[k] = String.fromCharCode(base + k - lo); }));
+    (t.match(/beginbfrange[\s\S]*?endbfrange/g) || []).forEach(b => b.replace(/<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>\s*(?:<([0-9a-fA-F]+)>|\[([^\]]*)\])/g, (x, a, z, c, arr) => { const lo = parseInt(a, 16), hi = parseInt(z, 16); if (c) { const base = parseInt(c, 16); for (let k = lo; k <= hi && k - lo < 70000; k++) mp[k] = String.fromCharCode(base + k - lo); } else (arr.match(/<([0-9a-fA-F]+)>/g) || []).forEach((h, i) => { mp[lo + i] = String.fromCharCode(parseInt(h.replace(/[<>]/g, ''), 16)); }); }));
     return mp; };
-  const fontMap = {}; Object.keys(objs).forEach(id => { const o = objs[id]; if (/\/Type\s*\/Font\b/.test(o.dict) && /\/ToUnicode\s+(\d+)\s+0\s+R/.test(o.dict)) { const t = objs[/\/ToUnicode\s+(\d+)\s+0\s+R/.exec(o.dict)[1]]; if (t && t.data) fontMap[id] = parseCMap(t.data); } });
-  const nameToObj = {}; Object.keys(objs).forEach(id => { const o = objs[id]; const fm = /\/Font\s*<<([^>]*)>>/.exec(o.dict); if (fm) fm[1].replace(/\/(\w+)\s+(\d+)\s+0\s+R/g, (x, n, r) => { nameToObj[n] = r; }); });
-  const dec = (hex, mp) => { let o = ''; if (mp && Object.keys(mp).length) { const w = hex.length % 4 === 0 && Object.keys(mp).some(k => +k > 255) ? 4 : 2; for (let i = 0; i + w <= hex.length; i += w) o += mp[parseInt(hex.substr(i, w), 16)] || ''; } else for (let i = 0; i + 2 <= hex.length; i += 2) o += String.fromCharCode(parseInt(hex.substr(i, 2), 16)); return o; };
-  const lines = [];
-  for (const id of Object.keys(objs)) {
-    const o = objs[id]; if (!o.data || /\/Type\s*\/(XObject|Font|FontDescriptor|ObjStm|XRef)/.test(o.dict)) continue;
-    const t = new TextDecoder('latin1').decode(o.data); if (!/\bBT\b/.test(t)) continue;
-    let mp = null, cur = '';
-    t.replace(/\/(\w+)\s+[\d.]+\s+Tf|<([0-9a-fA-F]+)>\s*Tj|\[((?:<[0-9a-fA-F]*>|\([^)]*\)|[-\d.\s])*)\]\s*TJ|\(((?:\\.|[^\\)])*)\)\s*Tj|(T\*|Td|TD|Tm|ET)/g, (x, fn, h, arr, lit, op) => {
-      if (fn) { mp = fontMap[nameToObj[fn]] || null; return; }
-      if (h) cur += dec(h, mp);
-      else if (arr) arr.replace(/<([0-9a-fA-F]*)>|\(((?:\\.|[^\\)])*)\)|(-?[\d.]+)/g, (y, hx, lt, num) => { if (hx != null) cur += dec(hx, mp); else if (lt != null) cur += lt.replace(/\\([()\\])/g, '$1'); else if (num && +num < -250) cur += ' '; });
-      else if (lit != null) cur += lit.replace(/\\([()\\])/g, '$1');
-      else if (op && cur) { if (op !== 'Td' || /\S/.test(cur)) { lines.push(cur); cur = ''; } }
+  const fontMap = {}, nameToObj = {};
+  Object.keys(objs).forEach(id => { const o = objs[id]; if (/\/Type\s*\/Font\b/.test(o.dict)) { const tm = /\/ToUnicode\s+(\d+)\s+0\s+R/.exec(o.dict); if (tm && objs[tm[1]] && objs[tm[1]].data) fontMap[id] = parseCMap(objs[tm[1]].data); }
+    const fm = /\/Font\s*<<([^>]*(?:<<[^>]*>>[^>]*)*)>>/.exec(o.dict); if (fm) fm[1].replace(/\/([\w.+-]+)\s+(\d+)\s+0\s+R/g, (x, n, r) => { nameToObj[n] = r; }); });
+  const dec = (hex, mp) => { let o = ''; if (mp) { const wide = Object.keys(mp).some(k => +k > 255) || hex.length % 4 === 0 && Object.keys(mp).length > 0 && hex.length >= 8; const w = wide ? 4 : 2; for (let i = 0; i + w <= hex.length; i += w) o += mp[parseInt(hex.substr(i, w), 16)] || ''; } else for (let i = 0; i + 2 <= hex.length; i += 2) o += String.fromCharCode(parseInt(hex.substr(i, 2), 16)); return o; };
+  const unesc = x => x.replace(/\\([nrtbf])/g, (y, c) => ({n: '\n', r: '', t: ' ', b: '', f: ''}[c])).replace(/\\(\d{1,3})/g, (y, o) => String.fromCharCode(parseInt(o, 8))).replace(/\\([()\\])/g, '$1');
+  const pages = [], ids = Object.keys(objs).filter(i => objs[i].data && !/\/Type\s*\/(XObject|Font|FontDescriptor|ObjStm|XRef|Metadata)/.test(objs[i].dict)).sort((a, b) => a - b);
+  for (const id of ids) {
+    const t = new TextDecoder('latin1').decode(objs[id].data); if (!/\bBT\b/.test(t)) continue; const lines = []; let mp = null;
+    (t.match(/BT[\s\S]*?ET/g) || []).forEach(blk => {
+      let cur = '', y = null;
+      blk.replace(/\/([\w.+-]+)\s+[\d.]+\s+Tf|(?:[-\d.]+\s+){5}([-\d.]+)\s+Tm|[-\d.]+\s+([-\d.]+)\s+T[dD]|<([0-9a-fA-F]+)>\s*Tj|\[((?:<[0-9a-fA-F]*>|\((?:\\.|[^\\)])*\)|[-\d.\s])*)\]\s*TJ|\(((?:\\.|[^\\)])*)\)\s*Tj/g, (x, fn, ty, ty2, h, arr, lit) => {
+        if (fn) { mp = fontMap[nameToObj[fn]] || null; return; }
+        if (ty != null) { if (y == null) y = +ty; else if (Math.abs(+ty - y) > 1.5) { if (cur) lines.push({y, t: cur}); cur = ''; y = +ty; } return; }
+        if (ty2 != null) { if (Math.abs(+ty2) > 1.5) { if (cur) lines.push({y, t: cur}); cur = ''; y = (y == null ? 0 : y) + +ty2; } return; }
+        if (h) cur += dec(h, mp);
+        else if (arr) arr.replace(/<([0-9a-fA-F]*)>|\(((?:\\.|[^\\)])*)\)|(-?[\d.]+)/g, (z, hx, lt, num) => { if (hx != null) cur += dec(hx, mp); else if (lt != null) cur += unesc(lt); else if (num && +num < -250) cur += ' '; });
+        else if (lit != null) cur += unesc(lit);
+      });
+      if (cur) lines.push({y, t: cur});
     });
-    if (cur) lines.push(cur);
+    // junta blocos na mesma linha (mesma altura) e separa os de linhas diferentes
+    const out = []; lines.forEach(l => { const last = out[out.length - 1]; if (last && l.y != null && last.y != null && Math.abs(last.y - l.y) <= 1.5) last.t += (/\s$/.test(last.t) || /^\s/.test(l.t) ? '' : ' ') + l.t; else out.push({y: l.y, t: l.t}); });
+    pages.push(out.map(l => l.t.replace(/\s+/g, ' ').trim()).filter(Boolean));
   }
-  const txt = lines.map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n');
+  // tira cabeçalho e rodapé: linhas que se repetem em várias páginas ou que são só número de página
+  const cnt = {}; pages.forEach(pg => new Set(pg).forEach(l => { cnt[l] = (cnt[l] || 0) + 1; }));
+  const txt = pages.map(pg => pg.filter(l => !(pages.length > 1 && cnt[l] >= Math.min(3, pages.length) && l.length < 90) && !(l.length < 70 && /(\bp[áa]gina\s*)?\b\d+\s*(\/|de)\s*\d+$/i.test(l))).join('\n')).join('\n');
   if (txt.replace(/\W/g, '').length < 40) throw new Error('Não consegui ler o texto deste PDF (pode ser escaneado ou protegido). Exporte o documento como Word (.docx) ou cole o texto.');
   return txt;
 }
@@ -159,6 +175,7 @@ function docParse(text) {
   const newIcp = n => { icp = {name: String(n || '').trim().slice(0, 120), profile: '', situation: '', need: '', behavior: '', intent: '', pains: '', doubts: '', desires: '', hidden: ''}; K.icps.push(icp); cur = null; return icp; };
   const defIcp = () => def || (def = K.icps.find(x => /^publico( principal| alvo)?$/.test(dnorm(x.name))) || newIcp('Público principal'));
   const setField = (o, M, key, val) => { for (const [k, re] of Object.entries(M)) if (re.test(key)) { if (k === 'name') { o.name = o.name || val; } else if (Array.isArray(o[k])) listAdd(o[k], val); else add(o, k, val); return k; } return ''; };
+  const bareSec = t => { const n = dnorm(t); for (const [k, re] of DOC_SEC) { if (k.endsWith('_item')) continue; const m = re.exec(n); if (m) return n.slice(m[0].length).trim().split(/\s+/).filter(Boolean).length <= 2; } return false; };
   const bare = v => String(v).replace(/^[-•*–—]\s+|^\d+[.)]\s+/, '').trim();
   const secAdd = (s, v) => {
     v = bare(v); if (!v) return;
@@ -193,6 +210,7 @@ function docParse(text) {
       if (nm && (secOf(nm[2].replace(/:$/, '')) || /^(produto|servico|icp|persona)/.test(dnorm(nm[2])))) { title = nm[2]; level = 2; }
       else if (/^[A-ZÀ-Ú0-9][A-ZÀ-Ú0-9 /&\-–—,()]{3,70}:?$/.test(L) && /[A-ZÀ-Ú]{3}/.test(L) && !/\d{4,}/.test(L)) { title = L.replace(/:$/, ''); level = 1; }
       else if (/^[^:|]{2,60}:$/.test(L) && !/^[-•*]/.test(L)) { title = L.replace(/:$/, ''); level = 3; }
+      else if (L.length <= 45 && !/[.,;:!?]$/.test(L) && !/^[-•*\d]/.test(L) && /^[A-ZÀ-Ú]/.test(L) && bareSec(L)) { title = L; level = 2; }   // título solto, sem marcação (comum em PDF)
     }
     if (title) {
       title = title.replace(/^\d+(\.\d+)*[.)]?\s+/, ''); const n = dnorm(title), n2 = title.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\*\*/g, '').trim(); let m;
@@ -354,7 +372,7 @@ function docStrip(p) {
   const empty = !ic && !pr && !String((p.brief || {}).audience || '').trim();
   return `<div class="doc-strip ${empty ? 'warn' : ''}"><span><b>Projeto: ${esc(p.name)}</b> · ${ic} público(s) · ${pr} produto(s)/serviço(s) · ${lg.length} logo(s)${d && d.name ? ' · documento: ' + esc(d.name) : ''}</span><span class="doc-strip-act">${empty ? 'As peças estão sem informações do projeto. ' : ''}<button class="btn sm ${empty ? 'dark' : ''}" onclick="docOpen()">📄 ${d && d.name ? 'Atualizar com outro documento' : 'Subir o documento do projeto'}</button></span></div>`;
 }
-const DOC_STRIP_PAGES = ['stories', 'campaigns', 'carrosseis', 'videoLab', 'landings', 'feed', 'editorial'];
+const DOC_STRIP_PAGES = ['ofertas', 'design', 'stories', 'campaigns', 'carrosseis', 'videoLab', 'landings', 'feed', 'editorial'];
 function docInjectStrip(page) {
   if (!DOC_STRIP_PAGES.includes(page)) return; const root = $('page-' + page); if (!root) return; root.querySelectorAll('.doc-strip').forEach(n => n.remove());
   const p = curProject(); if (!p) return; const host = root.querySelector('.subpage') || root; host.insertAdjacentHTML('afterbegin', docStrip(p));

@@ -7,6 +7,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal
   loadState();
   bootRender();
   await loadStatus();
+  /* com senha ativa e sem login, a porta de entrada é a página de entrada (landing + login) */
+  if (API.available && API.status && API.status.auth && API.status.auth.required && !API.status.auth.loggedIn && /^https?:/.test(location.protocol)) { location.replace(API.status.wp ? 'entrar.php' : 'entrar.html'); return; }
   if (canSync()) await pullWorkspace();
   refreshCurrentView();
+  if (location.hash === '#projetos') go('projects');
 })();

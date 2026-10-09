@@ -41,7 +41,7 @@ async function doLogin() {
   try { await api('auth.php', {method: 'POST', body: {action: 'login', password: $('loginPass').value}}); closeModal(); await loadStatus(); toast('Conectado.'); await pullWorkspace(); refreshCurrentView(); }
   catch (e) { toast(e.message); }
 }
-async function doLogout() { try { await api('auth.php', {method: 'POST', body: {action: 'logout'}}); } catch (e) { /* ok */ } await loadStatus(); refreshCurrentView(); toast('Sessão encerrada.'); }
+async function doLogout() { try { await api('auth.php', {method: 'POST', body: {action: 'logout'}}); } catch (e) { /* ok */ } await loadStatus(); if (API.status && API.status.auth && API.status.auth.required && !API.status.wp && /^https?:/.test(location.protocol)) { location.href = 'entrar.html'; return; } refreshCurrentView(); toast('Sessão encerrada.'); }
 
 /* ---- sincronização do workspace (arquivo JSON no servidor) ---- */
 const canSync = () => canUseApi() && API.status.sync && API.status.sync.enabled;

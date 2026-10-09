@@ -27,6 +27,9 @@
 ## Caminho C — por FTP/Gerenciador de arquivos
 Descompacte `ampliacao-studio-plugin.zip` em `wp-content/plugins/` (fica `wp-content/plugins/ampliacao-studio/`) e o tema em `wp-content/themes/`. Depois ative no painel.
 
+## Página de entrada
+A equipe entra por `seusite.com/studio/` (ou `.../wp-content/plugins/ampliacao-studio/app/entrar.php`): uma página que apresenta a plataforma e pede o login do WordPress. Depois de entrar, abre direto em *Projetos*. Contas de cliente (área de membros) que entram por ali vão para a *Área do cliente*.
+
 ## Primeiro uso
 1. Menu **Ampliação Studio** (barra lateral do WordPress, ícone de megafone) → **Abrir o Ampliação Studio**. Ele abre em tela cheia, numa aba nova, com o seu login do WordPress.
 2. A tela do plugin mostra a **Verificação** (PHP, cURL, pasta de dados, Elementor) e os endereços de **leads**, **WhatsApp** e **Portal do cliente**.

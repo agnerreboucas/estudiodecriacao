@@ -166,6 +166,12 @@ function amplia_studio_capability(): string { return apply_filters('amplia_studi
 add_action('admin_menu', function () {
     add_menu_page('Ampliação Studio', 'Ampliação Studio', amplia_studio_capability(), 'ampliacao-studio', 'amplia_studio_admin_page', 'dashicons-megaphone', 3);
 });
+/* seusite.com/studio leva à página de entrada do Studio */
+add_action('template_redirect', function () {
+    $path = trim((string) wp_parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/'); $home = trim((string) wp_parse_url(home_url('/'), PHP_URL_PATH), '/');
+    $rel = $home !== '' && strpos($path, $home) === 0 ? trim(substr($path, strlen($home)), '/') : $path;
+    if ($rel === 'studio') { wp_safe_redirect(AMPLIA_STUDIO_URL . 'app/entrar.php'); exit; }
+});
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($l) {
     array_unshift($l, '<a href="' . esc_url(admin_url('admin.php?page=ampliacao-studio')) . '">Abrir</a>'); return $l;
 });
@@ -180,6 +186,7 @@ function amplia_studio_admin_page(): void {
     echo '<div class="wrap"><h1>Ampliação Studio</h1>';
     echo '<p style="font-size:15px;max-width:720px">O Studio abre em tela cheia, com o seu login do WordPress. Os projetos ficam salvos aqui no seu site.</p>';
     echo '<p><a class="button button-primary button-hero" href="' . esc_url($app) . '" target="_blank" rel="noopener">Abrir o Ampliação Studio</a></p>';
+    echo '<p>Página de entrada (landing + login) para a equipe: <code>' . esc_html(home_url('/studio/')) . '</code> · direto: <code>' . esc_html(AMPLIA_STUDIO_URL . 'app/entrar.php') . '</code></p>';
     echo '<h2>Verificação</h2><ul>';
     echo $row(version_compare(PHP_VERSION, '8.0', '>='), 'PHP ' . PHP_VERSION . ' (precisa do 8.0 ou mais novo)');
     echo $row($curl, $curl ? 'cURL ativo (necessário para IA, imagens e integrações)' : 'cURL desligado: peça à hospedagem para ativar');

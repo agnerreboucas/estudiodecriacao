@@ -190,6 +190,7 @@ function drawRect(ctx, L) {
 }
 const IMGS = new Map();   // imgId → ImageBitmap
 function drawImageLayer(ctx, L, slide) {
+  if (L.plate) { const m = Math.min(L.w, L.h), pd = (L.platePad == null ? 0.14 : L.platePad) * m; ctx.save(); ctx.globalAlpha = 1; ctx.fillStyle = L.plate; rr(ctx, L.x - pd, L.y - pd, L.w + 2 * pd, L.h + 2 * pd, (L.plateR == null ? 0.2 : L.plateR) * m); ctx.fill(); ctx.restore(); }
   ctx.save(); shapePath(ctx, L); ctx.clip(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity;
   const img = L.imgId && IMGS.get(L.imgId);
   if (img) {
