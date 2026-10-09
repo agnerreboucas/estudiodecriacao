@@ -22,3 +22,6 @@
 .st-card{display:block;width:100%;text-align:left;border:1px solid #8886;background:transparent;color:inherit;border-radius:8px;padding:6px 8px;margin-bottom:6px;cursor:pointer;font-size:12px}
 .st-card b{display:block;font-size:12.5px}.st-card small{display:block;color:#888}.st-card span{display:block;color:#888;font-size:11px}
 .st-card.on{outline:2px solid #e4572e;border-color:#e4572e}
+.doc-strip{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;background:#f3f3f6;border:1px solid #e1e1e8;border-radius:12px;padding:8px 14px;margin:0 0 14px;font-size:13px}
+.doc-strip.warn{background:#fff8e6;border-color:#f0dca8}
+.doc-strip .doc-strip-act{display:flex;gap:8px;align-items:center;flex-wrap:wrap}

@@ -122,11 +122,7 @@ function approvePositioning() {
   pre.positioningApproved = true; pre.history.unshift({at: new Date().toISOString(), action: 'Posicionamento aprovado', note: ''}); persist(); renderProjectTab(); toast('Posicionamento aprovado. Próximo gate: Estratégia.');
 }
 function saveProjectSettings() { const p = curProject(); p.name = $('psName').value.trim() || p.name; p.status = $('psStatus').value; p.desc = $('psDesc').value; p.goal = $('psGoal').value; p.client = $('psClient').value; BRIEF_FIELDS.concat([['notes']]).forEach(([k]) => { p.brief[k] = $('pb_' + k).value; }); persist(); renderProjectTab(); updateContextUI(); toast('Projeto salvo.'); }
-function deleteProject(id) {
-  const p = projectById(id); if (!confirm(`Excluir "${p.name}" e todas as suas criações? Exporte antes se quiser guardar.`)) return;
-  state.projects = state.projects.filter(x => x.id !== id); state.creatives = state.creatives.filter(c => c.projectId !== id);
-  state.activeProjectId = state.projects[0] ? state.projects[0].id : ''; persist(); updateContextUI(); go('projects'); toast('Projeto excluído.');
-}
+function deleteProject(id) { bkDelProjects([id]); }
 
 /* ---- landing pages exportáveis ---- */
 function landingModal(id) {

@@ -1,5 +1,5 @@
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'skills', 'stories', 'portal', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'feed', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'approval', 'publishingHub', 'analyticsHub', 'project', 'flow'];
+const PAGES = ['home', 'skills', 'stories', 'portal', 'projects', 'inspiration', 'editora', 'diagram', 'editorial', 'biblioteca', 'carrosseis', 'feed', 'landings', 'library', 'brand', 'settings', 'matrix', 'videoLab', 'campaigns', 'ofertas', 'approval', 'publishingHub', 'analyticsHub', 'project', 'flow', 'planilha'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -17,7 +17,7 @@ function askText(title, label, cb) {
 }
 
 /* ---- navegação ---- */
-function go(page) {
+function go(page) { if (typeof bkReset === 'function' && typeof ui !== 'undefined' && page !== ui.page) bkReset();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = $('page-' + page); if (el) el.classList.add('active');
   document.querySelectorAll('.rail-nav button,.rail-bottom button').forEach(b => b.classList.toggle('active', b.dataset.page === (page === 'diagram' ? 'editora' : page)));
@@ -25,8 +25,9 @@ function go(page) {
 }
 function renderPage(page) {
   ({feed: renderFeed, home: renderHome, projects: renderProjects, library: renderLibrary, brand: renderBrand, settings: renderSettings, matrix: renderMatrixPage,
-    videoLab: renderVideoLab, campaigns: renderCampaignsPage, skills: renderSkillsPage, stories: renderStories, portal: renderPortal, approval: renderApprovalPage, publishingHub: renderPublishingPage,
-    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, flow: renderFlow, editorial: renderEditorial, biblioteca: renderBiblioteca, carrosseis: renderCarrosseis, landings: renderLandings}[page] || (() => {}))();
+    videoLab: renderVideoLab, campaigns: renderCampaignsPage, ofertas: renderOfertas, skills: renderSkillsPage, stories: renderStories, portal: renderPortal, approval: renderApprovalPage, publishingHub: renderPublishingPage,
+    analyticsHub: renderAnalyticsPage, project: renderProjectTab, wizard: renderWizard, design: renderDesign, inspiration: renderInspiration, editora: renderEditora, diagram: renderDiagram, flow: renderFlow, planilha: renderPlanilha, editorial: renderEditorial, biblioteca: renderBiblioteca, carrosseis: renderCarrosseis, landings: renderLandings}[page] || (() => {}))();
+  try { if (typeof docInjectStrip === 'function') docInjectStrip(page); } catch (e) { /* faixa é só um aviso */ }
 }
 function refreshCurrentView() { renderSyncBadge(); renderHome(); renderPage(ui.page); updateContextUI(); }
 function bootRender() { $('credits').textContent = state.credits; updateContextUI(); renderHome(); renderPage(ui.page); renderSyncBadge(); }
@@ -155,7 +156,8 @@ function saveBrand() { const b = curProject().brand; b.positioning = $('bPos').v
 
 /* ---- projetos ---- */
 function renderProjects() {
-  $('projectsGrid').innerHTML = state.projects.map(p => `<article class="project-card" onclick="openProject('${p.id}')"><div class="cover ${esc(p.cover)}">${esc(p.icon)}</div><div class="body"><strong>${esc(p.name)}</strong><small>${esc(p.desc)} · Pré-projeto: ${esc(p.pre.status)}</small></div></article>`).join('') +
+  if ($('projectsBar')) $('projectsBar').innerHTML = bkBar('prj', state.projects.map(p => p.id), 'renderProjects', 'bkDelProjects()', 'projeto');
+  $('projectsGrid').innerHTML = state.projects.map(p => `<article class="project-card${bkCls('prj', p.id)}" onclick="${bkOn('prj') ? `bkTog('prj','${p.id}','renderProjects')` : `openProject('${p.id}')`}">${bkChk('prj', p.id, 'renderProjects')}<div class="cover ${esc(p.cover)}">${esc(p.icon)}</div><div class="body"><strong>${esc(p.name)}</strong><small>${esc(p.desc)} · Pré-projeto: ${esc(p.pre.status)}</small></div></article>`).join('') +
     `<article class="project-card" onclick="openWizard()"><div class="cover" style="background:#fafafa;border-bottom:1px dashed #ddd">＋</div><div class="body"><strong>Novo projeto</strong><small>Começar um novo trabalho</small></div></article>`;
 }
 function openProject(id) { setActiveProject(id); updateContextUI(); ui.tab = 'overview'; go('project'); }
@@ -167,7 +169,8 @@ function renderLibrary() {
   $('libraryFilters').innerHTML = LIB_FILTERS.map(x => `<button class="${x[0] === f[0] ? 'active' : ''}" onclick="ui.lib='${x[0]}';renderLibrary()">${x[1]}</button>`).join('');
   const list = state.creatives.filter(f[2]);
   const assets = state.projects.flatMap(p => p.assets.map(a => ({...a, project: p.name})));
-  $('libraryGrid').innerHTML = list.map(artCard).join('') || emptyState('Nada por aqui', 'Nenhuma criação neste filtro.');
+  if ($('libraryBar')) $('libraryBar').innerHTML = bkLibBar(list);
+  $('libraryGrid').innerHTML = list.map(artCardSel).join('') || emptyState('Nada por aqui', 'Nenhuma criação neste filtro.');
   $('libraryAssets').innerHTML = assets.length ? `<div class="panel" style="margin-top:14px"><h3>Assets e referências</h3><div class="list">${assets.map(a => `<div class="list-item"><div><strong>${esc(a.name)}</strong><small>${esc(a.category)} · ${esc(a.project)}</small></div>${a.url ? `<a class="btn" href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">Abrir</a>` : ''}</div>`).join('')}</div></div>` : '';
 }
 

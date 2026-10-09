@@ -10,6 +10,17 @@ Caixa de pedido ("Peça ao Ampliação Studio...") e atalhos: **Criar projeto, a
 ## Mapa do projeto
 O fluxo do projeto do briefing ao aprendizado, com o que já foi feito e o que falta em cada etapa.
 
+## Criar a partir de planilha
+Para subir um planejamento inteiro de uma vez, **no formato das suas planilhas**. Entra pelo menu *Criar de planilha* ou pelos botões **Criar a partir de planilha** (aba Carrosséis) e **Criar anúncios a partir de planilha** (aba Campanhas). Nada que já existe é alterado: tudo entra como novo, em rascunho. Não precisa de pré-projeto nem de briefing.
+- **Destino:** no projeto aberto ou **projeto novo criado só com a planilha**.
+- **Anúncios** (ID, Fase, Ângulo, Headline, Sub-headline, Texto Principal, Descrição; opcionais Botão, Imagem e Campanha): cada linha vira uma peça nas 3 medidas, guardando ID, Ângulo, Texto Principal e Descrição. Fases: Atenção = Atração e Compra = Ação. Texto Principal e Descrição também podem vir numa aba separada, ligada pelo ID.
+- **Carrosséis, um por linha** (aba CARROSSÉIS): Carrossel, Objetivo, Legenda, Hashtags, Título/Texto principal/Descrição (anúncio) e as colunas Slide 1, Slide 1 texto, Slide 2... (3 a 20 slides).
+- **Carrosséis, POSTS + SLIDES** (+ aba LEGENDAS): cada post vira um carrossel; a frase de cada slide entra como título (ou parágrafo). A referência visual e o termo de busca aparecem ao lado do texto de cada slide. Posts já importados são ignorados se você reenviar o arquivo.
+- **Legendas:** orgânico usa Legenda e Hashtags; anúncio usa Título do anúncio, Texto principal e Descrição. A aba LEGENDAS só completa o que faltar.
+- **Identidade visual:** *Respeitar o brand book* usa o Kit de marca (Design → Kit de marca): logo como avatar, nome do projeto, fonte do título e cor de destaque. Escolha também o estilo e o modelo. Nos anúncios, marque *Logo do Kit de marca* (depois, *Aplicar a todas as peças* refaz as artes). Também dá para copiar a aparência de um carrossel ou campanha que você já ajustou.
+- **Depois de importar:** *Aplicar a todos…* (carrossel; origem pode ser o brand book) e *Aplicar a cor e a imagem desta peça a todas* (anúncio) atualizam o resto sem mexer nos textos. *Trocar modelo* → *Aplicar este modelo* (marque "todos" para o projeto inteiro).
+- As **imagens não vão na planilha**: suba antes em *Imagens*. Só aceita .xlsx (no Google Planilhas: Arquivo → Fazer download → Excel).
+
 ## 1 · Cliente e pré-projeto
 - **Projetos:** cada cliente/produto é um projeto, com marca (Brand Brain), voz (Voice Brain), arquivos e tudo ligado a ele. O assistente *Novo projeto* aceita briefing escrito, em áudio ou por formulário enviado ao cliente (link, Google Forms ou planilha).
 - **Pré-projeto:** do briefing ao diagnóstico: desafios → hipóteses (marcadas como DADO ou HIPÓTESE) → cruzamento → diagnóstico → resumo executivo, elevator pitch e **apresentação em slides**. O Radar de concorrentes e o dossiê do Google Meu Negócio ficam aqui.
@@ -54,3 +65,17 @@ O fluxo do projeto do briefing ao aprendizado, com o que já foi feito e o que f
 
 ## O que ainda depende de você
 IA só funciona com chave; números do Instagram são lançados à mão; publicação direta no Meta (login) ainda não existe; o Studio não pesquisa na internet.
+
+## Selecionar e excluir vários de uma vez
+Em **Projetos**, **Estúdio de Design (Peças do projeto)**, **Campanhas → Anúncios**, **Biblioteca**, **Carrosséis** e **Motor de Ofertas → Anúncios** há o botão **☑ Selecionar**.
+
+1. Toque em **Selecionar**. Cada item ganha uma caixinha; tocar no item também marca.
+2. Marque os que quer apagar (ou **Todos**; **Limpar** desmarca).
+3. Toque em **🗑 Excluir (n)** e confirme.
+4. Por 30 segundos aparece **Desfazer** no pé da tela. Depois disso a exclusão é definitiva.
+
+Notas:
+- Excluir um **projeto** apaga tudo o que há nele (peças, campanhas, carrosséis, textos, Motor de Ofertas). Se quiser guardar uma cópia, exporte antes.
+- Excluir um **anúncio de campanha** apaga também as 3 medidas dele (feed, vertical e horizontal).
+- Peças que nasceram de uma campanha aparecem como "campanha" no Estúdio de Design: apague-as pela própria campanha.
+- No Motor de Ofertas, excluir anúncios não muda a estratégia (conceito, ângulos, ofertas e copies).

@@ -72,3 +72,5 @@
 .fl-leg{display:inline-block;margin-left:8px}
 @media(max-width:1024px){.fl-grid{grid-template-columns:1fr}}
 @media(min-width:1025px) and (max-width:1300px){.fl-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.rail button.rail-up .rail-lb{font-weight:700}@media(min-width:1025px){.rail button.rail-up{background:#fff3ea;border:1px dashed var(--accent,#e8590c)}.rail button.rail-up.active{background:#111;border-color:#111}}

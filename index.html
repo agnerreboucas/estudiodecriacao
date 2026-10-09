@@ -5,13 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#111111">
 <title>Ampliação Studio — Creative Workspace</title>
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/journey.css">
-<link rel="stylesheet" href="css/architecture.css">
-<link rel="stylesheet" href="css/studio.css">
-<link rel="stylesheet" href="css/responsive.css">
-<link rel="stylesheet" href="css/menu.css">
-<link rel="stylesheet" href="css/campanha.css">
+<link rel="stylesheet" href="css/base.css?v=1.5.0">
+<link rel="stylesheet" href="css/journey.css?v=1.5.0">
+<link rel="stylesheet" href="css/architecture.css?v=1.5.0">
+<link rel="stylesheet" href="css/studio.css?v=1.5.0">
+<link rel="stylesheet" href="css/responsive.css?v=1.5.0">
+<link rel="stylesheet" href="css/menu.css?v=1.5.0">
+<link rel="stylesheet" href="css/campanha.css?v=1.5.0">
+<link rel="stylesheet" href="css/ofertas.css?v=1.5.0">
+<link rel="stylesheet" href="css/bulk.css?v=1.5.0">
 </head>
 <body>
 <div class="app">
@@ -21,6 +23,7 @@
   <nav class="rail-nav">
     <button class="active" data-page="home" title="Início"><span data-ico="home"></span><span class="rail-lb">Início</span></button>
     <button data-page="flow" title="Mapa do projeto"><span data-ico="webhook"></span><span class="rail-lb">Mapa do projeto</span></button>
+    <button data-page="planilha" class="rail-up" title="Subir tabela (.xlsx) e criar anúncios e carrosséis em lote" onclick="pmQuick('')"><span data-ico="grid"></span><span class="rail-lb">Subir tabela (em lote)</span></button>
     <div class="rail-grp" data-g="Cliente e pré-projeto"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">1 · Cliente e pré-projeto</span><small>Entender o cliente e o cliente dele</small><i aria-hidden="true">▾</i></button><div class="rail-items">
       <button data-page="projects" title="Projetos"><span data-ico="folder"></span><span class="rail-lb">Projetos</span></button>
       <button data-page="matrix" title="Matriz de Criação"><span data-ico="sparkles"></span><span class="rail-lb">Matriz de Criação</span></button>
@@ -28,6 +31,7 @@
       <button data-page="inspiration" title="Inspiração"><span data-ico="pin"></span><span class="rail-lb">Inspiração</span></button>
     </div></div>
     <div class="rail-grp" data-g="Anúncios"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">2 · Anúncios</span><small>Um criativo por dor e por produto</small><i aria-hidden="true">▾</i></button><div class="rail-items">
+      <button data-page="ofertas" title="Motor de Ofertas e Anúncios"><span data-ico="sparkles"></span><span class="rail-lb">Motor de Ofertas</span></button>
       <button data-page="editorial" title="Agente Editorial"><span data-ico="target"></span><span class="rail-lb">Agente Editorial</span></button>
       <button data-page="design" title="Estúdio de Design"><span data-ico="palette"></span><span class="rail-lb">Estúdio de Design</span></button>
       <button data-page="videoLab" title="Video Lab"><span data-ico="video"></span><span class="rail-lb">Video Lab</span></button>
@@ -113,7 +117,8 @@
 
 <section id="page-projects" class="page">
   <div class="subpage">
-    <div class="page-head"><div><h1>Projetos</h1><p>Todos os trabalhos do seu workspace.</p></div><div class="actions"><button class="btn" onclick="openModal('newproject')">＋ Novo projeto</button></div></div>
+    <div class="page-head"><div><h1>Projetos</h1><p>Todos os trabalhos do seu workspace.</p></div><div class="actions"><button class="btn" onclick="docOpen()" title="Sobe o briefing completo para o projeto atual">📄 Subir documento do projeto</button><button class="btn" onclick="openModal('newproject')">＋ Novo projeto</button></div></div>
+    <div id="projectsBar" style="margin:0 0 10px;display:flex;justify-content:flex-end"></div>
     <div class="project-grid" id="projectsGrid"></div>
   </div>
 </section>
@@ -122,6 +127,7 @@
   <div class="subpage">
     <div class="page-head"><div><h1>Biblioteca</h1><p>Criações, referências e assets do workspace.</p></div><button class="btn" onclick="openModal('asset')">＋ Adicionar asset</button></div>
     <div class="filterbar" id="libraryFilters"></div>
+    <div id="libraryBar" style="margin:0 0 10px;display:flex;justify-content:flex-end"></div>
     <div class="masonry" id="libraryGrid"></div>
     <div id="libraryAssets"></div>
   </div>
@@ -134,6 +140,7 @@
 <section id="page-design" class="page"><div class="subpage dz-wide" id="designRoot"></div></section>
 <section id="page-inspiration" class="page"><div class="subpage dz-wide" id="inspoRoot"></div></section>
 <section id="page-editora" class="page"><div class="subpage dz-wide" id="editoraRoot"></div></section>
+<section id="page-ofertas" class="page"><div class="subpage dz-wide" id="ofertasRoot"></div></section>
 <section id="page-editorial" class="page"><div class="subpage dz-wide" id="editorialRoot"></div></section>
 <section id="page-biblioteca" class="page"><div class="subpage dz-wide" id="bibliotecaRoot"></div></section>
 <section id="page-carrosseis" class="page"><div class="subpage dz-wide" id="carrosseisRoot"></div></section>
@@ -144,6 +151,7 @@
 <section id="page-videoLab" class="page"><div class="subpage" id="videoRoot"></div></section>
 <section id="page-campaigns" class="page"><div class="subpage" id="campaignsRoot"></div></section>
 <section id="page-stories" class="page"><div class="subpage" id="storiesRoot"></div></section>
+<section id="page-planilha" class="page"><div class="subpage" id="planilhaRoot"></div></section>
 <section id="page-portal" class="page"><div class="subpage" id="portalRoot"></div></section>
 <section id="page-skills" class="page"><div class="subpage" id="skillsRoot"></div></section>
 <section id="page-approval" class="page"><div class="subpage" id="approvalRoot"></div></section>
@@ -185,103 +193,109 @@
 <input type="file" id="importFile" accept="application/json,.json,.ampliacao,.zip" hidden onchange="if(this.files[0])importFile(this.files[0]);this.value=''">
 <div class="toast" id="toast"></div>
 
-<script src="js/util.js"></script>
-<script src="js/icons.js"></script>
-<script src="js/store.js"></script>
-<script src="js/integrations.js"></script>
-<script src="js/core.js"></script>
-<script src="js/wizard.js"></script>
-<script src="js/preproject.js"></script>
-<script src="js/present.js"></script>
-<script src="js/radar.js"></script>
-<script src="js/design-data.js"></script>
-<script src="js/logo-fonts.js"></script>
-<script src="js/design-engine.js"></script>
-<script src="js/design-formats.js"></script>
-<script src="js/design-brand.js"></script>
-<script src="js/design-layouts.js"></script>
-<script src="js/design-layouts-a.js"></script>
-<script src="js/design-layouts-b.js"></script>
-<script src="js/design-layouts-c.js"></script>
-<script src="js/design-layouts-d.js"></script>
-<script src="js/design-layouts-e.js"></script>
-<script src="js/design-layouts-f.js"></script>
-<script src="js/design-layouts-ui.js"></script>
-<script src="js/deck.js"></script>
-<script src="js/media.js"></script>
-<script src="js/logo-data.js"></script>
-<script src="js/logo-icons.js"></script>
-<script src="js/logo-lab.js"></script>
-<script src="js/logo-mock.js"></script>
-<script src="js/logo-fontpage.js"></script>
-<script src="js/fonts-mine.js"></script>
-<script src="js/logo-showcase.js"></script>
-<script src="js/inspiration.js"></script>
-<script src="js/ebook-engine.js"></script>
-<script src="js/ebook-data.js"></script>
-<script src="js/ebook-ui.js"></script>
-<script src="js/dtp-engine.js"></script>
-<script src="js/dtp-ui.js"></script>
-<script src="js/dtp-extra.js"></script>
-<script src="js/dtp-templates.js"></script>
-<script src="js/ai-layout.js"></script>
-<script src="js/fonts-lab.js"></script>
-<script src="js/editora-hub.js"></script>
-<script src="js/flipbook.js"></script>
-<script src="js/ebook-motor.js"></script>
-<script src="js/design-templates.js"></script>
-<script src="js/design-psd.js"></script>
-<script src="js/design-ui.js"></script>
-<script src="js/design-var.js"></script>
-<script src="js/project.js"></script>
-<script src="js/hubs.js"></script>
-<script src="js/integracoes.js"></script>
-<script src="js/imglib.js"></script>
-<script src="js/editorial-skill.js"></script>
-<script src="js/editorial.js"></script>
-<script src="js/editorial-ent.js"></script>
-<script src="js/carousel.js"></script>
-<script src="js/piece-map.js"></script>
-<script src="js/carousel-studio.js"></script>
-<script src="js/feed-planner.js"></script>
-<script src="js/grid-split.js"></script>
-<script src="js/kit-social.js"></script>
-<script src="js/social-data.js"></script>
-<script src="js/social-ui.js"></script>
-<script src="js/social-analytics.js"></script>
-<script src="js/landing.js"></script>
-<script src="js/landing-ui.js"></script>
-<script src="js/builder.js"></script>
-<script src="js/builder-ui.js"></script>
-<script src="js/sections.js"></script>
-<script src="js/tpl-import.js"></script>
-<script src="js/tpl-ui.js"></script>
-<script src="js/wp-theme-php.js"></script>
-<script src="js/wp-theme.js"></script>
-<script src="js/wp-elementor.js"></script>
-<script src="js/pacote.js"></script>
-<script src="js/campanha.js"></script>
-<script src="js/skills-text.js"></script>
-<script src="js/skills-ui.js"></script>
-<script src="js/doc-export.js"></script>
-<script src="js/video-roteiros.js"></script>
-<script src="js/stories.js"></script>
-<script src="js/portal.js"></script>
-<script src="js/campanha-hub.js"></script>
-<script src="js/flow.js"></script>
-<script src="js/leads-ui.js"></script>
-<script src="js/briefing-form.js"></script>
-<script src="js/briefing-ui.js"></script>
-<script src="js/briefing-google.js"></script>
-<script src="js/pre-engine.js"></script>
-<script src="js/routing-ui.js"></script>
-<script src="js/site-ui.js"></script>
-<script src="js/app.js"></script>
-<script src="js/ebook-kdp.js"></script>
-<script src="js/ebook-cover.js"></script>
-<script src="js/ebook-book.js"></script>
-<script src="js/acc.js"></script>
-<script src="js/nav.js"></script>
-<script src="js/responsive.js"></script>
+<script src="js/util.js?v=1.5.0"></script>
+<script src="js/icons.js?v=1.5.0"></script>
+<script src="js/store.js?v=1.5.0"></script>
+<script src="js/integrations.js?v=1.5.0"></script>
+<script src="js/core.js?v=1.5.0"></script>
+<script src="js/wizard.js?v=1.5.0"></script>
+<script src="js/preproject.js?v=1.5.0"></script>
+<script src="js/present.js?v=1.5.0"></script>
+<script src="js/radar.js?v=1.5.0"></script>
+<script src="js/design-data.js?v=1.5.0"></script>
+<script src="js/logo-fonts.js?v=1.5.0"></script>
+<script src="js/design-engine.js?v=1.5.0"></script>
+<script src="js/design-formats.js?v=1.5.0"></script>
+<script src="js/design-brand.js?v=1.5.0"></script>
+<script src="js/design-layouts.js?v=1.5.0"></script>
+<script src="js/design-layouts-a.js?v=1.5.0"></script>
+<script src="js/design-layouts-b.js?v=1.5.0"></script>
+<script src="js/design-layouts-c.js?v=1.5.0"></script>
+<script src="js/design-layouts-d.js?v=1.5.0"></script>
+<script src="js/design-layouts-e.js?v=1.5.0"></script>
+<script src="js/design-layouts-f.js?v=1.5.0"></script>
+<script src="js/design-layouts-ui.js?v=1.5.0"></script>
+<script src="js/deck.js?v=1.5.0"></script>
+<script src="js/media.js?v=1.5.0"></script>
+<script src="js/logo-data.js?v=1.5.0"></script>
+<script src="js/logo-icons.js?v=1.5.0"></script>
+<script src="js/logo-lab.js?v=1.5.0"></script>
+<script src="js/logo-mock.js?v=1.5.0"></script>
+<script src="js/logo-fontpage.js?v=1.5.0"></script>
+<script src="js/fonts-mine.js?v=1.5.0"></script>
+<script src="js/logo-showcase.js?v=1.5.0"></script>
+<script src="js/inspiration.js?v=1.5.0"></script>
+<script src="js/ebook-engine.js?v=1.5.0"></script>
+<script src="js/ebook-data.js?v=1.5.0"></script>
+<script src="js/ebook-ui.js?v=1.5.0"></script>
+<script src="js/dtp-engine.js?v=1.5.0"></script>
+<script src="js/dtp-ui.js?v=1.5.0"></script>
+<script src="js/dtp-extra.js?v=1.5.0"></script>
+<script src="js/dtp-templates.js?v=1.5.0"></script>
+<script src="js/ai-layout.js?v=1.5.0"></script>
+<script src="js/fonts-lab.js?v=1.5.0"></script>
+<script src="js/editora-hub.js?v=1.5.0"></script>
+<script src="js/flipbook.js?v=1.5.0"></script>
+<script src="js/ebook-motor.js?v=1.5.0"></script>
+<script src="js/design-templates.js?v=1.5.0"></script>
+<script src="js/design-psd.js?v=1.5.0"></script>
+<script src="js/design-ui.js?v=1.5.0"></script>
+<script src="js/design-var.js?v=1.5.0"></script>
+<script src="js/project.js?v=1.5.0"></script>
+<script src="js/hubs.js?v=1.5.0"></script>
+<script src="js/integracoes.js?v=1.5.0"></script>
+<script src="js/imglib.js?v=1.5.0"></script>
+<script src="js/editorial-skill.js?v=1.5.0"></script>
+<script src="js/editorial.js?v=1.5.0"></script>
+<script src="js/editorial-ent.js?v=1.5.0"></script>
+<script src="js/carousel.js?v=1.5.0"></script>
+<script src="js/piece-map.js?v=1.5.0"></script>
+<script src="js/carousel-studio.js?v=1.5.0"></script>
+<script src="js/feed-planner.js?v=1.5.0"></script>
+<script src="js/grid-split.js?v=1.5.0"></script>
+<script src="js/kit-social.js?v=1.5.0"></script>
+<script src="js/social-data.js?v=1.5.0"></script>
+<script src="js/social-ui.js?v=1.5.0"></script>
+<script src="js/social-analytics.js?v=1.5.0"></script>
+<script src="js/landing.js?v=1.5.0"></script>
+<script src="js/landing-ui.js?v=1.5.0"></script>
+<script src="js/builder.js?v=1.5.0"></script>
+<script src="js/builder-ui.js?v=1.5.0"></script>
+<script src="js/sections.js?v=1.5.0"></script>
+<script src="js/tpl-import.js?v=1.5.0"></script>
+<script src="js/tpl-ui.js?v=1.5.0"></script>
+<script src="js/wp-theme-php.js?v=1.5.0"></script>
+<script src="js/wp-theme.js?v=1.5.0"></script>
+<script src="js/wp-elementor.js?v=1.5.0"></script>
+<script src="js/pacote.js?v=1.5.0"></script>
+<script src="js/campanha.js?v=1.5.0"></script>
+<script src="js/skills-text.js?v=1.5.0"></script>
+<script src="js/skills-ui.js?v=1.5.0"></script>
+<script src="js/doc-export.js?v=1.5.0"></script>
+<script src="js/video-roteiros.js?v=1.5.0"></script>
+<script src="js/stories.js?v=1.5.0"></script>
+<script src="js/portal.js?v=1.5.0"></script>
+<script src="js/doc-import.js?v=1.5.0"></script>
+<script src="js/campanha-hub.js?v=1.5.0"></script>
+<script src="js/bulk.js?v=1.5.0"></script>
+<script src="js/ofertas.js?v=1.5.0"></script>
+<script src="js/ofertas-ui.js?v=1.5.0"></script>
+<script src="js/planilha-matriz.js?v=1.5.0"></script>
+<script src="js/aparencia-lote.js?v=1.5.0"></script>
+<script src="js/flow.js?v=1.5.0"></script>
+<script src="js/leads-ui.js?v=1.5.0"></script>
+<script src="js/briefing-form.js?v=1.5.0"></script>
+<script src="js/briefing-ui.js?v=1.5.0"></script>
+<script src="js/briefing-google.js?v=1.5.0"></script>
+<script src="js/pre-engine.js?v=1.5.0"></script>
+<script src="js/routing-ui.js?v=1.5.0"></script>
+<script src="js/site-ui.js?v=1.5.0"></script>
+<script src="js/app.js?v=1.5.0"></script>
+<script src="js/ebook-kdp.js?v=1.5.0"></script>
+<script src="js/ebook-cover.js?v=1.5.0"></script>
+<script src="js/ebook-book.js?v=1.5.0"></script>
+<script src="js/acc.js?v=1.5.0"></script>
+<script src="js/nav.js?v=1.5.0"></script>
+<script src="js/responsive.js?v=1.5.0"></script>
 </body>
 </html>

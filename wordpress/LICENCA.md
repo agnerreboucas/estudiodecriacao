@@ -2,7 +2,7 @@
 
 > **Aviso:** este texto é um **modelo**. Os campos entre colchetes são decisões comerciais suas, e o texto final deve ser revisado por um advogado antes de vender. O pacote não inclui servidor de licenças nem ativação por chave: se quiser esse recurso, precisa ser desenvolvido à parte.
 
-**Produto:** Ampliação Studio para WordPress (tema + plugin) — versão 1.0.0
+**Produto:** Ampliação Studio para WordPress (tema + plugin) — versão 1.4.1
 **Titular dos direitos:** [CONFIRMAR: nome/razão social e CNPJ/CPF]
 **Licenciado:** [CONFIRMAR: nome do comprador]
 
