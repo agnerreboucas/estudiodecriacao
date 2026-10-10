@@ -1,5 +1,8 @@
 # Histórico de versões
 
+## 1.13.0
+- **Social Hub retirado da plataforma** (sessão do menu, tela e arquivos). Os dados guardados do Hub nos projetos são apagados ao carregar. A aba **Publicação** e a **Análise** (insights, orgânico × pago, horários, localidades) continuam como estavam.
+
 ## 1.12.0
 - **Aprovação em uma página só.** "Aprovação" e "Aprovação de arte" viraram uma tela com três etapas: **1 · Revisão interna** (criações da fila e peças da Publicação que esperam um ok, com Aprovar / Pedir ajustes / Devolver), **2 · Cliente** (o envio com prazo, respostas, correções e PDF, igual ao de antes) e **3 · Pronto para publicar** (o que foi aprovado pela equipe ou pelo cliente, com o botão Agendar). Contadores no topo mostram onde cada coisa está.
 - Saiu o item duplicado "Aprovação de arte" do menu; a rota antiga leva à etapa Cliente. Nada foi perdido: o link do cliente, o prazo de 72 horas e o PDF continuam iguais.

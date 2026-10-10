@@ -9,7 +9,7 @@ shutil.copytree(os.path.join(SRC, 'assets'), OUT + '/assets')
 shutil.copy(os.path.join(SRC, 'app-index.php'), OUT + '/app/index.php')
 shutil.copy(os.path.join(SRC, 'app-entrar.php'), OUT + '/app/entrar.php')
 for f in ('index.html', 'cliente.html', 'briefing.html', 'aprovacao.html', 'entrar.html'): shutil.copy(os.path.join(R, f), OUT + '/app/' + f)
-for d in ('css', 'js', 'fonts', 'vendor', 'assets', 'socialhub'):
+for d in ('css', 'js', 'fonts', 'vendor', 'assets'):
     if os.path.isdir(os.path.join(R, d)): shutil.copytree(os.path.join(R, d), OUT + '/app/' + d)
 shutil.copytree(os.path.join(R, 'api'), OUT + '/app/api', ignore=shutil.ignore_patterns('config.php', 'data'))
 shutil.copy(os.path.join(SRC, 'api-wp-bridge.php'), OUT + '/app/api/wp-bridge.php')
