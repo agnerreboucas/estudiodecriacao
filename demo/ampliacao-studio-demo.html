@@ -1022,6 +1022,30 @@ body.mz-lock{overflow:hidden}
 .sh-wrap iframe{display:block;width:100%;height:calc(100vh - 250px);min-height:680px;border:0}
 .sh-load{position:absolute;inset:0;display:grid;place-items:center;background:#fff;color:#666;font-size:14px}
 .sh-empty{margin:0 0 10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+/* Aprovação (página única) */
+.ah-steps{display:flex;align-items:stretch;gap:6px;margin:6px 0 18px}
+.ah-arr{align-self:center;color:#aaa;font-size:28px;font-style:normal;padding:0 2px}
+.ah-step{flex:1;display:grid;grid-template-columns:auto 1fr;grid-template-areas:"n t" "n big" "n small";column-gap:12px;row-gap:0;align-items:center;text-align:left;padding:14px 16px;border:1.5px solid #e1e1da;border-radius:16px;background:#fff;cursor:pointer;font:inherit;transition:.15s}
+.ah-step:hover{border-color:#111}.ah-step.on{border-color:#111;background:#111;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.ah-n{grid-area:n;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#f0efe8;font-weight:800}
+.ah-step.on .ah-n{background:#fff;color:#111}
+.ah-t{grid-area:t;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#777;font-weight:700}.ah-step.on .ah-t{color:#bbb}
+.ah-big{grid-area:big;font-size:30px;line-height:1.1}
+.ah-step small{grid-area:small;color:#777}.ah-step.on small{color:#cfcfc6}
+.ah-step.warn .ah-n{background:#fdecc8;color:#8a5a00}.ah-step.ok .ah-n{background:#d8f1df;color:#17703f}.ah-step.go .ah-n{background:#dce8fb;color:#1f5fc4}
+.ah-step.on.warn .ah-n,.ah-step.on.ok .ah-n,.ah-step.on.go .ah-n{background:#fff;color:#111}
+.ah-body .panel,.ah-sec{background:#fff;border:1px solid #e3e3dd;border-radius:16px;padding:16px 18px;margin-bottom:14px}
+.ah-sec h3{margin:0 0 2px}.ah-sec .muted{margin:0 0 8px;font-size:13px}
+.ah-sec summary{cursor:pointer;font-weight:700}.ah-h4{margin:16px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:#777}
+.ah-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0 12px 14px;border-top:1px solid #efefe9;border-left:4px solid #e8a317;margin-left:0}
+.ah-row.ok{border-left-color:#2cae68}.ah-row.adj{border-left-color:#e0483f}
+.ah-main b{display:block}.ah-main small{display:flex;gap:6px;align-items:center;flex-wrap:wrap;color:#777;margin-top:3px}
+.ah-act{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.ah-chip{background:#f0efe8;border-radius:999px;padding:2px 9px;font-size:11.5px;color:#444}.ah-chip.alt{background:#e7ecf8;color:#27468f}
+.ah-empty{display:grid;gap:2px;padding:22px;text-align:center;background:#fafaf6;border-radius:12px;color:#777}.ah-empty b{color:#111}
+.ah-next{padding:14px 16px;background:#eef6ff;border-radius:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+@media(max-width:760px){.ah-steps{flex-direction:column}.ah-arr{display:none}}
+.ah-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px;font-size:13px}
 
 </style>
 </head>
@@ -1061,8 +1085,7 @@ body.mz-lock{overflow:hidden}
       <button data-page="socialhub" title="Social Hub e Insights"><span data-ico="chart"></span><span class="rail-lb">Social Hub e Insights</span></button>
     </div></div>
     <div class="rail-grp" data-g="Mostrar ao cliente"><button type="button" class="rail-gh" aria-expanded="true"><span class="rail-gt">5 · Mostrar ao cliente</span><small>Aprovar, publicar e apresentar</small><i aria-hidden="true">▾</i></button><div class="rail-items">
-      <button data-page="aprarte" title="Aprovação de arte (cliente)"><span data-ico="image"></span><span class="rail-lb">Aprovação de arte</span></button>
-      <button data-page="approval" title="Aprovação"><span data-ico="check"></span><span class="rail-lb">Aprovação</span></button>
+      <button data-page="approval" title="Aprovação: equipe, cliente e pronto para publicar"><span data-ico="check"></span><span class="rail-lb">Aprovação</span></button>
       <button data-page="publishingHub" title="Publicação"><span data-ico="send"></span><span class="rail-lb">Publicação</span></button>
       <button data-page="portal" title="Portal do cliente"><span data-ico="inbox"></span><span class="rail-lb">Portal do cliente</span></button>
     </div></div>
@@ -22610,7 +22633,9 @@ const aprSel = p => { const a = aprState(p); return aprPieces(p).filter(x => !a.
 
 /* ---------- tela ---------- */
 function renderAprarte() {
-  const p = curProject(), r = $('aprarteRoot'); if (!r) return; if (!p) { r.innerHTML = noProject('Aprovação de arte'); return; }
+  /* a tela virou a etapa "Cliente" da página única Aprovação: fora dela, redireciona */
+  if (!apr.embed || ui.page !== 'approval') { if (typeof apH === 'object') apH.tab = 'cliente'; apr.embed = false; go('approval'); return; }
+  const p = curProject(), r = $(apr.root || 'aprarteRoot'); if (!r) return; if (!p) { r.innerHTML = noProject('Aprovação de arte'); return; }
   const a = aprState(p), all = aprPieces(p), sel = all.filter(x => !a.excl.includes(x.id)), srv = API.available && !needsLogin(), sent = !!a.t && !!a.sentAt;
   const grp = (t, list) => list.length ? `<h4 style="margin:14px 0 6px">${t} <small class="muted">(${list.length})</small></h4><div class="apr-list">${list.map(x => `<label class="apr-row"><input type="checkbox" ${a.excl.includes(x.id) ? '' : 'checked'} onchange="aprToggle('${x.id}',this.checked)"><canvas class="apr-th" width="60" height="75" data-pc="${x.id}"></canvas><span><b>${esc(x.label)}</b><small>${APR_KIND[x.kind]} · ${x.kind === 'ad' ? 1 : x.set.slides.length} ${x.kind === 'story' ? 'frame(s)' : 'arte(s)'}${x.caption ? ' · com legenda' : ''}</small></span></label>`).join('')}</div>` : '';
   r.innerHTML = hubHead('Aprovação de arte', 'Leve as peças ao cliente do jeito que vão aparecer, recolha a decisão, o texto editado e as anotações, e receba a lista de correções. Sem resposta no prazo, vale como aprovado.', `<button class="btn" onclick="aprPdf()">📄 PDF de apresentação</button>`) +
@@ -22626,6 +22651,7 @@ function renderAprarte() {
       <div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" id="apSend" onclick="aprSend()" ${apr.busy || !sel.length ? 'disabled' : ''}>${sent ? '↻ Reenviar (reinicia o prazo)' : '✉ Enviar para aprovação'}</button>${sent && srv ? '<button class="btn" onclick="aprUpdatePieces()" title="Atualiza as artes sem reiniciar o prazo">Atualizar artes</button>' : ''}<button class="btn" onclick="aprExportHtml()">⬇ Arquivo único (HTML)</button></div>
       <p id="apMsg" class="muted" style="font-size:12.5px;margin:8px 0 0">${esc(apr.msg || (srv ? '' : 'Servidor não conectado: dá para baixar o arquivo único, mas o link com respostas para a equipe precisa do servidor.'))}</p></div>` +
     (sent ? `<div class="panel" style="margin-top:14px"><div id="aprResp"><p class="muted">Carregando respostas…</p></div></div>` : '');
+  if (apr.embed) { const h = r.querySelector('.page-head'); if (h) { const act = h.querySelector('.actions'), ps = act && act.querySelector('.proj-select'); if (ps) ps.remove(); const t = document.createElement('div'); t.className = 'ah-tools'; t.innerHTML = '<span class="muted">Leve as peças ao cliente do jeito que vão aparecer, recolha a decisão e receba a lista de correções.</span><div class="row-gap">' + (act ? act.innerHTML : '') + '</div>'; h.replaceWith(t); } }
   r.querySelectorAll('.apr-th').forEach(cv => aprThumb(cv, all.find(x => x.id === cv.dataset.pc)));
   if (sent && srv) aprRefresh();
 }
@@ -23176,6 +23202,78 @@ window.addEventListener('message', e => {
     p.socialhub = {snap: txt, at: new Date().toISOString(), seededAt: (p.socialhub && p.socialhub.seededAt) || ''}; persist();
   }, 700);
 });
+
+</script>
+<script>
+/* ===== Aprovação: uma página só, em 3 etapas — 1 Revisão interna → 2 Cliente → 3 Pronto para publicar.
+   Junta o que antes era "Aprovação", "Aprovação de arte" e a fila da Publicação. A etapa Cliente reaproveita js/aprov.js. ===== */
+const apH = {tab: 'interna', kick: 0};
+const AH_STEPS = [['interna', '1', 'Revisão interna', 'A equipe confere antes de mostrar ao cliente'], ['cliente', '2', 'Cliente', 'Link de aprovação com prazo'], ['pronto', '3', 'Pronto para publicar', 'Aprovado e esperando data']];
+
+function apHInterna(p) {
+  soMigrate(); const gate = (p.approvals || []).map(a => ({src: 'gate', id: a.id, title: a.title, kind: a.kind, at: a.decidedAt || a.created, note: a.note, status: a.status}));
+  const posts = so().posts.filter(x => x.status === 'aguardando_aprovacao').map(x => ({src: 'post', id: x.id, title: x.title || (x.caption || '').slice(0, 60) || 'Peça da Publicação', kind: soFmt(x.format), at: (x.history && x.history.length ? x.history[x.history.length - 1].at : '') || x.scheduledFor || '', note: '', status: 'Pendente'}));
+  const all = gate.concat(posts); return {pend: all.filter(x => x.status === 'Pendente'), done: all.filter(x => x.status !== 'Pendente')};
+}
+function apHClienteInfo(p) {
+  const a = aprState(p); if (!a.t || !a.sentAt) return {sent: false}; const E = apr.est; if (!E) return {sent: true, known: false};
+  const exp = aprExpired(E.submission), c = {pending: 0, approved: 0, altered: 0, rejected: 0, published: 0, auto: 0}; E.items.forEach(it => { c[aprStatusOf(it, E.records[it.id], exp)]++; });
+  return {sent: true, known: true, c, total: E.items.length, answered: E.items.length - c.pending};
+}
+function apHPronto(p) {
+  soMigrate(); const S = so(), cli = (SM.list || []).slice(), posts = S.posts.filter(x => x.status === 'aprovado'), ok = (p.approvals || []).filter(a => a.status === 'Aprovado');
+  return {cli, posts, ok, n: cli.length + posts.length};
+}
+
+function apHSteps(p) {
+  const I = apHInterna(p), C = apHClienteInfo(p), R = apHPronto(p);
+  const card = (k, n, t, sub, big, line, tone) => `<button class="ah-step ${apH.tab === k ? 'on' : ''} ${tone || ''}" onclick="apHGo('${k}')"><span class="ah-n">${n}</span><span class="ah-t">${t}</span><b class="ah-big">${big}</b><small>${line}</small></button>`;
+  const cl = !C.sent ? card('cliente', '2', 'Cliente', '', '—', 'Ainda não enviado ao cliente', 'idle') : !C.known ? card('cliente', '2', 'Cliente', '', '…', 'Lendo as respostas', '') : card('cliente', '2', 'Cliente', '', `${C.answered}/${C.total}`, `${C.c.approved + C.c.auto} aprovadas · ${C.c.altered + C.c.rejected} para corrigir`, C.c.pending ? 'warn' : 'ok');
+  return card('interna', '1', 'Revisão interna', '', I.pend.length, I.pend.length ? 'esperando a equipe' : 'nada esperando', I.pend.length ? 'warn' : 'ok') + '<i class="ah-arr">›</i>' + cl + '<i class="ah-arr">›</i>' + card('pronto', '3', 'Pronto para publicar', '', R.n, R.n ? 'aprovadas, sem data' : 'nada esperando data', R.n ? 'go' : 'idle');
+}
+function apHRow(x) {
+  const src = x.src === 'post' ? 'Publicação' : 'Fila de criação', act = x.src === 'gate'
+    ? (x.status !== 'Aprovado' ? `<button class="btn sm dark" onclick="approvalSet('${x.id}','Aprovado')">Aprovar</button>` : '') + (x.status === 'Pendente' ? `<button class="btn sm" onclick="approvalAdjust('${x.id}')">Pedir ajustes</button>` : '')
+    : `<button class="btn sm dark" onclick="apHPost('${x.id}','aprovado')">Aprovar</button><button class="btn sm" onclick="apHPost('${x.id}','rascunho')">Devolver</button>`;
+  return `<div class="ah-row ${x.status === 'Aprovado' ? 'ok' : x.status === 'Ajustes' ? 'adj' : ''}"><div class="ah-main"><b>${esc(x.title)}</b><small><span class="ah-chip">${esc(x.kind || 'Peça')}</span><span class="ah-chip alt">${src}</span>${x.at ? ' ' + esc(fmtDate(x.at)) : ''}${x.note ? ' · ' + esc(x.note) : ''}</small></div><div class="ah-act">${x.status !== 'Pendente' ? `<span class="st-pill st-${esc(String(x.status).toLowerCase())}">${esc(x.status)}</span>` : ''}${act}</div></div>`;
+}
+function apHBodyInterna(p) {
+  const I = apHInterna(p);
+  return `<div class="ah-sec"><div class="section-row"><div><h3>Esperando revisão da equipe <span class="so-badge">${I.pend.length}</span></h3><p class="muted">Conceitos, roteiros, criações e peças da Publicação que pedem um “ok” antes de seguir.</p></div>${p.approvals.some(a => a.status === 'Pendente') ? `<button class="btn" onclick="approveAll()">Aprovar o lote de criações</button>` : ''}</div>
+    ${I.pend.length ? I.pend.map(apHRow).join('') : `<div class="ah-empty"><b>Tudo em dia.</b><span>Quando alguém enviar algo para aprovação, aparece aqui.</span></div>`}</div>
+    ${I.done.length ? `<details class="ah-sec"><summary>Já decididas <span class="so-badge">${I.done.length}</span></summary>${I.done.slice().sort((a, b) => String(b.at).localeCompare(String(a.at))).slice(0, 30).map(apHRow).join('')}</details>` : ''}
+    ${I.pend.length === 0 ? `<div class="ah-next"><b>Próximo passo</b> Mande as peças aprovadas ao cliente. <button class="btn sm dark" onclick="apHGo('cliente')">Ir para a etapa Cliente ›</button></div>` : ''}`;
+}
+function apHBodyPronto(p) {
+  const R = apHPronto(p), srvOk = aprState(p).t && smSrv(), item = (t, sub, btn) => `<div class="ah-row ok"><div class="ah-main"><b>${esc(t)}</b><small>${sub}</small></div><div class="ah-act">${btn}</div></div>`;
+  return `<div class="ah-sec"><div class="section-row"><div><h3>Pronto para publicar <span class="so-badge">${R.n}</span></h3><p class="muted">Aprovado e ainda sem data. Escolha dia, horário, estilo e redes no calendário.</p></div><button class="btn dark" onclick="soUI.tab='calendario';go('publishingHub')">Abrir o calendário</button></div>
+    ${R.cli.length ? `<h4 class="ah-h4">Aprovadas pelo cliente</h4>${R.cli.map(x => item(x.title, `<span class="ah-chip">${esc(APR_KIND[x.kind] || x.kind)}</span>${x.auto ? '<span class="ah-chip alt">por prazo</span>' : x.by ? ' por ' + esc(x.by) : ''}`, `<button class="btn sm dark" onclick="smOpen('${x.id}')">Agendar</button>`)).join('')}` : (aprState(p).t ? '' : '<p class="muted" style="font-size:12.5px">As peças aprovadas pelo cliente aparecem aqui assim que ele responder.</p>')}
+    ${R.posts.length ? `<h4 class="ah-h4">Aprovadas na Publicação</h4>${R.posts.map(x => item(x.title || (x.caption || '').slice(0, 60) || 'Peça', `<span class="ah-chip">${esc(soFmt(x.format))}</span> ${x.scheduledFor ? esc(KS.format.formatDateTime(x.scheduledFor)) : 'sem data'}`, `<button class="btn sm dark" onclick="soUI.tab='calendario';soUI.day='${x.scheduledFor ? soDay(x.scheduledFor) : soToday()}';go('publishingHub')">Agendar</button>`)).join('')}` : ''}
+    ${R.ok.length ? `<h4 class="ah-h4">Criações aprovadas</h4>${R.ok.slice(0, 20).map(a => item(a.title, `<span class="ah-chip">${esc(a.kind)}</span> ${esc(fmtDate(a.decidedAt || a.created))}`, `<button class="btn sm" onclick="go('publishingHub')">Preparar publicação</button>`)).join('')}` : ''}
+    ${R.n === 0 && !R.ok.length ? `<div class="ah-empty"><b>Nada esperando data.</b><span>O que for aprovado pela equipe ou pelo cliente chega aqui.</span></div>` : ''}</div>`;
+}
+
+function renderApprovalPage() {
+  const p = curProject(), r = $('approvalRoot'); if (!r) return; if (!p) { r.innerHTML = noProject('Aprovação'); return; }
+  r.innerHTML = hubHead('Aprovação', 'Do rascunho ao ar em três etapas: a equipe confere, o cliente aprova e a peça fica pronta para publicar.', '') + `<div class="ah-steps" id="ahSteps">${apHSteps(p)}</div><div id="approvalBody" class="ah-body"></div>`;
+  apHBody(p); apHKick(p);
+}
+function apHBody(p) {
+  const b = $('approvalBody'); if (!b) return; apr.embed = false;
+  if (apH.tab === 'cliente') { apr.embed = true; apr.root = 'approvalBody'; renderAprarte(); return; }
+  b.innerHTML = apH.tab === 'pronto' ? apHBodyPronto(p) : apHBodyInterna(p);
+}
+function apHGo(k) { apH.tab = k; const y = window.scrollY; renderApprovalPage(); window.scrollTo(0, y); }
+function apHPost(id, to) { const r = soMove(id, to); if (!r.ok) toast(r.msg); else toast(to === 'aprovado' ? 'Peça aprovada.' : 'Peça devolvida para ajustes.'); const y = window.scrollY; renderApprovalPage(); window.scrollTo(0, y); }
+/* lê, uma vez por abertura, as respostas do cliente e as peças aprovadas, e atualiza os números das etapas */
+async function apHKick(p) {
+  if (Date.now() - apH.kick < 4000) return; apH.kick = Date.now(); const a = aprState(p); if (!(API.available && !needsLogin())) return;
+  try {
+    if (a.t && a.sentAt) apr.est = await api('aprovacao.php', {method: 'POST', body: {action: 'equipe', t: a.t}});
+    if (typeof smApproved === 'function' && a.t) SM.list = await smApproved(true);
+  } catch (e) { return; }
+  if (ui.page !== 'approval' || curProject().id !== p.id) return; const st = $('ahSteps'); if (st) st.innerHTML = apHSteps(p); if (apH.tab === 'pronto') apHBody(p);
+}
 
 </script>
 <script>

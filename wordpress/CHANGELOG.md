@@ -1,5 +1,9 @@
 # Histórico de versões
 
+## 1.12.0
+- **Aprovação em uma página só.** "Aprovação" e "Aprovação de arte" viraram uma tela com três etapas: **1 · Revisão interna** (criações da fila e peças da Publicação que esperam um ok, com Aprovar / Pedir ajustes / Devolver), **2 · Cliente** (o envio com prazo, respostas, correções e PDF, igual ao de antes) e **3 · Pronto para publicar** (o que foi aprovado pela equipe ou pelo cliente, com o botão Agendar). Contadores no topo mostram onde cada coisa está.
+- Saiu o item duplicado "Aprovação de arte" do menu; a rota antiga leva à etapa Cliente. Nada foi perdido: o link do cliente, o prazo de 72 horas e o PDF continuam iguais.
+
 ## 1.11.0
 - **Nova sessão no menu: Social Hub e Insights.** O app Social Hub completo (Painel, Agenda com .ics, Conteúdo e insights, Público, Localidades, Publicações, Impulsionar, Relacionamento com graus e resposta em lote, Relatórios em PDF, Atualizar números, Importar histórico, Contas, Equipe, Histórico) roda dentro do Studio, sem login extra.
 - **Um Social Hub por projeto.** Na primeira abertura ele nasce das contas, publicações, conversas, compromissos e métricas da aba Publicação; depois cada alteração feita no Hub é guardada sozinha no projeto (sobrevive a recarregar e vai junto na sincronização). Botões: *Trazer da Publicação* (refaz o Hub com os dados do Studio) e *Baixar dados (.json)*.

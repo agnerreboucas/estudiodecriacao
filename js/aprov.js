@@ -56,7 +56,9 @@ const aprSel = p => { const a = aprState(p); return aprPieces(p).filter(x => !a.
 
 /* ---------- tela ---------- */
 function renderAprarte() {
-  const p = curProject(), r = $('aprarteRoot'); if (!r) return; if (!p) { r.innerHTML = noProject('Aprovação de arte'); return; }
+  /* a tela virou a etapa "Cliente" da página única Aprovação: fora dela, redireciona */
+  if (!apr.embed || ui.page !== 'approval') { if (typeof apH === 'object') apH.tab = 'cliente'; apr.embed = false; go('approval'); return; }
+  const p = curProject(), r = $(apr.root || 'aprarteRoot'); if (!r) return; if (!p) { r.innerHTML = noProject('Aprovação de arte'); return; }
   const a = aprState(p), all = aprPieces(p), sel = all.filter(x => !a.excl.includes(x.id)), srv = API.available && !needsLogin(), sent = !!a.t && !!a.sentAt;
   const grp = (t, list) => list.length ? `<h4 style="margin:14px 0 6px">${t} <small class="muted">(${list.length})</small></h4><div class="apr-list">${list.map(x => `<label class="apr-row"><input type="checkbox" ${a.excl.includes(x.id) ? '' : 'checked'} onchange="aprToggle('${x.id}',this.checked)"><canvas class="apr-th" width="60" height="75" data-pc="${x.id}"></canvas><span><b>${esc(x.label)}</b><small>${APR_KIND[x.kind]} · ${x.kind === 'ad' ? 1 : x.set.slides.length} ${x.kind === 'story' ? 'frame(s)' : 'arte(s)'}${x.caption ? ' · com legenda' : ''}</small></span></label>`).join('')}</div>` : '';
   r.innerHTML = hubHead('Aprovação de arte', 'Leve as peças ao cliente do jeito que vão aparecer, recolha a decisão, o texto editado e as anotações, e receba a lista de correções. Sem resposta no prazo, vale como aprovado.', `<button class="btn" onclick="aprPdf()">📄 PDF de apresentação</button>`) +
@@ -72,6 +74,7 @@ function renderAprarte() {
       <div class="row-gap" style="flex-wrap:wrap"><button class="btn dark" id="apSend" onclick="aprSend()" ${apr.busy || !sel.length ? 'disabled' : ''}>${sent ? '↻ Reenviar (reinicia o prazo)' : '✉ Enviar para aprovação'}</button>${sent && srv ? '<button class="btn" onclick="aprUpdatePieces()" title="Atualiza as artes sem reiniciar o prazo">Atualizar artes</button>' : ''}<button class="btn" onclick="aprExportHtml()">⬇ Arquivo único (HTML)</button></div>
       <p id="apMsg" class="muted" style="font-size:12.5px;margin:8px 0 0">${esc(apr.msg || (srv ? '' : 'Servidor não conectado: dá para baixar o arquivo único, mas o link com respostas para a equipe precisa do servidor.'))}</p></div>` +
     (sent ? `<div class="panel" style="margin-top:14px"><div id="aprResp"><p class="muted">Carregando respostas…</p></div></div>` : '');
+  if (apr.embed) { const h = r.querySelector('.page-head'); if (h) { const act = h.querySelector('.actions'), ps = act && act.querySelector('.proj-select'); if (ps) ps.remove(); const t = document.createElement('div'); t.className = 'ah-tools'; t.innerHTML = '<span class="muted">Leve as peças ao cliente do jeito que vão aparecer, recolha a decisão e receba a lista de correções.</span><div class="row-gap">' + (act ? act.innerHTML : '') + '</div>'; h.replaceWith(t); } }
   r.querySelectorAll('.apr-th').forEach(cv => aprThumb(cv, all.find(x => x.id === cv.dataset.pc)));
   if (sent && srv) aprRefresh();
 }
