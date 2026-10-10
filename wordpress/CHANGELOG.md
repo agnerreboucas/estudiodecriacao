@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 1.8.0
+- **Aprovados ligados ao calendário (Publicação > Calendário).** Painel "Aprovados esperando agendamento" com as peças que o cliente aprovou (ou aprovadas por prazo): arraste uma peça para um dia, ou clique em **Agendar** / **Agendar aprovado neste dia**. Você escolhe a peça, o dia, o **horário**, o **estilo** (imagem, carrossel, story, vídeo) e as **redes** (Instagram/Facebook). A legenda vem do cliente (com a edição dele, se houve) e é validada pelas regras de cada rede. Peça já agendada sai do painel; rejeitada/alterada não aparece.
+- **Integração com a Meta (Instagram + Facebook) — `api/meta_social.php`.** Fila própria de publicações (o Instagram não agenda sozinho): ao agendar, o job entra na fila; um cron chama `api/meta_social.php?action=run&key=SUA_CHAVE` e o servidor publica no horário. Suporta imagem, carrossel (2–10), stories e vídeo (URL pública), 3 tentativas com espera, sem repetir o que já saiu em uma das redes, link da publicação de volta no Studio, "Publicar agora" e cancelar ao tirar de "Agendado".
+- **Conexão com a Meta** (Contas e dados): botão *Entrar com o Facebook* (OAuth, token longo, escolhe Página + Instagram profissional), conexão manual por token, testar, desconectar, criar as contas no Studio e "Rodar a fila agora". Chaves ficam só no servidor (`META_*` no `config.php` ou salvas no app com a senha do Studio). Sem token (ou com `META_DRY_RUN`) tudo é simulado e nada é enviado.
+- Imagens são servidas à Meta por link público assinado (HMAC) e temporário.
+
 ## 1.7.0
 - **Aprovação de arte (cliente), ligada ao Studio.** Nova tela *Aprovação de arte* (menu 5 · Mostrar ao cliente): escolha as peças reais do projeto (anúncios por fase da jornada nas medidas feed e Stories, carrosséis, stories e posts do Estúdio de Design), defina marca, @ e prazo, e envie. O Studio gera as artes em JPEG, cria o link `aprovacao.html?t=CÓDIGO` (sem login para o cliente) e guarda tudo no servidor (`api/aprovacao.php`).
 - **Prazo de 72 horas.** O envio grava `sentAt`; passadas as horas (editável), toda peça *não avaliada* passa a **Aprovada por prazo** (selo tracejado, aviso na tela do cliente e no portão). Alterado e Rejeitado não expiram. A regra aparece no envio, na tela do cliente e no PDF. Confirme com seu contrato se vale para o seu caso.

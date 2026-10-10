@@ -3,7 +3,7 @@ declare(strict_types=1);
 /* Biblioteca comum da API do Ampliação Studio. Chaves ficam em config.php (nunca no navegador). */
 $GLOBALS['CFG'] = is_file(__DIR__ . '/config.php') ? (require __DIR__ . '/config.php') : [];
 /* Chaves salvas pelo app (Configurações → Integrações) ficam em <DATA_DIR>/keys.json, fora do alcance da web (.htaccess). config.php sempre vence. */
-const APP_KEYS = ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'ELEVENLABS_API_KEY', 'MAGNIFIC_API_KEY', 'HIGGSFIELD_API_KEY', 'AI_PROVIDER', 'WHATSAPP_TOKEN', 'WHATSAPP_PHONE_ID'];
+const APP_KEYS = ['ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'ELEVENLABS_API_KEY', 'MAGNIFIC_API_KEY', 'HIGGSFIELD_API_KEY', 'AI_PROVIDER', 'WHATSAPP_TOKEN', 'WHATSAPP_PHONE_ID', 'META_APP_ID', 'META_APP_SECRET', 'META_PAGE_ID', 'META_PAGE_TOKEN', 'META_IG_USER_ID', 'META_CRON_KEY'];
 function keys_file(): string { return rtrim((string) ($GLOBALS['CFG']['DATA_DIR'] ?? __DIR__ . '/data'), '/') . '/keys.json'; }
 (function () { $f = keys_file(); if (!is_file($f)) return; $j = json_decode((string) @file_get_contents($f), true); if (!is_array($j)) return;
     foreach (APP_KEYS as $k) if (isset($j[$k]) && is_string($j[$k]) && $j[$k] !== '' && (($GLOBALS['CFG'][$k] ?? '') === '')) $GLOBALS['CFG'][$k] = $j[$k]; })();

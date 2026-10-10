@@ -95,3 +95,11 @@ Menu **5 · Mostrar ao cliente → Aprovação de arte**.
 - **📄 PDF de apresentação:** lâminas 16:9 com data de envio, regra do prazo, visão geral e uma lâmina por peça.
 - **Arquivo único (HTML):** versão para enviar por e-mail ou hospedar; as respostas ficam só no navegador de quem abre.
 - O cliente abre o link no celular, informa nome e data, vê a grade, decide, edita texto, marca pontos na imagem e comenta. Para o servidor guardar as respostas é preciso ter a senha do Studio ativa (assim só a equipe vê o painel da equipe).
+
+## Publicação: aprovados no calendário e Meta
+1. Depois que o cliente aprova em *Aprovação de arte*, abra **Publicação > Calendário**: as peças aprovadas aparecem em "Aprovados esperando agendamento".
+2. Arraste a peça para o dia (ou clique em **Agendar**). Escolha **horário**, **estilo** (imagem, carrossel, story, vídeo) e **redes**. Confira a legenda e clique em **Agendar**.
+3. Em **Contas e dados > Conexão com a Meta**, clique em *Entrar com o Facebook* (ou use o token manual). Contas conectadas (✓) publicam sozinhas; as outras ficam só no Studio.
+4. No servidor, configure um cron a cada 5 minutos chamando `api/meta_social.php?action=run&key=SUA_CHAVE` (a chave é `META_CRON_KEY`). Sem cron, use o botão *Rodar a fila agora*.
+5. Sem token (ou com `META_DRY_RUN`) tudo é simulado: nada é enviado à Meta.
+

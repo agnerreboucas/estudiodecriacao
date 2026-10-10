@@ -48,6 +48,11 @@ return [
 
     /* Captura de leads: formulários/landing pages enviam POST para api/leads.php?token=...&project=ID */
     'LEADS_TOKEN'           => '',   // texto longo e aleatório
+    // Publicação na Meta (Instagram + Facebook) — veja o card "Conexão com a Meta" em Publicação > Contas e dados
+    'META_APP_ID' => '', 'META_APP_SECRET' => '',      // app em developers.facebook.com
+    'META_PAGE_ID' => '', 'META_PAGE_TOKEN' => '', 'META_IG_USER_ID' => '',  // (opcional) preenchidos pelo botão Conectar
+    'META_CRON_KEY' => '',           // chave p/ o cron chamar api/meta_social.php?action=run&key=...
+    'META_DRY_RUN' => false,         // true = simula sem enviar nada à Meta
     'WHATSAPP_VERIFY_TOKEN' => '',   // token de verificação do webhook do WhatsApp Cloud
     'META_APP_SECRET'       => '',   // valida a assinatura X-Hub-Signature-256 do WhatsApp/Meta
 
