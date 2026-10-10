@@ -981,6 +981,40 @@ body.mz-lock{overflow:hidden}
 .sm-chip span{flex:1;display:flex;flex-direction:column;min-width:0}.sm-chip small{color:#777}
 .so-day.sm-over{outline:2px dashed #7c3aed;background:rgba(124,58,237,.08)}
 
+/* Marca e arquétipo */
+.id-steps{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}
+.id-step{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line,#e3e3e3);border-radius:999px;background:#fff;cursor:pointer;font:inherit}
+.id-step b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#eee;font-size:12px}
+.id-step.on{background:#111;color:#fff;border-color:#111}.id-step.on b{background:#fff;color:#111}.id-step.done b{background:#d9f2e0}
+.id-body{padding:4px 0 8px}.id-body h3{margin:6px 0 4px}.id-body h4{margin:0}
+.id-chips{display:flex;flex-wrap:wrap;gap:8px}
+.id-chip{padding:9px 14px;border:1px solid #d6d6d0;border-radius:999px;background:#fff;cursor:pointer;font:inherit;font-size:14px}
+.id-chip:hover{border-color:#111}.id-chip.on{background:#111;color:#fff;border-color:#111}.id-chip.own{background:#7c3aed;border-color:#7c3aed}
+.id-nav{display:flex;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--line,#eee)}
+.id-rank{display:flex;flex-direction:column;gap:8px;margin:10px 0 14px}
+.id-bar{display:grid;grid-template-columns:120px 1fr 44px;gap:10px;align-items:center;font-size:14px}
+.id-bar i{display:block;height:12px;background:#eee;border-radius:99px;overflow:hidden}.id-bar u{display:block;height:100%;background:#111;border-radius:99px}.id-bar em{font-style:normal;color:#777;font-size:12px}
+.id-arch{border:1px solid #d6d6d0;border-radius:14px;padding:16px 18px;background:#fafaf7}
+.id-arch-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px}.id-arch-h h2{margin:0}.id-arch-h small{color:#777}
+.id-kv{display:grid;grid-template-columns:140px 1fr;gap:10px;padding:5px 0;border-top:1px solid #ececE6;font-size:14px}.id-kv span{color:#777}
+.id-note{margin:10px 0;padding:10px 12px;background:#fff7e0;border-radius:10px;font-size:12.5px}
+.id-tags{display:flex;flex-wrap:wrap;gap:6px}
+.id-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;background:#f0efe9;border-radius:999px;font-size:13px}
+.id-tag button{border:0;background:none;cursor:pointer;color:#999;padding:0}
+.id-sug{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}.id-sug small{color:#888;margin-right:4px}
+.id-sug button{padding:4px 10px;border:1px dashed #bbb;background:#fff;border-radius:999px;cursor:pointer;font:inherit;font-size:12.5px}.id-sug button:hover{border-color:#111}
+.id-lists{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.id-sl{display:grid;grid-template-columns:110px 1fr 110px;gap:10px;align-items:center;font-size:13px;margin:6px 0}.id-sl span:last-child{text-align:right}
+@media(max-width:560px){.id-kv{grid-template-columns:1fr}.id-sl{grid-template-columns:80px 1fr 80px}.id-bar{grid-template-columns:90px 1fr 40px}}
+/* Produtos */
+.pr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:14px}
+.pr-card{border:1px solid #d6d6d0;border-radius:14px;padding:14px;background:#fff;cursor:pointer}.pr-card:hover{border-color:#111}.pr-card.off{opacity:.65}
+.pr-top{display:flex;flex-direction:column;gap:2px}.pr-top small{color:#777}.pr-card p{font-size:13px;margin:8px 0}
+.pr-meter{height:8px;background:#eee;border-radius:99px;overflow:hidden;margin:6px 0}.pr-meter i{display:block;height:100%;background:#2e9e5b}
+.pr-sec{border:1px solid #e3e3dd;border-radius:12px;margin-top:10px;background:#fff}
+.pr-sech{display:flex;align-items:baseline;gap:12px;width:100%;padding:12px 14px;border:0;background:none;cursor:pointer;font:inherit;text-align:left}.pr-sech small{color:#888;flex:1}
+.pr-secb{padding:4px 14px 14px}
+
 </style>
 </head>
 <body>
@@ -1143,6 +1177,8 @@ body.mz-lock{overflow:hidden}
     <nav class="project-nav" id="projectNav">
       <button class="active" data-tab="overview">Visão geral</button>
       <button data-tab="preproject">Pré-Projeto</button>
+      <button data-tab="identity">Marca e arquétipo</button>
+      <button data-tab="products">Produtos e serviços</button>
       <button data-tab="strategy">Estratégia & ICP</button>
       <button data-tab="radar">Concorrentes</button>
       <button data-tab="creative">Feed criativo</button>
@@ -1250,6 +1286,7 @@ document.addEventListener('DOMContentLoaded', () => hydrateIcons());
 
 </script>
 <script>
+const ID_ARCH = ['inocente', 'explorador', 'sabio', 'heroi', 'foradalei', 'mago', 'caracomum', 'amante', 'bobo', 'prestativo', 'criador', 'governante'], ID_LISTS = ['fala', 'naoFala', 'atitudeTem', 'atitudeNao', 'admira', 'repudia', 'usa', 'naoUsa'], ID_SLIDERS = ['formal', 'humor', 'tecnico', 'calor', 'ousadia'];
 /* Estado do workspace: modelo de dados, persistência local, exportação/importação */
 const STORE_KEY = window.DEMO_MODE ? 'ampliacao_studio_demo' : 'ampliacao_studio_v1';
 const SCHEMA = 1;
@@ -1289,7 +1326,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}, scripts: []}, stories: [], mesa: (typeof normalizeMesa === 'function' ? normalizeMesa({}) : null), portal: {t: '', items: [], news: [], clientEmails: '', notifyEmails: '', requireLogin: false, publishedAt: '', seen: 0},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], engine: {}, approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], identity: (typeof normalizeIdentity === 'function' ? normalizeIdentity({}) : {}), sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], engine: {}, approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -1514,7 +1551,17 @@ function normalizePortal(x) {
 function normalizeProducts(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), lines = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(t => str(t, n)).filter(Boolean), TY = ['curso', 'ebook', 'servico', 'evento', 'produto', 'cadastro'];
   return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 200).map(r => ({id: r.id, name: str(r.name, 160) || 'Produto', type: TY.includes(r.type) ? r.type : 'produto', summary: str(r.summary, 2000), price: str(r.price, 80), audience: str(r.audience, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(r.checkout || '') ? r.checkout : '',
-    benefits: lines(r.benefits, 300, 30), features: lines(r.features, 300, 40), objections: lines(r.objections, 300, 20), proofs: lines(r.proofs, 400, 20), images: (Array.isArray(r.images) ? r.images : []).filter(sid).slice(0, 8), created: str(r.created, 40) || new Date().toISOString()}));
+    benefits: lines(r.benefits, 300, 30), features: lines(r.features, 300, 40), objections: lines(r.objections, 300, 20), proofs: lines(r.proofs, 400, 20), images: (Array.isArray(r.images) ? r.images : []).filter(sid).slice(0, 8), created: str(r.created, 40) || new Date().toISOString(),
+    status: ['ativo', 'pausado', 'em_breve'].includes(r.status) ? r.status : 'ativo', format: ['', 'online', 'presencial', 'fisico', 'hibrido'].includes(r.format) ? r.format : '', sku: str(r.sku, 60), weight: str(r.weight, 80), size: str(r.size, 120), duration: str(r.duration, 120), includes: lines(r.includes, 200, 40),
+    priceNote: str(r.priceNote, 300), payment: str(r.payment, 300), delivery: str(r.delivery, 400), deliveryTime: str(r.deliveryTime, 160), validity: str(r.validity, 200), warranty: str(r.warranty, 300),
+    notFor: str(r.notFor, 600), problems: lines(r.problems, 300, 20), resolveTime: str(r.resolveTime, 200), differentials: lines(r.differentials, 300, 20), limits: lines(r.limits, 300, 20), notes: str(r.notes, 1000)}));
+}
+/* Identidade da marca: valores → atitudes → arquétipo (12, de "O Herói e o Fora da Lei") → voz. Só ids e textos curtos. */
+function normalizeIdentity(x) {
+  x = x && typeof x === 'object' ? x : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), ids = (a, m) => [...new Set((Array.isArray(a) ? a : []).filter(v => /^[a-z0-9]{2,24}$/.test(String(v))))].slice(0, m), tx = (a, n, m) => [...new Set((Array.isArray(a) ? a : []).map(t => str(t, n).trim()).filter(Boolean))].slice(0, m);
+  const l = x.lists && typeof x.lists === 'object' ? x.lists : {}, sl = x.sliders && typeof x.sliders === 'object' ? x.sliders : {}, lists = {}, sliders = {};
+  ID_LISTS.forEach(k => { lists[k] = tx(l[k], 90, 40); }); ID_SLIDERS.forEach(k => { const n = Math.round(+sl[k]); sliders[k] = n >= 1 && n <= 5 ? n : 3; });
+  return {step: Math.min(5, Math.max(1, Math.round(+x.step) || 1)), values: ids(x.values, 12), valuesExtra: tx(x.valuesExtra, 60, 10), attitudes: ids(x.attitudes, 12), attitudesExtra: tx(x.attitudesExtra, 90, 10), arch: ID_ARCH.includes(x.arch) ? x.arch : '', arch2: ID_ARCH.includes(x.arch2) ? x.arch2 : '', sliders, lists, refBrands: tx(x.refBrands, 60, 12), notes: str(x.notes, 1500), doneAt: str(x.doneAt, 40)};
 }
 /* Editor visual (estilo Elementor): seções → colunas (grade de 12, com largura por dispositivo) → widgets. Tudo com tipos e limites fixos. */
 const BX_WIDGETS = ['heading', 'text', 'image', 'video', 'button', 'list', 'feature', 'spacer', 'divider', 'form', 'faq', 'quote', 'countdown', 'tpl'];
@@ -1617,7 +1664,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.campaigns = normalizeCampaigns(q.campaigns); q.engine = normalizeEngine(q.engine); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); q.portal = normalizePortal(q.portal); q.mesa = typeof normalizeMesa === 'function' ? normalizeMesa(q.mesa) : (q.mesa || {}); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.identity = normalizeIdentity(q.identity); q.campaigns = normalizeCampaigns(q.campaigns); q.engine = normalizeEngine(q.engine); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); q.portal = normalizePortal(q.portal); q.mesa = typeof normalizeMesa === 'function' ? normalizeMesa(q.mesa) : (q.mesa || {}); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
@@ -1799,7 +1846,8 @@ function projectContext(p) {
     pre.diag.scenario ? 'Diagnóstico: ' + [pre.diag.scenario, pre.diag.causal, pre.diag.consequence, pre.diag.need].join(' ') : '',
     pre.objective ? 'Objetivo estratégico: ' + pre.objective : '',
     pre.icps.length ? 'ICPs:\n' + pre.icps.map(x => `- ${x.name}: ${x.profile} | ${x.situation} | ${x.need}` + (x.pains ? ` | Dores: ${String(x.pains).split('\n').slice(0, 4).join('; ')}` : '') + (x.doubts ? ` | Dúvidas: ${String(x.doubts).split('\n').slice(0, 4).join('; ')}` : '') + (x.desires ? ` | Desejos: ${String(x.desires).split('\n').slice(0, 3).join('; ')}` : '') + (x.hidden ? ` | Urgências ocultas: ${String(x.hidden).split('\n').slice(0, 3).join('; ')}` : '')).join('\n') : '', (p.products || []).length ? 'Produtos e serviços: ' + p.products.slice(0, 8).map(x => x.name + (x.summary ? ' (' + x.summary.slice(0, 100) + ')' : '')).join('; ') : '',
-    (p.products || []).length ? 'Produtos e serviços:\n' + p.products.slice(0, 12).map(x => `- ${x.name}${x.price ? ' (' + x.price + ')' : ''}: ${x.summary || ''}${(x.benefits || []).length ? ' | Benefícios: ' + x.benefits.slice(0, 4).join('; ') : ''}${(x.objections || []).length ? ' | Objeções: ' + x.objections.slice(0, 3).join('; ') : ''}`).join('\n') : '',
+    typeof identityTxt === 'function' && identityTxt(p) ? identityTxt(p) : '',
+    (p.products || []).length ? 'Produtos e serviços:\n' + p.products.slice(0, 12).map(x => `- ${x.name}${x.price ? ' (' + x.price + ')' : ''}: ${x.summary || ''}${(x.benefits || []).length ? ' | Benefícios: ' + x.benefits.slice(0, 4).join('; ') : ''}${(x.objections || []).length ? ' | Objeções: ' + x.objections.slice(0, 3).join('; ') : ''}${typeof prodFacts === 'function' ? prodFacts(x) : ''}`).join('\n') : '',
     p.brief.offer ? 'Oferta: ' + p.brief.offer : '', p.brief.audience ? 'Público: ' + p.brief.audience : '', p.brief.problem ? 'Problema do cliente: ' + p.brief.problem : '',
     p.competitors.some(hasTeardown) ? 'O que o mercado faz (referências): ' + p.competitors.filter(hasTeardown).map(c => `${c.name}: hooks ${(c.teardown.hooks || []).join('; ')}; ângulos ${(c.teardown.angles || []).join('; ')}`).join(' | ') : '',
     p.voice.personality ? 'Personalidade da voz: ' + p.voice.personality : '', p.voice.antivocab ? 'Nunca dizer: ' + p.voice.antivocab : '', p.voice.rules ? 'Regras de escrita: ' + p.voice.rules : '',
@@ -18834,7 +18882,7 @@ function prodModal(id) {
 const prodLines = id => $(id).value.split('\n').map(t => t.trim()).filter(Boolean);
 function prodSave(id) {
   const p = curProject(), name = $('pd_name').value.trim(); if (!name) { toast('Dê um nome ao produto.'); return; }
-  const o = normalizeProducts([{id: id || uid('pr'), name, type: $('pd_type').value, summary: $('pd_summary').value, price: $('pd_price').value, audience: $('pd_audience').value, checkout: $('pd_checkout').value.trim(), benefits: prodLines('pd_benefits'), features: prodLines('pd_features'), objections: prodLines('pd_objections'), proofs: prodLines('pd_proofs'), images: id ? (p.products.find(y => y.id === id) || {}).images : []}])[0];
+  const o = normalizeProducts([{...(id ? (p.products.find(y => y.id === id) || {}) : {}), id: id || uid('pr'), name, type: $('pd_type').value, summary: $('pd_summary').value, price: $('pd_price').value, audience: $('pd_audience').value, checkout: $('pd_checkout').value.trim(), benefits: prodLines('pd_benefits'), features: prodLines('pd_features'), objections: prodLines('pd_objections'), proofs: prodLines('pd_proofs'), images: id ? (p.products.find(y => y.id === id) || {}).images : []}])[0];
   if (id) p.products[p.products.findIndex(y => y.id === id)] = o; else p.products.push(o); persist(); closeModal(); renderLandings();
 }
 function prodDel(id) { if (!confirm('Excluir este produto? As páginas já criadas continuam.')) return; const p = curProject(); p.products = p.products.filter(x => x.id !== id); persist(); renderLandings(); }
@@ -18849,7 +18897,7 @@ function lpNewFromProduct(id) { lpNewModal(id); }
 function lpProductFacts(l) {
   const p = curProject(), x = (p.products || []).find(y => y.id === l.productId); if (!x) return '';
   const pick = (arr, sel) => (l.pick && l.pick.all !== false) ? arr : arr.filter((_, i) => (sel || []).includes(i));
-  return `PRODUTO DO PROJETO (fatos cadastrados; use SÓ estes):\nBenefícios: ${pick(x.benefits, l.pick && l.pick.b).join(' | ') || '(nenhum)'}\nCaracterísticas: ${pick(x.features, l.pick && l.pick.f).join(' | ') || '(nenhuma)'}\nObjeções: ${x.objections.join(' | ') || '(nenhuma)'}\nProvas reais: ${x.proofs.join(' | ') || '(nenhuma: use [CONFIRMAR])'}\n\n`;
+  return `PRODUTO DO PROJETO (fatos cadastrados; use SÓ estes):\nBenefícios: ${pick(x.benefits, l.pick && l.pick.b).join(' | ') || '(nenhum)'}\nCaracterísticas: ${pick(x.features, l.pick && l.pick.f).join(' | ') || '(nenhuma)'}\nObjeções: ${x.objections.join(' | ') || '(nenhuma)'}\nProvas reais: ${x.proofs.join(' | ') || '(nenhuma: use [CONFIRMAR])'}\n${typeof prodFacts === 'function' ? prodFacts(x, true) : ''}\n`;
 }
 function lpNewModal(productId) {
   const p = curProject(), prods = p.products || [], pr = prods.find(x => x.id === productId), def = pr ? (LP_TYPE_INFO[pr.type] ? pr.type : 'generico') : 'curso';
@@ -22817,6 +22865,267 @@ async function smSyncAccounts(quiet) {
   if (st.ig_id) ensure('instagram', st.ig_username ? '@' + st.ig_username : '@instagram', st.ig_id); if (st.page_id) ensure('facebook', st.page_name || 'Página', st.page_id);
   soSave(); if (!quiet) toast(n ? n + ' conta(s) criada(s).' : 'Contas já estão aqui.');
 }
+
+</script>
+<script>
+/* Identidade da marca: os 12 arquétipos (modelo de "O Herói e o Fora da Lei"), valores e atitudes para escolher.
+   Textos escritos para o Studio. As marcas citadas são exemplos comuns na literatura de arquétipos: a classificação é interpretação e varia entre autores. */
+const ID_GROUPS = {independencia: 'Independência e realização', maestria: 'Maestria e risco', pertencimento: 'Pertencimento e prazer', estabilidade: 'Estabilidade e controle'};
+const ID_ARCHS = {
+  inocente: {n: 'Inocente', g: 'independencia', desejo: 'Ser feliz e viver com simplicidade e segurança', medo: 'Fazer algo errado e ser punido', dom: 'Fé, otimismo e pureza', sombra: 'Ingenuidade; negar problemas reais', tom: 'Simples, positivo, gentil, sem jargão', marcas: ['Dove', 'Coca-Cola', 'Innocent'], usa: ['simples', 'bom', 'puro', 'tranquilo', 'honesto', 'sem complicação'], evita: ['ironia pesada', 'ameaça', 'cinismo', 'urgência falsa']},
+  explorador: {n: 'Explorador', g: 'independencia', desejo: 'Liberdade para descobrir quem é e o que há de novo', medo: 'Ficar preso, estagnado, ser comum', dom: 'Autonomia, ambição, coragem de ir', sombra: 'Fugir de compromisso; viver só de partida', tom: 'Convidativo, curioso, espontâneo, sem pressa', marcas: ['Jeep', 'The North Face', 'Land Rover', 'Patagonia'], usa: ['descobrir', 'caminho', 'liberdade', 'novo', 'explorar', 'ir além'], evita: ['rotina', 'padrão', 'conformar', 'sempre igual']},
+  sabio: {n: 'Sábio', g: 'independencia', desejo: 'Entender o mundo e transmitir a verdade', medo: 'Ser enganado ou ignorante', dom: 'Sabedoria, análise, inteligência', sombra: 'Frieza, excesso de análise, arrogância intelectual', tom: 'Claro, calmo, baseado em fatos, didático', marcas: ['Google', 'BBC', 'TED', 'Harvard'], usa: ['entender', 'dados mostram', 'na prática', 'passo a passo', 'por que', 'método'], evita: ['achismo', 'promessa milagrosa', 'gíria forçada', 'exagero']},
+  heroi: {n: 'Herói', g: 'maestria', desejo: 'Provar o próprio valor com ação corajosa', medo: 'Fraqueza, vulnerabilidade, falhar', dom: 'Competência, coragem, determinação', sombra: 'Arrogância; precisar sempre de um inimigo', tom: 'Direto, motivador, confiante, de desafio', marcas: ['Nike', 'FedEx', 'Duracell', 'BMW'], usa: ['conquistar', 'superar', 'meta', 'resultado', 'força', 'vá em frente'], evita: ['desistir', 'tanto faz', 'mais ou menos', 'vitimismo']},
+  foradalei: {n: 'Fora da Lei', g: 'maestria', desejo: 'Rebelião, ruptura e libertação', medo: 'Ser impotente ou irrelevante', dom: 'Coragem de questionar e de virar o jogo', sombra: 'Destruir sem construir; agressividade gratuita', tom: 'Provocador, irreverente, sem filtro, anti-regra', marcas: ['Harley-Davidson', 'Diesel', 'Virgin', 'Jack Daniel\'s'], usa: ['quebrar', 'sem regra', 'rebelde', 'chega de', 'contra o óbvio', 'verdade nua'], evita: ['tradição por tradição', 'sempre foi assim', 'politicamente correto vazio', 'servilismo']},
+  mago: {n: 'Mago', g: 'maestria', desejo: 'Transformar a realidade e fazer sonhos acontecerem', medo: 'Consequências negativas inesperadas', dom: 'Visão, encantamento, transformação', sombra: 'Manipulação; prometer mais do que entrega', tom: 'Inspirador, visionário, misterioso, simbólico', marcas: ['Disney', 'Apple', 'Tesla', 'Dyson'], usa: ['transformar', 'imagine', 'descubra o segredo', 'momento', 'mágica', 'revelar'], evita: ['rotina', 'tarefa', 'burocracia', 'prometer sem provar']},
+  caracomum: {n: 'Cara Comum', g: 'pertencimento', desejo: 'Pertencer e ser aceito como é', medo: 'Ser excluído ou se destacar demais', dom: 'Realismo, empatia, falta de pretensão', sombra: 'Perder a identidade para se encaixar', tom: 'Próximo, honesto, informal, de conversa', marcas: ['IKEA', 'Budweiser', 'Havaianas', 'Magazine Luiza'], usa: ['a gente', 'de verdade', 'do jeito que é', 'junto', 'no dia a dia', 'sem frescura'], evita: ['elitismo', 'palavra difícil', 'pose', 'exclusividade']},
+  amante: {n: 'Amante', g: 'pertencimento', desejo: 'Intimidade, paixão e experiências sensoriais', medo: 'Ficar sozinho ou não ser desejado', dom: 'Paixão, gratidão, apreciação', sombra: 'Dependência de aprovação; superficialidade', tom: 'Caloroso, sensorial, sedutor, elegante', marcas: ['Chanel', 'Victoria\'s Secret', 'Häagen-Dazs', 'Godiva'], usa: ['sentir', 'prazer', 'cuidar de você', 'desejo', 'especial', 'sensação'], evita: ['frieza técnica', 'agressividade', 'jargão', 'pressa']},
+  bobo: {n: 'Bobo da Corte', g: 'pertencimento', desejo: 'Viver o presente com diversão e leveza', medo: 'Ser ignorado ou entediar', dom: 'Alegria, humor, espontaneidade', sombra: 'Frivolidade; fugir de temas sérios', tom: 'Brincalhão, bem-humorado, leve, surpreendente', marcas: ['M&M\'s', 'Old Spice', 'Ben & Jerry\'s', 'Skol'], usa: ['bora', 'divertido', 'sem drama', 'rir', 'brincar', 'curtir'], evita: ['solenidade', 'tom professoral', 'drama', 'culpa']},
+  prestativo: {n: 'Prestativo', g: 'estabilidade', desejo: 'Proteger e cuidar das pessoas', medo: 'Egoísmo e ingratidão', dom: 'Compaixão, generosidade, acolhimento', sombra: 'Martírio; deixar o outro dependente', tom: 'Acolhedor, atencioso, tranquilizador, paciente', marcas: ['Johnson & Johnson', 'UNICEF', 'Volvo', 'Campbell\'s'], usa: ['cuidar', 'estamos com você', 'apoio', 'seguro', 'ajudar', 'proteção'], evita: ['pressão', 'culpa', 'frieza', 'ironia']},
+  criador: {n: 'Criador', g: 'estabilidade', desejo: 'Criar algo de valor duradouro', medo: 'Mediocridade, execução sem visão', dom: 'Criatividade, imaginação, capricho', sombra: 'Perfeccionismo; nunca terminar', tom: 'Imaginativo, expressivo, original, cuidadoso', marcas: ['Lego', 'Adobe', 'Crayola', 'Pinterest'], usa: ['criar', 'construir', 'imaginar', 'do zero', 'feito com cuidado', 'autoral'], evita: ['padrão', 'genérico', 'copiar', 'atalho']},
+  governante: {n: 'Governante', g: 'estabilidade', desejo: 'Controle, ordem e prosperidade', medo: 'Caos e perder o poder', dom: 'Liderança, responsabilidade, visão de conjunto', sombra: 'Autoritarismo; distância do cliente', tom: 'Seguro, sóbrio, autoritativo, refinado', marcas: ['Mercedes-Benz', 'Rolex', 'American Express', 'Microsoft'], usa: ['padrão', 'referência', 'liderança', 'garantia', 'excelência', 'confiança'], evita: ['gíria', 'improviso', 'bagunça', 'tom de brincadeira']}
+};
+/* chips: [id, rótulo, arquétipos (o primeiro vale 2 pontos, os demais 1)] */
+const ID_VALUES = [
+  ['seguranca', 'Segurança', ['inocente', 'governante']], ['simplicidade', 'Simplicidade', ['inocente', 'caracomum']], ['honestidade', 'Honestidade', ['inocente', 'sabio', 'caracomum']], ['otimismo', 'Otimismo', ['inocente', 'bobo']], ['confianca', 'Confiança', ['inocente', 'governante', 'prestativo']],
+  ['liberdade', 'Liberdade', ['explorador', 'foradalei']], ['aventura', 'Aventura', ['explorador', 'heroi']], ['autenticidade', 'Autenticidade', ['explorador', 'caracomum']], ['descoberta', 'Descoberta', ['explorador', 'sabio']],
+  ['conhecimento', 'Conhecimento', ['sabio']], ['verdade', 'Verdade', ['sabio', 'foradalei']], ['clareza', 'Clareza', ['sabio', 'governante']],
+  ['coragem', 'Coragem', ['heroi', 'foradalei']], ['superacao', 'Superação', ['heroi']], ['disciplina', 'Disciplina', ['heroi', 'governante']], ['excelencia', 'Excelência', ['heroi', 'governante', 'criador']], ['resultado', 'Resultado', ['heroi']],
+  ['ruptura', 'Ruptura', ['foradalei']], ['rebeldia', 'Rebeldia', ['foradalei']], ['inconformismo', 'Inconformismo', ['foradalei', 'criador']],
+  ['transformacao', 'Transformação', ['mago']], ['visao', 'Visão', ['mago', 'criador']], ['encantamento', 'Encantamento', ['mago', 'amante']],
+  ['pertencimento', 'Pertencimento', ['caracomum']], ['igualdade', 'Igualdade', ['caracomum']], ['humildade', 'Humildade', ['caracomum']], ['comunidade', 'Comunidade', ['caracomum', 'prestativo']],
+  ['intimidade', 'Intimidade', ['amante']], ['paixao', 'Paixão', ['amante']], ['beleza', 'Beleza', ['amante', 'criador']],
+  ['alegria', 'Alegria', ['bobo']], ['leveza', 'Leveza', ['bobo', 'inocente']], ['humor', 'Humor', ['bobo']],
+  ['cuidado', 'Cuidado', ['prestativo']], ['generosidade', 'Generosidade', ['prestativo']], ['empatia', 'Empatia', ['prestativo', 'amante']], ['servir', 'Servir', ['prestativo']],
+  ['inovacao', 'Inovação', ['criador', 'mago']], ['criatividade', 'Criatividade', ['criador']], ['expressao', 'Expressão', ['criador']],
+  ['lideranca', 'Liderança', ['governante', 'heroi']], ['ordem', 'Ordem', ['governante']], ['prestigio', 'Prestígio', ['governante', 'amante']], ['responsabilidade', 'Responsabilidade', ['governante', 'prestativo']]
+];
+const ID_ATTS = [
+  ['direto', 'Fala sem rodeio', ['heroi', 'foradalei']], ['desafia', 'Desafia o que todo mundo aceita', ['foradalei']], ['acolhe', 'Protege e acolhe quem chega', ['prestativo']], ['explica', 'Explica com calma e com dados', ['sabio']],
+  ['convida', 'Convida a experimentar o novo', ['explorador']], ['comum', 'Fala como gente comum', ['caracomum']], ['graca', 'Faz graça e não se leva tão a sério', ['bobo']], ['capricho', 'Cria algo do zero com capricho', ['criador']],
+  ['comando', 'Assume o comando e dá direção', ['governante']], ['surpreende', 'Encanta e surpreende', ['mago']], ['carinho', 'Fala com carinho e proximidade', ['amante']], ['positivo', 'Mantém tudo simples e positivo', ['inocente']],
+  ['enfrenta', 'Enfrenta o problema de frente', ['heroi']], ['quebra', 'Quebra regras que não fazem sentido', ['foradalei']], ['autoridade', 'Mostra o caminho com autoridade', ['governante', 'sabio']], ['detalhes', 'Cuida dos detalhes', ['criador', 'amante']],
+  ['celebra', 'Celebra conquistas', ['heroi', 'bobo']], ['admite', 'Admite o que não sabe', ['caracomum', 'sabio']], ['escuta', 'Escuta antes de falar', ['prestativo', 'caracomum']], ['provoca', 'Provoca e incomoda para despertar', ['foradalei', 'mago']],
+  ['inspira', 'Inspira a ir além do limite', ['heroi', 'explorador']], ['muda', 'Transforma a vida da pessoa', ['mago', 'heroi']], ['bastidores', 'Mostra bastidores sem filtro', ['caracomum', 'foradalei']], ['tradicao', 'Valoriza tradição e confiança', ['governante', 'inocente']],
+  ['curioso', 'Mostra o mundo com curiosidade', ['explorador', 'sabio']], ['generoso', 'Dá conteúdo generoso e gratuito', ['prestativo']], ['acido', 'Usa humor ácido', ['bobo', 'foradalei']], ['facil', 'Faz o difícil parecer fácil', ['sabio', 'criador']],
+  ['sonhos', 'Fala de sonhos e de futuro', ['mago', 'inocente']], ['cobra', 'Cobra resultado e disciplina', ['heroi', 'governante']]
+];
+const ID_SLIDER_INFO = {formal: ['Formal', 'Informal'], humor: ['Sério', 'Bem-humorado'], tecnico: ['Técnico', 'Simples'], calor: ['Reservado', 'Caloroso'], ousadia: ['Contido', 'Ousado']};
+const ID_LIST_INFO = {
+  fala: ['O que a marca fala', 'Assuntos e jeitos de falar que combinam com ela.'], naoFala: ['O que a marca NÃO fala', 'Assuntos e jeitos que ela evita.'],
+  atitudeTem: ['Atitudes que a marca tem', 'Como ela se comporta.'], atitudeNao: ['Atitudes que a marca NÃO tem', 'O que ela nunca faria.'],
+  admira: ['O que a marca admira', 'Pessoas, comportamentos e ideias que ela valoriza.'], repudia: ['O que a marca repudia', 'O que ela rejeita.'],
+  usa: ['Palavras que a marca USA', 'Vocabulário próprio.'], naoUsa: ['Palavras que a marca NÃO usa', 'Vão para a lista de proibidas nas criações.']
+};
+const ID_SUG = {
+  admira: ['Quem faz o que promete', 'Gente que persiste', 'Clareza', 'Quem escuta de verdade', 'Criatividade', 'Coragem de ser diferente', 'Cuidado com os detalhes', 'Resultado real'],
+  repudia: ['Falsidade', 'Promessa milagrosa', 'Arrogância', 'Descaso com o cliente', 'Copiar os outros', 'Pressão e urgência falsa', 'Linguagem difícil de propósito', 'Desrespeito'],
+  fala: ['O dia a dia do cliente', 'Bastidores do trabalho', 'Casos reais', 'Dicas práticas', 'Erros comuns', 'Mitos e verdades', 'Opinião sobre o mercado'],
+  naoFala: ['Política partidária', 'Fofoca de concorrente', 'Resultado garantido', 'Preço sem contexto', 'Piada com o cliente']
+};
+
+/* pontuação: valores e atitudes escolhidos → afinidade com cada arquétipo */
+function idScore(id) {
+  const s = {}; ID_ARCH.forEach(k => { s[k] = 0; });
+  const add = (list, sel) => (sel || []).forEach(i => { const c = list.find(x => x[0] === i); if (c) c[2].forEach((a, n) => { s[a] += n === 0 ? 2 : 1; }); });
+  add(ID_VALUES, id.values); add(ID_ATTS, id.attitudes);
+  const arr = ID_ARCH.map(k => ({id: k, score: s[k]})).sort((a, b) => b.score - a.score || ID_ARCH.indexOf(a.id) - ID_ARCH.indexOf(b.id)), top = arr[0].score || 1;
+  return arr.map(x => ({id: x.id, score: x.score, pct: Math.round(x.score / top * 100)}));
+}
+const idMain = id => id.arch || (idScore(id)[0].score ? idScore(id)[0].id : '');
+/* resumo do tom a partir dos controles */
+function idToneText(id) {
+  const S = id.sliders, w = (k, lo, hi) => S[k] <= 2 ? lo : S[k] >= 4 ? hi : '';
+  return [w('formal', 'formal', 'informal'), w('humor', 'sério', 'bem-humorado'), w('tecnico', 'técnico', 'simples e direto'), w('calor', 'reservado', 'caloroso'), w('ousadia', 'contido', 'ousado')].filter(Boolean).join(', ');
+}
+/* texto para a IA: só o que foi preenchido */
+function identityTxt(p) {
+  const id = p && p.identity; if (!id) return '';
+  const a = ID_ARCHS[idMain(id)], a2 = ID_ARCHS[id.arch2], L = id.lists, vals = id.values.map(v => (ID_VALUES.find(x => x[0] === v) || [0, v])[1]).concat(id.valuesExtra), ats = id.attitudes.map(v => (ID_ATTS.find(x => x[0] === v) || [0, v])[1]).concat(id.attitudesExtra);
+  const lines = [a ? `Arquétipo da marca: ${a.n}${a2 ? ' (secundário: ' + a2.n + ')' : ''}. Desejo central: ${a.desejo}. Tom típico: ${a.tom}.` : '', vals.length ? 'Valores: ' + vals.join(', ') : '', ats.length ? 'Atitudes: ' + ats.join('; ') : '', idToneText(id) ? 'Tom de voz: ' + idToneText(id) : '',
+    L.fala.length ? 'A marca fala de: ' + L.fala.join('; ') : '', L.naoFala.length ? 'A marca NÃO fala de: ' + L.naoFala.join('; ') : '', L.atitudeTem.length ? 'Atitudes que tem: ' + L.atitudeTem.join('; ') : '', L.atitudeNao.length ? 'Atitudes que NÃO tem: ' + L.atitudeNao.join('; ') : '',
+    L.admira.length ? 'Admira: ' + L.admira.join('; ') : '', L.repudia.length ? 'Repudia: ' + L.repudia.join('; ') : '', L.usa.length ? 'PALAVRAS QUE USA: ' + L.usa.join(', ') : '', L.naoUsa.length ? 'PALAVRAS PROIBIDAS (nunca usar): ' + L.naoUsa.join(', ') : ''].filter(Boolean);
+  return lines.length ? 'IDENTIDADE DA MARCA (definida pelo cliente)\n' + lines.join('\n') : '';
+}
+
+</script>
+<script>
+/* Aba "Marca" do projeto: valores → atitudes → arquétipo → voz → resumo. Tudo salvo em p.identity. */
+const idUI = {};
+const idP = () => curProject(), idD = () => { const p = idP(); if (!p.identity || !p.identity.step) p.identity = normalizeIdentity(p.identity); return p.identity; };
+const idSave = () => { persist(); };
+const idRe = () => keepScroll(renderProjectTab);
+const idStepNames = ['Valores', 'Atitudes', 'Seu arquétipo', 'Voz e palavras', 'Resumo'];
+
+function idStepper(id) {
+  return `<div class="id-steps">${idStepNames.map((n, i) => `<button class="id-step ${id.step === i + 1 ? 'on' : ''} ${id.step > i + 1 ? 'done' : ''}" onclick="idGo(${i + 1})"><b>${i + 1}</b><span>${n}</span></button>`).join('')}</div>`;
+}
+function idGo(n) { const id = idD(); if (n >= 3 && !id.values.length && !id.valuesExtra.length && !id.attitudes.length) { toast('Escolha alguns valores ou atitudes primeiro.'); n = id.values.length ? n : 1; } id.step = n; if (n === 5 && !id.doneAt) id.doneAt = new Date().toISOString(); idSave(); idRe(); }
+function idNext(d) { idGo(Math.min(5, Math.max(1, idD().step + d))); }
+
+function idChips(list, sel, key, extraKey) {
+  const id = idD();
+  return `<div class="id-chips">${list.map(([k, l]) => `<button class="id-chip ${sel.includes(k) ? 'on' : ''}" onclick="idToggle('${key}','${k}')">${esc(l)}</button>`).join('')}${id[extraKey].map((t, i) => `<button class="id-chip on own" title="Tirar" onclick="idDelExtra('${extraKey}',${i})">${esc(t)} ✕</button>`).join('')}</div>
+  <div class="row-gap" style="margin-top:10px"><input id="idExtra_${key}" placeholder="Outro (digite e aperte Enter)" style="flex:1;max-width:340px" onkeydown="if(event.key==='Enter'){event.preventDefault();idAddExtra('${key}','${extraKey}')}"><button class="btn sm" onclick="idAddExtra('${key}','${extraKey}')">＋ Adicionar</button></div>`;
+}
+function idToggle(key, k) { const a = idD()[key], i = a.indexOf(k); if (i >= 0) a.splice(i, 1); else if (a.length >= 12) { toast('Escolha no máximo 12. O ideal é de 5 a 7.'); return; } else a.push(k); idSave(); idRe(); }
+function idAddExtra(key, extraKey) { const el = $('idExtra_' + key), t = (el.value || '').trim(); if (!t) return; const a = idD()[extraKey]; if (!a.some(x => x.toLowerCase() === t.toLowerCase()) && a.length < 10) a.push(t.slice(0, 90)); idSave(); idRe(); }
+function idDelExtra(extraKey, i) { idD()[extraKey].splice(i, 1); idSave(); idRe(); }
+
+function idCount(n, lo, hi) { return `<p class="muted" style="margin:6px 0 12px">${n} escolhido(s). ${n < lo ? `Escolha de ${lo} a ${hi}.` : n > hi ? `Tente ficar entre ${lo} e ${hi}: quanto menos, mais claro.` : 'Está bom.'}</p>`; }
+
+function idStep1(id) {
+  return `<h3>1 · Os valores</h3><p class="muted">Clique nos valores que são <b>de verdade</b> da pessoa ou da marca, os que ela defenderia mesmo perdendo dinheiro. Escolha de 5 a 7.</p>${idCount(id.values.length + id.valuesExtra.length, 5, 7)}${idChips(ID_VALUES, id.values, 'values', 'valuesExtra')}`;
+}
+function idStep2(id) {
+  return `<h3>2 · As atitudes</h3><p class="muted">Agora, como a marca <b>age</b> no dia a dia. Clique no que combina. Escolha de 5 a 7.</p>${idCount(id.attitudes.length + id.attitudesExtra.length, 5, 7)}${idChips(ID_ATTS, id.attitudes, 'attitudes', 'attitudesExtra')}`;
+}
+function idArchCard(k, big) {
+  const a = ID_ARCHS[k];
+  return `<div class="id-arch ${big ? 'big' : ''}"><div class="id-arch-h"><h2>${esc(a.n)}</h2><small>${esc(ID_GROUPS[a.g])}</small></div>
+    <div class="id-kv"><span>Deseja</span><b>${esc(a.desejo)}</b></div><div class="id-kv"><span>Tem medo de</span><b>${esc(a.medo)}</b></div><div class="id-kv"><span>Dom</span><b>${esc(a.dom)}</b></div><div class="id-kv"><span>Cuidado (sombra)</span><b>${esc(a.sombra)}</b></div><div class="id-kv"><span>Tom de voz</span><b>${esc(a.tom)}</b></div>
+    <div class="id-kv"><span>Marcas parecidas</span><b>${a.marcas.map(esc).join(' · ')}</b></div></div>`;
+}
+function idStep3(id) {
+  const sc = idScore(id), has = sc[0].score > 0, main = idMain(id), top = sc.slice(0, 3);
+  if (!has) return `<h3>3 · Seu arquétipo</h3><p class="muted">Escolha valores e atitudes nos passos 1 e 2 para ver o resultado.</p>`;
+  return `<h3>3 · Seu arquétipo</h3><p class="muted">Pelos valores e atitudes que você escolheu, a marca se parece mais com:</p>
+  <div class="id-rank">${top.map(x => `<div class="id-bar"><span>${esc(ID_ARCHS[x.id].n)}</span><i><u style="width:${x.pct}%"></u></i><em>${x.pct}%</em></div>`).join('')}</div>
+  ${idArchCard(main, true)}
+  <div class="id-note">As marcas citadas são <b>exemplos comuns</b> nos livros de arquétipos. A classificação de cada marca é interpretação e muda de autor para autor, use só como referência de sensação.</div>
+  <h4 style="margin:16px 0 6px">Não concorda? Escolha você</h4><p class="muted" style="margin:0 0 8px">Principal${id.arch ? ' (escolhido por você)' : ' (sugerido)'} e, se quiser, um secundário.</p>
+  <div class="id-chips">${ID_ARCH.map(k => `<button class="id-chip ${main === k ? 'on' : ''}" onclick="idSetArch('${k}')">${esc(ID_ARCHS[k].n)}</button>`).join('')}</div>
+  <div class="id-chips" style="margin-top:8px"><span class="muted" style="align-self:center;font-size:12px">Secundário:</span>${top.filter(x => x.id !== main).concat(sc.filter(x => !top.includes(x) && x.id !== main).slice(0, 0)).map(x => `<button class="id-chip ${id.arch2 === x.id ? 'on' : ''}" onclick="idSetArch2('${x.id}')">${esc(ID_ARCHS[x.id].n)}</button>`).join('')}${id.arch2 ? '<button class="id-chip" onclick="idSetArch2(\'\')">sem secundário</button>' : ''}</div>
+  <h4 style="margin:16px 0 6px">Marcas que você admira</h4>${idTagEditor('refBrands', id.refBrands, [], 'Ex.: Nike, uma loja do bairro…', true)}`;
+}
+function idSetArch(k) { const id = idD(), top = idScore(id)[0].id; id.arch = k === top ? '' : k; if (id.arch2 === k) id.arch2 = ''; idSave(); idRe(); }
+function idSetArch2(k) { idD().arch2 = idD().arch2 === k ? '' : k; idSave(); idRe(); }
+
+/* editor de lista com sugestões */
+function idTagEditor(key, arr, sugg, ph, top) {
+  const isList = !top;
+  return `<div class="id-tags">${arr.map((t, i) => `<span class="id-tag">${esc(t)}<button title="Tirar" onclick="idUntag('${key}',${i},${isList})">✕</button></span>`).join('') || '<small class="muted">Nada ainda.</small>'}</div>
+  ${sugg.filter(s => !arr.includes(s)).length ? `<div class="id-sug"><small>Sugestões, clique para usar:</small>${sugg.filter(s => !arr.includes(s)).slice(0, 10).map(s => `<button onclick="idTag('${key}',this.textContent,${isList})">${esc(s)}</button>`).join('')}</div>` : ''}
+  <div class="row-gap" style="margin-top:6px"><input id="idT_${key}" placeholder="${esc(ph || 'Escreva e aperte Enter')}" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();idTag('${key}',this.value,${isList})}"><button class="btn sm" onclick="idTag('${key}',$('idT_${key}').value,${isList})">＋</button></div>`;
+}
+function idArr(key, isList) { return isList ? idD().lists[key] : idD()[key]; }
+function idTag(key, t, isList) { t = String(t || '').trim().slice(0, 90); if (!t) return; const a = idArr(key, isList); if (!a.some(x => x.toLowerCase() === t.toLowerCase()) && a.length < 40) a.push(t); idSave(); idRe(); }
+function idUntag(key, i, isList) { idArr(key, isList).splice(i, 1); idSave(); idRe(); }
+
+function idListSug(k, id) {
+  const a = ID_ARCHS[idMain(id)] || {}, sc = idScore(id), low = id.attitudes.length ? ID_ATTS.filter(x => !id.attitudes.includes(x[0]) && x[2].every(r => (sc.find(s => s.id === r) || {pct: 0}).pct < 40)).map(x => x[1]) : [];
+  return {usa: a.usa || [], naoUsa: a.evita || [], atitudeTem: id.attitudes.map(v => (ID_ATTS.find(x => x[0] === v) || [0, ''])[1]).filter(Boolean), atitudeNao: low.slice(0, 8), fala: ID_SUG.fala, naoFala: ID_SUG.naoFala, admira: ID_SUG.admira, repudia: ID_SUG.repudia}[k] || [];
+}
+function idStep4(id) {
+  const sl = ID_SLIDERS.map(k => { const [a, b] = ID_SLIDER_INFO[k]; return `<div class="id-sl"><span>${a}</span><input type="range" min="1" max="5" value="${id.sliders[k]}" oninput="idSlider('${k}',this.value)"><span>${b}</span></div>`; }).join('');
+  return `<h3>4 · Voz e palavras</h3><p class="muted">Defina como a marca fala. Use as sugestões (clique) ou escreva as suas.</p>
+  <div class="panel" style="margin:0 0 14px"><h4 style="margin:0 0 8px">Tom de voz</h4>${sl}<p class="muted" id="idToneTxt" style="margin:8px 0 0">${esc(idToneText(id) ? 'Resumo: ' + idToneText(id) + '.' : 'Tom equilibrado.')}</p></div>
+  <div class="id-lists">${ID_LISTS.map(k => `<div class="panel"><h4 style="margin:0">${esc(ID_LIST_INFO[k][0])}</h4><p class="muted" style="margin:2px 0 8px;font-size:12px">${esc(ID_LIST_INFO[k][1])}</p>${idTagEditor(k, id.lists[k], idListSug(k, id), '', false)}</div>`).join('')}</div>`;
+}
+function idSlider(k, v) { const id = idD(); id.sliders[k] = +v; idSave(); const t = $('idToneTxt'); if (t) t.textContent = idToneText(id) ? 'Resumo: ' + idToneText(id) + '.' : 'Tom equilibrado.'; }
+
+function idSummary(p) {
+  const id = p.identity, a = ID_ARCHS[idMain(id)], L = id.lists, lab = (list, ids) => ids.map(v => (list.find(x => x[0] === v) || [0, v])[1]);
+  const sec = (t, arr) => arr.length ? `**${t}:** ${arr.join('; ')}\n\n` : '';
+  return `# Identidade da marca — ${p.name}\n\n` + (a ? `**Arquétipo:** ${a.n}${id.arch2 ? ' + ' + ID_ARCHS[id.arch2].n : ''}\n\n**Deseja:** ${a.desejo}\n\n**Tem medo de:** ${a.medo}\n\n**Cuidado (sombra):** ${a.sombra}\n\n**Marcas parecidas (referência):** ${a.marcas.join(', ')}\n\n` : '') + sec('Valores', lab(ID_VALUES, id.values).concat(id.valuesExtra)) + sec('Atitudes', lab(ID_ATTS, id.attitudes).concat(id.attitudesExtra)) + sec('Marcas que admira', id.refBrands) + (idToneText(id) ? `**Tom de voz:** ${idToneText(id)}${a ? '. ' + a.tom : ''}\n\n` : '') +
+    ID_LISTS.map(k => sec(ID_LIST_INFO[k][0], L[k])).join('') + (id.notes ? `**Notas:** ${id.notes}\n` : '');
+}
+function idStep5(id) {
+  const p = idP(), main = idMain(id), L = id.lists, chip = arr => arr.length ? arr.map(t => `<span class="id-tag">${esc(t)}</span>`).join('') : '<small class="muted">—</small>', lab = (list, ids) => ids.map(v => (list.find(x => x[0] === v) || [0, v])[1]);
+  if (!main && !ID_LISTS.some(k => L[k].length)) return `<h3>5 · Resumo</h3><p class="muted">Preencha os passos anteriores para ver o resumo.</p>`;
+  return `<h3>5 · Resumo da marca</h3><p class="muted">Já está salvo no projeto. As criações com IA passam a usar isto (arquétipo, tom, palavras que usa e as proibidas).</p>
+  ${main ? idArchCard(main, true) : ''}
+  <div class="two" style="margin-top:12px"><div class="panel"><h4>Valores</h4><div class="id-tags">${chip(lab(ID_VALUES, id.values).concat(id.valuesExtra))}</div><h4 style="margin-top:12px">Atitudes</h4><div class="id-tags">${chip(lab(ID_ATTS, id.attitudes).concat(id.attitudesExtra))}</div><h4 style="margin-top:12px">Tom de voz</h4><p>${esc(idToneText(id) || 'equilibrado')}</p></div>
+  <div class="panel">${ID_LISTS.map(k => `<h4 style="margin:${k === 'fala' ? 0 : 10}px 0 4px">${esc(ID_LIST_INFO[k][0])}</h4><div class="id-tags">${chip(L[k])}</div>`).join('')}</div></div>
+  <div class="field full" style="margin-top:12px"><label>Notas</label><textarea rows="3" oninput="idD().notes=this.value.slice(0,1500);idSave()">${esc(id.notes)}</textarea></div>
+  <div class="actions" style="margin-top:12px;flex-wrap:wrap"><button class="btn dark" onclick="idApplyVoice()">Enviar para o Brand/Voice Brain</button><button class="btn" onclick="idCopy()">Copiar resumo</button><button class="btn" onclick="idDownload()">Baixar resumo (.md)</button><button class="btn" onclick="idReset()">Refazer do zero</button></div>`;
+}
+function idApplyVoice() {
+  const p = idP(), id = p.identity, a = ID_ARCHS[idMain(id)], L = id.lists, v = p.voice || (p.voice = {}), b = p.brand;
+  const want = {personality: [a ? `${a.n}: ${a.tom}` : '', idToneText(id)].filter(Boolean).join('. '), vocabulary: L.usa.join(', '), antivocab: L.naoUsa.join(', '), rules: [L.naoFala.length ? 'Não falar de: ' + L.naoFala.join('; ') : '', L.atitudeNao.length ? 'Nunca ter a atitude: ' + L.atitudeNao.join('; ') : '', L.repudia.length ? 'Repudia: ' + L.repudia.join('; ') : ''].filter(Boolean).join('\n')};
+  const clash = Object.keys(want).filter(k => want[k] && String(v[k] || '').trim() && String(v[k]).trim() !== want[k]);
+  if (clash.length && !confirm('O Voice Brain já tem texto em: ' + clash.join(', ') + '. Substituir pelo que você definiu aqui?')) return;
+  Object.keys(want).forEach(k => { if (want[k]) v[k] = want[k]; }); if (a && !String(b.tone || '').trim()) b.tone = a.tom; persist(); toast('Voice Brain atualizado.');
+}
+function idCopy() { const t = idSummary(idP()); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Resumo copiado.'), () => { download('identidade-da-marca.md', t, 'text/markdown'); }); }
+function idDownload() { download('identidade-da-marca.md', idSummary(idP()), 'text/markdown'); }
+function idReset() { if (!confirm('Apagar tudo o que foi respondido nesta aba?')) return; idP().identity = normalizeIdentity({}); idSave(); idRe(); }
+
+function identityHTML(p) {
+  const id = idD(), body = [idStep1, idStep2, idStep3, idStep4, idStep5][id.step - 1](id);
+  return `<div class="panel id-wrap"><div class="section-row"><div><h3>Marca: valores, arquétipo e voz</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">Cinco passos curtos. Cada resposta é salva sozinha no projeto.</p></div></div>${idStepper(id)}<div class="id-body">${body}</div>
+  <div class="id-nav"><button class="btn" onclick="idNext(-1)" ${id.step === 1 ? 'disabled' : ''}>‹ Voltar</button><button class="btn dark" onclick="idNext(1)" ${id.step === 5 ? 'disabled' : ''}>Continuar ›</button></div></div>`;
+}
+
+TABS.identity = identityHTML;
+
+</script>
+<script>
+/* Aba "Produtos" do projeto: ficha completa de cada produto ou serviço (fonte dos fatos para ofertas, anúncios e páginas). */
+const prUI = {id: '', open: {0: 1}};
+const PR_FORMAT = {'': 'Não definido', online: 'Online', presencial: 'Presencial', fisico: 'Produto físico', hibrido: 'Híbrido'}, PR_STATUS = {ativo: 'Ativo', pausado: 'Pausado', em_breve: 'Em breve'};
+const prList = () => curProject().products || (curProject().products = []);
+const prGet = id => prList().find(x => x.id === id);
+/* campos que contam para o "ficha pronta": [chave, rótulo] */
+const PR_CHECK = [['name', 'Nome'], ['summary', 'Descrição'], ['price', 'Preço'], ['audience', 'Para quem serve'], ['notFor', 'Para quem não serve'], ['problems', 'Problemas que resolve'], ['resolveTime', 'Tempo para resolver o problema'], ['delivery', 'Como é entregue'], ['deliveryTime', 'Prazo de entrega'], ['benefits', 'Benefícios'], ['features', 'Características'], ['objections', 'Objeções'], ['differentials', 'Diferenciais'], ['proofs', 'Provas reais']];
+function prDone(x) { const miss = PR_CHECK.filter(([k]) => { const v = x[k]; return Array.isArray(v) ? !v.length : !String(v || '').trim() || (k === 'name' && x.name === 'Produto'); }); return {pct: Math.round((PR_CHECK.length - miss.length) / PR_CHECK.length * 100), miss: miss.map(m => m[1])}; }
+/* fatos do produto para a IA: só o que foi preenchido */
+function prodFacts(x, full) {
+  const L = (t, v) => (Array.isArray(v) ? v.length : String(v || '').trim()) ? ` | ${t}: ${Array.isArray(v) ? v.slice(0, 6).join('; ') : String(v).slice(0, 220)}` : '';
+  const s = L('Formato', x.format ? PR_FORMAT[x.format] : '') + L('Peso', x.weight) + L('Tamanho', x.size) + L('Duração', x.duration) + L('Inclui', x.includes) + L('Condição de preço', x.priceNote) + L('Pagamento', x.payment) + L('Entrega', x.delivery) + L('Prazo de entrega', x.deliveryTime) + L('Validade', x.validity) + L('Garantia', x.warranty) + L('Serve para', full ? '' : x.audience) + L('NÃO serve para', x.notFor) + L('Problemas que resolve', x.problems) + L('Tempo para resolver', x.resolveTime) + L('Diferenciais', x.differentials) + L('Limites', x.limits);
+  return full ? s.replace(/ \| /g, '\n').replace(/^\n?/, '') + (s ? '\n' : '') : s;
+}
+
+function prHTML(p) {
+  if (prUI.id && prGet(prUI.id)) return prForm(prGet(prUI.id));
+  const L = prList();
+  return `<div class="panel"><div class="section-row"><div><h3>Produtos e serviços</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">Liste tudo o que a marca vende. Cada ficha completa fortalece a oferta, os anúncios e as páginas. O Studio só usa o que estiver preenchido.</p></div><div class="row-gap"><button class="btn" onclick="prQuick()">Colar lista</button><button class="btn dark" onclick="prNew()">＋ Novo produto/serviço</button></div></div>
+  ${L.length ? `<div class="pr-grid">${L.map(x => { const d = prDone(x); return `<div class="pr-card ${x.status !== 'ativo' ? 'off' : ''}" onclick="prOpen('${x.id}')"><div class="pr-top"><strong>${esc(x.name)}</strong><small>${esc((LP_TYPE_INFO[x.type] || {label: 'Produto físico / catálogo'}).label)}${x.status !== 'ativo' ? ' · ' + PR_STATUS[x.status] : ''}</small></div><p>${esc(x.summary).slice(0, 110) || '<span class="muted">Sem descrição.</span>'}</p><div class="pr-meter"><i style="width:${d.pct}%"></i></div><small class="muted">Ficha ${d.pct}% completa${d.miss.length ? ' · falta: ' + esc(d.miss.slice(0, 3).join(', ')) + (d.miss.length > 3 ? '…' : '') : ''}</small></div>`; }).join('')}</div>` : emptyState('Nenhum produto ainda', 'Clique em “Novo produto/serviço” ou em “Colar lista” para começar.')}</div>`;
+}
+function prNew() { const x = normalizeProducts([{id: uid('pr'), name: 'Novo produto'}])[0]; x.name = ''; prList().push(x); prUI.id = x.id; prUI.open = {0: 1}; persist(); renderProjectTab(); setTimeout(() => { const n = $('pr_name'); if (n) n.focus(); }, 60); }
+function prOpen(id) { prUI.id = id; prUI.open = {0: 1}; renderProjectTab(); window.scrollTo(0, 0); }
+function prBack() { const x = prGet(prUI.id); if (x && !x.name.trim() && !x.summary.trim()) prList().splice(prList().indexOf(x), 1); else if (x && !x.name.trim()) x.name = 'Produto'; prUI.id = ''; persist(); renderProjectTab(); }
+function prQuick() {
+  showModal('Colar lista de produtos e serviços', `<p style="margin-top:0;font-size:13px">Um por linha. Pode colar de uma planilha: <b>nome</b> ou <b>nome ; preço</b> ou <b>nome ; preço ; descrição</b>. Depois você completa a ficha de cada um.</p><textarea id="prQ" rows="9" style="width:100%" placeholder="Consulta inicial ; R$ 250\nMentoria 3 meses ; R$ 3.000 ; Acompanhamento semanal"></textarea><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="prQuickSave()">Adicionar</button></div>`);
+}
+function prQuickSave() {
+  const rows = $('prQ').value.split('\n').map(l => l.split(/\t|;/).map(c => c.trim())).filter(r => r[0]), L = prList(); let n = 0;
+  rows.slice(0, 80).forEach(r => { if (L.some(x => x.name.toLowerCase() === r[0].toLowerCase())) return; L.push(normalizeProducts([{id: uid('pr'), name: r[0], price: r[1] || '', summary: r[2] || ''}])[0]); n++; });
+  persist(); closeModal(); renderProjectTab(); toast(n ? n + ' produto(s) adicionado(s).' : 'Nada novo para adicionar.');
+}
+function prDup(id) { const x = prGet(id), c = JSON.parse(JSON.stringify(x)); c.id = uid('pr'); c.name = x.name + ' (cópia)'; c.created = new Date().toISOString(); prList().push(c); prUI.id = c.id; persist(); renderProjectTab(); }
+function prDel(id) { if (!confirm('Excluir este produto? As páginas já criadas continuam.')) return; const L = prList(); L.splice(L.findIndex(x => x.id === id), 1); prUI.id = ''; persist(); renderProjectTab(); }
+/* grava direto no objeto a cada mudança */
+function prSet(k, v, isLines) { const x = prGet(prUI.id); if (!x) return; x[k] = isLines ? String(v).split('\n').map(t => t.trim()).filter(Boolean) : String(v); prDebounce(); prMeter(); }
+let prT; function prDebounce() { clearTimeout(prT); prT = setTimeout(() => { const x = prGet(prUI.id); if (x) { const n = normalizeProducts([x])[0]; Object.assign(x, n); } persist(); }, 400); }
+function prMeter() { const x = prGet(prUI.id), d = x && prDone(x), el = $('prMeter'); if (el && d) { el.querySelector('i').style.width = d.pct + '%'; el.nextElementSibling.textContent = `Ficha ${d.pct}% completa${d.miss.length ? ' · falta: ' + d.miss.join(', ') : ' · pronta para oferta'}`; } }
+function prToggle(i) { prUI.open[i] = !prUI.open[i]; keepScroll(renderProjectTab); }
+
+function prForm(x) {
+  const d = prDone(x), f = (k, l, o = {}) => `<div class="field ${o.full ? 'full' : ''}"><label>${l}</label>${o.area ? `<textarea rows="${o.rows || 3}" id="pr_${k}" placeholder="${esc(o.ph || '')}" oninput="prSet('${k}',this.value,${!!o.lines})">${esc(o.lines ? (x[k] || []).join('\n') : x[k])}</textarea>` : `<input id="pr_${k}" value="${esc(x[k])}" placeholder="${esc(o.ph || '')}" oninput="prSet('${k}',this.value)">`}${o.hint ? `<small class="muted">${o.hint}</small>` : ''}</div>`;
+  const sel = (k, l, map) => `<div class="field"><label>${l}</label><select onchange="prSet('${k}',this.value);${k === 'type' ? '' : ''}">${Object.entries(map).map(([a, b]) => `<option value="${a}" ${x[k] === a ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select></div>`;
+  const types = {}; ['produto', 'curso', 'ebook', 'servico', 'evento', 'cadastro'].forEach(t => { types[t] = (LP_TYPE_INFO[t] || {label: 'Produto físico / catálogo'}).label; });
+  const sec = (i, t, sub, inner) => `<div class="pr-sec ${prUI.open[i] ? 'open' : ''}"><button class="pr-sech" onclick="prToggle(${i})"><b>${t}</b><small>${sub}</small><i>${prUI.open[i] ? '▾' : '▸'}</i></button>${prUI.open[i] ? `<div class="form-grid pr-secb">${inner}</div>` : ''}</div>`;
+  return `<div class="panel"><div class="section-row"><div><button class="btn sm" onclick="prBack()">‹ Todos os produtos</button><h3 style="margin:10px 0 2px">${esc(x.name) || 'Novo produto ou serviço'}</h3></div><div class="row-gap"><button class="btn sm" onclick="prSuggest()" ${aiReady() ? '' : 'disabled'} title="Sugere itens a partir da descrição. Tudo vem marcado [CONFIRMAR]">✦ Completar com IA</button><button class="btn sm dark" onclick="lpNewFromProduct('${x.id}')">Criar página</button><button class="btn sm" onclick="prDup('${x.id}')">Duplicar</button><button class="btn sm" onclick="prDel('${x.id}')">Excluir</button></div></div>
+  <div class="pr-meter" id="prMeter" style="margin:10px 0 4px"><i style="width:${d.pct}%"></i></div><small class="muted">Ficha ${d.pct}% completa${d.miss.length ? ' · falta: ' + esc(d.miss.join(', ')) : ' · pronta para oferta'}</small>
+  ${sec(0, '1 · O básico', 'nome, tipo e descrição', f('name', 'Nome', {full: 1, ph: 'Ex.: Mentoria de 3 meses'}) + sel('type', 'Tipo', types) + sel('status', 'Situação', PR_STATUS) + f('summary', 'Descrição', {full: 1, area: 1, ph: 'O que é, em uma ou duas frases.'}) + f('sku', 'Código interno (opcional)'))}
+  ${sec(1, '2 · Características', 'formato, peso, tamanho, duração, o que inclui', sel('format', 'Formato', PR_FORMAT) + f('duration', 'Duração', {ph: 'Ex.: 12 encontros de 1 h · uso por 6 meses'}) + f('weight', 'Peso', {ph: 'Ex.: 350 g'}) + f('size', 'Tamanho / dimensões', {ph: 'Ex.: 20 × 15 × 8 cm'}) + f('includes', 'O que está incluso', {full: 1, area: 1, lines: 1, ph: 'Um por linha', hint: 'Um item por linha.'}) + f('features', 'Outras características', {full: 1, area: 1, lines: 1, ph: 'Um por linha'}))}
+  ${sec(2, '3 · Preço e entrega', 'preço, pagamento, entrega, prazo, validade, garantia', f('price', 'Preço', {ph: 'Ex.: R$ 297'}) + f('priceNote', 'Condição do preço', {ph: 'Ex.: ou 3x sem juros'}) + f('payment', 'Formas de pagamento', {full: 1}) + f('delivery', 'Como é entregue', {full: 1, ph: 'Ex.: acesso por e-mail · envio pelos Correios · atendimento no local'}) + f('deliveryTime', 'Prazo de entrega', {ph: 'Ex.: em até 5 dias úteis'}) + f('validity', 'Validade', {ph: 'Ex.: acesso por 12 meses · vence em 6 meses'}) + f('warranty', 'Garantia', {full: 1, ph: 'Só o que existe de verdade'}) + f('checkout', 'Link de compra ou inscrição', {full: 1, ph: 'https://…'}))}
+  ${sec(3, '4 · Para quem serve', 'quem serve, quem não serve, problemas e tempo de resolução', f('audience', 'Para quem serve', {full: 1, area: 1}) + f('notFor', 'Para quem NÃO serve', {full: 1, area: 1, hint: 'Dizer isso aumenta a confiança e filtra curiosos.'}) + f('problems', 'Principais problemas que resolve', {full: 1, area: 1, lines: 1, rows: 4, ph: 'Um por linha'}) + f('resolveTime', 'Tempo para resolver o problema', {ph: 'Ex.: primeiros resultados em 30 dias'}) + f('limits', 'Limites e avisos', {full: 1, area: 1, lines: 1, ph: 'Ex.: não substitui acompanhamento médico'}))}
+  ${sec(4, '5 · Argumentos de venda', 'benefícios, diferenciais, objeções', f('benefits', 'Benefícios (o que a pessoa ganha)', {full: 1, area: 1, lines: 1, rows: 4, ph: 'Um por linha'}) + f('differentials', 'Diferenciais (por que escolher este)', {full: 1, area: 1, lines: 1, ph: 'Um por linha'}) + f('objections', 'Objeções comuns', {full: 1, area: 1, lines: 1, ph: 'Ex.: Não tenho tempo'}))}
+  ${sec(5, '6 · Provas e notas', 'provas reais e observações', f('proofs', 'Provas reais (números, depoimentos autorizados, casos)', {full: 1, area: 1, lines: 1, rows: 4, ph: 'Só o que existe de verdade'}) + f('notes', 'Notas internas', {full: 1, area: 1}))}</div>`;
+}
+async function prSuggest() {
+  const x = prGet(prUI.id); if (!x || !(x.summary || '').trim()) { toast('Escreva a descrição primeiro.'); return; } const btn = event && event.target; if (btn) { btn.disabled = true; btn.textContent = 'Pensando…'; }
+  try {
+    const j = await aiJSON('Você ajuda a organizar a ficha de um produto ou serviço. Com base SÓ no que foi escrito, sugira itens. Nunca invente números, prazos, preços, garantias, resultados ou fatos. Todo item que for suposição termina com " [CONFIRMAR]". JSON: {"problems":[""],"benefits":[""],"differentials":[""],"objections":[""],"notFor":""}', `Nome: ${x.name}\nDescrição: ${x.summary}\nPúblico: ${x.audience}`);
+    ['problems', 'benefits', 'differentials', 'objections'].forEach(k => { const add = (Array.isArray(j[k]) ? j[k] : []).slice(0, 6).map(t => String(t).slice(0, 280)).filter(t => t && !x[k].includes(t)); x[k] = x[k].concat(add).slice(0, 20); });
+    if (j.notFor && !x.notFor) x.notFor = String(j.notFor).slice(0, 500); persist(); renderProjectTab(); toast('Sugestões adicionadas, marcadas [CONFIRMAR]. Revise.');
+  } catch (e) { toast(e.message); }
+  if (btn) { btn.disabled = false; btn.textContent = '✦ Completar com IA'; }
+}
+
+TABS.products = prHTML;
 
 </script>
 <script>

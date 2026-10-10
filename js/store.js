@@ -1,3 +1,4 @@
+const ID_ARCH = ['inocente', 'explorador', 'sabio', 'heroi', 'foradalei', 'mago', 'caracomum', 'amante', 'bobo', 'prestativo', 'criador', 'governante'], ID_LISTS = ['fala', 'naoFala', 'atitudeTem', 'atitudeNao', 'admira', 'repudia', 'usa', 'naoUsa'], ID_SLIDERS = ['formal', 'humor', 'tecnico', 'calor', 'ousadia'];
 /* Estado do workspace: modelo de dados, persistência local, exportação/importação */
 const STORE_KEY = window.DEMO_MODE ? 'ampliacao_studio_demo' : 'ampliacao_studio_v1';
 const SCHEMA = 1;
@@ -37,7 +38,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}, scripts: []}, stories: [], mesa: (typeof normalizeMesa === 'function' ? normalizeMesa({}) : null), portal: {t: '', items: [], news: [], clientEmails: '', notifyEmails: '', requireLogin: false, publishedAt: '', seen: 0},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], engine: {}, approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], identity: (typeof normalizeIdentity === 'function' ? normalizeIdentity({}) : {}), sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], engine: {}, approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -262,7 +263,17 @@ function normalizePortal(x) {
 function normalizeProducts(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), lines = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, m).map(t => str(t, n)).filter(Boolean), TY = ['curso', 'ebook', 'servico', 'evento', 'produto', 'cadastro'];
   return (Array.isArray(x) ? x : []).filter(r => r && sid(r.id)).slice(0, 200).map(r => ({id: r.id, name: str(r.name, 160) || 'Produto', type: TY.includes(r.type) ? r.type : 'produto', summary: str(r.summary, 2000), price: str(r.price, 80), audience: str(r.audience, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(r.checkout || '') ? r.checkout : '',
-    benefits: lines(r.benefits, 300, 30), features: lines(r.features, 300, 40), objections: lines(r.objections, 300, 20), proofs: lines(r.proofs, 400, 20), images: (Array.isArray(r.images) ? r.images : []).filter(sid).slice(0, 8), created: str(r.created, 40) || new Date().toISOString()}));
+    benefits: lines(r.benefits, 300, 30), features: lines(r.features, 300, 40), objections: lines(r.objections, 300, 20), proofs: lines(r.proofs, 400, 20), images: (Array.isArray(r.images) ? r.images : []).filter(sid).slice(0, 8), created: str(r.created, 40) || new Date().toISOString(),
+    status: ['ativo', 'pausado', 'em_breve'].includes(r.status) ? r.status : 'ativo', format: ['', 'online', 'presencial', 'fisico', 'hibrido'].includes(r.format) ? r.format : '', sku: str(r.sku, 60), weight: str(r.weight, 80), size: str(r.size, 120), duration: str(r.duration, 120), includes: lines(r.includes, 200, 40),
+    priceNote: str(r.priceNote, 300), payment: str(r.payment, 300), delivery: str(r.delivery, 400), deliveryTime: str(r.deliveryTime, 160), validity: str(r.validity, 200), warranty: str(r.warranty, 300),
+    notFor: str(r.notFor, 600), problems: lines(r.problems, 300, 20), resolveTime: str(r.resolveTime, 200), differentials: lines(r.differentials, 300, 20), limits: lines(r.limits, 300, 20), notes: str(r.notes, 1000)}));
+}
+/* Identidade da marca: valores → atitudes → arquétipo (12, de "O Herói e o Fora da Lei") → voz. Só ids e textos curtos. */
+function normalizeIdentity(x) {
+  x = x && typeof x === 'object' ? x : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), ids = (a, m) => [...new Set((Array.isArray(a) ? a : []).filter(v => /^[a-z0-9]{2,24}$/.test(String(v))))].slice(0, m), tx = (a, n, m) => [...new Set((Array.isArray(a) ? a : []).map(t => str(t, n).trim()).filter(Boolean))].slice(0, m);
+  const l = x.lists && typeof x.lists === 'object' ? x.lists : {}, sl = x.sliders && typeof x.sliders === 'object' ? x.sliders : {}, lists = {}, sliders = {};
+  ID_LISTS.forEach(k => { lists[k] = tx(l[k], 90, 40); }); ID_SLIDERS.forEach(k => { const n = Math.round(+sl[k]); sliders[k] = n >= 1 && n <= 5 ? n : 3; });
+  return {step: Math.min(5, Math.max(1, Math.round(+x.step) || 1)), values: ids(x.values, 12), valuesExtra: tx(x.valuesExtra, 60, 10), attitudes: ids(x.attitudes, 12), attitudesExtra: tx(x.attitudesExtra, 90, 10), arch: ID_ARCH.includes(x.arch) ? x.arch : '', arch2: ID_ARCH.includes(x.arch2) ? x.arch2 : '', sliders, lists, refBrands: tx(x.refBrands, 60, 12), notes: str(x.notes, 1500), doneAt: str(x.doneAt, 40)};
 }
 /* Editor visual (estilo Elementor): seções → colunas (grade de 12, com largura por dispositivo) → widgets. Tudo com tipos e limites fixos. */
 const BX_WIDGETS = ['heading', 'text', 'image', 'video', 'button', 'list', 'feature', 'spacer', 'divider', 'form', 'faq', 'quote', 'countdown', 'tpl'];
@@ -365,7 +376,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.campaigns = normalizeCampaigns(q.campaigns); q.engine = normalizeEngine(q.engine); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); q.portal = normalizePortal(q.portal); q.mesa = typeof normalizeMesa === 'function' ? normalizeMesa(q.mesa) : (q.mesa || {}); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.identity = normalizeIdentity(q.identity); q.campaigns = normalizeCampaigns(q.campaigns); q.engine = normalizeEngine(q.engine); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); q.portal = normalizePortal(q.portal); q.mesa = typeof normalizeMesa === 'function' ? normalizeMesa(q.mesa) : (q.mesa || {}); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');

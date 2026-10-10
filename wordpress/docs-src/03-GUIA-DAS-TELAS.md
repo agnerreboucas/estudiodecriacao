@@ -103,3 +103,7 @@ Menu **5 · Mostrar ao cliente → Aprovação de arte**.
 4. No servidor, configure um cron a cada 5 minutos chamando `api/meta_social.php?action=run&key=SUA_CHAVE` (a chave é `META_CRON_KEY`). Sem cron, use o botão *Rodar a fila agora*.
 5. Sem token (ou com `META_DRY_RUN`) tudo é simulado: nada é enviado à Meta.
 
+## Marca e arquétipo, Produtos e serviços (aba do projeto)
+- **Marca e arquétipo:** escolha valores (5 a 7), depois atitudes; o Studio mostra o arquétipo mais próximo, marcas parecidas e o tom. No passo 4 defina o que a marca fala e não fala, o que admira e repudia, e as palavras que usa e que **nunca** usa. No resumo, "Enviar para o Brand/Voice Brain" copia isso para o Voice Brain.
+- **Produtos e serviços:** cadastre cada produto (ou cole a lista de uma vez). Quanto mais completa a ficha, melhor a oferta, o anúncio e a página. O Studio só usa o que você preencheu e não inventa o resto.
+

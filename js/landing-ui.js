@@ -69,7 +69,7 @@ function prodModal(id) {
 const prodLines = id => $(id).value.split('\n').map(t => t.trim()).filter(Boolean);
 function prodSave(id) {
   const p = curProject(), name = $('pd_name').value.trim(); if (!name) { toast('Dê um nome ao produto.'); return; }
-  const o = normalizeProducts([{id: id || uid('pr'), name, type: $('pd_type').value, summary: $('pd_summary').value, price: $('pd_price').value, audience: $('pd_audience').value, checkout: $('pd_checkout').value.trim(), benefits: prodLines('pd_benefits'), features: prodLines('pd_features'), objections: prodLines('pd_objections'), proofs: prodLines('pd_proofs'), images: id ? (p.products.find(y => y.id === id) || {}).images : []}])[0];
+  const o = normalizeProducts([{...(id ? (p.products.find(y => y.id === id) || {}) : {}), id: id || uid('pr'), name, type: $('pd_type').value, summary: $('pd_summary').value, price: $('pd_price').value, audience: $('pd_audience').value, checkout: $('pd_checkout').value.trim(), benefits: prodLines('pd_benefits'), features: prodLines('pd_features'), objections: prodLines('pd_objections'), proofs: prodLines('pd_proofs'), images: id ? (p.products.find(y => y.id === id) || {}).images : []}])[0];
   if (id) p.products[p.products.findIndex(y => y.id === id)] = o; else p.products.push(o); persist(); closeModal(); renderLandings();
 }
 function prodDel(id) { if (!confirm('Excluir este produto? As páginas já criadas continuam.')) return; const p = curProject(); p.products = p.products.filter(x => x.id !== id); persist(); renderLandings(); }
@@ -84,7 +84,7 @@ function lpNewFromProduct(id) { lpNewModal(id); }
 function lpProductFacts(l) {
   const p = curProject(), x = (p.products || []).find(y => y.id === l.productId); if (!x) return '';
   const pick = (arr, sel) => (l.pick && l.pick.all !== false) ? arr : arr.filter((_, i) => (sel || []).includes(i));
-  return `PRODUTO DO PROJETO (fatos cadastrados; use SÓ estes):\nBenefícios: ${pick(x.benefits, l.pick && l.pick.b).join(' | ') || '(nenhum)'}\nCaracterísticas: ${pick(x.features, l.pick && l.pick.f).join(' | ') || '(nenhuma)'}\nObjeções: ${x.objections.join(' | ') || '(nenhuma)'}\nProvas reais: ${x.proofs.join(' | ') || '(nenhuma: use [CONFIRMAR])'}\n\n`;
+  return `PRODUTO DO PROJETO (fatos cadastrados; use SÓ estes):\nBenefícios: ${pick(x.benefits, l.pick && l.pick.b).join(' | ') || '(nenhum)'}\nCaracterísticas: ${pick(x.features, l.pick && l.pick.f).join(' | ') || '(nenhuma)'}\nObjeções: ${x.objections.join(' | ') || '(nenhuma)'}\nProvas reais: ${x.proofs.join(' | ') || '(nenhuma: use [CONFIRMAR])'}\n${typeof prodFacts === 'function' ? prodFacts(x, true) : ''}\n`;
 }
 function lpNewModal(productId) {
   const p = curProject(), prods = p.products || [], pr = prods.find(x => x.id === productId), def = pr ? (LP_TYPE_INFO[pr.type] ? pr.type : 'generico') : 'curso';
