@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Ampliação Studio
  * Description: Estúdio de marketing completo dentro do WordPress: campanhas, anúncios nas 3 medidas, roteiros de vídeo, Stories, landing pages, logo, leads e Portal do cliente.
- * Version: 1.6.0
+ * Version: 1.7.0
  * Requires PHP: 8.0
  * Author: Ampliação
  * License: Proprietary
@@ -10,7 +10,7 @@
  */
 if (!defined('ABSPATH')) exit;
 
-define('AMPLIA_STUDIO_VERSION', '1.6.0');
+define('AMPLIA_STUDIO_VERSION', '1.7.0');
 define('AMPLIA_STUDIO_DIR', plugin_dir_path(__FILE__));
 define('AMPLIA_STUDIO_URL', plugin_dir_url(__FILE__));
 

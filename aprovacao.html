@@ -119,7 +119,7 @@ button { cursor: pointer; }
 .mini-box.st { aspect-ratio: 4 / 5; }
 .sec.others { margin-top: 44px; border-top: 1px solid var(--line); padding-top: 28px; }
 .others .minis { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-@media (max-width: 760px) { .brand { order: 1; } .top-r { order: 2; margin-left: auto; } .nav { order: 3; flex-basis: 100%; flex: none; } }
+@media (max-width: 760px) { .brand { order: 1; } .top-r { order: 2; margin-left: auto; } .nav { order: 3; flex: 0 0 100%; max-width: 100%; } }
 h1 { font-size: clamp(24px, 3.4vw, 34px); line-height: 1.1; margin: 0; letter-spacing: -.02em; font-weight: 800; text-wrap: balance; }
 h2 { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; margin: 0; font-weight: 700; color: var(--muted); }
 h3 { font-size: 18px; line-height: 1.2; margin: 0; letter-spacing: -.01em; }
@@ -406,6 +406,17 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
   .cc-h { grid-template-columns: 56px 1fr; }
   .cc-h .pill { grid-column: 2; justify-self: start; }
 }
+/* imagem real por slide */
+.art.a-img { padding: 0; background: #111; display: block; }
+.art.a-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* prazo de 72 horas */
+.deadline { display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px; border-radius: 12px; margin: 0 0 16px; background: var(--surface); border: 1px solid var(--line); font-size: 14px; line-height: 1.45; }
+.deadline b { font-weight: 800; }
+.deadline.soon { background: var(--alt-bg); border-color: transparent; color: var(--alt); }
+.deadline.over { background: var(--ok-bg); border-color: transparent; color: var(--ok); }
+.seal { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; letter-spacing: .02em; border: 1.5px dashed currentColor; border-radius: 6px; padding: 1px 6px; color: var(--ok); }
+.autoseal { margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; background: var(--ok-bg); color: var(--ok); font-size: 13.5px; font-weight: 600; }
+.tbadge.auto { background: #17703f; border: 1.5px dashed #fff; }
 @media (prefers-reduced-motion: reduce) {
   .track, .item, .toast, .bar span, .mini-box { transition: none; }
 }
@@ -432,11 +443,12 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
      window.AMPLIACAO_APROVACAO = { items: [...], agency: true|false }
      items segue o formato de SAMPLE abaixo. */
   var CFG = window.AMPLIACAO_APROVACAO || {};
-  var BRAND = 'Laboratório de Luz', HANDLE = 'laboratoriodeluz';
+  if (!CFG.rest && !(CFG.items && CFG.items.length) && /[?&]t=[a-f0-9]{24}/.test(location.search)) CFG.rest = 'api/aprovacao.php';   // link do Studio: aprovacao.html?t=CODIGO
+  var BRAND = CFG.brand || 'Laboratório de Luz', HANDLE = CFG.handle || 'laboratoriodeluz', PROJ = String(CFG.project || 'laboratorio-de-luz').replace(/[^\w-]/g, '');
   var LABEL = { pending: 'Não avaliado', approved: 'Aprovado', altered: 'Alterado', rejected: 'Rejeitado', published: 'Publicado' };
   var PLURAL = { pending: 'Não avaliados', approved: 'Aprovados', altered: 'Alterados', rejected: 'Rejeitados', published: 'Publicados' };
   var CTAS = ['Saiba mais', 'Baixar', 'Cadastre-se', 'Fale conosco', 'Enviar mensagem', 'Comprar agora'];
-  var KEY = 'aprovacao-laboratorio-de-luz-v2', WHO_KEY = 'aprovacao-laboratorio-de-luz-revisor';
+  var KEY = 'aprovacao-' + PROJ + '-v2', WHO_KEY = 'aprovacao-' + PROJ + '-revisor';
   var STAGES = [
     { k: 'descoberta', n: 'Descoberta', d: 'Apresenta a marca a quem ainda não conhece.' },
     { k: 'atencao', n: 'Atenção', d: 'Desperta interesse pelo problema e pelo jeito da marca.' },
@@ -573,7 +585,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
   ];
   /* peças já publicadas, só como exemplo */
   SAMPLE.forEach(function (it) { if (['f1', 'f2', 's1', 'r1', 'a1', 'a7'].indexOf(it.id) >= 0) it.published = true; });
-  var ALL = CFG.items && CFG.items.length ? CFG.items : SAMPLE;
+  var ALL = CFG.items && CFG.items.length ? CFG.items : (CFG.rest ? [] : SAMPLE);
 
   var state = { view: 'page', page: 'overview', from: 'visao', filter: 'all', layout: 'cards', cfilter: 'open', cur: null, slide: 0, annotate: false, localOnly: false, notice: '', sumtext: '' };
   var records = {}, submission = null, dbApi = null, userApi = null, reviewer = null;
@@ -601,7 +613,23 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
   function peek(id) { return records[id] || null; }
   function rec(id) { if (!records[id]) records[id] = { status: 'pending', comment: '', notes: '', pins: [], thread: [] }; var r = records[id]; if (!r.pins) r.pins = []; if (!r.thread) r.thread = []; return r; }
   function isPub(item) { var r = peek(item.id); if (r && r.published === false) return false; if (r && r.published) return true; return !!item.published; }
-  function statusOf(item) { if (isPub(item)) return 'published'; var r = peek(item.id); return r && r.status || 'pending'; }
+  function statusOf(item) { if (isPub(item)) return 'published'; var r = peek(item.id), st = r && r.status || 'pending'; return st === 'pending' && expired() ? 'approved' : st; }
+  /* prazo: a contagem começa no envio (sentAt). Passadas as horas, o que ficou sem resposta conta como aprovado por prazo.
+     Alterado e Rejeitado não expiram. O estado "aprovado por prazo" é calculado na leitura. */
+  function sentAt() { return (submission && submission.sentAt) || CFG.sentAt || ''; }
+  function deadlineH() { return +((submission && submission.deadlineHours) || CFG.deadlineHours || 72) || 72; }
+  function deadlineAt() { var s = sentAt(), d = s ? new Date(s) : null; return d && !isNaN(d) ? new Date(d.getTime() + deadlineH() * 3600000) : null; }
+  function expired() { var d = deadlineAt(); return !!d && Date.now() > d.getTime(); }
+  function isAuto(item) { if (!expired() || isPub(item)) return false; var r = peek(item.id); return !r || !r.status || r.status === 'pending'; }
+  function lab(item) { return isAuto(item) ? 'Aprovado por prazo' : LABEL[statusOf(item)]; }
+  function remaining() { var d = deadlineAt(); if (!d) return ''; var ms = d.getTime() - Date.now(); if (ms <= 0) return ''; var h = Math.floor(ms / 3600000), dd = Math.floor(h / 24); return dd >= 1 ? dd + (dd > 1 ? ' dias' : ' dia') + (h % 24 ? ' e ' + (h % 24) + ' h' : '') : h >= 1 ? h + ' h' : Math.max(1, Math.round(ms / 60000)) + ' min'; }
+  function deadlineHTML() {
+    var d = deadlineAt(); if (!d) return '';
+    var left = d.getTime() - Date.now(), pend = ALL.filter(function (i) { var r = peek(i.id); return !isPub(i) && (!r || !r.status || r.status === 'pending'); }).length, nAuto = ALL.filter(isAuto).length;
+    var when = d.toLocaleString('pt-BR', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }), sent = whenDay(sentAt());
+    if (left <= 0) return '<div class="deadline over" role="status"><div><b>Prazo encerrado em ' + esc(when) + '.</b> ' + (nAuto ? nAuto + (nAuto > 1 ? ' peças sem resposta foram aprovadas por prazo' : ' peça sem resposta foi aprovada por prazo') + ' (selo tracejado). ' : '') + 'Alterado e Rejeitado continuam abertos. Você ainda pode decidir qualquer peça.</div></div>';
+    return '<div class="deadline' + (left < 24 * 3600000 ? ' soon' : '') + '" role="status"><div>Enviado em <b>' + esc(sent) + '</b>. Responda até <b>' + esc(when) + '</b> (faltam ' + esc(remaining()) + '). ' + (pend ? 'Hoje há <b>' + pend + '</b> sem resposta. ' : '') + 'Passado o prazo de ' + deadlineH() + ' horas, o que não tiver resposta conta como aprovado.</div></div>';
+  }
   function me() { return reviewer && reviewer.name ? reviewer.name : 'Revisor'; }
   function nowIso() { return new Date().toISOString(); }
   function when(iso) { if (!iso) return ''; var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleString('pt-BR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
@@ -735,6 +763,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
     var type = n === 1 || i === 0 ? 'cover' : (i === n - 1 ? 'cta' : 'mid');
     var story = item.format === 'story';
     var play = item.kind === 'reels' && i === 0 ? '<div class="play"></div>' : '';
+    var im = (item.slides[i] || {}).img || s.img; if (im && /^(https?:\/\/|\/|data:image\/|[\w.-]+\/[\w./?=&%-]+$)/i.test(im)) return '<div class="art a-img' + (story ? ' story' : '') + (tile ? ' tmode' : '') + '"><img src="' + esc(im) + '" alt="" loading="lazy" decoding="async">' + play + '</div>';
     return '<div class="art a-' + item.style + ' t-' + type + (story ? ' story' : '') + (tile ? ' tmode" style="--tsz:' + tsz(s.h) + 'cqw' : '') + '">' +
       '<div class="a-top"><span>' + BRAND + '</span><span>' + (n > 1 ? (i + 1) + '/' + n : '2026') + '</span></div>' +
       '<div class="a-main"><div class="a-h">' + fmt(s.h) + '</div>' + (s.b ? '<div class="a-b">' + fmt(s.b) + '</div>' : '') + '</div>' +
@@ -777,7 +806,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
   function loadWho() { try { var d = JSON.parse(localStorage.getItem(WHO_KEY) || 'null'); if (d && d.name) reviewer = d; } catch (e) {} if (CFG.reviewer && CFG.reviewer.name) reviewer = CFG.reviewer; }
   function showGate() {
     var today = new Date(); var iso = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-    $('#gatehost').innerHTML = '<div class="gate"><form class="card gatebox" id="gform" role="dialog" aria-modal="true" aria-labelledby="gt"><h3 id="gt">Antes de começar</h3><p>Seu nome e a data ficam registrados em cada decisão, comentário e mudança que você fizer.</p>' +
+    $('#gatehost').innerHTML = '<div class="gate"><form class="card gatebox" id="gform" role="dialog" aria-modal="true" aria-labelledby="gt"><h3 id="gt">Antes de começar</h3><p>Seu nome e a data ficam registrados em cada decisão, comentário e mudança que você fizer.</p>' + (deadlineAt() ? '<p style="font-weight:600">Prazo: até ' + esc(deadlineAt().toLocaleString('pt-BR', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })) + '. Sem resposta nesse prazo, a peça conta como aprovada.</p>' : '') +
       '<div><label for="gname">Seu nome</label><input type="text" id="gname" required autocomplete="name" value="' + esc(reviewer ? reviewer.name : '') + '"></div>' +
       '<div><label for="gday">Data da revisão</label><input type="date" id="gday" value="' + esc(reviewer && reviewer.day || iso) + '" required></div>' +
       '<button class="btn primary" type="submit">Entrar na revisão</button></form></div>';
@@ -802,7 +831,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
   function mini(item, label, sub) {
     var v = vals(item), st = statusOf(item), story = item.format === 'story';
     var nf = item.kind === 'story' || item.kind === 'carousel' ? '<span class="nf">' + item.slides.length + (item.kind === 'story' ? ' frames' : ' slides') + '</span>' : '';
-    return '<button class="mini ' + st + '" data-open="' + item.id + '" aria-label="Abrir ' + esc(titleOf(item)) + ', ' + LABEL[st] + '"><span class="mini-box' + (story ? ' st' : '') + '">' + art(item, v, 0, true) + nf + '</span><span class="mini-l"><b>' + esc(label) + '</b>' + esc(sub || '') + '</span></button>';
+    return '<button class="mini ' + st + '" data-open="' + item.id + '" aria-label="Abrir ' + esc(titleOf(item)) + ', ' + lab(item) + '"><span class="mini-box' + (story ? ' st' : '') + '">' + art(item, v, 0, true) + nf + '</span><span class="mini-l"><b>' + esc(label) + '</b>' + esc(sub || '') + '</span></button>';
   }
   function cardHTML(item) {
     var v = vals(item), r = peek(item.id) || {}, st = statusOf(item), story = item.format === 'story';
@@ -811,7 +840,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
     var sub = item.kind === 'ad' ? item.meta.period : dateLabel(item);
     return '<button class="card item" data-open="' + item.id + '" aria-label="Abrir ' + esc(titleOf(item)) + '">' +
       '<span class="thumb">' + art(item, v, 0, true) + '<span class="kind">' + esc(kindLabel(item)) + '</span></span>' +
-      '<span class="meta"><span class="meta-row"><span class="pill ' + st + '">' + LABEL[st] + '</span><span class="item-sub">' + esc(sub) + '</span></span>' +
+      '<span class="meta"><span class="meta-row"><span class="pill ' + st + '">' + lab(item) + (isAuto(item) ? ' <span class="seal">72 h</span>' : '') + '</span><span class="item-sub">' + esc(sub) + '</span></span>' +
       '<span class="item-title">' + esc(titleOf(item)) + '</span>' + (byline(item) ? '<span class="byline">' + esc(byline(item)) + '</span>' : '') +
       (flags ? '<span class="flags">' + flags + '</span>' : '') + '</span></button>';
   }
@@ -845,8 +874,8 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
   function tileHTML(item) {
     var v = vals(item), st = statusOf(item);
     var ic = item.kind === 'carousel' || item.kind === 'story' ? ICON_MULTI : item.kind === 'reels' ? ICON_PLAY : '';
-    return '<button class="tile ' + st + '" data-open="' + item.id + '" aria-label="Abrir ' + esc(titleOf(item)) + ', ' + LABEL[st] + '">' + art(item, v, 0, true) +
-      (st !== 'pending' ? '<span class="tbadge ' + st + '">' + LABEL[st] + '</span>' : '') + ic +
+    return '<button class="tile ' + st + '" data-open="' + item.id + '" aria-label="Abrir ' + esc(titleOf(item)) + ', ' + lab(item) + '">' + art(item, v, 0, true) +
+      (st !== 'pending' ? '<span class="tbadge ' + st + (isAuto(item) ? ' auto' : '') + '">' + lab(item) + '</span>' : '') + ic +
       '<span class="ov">' + esc(titleOf(item)) + '<small>' + esc(whereOf(item) + ' · ' + kindLabel(item)) + '</small></span></button>';
   }
   function homeHTML() {
@@ -862,7 +891,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
     var grid = cols.length
       ? '<div class="mason" style="--n:' + cols.length + '">' + cols.map(function (c) { return '<div class="mcol">' + c.map(tileHTML).join('') + '</div>'; }).join('') + '</div>'
       : '<div class="empty">Nenhuma peça com esse filtro.</div>';
-    return '<div class="home-h"><h1>Aprovação de conteúdo</h1><p class="lead">Veja tudo de uma vez. Clique em uma peça para ver como ela aparece no Instagram, revisar e decidir.</p></div>' + filtersHTML(ALL, false) + grid;
+    return deadlineHTML() + '<div class="home-h"><h1>Aprovação de conteúdo</h1><p class="lead">Veja tudo de uma vez. Clique em uma peça para ver como ela aparece no Instagram, revisar e decidir.</p></div>' + filtersHTML(ALL, false) + grid;
   }
   function othersHTML(item) {
     var sec = sectionOf(item), list = inSection(sec).filter(function (i) { return i.id !== item.id; });
@@ -905,7 +934,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
       return h + '<div class="pgrid">' + arr.map(function (item) {
         var v = vals(item);
         var ic = item.kind === 'carousel' ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h12a2 2 0 0 1 2 2v12h-2V5H7zM3 7h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>' : '';
-        return '<button class="pcell" data-open="' + item.id + '" aria-label="Abrir ' + esc(titleOf(item)) + ', ' + LABEL[statusOf(item)] + '">' + art(item, v, 0, true) + ic + '<span class="stat ' + statusOf(item) + '"></span></button>';
+        return '<button class="pcell" data-open="' + item.id + '" aria-label="Abrir ' + esc(titleOf(item)) + ', ' + lab(item) + '">' + art(item, v, 0, true) + ic + '<span class="stat ' + statusOf(item) + '"></span></button>';
       }).join('') + '</div><p class="pnote">Assim o perfil fica depois das publicações. O post mais novo aparece no canto superior esquerdo.</p>';
     }
     var groups = [], idx = {};
@@ -963,7 +992,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
     var rejNoComment = ALL.filter(function (i) { var r = peek(i.id); return !isPub(i) && r && r.status === 'rejected' && !(r.comment || '').trim(); }).length;
     var body = home ? homeHTML() : state.page === 'ads' ? adsHTML() : state.page === 'feed' ? feedHTML() : state.page === 'stories' ? storiesHTML() : changesHTML();
     var submitHTML;
-    if (submission) {
+    if (submission && submission.at) {
       submitHTML = '<p><b>Revisão enviada</b>' + (submission.by ? ' por ' + esc(submission.by) : '') + ' em ' + esc(when(submission.at)) + '. Você ainda pode ajustar qualquer decisão.</p><button class="btn" id="reopen">Reabrir revisão</button>';
     } else {
       var toReview = total - all.published;
@@ -971,7 +1000,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
       submitHTML = '<p>' + why + '</p><button class="btn primary" id="send"' + (all.pending || rejNoComment ? ' disabled' : '') + '>Enviar revisão à agência</button>';
     }
     $('#view').innerHTML = (state.notice ? '<div class="notice" style="margin:0 0 16px">' + esc(state.notice) + '</div>' : '') +
-      (submission && !home ? '<div class="sent" style="margin:0 0 16px">Obrigado. A agência já recebeu a sua revisão.</div>' : '') + body +
+      (submission && submission.at && !home ? '<div class="sent" style="margin:0 0 16px">Obrigado. A agência já recebeu a sua revisão.</div>' : '') + body +
       (home ? '' : '<div class="submit"><div class="submit-in">' + submitHTML + '</div></div>');
   }
 
@@ -1034,6 +1063,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
             '<textarea id="b' + i + '" rows="2" data-f="b" data-i="' + i + '" aria-label="Texto de apoio, ' + role + '">' + esc(s.b) + '</textarea></div>';
         }).join('') + '</section>';
     }
+    var autoseal = '<div class="autoseal" id="autoseal" hidden></div>';
     var tracked = '<section class="card" id="trackedcard" hidden><div class="sec-h"><h2>Mudanças sugeridas</h2><span class="help" id="trackedby"></span></div><div id="tracked" style="display:grid;gap:10px"></div></section>';
     var notes = '<section class="card"><div class="sec-h"><h2>Indicações de mudança</h2><button class="btn sm" id="annot" aria-pressed="false">Anotar na imagem</button></div>' +
       '<textarea id="notes" rows="3" data-f="notes" placeholder="Ex.: trocar o segundo slide por um exemplo de cliente; aumentar o logo." aria-label="Indicações de mudança">' + esc(r.notes || '') + '</textarea>' +
@@ -1041,7 +1071,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
     var comments = '<section class="card"><div class="sec-h"><h2>Comentários</h2><span class="help" id="cmcount"></span></div><ul class="thread" id="thread"></ul>' +
       '<div class="composer"><label class="lbl" for="cmtxt"><span>Novo comentário como ' + esc(me()) + '</span></label><textarea id="cmtxt" rows="2" placeholder="Escreva um comentário para a equipe"></textarea><div class="actions"><button class="btn sm" id="cmsend">Comentar</button><span class="help">Ctrl+Enter também envia.</span></div></div></section>';
     var apply = isAgency() ? '<section class="card"><h2>Equipe</h2><div id="applybox" style="display:grid;gap:8px"></div></section>' : '';
-    return '<div class="pubbanner" id="pubbanner" hidden></div><section class="card"><div class="sec-h"><h2>Sua decisão</h2><span class="pill pending" id="spill">Pendente</span></div>' +
+    return '<div class="pubbanner" id="pubbanner" hidden></div>' + autoseal + '<section class="card"><div class="sec-h"><h2>Sua decisão</h2><span class="pill pending" id="spill">Pendente</span></div>' +
       '<div class="dec-row" role="group" aria-label="Decisão">' + dec + '</div><div class="hint" id="hint" hidden></div>' +
       '<div><label class="lbl" for="comment" id="clabel"></label><textarea id="comment" rows="3" data-f="comment"></textarea></div>' +
       '<div class="err" id="cerr" hidden>Escreva o motivo da rejeição para a equipe saber o que ajustar.</div>' +
@@ -1077,7 +1107,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
   function updateDecision(item) {
     var r = peek(item.id) || { status: 'pending' }, st = r.status || 'pending';
     $$('.dec').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-s') === st)); });
-    var ds = statusOf(item), sp = $('#spill'); sp.className = 'pill ' + ds; sp.textContent = LABEL[ds];
+    var ds = statusOf(item), sp = $('#spill'); sp.className = 'pill ' + ds; sp.textContent = lab(item); var as = $('#autoseal'); if (as) { as.hidden = !isAuto(item); as.textContent = 'Aprovado automaticamente: o prazo de ' + deadlineH() + ' horas terminou sem resposta. Você ainda pode decidir esta peça.'; }
     var pb = $('#pubbanner'); if (pb) { pb.hidden = ds !== 'published'; pb.textContent = 'Esta peça já foi publicada' + (r.published && r.published.at ? ' em ' + when(r.published.at) : '') + '.'; }
     var cm = $('#comment'), lb = $('#clabel');
     cm.disabled = st === 'pending'; cm.value = r.comment || '';
@@ -1246,15 +1276,15 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
       return;
     }
     if (e.target.closest('#send')) {
-      var c = counts(ALL), body = { at: nowIso(), by: me(), day: reviewer && reviewer.day || '', total: ALL.length, approved: c.approved, altered: c.altered, rejected: c.rejected };
+      var c = counts(ALL), body = { at: nowIso(), by: me(), day: reviewer && reviewer.day || '', total: ALL.length, approved: c.approved, altered: c.altered, rejected: c.rejected, sentAt: sentAt() || undefined, deadlineHours: deadlineH() };
       submission = body; renderPage(); toast('Revisão enviada');
       if (dbApi && !state.localOnly) dbApi.doc('meta/submission').set(body).catch(function () { state.localOnly = true; saveLocal(); });
       else saveLocal();
       return;
     }
     if (e.target.closest('#reopen')) {
-      submission = null; renderPage();
-      if (dbApi && !state.localOnly) dbApi.doc('meta/submission').delete().catch(function () {}); else saveLocal();
+      submission = sentAt() ? { sentAt: sentAt(), deadlineHours: deadlineH() } : null; renderPage();
+      if (dbApi && !state.localOnly) (submission ? dbApi.doc('meta/submission').set(submission) : dbApi.doc('meta/submission').delete()).catch(function () {}); else saveLocal();
     }
   });
   document.addEventListener('keydown', function (e) {
@@ -1266,21 +1296,90 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
     else if (e.key === 'Escape') { state.annotate = false; go(state.from || 'visao'); }
   });
 
+  /* salvar ao fechar/trocar de aba: nada se perde na janela do atraso de gravação */
+  function flushAllNow() {
+    saveLocal();
+    Object.keys(dirty).forEach(function (id) { clearTimeout(timers[id]); inflight[id] = false; try { flush(id); } catch (e) {} });
+  }
+  window.addEventListener('pagehide', flushAllNow);
+  window.addEventListener('beforeunload', flushAllNow);
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flushAllNow(); });
+
+  /* armazenamento próprio por API (api/aprovacao.php): o cliente abre aprovacao.html?t=CODIGO */
+  function setBrand() {
+    var b = $('.brand'); if (!b) return; var m = $('.mark', b), bb = $('b', b), sp = $('span', b);
+    if (m) m.textContent = (BRAND || 'A').charAt(0).toUpperCase(); if (bb) bb.textContent = BRAND;
+    if (sp) sp.textContent = CFG.subtitle || ('Aprovação · ' + new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }));
+    document.title = 'Aprovação · ' + BRAND;
+  }
+  function restUrl(a, extra) { return CFG.rest + (CFG.rest.indexOf('?') >= 0 ? '&' : '?') + 'action=' + a + '&t=' + encodeURIComponent(CFG.token) + (extra || ''); }
+  function restPost(body) {
+    body.t = CFG.token;
+    return fetch(CFG.rest, { method: 'POST', credentials: 'same-origin', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok || !j.ok) { var e = new Error(j.error || ('HTTP ' + r.status)); e.code = (r.status === 401 || r.status === 403) ? 'invalid_argument' : 'error'; throw e; }
+        return j;
+      });
+    });
+  }
+  function restDb() {
+    var L = { rev: [], sub: [] }, last = {}, lastSub = 'x', timer = 0;
+    function emit(est) {
+      var changes = [], recs = est.records || {};
+      Object.keys(recs).forEach(function (id) { var j = JSON.stringify(recs[id]); if (last[id] !== j) { changes.push({ type: id in last ? 'modified' : 'added', doc: { id: id, data: function () { return recs[id]; } } }); last[id] = j; } });
+      Object.keys(last).forEach(function (id) { if (!(id in recs)) { changes.push({ type: 'removed', doc: { id: id, data: function () { return null; } } }); delete last[id]; } });
+      if (changes.length) L.rev.forEach(function (cb) { cb({ docChanges: function () { return changes; } }); });
+      var sj = JSON.stringify(est.submission || null);
+      if (sj !== lastSub) { lastSub = sj; L.sub.forEach(function (cb) { cb({ exists: !!est.submission, data: function () { return est.submission; } }); }); }
+    }
+    function poll() { fetch(restUrl('estado'), { cache: 'no-store', credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (j) { if (j && j.ok) emit(j); }).catch(function () {}); }
+    return {
+      collection: function () { return { onSnapshot: function (cb) { L.rev.push(cb); } }; },
+      doc: function (path) {
+        var parts = path.split('/');
+        if (parts[0] === 'reviews') return { set: function (body) { return restPost({ action: 'registro', id: parts[1], record: body }); } };
+        return { onSnapshot: function (cb) { L.sub.push(cb); }, set: function (body) { return restPost({ action: 'envio', submission: body }); }, delete: function () { return restPost({ action: 'envio', remove: true }); } };
+      },
+      start: function (first) { emit(first); clearInterval(timer); timer = setInterval(poll, 20000); }
+    };
+  }
+  function loadRest() {
+    var v = $('#view'); v.innerHTML = '<div class="empty">Carregando…</div>';
+    fetch(restUrl('estado'), { cache: 'no-store', credentials: 'same-origin' }).then(function (r) { return r.json().then(function (j) { j._st = r.status; return j; }); }).then(function (j) {
+      if (!j || !j.ok) { v.innerHTML = '<div class="empty">' + esc((j && j.error) || 'Este link não está ativo. Peça um novo à agência.') + '</div>'; return; }
+      BRAND = j.brand && j.brand.name || BRAND; HANDLE = j.brand && j.brand.handle || HANDLE; CFG.subtitle = j.subtitle || CFG.subtitle; CFG.agency = j.agency === true;
+      CFG.sentAt = j.submission && j.submission.sentAt || ''; CFG.deadlineHours = j.submission && j.submission.deadlineHours || 72;
+      PROJ = 'rest-' + CFG.token.slice(0, 10); KEY = 'aprovacao-' + PROJ + '-v2'; WHO_KEY = 'aprovacao-' + PROJ + '-revisor';
+      ALL = j.items || []; setBrand();
+      var db = restDb(); boot(db, j);
+    }).catch(function () { v.innerHTML = '<div class="empty">Não consegui carregar. Confira a conexão e tente de novo.</div>'; });
+  }
+
   /* início */
-  loadWho();
-  applyToken((location.hash || '').slice(1));
-  render(); setSave('saved');
-  if (!reviewer) showGate();
-  try { window.matchMedia('(min-width: 860px)').addEventListener('change', function () { if (state.view === 'page' && state.page === 'overview') renderPage(); }); } catch (e) {}
-  var p;
-  try { p = window.claude && window.claude.use ? window.claude.use('db') : Promise.resolve(null); } catch (e) { p = Promise.resolve(null); }
-  p.then(function (db) {
-    if (db) startDb(db); else { state.localOnly = true; loadLocal(); setSave('local'); onData(); }
-  }, function () { state.localOnly = true; loadLocal(); setSave('local'); onData(); });
-  try {
-    var up = window.claude && window.claude.use ? window.claude.use('user') : null;
-    if (up) up.then(function (u) { userApi = u; if (state.view === 'page') renderPage(); else updateApply(curItem()); }, function () {});
-  } catch (e) {}
+  function boot(db, first) {
+    loadWho();
+    applyToken((location.hash || '').slice(1));
+    render(); setSave('saved');
+    if (!reviewer) showGate();
+    try { window.matchMedia('(min-width: 860px)').addEventListener('change', function () { if (state.view === 'page' && state.page === 'overview') renderPage(); }); } catch (e) {}
+    var p;
+    if (db) p = Promise.resolve(db); else { try { p = window.claude && window.claude.use ? window.claude.use('db') : Promise.resolve(null); } catch (e) { p = Promise.resolve(null); } }
+    p.then(function (d) {
+      if (d) { startDb(d); if (d.start) { d.start(first); var unsynced = []; loadLocalOnlyNew(first.records || {}, unsynced); unsynced.forEach(touch); } }
+      else { state.localOnly = true; loadLocal(); setSave('local'); onData(); }
+    }, function () { state.localOnly = true; loadLocal(); setSave('local'); onData(); });
+    try {
+      var up = window.claude && window.claude.use ? window.claude.use('user') : null;
+      if (up) up.then(function (u) { userApi = u; if (state.view === 'page') renderPage(); else updateApply(curItem()); }, function () {});
+    } catch (e) {}
+  }
+  /* respostas feitas offline e ainda não enviadas voltam para a fila */
+  function loadLocalOnlyNew(server, out) { try { var d = JSON.parse(localStorage.getItem(KEY) || 'null'); if (d && d.records) Object.keys(d.records).forEach(function (id) { if (!server[id] && find(id)) { records[id] = d.records[id]; out.push(id); } }); } catch (e) {} }
+  if (CFG.rest) {
+    var tk = CFG.token || (new URLSearchParams(location.search)).get('t') || '';
+    if (!/^[a-f0-9]{24}$/.test(tk)) { setBrand(); $('#view').innerHTML = '<div class="empty">Link incompleto. Peça um novo à agência.</div>'; }
+    else { CFG.token = tk; loadRest(); }
+  } else { setBrand(); boot(null); }
 })();
 </script>
 

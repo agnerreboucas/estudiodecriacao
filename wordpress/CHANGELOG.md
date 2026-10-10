@@ -1,5 +1,13 @@
 # Histórico de versões
 
+## 1.7.0
+- **Aprovação de arte (cliente), ligada ao Studio.** Nova tela *Aprovação de arte* (menu 5 · Mostrar ao cliente): escolha as peças reais do projeto (anúncios por fase da jornada nas medidas feed e Stories, carrosséis, stories e posts do Estúdio de Design), defina marca, @ e prazo, e envie. O Studio gera as artes em JPEG, cria o link `aprovacao.html?t=CÓDIGO` (sem login para o cliente) e guarda tudo no servidor (`api/aprovacao.php`).
+- **Prazo de 72 horas.** O envio grava `sentAt`; passadas as horas (editável), toda peça *não avaliada* passa a **Aprovada por prazo** (selo tracejado, aviso na tela do cliente e no portão). Alterado e Rejeitado não expiram. A regra aparece no envio, na tela do cliente e no PDF. Confirme com seu contrato se vale para o seu caso.
+- **PDF de apresentação** (16:9, creme/preto/vermelho): capa com data de envio, regra do prazo, visão geral com contorno por status, uma lâmina por categoria e por peça (com a decisão do cliente quando já houver) e fechamento com o prazo.
+- **Respostas e correções no Studio**: contagem por status (inclui "por prazo"), correções com antes e depois do texto, anotações, link para o painel da equipe, e-mail para a equipe quando o cliente envia a revisão.
+- **Arquivo único (HTML)** com as peças e imagens dentro, para teste rápido ou hospedagem simples.
+- **Correções no módulo de aprovação:** sem rolagem lateral em celular de 390 px (502 px antes); decisões feitas logo antes de fechar ou recarregar a página não se perdem; imagens reais por slide agora aparecem (o campo `img` não era usado); só é "revisão enviada" quando o cliente envia.
+
 ## 1.6.0
 - **Mesa de páginas** (menu *Mesa de páginas*): editor visual de sites/landings no estilo Figma + Elementor + Webflow. Biblioteca à esquerda (Elementos, Blocos, Camadas, Biblioteca, Assets), canvas no centro, propriedades à direita (Conteúdo, Estilo, Layout, Avançado, Responsivo).
 - 3 telas lado a lado (Desktop 1440, Tablet 768, Mobile 390): o que você muda numa tela vale só para ela; réguas, guias, encaixe, desfazer/refazer, várias páginas, autosave e versões (restaurar, duplicar, comparar, aprovada).

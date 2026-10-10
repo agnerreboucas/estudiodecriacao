@@ -85,3 +85,13 @@ Notas:
 - Excluir um **anúncio de campanha** apaga também as 3 medidas dele (feed, vertical e horizontal).
 - Peças que nasceram de uma campanha aparecem como "campanha" no Estúdio de Design: apague-as pela própria campanha.
 - No Motor de Ofertas, excluir anúncios não muda a estratégia (conceito, ângulos, ofertas e copies).
+
+## Aprovação de arte (cliente)
+Menu **5 · Mostrar ao cliente → Aprovação de arte**.
+1. **O que enviar:** as peças reais do projeto (anúncios por fase, feed e stories). Marque o que vai ao cliente.
+2. **Prazo e envio:** marca, @ do perfil, horas de prazo (padrão 72) e e-mail da equipe. **Enviar para aprovação** gera as artes e o link para o cliente. O prazo começa no envio.
+3. **Respostas do cliente:** veja quantas peças foram aprovadas, alteradas, rejeitadas ou aprovadas por prazo, as correções com antes e depois, e abra o **Painel da equipe** para marcar como aplicada e publicada.
+- **Regra das 72 horas:** peça sem resposta passa a *Aprovada por prazo* (selo tracejado). *Alterado* e *Rejeitado* não expiram. Confirme com o seu contrato.
+- **📄 PDF de apresentação:** lâminas 16:9 com data de envio, regra do prazo, visão geral e uma lâmina por peça.
+- **Arquivo único (HTML):** versão para enviar por e-mail ou hospedar; as respostas ficam só no navegador de quem abre.
+- O cliente abre o link no celular, informa nome e data, vê a grade, decide, edita texto, marca pontos na imagem e comenta. Para o servidor guardar as respostas é preciso ter a senha do Studio ativa (assim só a equipe vê o painel da equipe).
