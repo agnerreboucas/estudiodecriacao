@@ -1,6 +1,6 @@
 === Ampliação Studio ===
 Requires PHP: 8.0
-Stable tag: 1.5.0
+Stable tag: 1.6.0
 
 Instalação: Plugins → Adicionar novo → Enviar plugin → escolha o .zip → Ativar.
 Depois: menu "Ampliação Studio" → Abrir o Ampliação Studio.

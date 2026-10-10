@@ -1,5 +1,13 @@
 # Histórico de versões
 
+## 1.6.0
+- **Mesa de páginas** (menu *Mesa de páginas*): editor visual de sites/landings no estilo Figma + Elementor + Webflow. Biblioteca à esquerda (Elementos, Blocos, Camadas, Biblioteca, Assets), canvas no centro, propriedades à direita (Conteúdo, Estilo, Layout, Avançado, Responsivo).
+- 3 telas lado a lado (Desktop 1440, Tablet 768, Mobile 390): o que você muda numa tela vale só para ela; réguas, guias, encaixe, desfazer/refazer, várias páginas, autosave e versões (restaurar, duplicar, comparar, aprovada).
+- Design System do projeto (cores, tipografia, espaçamento, raios, sombras), componentes globais, biblioteca própria, 15 blocos e 4 modelos prontos que usam briefing, ICP, oferta, logo, cores e fontes do projeto. Comandos ✨ de IA.
+- Exporta JSON, HTML, CSS, ZIP e **Elementor (somente widgets gratuitos)**; importa Elementor, HTML e JSON da Mesa.
+- Módulo isolado: Landings antigas continuam como estavam.
+
+## 1.5.0
 ## 1.5.0
 - **Documento do projeto (briefing completo).** Em *Projetos → 📄 Subir documento do projeto* (e na aba Pré-projeto) você sobe um arquivo Word (.docx), PDF, texto, Markdown, HTML, RTF, CSV ou JSON, ou cola o texto. O Studio reconhece empresa, produtos e serviços, públicos (ICP), dores, dúvidas, desejos, urgências ocultas, objetivo, canais, orçamento, concorrentes, tom de voz, vocabulário, regras, posicionamento, visual e cores. Com a IA ligada ela extrai; sem IA, um leitor de seções faz o trabalho. Mostra o que entendeu antes de aplicar.
 - **Nada se perde.** Só completa campos vazios e acrescenta o que falta (produtos e públicos com o mesmo nome são completados, não duplicados). Subir o mesmo documento de novo não repete nada. Campanhas que já existem ganham as linhas novas nos bancos de dores, dúvidas, desejos e urgências; as peças prontas não mudam.

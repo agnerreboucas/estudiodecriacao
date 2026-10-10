@@ -36,7 +36,7 @@ function newProject(name, desc, extra = {}) {
     voice: {personality: '', principles: '', vocabulary: '', antivocab: '', rules: '', channels: '', examples: '', checklist: ''},
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
-    video: {conceptId: '', scenes: [], steps: {}, scripts: []}, stories: [], portal: {t: '', items: [], news: [], clientEmails: '', notifyEmails: '', requireLogin: false, publishedAt: '', seen: 0},
+    video: {conceptId: '', scenes: [], steps: {}, scripts: []}, stories: [], mesa: (typeof normalizeMesa === 'function' ? normalizeMesa({}) : null), portal: {t: '', items: [], news: [], clientEmails: '', notifyEmails: '', requireLogin: false, publishedAt: '', seen: 0},
     ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], engine: {}, approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
@@ -352,11 +352,11 @@ function normalize(s) {
   s.workspace = mergeDefaults(s.workspace, base.workspace);
   s.credits = Number.isFinite(+s.credits) ? +s.credits : 30;
   s.inspo = normalizeInspo(s.inspo);
-  s.imglib = normalizeImglib(s.imglib); s.tplbank = normalizeTplbank(s.tplbank); s.lpRefs = normalizeLpRefs(s.lpRefs); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills);
+  s.imglib = normalizeImglib(s.imglib); s.tplbank = normalizeTplbank(s.tplbank); s.lpRefs = normalizeLpRefs(s.lpRefs); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills); s.mesaLib = typeof normalizeMesaLib === 'function' ? normalizeMesaLib(s.mesaLib) : (s.mesaLib || {items: []});
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.campaigns = normalizeCampaigns(q.campaigns); q.engine = normalizeEngine(q.engine); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); q.portal = normalizePortal(q.portal); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.campaigns = normalizeCampaigns(q.campaigns); q.engine = normalizeEngine(q.engine); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); q.portal = normalizePortal(q.portal); q.mesa = typeof normalizeMesa === 'function' ? normalizeMesa(q.mesa) : (q.mesa || {}); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
