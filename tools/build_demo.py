@@ -11,6 +11,8 @@ def scripts(m):
     out = ''
     if path == 'js/util.js': out += '<script>window.DEMO_MODE=true</script>\n'
     if path == 'js/app.js': out += js('demo/demo.js') + '\n'
+    # Social Hub: o app (socialhub/index.html) vai embutido como texto, para a demo de arquivo único abrir o iframe sem servidor
+    if path == 'js/socialhub.js' and (root / 'socialhub' / 'index.html').exists(): out += '<script>window.SOCIALHUB_TEMPLATE=' + __import__('json').dumps((root / 'socialhub' / 'index.html').read_text()).replace('</', '<\\/') + ';</script>\n'
     return out + js(path)
 html = re.sub(r'<script src="([^"]+)"></script>', scripts, html)
 html = html.replace('<title>Ampliação Studio — Creative Workspace</title>', '<title>Ampliação Studio — Demonstração</title>')

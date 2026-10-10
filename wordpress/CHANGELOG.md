@@ -1,5 +1,10 @@
 # Histórico de versões
 
+## 1.11.0
+- **Nova sessão no menu: Social Hub e Insights.** O app Social Hub completo (Painel, Agenda com .ics, Conteúdo e insights, Público, Localidades, Publicações, Impulsionar, Relacionamento com graus e resposta em lote, Relatórios em PDF, Atualizar números, Importar histórico, Contas, Equipe, Histórico) roda dentro do Studio, sem login extra.
+- **Um Social Hub por projeto.** Na primeira abertura ele nasce das contas, publicações, conversas, compromissos e métricas da aba Publicação; depois cada alteração feita no Hub é guardada sozinha no projeto (sobrevive a recarregar e vai junto na sincronização). Botões: *Trazer da Publicação* (refaz o Hub com os dados do Studio) e *Baixar dados (.json)*.
+- O arquivo do Hub (`socialhub/index.html`) vai no plugin do WordPress e na demo. Os dados da campanha original não vão junto.
+
 ## 1.10.0
 - **Formulário único do cliente** (o link do briefing virou o formulário completo, 11 partes): quem responde, empresa (site, @Instagram, redes), **a marca** (valores e atitudes de clicar, tom de voz, o que fala/não fala, admira/repudia, palavras que usa/nunca usa; mostra ao cliente o arquétipo na hora), o cliente do cliente, **produtos e serviços** com a ficha completa (formato, peso, tamanho, duração, entrega, prazo, validade, garantia, pagamento, para quem não serve, problemas que resolve, tempo de resolução), **concorrentes** (até 8, com site, Instagram, o que fazem bem/mal e a diferença), referências, marketing, **depoimentos** (com campo de autorização), links e materiais que já existem e **envio de fotos e arquivos** (logo, fotos, produtos, materiais já feitos, prints; imagens JPG/PNG/WebP e PDF, conferidos pelo conteúdo).
 - **Importar respostas** agora preenche, sem apagar o que já existe: Marca e arquétipo, Voice Brain (palavras que usa e proibidas), fichas de produto, **Concorrentes** (com site, @ e notas), **Materiais do cliente** (links e depoimentos) e envia as imagens para a **Biblioteca**. Importar de novo não duplica.

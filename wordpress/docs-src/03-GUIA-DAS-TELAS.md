@@ -113,3 +113,8 @@ Menu **5 · Mostrar ao cliente → Aprovação de arte**.
 3. Quando ele enviar, clique em **Importar respostas**. Marca, produtos, concorrentes, depoimentos, links e imagens vão para o projeto, sem apagar o que você já tinha.
 4. Confira em **Marca e arquétipo**, **Produtos e serviços**, **Concorrentes** e **Materiais do cliente**. Depoimentos só são usados pela IA se estiverem marcados como autorizados.
 
+## Social Hub e Insights
+- No menu, **Social Hub e Insights**. É o painel de redes sociais completo: Painel (alcance, impressões, frequência, mensagens), Agenda, Conteúdo e insights (só com amostra suficiente), Público, Localidades, Publicações, Impulsionar, Relacionamento (graus de relação e resposta em lote), Relatórios em PDF, Atualizar números, Importar histórico, Contas, Equipe e Histórico.
+- Cada projeto tem o seu. Na primeira vez ele já vem com as contas e publicações da aba **Publicação**. O que você alterar dentro do Hub fica guardado no projeto.
+- **Trazer da Publicação** refaz o Hub com o que está na aba Publicação (apaga o que foi mudado só no Hub). **Baixar dados** guarda um arquivo de cópia.
+
