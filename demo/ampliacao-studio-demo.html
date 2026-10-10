@@ -1179,6 +1179,7 @@ body.mz-lock{overflow:hidden}
       <button data-tab="preproject">Pré-Projeto</button>
       <button data-tab="identity">Marca e arquétipo</button>
       <button data-tab="products">Produtos e serviços</button>
+      <button data-tab="intake">Materiais do cliente</button>
       <button data-tab="strategy">Estratégia & ICP</button>
       <button data-tab="radar">Concorrentes</button>
       <button data-tab="creative">Feed criativo</button>
@@ -1286,6 +1287,7 @@ document.addEventListener('DOMContentLoaded', () => hydrateIcons());
 
 </script>
 <script>
+const IN_LINKS = ['site', 'instagram', 'redes', 'logo', 'fotos', 'videos', 'marca', 'jafeito'];
 const ID_ARCH = ['inocente', 'explorador', 'sabio', 'heroi', 'foradalei', 'mago', 'caracomum', 'amante', 'bobo', 'prestativo', 'criador', 'governante'], ID_LISTS = ['fala', 'naoFala', 'atitudeTem', 'atitudeNao', 'admira', 'repudia', 'usa', 'naoUsa'], ID_SLIDERS = ['formal', 'humor', 'tecnico', 'calor', 'ousadia'];
 /* Estado do workspace: modelo de dados, persistência local, exportação/importação */
 const STORE_KEY = window.DEMO_MODE ? 'ampliacao_studio_demo' : 'ampliacao_studio_v1';
@@ -1326,7 +1328,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}, scripts: []}, stories: [], mesa: (typeof normalizeMesa === 'function' ? normalizeMesa({}) : null), portal: {t: '', items: [], news: [], clientEmails: '', notifyEmails: '', requireLogin: false, publishedAt: '', seen: 0},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], identity: (typeof normalizeIdentity === 'function' ? normalizeIdentity({}) : {}), sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], engine: {}, approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], intake: (typeof normalizeIntake === 'function' ? normalizeIntake({}) : {}), identity: (typeof normalizeIdentity === 'function' ? normalizeIdentity({}) : {}), sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], engine: {}, approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -1557,6 +1559,13 @@ function normalizeProducts(x) {
     notFor: str(r.notFor, 600), problems: lines(r.problems, 300, 20), resolveTime: str(r.resolveTime, 200), differentials: lines(r.differentials, 300, 20), limits: lines(r.limits, 300, 20), notes: str(r.notes, 1000)}));
 }
 /* Identidade da marca: valores → atitudes → arquétipo (12, de "O Herói e o Fora da Lei") → voz. Só ids e textos curtos. */
+/* Materiais do cliente: links, depoimentos e arquivos recebidos pelo briefing */
+function normalizeIntake(x) {
+  x = x && typeof x === 'object' ? x : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || ''));
+  const links = {}; IN_LINKS.forEach(k => { links[k] = str(x.links && x.links[k], 1200); });
+  return {links, testimonials: (Array.isArray(x.testimonials) ? x.testimonials : []).filter(t => t && sid(t.id)).slice(0, 60).map(t => ({id: t.id, who: str(t.who, 120), text: str(t.text, 1500), link: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(t.link || '') ? t.link : '', product: str(t.product, 120), auth: ['sim', 'pedir', 'nao'].includes(t.auth) ? t.auth : 'pedir'})),
+    files: (Array.isArray(x.files) ? x.files : []).filter(f => f && /^[a-f0-9]{16}$/.test(String(f.id)) && /^(jpg|png|webp|pdf)$/.test(String(f.ext))).slice(0, 80).map(f => ({id: f.id, ext: f.ext, cat: ['logo', 'fotos', 'produtos', 'materiais', 'depoimentos'].includes(f.cat) ? f.cat : 'materiais', name: str(f.name, 80), t: /^[a-f0-9]{24}$/.test(String(f.t)) ? f.t : '', lib: sid(f.lib) ? f.lib : ''}))};
+}
 function normalizeIdentity(x) {
   x = x && typeof x === 'object' ? x : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), ids = (a, m) => [...new Set((Array.isArray(a) ? a : []).filter(v => /^[a-z0-9]{2,24}$/.test(String(v))))].slice(0, m), tx = (a, n, m) => [...new Set((Array.isArray(a) ? a : []).map(t => str(t, n).trim()).filter(Boolean))].slice(0, m);
   const l = x.lists && typeof x.lists === 'object' ? x.lists : {}, sl = x.sliders && typeof x.sliders === 'object' ? x.sliders : {}, lists = {}, sliders = {};
@@ -1664,7 +1673,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.identity = normalizeIdentity(q.identity); q.campaigns = normalizeCampaigns(q.campaigns); q.engine = normalizeEngine(q.engine); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); q.portal = normalizePortal(q.portal); q.mesa = typeof normalizeMesa === 'function' ? normalizeMesa(q.mesa) : (q.mesa || {}); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.identity = normalizeIdentity(q.identity); q.intake = normalizeIntake(q.intake); q.campaigns = normalizeCampaigns(q.campaigns); q.engine = normalizeEngine(q.engine); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); q.portal = normalizePortal(q.portal); q.mesa = typeof normalizeMesa === 'function' ? normalizeMesa(q.mesa) : (q.mesa || {}); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');
@@ -1847,8 +1856,10 @@ function projectContext(p) {
     pre.objective ? 'Objetivo estratégico: ' + pre.objective : '',
     pre.icps.length ? 'ICPs:\n' + pre.icps.map(x => `- ${x.name}: ${x.profile} | ${x.situation} | ${x.need}` + (x.pains ? ` | Dores: ${String(x.pains).split('\n').slice(0, 4).join('; ')}` : '') + (x.doubts ? ` | Dúvidas: ${String(x.doubts).split('\n').slice(0, 4).join('; ')}` : '') + (x.desires ? ` | Desejos: ${String(x.desires).split('\n').slice(0, 3).join('; ')}` : '') + (x.hidden ? ` | Urgências ocultas: ${String(x.hidden).split('\n').slice(0, 3).join('; ')}` : '')).join('\n') : '', (p.products || []).length ? 'Produtos e serviços: ' + p.products.slice(0, 8).map(x => x.name + (x.summary ? ' (' + x.summary.slice(0, 100) + ')' : '')).join('; ') : '',
     typeof identityTxt === 'function' && identityTxt(p) ? identityTxt(p) : '',
+    typeof intakeTxt === 'function' && intakeTxt(p) ? intakeTxt(p) : '',
     (p.products || []).length ? 'Produtos e serviços:\n' + p.products.slice(0, 12).map(x => `- ${x.name}${x.price ? ' (' + x.price + ')' : ''}: ${x.summary || ''}${(x.benefits || []).length ? ' | Benefícios: ' + x.benefits.slice(0, 4).join('; ') : ''}${(x.objections || []).length ? ' | Objeções: ' + x.objections.slice(0, 3).join('; ') : ''}${typeof prodFacts === 'function' ? prodFacts(x) : ''}`).join('\n') : '',
     p.brief.offer ? 'Oferta: ' + p.brief.offer : '', p.brief.audience ? 'Público: ' + p.brief.audience : '', p.brief.problem ? 'Problema do cliente: ' + p.brief.problem : '',
+    (p.competitors || []).some(c => c.notes) ? 'Concorrentes informados pelo cliente: ' + p.competitors.filter(c => c.notes || c.name).slice(0, 8).map(c => `${c.name}${c.url ? ' (' + c.url + ')' : ''}${c.notes ? ': ' + c.notes.slice(0, 300) : ''}`).join(' | ') : '',
     p.competitors.some(hasTeardown) ? 'O que o mercado faz (referências): ' + p.competitors.filter(hasTeardown).map(c => `${c.name}: hooks ${(c.teardown.hooks || []).join('; ')}; ângulos ${(c.teardown.angles || []).join('; ')}`).join(' | ') : '',
     p.voice.personality ? 'Personalidade da voz: ' + p.voice.personality : '', p.voice.antivocab ? 'Nunca dizer: ' + p.voice.antivocab : '', p.voice.rules ? 'Regras de escrita: ' + p.voice.rules : '',
     p.brand.tone ? `Tom de voz: ${p.brand.tone}. Regra: ${p.brand.rule}` : '', p.brand.instructions ? 'Instruções de marca: ' + p.brand.instructions : '',
@@ -22868,88 +22879,6 @@ async function smSyncAccounts(quiet) {
 
 </script>
 <script>
-/* Identidade da marca: os 12 arquétipos (modelo de "O Herói e o Fora da Lei"), valores e atitudes para escolher.
-   Textos escritos para o Studio. As marcas citadas são exemplos comuns na literatura de arquétipos: a classificação é interpretação e varia entre autores. */
-const ID_GROUPS = {independencia: 'Independência e realização', maestria: 'Maestria e risco', pertencimento: 'Pertencimento e prazer', estabilidade: 'Estabilidade e controle'};
-const ID_ARCHS = {
-  inocente: {n: 'Inocente', g: 'independencia', desejo: 'Ser feliz e viver com simplicidade e segurança', medo: 'Fazer algo errado e ser punido', dom: 'Fé, otimismo e pureza', sombra: 'Ingenuidade; negar problemas reais', tom: 'Simples, positivo, gentil, sem jargão', marcas: ['Dove', 'Coca-Cola', 'Innocent'], usa: ['simples', 'bom', 'puro', 'tranquilo', 'honesto', 'sem complicação'], evita: ['ironia pesada', 'ameaça', 'cinismo', 'urgência falsa']},
-  explorador: {n: 'Explorador', g: 'independencia', desejo: 'Liberdade para descobrir quem é e o que há de novo', medo: 'Ficar preso, estagnado, ser comum', dom: 'Autonomia, ambição, coragem de ir', sombra: 'Fugir de compromisso; viver só de partida', tom: 'Convidativo, curioso, espontâneo, sem pressa', marcas: ['Jeep', 'The North Face', 'Land Rover', 'Patagonia'], usa: ['descobrir', 'caminho', 'liberdade', 'novo', 'explorar', 'ir além'], evita: ['rotina', 'padrão', 'conformar', 'sempre igual']},
-  sabio: {n: 'Sábio', g: 'independencia', desejo: 'Entender o mundo e transmitir a verdade', medo: 'Ser enganado ou ignorante', dom: 'Sabedoria, análise, inteligência', sombra: 'Frieza, excesso de análise, arrogância intelectual', tom: 'Claro, calmo, baseado em fatos, didático', marcas: ['Google', 'BBC', 'TED', 'Harvard'], usa: ['entender', 'dados mostram', 'na prática', 'passo a passo', 'por que', 'método'], evita: ['achismo', 'promessa milagrosa', 'gíria forçada', 'exagero']},
-  heroi: {n: 'Herói', g: 'maestria', desejo: 'Provar o próprio valor com ação corajosa', medo: 'Fraqueza, vulnerabilidade, falhar', dom: 'Competência, coragem, determinação', sombra: 'Arrogância; precisar sempre de um inimigo', tom: 'Direto, motivador, confiante, de desafio', marcas: ['Nike', 'FedEx', 'Duracell', 'BMW'], usa: ['conquistar', 'superar', 'meta', 'resultado', 'força', 'vá em frente'], evita: ['desistir', 'tanto faz', 'mais ou menos', 'vitimismo']},
-  foradalei: {n: 'Fora da Lei', g: 'maestria', desejo: 'Rebelião, ruptura e libertação', medo: 'Ser impotente ou irrelevante', dom: 'Coragem de questionar e de virar o jogo', sombra: 'Destruir sem construir; agressividade gratuita', tom: 'Provocador, irreverente, sem filtro, anti-regra', marcas: ['Harley-Davidson', 'Diesel', 'Virgin', 'Jack Daniel\'s'], usa: ['quebrar', 'sem regra', 'rebelde', 'chega de', 'contra o óbvio', 'verdade nua'], evita: ['tradição por tradição', 'sempre foi assim', 'politicamente correto vazio', 'servilismo']},
-  mago: {n: 'Mago', g: 'maestria', desejo: 'Transformar a realidade e fazer sonhos acontecerem', medo: 'Consequências negativas inesperadas', dom: 'Visão, encantamento, transformação', sombra: 'Manipulação; prometer mais do que entrega', tom: 'Inspirador, visionário, misterioso, simbólico', marcas: ['Disney', 'Apple', 'Tesla', 'Dyson'], usa: ['transformar', 'imagine', 'descubra o segredo', 'momento', 'mágica', 'revelar'], evita: ['rotina', 'tarefa', 'burocracia', 'prometer sem provar']},
-  caracomum: {n: 'Cara Comum', g: 'pertencimento', desejo: 'Pertencer e ser aceito como é', medo: 'Ser excluído ou se destacar demais', dom: 'Realismo, empatia, falta de pretensão', sombra: 'Perder a identidade para se encaixar', tom: 'Próximo, honesto, informal, de conversa', marcas: ['IKEA', 'Budweiser', 'Havaianas', 'Magazine Luiza'], usa: ['a gente', 'de verdade', 'do jeito que é', 'junto', 'no dia a dia', 'sem frescura'], evita: ['elitismo', 'palavra difícil', 'pose', 'exclusividade']},
-  amante: {n: 'Amante', g: 'pertencimento', desejo: 'Intimidade, paixão e experiências sensoriais', medo: 'Ficar sozinho ou não ser desejado', dom: 'Paixão, gratidão, apreciação', sombra: 'Dependência de aprovação; superficialidade', tom: 'Caloroso, sensorial, sedutor, elegante', marcas: ['Chanel', 'Victoria\'s Secret', 'Häagen-Dazs', 'Godiva'], usa: ['sentir', 'prazer', 'cuidar de você', 'desejo', 'especial', 'sensação'], evita: ['frieza técnica', 'agressividade', 'jargão', 'pressa']},
-  bobo: {n: 'Bobo da Corte', g: 'pertencimento', desejo: 'Viver o presente com diversão e leveza', medo: 'Ser ignorado ou entediar', dom: 'Alegria, humor, espontaneidade', sombra: 'Frivolidade; fugir de temas sérios', tom: 'Brincalhão, bem-humorado, leve, surpreendente', marcas: ['M&M\'s', 'Old Spice', 'Ben & Jerry\'s', 'Skol'], usa: ['bora', 'divertido', 'sem drama', 'rir', 'brincar', 'curtir'], evita: ['solenidade', 'tom professoral', 'drama', 'culpa']},
-  prestativo: {n: 'Prestativo', g: 'estabilidade', desejo: 'Proteger e cuidar das pessoas', medo: 'Egoísmo e ingratidão', dom: 'Compaixão, generosidade, acolhimento', sombra: 'Martírio; deixar o outro dependente', tom: 'Acolhedor, atencioso, tranquilizador, paciente', marcas: ['Johnson & Johnson', 'UNICEF', 'Volvo', 'Campbell\'s'], usa: ['cuidar', 'estamos com você', 'apoio', 'seguro', 'ajudar', 'proteção'], evita: ['pressão', 'culpa', 'frieza', 'ironia']},
-  criador: {n: 'Criador', g: 'estabilidade', desejo: 'Criar algo de valor duradouro', medo: 'Mediocridade, execução sem visão', dom: 'Criatividade, imaginação, capricho', sombra: 'Perfeccionismo; nunca terminar', tom: 'Imaginativo, expressivo, original, cuidadoso', marcas: ['Lego', 'Adobe', 'Crayola', 'Pinterest'], usa: ['criar', 'construir', 'imaginar', 'do zero', 'feito com cuidado', 'autoral'], evita: ['padrão', 'genérico', 'copiar', 'atalho']},
-  governante: {n: 'Governante', g: 'estabilidade', desejo: 'Controle, ordem e prosperidade', medo: 'Caos e perder o poder', dom: 'Liderança, responsabilidade, visão de conjunto', sombra: 'Autoritarismo; distância do cliente', tom: 'Seguro, sóbrio, autoritativo, refinado', marcas: ['Mercedes-Benz', 'Rolex', 'American Express', 'Microsoft'], usa: ['padrão', 'referência', 'liderança', 'garantia', 'excelência', 'confiança'], evita: ['gíria', 'improviso', 'bagunça', 'tom de brincadeira']}
-};
-/* chips: [id, rótulo, arquétipos (o primeiro vale 2 pontos, os demais 1)] */
-const ID_VALUES = [
-  ['seguranca', 'Segurança', ['inocente', 'governante']], ['simplicidade', 'Simplicidade', ['inocente', 'caracomum']], ['honestidade', 'Honestidade', ['inocente', 'sabio', 'caracomum']], ['otimismo', 'Otimismo', ['inocente', 'bobo']], ['confianca', 'Confiança', ['inocente', 'governante', 'prestativo']],
-  ['liberdade', 'Liberdade', ['explorador', 'foradalei']], ['aventura', 'Aventura', ['explorador', 'heroi']], ['autenticidade', 'Autenticidade', ['explorador', 'caracomum']], ['descoberta', 'Descoberta', ['explorador', 'sabio']],
-  ['conhecimento', 'Conhecimento', ['sabio']], ['verdade', 'Verdade', ['sabio', 'foradalei']], ['clareza', 'Clareza', ['sabio', 'governante']],
-  ['coragem', 'Coragem', ['heroi', 'foradalei']], ['superacao', 'Superação', ['heroi']], ['disciplina', 'Disciplina', ['heroi', 'governante']], ['excelencia', 'Excelência', ['heroi', 'governante', 'criador']], ['resultado', 'Resultado', ['heroi']],
-  ['ruptura', 'Ruptura', ['foradalei']], ['rebeldia', 'Rebeldia', ['foradalei']], ['inconformismo', 'Inconformismo', ['foradalei', 'criador']],
-  ['transformacao', 'Transformação', ['mago']], ['visao', 'Visão', ['mago', 'criador']], ['encantamento', 'Encantamento', ['mago', 'amante']],
-  ['pertencimento', 'Pertencimento', ['caracomum']], ['igualdade', 'Igualdade', ['caracomum']], ['humildade', 'Humildade', ['caracomum']], ['comunidade', 'Comunidade', ['caracomum', 'prestativo']],
-  ['intimidade', 'Intimidade', ['amante']], ['paixao', 'Paixão', ['amante']], ['beleza', 'Beleza', ['amante', 'criador']],
-  ['alegria', 'Alegria', ['bobo']], ['leveza', 'Leveza', ['bobo', 'inocente']], ['humor', 'Humor', ['bobo']],
-  ['cuidado', 'Cuidado', ['prestativo']], ['generosidade', 'Generosidade', ['prestativo']], ['empatia', 'Empatia', ['prestativo', 'amante']], ['servir', 'Servir', ['prestativo']],
-  ['inovacao', 'Inovação', ['criador', 'mago']], ['criatividade', 'Criatividade', ['criador']], ['expressao', 'Expressão', ['criador']],
-  ['lideranca', 'Liderança', ['governante', 'heroi']], ['ordem', 'Ordem', ['governante']], ['prestigio', 'Prestígio', ['governante', 'amante']], ['responsabilidade', 'Responsabilidade', ['governante', 'prestativo']]
-];
-const ID_ATTS = [
-  ['direto', 'Fala sem rodeio', ['heroi', 'foradalei']], ['desafia', 'Desafia o que todo mundo aceita', ['foradalei']], ['acolhe', 'Protege e acolhe quem chega', ['prestativo']], ['explica', 'Explica com calma e com dados', ['sabio']],
-  ['convida', 'Convida a experimentar o novo', ['explorador']], ['comum', 'Fala como gente comum', ['caracomum']], ['graca', 'Faz graça e não se leva tão a sério', ['bobo']], ['capricho', 'Cria algo do zero com capricho', ['criador']],
-  ['comando', 'Assume o comando e dá direção', ['governante']], ['surpreende', 'Encanta e surpreende', ['mago']], ['carinho', 'Fala com carinho e proximidade', ['amante']], ['positivo', 'Mantém tudo simples e positivo', ['inocente']],
-  ['enfrenta', 'Enfrenta o problema de frente', ['heroi']], ['quebra', 'Quebra regras que não fazem sentido', ['foradalei']], ['autoridade', 'Mostra o caminho com autoridade', ['governante', 'sabio']], ['detalhes', 'Cuida dos detalhes', ['criador', 'amante']],
-  ['celebra', 'Celebra conquistas', ['heroi', 'bobo']], ['admite', 'Admite o que não sabe', ['caracomum', 'sabio']], ['escuta', 'Escuta antes de falar', ['prestativo', 'caracomum']], ['provoca', 'Provoca e incomoda para despertar', ['foradalei', 'mago']],
-  ['inspira', 'Inspira a ir além do limite', ['heroi', 'explorador']], ['muda', 'Transforma a vida da pessoa', ['mago', 'heroi']], ['bastidores', 'Mostra bastidores sem filtro', ['caracomum', 'foradalei']], ['tradicao', 'Valoriza tradição e confiança', ['governante', 'inocente']],
-  ['curioso', 'Mostra o mundo com curiosidade', ['explorador', 'sabio']], ['generoso', 'Dá conteúdo generoso e gratuito', ['prestativo']], ['acido', 'Usa humor ácido', ['bobo', 'foradalei']], ['facil', 'Faz o difícil parecer fácil', ['sabio', 'criador']],
-  ['sonhos', 'Fala de sonhos e de futuro', ['mago', 'inocente']], ['cobra', 'Cobra resultado e disciplina', ['heroi', 'governante']]
-];
-const ID_SLIDER_INFO = {formal: ['Formal', 'Informal'], humor: ['Sério', 'Bem-humorado'], tecnico: ['Técnico', 'Simples'], calor: ['Reservado', 'Caloroso'], ousadia: ['Contido', 'Ousado']};
-const ID_LIST_INFO = {
-  fala: ['O que a marca fala', 'Assuntos e jeitos de falar que combinam com ela.'], naoFala: ['O que a marca NÃO fala', 'Assuntos e jeitos que ela evita.'],
-  atitudeTem: ['Atitudes que a marca tem', 'Como ela se comporta.'], atitudeNao: ['Atitudes que a marca NÃO tem', 'O que ela nunca faria.'],
-  admira: ['O que a marca admira', 'Pessoas, comportamentos e ideias que ela valoriza.'], repudia: ['O que a marca repudia', 'O que ela rejeita.'],
-  usa: ['Palavras que a marca USA', 'Vocabulário próprio.'], naoUsa: ['Palavras que a marca NÃO usa', 'Vão para a lista de proibidas nas criações.']
-};
-const ID_SUG = {
-  admira: ['Quem faz o que promete', 'Gente que persiste', 'Clareza', 'Quem escuta de verdade', 'Criatividade', 'Coragem de ser diferente', 'Cuidado com os detalhes', 'Resultado real'],
-  repudia: ['Falsidade', 'Promessa milagrosa', 'Arrogância', 'Descaso com o cliente', 'Copiar os outros', 'Pressão e urgência falsa', 'Linguagem difícil de propósito', 'Desrespeito'],
-  fala: ['O dia a dia do cliente', 'Bastidores do trabalho', 'Casos reais', 'Dicas práticas', 'Erros comuns', 'Mitos e verdades', 'Opinião sobre o mercado'],
-  naoFala: ['Política partidária', 'Fofoca de concorrente', 'Resultado garantido', 'Preço sem contexto', 'Piada com o cliente']
-};
-
-/* pontuação: valores e atitudes escolhidos → afinidade com cada arquétipo */
-function idScore(id) {
-  const s = {}; ID_ARCH.forEach(k => { s[k] = 0; });
-  const add = (list, sel) => (sel || []).forEach(i => { const c = list.find(x => x[0] === i); if (c) c[2].forEach((a, n) => { s[a] += n === 0 ? 2 : 1; }); });
-  add(ID_VALUES, id.values); add(ID_ATTS, id.attitudes);
-  const arr = ID_ARCH.map(k => ({id: k, score: s[k]})).sort((a, b) => b.score - a.score || ID_ARCH.indexOf(a.id) - ID_ARCH.indexOf(b.id)), top = arr[0].score || 1;
-  return arr.map(x => ({id: x.id, score: x.score, pct: Math.round(x.score / top * 100)}));
-}
-const idMain = id => id.arch || (idScore(id)[0].score ? idScore(id)[0].id : '');
-/* resumo do tom a partir dos controles */
-function idToneText(id) {
-  const S = id.sliders, w = (k, lo, hi) => S[k] <= 2 ? lo : S[k] >= 4 ? hi : '';
-  return [w('formal', 'formal', 'informal'), w('humor', 'sério', 'bem-humorado'), w('tecnico', 'técnico', 'simples e direto'), w('calor', 'reservado', 'caloroso'), w('ousadia', 'contido', 'ousado')].filter(Boolean).join(', ');
-}
-/* texto para a IA: só o que foi preenchido */
-function identityTxt(p) {
-  const id = p && p.identity; if (!id) return '';
-  const a = ID_ARCHS[idMain(id)], a2 = ID_ARCHS[id.arch2], L = id.lists, vals = id.values.map(v => (ID_VALUES.find(x => x[0] === v) || [0, v])[1]).concat(id.valuesExtra), ats = id.attitudes.map(v => (ID_ATTS.find(x => x[0] === v) || [0, v])[1]).concat(id.attitudesExtra);
-  const lines = [a ? `Arquétipo da marca: ${a.n}${a2 ? ' (secundário: ' + a2.n + ')' : ''}. Desejo central: ${a.desejo}. Tom típico: ${a.tom}.` : '', vals.length ? 'Valores: ' + vals.join(', ') : '', ats.length ? 'Atitudes: ' + ats.join('; ') : '', idToneText(id) ? 'Tom de voz: ' + idToneText(id) : '',
-    L.fala.length ? 'A marca fala de: ' + L.fala.join('; ') : '', L.naoFala.length ? 'A marca NÃO fala de: ' + L.naoFala.join('; ') : '', L.atitudeTem.length ? 'Atitudes que tem: ' + L.atitudeTem.join('; ') : '', L.atitudeNao.length ? 'Atitudes que NÃO tem: ' + L.atitudeNao.join('; ') : '',
-    L.admira.length ? 'Admira: ' + L.admira.join('; ') : '', L.repudia.length ? 'Repudia: ' + L.repudia.join('; ') : '', L.usa.length ? 'PALAVRAS QUE USA: ' + L.usa.join(', ') : '', L.naoUsa.length ? 'PALAVRAS PROIBIDAS (nunca usar): ' + L.naoUsa.join(', ') : ''].filter(Boolean);
-  return lines.length ? 'IDENTIDADE DA MARCA (definida pelo cliente)\n' + lines.join('\n') : '';
-}
-
-</script>
-<script>
 /* Aba "Marca" do projeto: valores → atitudes → arquétipo → voz → resumo. Tudo salvo em p.identity. */
 const idUI = {};
 const idP = () => curProject(), idD = () => { const p = idP(); if (!p.identity || !p.identity.step) p.identity = normalizeIdentity(p.identity); return p.identity; };
@@ -23126,6 +23055,41 @@ async function prSuggest() {
 }
 
 TABS.products = prHTML;
+
+</script>
+<script>
+/* Aba "Materiais" do projeto: links, depoimentos e arquivos que o cliente enviou pelo formulário (ou que você cadastra aqui). */
+const inUI = {edit: ''};
+const IN_LINK_LAB = {site: 'Site', instagram: 'Instagram', redes: 'Outras redes', logo: 'Logo (link)', fotos: 'Fotos (link)', videos: 'Vídeos (link)', marca: 'Manual de marca / cores / fontes', jafeito: 'Materiais de comunicação já feitos'};
+const IN_AUTH = {sim: 'Autorizado', pedir: 'Falta autorização', nao: 'Não pode usar'}, IN_CAT = {logo: 'Logo', fotos: 'Fotos da empresa', produtos: 'Fotos de produtos', materiais: 'Materiais já feitos', depoimentos: 'Depoimentos (prints)'};
+const inP = () => { const p = curProject(); p.intake = normalizeIntake(p.intake); return p.intake; };
+const inUrl = v => { v = String(v || '').trim(); const m = v.match(/^https?:\/\/\S+$/i); return m ? m[0] : (/^@[\w.]{2,40}$/.test(v) ? 'https://instagram.com/' + v.slice(1) : ''); };
+function intakeHTML(p) {
+  const it = inP(), links = IN_LINKS.map(k => `<div class="field ${k === 'jafeito' || k === 'marca' ? 'full' : ''}"><label>${esc(IN_LINK_LAB[k])}</label>${k === 'jafeito' || k === 'marca' ? `<textarea rows="2" oninput="inSetLink('${k}',this.value)">${esc(it.links[k])}</textarea>` : `<input value="${esc(it.links[k])}" oninput="inSetLink('${k}',this.value)" placeholder="https://… ou @perfil">`}${inUrl(it.links[k]) ? `<small><a href="${esc(inUrl(it.links[k]))}" target="_blank" rel="noopener">abrir ↗</a></small>` : ''}</div>`).join('');
+  const dep = it.testimonials.map(t => inUI.edit === t.id ? inDepForm(t) : `<div class="list-item"><div><strong>${esc(t.who) || 'Sem nome'}</strong><small>${esc(IN_AUTH[t.auth])}${t.product ? ' · ' + esc(t.product) : ''}</small><p style="margin:6px 0 0;font-size:13.5px">${esc(t.text).slice(0, 280) || '<span class="muted">Sem texto (só link).</span>'}${t.link && inUrl(t.link) ? ` <a href="${esc(t.link)}" target="_blank" rel="noopener">ver ↗</a>` : ''}</p></div><div class="row-gap"><button class="btn sm" onclick="inEdit('${t.id}')">Editar</button><button class="btn sm" onclick="inDepDel('${t.id}')">Excluir</button></div></div>`).join('');
+  const fl = it.files.length ? Object.entries(IN_CAT).map(([c, l]) => { const g = it.files.filter(f => f.cat === c); return g.length ? `<div style="margin-top:8px"><b style="font-size:13px">${l}</b> <small class="muted">${g.length}</small><div class="id-tags" style="margin-top:4px">${g.map(f => `<span class="id-tag">${esc(f.name)}${f.ext === 'pdf' && f.t ? ` <a href="api/briefing.php?t=${f.t}&f=${f.id}.pdf" target="_blank" rel="noopener">abrir</a>` : f.lib ? ' · na Biblioteca' : ''}</span>`).join('')}</div></div>` : ''; }).join('') : '<p class="muted">Nenhum arquivo recebido ainda. As imagens que o cliente enviar pelo briefing vão para a Biblioteca quando você importar as respostas.</p>';
+  return `<div class="panel"><div class="section-row"><div><h3>Materiais do cliente</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">Links, depoimentos e arquivos. Chegam pelo <b>formulário do cliente</b> (Pré-Projeto → Briefing do cliente → Importar respostas) ou você preenche aqui.</p></div><button class="btn sm" onclick="ui.tab='preproject';renderProjectTab()">Abrir o formulário do cliente</button></div>
+  <h4 style="margin:16px 0 8px">Links</h4><div class="form-grid">${links}</div></div>
+  <div class="panel" style="margin-top:14px"><div class="section-row"><div><h3>Depoimentos de clientes</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">A IA só usa os marcados como <b>autorizados</b>.</p></div><button class="btn sm dark" onclick="inDepNew()">＋ Novo depoimento</button></div><div class="list">${dep || '<p class="muted">Nenhum depoimento ainda.</p>'}</div></div>
+  <div class="panel" style="margin-top:14px"><h3>Arquivos recebidos</h3>${fl}${it.files.some(f => f.lib) ? `<div style="margin-top:10px"><button class="btn sm" onclick="go('biblioteca')">Abrir a Biblioteca de imagens</button></div>` : ''}</div>`;
+}
+let inT; function inSetLink(k, v) { inP().links[k] = String(v).slice(0, 1200); clearTimeout(inT); inT = setTimeout(persist, 400); }
+function inDepForm(t) {
+  return `<div class="list-item" style="display:block"><div class="form-grid"><div class="field"><label>Quem falou</label><input id="dpWho" value="${esc(t.who)}"></div><div class="field"><label>Sobre qual produto</label><input id="dpProd" value="${esc(t.product)}"></div><div class="field full"><label>O que disse</label><textarea id="dpText" rows="3">${esc(t.text)}</textarea></div><div class="field"><label>Link (vídeo, post, avaliação)</label><input id="dpLink" value="${esc(t.link)}"></div><div class="field"><label>Autorização</label><select id="dpAuth">${Object.entries(IN_AUTH).map(([k, l]) => `<option value="${k}" ${t.auth === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div><div class="actions" style="margin-top:8px"><button class="btn sm dark" onclick="inDepSave('${t.id}')">Salvar</button><button class="btn sm" onclick="inUI.edit='';renderProjectTab()">Cancelar</button></div></div>`;
+}
+function inEdit(id) { inUI.edit = id; keepScroll(renderProjectTab); }
+function inDepNew() { const it = inP(), t = {id: uid('dp'), who: '', text: '', link: '', product: '', auth: 'pedir'}; it.testimonials.unshift(t); inUI.edit = t.id; keepScroll(renderProjectTab); }
+function inDepSave(id) { const it = inP(), t = it.testimonials.find(x => x.id === id); if (!t) return; Object.assign(t, {who: $('dpWho').value, product: $('dpProd').value, text: $('dpText').value, link: $('dpLink').value.trim(), auth: $('dpAuth').value}); if (!t.who.trim() && !t.text.trim()) it.testimonials = it.testimonials.filter(x => x.id !== id); curProject().intake = normalizeIntake(it); inUI.edit = ''; persist(); keepScroll(renderProjectTab); }
+function inDepDel(id) { if (!confirm('Excluir este depoimento?')) return; const it = inP(); it.testimonials = it.testimonials.filter(x => x.id !== id); persist(); keepScroll(renderProjectTab); }
+/* texto para a IA: só depoimentos autorizados e links */
+function intakeTxt(p) {
+  const it = p && p.intake; if (!it) return ''; const L = [];
+  const lk = IN_LINKS.filter(k => (it.links[k] || '').trim()).map(k => `${IN_LINK_LAB[k]}: ${it.links[k].trim().slice(0, 200)}`); if (lk.length) L.push('Links da marca: ' + lk.join(' | '));
+  const dp = it.testimonials.filter(t => t.auth === 'sim' && t.text.trim()); if (dp.length) L.push('Depoimentos AUTORIZADOS (use só estes, sem alterar o sentido):\n' + dp.slice(0, 8).map(t => `- "${t.text.slice(0, 300)}" (${t.who}${t.product ? ', sobre ' + t.product : ''})`).join('\n'));
+  if (it.testimonials.some(t => t.auth !== 'sim')) L.push('Há depoimentos SEM autorização: não os use.');
+  return L.length ? 'MATERIAIS DO CLIENTE\n' + L.join('\n') : '';
+}
+TABS.intake = intakeHTML;
 
 </script>
 <script>
@@ -26818,8 +26782,91 @@ function utmCopy() { const o = $('utmOut'); o.select(); try { navigator.clipboar
 
 </script>
 <script>
+/* Identidade da marca: os 12 arquétipos (modelo de "O Herói e o Fora da Lei"), valores e atitudes para escolher.
+   Textos escritos para o Studio. As marcas citadas são exemplos comuns na literatura de arquétipos: a classificação é interpretação e varia entre autores. */
+const ID_GROUPS = {independencia: 'Independência e realização', maestria: 'Maestria e risco', pertencimento: 'Pertencimento e prazer', estabilidade: 'Estabilidade e controle'};
+const ID_ARCHS = {
+  inocente: {n: 'Inocente', g: 'independencia', desejo: 'Ser feliz e viver com simplicidade e segurança', medo: 'Fazer algo errado e ser punido', dom: 'Fé, otimismo e pureza', sombra: 'Ingenuidade; negar problemas reais', tom: 'Simples, positivo, gentil, sem jargão', marcas: ['Dove', 'Coca-Cola', 'Innocent'], usa: ['simples', 'bom', 'puro', 'tranquilo', 'honesto', 'sem complicação'], evita: ['ironia pesada', 'ameaça', 'cinismo', 'urgência falsa']},
+  explorador: {n: 'Explorador', g: 'independencia', desejo: 'Liberdade para descobrir quem é e o que há de novo', medo: 'Ficar preso, estagnado, ser comum', dom: 'Autonomia, ambição, coragem de ir', sombra: 'Fugir de compromisso; viver só de partida', tom: 'Convidativo, curioso, espontâneo, sem pressa', marcas: ['Jeep', 'The North Face', 'Land Rover', 'Patagonia'], usa: ['descobrir', 'caminho', 'liberdade', 'novo', 'explorar', 'ir além'], evita: ['rotina', 'padrão', 'conformar', 'sempre igual']},
+  sabio: {n: 'Sábio', g: 'independencia', desejo: 'Entender o mundo e transmitir a verdade', medo: 'Ser enganado ou ignorante', dom: 'Sabedoria, análise, inteligência', sombra: 'Frieza, excesso de análise, arrogância intelectual', tom: 'Claro, calmo, baseado em fatos, didático', marcas: ['Google', 'BBC', 'TED', 'Harvard'], usa: ['entender', 'dados mostram', 'na prática', 'passo a passo', 'por que', 'método'], evita: ['achismo', 'promessa milagrosa', 'gíria forçada', 'exagero']},
+  heroi: {n: 'Herói', g: 'maestria', desejo: 'Provar o próprio valor com ação corajosa', medo: 'Fraqueza, vulnerabilidade, falhar', dom: 'Competência, coragem, determinação', sombra: 'Arrogância; precisar sempre de um inimigo', tom: 'Direto, motivador, confiante, de desafio', marcas: ['Nike', 'FedEx', 'Duracell', 'BMW'], usa: ['conquistar', 'superar', 'meta', 'resultado', 'força', 'vá em frente'], evita: ['desistir', 'tanto faz', 'mais ou menos', 'vitimismo']},
+  foradalei: {n: 'Fora da Lei', g: 'maestria', desejo: 'Rebelião, ruptura e libertação', medo: 'Ser impotente ou irrelevante', dom: 'Coragem de questionar e de virar o jogo', sombra: 'Destruir sem construir; agressividade gratuita', tom: 'Provocador, irreverente, sem filtro, anti-regra', marcas: ['Harley-Davidson', 'Diesel', 'Virgin', 'Jack Daniel\'s'], usa: ['quebrar', 'sem regra', 'rebelde', 'chega de', 'contra o óbvio', 'verdade nua'], evita: ['tradição por tradição', 'sempre foi assim', 'politicamente correto vazio', 'servilismo']},
+  mago: {n: 'Mago', g: 'maestria', desejo: 'Transformar a realidade e fazer sonhos acontecerem', medo: 'Consequências negativas inesperadas', dom: 'Visão, encantamento, transformação', sombra: 'Manipulação; prometer mais do que entrega', tom: 'Inspirador, visionário, misterioso, simbólico', marcas: ['Disney', 'Apple', 'Tesla', 'Dyson'], usa: ['transformar', 'imagine', 'descubra o segredo', 'momento', 'mágica', 'revelar'], evita: ['rotina', 'tarefa', 'burocracia', 'prometer sem provar']},
+  caracomum: {n: 'Cara Comum', g: 'pertencimento', desejo: 'Pertencer e ser aceito como é', medo: 'Ser excluído ou se destacar demais', dom: 'Realismo, empatia, falta de pretensão', sombra: 'Perder a identidade para se encaixar', tom: 'Próximo, honesto, informal, de conversa', marcas: ['IKEA', 'Budweiser', 'Havaianas', 'Magazine Luiza'], usa: ['a gente', 'de verdade', 'do jeito que é', 'junto', 'no dia a dia', 'sem frescura'], evita: ['elitismo', 'palavra difícil', 'pose', 'exclusividade']},
+  amante: {n: 'Amante', g: 'pertencimento', desejo: 'Intimidade, paixão e experiências sensoriais', medo: 'Ficar sozinho ou não ser desejado', dom: 'Paixão, gratidão, apreciação', sombra: 'Dependência de aprovação; superficialidade', tom: 'Caloroso, sensorial, sedutor, elegante', marcas: ['Chanel', 'Victoria\'s Secret', 'Häagen-Dazs', 'Godiva'], usa: ['sentir', 'prazer', 'cuidar de você', 'desejo', 'especial', 'sensação'], evita: ['frieza técnica', 'agressividade', 'jargão', 'pressa']},
+  bobo: {n: 'Bobo da Corte', g: 'pertencimento', desejo: 'Viver o presente com diversão e leveza', medo: 'Ser ignorado ou entediar', dom: 'Alegria, humor, espontaneidade', sombra: 'Frivolidade; fugir de temas sérios', tom: 'Brincalhão, bem-humorado, leve, surpreendente', marcas: ['M&M\'s', 'Old Spice', 'Ben & Jerry\'s', 'Skol'], usa: ['bora', 'divertido', 'sem drama', 'rir', 'brincar', 'curtir'], evita: ['solenidade', 'tom professoral', 'drama', 'culpa']},
+  prestativo: {n: 'Prestativo', g: 'estabilidade', desejo: 'Proteger e cuidar das pessoas', medo: 'Egoísmo e ingratidão', dom: 'Compaixão, generosidade, acolhimento', sombra: 'Martírio; deixar o outro dependente', tom: 'Acolhedor, atencioso, tranquilizador, paciente', marcas: ['Johnson & Johnson', 'UNICEF', 'Volvo', 'Campbell\'s'], usa: ['cuidar', 'estamos com você', 'apoio', 'seguro', 'ajudar', 'proteção'], evita: ['pressão', 'culpa', 'frieza', 'ironia']},
+  criador: {n: 'Criador', g: 'estabilidade', desejo: 'Criar algo de valor duradouro', medo: 'Mediocridade, execução sem visão', dom: 'Criatividade, imaginação, capricho', sombra: 'Perfeccionismo; nunca terminar', tom: 'Imaginativo, expressivo, original, cuidadoso', marcas: ['Lego', 'Adobe', 'Crayola', 'Pinterest'], usa: ['criar', 'construir', 'imaginar', 'do zero', 'feito com cuidado', 'autoral'], evita: ['padrão', 'genérico', 'copiar', 'atalho']},
+  governante: {n: 'Governante', g: 'estabilidade', desejo: 'Controle, ordem e prosperidade', medo: 'Caos e perder o poder', dom: 'Liderança, responsabilidade, visão de conjunto', sombra: 'Autoritarismo; distância do cliente', tom: 'Seguro, sóbrio, autoritativo, refinado', marcas: ['Mercedes-Benz', 'Rolex', 'American Express', 'Microsoft'], usa: ['padrão', 'referência', 'liderança', 'garantia', 'excelência', 'confiança'], evita: ['gíria', 'improviso', 'bagunça', 'tom de brincadeira']}
+};
+/* chips: [id, rótulo, arquétipos (o primeiro vale 2 pontos, os demais 1)] */
+const ID_VALUES = [
+  ['seguranca', 'Segurança', ['inocente', 'governante']], ['simplicidade', 'Simplicidade', ['inocente', 'caracomum']], ['honestidade', 'Honestidade', ['inocente', 'sabio', 'caracomum']], ['otimismo', 'Otimismo', ['inocente', 'bobo']], ['confianca', 'Confiança', ['inocente', 'governante', 'prestativo']],
+  ['liberdade', 'Liberdade', ['explorador', 'foradalei']], ['aventura', 'Aventura', ['explorador', 'heroi']], ['autenticidade', 'Autenticidade', ['explorador', 'caracomum']], ['descoberta', 'Descoberta', ['explorador', 'sabio']],
+  ['conhecimento', 'Conhecimento', ['sabio']], ['verdade', 'Verdade', ['sabio', 'foradalei']], ['clareza', 'Clareza', ['sabio', 'governante']],
+  ['coragem', 'Coragem', ['heroi', 'foradalei']], ['superacao', 'Superação', ['heroi']], ['disciplina', 'Disciplina', ['heroi', 'governante']], ['excelencia', 'Excelência', ['heroi', 'governante', 'criador']], ['resultado', 'Resultado', ['heroi']],
+  ['ruptura', 'Ruptura', ['foradalei']], ['rebeldia', 'Rebeldia', ['foradalei']], ['inconformismo', 'Inconformismo', ['foradalei', 'criador']],
+  ['transformacao', 'Transformação', ['mago']], ['visao', 'Visão', ['mago', 'criador']], ['encantamento', 'Encantamento', ['mago', 'amante']],
+  ['pertencimento', 'Pertencimento', ['caracomum']], ['igualdade', 'Igualdade', ['caracomum']], ['humildade', 'Humildade', ['caracomum']], ['comunidade', 'Comunidade', ['caracomum', 'prestativo']],
+  ['intimidade', 'Intimidade', ['amante']], ['paixao', 'Paixão', ['amante']], ['beleza', 'Beleza', ['amante', 'criador']],
+  ['alegria', 'Alegria', ['bobo']], ['leveza', 'Leveza', ['bobo', 'inocente']], ['humor', 'Humor', ['bobo']],
+  ['cuidado', 'Cuidado', ['prestativo']], ['generosidade', 'Generosidade', ['prestativo']], ['empatia', 'Empatia', ['prestativo', 'amante']], ['servir', 'Servir', ['prestativo']],
+  ['inovacao', 'Inovação', ['criador', 'mago']], ['criatividade', 'Criatividade', ['criador']], ['expressao', 'Expressão', ['criador']],
+  ['lideranca', 'Liderança', ['governante', 'heroi']], ['ordem', 'Ordem', ['governante']], ['prestigio', 'Prestígio', ['governante', 'amante']], ['responsabilidade', 'Responsabilidade', ['governante', 'prestativo']]
+];
+const ID_ATTS = [
+  ['direto', 'Fala sem rodeio', ['heroi', 'foradalei']], ['desafia', 'Desafia o que todo mundo aceita', ['foradalei']], ['acolhe', 'Protege e acolhe quem chega', ['prestativo']], ['explica', 'Explica com calma e com dados', ['sabio']],
+  ['convida', 'Convida a experimentar o novo', ['explorador']], ['comum', 'Fala como gente comum', ['caracomum']], ['graca', 'Faz graça e não se leva tão a sério', ['bobo']], ['capricho', 'Cria algo do zero com capricho', ['criador']],
+  ['comando', 'Assume o comando e dá direção', ['governante']], ['surpreende', 'Encanta e surpreende', ['mago']], ['carinho', 'Fala com carinho e proximidade', ['amante']], ['positivo', 'Mantém tudo simples e positivo', ['inocente']],
+  ['enfrenta', 'Enfrenta o problema de frente', ['heroi']], ['quebra', 'Quebra regras que não fazem sentido', ['foradalei']], ['autoridade', 'Mostra o caminho com autoridade', ['governante', 'sabio']], ['detalhes', 'Cuida dos detalhes', ['criador', 'amante']],
+  ['celebra', 'Celebra conquistas', ['heroi', 'bobo']], ['admite', 'Admite o que não sabe', ['caracomum', 'sabio']], ['escuta', 'Escuta antes de falar', ['prestativo', 'caracomum']], ['provoca', 'Provoca e incomoda para despertar', ['foradalei', 'mago']],
+  ['inspira', 'Inspira a ir além do limite', ['heroi', 'explorador']], ['muda', 'Transforma a vida da pessoa', ['mago', 'heroi']], ['bastidores', 'Mostra bastidores sem filtro', ['caracomum', 'foradalei']], ['tradicao', 'Valoriza tradição e confiança', ['governante', 'inocente']],
+  ['curioso', 'Mostra o mundo com curiosidade', ['explorador', 'sabio']], ['generoso', 'Dá conteúdo generoso e gratuito', ['prestativo']], ['acido', 'Usa humor ácido', ['bobo', 'foradalei']], ['facil', 'Faz o difícil parecer fácil', ['sabio', 'criador']],
+  ['sonhos', 'Fala de sonhos e de futuro', ['mago', 'inocente']], ['cobra', 'Cobra resultado e disciplina', ['heroi', 'governante']]
+];
+const ID_SLIDER_INFO = {formal: ['Formal', 'Informal'], humor: ['Sério', 'Bem-humorado'], tecnico: ['Técnico', 'Simples'], calor: ['Reservado', 'Caloroso'], ousadia: ['Contido', 'Ousado']};
+const ID_LIST_INFO = {
+  fala: ['O que a marca fala', 'Assuntos e jeitos de falar que combinam com ela.'], naoFala: ['O que a marca NÃO fala', 'Assuntos e jeitos que ela evita.'],
+  atitudeTem: ['Atitudes que a marca tem', 'Como ela se comporta.'], atitudeNao: ['Atitudes que a marca NÃO tem', 'O que ela nunca faria.'],
+  admira: ['O que a marca admira', 'Pessoas, comportamentos e ideias que ela valoriza.'], repudia: ['O que a marca repudia', 'O que ela rejeita.'],
+  usa: ['Palavras que a marca USA', 'Vocabulário próprio.'], naoUsa: ['Palavras que a marca NÃO usa', 'Vão para a lista de proibidas nas criações.']
+};
+const ID_SUG = {
+  admira: ['Quem faz o que promete', 'Gente que persiste', 'Clareza', 'Quem escuta de verdade', 'Criatividade', 'Coragem de ser diferente', 'Cuidado com os detalhes', 'Resultado real'],
+  repudia: ['Falsidade', 'Promessa milagrosa', 'Arrogância', 'Descaso com o cliente', 'Copiar os outros', 'Pressão e urgência falsa', 'Linguagem difícil de propósito', 'Desrespeito'],
+  fala: ['O dia a dia do cliente', 'Bastidores do trabalho', 'Casos reais', 'Dicas práticas', 'Erros comuns', 'Mitos e verdades', 'Opinião sobre o mercado'],
+  naoFala: ['Política partidária', 'Fofoca de concorrente', 'Resultado garantido', 'Preço sem contexto', 'Piada com o cliente']
+};
+
+/* pontuação: valores e atitudes escolhidos → afinidade com cada arquétipo */
+function idScore(id) {
+  const s = {}; Object.keys(ID_ARCHS).forEach(k => { s[k] = 0; });
+  const add = (list, sel) => (sel || []).forEach(i => { const c = list.find(x => x[0] === i); if (c) c[2].forEach((a, n) => { s[a] += n === 0 ? 2 : 1; }); });
+  add(ID_VALUES, id.values); add(ID_ATTS, id.attitudes);
+  const arr = Object.keys(ID_ARCHS).map(k => ({id: k, score: s[k]})).sort((a, b) => b.score - a.score || Object.keys(ID_ARCHS).indexOf(a.id) - Object.keys(ID_ARCHS).indexOf(b.id)), top = arr[0].score || 1;
+  return arr.map(x => ({id: x.id, score: x.score, pct: Math.round(x.score / top * 100)}));
+}
+const idMain = id => id.arch || (idScore(id)[0].score ? idScore(id)[0].id : '');
+/* resumo do tom a partir dos controles */
+function idToneText(id) {
+  const S = id.sliders, w = (k, lo, hi) => S[k] <= 2 ? lo : S[k] >= 4 ? hi : '';
+  return [w('formal', 'formal', 'informal'), w('humor', 'sério', 'bem-humorado'), w('tecnico', 'técnico', 'simples e direto'), w('calor', 'reservado', 'caloroso'), w('ousadia', 'contido', 'ousado')].filter(Boolean).join(', ');
+}
+/* texto para a IA: só o que foi preenchido */
+function identityTxt(p) {
+  const id = p && p.identity; if (!id) return '';
+  const a = ID_ARCHS[idMain(id)], a2 = ID_ARCHS[id.arch2], L = id.lists, vals = id.values.map(v => (ID_VALUES.find(x => x[0] === v) || [0, v])[1]).concat(id.valuesExtra), ats = id.attitudes.map(v => (ID_ATTS.find(x => x[0] === v) || [0, v])[1]).concat(id.attitudesExtra);
+  const lines = [a ? `Arquétipo da marca: ${a.n}${a2 ? ' (secundário: ' + a2.n + ')' : ''}. Desejo central: ${a.desejo}. Tom típico: ${a.tom}.` : '', vals.length ? 'Valores: ' + vals.join(', ') : '', ats.length ? 'Atitudes: ' + ats.join('; ') : '', idToneText(id) ? 'Tom de voz: ' + idToneText(id) : '',
+    L.fala.length ? 'A marca fala de: ' + L.fala.join('; ') : '', L.naoFala.length ? 'A marca NÃO fala de: ' + L.naoFala.join('; ') : '', L.atitudeTem.length ? 'Atitudes que tem: ' + L.atitudeTem.join('; ') : '', L.atitudeNao.length ? 'Atitudes que NÃO tem: ' + L.atitudeNao.join('; ') : '',
+    L.admira.length ? 'Admira: ' + L.admira.join('; ') : '', L.repudia.length ? 'Repudia: ' + L.repudia.join('; ') : '', L.usa.length ? 'PALAVRAS QUE USA: ' + L.usa.join(', ') : '', L.naoUsa.length ? 'PALAVRAS PROIBIDAS (nunca usar): ' + L.naoUsa.join(', ') : ''].filter(Boolean);
+  return lines.length ? 'IDENTIDADE DA MARCA (definida pelo cliente)\n' + lines.join('\n') : '';
+}
+
+</script>
+<script>
 /* ===== Briefing do cliente: perguntas do formulário (usadas pela página pública briefing.html e pelo Studio),
    texto para a IA e planilha (CSV). Tipos: text, tel, email, url, area, select, checks. ===== */
+const BF_SLIDE = {formal: ['Bem formal', 'Mais formal', 'Equilibrado', 'Mais informal', 'Bem informal'], humor: ['Bem sério', 'Mais sério', 'Equilibrado', 'Mais bem-humorado', 'Muito bem-humorado'], tecnico: ['Bem técnico', 'Mais técnico', 'Equilibrado', 'Mais simples', 'Bem simples e direto'], calor: ['Bem reservado', 'Mais reservado', 'Equilibrado', 'Mais caloroso', 'Bem caloroso'], ousadia: ['Bem contido', 'Mais contido', 'Equilibrado', 'Mais ousado', 'Bem ousado']};
 const BF_TONES = ['Formal', 'Próximo e acolhedor', 'Técnico', 'Direto', 'Divertido', 'Inspirador', 'Sério e seguro'];
 const BF_SECTIONS = [
   {k: 'contato', t: 'Quem está respondendo', d: 'Para a gente falar com a pessoa certa.', f: [
@@ -26829,8 +26876,15 @@ const BF_SECTIONS = [
     ['cidade', 'Cidade e região onde atende', 'text'], ['tempo', 'Há quanto tempo a empresa existe', 'text'], ['equipe', 'Tamanho da equipe', 'text'],
     ['historia', 'A história da empresa, em poucas linhas', 'area'], ['missao', 'Missão, valores e propósito (se existirem)', 'area'],
     ['diferenciais', 'O que a empresa faz melhor do que os concorrentes? (um por linha)', 'area'],
-    ['tom', 'Como a empresa fala com as pessoas?', 'checks', BF_TONES], ['usar', 'Palavras e expressões que a empresa USA', 'area'], ['evitar', 'Palavras e assuntos que a empresa EVITA', 'area'],
     ['regras', 'Regras do setor que a comunicação precisa seguir (OAB, CRM, CREA, ANVISA...). O que é proibido anunciar?', 'area']]},
+  {k: 'identidade', t: 'A marca: valores, atitudes e voz', d: 'Clique no que combina com a empresa. Com isso o Studio descobre o arquétipo da marca e o jeito certo de falar.', f: [
+    ['valores', 'Quais valores são de verdade da empresa (ou de quem a comanda)? Escolha de 5 a 7.', 'checks', (typeof ID_VALUES !== 'undefined' ? ID_VALUES.map(x => x[1]) : [])], ['valoresExtra', 'Algum valor que não está na lista? (um por linha)', 'area'],
+    ['atitudes', 'Como a empresa age no dia a dia? Escolha de 5 a 7.', 'checks', (typeof ID_ATTS !== 'undefined' ? ID_ATTS.map(x => x[1]) : [])], ['atitudesExtra', 'Alguma atitude que não está na lista? (uma por linha)', 'area'],
+    ['t_formal', 'Tom de voz: formal ou informal?', 'select', BF_SLIDE.formal], ['t_humor', 'Sério ou bem-humorado?', 'select', BF_SLIDE.humor], ['t_tecnico', 'Técnico ou simples?', 'select', BF_SLIDE.tecnico], ['t_calor', 'Reservado ou caloroso?', 'select', BF_SLIDE.calor], ['t_ousadia', 'Contido ou ousado?', 'select', BF_SLIDE.ousadia],
+    ['fala', 'O que a empresa FALA? Assuntos e jeitos de falar (um por linha)', 'area'], ['naoFala', 'O que a empresa NÃO fala? (um por linha)', 'area'],
+    ['atitudeTem', 'Atitudes que a empresa TEM (um por linha)', 'area'], ['atitudeNao', 'Atitudes que a empresa NÃO tem, o que nunca faria (um por linha)', 'area'],
+    ['admira', 'O que a empresa ADMIRA? Pessoas, comportamentos, ideias (um por linha)', 'area'], ['repudia', 'O que a empresa REPUDIA? (um por linha)', 'area'],
+    ['usa', 'Palavras e expressões que a empresa USA (uma por linha)', 'area'], ['naoUsa', 'Palavras e expressões que a empresa NUNCA usa (uma por linha)', 'area']]},
   {k: 'publico', t: 'O cliente do seu cliente', d: 'Quem compra de você e como ele pensa. Escreva do jeito que ele fala.', f: [
     ['quem', 'Quem são os seus clientes? (perfil, idade, cidade, profissão)', 'area'], ['decide', 'Quem decide a compra? Alguém mais participa?', 'text'],
     ['situacoes', 'Em que situações as pessoas procuram vocês? (liste as mais comuns, uma por linha)', 'area'],
@@ -26843,22 +26897,44 @@ const BF_SECTIONS = [
     ['como', 'Como funciona? Etapas, do primeiro contato até a entrega', 'area'], ['incluso', 'O que está incluso', 'area'], ['preco', 'Preço ou faixa de preço (ou "sob consulta")', 'text'], ['prazo', 'Prazo de entrega ou duração', 'text'],
     ['diferencial', 'Por que escolher este e não o do concorrente?', 'area'], ['perguntas', 'Perguntas que as pessoas fazem sobre ele (uma por linha)', 'area'],
     ['provas', 'Resultados, casos e depoimentos REAIS que você pode usar (só o que é verdadeiro e autorizado)', 'area'], ['objecoes', 'Objeções mais comuns', 'area'],
+    ['formato', 'Formato', 'select', ['Online', 'Presencial', 'Produto físico', 'Híbrido']], ['duracao', 'Duração (de uso, do atendimento ou do curso)', 'text'], ['peso', 'Peso (se for produto físico)', 'text'], ['tamanho', 'Tamanho ou dimensões (se houver)', 'text'],
+    ['entrega', 'Como é entregue? (e-mail, Correios, no local, retirada…)', 'text'], ['validade', 'Validade, se houver (prazo de uso ou de consumo)', 'text'], ['garantia', 'Garantia (só se existir de verdade)', 'text'], ['pagamento', 'Formas de pagamento e parcelamento', 'text'],
+    ['naoserve', 'Para quem NÃO serve', 'area'], ['problemas', 'Principais problemas que ele resolve (um por linha)', 'area'], ['tempo', 'Em quanto tempo o problema costuma ser resolvido?', 'text'], ['fotosprod', 'Link com fotos deste produto (se tiver)', 'url'],
     ['acao', 'O que a pessoa deve fazer ao ver o anúncio?', 'select', ['Agendar uma conversa', 'Falar no WhatsApp', 'Pedir orçamento', 'Comprar online', 'Preencher um formulário', 'Outro']], ['link', 'Link de compra ou agendamento (se houver)', 'url']]},
-  {k: 'concorrencia', t: 'Concorrentes e referências', f: [
-    ['lista', 'Quem são os principais concorrentes? (nome e @ ou site, um por linha)', 'area'], ['admira', 'Quais empresas ou perfis você admira? O que gosta neles?', 'area'], ['naoquer', 'O que você NÃO quer que a empresa pareça?', 'area']]},
+  {k: 'concorrencia', t: 'Concorrentes', d: 'Cadastre os principais concorrentes (até 8). Cole o site e o Instagram de cada um e conte o pouco que você sabe.', repeat: 8, item: 'Concorrente', f: [
+    ['nome', 'Nome do concorrente', 'text', 1], ['site', 'Site', 'url'], ['instagram', 'Instagram (link ou @)', 'text'], ['oque', 'O que vendem e para quem', 'area'], ['preco', 'Faixa de preço (se souber)', 'text'],
+    ['forte', 'O que eles fazem bem', 'area'], ['fraco', 'O que fazem mal ou deixam de fazer', 'area'], ['diferenca', 'Em que a sua empresa é diferente deles', 'area'], ['outros', 'Outros links (anúncios, avaliações, notícias)', 'text']]},
+  {k: 'referencias', t: 'Referências e o que evitar', f: [
+    ['admira', 'Quais empresas ou perfis você admira (de qualquer área)? O que gosta neles?', 'area'], ['naoquer', 'O que você NÃO quer que a empresa pareça?', 'area']]},
   {k: 'marketing', t: 'Marketing e vendas hoje', f: [
     ['canais', 'O que já usam hoje? (Instagram, Google, anúncios, blog, indicação...)', 'area'], ['ja', 'O que já foi feito e funcionou? O que não funcionou?', 'area'],
     ['orcamento', 'Orçamento mensal para anúncios (faixa; pode ser aproximado)', 'text'], ['metas', 'Metas para os próximos meses (contatos, vendas, agendamentos por mês)', 'area'], ['prazo', 'Datas importantes ou prazos', 'text'],
     ['atendimento', 'Quem atende os contatos? Em que horários? Responde rápido no WhatsApp?', 'area'], ['ferramentas', 'Usam algum CRM, planilha ou sistema de vendas?', 'text']]},
-  {k: 'materiais', t: 'Materiais e acessos', d: 'Cole links (Google Drive, Dropbox...). Não envie senhas por aqui.', f: [
-    ['logo', 'Link com a logo (de preferência em PNG ou SVG)', 'url'], ['fotos', 'Link com fotos da empresa, da equipe e dos produtos', 'url'], ['videos', 'Link com vídeos', 'url'], ['marca', 'Cores, fontes ou manual de marca (link ou descrição)', 'area'], ['outros', 'Outros materiais úteis (apresentações, tabelas de preço, depoimentos)', 'area']]}
+  {k: 'depoimentos', t: 'Depoimentos de clientes', d: 'Só coloque o que é verdadeiro. Se a pessoa ainda não autorizou o uso, marque isso: a gente não usa sem autorização.', repeat: 10, item: 'Depoimento', f: [
+    ['nome', 'Quem falou (nome, ou "cliente de Campinas")', 'text', 1], ['texto', 'O que a pessoa disse (copie do jeito que ela escreveu)', 'area'], ['link', 'Link do vídeo, post ou avaliação (se houver)', 'url'], ['produto', 'Sobre qual produto ou serviço?', 'text'], ['autorizado', 'A pessoa autorizou o uso?', 'select', ['Sim, autorizou', 'Ainda preciso pedir', 'Não pode usar']]]},
+  {k: 'materiais', t: 'Links e materiais que já existem', d: 'Cole links (Google Drive, Dropbox, site, Instagram…). Não envie senhas por aqui.', f: [
+    ['logo', 'Link com a logo (de preferência em PNG ou SVG)', 'url'], ['fotos', 'Link com fotos da empresa, da equipe e dos produtos', 'url'], ['videos', 'Link com vídeos', 'url'], ['marca', 'Cores, fontes ou manual de marca (link ou descrição)', 'area'],
+    ['jafeito', 'Materiais de comunicação que a empresa já fez: posts, anúncios, folders, site antigo (cole os links, um por linha)', 'area'], ['outros', 'Outros materiais úteis (apresentações, tabelas de preço…)', 'area']]},
+  {k: 'arquivos', t: 'Fotos e arquivos', d: 'Envie direto daqui: logo, fotos, materiais que já usa, prints de depoimentos. Imagens (JPG, PNG, WebP) e PDF.', files: [['logo', 'Logo'], ['fotos', 'Fotos da empresa e da equipe'], ['produtos', 'Fotos dos produtos'], ['materiais', 'Materiais de comunicação que já fez (posts, anúncios, folders, PDF)'], ['depoimentos', 'Prints e fotos de depoimentos']], f: []}
 ];
+/* respostas antigas (concorrência em campos soltos) → formato novo */
+function bfMigrate(a) {
+  a = a && typeof a === 'object' && !Array.isArray(a) ? a : {};
+  if (a.concorrencia && !Array.isArray(a.concorrencia)) {
+    const K = a.concorrencia, lines = String(K.lista || '').split(/\n+/).map(x => x.trim()).filter(Boolean).slice(0, 8);
+    a.concorrencia = lines.map(l => { const m = l.match(/https?:\/\/\S+/), at = l.match(/@[\w.]+/); return {nome: l.replace(/https?:\/\/\S+|@[\w.]+/g, '').replace(/[-–,;:|()]+\s*$/g, '').trim() || l.slice(0, 60), site: m ? m[0] : '', instagram: at ? at[0] : ''}; });
+    if (K.admira || K.naoquer) a.referencias = Object.assign({admira: K.admira || '', naoquer: K.naoquer || ''}, a.referencias || {});
+  }
+  return a;
+}
 const bfSec = k => BF_SECTIONS.find(s => s.k === k);
 const bfStr = v => (Array.isArray(v) ? v.join(', ') : String(v == null ? '' : v)).trim();
 /* respostas em texto corrido, para a IA e para ler */
 function bfText(a, name) {
   a = a || {}; const L = [`BRIEFING DETALHADO DO CLIENTE${name ? ' · ' + name : ''}`];
+  a = bfMigrate(a);
   BF_SECTIONS.forEach(s => {
+    if (s.files) { const fl = (Array.isArray(a[s.k]) ? a[s.k] : []); if (!fl.length) return; L.push(`\n## ${s.t}`); s.files.forEach(([c, l]) => { const g = fl.filter(f => f.cat === c); if (g.length) L.push(`- ${l}: ${g.length} arquivo(s) (${g.map(f => f.name).slice(0, 8).join(', ')})`); }); return; }
     if (s.repeat) { const items = (Array.isArray(a[s.k]) ? a[s.k] : []).filter(x => x && bfStr(x.nome)); if (!items.length) return; L.push(`\n## ${s.t}`); items.forEach((it, i) => { L.push(`\n${s.item} ${i + 1}: ${bfStr(it.nome)}`); s.f.slice(1).forEach(([k, l]) => { const v = bfStr(it[k]); if (v) L.push(`- ${l}: ${v}`); }); }); return; }
     const x = a[s.k] || {}, rows = s.f.map(([k, l]) => [l, bfStr(x[k])]).filter(r => r[1]); if (!rows.length) return; L.push(`\n## ${s.t}`); rows.forEach(([l, v]) => L.push(`- ${l}: ${v}`));
   });
@@ -26868,7 +26944,7 @@ function bfText(a, name) {
 /* planilha: uma linha por pergunta respondida */
 function bfRows(a) {
   a = a || {}; const R = [['Seção', 'Item', 'Pergunta', 'Resposta']];
-  BF_SECTIONS.forEach(s => { if (s.repeat) (Array.isArray(a[s.k]) ? a[s.k] : []).forEach((it, i) => { if (!it || !bfStr(it.nome)) return; s.f.forEach(([k, l]) => { const v = bfStr(it[k]); if (v) R.push([s.t, (s.item + ' ' + (i + 1)), l, v]); }); }); else { const x = a[s.k] || {}; s.f.forEach(([k, l]) => { const v = bfStr(x[k]); if (v) R.push([s.t, '', l, v]); }); } });
+  a = bfMigrate(a); BF_SECTIONS.forEach(s => { if (s.files) { (Array.isArray(a[s.k]) ? a[s.k] : []).forEach(f => R.push([s.t, '', (s.files.find(x => x[0] === f.cat) || [0, f.cat])[1], f.name])); return; } if (s.repeat) (Array.isArray(a[s.k]) ? a[s.k] : []).forEach((it, i) => { if (!it || !bfStr(it.nome)) return; s.f.forEach(([k, l]) => { const v = bfStr(it[k]); if (v) R.push([s.t, (s.item + ' ' + (i + 1)), l, v]); }); }); else { const x = a[s.k] || {}; s.f.forEach(([k, l]) => { const v = bfStr(x[k]); if (v) R.push([s.t, '', l, v]); }); } });
   (Array.isArray(a.extras) ? a.extras : []).forEach(x => { if (x && x.r) R.push(['Outras respostas', '', x.q, x.r]); });
   return R;
 }
@@ -26920,7 +26996,7 @@ async function bfCsv() {
 }
 /* respostas → projeto: ficha, voz, produtos e serviços (o que o cliente já respondeu não é apagado) */
 function bfApply(p, a) {
-  const b = bfStore(p), E = a.empresa || {}, C = a.contato || {}, P = a.publico || {}, K = a.concorrencia || {}, M = a.marketing || {}, br = p.brief, S = bfStr;
+  a = bfMigrate(a); const b = bfStore(p), E = a.empresa || {}, C = a.contato || {}, P = a.publico || {}, K = a.concorrencia || {}, M = a.marketing || {}, br = p.brief, S = bfStr;
   const prods = (Array.isArray(a.produtos) ? a.produtos : []).filter(x => x && S(x.nome));
   const put = (k, v) => { v = S(v); if (!v) return; const cur = String(br[k] || '').trim(); if (!cur || cur === (b.prev[k] || '')) { br[k] = v; b.prev[k] = v; } };
   put('offer', prods.map(x => S(x.nome) + (S(x.oque) ? ': ' + S(x.oque) : '')).join('\n')); put('audience', P.quem); put('problem', P.problemas); put('goal', M.metas); put('channels', M.canais); put('budget', M.orcamento); put('deadline', M.prazo); put('competitors', K.lista);
@@ -26928,27 +27004,70 @@ function bfApply(p, a) {
   if (!String(br.notes || '').includes('Responsável pelo briefing:')) br.notes = (br.notes ? br.notes + '\n' : '') + who;
   if (!String(p.client || '').trim() && S(E.nome)) p.client = S(E.nome);
   const v = p.voice || (p.voice = {}); const fill = (o, k, x) => { x = S(x); if (x && !String(o[k] || '').trim()) o[k] = x; };
-  fill(v, 'vocabulary', E.usar); fill(v, 'antivocab', E.evitar); fill(v, 'rules', E.regras); fill(v, 'personality', Array.isArray(E.tom) ? E.tom.join(', ') : E.tom); if (p.brand) fill(p.brand, 'tone', Array.isArray(E.tom) ? E.tom.join(', ') : E.tom);
+  const I = a.identidade || {}; fill(v, 'vocabulary', E.usar || bfLines(I.usa).join(', ')); fill(v, 'antivocab', E.evitar || bfLines(I.naoUsa).join(', ')); fill(v, 'rules', E.regras); fill(v, 'personality', Array.isArray(E.tom) ? E.tom.join(', ') : E.tom); if (p.brand) fill(p.brand, 'tone', Array.isArray(E.tom) ? E.tom.join(', ') : E.tom);
   const TY = {'Serviço': 'servico', 'Produto': 'produto', 'Curso ou treinamento': 'curso', 'Evento': 'evento'}; let added = 0, upd = 0; const list = (p.products = p.products || []);
   prods.forEach(x => {
     const cand = {name: S(x.nome), type: TY[S(x.tipo)] || 'servico', summary: S(x.oque), audience: S(x.paraquem), price: S(x.preco), checkout: /^https?:\/\/\S+$/i.test(S(x.link)) ? S(x.link) : '',
-      benefits: bfLines(x.diferencial), features: bfLines(x.como).concat(bfLines(x.incluso).map(t => 'Incluso: ' + t), S(x.prazo) ? ['Prazo: ' + S(x.prazo)] : []), objections: bfLines(x.objecoes).concat(bfLines(x.perguntas)), proofs: bfLines(x.provas)};
+      benefits: bfLines(x.diferencial), features: bfLines(x.como).concat(bfLines(x.incluso).map(t => 'Incluso: ' + t), S(x.prazo) ? ['Prazo: ' + S(x.prazo)] : []), objections: bfLines(x.objecoes).concat(bfLines(x.perguntas)), proofs: bfLines(x.provas),
+      format: {'Online': 'online', 'Presencial': 'presencial', 'Produto físico': 'fisico', 'Híbrido': 'hibrido'}[S(x.formato)] || '', duration: S(x.duracao), weight: S(x.peso), size: S(x.tamanho), delivery: S(x.entrega), deliveryTime: S(x.prazo), validity: S(x.validade), warranty: S(x.garantia), payment: S(x.pagamento), notFor: S(x.naoserve), problems: bfLines(x.problemas), resolveTime: S(x.tempo)};
     const ex = list.find(y => y.name.toLowerCase() === cand.name.toLowerCase());
-    if (ex) { ['summary', 'audience', 'price', 'checkout'].forEach(k => { if (!String(ex[k] || '').trim() && cand[k]) ex[k] = cand[k]; }); ['benefits', 'features', 'objections', 'proofs'].forEach(k => { if (!(ex[k] || []).length && cand[k].length) ex[k] = cand[k]; }); upd++; }
+    if (ex) { ['summary', 'audience', 'price', 'checkout', 'format', 'duration', 'weight', 'size', 'delivery', 'deliveryTime', 'validity', 'warranty', 'payment', 'notFor', 'resolveTime'].forEach(k => { if (!String(ex[k] || '').trim() && cand[k]) ex[k] = cand[k]; }); ['benefits', 'features', 'objections', 'proofs', 'problems'].forEach(k => { if (!(ex[k] || []).length && cand[k].length) ex[k] = cand[k]; }); upd++; }
     else { list.push(Object.assign({id: uid('pd'), images: []}, cand)); added++; }
   });
   p.products = normalizeProducts(list);
+  const ext = bfApplyExtra(p, a, b); added += 0;
   b.text = bfText(a, p.name).slice(0, 40000); b.importedAt = new Date().toISOString();
   if (p.pre && p.pre.history) p.pre.history.unshift({at: b.importedAt, action: 'Briefing do cliente importado', note: `${added} produto(s)/serviço(s) novo(s), ${upd} atualizado(s).`});
-  return {added, upd};
+  return {added, upd, comp: ext.comp, dep: ext.dep, ident: ext.ident};
+}
+/* identidade, concorrentes, links e depoimentos (não apaga o que já existe) */
+function bfApplyExtra(p, a, b) {
+  const S = bfStr, I = a.identidade || {}, out = {comp: 0, dep: 0, ident: false};
+  const id = p.identity = normalizeIdentity(p.identity), lab2id = (list, l) => { const x = list.find(v => v[1].toLowerCase() === String(l).trim().toLowerCase()); return x ? x[0] : ''; };
+  const has = id.values.length || id.attitudes.length || id.valuesExtra.length;
+  if (!has) {
+    const pick = (list, arr) => { const ids = [], extra = []; (Array.isArray(arr) ? arr : []).forEach(l => { const k = lab2id(list, l); if (k) ids.push(k); else if (S(l)) extra.push(S(l)); }); return [ids, extra]; };
+    const [vi, ve] = pick(ID_VALUES, I.valores), [ai, ae] = pick(ID_ATTS, I.atitudes);
+    id.values = vi.slice(0, 12); id.valuesExtra = ve.concat(bfLines(I.valoresExtra)).slice(0, 10); id.attitudes = ai.slice(0, 12); id.attitudesExtra = ae.concat(bfLines(I.atitudesExtra)).slice(0, 10);
+    ID_SLIDERS.forEach(k => { const n = BF_SLIDE[k].indexOf(S(I['t_' + k])); if (n >= 0) id.sliders[k] = n + 1; });
+    ID_LISTS.forEach(k => { if (!id.lists[k].length) id.lists[k] = bfLines(I[k]).slice(0, 40); });
+    out.ident = !!(id.values.length || id.attitudes.length || ID_LISTS.some(k => id.lists[k].length) || ID_SLIDERS.some(k => id.sliders[k] !== 3));
+    const R = a.referencias || {}; if (!id.refBrands.length && S(R.admira)) id.refBrands = bfLines(R.admira).map(t => t.slice(0, 60)).slice(0, 12);
+    if (out.ident && !id.notes && S(R.naoquer)) id.notes = 'Não quer que a empresa pareça: ' + S(R.naoquer).slice(0, 800);
+  }
+  p.identity = normalizeIdentity(id);
+  if (out.ident) { const v = p.voice || (p.voice = {}), ar = ID_ARCHS[idMain(p.identity)], tt = [ar && ar.tom, idToneText(p.identity)].filter(Boolean).join('. '); if (!String(v.personality || '').trim() && tt) v.personality = tt; if (p.brand && !String(p.brand.tone || '').trim() && tt) p.brand.tone = tt; }
+  (Array.isArray(a.concorrencia) ? a.concorrencia : []).filter(x => x && S(x.nome)).forEach(x => {
+    const name = S(x.nome), url = /^https?:\/\/\S+$/i.test(S(x.site)) ? S(x.site) : (/^[\w.-]+\.[a-z]{2,}(\/\S*)?$/i.test(S(x.site)) ? 'https://' + S(x.site) : '');
+    if ((p.competitors || []).some(c => c.name.toLowerCase() === name.toLowerCase() || (url && c.url === url))) return;
+    const notes = [['Vende', x.oque], ['Preço', x.preco], ['Faz bem', x.forte], ['Faz mal', x.fraco], ['Nossa diferença', x.diferenca]].filter(r => S(r[1])).map(r => r[0] + ': ' + S(r[1])).join(' · ');
+    (p.competitors = p.competitors || []).push({id: uid('cp'), name: name.slice(0, 120), url, social: [S(x.instagram), S(x.outros)].filter(Boolean).join(', ').slice(0, 300), notes: notes.slice(0, 1200), scan: null, teardown: null, addedAt: new Date().toISOString(), from: 'briefing'}); out.comp++;
+  });
+  const it = p.intake = normalizeIntake(p.intake), M = a.materiais || {}, E = a.empresa || {};
+  const lk = {site: E.site, instagram: E.instagram, redes: E.redes, logo: M.logo, fotos: M.fotos, videos: M.videos, marca: M.marca, jafeito: M.jafeito}; IN_LINKS.forEach(k => { if (!S(it.links[k]) && S(lk[k])) it.links[k] = S(lk[k]).slice(0, 1200); });
+  (Array.isArray(a.depoimentos) ? a.depoimentos : []).filter(x => x && S(x.nome) && (S(x.texto) || S(x.link))).forEach(x => {
+    if (it.testimonials.some(t => t.who === S(x.nome).slice(0, 120) && t.text === S(x.texto).slice(0, 1500))) return;
+    it.testimonials.push({id: uid('dp'), who: S(x.nome), text: S(x.texto), link: S(x.link), product: S(x.produto), auth: /^Sim/.test(S(x.autorizado)) ? 'sim' : /^Não/.test(S(x.autorizado)) ? 'nao' : 'pedir'}); out.dep++;
+  });
+  p.intake = normalizeIntake(it); return out;
+}
+/* baixa as imagens enviadas para a Biblioteca (uma vez) e guarda a lista de arquivos */
+async function bfImportFiles(p, a, t) {
+  const it = p.intake = normalizeIntake(p.intake); let n = 0;
+  for (const f of (Array.isArray(a.arquivos) ? a.arquivos : [])) {
+    if (!f || it.files.some(x => x.id === f.id)) continue; const rec = {id: f.id, ext: f.ext, cat: f.cat, name: f.name, t, lib: ''};
+    if (f.ext !== 'pdf' && typeof libAddBlob === 'function') { try { const r = await fetch(`api/briefing.php?t=${t}&f=${f.id}.${f.ext}`); if (r.ok) { const li = await libAddBlob(await r.blob(), {name: 'Briefing · ' + f.cat + ' · ' + f.name, tags: ['briefing', f.cat], kind: 'upload'}); rec.lib = (li && li.id) || ''; n++; } } catch (e) { /* segue sem a imagem */ } }
+    it.files.push(rec);
+  }
+  p.intake = normalizeIntake(it); return n;
 }
 async function bfImport() {
   const p = curProject(), b = bfStore(p);
   try {
     const r = await bfFetch(), a = r.answers || {}; if (!bfText(a).split('\n').length || bfText(a).length < 60) { toast('Ainda não há respostas para importar.'); return; }
     const miss = bfMissing(a); if (r.status !== 'enviado' && !confirm('O cliente ainda não enviou o briefing (falta: ' + miss.join(', ') + '). Importar o que já foi preenchido?')) return;
-    const x = bfApply(p, a); b.status = r.status; b.submittedAt = r.submittedAt || ''; b.updatedAt = r.updatedAt || ''; persist();
-    showModal('Briefing importado', `<p>As respostas foram para o projeto: ficha do briefing, voz da marca, <b>${x.added}</b> produto(s) ou serviço(s) novo(s) e ${x.upd} atualizado(s). O que você já tinha preenchido foi mantido.</p><p class="muted" style="font-size:13px">Agora a IA usa esse material quando você gerar o pré-projeto, os anúncios, os posts e as páginas.</p><div class="modal-actions"><button class="btn" onclick="closeModal();bfRerender()">Fechar</button><button class="btn dark" onclick="closeModal();preGenAll(true)">✦ Gerar o pré-projeto agora</button></div>`);
+    const x = bfApply(p, a); x.imgs = await bfImportFiles(p, bfMigrate(a), b.t); b.status = r.status; b.submittedAt = r.submittedAt || ''; b.updatedAt = r.updatedAt || ''; persist();
+    showModal('Briefing importado', `<p>As respostas foram para o projeto: ficha do briefing, voz da marca, <b>${x.added}</b> produto(s) ou serviço(s) novo(s) e ${x.upd} atualizado(s), ${x.comp} concorrente(s), ${x.dep} depoimento(s)${x.ident ? ', a identidade da marca (aba Marca e arquétipo)' : ''} e ${x.imgs} imagem(ns) na Biblioteca. O que você já tinha preenchido foi mantido.</p><p class="muted" style="font-size:13px">Agora a IA usa esse material quando você gerar o pré-projeto, os anúncios, os posts e as páginas.</p><div class="modal-actions"><button class="btn" onclick="closeModal();bfRerender()">Fechar</button><button class="btn dark" onclick="closeModal();preGenAll(true)">✦ Gerar o pré-projeto agora</button></div>`);
   } catch (e) { toast(e.message); } bfRerender();
 }
 
@@ -26971,7 +27090,7 @@ function bfScript() {
     const m = {text: 'addTextItem', tel: 'addTextItem', email: 'addTextItem', url: 'addTextItem', area: 'addParagraphTextItem', select: 'addListItem', checks: 'addCheckboxItem'}[type] || 'addTextItem';
     L.push(`  it = f.${m}().setTitle(${q(label)})${help ? '.setHelpText(' + q(help) + ')' : ''}${req ? '.setRequired(true)' : ''};` + (opts ? ` it.setChoiceValues(${JSON.stringify(opts)});` : ''));
   };
-  BF_SECTIONS.forEach((s, si) => {
+  BF_SECTIONS.filter(s => !s.files).forEach((s, si) => {
     if (s.repeat) {
       for (let n = 1; n <= BFG_PROD; n++) {
         L.push(`  f.addPageBreakItem().setTitle(${q(s.t + ' · ' + n)}).setHelpText(${q(n === 1 ? (s.d || '') : 'Deixe em branco se não houver mais produtos ou serviços.')});`);
@@ -27011,22 +27130,22 @@ function bfParseCSV(text) {
 const BFG_ALIAS = {
   'contato.nome': ['seu nome', 'nome completo', 'nome do responsavel', 'responsavel pelo preenchimento'], 'contato.whatsapp': ['whatsapp', 'whats app', 'telefone', 'celular'], 'contato.email': ['seu e mail', 'e mail do responsavel', 'email do responsavel', 'seu email'], 'contato.cargo': ['cargo', 'funcao'],
   'empresa.nome': ['nome da empresa', 'nome fantasia', 'nome do negocio', 'nome da sua empresa', 'nome do seu negocio', 'empresa'], 'empresa.razao': ['razao social', 'cnpj'], 'empresa.site': ['site', 'website', 'pagina na internet'], 'empresa.instagram': ['instagram'], 'empresa.cidade': ['cidade', 'regiao', 'onde atende', 'onde fica'], 'empresa.historia': ['historia da empresa', 'conte a historia', 'sobre a empresa', 'quem somos'],
-  'empresa.diferenciais': ['diferenciais', 'diferencial da empresa', 'o que faz melhor'], 'empresa.tom': ['tom de voz', 'como a empresa fala', 'personalidade da marca'], 'empresa.evitar': ['palavras que evita', 'evitar', 'proibido'], 'empresa.regras': ['regras do setor', 'regras do conselho', 'oab', 'regulamentacao'],
+  'empresa.diferenciais': ['diferenciais', 'diferencial da empresa', 'o que faz melhor'], 'identidade.naoUsa': ['palavras que a empresa nunca usa', 'palavras que evita', 'evitar', 'proibido'], 'identidade.usa': ['palavras que a empresa usa'], 'empresa.regras': ['regras do setor', 'regras do conselho', 'oab', 'regulamentacao'],
   'publico.quem': ['quem sao os seus clientes', 'quem sao seus clientes', 'publico alvo', 'cliente ideal', 'perfil do cliente'], 'publico.problemas': ['problemas', 'dores'], 'publico.perguntas': ['perguntas frequentes', 'duvidas', 'perguntas que'], 'publico.objecoes': ['objecoes'], 'publico.desejos': ['desejos', 'o que querem'], 'publico.descobre': ['como encontram', 'como conhecem', 'como chegam'],
   'produtos.nome': ['nome do produto', 'nome do servico', 'nome do produto ou servico', 'servico principal', 'produto principal', 'qual servico', 'qual produto', 'o que voce vende', 'o que voces vendem', 'servico oferecido'], 'produtos.oque': ['descricao do servico', 'descricao do produto', 'descricao', 'o que e o servico', 'o que e o produto'], 'produtos.como': ['como funciona', 'etapas', 'passo a passo'], 'produtos.incluso': ['o que esta incluso', 'incluso'],
   'produtos.preco': ['preco', 'quanto custa', 'valor', 'investimento', 'faixa de preco'], 'produtos.prazo': ['prazo', 'duracao'], 'produtos.diferencial': ['diferencial do', 'por que escolher'], 'produtos.provas': ['depoimentos', 'resultados', 'casos reais', 'provas'], 'produtos.link': ['link de compra', 'link de agendamento'],
-  'concorrencia.lista': ['concorrentes', 'concorrencia'], 'concorrencia.admira': ['admira', 'referencias', 'inspiracao'], 'marketing.canais': ['canais', 'o que ja usam', 'o que ja utiliza'], 'marketing.orcamento': ['orcamento', 'verba', 'investimento em anuncios'], 'marketing.metas': ['metas', 'objetivo do projeto', 'objetivos'], 'marketing.prazo': ['prazos', 'datas importantes'], 'marketing.atendimento': ['quem atende', 'atendimento'], 'marketing.ferramentas': ['crm', 'sistema de vendas', 'ferramentas'],
+  'concorrencia.nome': ['concorrentes', 'concorrencia', 'nome do concorrente'], 'referencias.admira': ['empresas ou perfis voce admira', 'referencias', 'inspiracao'], 'marketing.canais': ['canais', 'o que ja usam', 'o que ja utiliza'], 'marketing.orcamento': ['orcamento', 'verba', 'investimento em anuncios'], 'marketing.metas': ['metas', 'objetivo do projeto', 'objetivos'], 'marketing.prazo': ['prazos', 'datas importantes'], 'marketing.atendimento': ['quem atende', 'atendimento'], 'marketing.ferramentas': ['crm', 'sistema de vendas', 'ferramentas'],
   'materiais.logo': ['logo', 'logotipo'], 'materiais.fotos': ['fotos'], 'materiais.videos': ['videos'], 'materiais.marca': ['cores', 'manual de marca', 'identidade visual']
 };
 /* descobre a que pergunta do briefing uma coluna se refere: {s: seção, f: campo, n: nº do produto} ou null */
 function bfgGuess(h) {
-  let n = 0, label = String(h || '').trim(); const m = label.match(/^(?:produto(?: ou servi[çc]o)?|servi[çc]o)\s*(\d)\s*(?:[—–\-:.·|]\s*)(.+)$/i); if (m) { n = +m[1]; label = m[2]; }
+  let n = 0, label = String(h || '').trim(); const m = label.match(/^(?:produto(?: ou servi[çc]o)?|servi[çc]o|concorrente|depoimento)\s*(\d)\s*(?:[—–\-:.·|]\s*)(.+)$/i); if (m) { n = +m[1]; label = m[2]; }
   const T = bfgNorm(label); if (!T) return null; if (/carimbo|timestamp|data hora|endereco de e mail|email address/.test(T)) return {skip: 1};
   /* 1) apelidos */
   { let hit = null, hl = 0; Object.keys(BFG_ALIAS).forEach(key => { const isRep = key.startsWith('produtos.'); if (n && !isRep) return; BFG_ALIAS[key].forEach(a => { if (a.length > hl && (' ' + T + ' ').includes(' ' + a + ' ')) { hit = key; hl = a.length; } }); });
-    if (hit) { const [sec, f] = hit.split('.'); return {s: sec, f, n: sec === 'produtos' ? (n || 1) : 0, score: .9}; } }
+    if (hit) { const [sec, f] = hit.split('.'); return {s: sec, f, n: (BF_SECTIONS.find(s => s.k === sec) || {}).repeat ? (n || 1) : 0, score: .9}; } }
   let best = null, bs = 0; const cands = [];
-  BF_SECTIONS.forEach(s => s.f.forEach(([k, l]) => { if (s.repeat && n === 0 && false) return; cands.push({s: s.k, f: k, l, rep: !!s.repeat}); }));
+  BF_SECTIONS.filter(s => !s.files).forEach(s => s.f.forEach(([k, l]) => { if (s.repeat && n === 0 && false) return; cands.push({s: s.k, f: k, l, rep: !!s.repeat}); }));
   const wt = new Set(bfgTok(label));
   cands.forEach(c => {
     if (n && !c.rep) return; if (!n && c.rep && c.f !== 'nome') {/* campos de produto sem número: só se bater muito */}
@@ -27038,7 +27157,7 @@ function bfgGuess(h) {
 const bfgKey = g => g ? (g.skip ? 'skip' : g.n ? `${g.s}.${g.n}.${g.f}` : `${g.s}.${g.f}`) : 'extra';
 function bfgOptions() {
   let o = '<option value="skip">Ignorar</option><option value="extra">Anotar em “Outras respostas”</option>';
-  BF_SECTIONS.forEach(s => { if (s.repeat) { for (let n = 1; n <= BFG_PROD; n++) o += `<optgroup label="${esc(s.t)} ${n}">${s.f.map(([k, l]) => `<option value="${s.k}.${n}.${k}">${esc(l.slice(0, 70))}</option>`).join('')}</optgroup>`; } else o += `<optgroup label="${esc(s.t)}">${s.f.map(([k, l]) => `<option value="${s.k}.${k}">${esc(l.slice(0, 70))}</option>`).join('')}</optgroup>`; });
+  BF_SECTIONS.filter(s => !s.files).forEach(s => { if (s.repeat) { for (let n = 1; n <= BFG_PROD; n++) o += `<optgroup label="${esc(s.t)} ${n}">${s.f.map(([k, l]) => `<option value="${s.k}.${n}.${k}">${esc(l.slice(0, 70))}</option>`).join('')}</optgroup>`; } else o += `<optgroup label="${esc(s.t)}">${s.f.map(([k, l]) => `<option value="${s.k}.${k}">${esc(l.slice(0, 70))}</option>`).join('')}</optgroup>`; });
   return o;
 }
 function bfgOpen() {
@@ -27061,15 +27180,15 @@ function bfgStep2() {
 }
 /* linha do CSV + mapa → objeto de respostas no formato do briefing */
 function bfgAnswers(head, row, map) {
-  const a = {contato: {}, empresa: {}, publico: {}, produtos: [], concorrencia: {}, marketing: {}, materiais: {}, extras: []}, ext = [];
+  const a = {extras: []}, ext = []; BF_SECTIONS.forEach(s => { if (!s.files) a[s.k] = s.repeat ? [] : {}; });
   head.forEach((h, i) => {
     const v = String(row[i] == null ? '' : row[i]).trim(), k = map[i]; if (!v || k === 'skip') return; if (k === 'extra') { ext.push([h, v]); return; }
     const p = k.split('.'); let sec, fld, n = 0; if (p.length === 3) { sec = p[0]; n = +p[1]; fld = p[2]; } else { sec = p[0]; fld = p[1]; }
     const S = BF_SECTIONS.find(s => s.k === sec), F = S && S.f.find(x => x[0] === fld); if (!F) { ext.push([h, v]); return; }
     const val = F[2] === 'checks' ? v.split(/\s*,\s*/).filter(Boolean) : v;
-    if (S.repeat) { while (a.produtos.length < n) a.produtos.push({}); a.produtos[n - 1][fld] = val; } else a[sec][fld] = val;
+    if (S.repeat) { while (a[sec].length < n) a[sec].push({}); a[sec][n - 1][fld] = val; } else a[sec][fld] = val;
   });
-  a.produtos = a.produtos.filter(x => x && Object.values(x).some(Boolean)); a.extras = ext.slice(0, 40).map(([q, r]) => ({q: q.slice(0, 160), r: r.slice(0, 1500)})); a.aceite = true; return a;
+  BF_SECTIONS.forEach(s => { if (s.repeat) a[s.k] = a[s.k].filter(x => x && Object.values(x).some(Boolean)); }); a.extras = ext.slice(0, 40).map(([q, r]) => ({q: q.slice(0, 160), r: r.slice(0, 1500)})); a.aceite = true; return a;
 }
 function bfgImport() {
   const p = curProject(), a = bfgAnswers(BFG.head, BFG.rows[BFG.pick], BFG.map), miss = bfMissing(Object.assign({}, a, {aceite: true}));

@@ -34,10 +34,17 @@ button{font:inherit;cursor:pointer}.btn{border:1.5px solid #111;background:#fff;
 .done{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 20px;text-align:center;margin:18px 0}.done .ck{width:64px;height:64px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:32px;margin:0 auto 12px}
 .err{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 20px;text-align:center;margin:40px 0}
 .save{font-size:13px;color:var(--mut)}
+.up{border:1.5px dashed #c9c9d0;border-radius:12px;padding:12px 14px;margin:14px 0}.up h4{margin:0 0 8px;font-size:15px}
+.th{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}.th figure{margin:0;position:relative;width:96px}.th img{width:96px;height:96px;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:#eee;display:block}
+.th .pdf{width:96px;height:96px;border-radius:10px;border:1px solid var(--line);display:grid;place-items:center;font-weight:700;background:#fff}
+.th figcaption{font-size:11px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.th button{position:absolute;top:4px;right:4px;border:0;background:#000b;color:#fff;border-radius:50%;width:22px;height:22px;line-height:20px;padding:0}
+.pick{display:inline-block;border:1.5px solid #111;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:14px}.pick input{display:none}
+.arq{background:#f4f1ea;border-radius:12px;padding:12px 14px;margin:16px 0 0;font-size:14.5px}.arq b{font-size:17px}
 </style>
 </head>
 <body>
 <div class="wrap" id="root"><div class="err">Carregando…</div></div>
+<script src="js/identidade-data.js"></script>
 <script src="js/briefing-form.js"></script>
 <script>
 (function () {
@@ -56,24 +63,61 @@ button{font:inherit;cursor:pointer}.btn{border:1.5px solid #111;background:#fff;
     if (t === 'checks') { var cur = Array.isArray(v) ? v : []; return '<div class="f"><span class="l">' + lab + '</span><div class="chk">' + opts.map(function (o) { return '<label><input type="checkbox" data-c="' + path + '" value="' + esc(o) + '" ' + (cur.indexOf(o) >= 0 ? 'checked' : '') + '> ' + esc(o) + '</label>'; }).join('') + '</div></div>'; }
     return '<div class="f"><label for="' + id + '">' + lab + '</label><input id="' + id + '" type="' + (t === 'text' ? 'text' : t) + '" data-p="' + path + '" value="' + esc(v) + '"' + (t === 'tel' ? ' inputmode="tel" autocomplete="tel"' : t === 'email' ? ' autocomplete="email"' : '') + '></div>';
   }
-  function secDone(s) { if (s.repeat) return (Array.isArray(A[s.k]) ? A[s.k] : []).some(function (x) { return x && bfStr(x.nome); }); var x = A[s.k] || {}; return s.f.some(function (f) { return bfStr(x[f[0]]); }); }
+  function secDone(s) { if (s.files) return (Array.isArray(A[s.k]) ? A[s.k] : []).length > 0; if (s.repeat) return (Array.isArray(A[s.k]) ? A[s.k] : []).some(function (x) { return x && bfStr(x.nome); }); var x = A[s.k] || {}; return s.f.some(function (f) { return bfStr(x[f[0]]); }); }
   function render(keepOpen) {
     var open = {}; if (keepOpen) [].forEach.call(root.querySelectorAll('details.sec'), function (d) { open[d.dataset.k] = d.open; });
-    if (!Array.isArray(A.produtos) || !A.produtos.length) A.produtos = [{}];
+    BF_SECTIONS.forEach(function (s) { if (s.repeat && (!Array.isArray(A[s.k]) || !A[s.k].length)) A[s.k] = [{}]; if (s.files && !Array.isArray(A[s.k])) A[s.k] = []; });
     var h = '<header class="top"><h1>Briefing do projeto' + (info.name ? ' · ' + esc(info.name) : '') + '</h1><p>Responda com calma. Não precisa terminar de uma vez: tudo é salvo sozinho e você pode voltar a este link quando quiser. Quanto mais detalhe, melhores ficam os anúncios, os posts e a página de vendas.</p></header>';
     h += '<div class="bar"><div class="prog"><i id="prog"></i></div><small><span id="progT"></span><span class="save" id="saveT"></span></small></div>';
     if (sent) h += '<div class="done"><div class="ck">✓</div><h2 style="margin:0 0 6px">Briefing enviado, obrigado!</h2><p style="margin:0;color:var(--mut)">Recebemos as suas respostas. Se lembrar de mais alguma coisa, é só editar abaixo e enviar de novo.</p></div>';
     BF_SECTIONS.forEach(function (s, i) {
       h += '<details class="sec" data-k="' + s.k + '" ' + ((keepOpen ? open[s.k] : i === 0) ? 'open' : '') + '><summary><span class="n">' + (i + 1) + '</span>' + esc(s.t) + '<span class="st"></span></summary><div class="body">' + (s.d ? '<p class="d">' + esc(s.d) + '</p>' : '');
-      if (s.repeat) {
-        (A[s.k] || []).forEach(function (it, n) { h += '<div class="it"><h4>' + esc(s.item) + ' ' + (n + 1) + (A[s.k].length > 1 ? '<button type="button" class="btn sm" data-rm="' + n + '">Remover</button>' : '') + '</h4>' + s.f.map(function (f) { return field(s.k + '.' + n, f); }).join('') + '</div>'; });
-        if ((A[s.k] || []).length < s.repeat) h += '<button type="button" class="btn" data-add="1">＋ Adicionar outro ' + esc(s.item.toLowerCase()) + '</button>';
-      } else h += s.f.map(function (f) { return field(s.k, f); }).join('');
+      if (s.files) h += filesHtml(s);
+      else if (s.repeat) {
+        (A[s.k] || []).forEach(function (it, n) { h += '<div class="it"><h4>' + esc(s.item) + ' ' + (n + 1) + (A[s.k].length > 1 ? '<button type="button" class="btn sm" data-rm="' + s.k + '|' + n + '">Remover</button>' : '') + '</h4>' + s.f.map(function (f) { return field(s.k + '.' + n, f); }).join('') + '</div>'; });
+        if ((A[s.k] || []).length < s.repeat) h += '<button type="button" class="btn" data-add="' + s.k + '">＋ Adicionar outro ' + esc(s.item.toLowerCase()) + '</button>';
+      } else h += s.f.map(function (f) { return field(s.k, f); }).join('') + (s.k === 'identidade' ? '<div class="arq" id="arq"></div>' : '');
       h += '</div></details>';
     });
     h += '<div class="acc"><label><input type="checkbox" id="aceite" ' + (A.aceite ? 'checked' : '') + '><span>Autorizo o uso das informações deste formulário para elaborar o projeto de marketing da minha empresa. Declaro que os resultados, depoimentos e dados informados são verdadeiros e que tenho autorização para divulgá-los.</span></label></div>';
     h += '<div id="msg"></div><div class="act"><button class="btn dark" id="send" type="button">' + (sent ? 'Enviar novamente' : 'Enviar briefing') + '</button><button class="btn" id="saveNow" type="button">Salvar agora</button></div>';
-    root.innerHTML = h; progress();
+    root.innerHTML = h; progress(); archPrev();
+  }
+  function filesHtml(s) {
+    var all = Array.isArray(A[s.k]) ? A[s.k] : [];
+    return s.files.map(function (c) {
+      var list = all.filter(function (f) { return f.cat === c[0]; });
+      return '<div class="up"><h4>' + esc(c[1]) + '</h4><div class="th">' + list.map(function (f) {
+        var u = 'api/briefing.php?t=' + encodeURIComponent(T) + '&f=' + f.id + '.' + f.ext;
+        return '<figure>' + (f.ext === 'pdf' ? '<a class="pdf" href="' + u + '" target="_blank" rel="noopener">PDF</a>' : '<img src="' + u + '" alt="">') + '<button type="button" title="Remover" data-rf="' + f.id + '">×</button><figcaption>' + esc(f.name) + '</figcaption></figure>';
+      }).join('') + '</div><label class="pick">＋ Escolher arquivos<input type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf" data-up="' + c[0] + '"></label></div>';
+    }).join('');
+  }
+  function archPrev() {
+    var el = document.getElementById('arq'); if (!el || typeof idScore !== 'function') return; var I = A.identidade || {};
+    var vals = (Array.isArray(I.valores) ? I.valores : []).map(function (l) { var x = ID_VALUES.filter(function (v) { return v[1] === l; })[0]; return x && x[0]; }).filter(Boolean);
+    var ats = (Array.isArray(I.atitudes) ? I.atitudes : []).map(function (l) { var x = ID_ATTS.filter(function (v) { return v[1] === l; })[0]; return x && x[0]; }).filter(Boolean);
+    if (!vals.length && !ats.length) { el.style.display = 'none'; return; } el.style.display = '';
+    var sc = idScore({values: vals, attitudes: ats}), a = ID_ARCHS[sc[0].id], b = ID_ARCHS[sc[1].id];
+    el.innerHTML = 'Pelas suas escolhas, a marca se parece com o arquétipo <b>' + esc(a.n) + '</b>' + (sc[1].pct >= 70 ? ' (com traços de ' + esc(b.n) + ')' : '') + '. ' + esc(a.tom) + '.';
+  }
+  function shrink(file, cat) {
+    return new Promise(function (res, rej) {
+      if (file.type === 'application/pdf') { if (file.size > 5.5e6) return rej(new Error(file.name + ': PDF acima de 5 MB.')); var r0 = new FileReader(); r0.onload = function () { res(r0.result); }; r0.readAsDataURL(file); return; }
+      if (cat === 'logo' && file.type === 'image/png' && file.size < 2.5e6) { var r1 = new FileReader(); r1.onload = function () { res(r1.result); }; r1.readAsDataURL(file); return; }
+      var im = new Image(), u = URL.createObjectURL(file);
+      im.onload = function () { var k = Math.min(1, 1800 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg', 0.85)); };
+      im.onerror = function () { URL.revokeObjectURL(u); rej(new Error(file.name + ': não consegui ler a imagem.')); }; im.src = u;
+    });
+  }
+  async function upload(cat, files) {
+    var ok = 0;
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i]; msg('Enviando ' + (i + 1) + ' de ' + files.length + '…', 'ok');
+      try { var data = await shrink(f, cat), r = await api({action: 'upload', t: T, data: data}); if (!r.ok) throw new Error(r.error || 'Falhou.'); A.arquivos.push({id: r.id, ext: r.ext, cat: cat, name: f.name.slice(0, 80)}); ok++; }
+      catch (e) { msg(e.message || 'Não consegui enviar ' + f.name, 'bad'); }
+    }
+    if (ok) { dirty = true; await save(true); msg(ok + ' arquivo(s) enviado(s).', 'ok'); render(true); var d = root.querySelector('details[data-k="arquivos"]'); if (d) d.open = true; }
   }
   function progress() {
     var done = BF_SECTIONS.filter(secDone).length, n = BF_SECTIONS.length; var p = document.getElementById('prog'); if (p) p.style.width = Math.round(done / n * 100) + '%';
@@ -89,11 +133,14 @@ button{font:inherit;cursor:pointer}.btn{border:1.5px solid #111;background:#fff;
     var t = e.target, c = t.getAttribute && t.getAttribute('data-c');
     if (c) { var cur = val(c); cur = Array.isArray(cur) ? cur.slice() : []; var i = cur.indexOf(t.value); if (t.checked && i < 0) cur.push(t.value); if (!t.checked && i >= 0) cur.splice(i, 1); put(c, cur); later(); }
     else if (t.id === 'aceite') { A.aceite = t.checked; later(); } else if (t.tagName === 'SELECT') { later(); }
+    if (t.getAttribute && t.getAttribute('data-up')) { var fs = [].slice.call(t.files); t.value = ''; if (fs.length) upload(t.getAttribute('data-up'), fs); }
+    if (c) archPrev();
   });
   root.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('button'); if (!b) return;
-    if (b.hasAttribute('data-add')) { A.produtos.push({}); later(); render(true); var d = root.querySelector('details[data-k="produtos"]'); if (d) d.open = true; }
-    else if (b.hasAttribute('data-rm')) { if (confirm('Remover este item?')) { A.produtos.splice(+b.getAttribute('data-rm'), 1); later(); render(true); } }
+    if (b.hasAttribute('data-add')) { var k = b.getAttribute('data-add'); A[k].push({}); later(); render(true); var d = root.querySelector('details[data-k="' + k + '"]'); if (d) d.open = true; }
+    else if (b.hasAttribute('data-rf')) { var id = b.getAttribute('data-rf'), fl = A.arquivos.filter(function (f) { return f.id === id; })[0]; if (fl && confirm('Remover este arquivo?')) { A.arquivos = A.arquivos.filter(function (f) { return f.id !== id; }); api({action: 'rmfile', t: T, file: id + '.' + fl.ext}); dirty = true; save(true); render(true); var d2 = root.querySelector('details[data-k="arquivos"]'); if (d2) d2.open = true; } }
+    else if (b.hasAttribute('data-rm')) { var pr = b.getAttribute('data-rm').split('|'); if (confirm('Remover este item?')) { A[pr[0]].splice(+pr[1], 1); later(); render(true); var d3 = root.querySelector('details[data-k="' + pr[0] + '"]'); if (d3) d3.open = true; } }
     else if (b.id === 'saveNow') { save(true).then(function (r) { if (r && r.ok) msg('Salvo. Pode fechar e voltar depois neste mesmo link.', 'ok'); }); }
     else if (b.id === 'send') {
       var miss = bfMissing(A); if (miss.length) { msg('Falta preencher: ' + miss.join(', ') + '.', 'bad'); return; }
@@ -105,7 +152,7 @@ button{font:inherit;cursor:pointer}.btn{border:1.5px solid #111;background:#fff;
   if (!/^[a-f0-9]{24}$/.test(T)) { root.innerHTML = '<div class="err"><h2>Link inválido</h2><p>Peça um novo link do briefing ao seu contato.</p></div>'; return; }
   api(null, true).then(function (r) {
     if (!r.ok) { root.innerHTML = '<div class="err"><h2>Não foi possível abrir</h2><p>' + esc(r.error || 'Link inválido.') + '</p></div>'; return; }
-    info = r; A = r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers) ? r.answers : {}; sent = r.status === 'enviado'; document.title = 'Briefing' + (r.name ? ' · ' + r.name : ''); render(false);
+    info = r; A = bfMigrate(r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers) ? r.answers : {}); sent = r.status === 'enviado'; document.title = 'Briefing' + (r.name ? ' · ' + r.name : ''); render(false);
   }, function () { root.innerHTML = '<div class="err"><h2>Sem conexão</h2><p>Não consegui falar com o servidor. Tente de novo em instantes.</p></div>'; });
 })();
 </script>

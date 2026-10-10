@@ -107,3 +107,9 @@ Menu **5 · Mostrar ao cliente → Aprovação de arte**.
 - **Marca e arquétipo:** escolha valores (5 a 7), depois atitudes; o Studio mostra o arquétipo mais próximo, marcas parecidas e o tom. No passo 4 defina o que a marca fala e não fala, o que admira e repudia, e as palavras que usa e que **nunca** usa. No resumo, "Enviar para o Brand/Voice Brain" copia isso para o Voice Brain.
 - **Produtos e serviços:** cadastre cada produto (ou cole a lista de uma vez). Quanto mais completa a ficha, melhor a oferta, o anúncio e a página. O Studio só usa o que você preencheu e não inventa o resto.
 
+## Formulário do cliente (link do briefing)
+1. Em **Pré-Projeto → Briefing do cliente**, crie o link e envie por WhatsApp.
+2. O cliente responde no celular (salva sozinho): empresa, marca (clicando), produtos, concorrentes (com site e Instagram), depoimentos, links e envia fotos, logo e materiais.
+3. Quando ele enviar, clique em **Importar respostas**. Marca, produtos, concorrentes, depoimentos, links e imagens vão para o projeto, sem apagar o que você já tinha.
+4. Confira em **Marca e arquétipo**, **Produtos e serviços**, **Concorrentes** e **Materiais do cliente**. Depoimentos só são usados pela IA se estiverem marcados como autorizados.
+

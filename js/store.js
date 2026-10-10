@@ -1,3 +1,4 @@
+const IN_LINKS = ['site', 'instagram', 'redes', 'logo', 'fotos', 'videos', 'marca', 'jafeito'];
 const ID_ARCH = ['inocente', 'explorador', 'sabio', 'heroi', 'foradalei', 'mago', 'caracomum', 'amante', 'bobo', 'prestativo', 'criador', 'governante'], ID_LISTS = ['fala', 'naoFala', 'atitudeTem', 'atitudeNao', 'admira', 'repudia', 'usa', 'naoUsa'], ID_SLIDERS = ['formal', 'humor', 'tecnico', 'calor', 'ousadia'];
 /* Estado do workspace: modelo de dados, persistência local, exportação/importação */
 const STORE_KEY = window.DEMO_MODE ? 'ampliacao_studio_demo' : 'ampliacao_studio_v1';
@@ -38,7 +39,7 @@ function newProject(name, desc, extra = {}) {
     pre: newPre(),
     matrix: {duration: 15, sel: {}, custom: {}, concepts: [], stage: 100},
     video: {conceptId: '', scenes: [], steps: {}, scripts: []}, stories: [], mesa: (typeof normalizeMesa === 'function' ? normalizeMesa({}) : null), portal: {t: '', items: [], news: [], clientEmails: '', notifyEmails: '', requireLogin: false, publishedAt: '', seen: 0},
-    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], identity: (typeof normalizeIdentity === 'function' ? normalizeIdentity({}) : {}), sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], engine: {}, approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
+    ebooks: [], layouts: [], motor: {}, cover: {}, kdp: {}, editorial: {}, carousel: {}, carousels: [], feeds: [], grids: [], social: {}, products: [], intake: (typeof normalizeIntake === 'function' ? normalizeIntake({}) : {}), identity: (typeof normalizeIdentity === 'function' ? normalizeIdentity({}) : {}), sites: [], competitors: [], design: {styles: [], sets: [], bank: {h: [], s: [], c: []}, batches: [], brand: {}, logos: []}, campaigns: [], engine: {}, approvals: [], publications: [], landings: [], metrics: [], assets: [], learnNote: ''
   });
 }
 function seedState() {
@@ -269,6 +270,13 @@ function normalizeProducts(x) {
     notFor: str(r.notFor, 600), problems: lines(r.problems, 300, 20), resolveTime: str(r.resolveTime, 200), differentials: lines(r.differentials, 300, 20), limits: lines(r.limits, 300, 20), notes: str(r.notes, 1000)}));
 }
 /* Identidade da marca: valores → atitudes → arquétipo (12, de "O Herói e o Fora da Lei") → voz. Só ids e textos curtos. */
+/* Materiais do cliente: links, depoimentos e arquivos recebidos pelo briefing */
+function normalizeIntake(x) {
+  x = x && typeof x === 'object' ? x : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || ''));
+  const links = {}; IN_LINKS.forEach(k => { links[k] = str(x.links && x.links[k], 1200); });
+  return {links, testimonials: (Array.isArray(x.testimonials) ? x.testimonials : []).filter(t => t && sid(t.id)).slice(0, 60).map(t => ({id: t.id, who: str(t.who, 120), text: str(t.text, 1500), link: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(t.link || '') ? t.link : '', product: str(t.product, 120), auth: ['sim', 'pedir', 'nao'].includes(t.auth) ? t.auth : 'pedir'})),
+    files: (Array.isArray(x.files) ? x.files : []).filter(f => f && /^[a-f0-9]{16}$/.test(String(f.id)) && /^(jpg|png|webp|pdf)$/.test(String(f.ext))).slice(0, 80).map(f => ({id: f.id, ext: f.ext, cat: ['logo', 'fotos', 'produtos', 'materiais', 'depoimentos'].includes(f.cat) ? f.cat : 'materiais', name: str(f.name, 80), t: /^[a-f0-9]{24}$/.test(String(f.t)) ? f.t : '', lib: sid(f.lib) ? f.lib : ''}))};
+}
 function normalizeIdentity(x) {
   x = x && typeof x === 'object' ? x : {}; const str = (v, n) => String(v == null ? '' : v).slice(0, n), ids = (a, m) => [...new Set((Array.isArray(a) ? a : []).filter(v => /^[a-z0-9]{2,24}$/.test(String(v))))].slice(0, m), tx = (a, n, m) => [...new Set((Array.isArray(a) ? a : []).map(t => str(t, n).trim()).filter(Boolean))].slice(0, m);
   const l = x.lists && typeof x.lists === 'object' ? x.lists : {}, sl = x.sliders && typeof x.sliders === 'object' ? x.sliders : {}, lists = {}, sliders = {};
@@ -376,7 +384,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.identity = normalizeIdentity(q.identity); q.campaigns = normalizeCampaigns(q.campaigns); q.engine = normalizeEngine(q.engine); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); q.portal = normalizePortal(q.portal); q.mesa = typeof normalizeMesa === 'function' ? normalizeMesa(q.mesa) : (q.mesa || {}); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.identity = normalizeIdentity(q.identity); q.intake = normalizeIntake(q.intake); q.campaigns = normalizeCampaigns(q.campaigns); q.engine = normalizeEngine(q.engine); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); q.portal = normalizePortal(q.portal); q.mesa = typeof normalizeMesa === 'function' ? normalizeMesa(q.mesa) : (q.mesa || {}); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');

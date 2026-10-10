@@ -56,10 +56,10 @@ const ID_SUG = {
 
 /* pontuação: valores e atitudes escolhidos → afinidade com cada arquétipo */
 function idScore(id) {
-  const s = {}; ID_ARCH.forEach(k => { s[k] = 0; });
+  const s = {}; Object.keys(ID_ARCHS).forEach(k => { s[k] = 0; });
   const add = (list, sel) => (sel || []).forEach(i => { const c = list.find(x => x[0] === i); if (c) c[2].forEach((a, n) => { s[a] += n === 0 ? 2 : 1; }); });
   add(ID_VALUES, id.values); add(ID_ATTS, id.attitudes);
-  const arr = ID_ARCH.map(k => ({id: k, score: s[k]})).sort((a, b) => b.score - a.score || ID_ARCH.indexOf(a.id) - ID_ARCH.indexOf(b.id)), top = arr[0].score || 1;
+  const arr = Object.keys(ID_ARCHS).map(k => ({id: k, score: s[k]})).sort((a, b) => b.score - a.score || Object.keys(ID_ARCHS).indexOf(a.id) - Object.keys(ID_ARCHS).indexOf(b.id)), top = arr[0].score || 1;
   return arr.map(x => ({id: x.id, score: x.score, pct: Math.round(x.score / top * 100)}));
 }
 const idMain = id => id.arch || (idScore(id)[0].score ? idScore(id)[0].id : '');

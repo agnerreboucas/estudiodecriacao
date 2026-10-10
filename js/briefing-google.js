@@ -15,7 +15,7 @@ function bfScript() {
     const m = {text: 'addTextItem', tel: 'addTextItem', email: 'addTextItem', url: 'addTextItem', area: 'addParagraphTextItem', select: 'addListItem', checks: 'addCheckboxItem'}[type] || 'addTextItem';
     L.push(`  it = f.${m}().setTitle(${q(label)})${help ? '.setHelpText(' + q(help) + ')' : ''}${req ? '.setRequired(true)' : ''};` + (opts ? ` it.setChoiceValues(${JSON.stringify(opts)});` : ''));
   };
-  BF_SECTIONS.forEach((s, si) => {
+  BF_SECTIONS.filter(s => !s.files).forEach((s, si) => {
     if (s.repeat) {
       for (let n = 1; n <= BFG_PROD; n++) {
         L.push(`  f.addPageBreakItem().setTitle(${q(s.t + ' · ' + n)}).setHelpText(${q(n === 1 ? (s.d || '') : 'Deixe em branco se não houver mais produtos ou serviços.')});`);
@@ -55,22 +55,22 @@ function bfParseCSV(text) {
 const BFG_ALIAS = {
   'contato.nome': ['seu nome', 'nome completo', 'nome do responsavel', 'responsavel pelo preenchimento'], 'contato.whatsapp': ['whatsapp', 'whats app', 'telefone', 'celular'], 'contato.email': ['seu e mail', 'e mail do responsavel', 'email do responsavel', 'seu email'], 'contato.cargo': ['cargo', 'funcao'],
   'empresa.nome': ['nome da empresa', 'nome fantasia', 'nome do negocio', 'nome da sua empresa', 'nome do seu negocio', 'empresa'], 'empresa.razao': ['razao social', 'cnpj'], 'empresa.site': ['site', 'website', 'pagina na internet'], 'empresa.instagram': ['instagram'], 'empresa.cidade': ['cidade', 'regiao', 'onde atende', 'onde fica'], 'empresa.historia': ['historia da empresa', 'conte a historia', 'sobre a empresa', 'quem somos'],
-  'empresa.diferenciais': ['diferenciais', 'diferencial da empresa', 'o que faz melhor'], 'empresa.tom': ['tom de voz', 'como a empresa fala', 'personalidade da marca'], 'empresa.evitar': ['palavras que evita', 'evitar', 'proibido'], 'empresa.regras': ['regras do setor', 'regras do conselho', 'oab', 'regulamentacao'],
+  'empresa.diferenciais': ['diferenciais', 'diferencial da empresa', 'o que faz melhor'], 'identidade.naoUsa': ['palavras que a empresa nunca usa', 'palavras que evita', 'evitar', 'proibido'], 'identidade.usa': ['palavras que a empresa usa'], 'empresa.regras': ['regras do setor', 'regras do conselho', 'oab', 'regulamentacao'],
   'publico.quem': ['quem sao os seus clientes', 'quem sao seus clientes', 'publico alvo', 'cliente ideal', 'perfil do cliente'], 'publico.problemas': ['problemas', 'dores'], 'publico.perguntas': ['perguntas frequentes', 'duvidas', 'perguntas que'], 'publico.objecoes': ['objecoes'], 'publico.desejos': ['desejos', 'o que querem'], 'publico.descobre': ['como encontram', 'como conhecem', 'como chegam'],
   'produtos.nome': ['nome do produto', 'nome do servico', 'nome do produto ou servico', 'servico principal', 'produto principal', 'qual servico', 'qual produto', 'o que voce vende', 'o que voces vendem', 'servico oferecido'], 'produtos.oque': ['descricao do servico', 'descricao do produto', 'descricao', 'o que e o servico', 'o que e o produto'], 'produtos.como': ['como funciona', 'etapas', 'passo a passo'], 'produtos.incluso': ['o que esta incluso', 'incluso'],
   'produtos.preco': ['preco', 'quanto custa', 'valor', 'investimento', 'faixa de preco'], 'produtos.prazo': ['prazo', 'duracao'], 'produtos.diferencial': ['diferencial do', 'por que escolher'], 'produtos.provas': ['depoimentos', 'resultados', 'casos reais', 'provas'], 'produtos.link': ['link de compra', 'link de agendamento'],
-  'concorrencia.lista': ['concorrentes', 'concorrencia'], 'concorrencia.admira': ['admira', 'referencias', 'inspiracao'], 'marketing.canais': ['canais', 'o que ja usam', 'o que ja utiliza'], 'marketing.orcamento': ['orcamento', 'verba', 'investimento em anuncios'], 'marketing.metas': ['metas', 'objetivo do projeto', 'objetivos'], 'marketing.prazo': ['prazos', 'datas importantes'], 'marketing.atendimento': ['quem atende', 'atendimento'], 'marketing.ferramentas': ['crm', 'sistema de vendas', 'ferramentas'],
+  'concorrencia.nome': ['concorrentes', 'concorrencia', 'nome do concorrente'], 'referencias.admira': ['empresas ou perfis voce admira', 'referencias', 'inspiracao'], 'marketing.canais': ['canais', 'o que ja usam', 'o que ja utiliza'], 'marketing.orcamento': ['orcamento', 'verba', 'investimento em anuncios'], 'marketing.metas': ['metas', 'objetivo do projeto', 'objetivos'], 'marketing.prazo': ['prazos', 'datas importantes'], 'marketing.atendimento': ['quem atende', 'atendimento'], 'marketing.ferramentas': ['crm', 'sistema de vendas', 'ferramentas'],
   'materiais.logo': ['logo', 'logotipo'], 'materiais.fotos': ['fotos'], 'materiais.videos': ['videos'], 'materiais.marca': ['cores', 'manual de marca', 'identidade visual']
 };
 /* descobre a que pergunta do briefing uma coluna se refere: {s: seção, f: campo, n: nº do produto} ou null */
 function bfgGuess(h) {
-  let n = 0, label = String(h || '').trim(); const m = label.match(/^(?:produto(?: ou servi[çc]o)?|servi[çc]o)\s*(\d)\s*(?:[—–\-:.·|]\s*)(.+)$/i); if (m) { n = +m[1]; label = m[2]; }
+  let n = 0, label = String(h || '').trim(); const m = label.match(/^(?:produto(?: ou servi[çc]o)?|servi[çc]o|concorrente|depoimento)\s*(\d)\s*(?:[—–\-:.·|]\s*)(.+)$/i); if (m) { n = +m[1]; label = m[2]; }
   const T = bfgNorm(label); if (!T) return null; if (/carimbo|timestamp|data hora|endereco de e mail|email address/.test(T)) return {skip: 1};
   /* 1) apelidos */
   { let hit = null, hl = 0; Object.keys(BFG_ALIAS).forEach(key => { const isRep = key.startsWith('produtos.'); if (n && !isRep) return; BFG_ALIAS[key].forEach(a => { if (a.length > hl && (' ' + T + ' ').includes(' ' + a + ' ')) { hit = key; hl = a.length; } }); });
-    if (hit) { const [sec, f] = hit.split('.'); return {s: sec, f, n: sec === 'produtos' ? (n || 1) : 0, score: .9}; } }
+    if (hit) { const [sec, f] = hit.split('.'); return {s: sec, f, n: (BF_SECTIONS.find(s => s.k === sec) || {}).repeat ? (n || 1) : 0, score: .9}; } }
   let best = null, bs = 0; const cands = [];
-  BF_SECTIONS.forEach(s => s.f.forEach(([k, l]) => { if (s.repeat && n === 0 && false) return; cands.push({s: s.k, f: k, l, rep: !!s.repeat}); }));
+  BF_SECTIONS.filter(s => !s.files).forEach(s => s.f.forEach(([k, l]) => { if (s.repeat && n === 0 && false) return; cands.push({s: s.k, f: k, l, rep: !!s.repeat}); }));
   const wt = new Set(bfgTok(label));
   cands.forEach(c => {
     if (n && !c.rep) return; if (!n && c.rep && c.f !== 'nome') {/* campos de produto sem número: só se bater muito */}
@@ -82,7 +82,7 @@ function bfgGuess(h) {
 const bfgKey = g => g ? (g.skip ? 'skip' : g.n ? `${g.s}.${g.n}.${g.f}` : `${g.s}.${g.f}`) : 'extra';
 function bfgOptions() {
   let o = '<option value="skip">Ignorar</option><option value="extra">Anotar em “Outras respostas”</option>';
-  BF_SECTIONS.forEach(s => { if (s.repeat) { for (let n = 1; n <= BFG_PROD; n++) o += `<optgroup label="${esc(s.t)} ${n}">${s.f.map(([k, l]) => `<option value="${s.k}.${n}.${k}">${esc(l.slice(0, 70))}</option>`).join('')}</optgroup>`; } else o += `<optgroup label="${esc(s.t)}">${s.f.map(([k, l]) => `<option value="${s.k}.${k}">${esc(l.slice(0, 70))}</option>`).join('')}</optgroup>`; });
+  BF_SECTIONS.filter(s => !s.files).forEach(s => { if (s.repeat) { for (let n = 1; n <= BFG_PROD; n++) o += `<optgroup label="${esc(s.t)} ${n}">${s.f.map(([k, l]) => `<option value="${s.k}.${n}.${k}">${esc(l.slice(0, 70))}</option>`).join('')}</optgroup>`; } else o += `<optgroup label="${esc(s.t)}">${s.f.map(([k, l]) => `<option value="${s.k}.${k}">${esc(l.slice(0, 70))}</option>`).join('')}</optgroup>`; });
   return o;
 }
 function bfgOpen() {
@@ -105,15 +105,15 @@ function bfgStep2() {
 }
 /* linha do CSV + mapa → objeto de respostas no formato do briefing */
 function bfgAnswers(head, row, map) {
-  const a = {contato: {}, empresa: {}, publico: {}, produtos: [], concorrencia: {}, marketing: {}, materiais: {}, extras: []}, ext = [];
+  const a = {extras: []}, ext = []; BF_SECTIONS.forEach(s => { if (!s.files) a[s.k] = s.repeat ? [] : {}; });
   head.forEach((h, i) => {
     const v = String(row[i] == null ? '' : row[i]).trim(), k = map[i]; if (!v || k === 'skip') return; if (k === 'extra') { ext.push([h, v]); return; }
     const p = k.split('.'); let sec, fld, n = 0; if (p.length === 3) { sec = p[0]; n = +p[1]; fld = p[2]; } else { sec = p[0]; fld = p[1]; }
     const S = BF_SECTIONS.find(s => s.k === sec), F = S && S.f.find(x => x[0] === fld); if (!F) { ext.push([h, v]); return; }
     const val = F[2] === 'checks' ? v.split(/\s*,\s*/).filter(Boolean) : v;
-    if (S.repeat) { while (a.produtos.length < n) a.produtos.push({}); a.produtos[n - 1][fld] = val; } else a[sec][fld] = val;
+    if (S.repeat) { while (a[sec].length < n) a[sec].push({}); a[sec][n - 1][fld] = val; } else a[sec][fld] = val;
   });
-  a.produtos = a.produtos.filter(x => x && Object.values(x).some(Boolean)); a.extras = ext.slice(0, 40).map(([q, r]) => ({q: q.slice(0, 160), r: r.slice(0, 1500)})); a.aceite = true; return a;
+  BF_SECTIONS.forEach(s => { if (s.repeat) a[s.k] = a[s.k].filter(x => x && Object.values(x).some(Boolean)); }); a.extras = ext.slice(0, 40).map(([q, r]) => ({q: q.slice(0, 160), r: r.slice(0, 1500)})); a.aceite = true; return a;
 }
 function bfgImport() {
   const p = curProject(), a = bfgAnswers(BFG.head, BFG.rows[BFG.pick], BFG.map), miss = bfMissing(Object.assign({}, a, {aceite: true}));
