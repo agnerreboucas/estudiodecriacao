@@ -1,7 +1,6 @@
-/* ===== Aprovação: uma página só, em 3 etapas — 1 Revisão interna → 2 Cliente → 3 Pronto para publicar.
-   Junta o que antes era "Aprovação", "Aprovação de arte" e a fila da Publicação. A etapa Cliente reaproveita js/aprov.js. ===== */
-const apH = {tab: 'interna', kick: 0};
-const AH_STEPS = [['interna', '1', 'Revisão interna', 'A equipe confere antes de mostrar ao cliente'], ['cliente', '2', 'Cliente', 'Link de aprovação com prazo'], ['pronto', '3', 'Pronto para publicar', 'Aprovado e esperando data']];
+/* ===== Aprovação: o portal do cliente (aprovacao.html: Início, Anúncios, Feed, Stories e Reels, Correções) montado dentro do Studio em modo equipe,
+   com uma barra do Studio por cima (enviar ao cliente, link, PDF, fila da equipe, prontas para publicar). ===== */
+const apH = {kick: 0, modal: '', sendOpen: false};
 
 function apHInterna(p) {
   soMigrate(); const gate = (p.approvals || []).map(a => ({src: 'gate', id: a.id, title: a.title, kind: a.kind, at: a.decidedAt || a.created, note: a.note, status: a.status}));
@@ -18,12 +17,6 @@ function apHPronto(p) {
   return {cli, posts, ok, n: cli.length + posts.length};
 }
 
-function apHSteps(p) {
-  const I = apHInterna(p), C = apHClienteInfo(p), R = apHPronto(p);
-  const card = (k, n, t, sub, big, line, tone) => `<button class="ah-step ${apH.tab === k ? 'on' : ''} ${tone || ''}" onclick="apHGo('${k}')"><span class="ah-n">${n}</span><span class="ah-t">${t}</span><b class="ah-big">${big}</b><small>${line}</small></button>`;
-  const cl = !C.sent ? card('cliente', '2', 'Cliente', '', '—', 'Ainda não enviado ao cliente', 'idle') : !C.known ? card('cliente', '2', 'Cliente', '', '…', 'Lendo as respostas', '') : card('cliente', '2', 'Cliente', '', `${C.answered}/${C.total}`, `${C.c.approved + C.c.auto} aprovadas · ${C.c.altered + C.c.rejected} para corrigir`, C.c.pending ? 'warn' : 'ok');
-  return card('interna', '1', 'Revisão interna', '', I.pend.length, I.pend.length ? 'esperando a equipe' : 'nada esperando', I.pend.length ? 'warn' : 'ok') + '<i class="ah-arr">›</i>' + cl + '<i class="ah-arr">›</i>' + card('pronto', '3', 'Pronto para publicar', '', R.n, R.n ? 'aprovadas, sem data' : 'nada esperando data', R.n ? 'go' : 'idle');
-}
 function apHRow(x) {
   const src = x.src === 'post' ? 'Publicação' : 'Fila de criação', act = x.src === 'gate'
     ? (x.status !== 'Aprovado' ? `<button class="btn sm dark" onclick="approvalSet('${x.id}','Aprovado')">Aprovar</button>` : '') + (x.status === 'Pendente' ? `<button class="btn sm" onclick="approvalAdjust('${x.id}')">Pedir ajustes</button>` : '')
@@ -35,7 +28,7 @@ function apHBodyInterna(p) {
   return `<div class="ah-sec"><div class="section-row"><div><h3>Esperando revisão da equipe <span class="so-badge">${I.pend.length}</span></h3><p class="muted">Conceitos, roteiros, criações e peças da Publicação que pedem um “ok” antes de seguir.</p></div>${p.approvals.some(a => a.status === 'Pendente') ? `<button class="btn" onclick="approveAll()">Aprovar o lote de criações</button>` : ''}</div>
     ${I.pend.length ? I.pend.map(apHRow).join('') : `<div class="ah-empty"><b>Tudo em dia.</b><span>Quando alguém enviar algo para aprovação, aparece aqui.</span></div>`}</div>
     ${I.done.length ? `<details class="ah-sec"><summary>Já decididas <span class="so-badge">${I.done.length}</span></summary>${I.done.slice().sort((a, b) => String(b.at).localeCompare(String(a.at))).slice(0, 30).map(apHRow).join('')}</details>` : ''}
-    ${I.pend.length === 0 ? `<div class="ah-next"><b>Próximo passo</b> Mande as peças aprovadas ao cliente. <button class="btn sm dark" onclick="apHGo('cliente')">Ir para a etapa Cliente ›</button></div>` : ''}`;
+    ${I.pend.length === 0 ? `<div class="ah-next"><b>Próximo passo</b> Mande as peças ao cliente. <button class="btn sm dark" onclick="closeModal();apHSend()">Enviar ao cliente ›</button></div>` : ''}`;
 }
 function apHBodyPronto(p) {
   const R = apHPronto(p), srvOk = aprState(p).t && smSrv(), item = (t, sub, btn) => `<div class="ah-row ok"><div class="ah-main"><b>${esc(t)}</b><small>${sub}</small></div><div class="ah-act">${btn}</div></div>`;
@@ -46,24 +39,59 @@ function apHBodyPronto(p) {
     ${R.n === 0 && !R.ok.length ? `<div class="ah-empty"><b>Nada esperando data.</b><span>O que for aprovado pela equipe ou pelo cliente chega aqui.</span></div>` : ''}</div>`;
 }
 
-function renderApprovalPage() {
+
+/* ---------- página: a barra do Studio + o portal (o mesmo aprovacao.html do cliente, em modo equipe) ---------- */
+const apHImgCache = new Map();
+async function apHLocalItems(p, onProg) {
+  const pcs = aprSel(p), out = []; let n = 0;
+  for (const pc of pcs) {
+    const sl = pc.kind === 'ad' ? [pc.set.slides[0]] : pc.set.slides, imgs = [];
+    for (let i = 0; i < sl.length; i++) { const key = pc.id + '#' + i + ':' + JSON.stringify(sl[i]).length; if (!apHImgCache.has(key)) apHImgCache.set(key, await aprRenderSlide(pc.set, sl[i])); imgs.push(apHImgCache.get(key)); n++; onProg && onProg(n); }
+    out.push(aprItem(pc, (q, i) => imgs[i]));
+  }
+  return out;
+}
+const apHToday = () => new Date().toISOString().slice(0, 10);
+function apHToolbar(p) {
+  const a = aprState(p), sent = !!a.t && !!a.sentAt, I = apHInterna(p), R = apHPronto(p);
+  return `<div class="ah-bar"><div class="ah-bar-l">${typeof projectSelect === 'function' ? projectSelect() : ''}<span class="ah-state ${sent ? 'on' : ''}">${sent ? 'Enviado ao cliente em ' + esc(fmtDate(a.sentAt)) : 'Ainda não enviado: esta é a prévia da equipe'}</span></div>
+    <div class="ah-bar-r"><button class="btn sm dark" onclick="apHSend()">${sent ? '↻ Reenviar ao cliente' : '✉ Enviar ao cliente'}</button>${sent ? `<button class="btn sm" onclick="apHCopy()">Copiar link</button>` : ''}<button class="btn sm" onclick="aprPdf()" title="PDF de apresentação das peças">📄 PDF</button><button class="btn sm" onclick="aprExportHtml()" title="Arquivo único para abrir sem servidor">⇣ Arquivo único</button>
+    <button class="btn sm" onclick="apHQueue()">Fila da equipe <span class="so-badge" id="ahQn">${I.pend.length}</span></button><button class="btn sm" onclick="apHReady()">Prontas para publicar <span class="so-badge" id="ahRn">${R.n}</span></button></div></div>`;
+}
+let apHToken = 0;
+function renderApprovalPage(force) {
   const p = curProject(), r = $('approvalRoot'); if (!r) return; if (!p) { r.innerHTML = noProject('Aprovação'); return; }
-  r.innerHTML = hubHead('Aprovação', 'Do rascunho ao ar em três etapas: a equipe confere, o cliente aprova e a peça fica pronta para publicar.', '') + `<div class="ah-steps" id="ahSteps">${apHSteps(p)}</div><div id="approvalBody" class="ah-body"></div>`;
-  apHBody(p); apHKick(p);
+  const mounted = $('apvHost') && $('apvHost').dataset.pid === p.id && !force;
+  if (mounted) { const bar = $('ahBar'); if (bar) bar.innerHTML = apHToolbar(p); if (apH.modal) apHModal(); return; }
+  r.innerHTML = `<div id="ahBar">${apHToolbar(p)}</div><div id="apvHost" data-pid="${p.id}" class="ah-host"><div class="ah-load">Preparando o portal de aprovação…</div></div>`;
+  apHMount(p); apHKick(p);
 }
-function apHBody(p) {
-  const b = $('approvalBody'); if (!b) return; apr.embed = false;
-  if (apH.tab === 'cliente') { apr.embed = true; apr.root = 'approvalBody'; renderAprarte(); return; }
-  b.innerHTML = apH.tab === 'pronto' ? apHBodyPronto(p) : apHBodyInterna(p);
-}
-function apHGo(k) { apH.tab = k; const y = window.scrollY; renderApprovalPage(); window.scrollTo(0, y); }
-function apHPost(id, to) { const r = soMove(id, to); if (!r.ok) toast(r.msg); else toast(to === 'aprovado' ? 'Peça aprovada.' : 'Peça devolvida para ajustes.'); const y = window.scrollY; renderApprovalPage(); window.scrollTo(0, y); }
-/* lê, uma vez por abertura, as respostas do cliente e as peças aprovadas, e atualiza os números das etapas */
-async function apHKick(p) {
-  if (Date.now() - apH.kick < 4000) return; apH.kick = Date.now(); const a = aprState(p); if (!(API.available && !needsLogin())) return;
+async function apHMount(p) {
+  const my = ++apHToken, host = $('apvHost'); if (!host) return; const a = aprState(p), srv = API.available && !needsLogin(), sent = !!a.t && !!a.sentAt && srv;
+  const reviewer = {name: 'Equipe', day: apHToday()};
   try {
-    if (a.t && a.sentAt) apr.est = await api('aprovacao.php', {method: 'POST', body: {action: 'equipe', t: a.t}});
-    if (typeof smApproved === 'function' && a.t) SM.list = await smApproved(true);
-  } catch (e) { return; }
-  if (ui.page !== 'approval' || curProject().id !== p.id) return; const st = $('ahSteps'); if (st) st.innerHTML = apHSteps(p); if (apH.tab === 'pronto') apHBody(p);
+    let cfg;
+    if (sent) cfg = {rest: 'api/aprovacao.php', token: a.t, agency: true, reviewer, project: 'rest'};
+    else {
+      const load = host.querySelector('.ah-load'), items = await apHLocalItems(p, n => { if (load && my === apHToken) load.textContent = 'Preparando as artes… ' + n; });
+      if (my !== apHToken) return;
+      if (!items.length) { host.innerHTML = '<div class="ah-empty big"><b>Ainda não há peças para aprovar.</b><span>Crie anúncios na Campanha ou carrosséis, posts e stories no Estúdio de Design. Eles aparecem aqui prontos para revisar e enviar ao cliente.</span></div>'; return; }
+      cfg = {items, agency: true, reviewer, brand: a.brand || p.name, handle: a.handle || '', project: 'studio-' + p.id, subtitle: 'Prévia da equipe · ' + new Date().toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'})};
+    }
+    if (my !== apHToken) return; await apvMount(host, cfg);
+  } catch (e) { if (my === apHToken) host.innerHTML = '<div class="ah-empty big"><b>Não consegui abrir o portal.</b><span>' + esc(e.message) + '</span></div>'; }
 }
+/* janelas: enviar, fila da equipe, prontas para publicar */
+function apHModal() {
+  const p = curProject(); if (!p || !apH.modal) return; const box = $('apHM'); if (!box) return;
+  box.innerHTML = apH.modal === 'fila' ? apHBodyInterna(p) : apHBodyPronto(p);
+}
+function apHQueue() { apH.modal = 'fila'; showModal('Fila da equipe', '<div id="apHM"></div>'); $('modalBox').classList.add('wide'); apHModal(); }
+function apHReady() { apH.modal = 'pronto'; apHKickList(); showModal('Prontas para publicar', '<div id="apHM"></div>'); $('modalBox').classList.add('wide'); apHModal(); }
+function apHSend() { apH.modal = ''; apH.sendOpen = true; showModal('Enviar ao cliente', '<div id="aprModalBody"></div>'); $('modalBox').classList.add('wide'); apr.embed = true; apr.root = 'aprModalBody'; renderAprarte(); }
+const _apHClose = closeModal;
+closeModal = function () { const was = apH.sendOpen; _apHClose(); apH.modal = ''; if (was) { apH.sendOpen = false; apr.embed = false; renderApprovalPage(true); } };
+function apHCopy() { const a = aprState(curProject()), u = a.link || (apr.est && apr.est.link) || ''; if (!u) { toast('Abra “Reenviar” para gerar o link.'); return; } (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(() => toast('Link copiado.'), () => prompt('Copie o link:', u)); }
+function apHPost(id, to) { const r = soMove(id, to); if (!r.ok) toast(r.msg); else toast(to === 'aprovado' ? 'Peça aprovada.' : 'Peça devolvida para ajustes.'); renderApprovalPage(); }
+async function apHKickList() { const p = curProject(), a = aprState(p); if (!(API.available && !needsLogin()) || !a.t || typeof smApproved !== 'function') return; try { SM.list = await smApproved(true); } catch (e) { return; } if (apH.modal === 'pronto') apHModal(); const n = $('ahRn'); if (n) n.textContent = apHPronto(p).n; }
+async function apHKick(p) { if (Date.now() - apH.kick < 4000) return; apH.kick = Date.now(); await apHKickList(); }

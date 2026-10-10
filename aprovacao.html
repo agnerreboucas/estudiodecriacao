@@ -110,6 +110,8 @@ button { cursor: pointer; }
 .pubbanner { background: var(--pub-bg); color: var(--pub); border-radius: 10px; padding: 10px 14px; font-weight: 700; font-size: 14px; }
 /* miniaturas: sempre 4:5, só o título, em tamanho legível */
 .art.tmode { aspect-ratio: 4 / 5 !important; padding: 8cqw !important; justify-content: center; }
+/* com arte real o recorte é pela imagem: sem o respiro do texto simulado (em telas largas 8cqw virava uma faixa fina) */
+.art.a-img.tmode { padding: 0 !important; }
 .tmode .a-top, .tmode .a-foot, .tmode .a-b { display: none !important; }
 .tmode .a-main { flex: none; padding: 0 !important; align-content: center; gap: 0; }
 .tmode .a-h { font-size: var(--tsz, 11cqw) !important; line-height: 1.06 !important; }
@@ -763,7 +765,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
     var type = n === 1 || i === 0 ? 'cover' : (i === n - 1 ? 'cta' : 'mid');
     var story = item.format === 'story';
     var play = item.kind === 'reels' && i === 0 ? '<div class="play"></div>' : '';
-    var im = (item.slides[i] || {}).img || s.img; if (im && /^(https?:\/\/|\/|data:image\/|[\w.-]+\/[\w./?=&%-]+$)/i.test(im)) return '<div class="art a-img' + (story ? ' story' : '') + (tile ? ' tmode' : '') + '"><img src="' + esc(im) + '" alt="" loading="lazy" decoding="async">' + play + '</div>';
+    var im = (item.slides[i] || {}).img || s.img; if (im && /^(https?:\/\/|\/|data:image\/|blob:|[\w.-]+\/[\w./?=&%-]+$)/i.test(im)) return '<div class="art a-img' + (story ? ' story' : '') + (tile ? ' tmode' : '') + '"><img src="' + esc(im) + '" alt="" loading="lazy" decoding="async">' + play + '</div>';
     return '<div class="art a-' + item.style + ' t-' + type + (story ? ' story' : '') + (tile ? ' tmode" style="--tsz:' + tsz(s.h) + 'cqw' : '') + '">' +
       '<div class="a-top"><span>' + BRAND + '</span><span>' + (n > 1 ? (i + 1) + '/' + n : '2026') + '</span></div>' +
       '<div class="a-main"><div class="a-h">' + fmt(s.h) + '</div>' + (s.b ? '<div class="a-b">' + fmt(s.b) + '</div>' : '') + '</div>' +
@@ -1347,7 +1349,7 @@ del { background: var(--bad-bg); color: var(--bad); text-decoration: line-throug
     var v = $('#view'); v.innerHTML = '<div class="empty">Carregando…</div>';
     fetch(restUrl('estado'), { cache: 'no-store', credentials: 'same-origin' }).then(function (r) { return r.json().then(function (j) { j._st = r.status; return j; }); }).then(function (j) {
       if (!j || !j.ok) { v.innerHTML = '<div class="empty">' + esc((j && j.error) || 'Este link não está ativo. Peça um novo à agência.') + '</div>'; return; }
-      BRAND = j.brand && j.brand.name || BRAND; HANDLE = j.brand && j.brand.handle || HANDLE; CFG.subtitle = j.subtitle || CFG.subtitle; CFG.agency = j.agency === true;
+      BRAND = j.brand && j.brand.name || BRAND; HANDLE = j.brand && j.brand.handle || HANDLE; CFG.subtitle = j.subtitle || CFG.subtitle; CFG.agency = CFG.agency === true || j.agency === true;
       CFG.sentAt = j.submission && j.submission.sentAt || ''; CFG.deadlineHours = j.submission && j.submission.deadlineHours || 72;
       PROJ = 'rest-' + CFG.token.slice(0, 10); KEY = 'aprovacao-' + PROJ + '-v2'; WHO_KEY = 'aprovacao-' + PROJ + '-revisor';
       ALL = j.items || []; setBrand();

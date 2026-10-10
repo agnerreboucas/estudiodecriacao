@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 1.14.0
+- **Aprovação no formato do portal.** A página Aprovação agora é o próprio portal de aprovação (o mesmo `aprovacao.html` do cliente), em modo equipe, dentro do Studio e sem iframe: menu **Início · Anúncios · Feed · Stories e Reels · Correções**, visão geral com filtros por status, anúncios por fase da jornada, feed por semana, revisão com o celular à esquerda e decisão, mudanças e comentários à direita, e a página de Correções com antes e depois. Usa as peças reais do projeto (artes geradas pelo Estúdio de Design).
+- **Barra do Studio por cima do portal:** Enviar/Reenviar ao cliente (janela com as peças, o prazo e o @), Copiar link, PDF, Arquivo único, **Fila da equipe** (criações e peças da Publicação que esperam ok) e **Prontas para publicar** (com o botão Agendar). Antes de enviar, o portal é a prévia da equipe; depois do envio, mostra as respostas do cliente.
+- Como o Studio monta o `aprovacao.html`, qualquer ajuste feito nele aparece nos dois lugares.
+- Correção no portal: com arte real, os cartões da visão geral viravam uma faixa fina em telas largas.
+
 ## 1.13.0
 - **Social Hub retirado da plataforma** (sessão do menu, tela e arquivos). Os dados guardados do Hub nos projetos são apagados ao carregar. A aba **Publicação** e a **Análise** (insights, orgânico × pago, horários, localidades) continuam como estavam.
 

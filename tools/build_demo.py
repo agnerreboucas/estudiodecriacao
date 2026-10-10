@@ -11,6 +11,8 @@ def scripts(m):
     out = ''
     if path == 'js/util.js': out += '<script>window.DEMO_MODE=true</script>\n'
     if path == 'js/app.js': out += js('demo/demo.js') + '\n'
+    # o portal de aprovação (aprovacao.html) é montado pelo Studio: na demo de arquivo único vai embutido como texto
+    if path == 'js/aprovacao-portal.js': out += '<script>window.APROVACAO_HTML=' + __import__('json').dumps((root / 'aprovacao.html').read_text()).replace('</', '<\\/') + ';</script>\n'
     return out + js(path)
 html = re.sub(r'<script src="([^"]+)"></script>', scripts, html)
 html = html.replace('<title>Ampliação Studio — Creative Workspace</title>', '<title>Ampliação Studio — Demonstração</title>')

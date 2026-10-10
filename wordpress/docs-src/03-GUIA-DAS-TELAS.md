@@ -114,7 +114,8 @@ Menu **5 · Mostrar ao cliente → Aprovação de arte**.
 4. Confira em **Marca e arquétipo**, **Produtos e serviços**, **Concorrentes** e **Materiais do cliente**. Depoimentos só são usados pela IA se estiverem marcados como autorizados.
 
 
-## Aprovação (página única)
-1. **Revisão interna:** o que a equipe precisa conferir. Aprovar, pedir ajustes ou devolver.
-2. **Cliente:** escolha as peças, defina o prazo e envie o link. Acompanhe as respostas, as correções e baixe o PDF.
-3. **Pronto para publicar:** tudo o que foi aprovado e ainda não tem data. Clique em **Agendar** para escolher dia, horário, estilo e redes.
+## Aprovação
+A tela é o portal de aprovação, o mesmo que o cliente abre, em modo equipe.
+- **Menu do portal:** Início (todas as peças, com filtros por status), Anúncios (por fase da jornada), Feed, Stories e Reels e Correções (o que foi decidido ou mudado, com antes e depois e o botão Marcar como aplicada).
+- **Barra do Studio:** *Enviar ao cliente* (escolha as peças, o prazo e o @), *Copiar link*, *PDF*, *Arquivo único*, *Fila da equipe* (o que a equipe precisa conferir) e *Prontas para publicar* (com o botão Agendar).
+- Antes do envio você vê a prévia da equipe. Depois do envio, as decisões do cliente aparecem no mesmo portal.
