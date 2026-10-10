@@ -35,6 +35,10 @@ return [
     'OPENAI_API_KEY'       => '',
     'OPENAI_IMAGE_MODEL'   => 'gpt-image-1',
     'OPENAI_IMAGE_QUALITY' => 'medium',   // low = mais barato, high = mais caro
+    /* Opcional: listas que aparecem em Configurações → Escolha da IA (formato 'id-do-modelo' => 'Nome que aparece'). Confira os nomes na documentação do provedor.
+       'ANTHROPIC_MODELS'   => ['claude-haiku-5-5' => 'Rápido e econômico', 'claude-sonnet-5-5' => 'Equilibrado', 'claude-opus-5-5' => 'Mais inteligente'],
+       'OPENAI_TEXT_MODELS' => ['gpt-4o-mini' => 'Rápido e econômico', 'gpt-4o' => 'Equilibrado'],
+       'OPENAI_IMAGE_MODELS'=> ['gpt-image-1' => 'GPT Image 1', 'gpt-image-1-mini' => 'GPT Image 1 Mini (mais barato)'], */
     'IMAGE_CALLS_PER_HOUR' => 20,
     'IMAGE_CALLS_PER_DAY'  => 80,         // trava de custo
 

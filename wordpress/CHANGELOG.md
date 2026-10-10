@@ -10,6 +10,9 @@
 - **Auto layout (como no Figma):** Horizontal/Vertical/Quebra/Grade, alinhamento 3×3, espaço e padding, filhos Ajustar/Preencher/Fixa, **Shift+A**, e **Adaptar Tablet e Celular** (no contêiner ou na página inteira): arruma no Desktop e o Studio ajusta as outras telas.
 - **Texto:** aumentar/diminuir a letra arrastando o canto; barra por palavra com fonte, tamanho, cor, destaque e efeitos (também em títulos); fonte e efeitos do texto inteiro (sombra, contorno, neon, brilho, gradiente).
 - **Ferramentas do Estúdio de Design na Mesa:** transparência, rotação, mesclagem, Frente/Trás, formas e recortes, gradiente rápido, tratamentos e ajustes de foto, banco de imagens e geração por IA. **Alt+arrastar duplica.**
+- **Imagem com IA na Mesa:** na imagem, *✨ Gerar com IA*: descreva digitando, **falando (🎤)** ou **colando** um prompt; ✨ melhorar o prompt; 📋 copiar o prompt; até 4 **imagens de referência** (ou a imagem atual) para variar/editar; proporção automática; vários resultados na tela com *Usar aqui* e *↻ Variar*. Tudo vai para a Biblioteca.
+- **Escolha da IA e do nível** (Configurações → *Escolha da IA*, e também na ✨ IA da Mesa e no modal de imagem): texto com Claude ou GPT e o modelo (rápido/equilibrado/mais inteligente); imagem com GPT Image ou Magnific, modelo e qualidade. O servidor só aceita modelos da lista dele (`api/models.php`, ajustável no `config.php`).
+- Correção: janelas do Studio (escolher imagem, fontes, etc.) abriam por trás da Mesa.
 - Módulo isolado: Landings antigas continuam como estavam.
 
 ## 1.5.0

@@ -143,20 +143,10 @@ function mzPhotoStyle(id) { const n = mzSelNode(); if (!n) return; const x = (ty
 function mzImgSources(n) {
   if (!mzIsImg(n)) return '';
   const stock = typeof stockReady === 'function' && stockReady(), ai = typeof imageReady === 'function' && imageReady();
-  return `<div class="row-gap" style="flex-wrap:wrap;margin:6px 0"><button class="btn sm" onclick="mzChooseImg('imgId')">📚 Biblioteca</button><button class="btn sm" onclick="mzUploadInto()">⬆ Enviar</button>${stock ? '<button class="btn sm" onclick="mzStockInto()">🔎 Banco</button>' : ''}<button class="btn sm" onclick="mzGenInto()" title="${ai ? 'Gerar com IA' : 'Requer a chave de imagem no servidor'}">✨ Gerar</button></div>`;
+  return `<div class="row-gap" style="flex-wrap:wrap;margin:6px 0"><button class="btn sm" onclick="mzChooseImg('imgId')">📚 Biblioteca</button><button class="btn sm" onclick="mzUploadInto()">⬆ Enviar</button>${stock ? '<button class="btn sm" onclick="mzStockInto()">🔎 Banco</button>' : ''}<button class="btn sm dark" onclick="mzGenInto()" title="${ai ? 'Criar a imagem com IA' : 'Requer a chave de imagem no servidor (dá para copiar o prompt)'}">✨ Gerar com IA</button>${n.props.imgId ? '<button class="btn sm" onclick="mzGenInto({vary:1})" title="Usa a imagem atual como referência">↻ Variar com IA</button>' : ''}</div>`;
 }
 function mzUploadInto() { const n = mzSelNode(); const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/png,image/jpeg,image/webp,image/svg+xml'; i.onchange = async () => { const f = i.files[0]; if (!f || !n) return; try { const r = await libAddBlob(f, {name: f.name.replace(/\.[^.]+$/, '')}); const id = r && (r.imgId || r.id || r); n.props.imgId = typeof id === 'string' ? id : (id && id.imgId) || n.props.imgId; mzCommit({panels: true}); } catch (e) { toast(e.message); } }; i.click(); }
 function mzStockInto() { const n = mzSelNode(); stockPick(r => { if (!n) return; n.props.imgId = r.id; mzCommit({panels: true}); }); }
-function mzGenInto() {
-  const n = mzSelNode(); if (!n) return; if (!imageReady()) { toast(needsLogin() ? 'Entre no Studio para gerar imagens.' : 'Geração de imagem indisponível: configure a chave de imagem em api/config.php no servidor.'); return; }
-  const c = mzCtx(MZ.p), base = [c.name ? 'imagem para o site de ' + c.name : 'imagem profissional para site', 'sem texto, sem logotipo, sem marca d’água'].join('. ');
-  showModal('✨ Gerar imagem com IA', `<div class="field"><label>O que a imagem deve mostrar</label><textarea id="mzGenP" rows="4">${esc(base)}</textarea></div><label class="mz-f"><span>Qualidade</span><select id="mzGenQ"><option value="low">Rascunho (mais barata)</option><option value="medium" selected>Média</option><option value="high">Alta (mais cara)</option></select></label><small class="muted block">Consome créditos da sua conta de imagem.</small><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" id="mzGenGo" onclick="mzGenRun('${n.id}')">Gerar</button></div>`);
-}
-async function mzGenRun(id) {
-  const f = mzFind(mzRoot(), id), btn = document.getElementById('mzGenGo'), prompt = (document.getElementById('mzGenP') || {}).value || ''; if (!f || !prompt.trim()) return; btn.disabled = true; btn.textContent = 'Gerando…';
-  try { const blob = await generateImage({prompt: prompt.trim(), size: 'landscape', quality: document.getElementById('mzGenQ').value, refs: []}), imgId = uid('img'); await imgPut(imgId, blob); f.node.props.imgId = imgId; closeModal(); mzCommit({panels: true}); toast('Imagem gerada e aplicada.'); } catch (e) { btn.disabled = false; btn.textContent = 'Gerar'; toast(e.message); }
-}
-
 /* ---------- ligação aos painéis ---------- */
 const mzTabStyleBase = window.mzTabStyle, mzTabLayoutBase = window.mzTabLayout, mzTabContentBase = window.mzTabContent;
 window.mzTabContent = function (n) { return mzTabContentBase(n) + (mzIsImg(n) ? `<div class="mz-sec"><h5>Trocar imagem</h5>${mzImgSources(n)}</div>` : ''); };

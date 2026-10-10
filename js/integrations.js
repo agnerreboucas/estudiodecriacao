@@ -25,8 +25,10 @@ const aiReady = () => canUseApi() && !!(API.status.ai && API.status.ai.configure
 const imageReady = () => canUseApi() && !!(API.status.image && API.status.image.configured);
 const blobToDataURL = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(b); });
 /* Gera imagem pelo servidor (OpenAI). refs = data URLs de fotos de referência (ex.: foto do produto). Devolve Blob PNG. */
-async function generateImage({prompt, size = 'square', quality = 'medium', refs = []}) {
-  const r = await api('image.php', {method: 'POST', body: {prompt, size, quality, refs}});
+async function generateImage({prompt, size = 'square', quality, refs = [], provider, model}) {
+  const P = typeof aiPrefs === 'function' ? aiPrefs() : {}; if (provider === undefined) { provider = P.imgProvider || ''; if (model === undefined) model = P.imgModel || ''; } if (!quality) quality = P.imgQuality || 'medium';
+  const r = await api('image.php', {method: 'POST', body: {prompt, size, quality, refs, provider, model}});
+  generateImage.last = {provider: r.provider || provider, model: r.model || model};
   return (await fetch(r.image)).blob();
 }
 
@@ -87,7 +89,7 @@ async function pullWorkspace(force) {
 /* ---- IA ---- */
 async function aiText(system, user, max = 1500) {
   if (typeof AI_CTX !== 'undefined' && AI_CTX) { const c = AI_CTX; AI_CTX = null; system = skillSystem(c.fn, c.stage, system); }   // skills de texto da função (tela Skills de texto)
-  const j = await api('ai.php', {method: 'POST', body: {system, messages: [{role: 'user', content: user}], max_tokens: max}});
+  const P = typeof aiPrefs === 'function' ? aiPrefs() : {}, j = await api('ai.php', {method: 'POST', body: {system, messages: [{role: 'user', content: user}], max_tokens: max, provider: P.textProvider || undefined, model: P.textModel || undefined}});
   return j.text || '';
 }
 async function aiJSON(system, user) {

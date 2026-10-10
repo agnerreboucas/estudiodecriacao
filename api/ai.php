@@ -1,15 +1,21 @@
 <?php
 require __DIR__ . '/_lib.php';
+require __DIR__ . '/models.php';
 require_auth();
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') fail('Use POST', 405);
 require_json_write();
 $prov = strtolower((string) cfg('AI_PROVIDER', 'anthropic'));
 if ($prov !== 'openai') $prov = 'anthropic';
 $key = (string) cfg($prov === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY', '');
-if ($key === '') fail('IA não configurada: defina ' . ($prov === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY') . ' em api/config.php', 503);
+if ($key === '' && cfg('OPENAI_API_KEY') === null && cfg('ANTHROPIC_API_KEY') === null) fail('IA não configurada: defina ' . ($prov === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY') . ' em api/config.php', 503);
 if (!rate_limit('ai:' . (session_id() ?: client_ip()), (int) cfg('AI_CALLS_PER_HOUR', 60), 3600)) fail('Limite de chamadas de IA por hora atingido.', 429);
 
 $b = body_json(7_000_000);
+/* escolha da usuária: provedor (se a chave existir) e modelo (só os da lista) */
+$want = strtolower((string) ($b['provider'] ?? ''));
+if (($want === 'openai' || $want === 'anthropic') && $want !== $prov && cfg($want === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY') !== null) { $prov = $want; $key = (string) cfg($prov === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY'); }
+if ($key === '') { $prov = cfg('OPENAI_API_KEY') !== null ? 'openai' : 'anthropic'; $key = (string) cfg($prov === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY'); }
+$model = pick_model(text_models($prov), $b['model'] ?? '', text_default($prov));
 $msgs = $b['messages'] ?? null;
 if (!is_array($msgs) || !$msgs || count($msgs) > 8) fail('messages inválido', 422);
 $clean = [];
@@ -48,14 +54,14 @@ if ($prov === 'openai') {
     }
     $ob = rtrim((string) cfg('OPENAI_API_URL', 'https://api.openai.com/v1'), '/');
     [$code, $j, $raw] = http_json($ob . '/chat/completions', ['content-type: application/json', 'Authorization: Bearer ' . $key],
-        ['model' => (string) cfg('OPENAI_TEXT_MODEL', 'gpt-4o'), 'max_completion_tokens' => max(1, min(8000, (int) ($b['max_tokens'] ?? 1500))), 'messages' => $om], 120);
+        ['model' => $model, 'max_completion_tokens' => max(1, min(8000, (int) ($b['max_tokens'] ?? 1500))), 'messages' => $om], 120);
     if ($code !== 200 || !is_array($j)) {
         $msg = is_array($j) ? ($j['error']['message'] ?? 'erro do provedor') : $raw;
         fail('IA (OpenAI): ' . substr((string) $msg, 0, 300), $code === 429 ? 429 : 502);
     }
-    json_out(['ok' => true, 'text' => (string) ($j['choices'][0]['message']['content'] ?? ''), 'usage' => $j['usage'] ?? null]);
+    json_out(['ok' => true, 'text' => (string) ($j['choices'][0]['message']['content'] ?? ''), 'usage' => $j['usage'] ?? null, 'model' => $model]);
 }
-$payload = ['model' => (string) cfg('ANTHROPIC_MODEL', 'claude-sonnet-5-5'), 'max_tokens' => max(1, min(8000, (int) ($b['max_tokens'] ?? 1500))), 'messages' => $clean];
+$payload = ['model' => $model, 'max_tokens' => max(1, min(8000, (int) ($b['max_tokens'] ?? 1500))), 'messages' => $clean];
 if (!empty($b['system']) && is_string($b['system'])) $payload['system'] = substr($b['system'], 0, 24000);
 
 [$code, $j, $raw] = http_json((string) cfg('ANTHROPIC_API_URL', 'https://api.anthropic.com/v1/messages'),
@@ -66,4 +72,4 @@ if ($code !== 200 || !is_array($j)) {
 }
 $text = '';
 foreach (($j['content'] ?? []) as $blk) if (($blk['type'] ?? '') === 'text') $text .= $blk['text'];
-json_out(['ok' => true, 'text' => $text, 'usage' => $j['usage'] ?? null]);
+json_out(['ok' => true, 'text' => $text, 'usage' => $j['usage'] ?? null, 'model' => $model]);

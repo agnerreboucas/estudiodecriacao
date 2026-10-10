@@ -959,6 +959,10 @@ body.mz-lock{overflow:hidden}
 .mz-fxgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px}.mz-fxgrid button{border:1px solid #cfd0d6;background:#fff;border-radius:7px;padding:6px 2px;font-size:11.5px;cursor:pointer;font-weight:600}.mz-fxgrid button:hover{background:#f3f3f6}
 .mz-pre{display:flex;gap:6px;margin-bottom:8px}.mz-pre button{width:38px;height:26px;border-radius:6px;border:1px solid #ccc;cursor:pointer}
 .mz-tabs button{font-size:10.8px!important;padding:10px 0!important;letter-spacing:-.1px}
+.mz-ref{position:relative;display:inline-block;margin:0 6px 6px 0}.mz-ref img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #ccc}.mz-ref button{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:0;background:#111;color:#fff;cursor:pointer;line-height:1}
+.mz-genres{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}.mz-genr{border:1px solid #dcdde3;border-radius:10px;padding:6px}.mz-genr img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}
+.modal-back{z-index:9900!important}
+.toast{z-index:9950!important}
 
 </style>
 </head>
@@ -1573,13 +1577,15 @@ function normalizeEbooks(x) {
     sections: (Array.isArray(e.sections) ? e.sections : []).filter(s => s && safeId(s.id)).slice(0, 300).map(s => ({id: s.id, type: STYPES.includes(s.type) ? s.type : 'text', label: str(s.label, 80), title: str(s.title, 300), subtitle: str(s.subtitle, 400), opener: !!s.opener, inToc: s.inToc !== false,
       blocks: (Array.isArray(s.blocks) ? s.blocks : []).filter(b => b && safeId(b.id) && TYPES.includes(b.t)).slice(0, 400).map(b => ({id: b.id, t: b.t, text: str(b.text, 20000), drop: !!b.drop, kind: KINDS.includes(b.kind) ? b.kind : 'tip', title: str(b.title, 200), leftTitle: str(b.leftTitle, 120), rightTitle: str(b.rightTitle, 120), left: lines(b.left), right: lines(b.right), items: lines(b.items), ordered: !!b.ordered}))}))}));
 }
+/* escolhas de IA da usuária (provedor/modelo de texto e de imagem); o servidor só aceita modelos da lista dele */
+function normalizeAiPrefs(x) { x = x && typeof x === 'object' ? x : {}; const t = (v, n) => String(v == null ? '' : v).replace(/[^\w.:\/-]/g, '').slice(0, n || 80); return {textProvider: ['anthropic', 'openai'].includes(x.textProvider) ? x.textProvider : '', textModel: t(x.textModel), imgProvider: ['openai', 'magnific'].includes(x.imgProvider) ? x.imgProvider : '', imgModel: t(x.imgModel), imgQuality: ['low', 'medium', 'high'].includes(x.imgQuality) ? x.imgQuality : 'medium'}; }
 function normalize(s) {
   const base = seedState();
   if (!s || typeof s !== 'object' || !Array.isArray(s.projects)) return base;
   s.schema = SCHEMA;
   s.meta = mergeDefaults(s.meta, base.meta);
   s.workspace = mergeDefaults(s.workspace, base.workspace);
-  s.credits = Number.isFinite(+s.credits) ? +s.credits : 30;
+  s.credits = Number.isFinite(+s.credits) ? +s.credits : 30; s.aiPrefs = normalizeAiPrefs(s.aiPrefs);
   s.inspo = normalizeInspo(s.inspo);
   s.imglib = normalizeImglib(s.imglib); s.tplbank = normalizeTplbank(s.tplbank); s.lpRefs = normalizeLpRefs(s.lpRefs); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills); s.mesaLib = typeof normalizeMesaLib === 'function' ? normalizeMesaLib(s.mesaLib) : (s.mesaLib || {items: []});
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
@@ -1687,8 +1693,10 @@ const aiReady = () => canUseApi() && !!(API.status.ai && API.status.ai.configure
 const imageReady = () => canUseApi() && !!(API.status.image && API.status.image.configured);
 const blobToDataURL = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(b); });
 /* Gera imagem pelo servidor (OpenAI). refs = data URLs de fotos de referência (ex.: foto do produto). Devolve Blob PNG. */
-async function generateImage({prompt, size = 'square', quality = 'medium', refs = []}) {
-  const r = await api('image.php', {method: 'POST', body: {prompt, size, quality, refs}});
+async function generateImage({prompt, size = 'square', quality, refs = [], provider, model}) {
+  const P = typeof aiPrefs === 'function' ? aiPrefs() : {}; if (provider === undefined) { provider = P.imgProvider || ''; if (model === undefined) model = P.imgModel || ''; } if (!quality) quality = P.imgQuality || 'medium';
+  const r = await api('image.php', {method: 'POST', body: {prompt, size, quality, refs, provider, model}});
+  generateImage.last = {provider: r.provider || provider, model: r.model || model};
   return (await fetch(r.image)).blob();
 }
 
@@ -1749,7 +1757,7 @@ async function pullWorkspace(force) {
 /* ---- IA ---- */
 async function aiText(system, user, max = 1500) {
   if (typeof AI_CTX !== 'undefined' && AI_CTX) { const c = AI_CTX; AI_CTX = null; system = skillSystem(c.fn, c.stage, system); }   // skills de texto da função (tela Skills de texto)
-  const j = await api('ai.php', {method: 'POST', body: {system, messages: [{role: 'user', content: user}], max_tokens: max}});
+  const P = typeof aiPrefs === 'function' ? aiPrefs() : {}, j = await api('ai.php', {method: 'POST', body: {system, messages: [{role: 'user', content: user}], max_tokens: max, provider: P.textProvider || undefined, model: P.textModel || undefined}});
   return j.text || '';
 }
 async function aiJSON(system, user) {
@@ -1797,6 +1805,22 @@ function integrationsHTML() {
   </div>`;
 }
 async function testWebhook() { try { await sendWebhook('teste', {from: 'Ampliação Studio', at: new Date().toISOString()}); toast('Webhook enviado.'); } catch (e) { toast('Webhook: ' + e.message); } }
+
+</script>
+<script>
+/* Escolha da IA: provedor e nível (modelo) para texto e imagem. A lista vem do servidor (api/models.php → status.php → catalog). */
+function aiPrefs() { return state.aiPrefs || (state.aiPrefs = normalizeAiPrefs()); }
+const aiCatalog = () => (typeof API !== 'undefined' && API.status && API.status.catalog) || null;
+function aiPrefSet(k, v) { const P = aiPrefs(); P[k] = String(v || '').replace(/[^\w.:\/-]/g, '').slice(0, 80); if (k === 'textProvider') P.textModel = ''; if (k === 'imgProvider') P.imgModel = ''; persist(); aiPickersRefresh(); }
+function aiPickerHtml(kind, compact) {
+  const C = aiCatalog(), P = aiPrefs(); if (!C) return `<p class="muted" style="font-size:12px;margin:0">${compact ? '' : 'A escolha de IA aparece quando o Studio está conectado ao servidor (com as chaves configuradas).'}</p>`;
+  const img = kind === 'image', grp = img ? C.image : C.text, ok = grp.providers.filter(p => p.configured), cur = (img ? P.imgProvider : P.textProvider) || grp.default, pv = ok.find(p => p.id === cur) || ok[0];
+  if (!pv) return `<p class="muted" style="font-size:12px;margin:0">${img ? 'Imagem' : 'Texto'}: nenhuma chave configurada no servidor.</p>`;
+  const mdl = (img ? P.imgModel : P.textModel) || pv.default, sel = (id, opts, val, on, lab) => `<label class="ai-pk"><span>${lab}</span><select id="${id}" onchange="${on}">${opts}</select></label>`;
+  const pOpts = ok.map(p => `<option value="${p.id}" ${p.id === pv.id ? 'selected' : ''}>${esc(p.name)}</option>`).join(''), mOpts = pv.models.map(m => `<option value="${esc(m.id)}" ${m.id === mdl ? 'selected' : ''}>${esc(m.name)}</option>`).join('');
+  return `<div class="ai-pkrow"><b class="ai-pkt">${img ? '🖼 Imagem' : '✍ Texto e Mesa'}</b>${ok.length > 1 ? sel('', pOpts, '', `aiPrefSet('${img ? 'imgProvider' : 'textProvider'}',this.value)`, 'IA') : `<span class="ai-pk"><span>IA</span><b>${esc(pv.name)}</b></span>`}${sel('', mOpts, '', `aiPrefSet('${img ? 'imgModel' : 'textModel'}',this.value)`, 'Nível / modelo')}${img && pv.id === 'openai' ? sel('', ['low', 'medium', 'high'].map(q => `<option value="${q}" ${P.imgQuality === q ? 'selected' : ''}>${{low: 'Rascunho (barato)', medium: 'Média', high: 'Alta (cara)'}[q]}</option>`).join(''), '', `aiPrefSet('imgQuality',this.value)`, 'Qualidade') : ''}</div>${compact ? '' : (img && pv.id === 'magnific' ? '<small class="muted">Magnific: integração ainda não validada com chave real; se falhar, use GPT Image.</small>' : '')}`;
+}
+function aiPickersRefresh() { document.querySelectorAll('.ai-pickbox').forEach(b => { b.innerHTML = aiPickerHtml(b.dataset.kind, b.dataset.compact === '1'); }); }
 
 </script>
 <script>
@@ -1996,7 +2020,8 @@ function renderSettings() {
     <div class="field full"><label>URL de captura de leads (usada nas landing pages exportadas)</label><input id="leadsUrl" placeholder="https://seusite.com/api/leads.php?token=...&project=ID" value="${esc(state.workspace.leadsUrl || '')}"></div></div>
     <div style="margin-top:15px"><button class="btn dark" onclick="saveSettings()">Salvar configurações</button></div></div>
   <div class="panel" style="margin-top:14px"><h3>Seus dados</h3><p class="muted">Tudo é salvo neste navegador. Exporte regularmente ou ative a sincronização com o servidor.</p><div class="actions" style="flex-wrap:wrap"><button class="btn" onclick="exportWorkspace()">⬇ Exportar workspace</button><button class="btn dark" onclick="pkgOpen()" title="Projeto ou peças, com imagens e fontes">📦 Salvar pacote</button><button class="btn" onclick="$('importFile').click()">📂 Abrir pacote</button><button class="btn" onclick="exportProject()">⬇ Exportar projeto atual (só dados)</button><button class="btn" onclick="$('importFile').click()">⬆ Importar JSON</button><button class="btn" onclick="resetWorkspace()">Reiniciar exemplo</button></div></div>
-  <div id="integracoesRoot" style="margin-top:22px"></div>`; renderIntegracoes();
+  <div class="panel" style="margin-top:14px"><h3>Escolha da IA</h3><p class="muted">Escolha qual IA e qual nível usar. Modelos mais inteligentes costumam ser mais lentos e mais caros. Vale para todo o Studio (textos, Mesa de páginas, imagens).</p><div class="ai-pickbox" data-kind="text"></div><div class="ai-pickbox" data-kind="image" style="margin-top:10px"></div></div>
+  <div id="integracoesRoot" style="margin-top:22px"></div>`; renderIntegracoes(); if (typeof aiPickersRefresh === 'function') aiPickersRefresh();
 }
 function saveSettings() { state.workspace.name = $('workspaceName').value; state.workspace.instruction = $('globalInstruction').value; state.workspace.leadsUrl = $('leadsUrl').value.trim(); persist(); toast('Configurações salvas.'); }
 
@@ -24116,7 +24141,7 @@ async function mzFromHtml(html, name) {
 const MZ_AI_EX = ['Criar uma seção de perguntas frequentes', 'Trocar o fundo para escuro', 'Colocar em duas colunas', 'Melhorar a hierarquia da página', 'Deixar a página com alta conversão', 'Centralizar o texto'];
 function mzAiToggle() {
   const b = document.getElementById('mzAiBar'); if (!b) return; if (b.style.display !== 'none') { b.style.display = 'none'; return; } b.style.display = 'flex';
-  b.innerHTML = `<div class="mz-ai"><div class="mz-ai-h"><b>✨ IA da mesa</b><span>trabalhando em: <b>${esc(mzPg().name)}</b>${MZ.sel ? ' · selecionado: ' + esc((mzSelNode() || {}).name || MZ_NAMES[(mzSelNode() || {}).type] || '') : ''}</span><button onclick="mzAiToggle()">×</button></div><div class="mz-ai-r"><input id="mzAiIn" placeholder="Ex.: criar uma seção de depoimentos, trocar o fundo para escuro…" onkeydown="if(event.key==='Enter')mzAiRun()"><button class="btn dark" onclick="mzAiRun()">↑</button></div><div class="mz-ai-ex">${MZ_AI_EX.map(t => `<button onclick="document.getElementById('mzAiIn').value='${t}';mzAiRun()">${t}</button>`).join('')}</div><div id="mzAiOut" class="mz-ai-o"></div></div>`; setTimeout(() => { const i = document.getElementById('mzAiIn'); if (i) i.focus(); }, 30);
+  b.innerHTML = `<div class="mz-ai"><div class="mz-ai-h"><b>✨ IA da mesa</b><span>trabalhando em: <b>${esc(mzPg().name)}</b>${MZ.sel ? ' · selecionado: ' + esc((mzSelNode() || {}).name || MZ_NAMES[(mzSelNode() || {}).type] || '') : ''}</span><button onclick="mzAiToggle()">×</button></div><div class="mz-ai-r"><input id="mzAiIn" placeholder="Ex.: criar uma seção de depoimentos, trocar o fundo para escuro…" onkeydown="if(event.key==='Enter')mzAiRun()"><button class="btn dark" onclick="mzAiRun()">↑</button></div><div class="mz-ai-ex">${MZ_AI_EX.map(t => `<button onclick="document.getElementById('mzAiIn').value='${t}';mzAiRun()">${t}</button>`).join('')}</div><div class="ai-pickbox" data-kind="text" data-compact="1" style="margin-top:6px"></div><div id="mzAiOut" class="mz-ai-o"></div></div>`; if (typeof aiPickersRefresh === 'function') aiPickersRefresh(); setTimeout(() => { const i = document.getElementById('mzAiIn'); if (i) i.focus(); }, 30);
 }
 const mzAiSay = t => { const o = document.getElementById('mzAiOut'); if (o) o.textContent = t; };
 const MZ_BLK_KW = [[/faq|pergunta|d[uú]vida/, 'faq'], [/depoimento|prova social|avalia/, 'testimonials'], [/formul|contato|lead|captura/, 'lead'], [/passo|como funciona|etapa/, 'steps'], [/plano|pre[cç]o/, 'pricing'], [/oferta/, 'offer'], [/rodap/, 'footer'], [/cabe[cç]alho|menu|topo/, 'header'], [/sobre|quem somos/, 'about'], [/hero|principal|capa/, 'hero'], [/benef[ií]cio|vantagem|diferencia/, 'benefits'], [/problema|solu[cç][aã]o|dor/, 'problem'], [/logo|selo|parceiro/, 'logos'], [/chamada final|cta|convite/, 'cta']];
@@ -24383,25 +24408,68 @@ function mzPhotoStyle(id) { const n = mzSelNode(); if (!n) return; const x = (ty
 function mzImgSources(n) {
   if (!mzIsImg(n)) return '';
   const stock = typeof stockReady === 'function' && stockReady(), ai = typeof imageReady === 'function' && imageReady();
-  return `<div class="row-gap" style="flex-wrap:wrap;margin:6px 0"><button class="btn sm" onclick="mzChooseImg('imgId')">📚 Biblioteca</button><button class="btn sm" onclick="mzUploadInto()">⬆ Enviar</button>${stock ? '<button class="btn sm" onclick="mzStockInto()">🔎 Banco</button>' : ''}<button class="btn sm" onclick="mzGenInto()" title="${ai ? 'Gerar com IA' : 'Requer a chave de imagem no servidor'}">✨ Gerar</button></div>`;
+  return `<div class="row-gap" style="flex-wrap:wrap;margin:6px 0"><button class="btn sm" onclick="mzChooseImg('imgId')">📚 Biblioteca</button><button class="btn sm" onclick="mzUploadInto()">⬆ Enviar</button>${stock ? '<button class="btn sm" onclick="mzStockInto()">🔎 Banco</button>' : ''}<button class="btn sm dark" onclick="mzGenInto()" title="${ai ? 'Criar a imagem com IA' : 'Requer a chave de imagem no servidor (dá para copiar o prompt)'}">✨ Gerar com IA</button>${n.props.imgId ? '<button class="btn sm" onclick="mzGenInto({vary:1})" title="Usa a imagem atual como referência">↻ Variar com IA</button>' : ''}</div>`;
 }
 function mzUploadInto() { const n = mzSelNode(); const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/png,image/jpeg,image/webp,image/svg+xml'; i.onchange = async () => { const f = i.files[0]; if (!f || !n) return; try { const r = await libAddBlob(f, {name: f.name.replace(/\.[^.]+$/, '')}); const id = r && (r.imgId || r.id || r); n.props.imgId = typeof id === 'string' ? id : (id && id.imgId) || n.props.imgId; mzCommit({panels: true}); } catch (e) { toast(e.message); } }; i.click(); }
 function mzStockInto() { const n = mzSelNode(); stockPick(r => { if (!n) return; n.props.imgId = r.id; mzCommit({panels: true}); }); }
-function mzGenInto() {
-  const n = mzSelNode(); if (!n) return; if (!imageReady()) { toast(needsLogin() ? 'Entre no Studio para gerar imagens.' : 'Geração de imagem indisponível: configure a chave de imagem em api/config.php no servidor.'); return; }
-  const c = mzCtx(MZ.p), base = [c.name ? 'imagem para o site de ' + c.name : 'imagem profissional para site', 'sem texto, sem logotipo, sem marca d’água'].join('. ');
-  showModal('✨ Gerar imagem com IA', `<div class="field"><label>O que a imagem deve mostrar</label><textarea id="mzGenP" rows="4">${esc(base)}</textarea></div><label class="mz-f"><span>Qualidade</span><select id="mzGenQ"><option value="low">Rascunho (mais barata)</option><option value="medium" selected>Média</option><option value="high">Alta (mais cara)</option></select></label><small class="muted block">Consome créditos da sua conta de imagem.</small><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" id="mzGenGo" onclick="mzGenRun('${n.id}')">Gerar</button></div>`);
-}
-async function mzGenRun(id) {
-  const f = mzFind(mzRoot(), id), btn = document.getElementById('mzGenGo'), prompt = (document.getElementById('mzGenP') || {}).value || ''; if (!f || !prompt.trim()) return; btn.disabled = true; btn.textContent = 'Gerando…';
-  try { const blob = await generateImage({prompt: prompt.trim(), size: 'landscape', quality: document.getElementById('mzGenQ').value, refs: []}), imgId = uid('img'); await imgPut(imgId, blob); f.node.props.imgId = imgId; closeModal(); mzCommit({panels: true}); toast('Imagem gerada e aplicada.'); } catch (e) { btn.disabled = false; btn.textContent = 'Gerar'; toast(e.message); }
-}
-
 /* ---------- ligação aos painéis ---------- */
 const mzTabStyleBase = window.mzTabStyle, mzTabLayoutBase = window.mzTabLayout, mzTabContentBase = window.mzTabContent;
 window.mzTabContent = function (n) { return mzTabContentBase(n) + (mzIsImg(n) ? `<div class="mz-sec"><h5>Trocar imagem</h5>${mzImgSources(n)}</div>` : ''); };
 window.mzTabStyle = function (n) { return mzTabStyleBase(n) + (mzIsImg(n) ? mzSecImage(n) : '') + (mzIsTexty(n) ? mzSecText(n) : '') + mzSecShape(n) + mzSecGrad(n) + mzSecAppear(n); };
 window.mzTabLayout = function (n) { const f = mzFind(mzRoot(), n.id); return mzAutoSec(n) + mzSizeSec(n, f && f.parent) + mzTabLayoutBase(n); };
+
+</script>
+<script>
+/* Mesa de páginas — imagem com IA: descrever (digitando, falando ou colando), usar imagens de referência, escolher a IA e o nível */
+const MZGEN = {id: '', refs: [], results: [], busy: false, mode: 'new', size: 'auto', useCur: false, rec: null};
+function mzGenInto(opts) {
+  const n = mzSelNode(); if (!n) { toast('Selecione uma imagem.'); return; } opts = opts || {}; Object.assign(MZGEN, {id: n.id, refs: [], results: [], busy: false, mode: opts.vary ? 'ref' : 'new', size: 'auto', useCur: !!(opts.vary && n.props.imgId)});
+  const c = mzCtx(MZ.p), base = n.props.alt || [c.name ? 'imagem para o site de ' + c.name : '', 'sem texto, sem logotipo, sem marca d’água'].filter(Boolean).join('. ');
+  showModal('✨ Imagem com IA', `<div class="field"><label>Descreva a imagem (digite, fale ou cole um prompt)</label><textarea id="mzGenP" rows="4" placeholder="Ex.: mulher sorrindo usando o notebook em uma cozinha clara, luz natural">${esc(base)}</textarea>
+    <div class="row-gap" style="flex-wrap:wrap;margin-top:6px"><button class="btn sm" id="mzGenMic" onclick="mzGenDictate()">🎤 Falar</button><button class="btn sm" onclick="mzGenImprove()" title="A IA reescreve como um bom prompt de imagem">✨ Melhorar prompt</button><button class="btn sm" onclick="mzGenCopy()">📋 Copiar prompt</button><button class="btn sm" onclick="mzGenPaste()">📥 Colar</button></div></div>
+    <div class="field"><label>Imagens de referência <small class="muted">(até 4 — a IA usa como base: produto, pessoa, estilo)</small></label><div id="mzGenRefs"></div>
+      <div class="row-gap" style="flex-wrap:wrap;margin-top:6px">${n.props.imgId ? '<label class="mz-ck" style="margin:0"><input type="checkbox" id="mzGenCur" ' + (MZGEN.useCur ? 'checked' : '') + ' onchange="MZGEN.useCur=this.checked"> Usar a imagem atual como referência</label>' : ''}<button class="btn sm" onclick="mzGenRefLib()">📚 Biblioteca</button><button class="btn sm" onclick="mzGenRefUp()">⬆ Enviar</button></div></div>
+    <div class="two"><label class="mz-f"><span>Proporção</span><select onchange="MZGEN.size=this.value">${[['auto', 'Igual ao elemento'], ['square', 'Quadrada'], ['portrait', 'Vertical'], ['landscape', 'Horizontal']].map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></label></div>
+    <div class="ai-pickbox" data-kind="image" data-compact="1"></div>
+    <small class="muted block" id="mzGenNote"></small>
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button><button class="btn dark" id="mzGenGo" onclick="mzGenRun()">✨ Gerar imagem</button></div>
+    <div id="mzGenRes" class="mz-genres"></div>`);
+  aiPickersRefresh(); mzGenRefsDraw(); const nt = document.getElementById('mzGenNote'); if (nt) nt.textContent = (typeof imageReady === 'function' && imageReady()) ? 'Cada geração consome créditos da conta do provedor escolhido.' : 'A geração por IA ainda não está ligada neste servidor (chave de imagem). Você pode copiar o prompt, gerar em outro app e usar ⬆ Enviar na imagem.';
+}
+function mzGenRefsDraw() { const d = document.getElementById('mzGenRefs'); if (!d) return; d.innerHTML = MZGEN.refs.length ? MZGEN.refs.map((id, i) => `<span class="mz-ref"><img data-lib="${id}" alt=""><button onclick="MZGEN.refs.splice(${i},1);mzGenRefsDraw()" title="Tirar">×</button></span>`).join('') : '<small class="muted">Nenhuma referência: a IA cria do zero.</small>'; libFill(d); }
+function mzGenRefLib() { libPick(r => { const li = libItem(r), id = li ? li.imgId : r; if (id && MZGEN.refs.length < 4 && !MZGEN.refs.includes(id)) MZGEN.refs.push(id); mzGenRefsDraw(); }, {raw: true, title: 'Imagem de referência'}); }
+function mzGenRefUp() { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/png,image/jpeg,image/webp'; i.onchange = async () => { const f = i.files[0]; if (!f || MZGEN.refs.length >= 4) return; try { const it = await libAddBlob(f, {name: f.name.replace(/\.[^.]+$/, '')}); MZGEN.refs.push(it.imgId); mzGenRefsDraw(); } catch (e) { toast(e.message); } }; i.click(); }
+const mzGenText = () => (document.getElementById('mzGenP') || {value: ''}).value.trim();
+function mzGenCopy() { const t = mzGenText(); if (!t) { toast('Escreva o prompt primeiro.'); return; } (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Prompt copiado.'), () => { const a = document.getElementById('mzGenP'); a.select(); document.execCommand('copy'); toast('Prompt copiado.'); }); }
+function mzGenPaste() { if (!navigator.clipboard || !navigator.clipboard.readText) { toast('Seu navegador não deixa colar por aqui: use Ctrl+V no campo.'); return; } navigator.clipboard.readText().then(t => { const a = document.getElementById('mzGenP'); a.value = (a.value ? a.value + ' ' : '') + t; }, () => toast('Sem permissão para ler a área de transferência: use Ctrl+V.')); }
+function mzGenDictate() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition, b = document.getElementById('mzGenMic'); if (!SR) { toast('Ditado por voz funciona no Chrome. Digite ou cole o prompt.'); return; }
+  if (MZGEN.rec) { try { MZGEN.rec.stop(); } catch (e) { /* ok */ } return; }
+  const r = new SR(); r.lang = 'pt-BR'; r.interimResults = false; r.continuous = true; MZGEN.rec = r; b.textContent = '⏹ Parar'; const a = document.getElementById('mzGenP');
+  r.onresult = e => { for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) a.value = (a.value ? a.value.trim() + ' ' : '') + e.results[i][0].transcript.trim(); };
+  r.onend = () => { MZGEN.rec = null; const m = document.getElementById('mzGenMic'); if (m) m.textContent = '🎤 Falar'; }; r.onerror = () => { MZGEN.rec = null; const m = document.getElementById('mzGenMic'); if (m) m.textContent = '🎤 Falar'; toast('Não consegui ouvir. Verifique a permissão do microfone.'); }; r.start();
+}
+async function mzGenImprove() {
+  const t = mzGenText(); if (!t) { toast('Escreva uma ideia primeiro.'); return; } if (typeof aiReady !== 'function' || !aiReady()) { toast('A IA de texto ainda não está ligada neste servidor.'); return; }
+  const c = mzCtx(MZ.p), a = document.getElementById('mzGenP'); a.disabled = true;
+  try { const r = await aiText('Você escreve prompts para geração de imagem de publicidade. Reescreva a ideia como UM prompt claro e específico (sujeito, cenário, luz, enquadramento, estilo fotográfico, cores). Sem texto escrito na imagem, sem logotipos. Não invente fatos sobre o negócio. Responda só com o prompt, em português.', `Negócio: ${c.name || ''}. ${c.offer ? 'Oferta: ' + c.offer + '.' : ''}\nIdeia: ${t}`, 400); if (r.trim()) a.value = r.trim().replace(/^["“]|["”]$/g, ''); } catch (e) { toast(e.message); } finally { a.disabled = false; }
+}
+async function mzGenRun() {
+  const f = mzFind(mzRoot(), MZGEN.id), btn = document.getElementById('mzGenGo'), prompt = mzGenText(); if (!f) return; if (!prompt) { toast('Descreva a imagem.'); return; } if (MZGEN.busy) return;
+  if (typeof imageReady !== 'function' || !imageReady()) { toast(needsLogin() ? 'Entre no Studio para gerar imagens.' : 'Geração de imagem indisponível: configure a chave de imagem em api/config.php no servidor.'); return; }
+  MZGEN.busy = true; btn.disabled = true; btn.textContent = 'Gerando…';
+  try {
+    const ids = MZGEN.refs.slice(); if (MZGEN.useCur && f.node.props.imgId && !ids.includes(f.node.props.imgId)) ids.unshift(f.node.props.imgId); const refs = [];
+    for (const id of ids.slice(0, 4)) { const b = await imgGet(id); if (b) refs.push(await blobToDataURL(b)); }
+    const fr = MZ.frames[MZ.bp], el = fr && mzElOf(fr, f.node.id), r = el && mzRectOf(el); let size = MZGEN.size; if (size === 'auto') { const ra = r && r.height ? r.width / r.height : 1; size = ra > 1.2 ? 'landscape' : ra < .83 ? 'portrait' : 'square'; }
+    const full = refs.length ? prompt + '. Use as imagens de referência como fonte da verdade do produto/pessoa/estilo: não altere formas, cores, rótulos nem proporções do que aparece nelas.' : prompt;
+    const P = aiPrefs(), pk = document.querySelector('.ai-pickbox[data-kind=image] select'), blob = await generateImage({prompt: full, size, refs});
+    const it = await libAddBlob(blob, {name: 'IA · ' + prompt.slice(0, 40), prompt, kind: 'ai'}); MZGEN.results.unshift({id: it.imgId, via: (generateImage.last || {}).model || ''}); mzGenResDraw();
+  } catch (e) { toast(e.message); } finally { MZGEN.busy = false; btn.disabled = false; btn.textContent = '✨ Gerar outra'; }
+}
+function mzGenResDraw() { const d = document.getElementById('mzGenRes'); if (!d) return; d.innerHTML = MZGEN.results.map(r => `<div class="mz-genr"><img data-lib="${r.id}" alt=""><div class="row-gap"><button class="btn sm dark" onclick="mzGenUse('${r.id}')">Usar aqui</button><button class="btn sm" onclick="mzGenAsRef('${r.id}')" title="Usar como referência para gerar outra">↻ Variar</button></div><small class="muted">${esc(r.via)}</small></div>`).join(''); libFill(d); }
+function mzGenUse(id) { const f = mzFind(mzRoot(), MZGEN.id); if (!f) return; f.node.props.imgId = id; closeModal(); mzCommit({panels: true}); toast('Imagem aplicada. Ela também ficou na sua Biblioteca.'); }
+function mzGenAsRef(id) { if (MZGEN.refs.length < 4 && !MZGEN.refs.includes(id)) MZGEN.refs.push(id); mzGenRefsDraw(); toast('Adicionada como referência: ajuste o prompt e gere de novo.'); }
 
 </script>
 <script>

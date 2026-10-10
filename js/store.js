@@ -344,13 +344,15 @@ function normalizeEbooks(x) {
     sections: (Array.isArray(e.sections) ? e.sections : []).filter(s => s && safeId(s.id)).slice(0, 300).map(s => ({id: s.id, type: STYPES.includes(s.type) ? s.type : 'text', label: str(s.label, 80), title: str(s.title, 300), subtitle: str(s.subtitle, 400), opener: !!s.opener, inToc: s.inToc !== false,
       blocks: (Array.isArray(s.blocks) ? s.blocks : []).filter(b => b && safeId(b.id) && TYPES.includes(b.t)).slice(0, 400).map(b => ({id: b.id, t: b.t, text: str(b.text, 20000), drop: !!b.drop, kind: KINDS.includes(b.kind) ? b.kind : 'tip', title: str(b.title, 200), leftTitle: str(b.leftTitle, 120), rightTitle: str(b.rightTitle, 120), left: lines(b.left), right: lines(b.right), items: lines(b.items), ordered: !!b.ordered}))}))}));
 }
+/* escolhas de IA da usuária (provedor/modelo de texto e de imagem); o servidor só aceita modelos da lista dele */
+function normalizeAiPrefs(x) { x = x && typeof x === 'object' ? x : {}; const t = (v, n) => String(v == null ? '' : v).replace(/[^\w.:\/-]/g, '').slice(0, n || 80); return {textProvider: ['anthropic', 'openai'].includes(x.textProvider) ? x.textProvider : '', textModel: t(x.textModel), imgProvider: ['openai', 'magnific'].includes(x.imgProvider) ? x.imgProvider : '', imgModel: t(x.imgModel), imgQuality: ['low', 'medium', 'high'].includes(x.imgQuality) ? x.imgQuality : 'medium'}; }
 function normalize(s) {
   const base = seedState();
   if (!s || typeof s !== 'object' || !Array.isArray(s.projects)) return base;
   s.schema = SCHEMA;
   s.meta = mergeDefaults(s.meta, base.meta);
   s.workspace = mergeDefaults(s.workspace, base.workspace);
-  s.credits = Number.isFinite(+s.credits) ? +s.credits : 30;
+  s.credits = Number.isFinite(+s.credits) ? +s.credits : 30; s.aiPrefs = normalizeAiPrefs(s.aiPrefs);
   s.inspo = normalizeInspo(s.inspo);
   s.imglib = normalizeImglib(s.imglib); s.tplbank = normalizeTplbank(s.tplbank); s.lpRefs = normalizeLpRefs(s.lpRefs); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills); s.mesaLib = typeof normalizeMesaLib === 'function' ? normalizeMesaLib(s.mesaLib) : (s.mesaLib || {items: []});
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });

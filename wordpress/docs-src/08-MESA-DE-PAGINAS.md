@@ -37,6 +37,12 @@ A Mesa é o editor visual de sites do Studio. Você monta a página arrastando, 
 - **Gradiente rápido** (cores do projeto) e gradiente livre.
 - **Imagem:** tratamentos de foto do Estúdio (30 estilos), brilho, contraste, saturação, preto e branco, sépia, desfoque, cor por cima com mistura; trocar por Biblioteca, envio, Banco de imagens ou ✨ gerar com IA.
 
+## Imagem com IA e escolha da IA
+- Selecione uma imagem → **✨ Gerar com IA**. Descreva digitando, **falando (🎤 no Chrome)** ou colando um prompt. **✨ Melhorar prompt** reescreve a ideia; **📋 Copiar prompt** serve para gerar em outro app (depois use ⬆ Enviar).
+- **Referências:** até 4 imagens (ou a atual) para a IA manter produto/pessoa/estilo. **↻ Variar com IA** parte da imagem atual.
+- **Qual IA e qual nível:** em *Configurações → Escolha da IA* (e dentro do modal) você escolhe Claude ou GPT para texto e o modelo (mais rápido e barato × mais inteligente e caro), e GPT Image ou Magnific para imagem. O que aparece depende das chaves configuradas no servidor.
+- Observação: o Magnific ainda não foi testado com chave real.
+
 ## Exportar e importar
 - HTML, CSS, ZIP (página + imagens), JSON da Mesa.
 - **Elementor:** gera widgets do Elementor **grátis** (nada do Pro). Em Elementor → Modelos → Importar. O que o Elementor grátis não tem fica como CSS extra (arquivo `mesa-css-extra.css`).

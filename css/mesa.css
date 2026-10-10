@@ -72,3 +72,7 @@ body.mz-lock{overflow:hidden}
 .mz-fxgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px}.mz-fxgrid button{border:1px solid #cfd0d6;background:#fff;border-radius:7px;padding:6px 2px;font-size:11.5px;cursor:pointer;font-weight:600}.mz-fxgrid button:hover{background:#f3f3f6}
 .mz-pre{display:flex;gap:6px;margin-bottom:8px}.mz-pre button{width:38px;height:26px;border-radius:6px;border:1px solid #ccc;cursor:pointer}
 .mz-tabs button{font-size:10.8px!important;padding:10px 0!important;letter-spacing:-.1px}
+.mz-ref{position:relative;display:inline-block;margin:0 6px 6px 0}.mz-ref img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #ccc}.mz-ref button{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:0;background:#111;color:#fff;cursor:pointer;line-height:1}
+.mz-genres{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}.mz-genr{border:1px solid #dcdde3;border-radius:10px;padding:6px}.mz-genr img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}
+.modal-back{z-index:9900!important}
+.toast{z-index:9950!important}
