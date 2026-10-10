@@ -1,7 +1,7 @@
 /* ===== Mesa de edição · motor do canvas =====
    Estado global MZ, quadros (iframes por breakpoint), sobreposição de seleção, seleção, arrastar (mover, inserir), redimensionar,
    guias, edição de texto no lugar e histórico (desfazer/refazer). Eventos por ponteiro, não por drag-and-drop HTML5. */
-const MZ = {open: false, p: null, sel: '', hover: '', bp: 'd', view: 'one', zoom: 0, fit: true, tab: 'content', left: 'elements', q: '', comp: '', hist: [], hi: -1, clip: null, frames: {}, imgs: new Map(), drag: null, editing: null, lastSnap: 0, saveT: 0, dirty: false, guides: true, rulers: true, cols: {}};
+const MZ = {open: false, p: null, sel: '', hover: '', bp: 'd', view: 'one', zoom: 0, fit: true, tab: 'content', left: 'elements', q: '', comp: '', hist: [], hi: -1, clip: null, frames: {}, imgs: new Map(), drag: null, editing: null, lastSnap: 0, saveT: 0, dirty: false, guides: true, rulers: true, cols: {}, free: true, draw: {on: false, tool: 'pen', color: '#111111', size: 4}};
 const mzM = () => MZ.p.mesa;
 const mzPg = () => mzPage(mzM());
 const mzRoot = () => MZ.comp ? (mzM().comps.find(c => c.id === MZ.comp) || {}).root || mzPg().root : mzPg().root;
@@ -33,7 +33,7 @@ function mzTouch() { MZ.dirty = true; mzM().rev++; clearTimeout(MZ.saveT); MZ.sa
 const MZ_ED_CSS = `html{overflow:hidden}body{margin:0;min-height:100vh;cursor:default;-webkit-user-select:none;user-select:none}[contenteditable]{-webkit-user-select:text;user-select:text;outline:none}
 [data-type=section]:empty,[data-type=container]:empty,[data-type=column]:empty,[data-type=div]:empty,[data-type=form]:empty,[data-type=link]:empty,.mz-in:empty{min-height:64px;outline:1px dashed rgba(110,110,170,.55);outline-offset:-1px;position:relative}
 [data-type=section]:empty::after,[data-type=container]:empty::after,[data-type=column]:empty::after,[data-type=div]:empty::after,[data-type=form]:empty::after,.mz-in:empty::after{content:"Solte um elemento aqui";position:absolute;inset:0;display:grid;place-items:center;font:12px system-ui;color:#8888a8;pointer-events:none}
-#mzOv{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:2147483000;--u:1;font-family:system-ui,sans-serif}#mzOv *{pointer-events:none;box-sizing:border-box}
+body.mz-drawing,body.mz-drawing *{cursor:crosshair!important}#mzOv{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:2147483000;--u:1;font-family:system-ui,sans-serif}#mzOv *{pointer-events:none;box-sizing:border-box}
 .ov-box{position:absolute;border:calc(2px*var(--u)) solid #2f6bff}.ov-hover{position:absolute;border:calc(1.5px*var(--u)) solid rgba(47,107,255,.55)}.ov-par{position:absolute;border:calc(1px*var(--u)) dashed rgba(47,107,255,.6)}
 .ov-lab{position:absolute;background:#2f6bff;color:#fff;font:700 calc(11px*var(--u))/1 system-ui;padding:calc(4px*var(--u)) calc(7px*var(--u));border-radius:calc(4px*var(--u)) calc(4px*var(--u)) 0 0;white-space:nowrap;transform-origin:0 100%}
 .ov-dim{position:absolute;background:#2f6bff;color:#fff;font:600 calc(10px*var(--u))/1 system-ui;padding:calc(3px*var(--u)) calc(6px*var(--u));border-radius:calc(4px*var(--u));white-space:nowrap}
@@ -50,7 +50,7 @@ function mzBuildFrames() {
     const wrap = document.createElement('div'); wrap.className = 'mz-fr' + (bp === MZ.bp ? ' on' : ''); wrap.dataset.bp = bp;
     wrap.innerHTML = `<div class="mz-fr-h"><b>${MZ_BPN[bp]}</b> <span>${MZ_BP[bp]} px</span></div><div class="mz-fr-w"><iframe title="${MZ_BPN[bp]}" scrolling="no"></iframe></div>`;
     cv.appendChild(wrap); const ifr = wrap.querySelector('iframe'), fr = {bp, wrap, ifr, doc: null, ready: false}; MZ.frames[bp] = fr;
-    ifr.addEventListener('load', () => { fr.doc = ifr.contentDocument; fr.ready = true; mzBindFrame(fr); mzRender(); });
+    ifr.addEventListener('load', () => { fr.doc = ifr.contentDocument; fr.ready = true; mzBindFrame(fr); if (MZ.draw.on) fr.doc.body.classList.add('mz-drawing'); mzRender(); });
     ifr.srcdoc = mzFrameHtml(bp);
     wrap.querySelector('.mz-fr-h').addEventListener('pointerdown', () => { if (MZ.bp !== bp) mzSetBp(bp); });
   });
@@ -120,7 +120,7 @@ function mzHoverSet(id) { if (MZ.hover === id) return; MZ.hover = id; mzOverlayA
 
 /* ---------- eventos do quadro ---------- */
 function mzBindFrame(fr) {
-  const d = fr.doc, win = d.defaultView;
+  const d = fr.doc, win = d.defaultView; d.addEventListener('pointerdown', e => { if (MZ.draw && MZ.draw.on && e.button === 0) { e.preventDefault(); e.stopImmediatePropagation(); mzDrawStart(fr, e); } }, true);
   d.addEventListener('pointermove', e => { if (MZ.drag || MZ.editing) return; const t = mzNodeAt(fr, e.clientX, e.clientY); mzHoverSet(t ? t.dataset.n : ''); });
   d.addEventListener('pointerleave', () => { if (!MZ.drag) mzHoverSet(''); });
   d.addEventListener('pointerdown', e => {
@@ -173,7 +173,8 @@ function mzDropDraw(fr, drop) {
 }
 function mzDragMove(fr, x, y, e) {
   const dr = MZ.drag; if (!dr) return; if (!dr.on) { if (Math.hypot(x - dr.x0, y - dr.y0) < 5) return; dr.on = true; fr.dragging = true; mzGhost(true, dr.label || 'Mover'); }
-  const f = mzFind(mzRoot(), dr.id); if (dr.kind === 'move' && f) { const st = mzStyleAt(f.node, MZ.bp); if (st.position === 'absolute' || st.position === 'fixed') { dr.free = true; const dx = (x - dr.x0), dy = (y - dr.y0); if (!dr.base) dr.base = {l: parseFloat(st.left) || 0, t: parseFloat(st.top) || 0}; const o = mzStyleSet(f.node, MZ.bp); o.left = Math.round(dr.base.l + dx) + 'px'; o.top = Math.round(dr.base.t + dy) + 'px'; mzRenderNow(); return; } }
+  const f = mzFind(mzRoot(), dr.id); if (dr.kind === 'move' && f && !dr.freed) { dr.freed = true; if (MZ.free !== !!(e && e.altKey)) mzFreeConvert(fr, dr, f); }
+  if (dr.kind === 'move' && f) { const st = mzStyleAt(f.node, MZ.bp); if (st.position === 'absolute' || st.position === 'fixed') { dr.free = true; const dx = (x - dr.x0), dy = (y - dr.y0); if (!dr.base) dr.base = {l: parseFloat(st.left) || 0, t: parseFloat(st.top) || 0}; const o = mzStyleSet(f.node, MZ.bp); o.left = Math.round(dr.base.l + dx) + 'px'; o.top = Math.round(dr.base.t + dy) + 'px'; mzRenderNow(); return; } }
   const item = dr.kind === 'move' ? f.node : {type: dr.type, id: ''}; dr.drop = mzDropAt(fr, x, y, item); mzDropDraw(fr, dr.drop);
 }
 function mzDragEnd(fr, x, y, e) {
@@ -248,7 +249,7 @@ function mzKey(e) {
   if (mod && k.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? mzRedo() : mzUndo(); return; } if (mod && k.toLowerCase() === 'y') { e.preventDefault(); mzRedo(); return; }
   if (mod && k.toLowerCase() === 'c') { e.preventDefault(); mzCopy(); return; } if (mod && k.toLowerCase() === 'x') { e.preventDefault(); mzCopy(); mzDelete(); return; } if (mod && k.toLowerCase() === 'v') { e.preventDefault(); mzPaste(); return; }
   if (mod && k.toLowerCase() === 'd') { e.preventDefault(); mzDup(); return; } if (mod && k.toLowerCase() === 'g') { e.preventDefault(); e.shiftKey ? mzUngroup() : mzGroup(); return; } if (mod && k.toLowerCase() === 's') { e.preventDefault(); persist(); toast('Salvo.'); return; }
-  if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); mzDelete(); return; } if (k === 'Escape') { if (MZ.sel) mzSelect(''); else mzClose(); return; }
+  if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); mzDelete(); return; } if (k === 'Escape') { if (MZ.draw && MZ.draw.on) { mzDrawToggle(false); return; } if (MZ.sel) mzSelect(''); else mzClose(); return; }
   if (k === 'Enter' && MZ.sel) { const fr = MZ.frames[MZ.bp]; if (fr) mzStartEdit(fr, MZ.sel); return; }
   if (k === '[') { mzMoveStep(-1); return; } if (k === ']') { mzMoveStep(1); return; }
   if (/^Arrow/.test(k) && MZ.sel) { const n = mzSelNode(); if (!n) return; const st = mzStyleAt(n, MZ.bp); if (st.position === 'absolute') { e.preventDefault(); const s = e.shiftKey ? 10 : 1, o = mzStyleSet(n, MZ.bp); if (k === 'ArrowLeft') o.left = ((parseFloat(st.left) || 0) - s) + 'px'; if (k === 'ArrowRight') o.left = ((parseFloat(st.left) || 0) + s) + 'px'; if (k === 'ArrowUp') o.top = ((parseFloat(st.top) || 0) - s) + 'px'; if (k === 'ArrowDown') o.top = ((parseFloat(st.top) || 0) + s) + 'px'; mzCommit({panels: true}); } else if (k === 'ArrowUp') { e.preventDefault(); mzMoveStep(-1); } else if (k === 'ArrowDown') { e.preventDefault(); mzMoveStep(1); } }

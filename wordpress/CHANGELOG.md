@@ -5,6 +5,8 @@
 - 3 telas lado a lado (Desktop 1440, Tablet 768, Mobile 390): o que você muda numa tela vale só para ela; réguas, guias, encaixe, desfazer/refazer, várias páginas, autosave e versões (restaurar, duplicar, comparar, aprovada).
 - Design System do projeto (cores, tipografia, espaçamento, raios, sombras), componentes globais, biblioteca própria, 15 blocos e 4 modelos prontos que usam briefing, ICP, oferta, logo, cores e fontes do projeto. Comandos ✨ de IA.
 - Exporta JSON, HTML, CSS, ZIP e **Elementor (somente widgets gratuitos)**; importa Elementor, HTML e JSON da Mesa.
+- **Modo livre (como no Canva):** arraste qualquer elemento para onde quiser (ele sai do fluxo e fica solto); Alt+arrastar reordena no layout; botão ✋ Livre liga/desliga. Setas movem 1 px (Shift = 10 px).
+- **Desenhar (✏️):** caneta, pincel, marca-texto e borracha, 8 cores + cor livre, tamanho ajustável; o desenho vira uma camada da página, sai no HTML/CSS exportado (SVG) e entra no Elementor como bloco HTML. Desfazer/refazer guardam 80 passos.
 - Módulo isolado: Landings antigas continuam como estavam.
 
 ## 1.5.0

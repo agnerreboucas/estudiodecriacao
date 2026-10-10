@@ -16,6 +16,11 @@ A Mesa é o editor visual de sites do Studio. Você monta a página arrastando, 
 6. **Versões**: salvas automaticamente; restaure, compare ou marque a aprovada.
 7. Botão ✨: peça em texto (ex.: "fundo escuro", "3 colunas", "mais conversão").
 
+## Mover livre e desenhar
+- **✋ Livre** (ligado por padrão): arraste qualquer elemento e solte onde quiser, como no Canva. Segure **Alt** ao arrastar para reordenar dentro do layout. Para devolver ao fluxo, em Layout → Posição escolha "Normal".
+- **✏️ Desenhar:** caneta, pincel, marca-texto e borracha, com cores e tamanho. O desenho fica numa camada "Desenho" (aparece em Camadas) por cima da página. Esc ou ✓ Concluir sai do modo.
+- **Desfazer/refazer:** Ctrl+Z / Ctrl+Y (ou os botões ↶ ↷), até 80 passos.
+
 ## Exportar e importar
 - HTML, CSS, ZIP (página + imagens), JSON da Mesa.
 - **Elementor:** gera widgets do Elementor **grátis** (nada do Pro). Em Elementor → Modelos → Importar. O que o Elementor grátis não tem fica como CSS extra (arquivo `mesa-css-extra.css`).

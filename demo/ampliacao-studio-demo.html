@@ -947,6 +947,11 @@ body.mz-lock{overflow:hidden}
 @media(max-width:1100px){.mz-body{grid-template-columns:240px 1fr 260px}.mz-launch{grid-template-columns:1fr}}
 
 .mz-shield{position:fixed;inset:0;z-index:9997;background:transparent;touch-action:none}
+.mz-drawbar{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #cfd0d6;border-radius:12px;padding:6px 10px;box-shadow:0 8px 24px rgba(0,0,0,.18);flex-wrap:wrap;max-width:94%}
+.mz-drawbar button{border:1px solid #dcdde3;background:#fff;border-radius:8px;padding:5px 9px;cursor:pointer;font-weight:600;font-size:12px}.mz-drawbar button.on{background:#111;color:#fff;border-color:#111}.mz-drawbar button.ok{background:#2f6bff;color:#fff;border-color:#2f6bff}
+.mz-drawbar .sw{width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #bbb;cursor:pointer}.mz-drawbar .sw.on{box-shadow:0 0 0 2px #2f6bff}.mz-drawbar .sep{width:1px;height:22px;background:#dcdde3}.mz-drawbar .sz{font-size:12px;display:flex;gap:6px;align-items:center}.mz-drawbar input[type=color]{width:26px;height:26px;padding:0;border:0;background:none}
+.mz-btn-i.on{background:#111;color:#fff;border-color:#111}
+.mz-top .mz-btn-i{padding:6px 8px;font-size:12.5px}.mz-top{gap:6px}.mz-saved{min-width:0}
 
 </style>
 </head>
@@ -22806,9 +22811,9 @@ function docCard(p) {
 const MZ_BP = {d: 1440, t: 768, m: 390};
 const MZ_BPN = {d: 'Desktop', t: 'Tablet', m: 'Mobile'};
 const MZ_CONT = ['page', 'section', 'container', 'column', 'div', 'form', 'link'];
-const MZ_LEAF = ['heading', 'text', 'image', 'video', 'button', 'icon', 'svg', 'list', 'divider', 'spacer', 'input', 'checkbox', 'radio', 'menu', 'logo', 'badge', 'accordion', 'tabs', 'countdown', 'table', 'gallery', 'timeline', 'component'];
+const MZ_LEAF = ['heading', 'text', 'image', 'video', 'button', 'icon', 'svg', 'list', 'divider', 'spacer', 'input', 'checkbox', 'radio', 'menu', 'logo', 'badge', 'accordion', 'tabs', 'countdown', 'table', 'gallery', 'timeline', 'draw', 'component'];
 const MZ_TYPES = MZ_CONT.concat(MZ_LEAF);
-const MZ_NAMES = {page: 'Página', section: 'Seção', container: 'Contêiner', column: 'Coluna', div: 'Bloco', form: 'Formulário', link: 'Link', heading: 'Título', text: 'Texto', image: 'Imagem', video: 'Vídeo', button: 'Botão', icon: 'Ícone', svg: 'SVG', list: 'Lista', divider: 'Divisor', spacer: 'Espaço', input: 'Campo', checkbox: 'Caixa de seleção', radio: 'Opção', menu: 'Menu', logo: 'Logo', badge: 'Selo', accordion: 'Perguntas (acordeão)', tabs: 'Abas', countdown: 'Contagem regressiva', table: 'Tabela', gallery: 'Galeria', timeline: 'Linha do tempo', component: 'Componente'};
+const MZ_NAMES = {page: 'Página', section: 'Seção', container: 'Contêiner', column: 'Coluna', div: 'Bloco', form: 'Formulário', link: 'Link', heading: 'Título', text: 'Texto', image: 'Imagem', video: 'Vídeo', button: 'Botão', icon: 'Ícone', svg: 'SVG', draw: 'Desenho', list: 'Lista', divider: 'Divisor', spacer: 'Espaço', input: 'Campo', checkbox: 'Caixa de seleção', radio: 'Opção', menu: 'Menu', logo: 'Logo', badge: 'Selo', accordion: 'Perguntas (acordeão)', tabs: 'Abas', countdown: 'Contagem regressiva', table: 'Tabela', gallery: 'Galeria', timeline: 'Linha do tempo', component: 'Componente'};
 const MZ_PROPS = ('display flexDirection flexWrap justifyContent alignItems alignContent alignSelf flex flexGrow flexShrink flexBasis order gap rowGap columnGap gridTemplateColumns gridTemplateRows gridColumn gridRow gridAutoFlow placeItems position top right bottom left zIndex width height minWidth minHeight maxWidth maxHeight margin marginTop marginRight marginBottom marginLeft padding paddingTop paddingRight paddingBottom paddingLeft overflow overflowX overflowY color background backgroundColor backgroundImage backgroundSize backgroundPosition backgroundRepeat border borderTop borderRight borderBottom borderLeft borderWidth borderStyle borderColor borderRadius boxShadow opacity filter backdropFilter transform transition fontFamily fontSize fontWeight fontStyle lineHeight letterSpacing textAlign textTransform textDecoration whiteSpace objectFit objectPosition aspectRatio cursor mixBlendMode textShadow listStyle verticalAlign wordBreak').split(' ');
 const MZ_PROPSET = new Set(MZ_PROPS);
 const MZ_INNER = new Set(['display', 'flexDirection', 'flexWrap', 'justifyContent', 'alignItems', 'alignContent', 'gap', 'rowGap', 'columnGap', 'gridTemplateColumns', 'gridTemplateRows', 'gridAutoFlow', 'placeItems']);
@@ -22907,6 +22912,9 @@ function mzNormProps(type, p) {
   else if (type === 'checkbox' || type === 'radio') { o.name = /^[\w-]{1,40}$/.test(p.name || '') ? p.name : 'opcao'; o.label = S(p.label, 300); o.value = S(p.value, 80) || 'sim'; o.required = !!p.required; }
   else if (type === 'menu') o.items = items(p.items, t => t && S(t.label, 60) ? {label: S(t.label, 60), href: MZ_URL(t.href) || '#'} : null, 20);
   else if (type === 'badge') o.text = S(p.text, 80);
+  else if (type === 'draw') { o.w = Math.max(100, Math.min(4000, Math.round(+p.w) || 1440)); o.h = Math.max(100, Math.min(20000, Math.round(+p.h) || 800));
+    o.strokes = (Array.isArray(p.strokes) ? p.strokes : []).slice(0, 500).map(k => { if (!k || typeof k !== 'object') return null; const pts = (Array.isArray(k.pts) ? k.pts : []).slice(0, 1600).map(v => Math.round((+v || 0) * 10) / 10); if (pts.length < 2) return null; if (pts.length % 2) pts.pop();
+      return {c: /^#[0-9a-fA-F]{3,8}$/.test(k.c || '') ? k.c : '#111111', w: Math.max(1, Math.min(120, +k.w || 4)), o: Math.max(.05, Math.min(1, +k.o || 1)), k: ['pen', 'marker', 'hl'].includes(k.k) ? k.k : 'pen', pts}; }).filter(Boolean); }
   else if (type === 'accordion') o.items = items(p.items, t => t && S(t.q, 300) ? {q: S(t.q, 300), a: mzRich(t.a || '')} : null, 30);
   else if (type === 'tabs') o.items = items(p.items, t => t && S(t.t, 60) ? {t: S(t.t, 60), c: mzRich(t.c || '')} : null, 10);
   else if (type === 'countdown') { o.date = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/.test(p.date || '') ? p.date : ''; o.done = S(p.done, 160); }
@@ -22959,6 +22967,8 @@ function mzVideoEmbed(u) {
   let m; if ((m = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/.exec(u))) return {iframe: `https://www.youtube-nocookie.com/embed/${m[1]}`};
   if ((m = /vimeo\.com\/(\d+)/.exec(u))) return {iframe: `https://player.vimeo.com/video/${m[1]}`}; return u ? {file: u} : null;
 }
+function mzDrawPath(pts) { if (pts.length < 4) return `M${pts[0]} ${pts[1]}l.01 .01`; let d = `M${pts[0]} ${pts[1]}`; for (let i = 2; i < pts.length - 2; i += 2) { const mx = (pts[i] + pts[i + 2]) / 2, my = (pts[i + 1] + pts[i + 3]) / 2; d += `Q${pts[i]} ${pts[i + 1]} ${Math.round(mx * 10) / 10} ${Math.round(my * 10) / 10}`; } return d + `L${pts[pts.length - 2]} ${pts[pts.length - 1]}`; }
+function mzDrawSvg(P) { return `<svg viewBox="0 0 ${P.w} ${P.h}" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">${(P.strokes || []).map(k => `<path d="${mzDrawPath(k.pts)}" fill="none" stroke="${k.c}" stroke-width="${k.w}" stroke-opacity="${k.o}" stroke-linecap="${k.k === 'hl' ? 'square' : 'round'}" stroke-linejoin="round"/>`).join('')}</svg>`; }
 /* ctx: {mode:'edit'|'out', comps, img(imgId)→url, ds} */
 function mzNodeHtml(n, ctx, root) {
   if (n.hidden) return ''; const ed = ctx.mode === 'edit', P = n.props, cls = ['mz-e', mzCls(n)], mt = mzTypoOf(n);
@@ -22983,6 +22993,7 @@ function mzNodeHtml(n, ctx, root) {
     case 'icon': return `<span class="${cls.join(' ')} mz-icon" ${at.join(' ')} style="font-size:${P.size}px">${mzIcon(P.name, '1em')}</span>`;
     case 'svg': return `<div class="${cls.join(' ')} mz-svg" ${at.join(' ')}>${P.svg || '<span class="mz-ph">SVG</span>'}</div>`;
     case 'list': { const t = P.ordered ? 'ol' : 'ul'; return `<${t} class="${cls.join(' ')} mz-list${P.icon ? ' mz-list-i' : ''}" ${at.join(' ')}>${P.items.map(i => `<li>${P.icon ? `<span class="mz-li">${mzIcon(P.icon, 18)}</span>` : ''}<span>${mzEsc(i)}</span></li>`).join('')}</${t}>`; }
+    case 'draw': return `<div class="${cls.join(' ')} mz-draw" ${at.join(' ')}>${mzDrawSvg(P)}</div>`;
     case 'divider': return `<hr class="${cls.join(' ')}" ${at.join(' ')}>`;
     case 'spacer': return `<div class="${cls.join(' ')} mz-spacer" ${at.join(' ')}></div>`;
     case 'input': { const lab = P.label ? `<span class="mz-lab">${mzEsc(P.label)}${P.required ? ' *' : ''}</span>` : ''; let f; if (P.kind === 'textarea') f = `<textarea name="${P.name}" placeholder="${mzEsc(P.placeholder)}" rows="4"${P.required ? ' required' : ''}></textarea>`; else if (P.kind === 'select') f = `<select name="${P.name}"${P.required ? ' required' : ''}>${P.options.map(o => `<option>${mzEsc(o)}</option>`).join('')}</select>`; else f = `<input type="${P.kind}" name="${P.name}" placeholder="${mzEsc(P.placeholder)}"${P.required ? ' required' : ''}>`; return `<label class="${cls.join(' ')} mz-field" ${at.join(' ')}>${lab}${f}</label>`; }
@@ -23018,7 +23029,7 @@ img{max-width:100%}.mz-img img{display:block;max-width:100%;height:auto;width:10
 h1,h2,h3,h4,h5,h6,p{margin:0}.mz-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 26px;border-radius:var(--mz-r-md);background:var(--mz-c-primary);color:#fff;text-decoration:none;cursor:pointer;border:2px solid var(--mz-c-primary);width:fit-content}
 .mz-btn-outline{background:transparent;color:var(--mz-c-primary)}.mz-btn-ghost{background:transparent;border-color:transparent;color:var(--mz-c-primary)}
 .mz-icon{display:inline-flex;line-height:1}.mz-list{margin:0;padding-left:1.2em}.mz-list-i{list-style:none;padding:0}.mz-list-i li{display:flex;gap:10px;align-items:flex-start;margin:6px 0}.mz-li{color:var(--mz-c-accent);flex:none;margin-top:3px}
-hr.mz-e{border:0;border-top:var(--mz-bw) solid var(--mz-bc);margin:0;width:100%}.mz-spacer{height:32px;width:100%}.mz-field{display:flex;flex-direction:column;gap:6px;font-size:15px}.mz-lab{font-weight:600}
+hr.mz-e{border:0;border-top:var(--mz-bw) solid var(--mz-bc);margin:0;width:100%}.mz-spacer{height:32px;width:100%}.mz-page{position:relative}.mz-draw{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:40}.mz-field{display:flex;flex-direction:column;gap:6px;font-size:15px}.mz-lab{font-weight:600}
 .mz-field input,.mz-field select,.mz-field textarea{font:inherit;padding:13px 14px;border:1.5px solid var(--mz-bc);border-radius:var(--mz-r-md);background:#fff;color:#111;width:100%}.mz-check{display:flex;gap:10px;align-items:flex-start;font-size:14px}
 .mz-menu ul{display:flex;gap:24px;list-style:none;margin:0;padding:0;flex-wrap:wrap}.mz-menu a{color:inherit;text-decoration:none;font-weight:600}.mz-badge{display:inline-block;padding:4px 12px;border-radius:99px;background:var(--mz-c-accent);color:#fff;width:fit-content}
 .mz-acc details{border-bottom:var(--mz-bw) solid var(--mz-bc);padding:14px 0}.mz-acc summary{cursor:pointer;font-weight:700}.mz-acc-a{margin-top:8px;color:var(--mz-c-muted)}
@@ -23177,6 +23188,7 @@ const MZ_FIELDS = {
   button: [{k: 'text', t: 'text', l: 'Texto'}, {k: 'href', t: 'url', l: 'Link'}, {k: 'variant', t: 'sel', l: 'Estilo', o: [['solid', 'Cheio'], ['outline', 'Contorno'], ['ghost', 'Sem fundo']]}, {k: 'newTab', t: 'bool', l: 'Abrir em nova aba'}],
   icon: [{k: 'name', t: 'icon', l: 'Ícone'}, {k: 'size', t: 'num', l: 'Tamanho (px)'}],
   svg: [{k: 'svg', t: 'area', l: 'Código SVG'}],
+  draw: [],
   list: [{k: 'items', t: 'lines', l: 'Itens (um por linha)'}, {k: 'icon', t: 'icon', l: 'Ícone dos itens (vazio = marcador)'}, {k: 'ordered', t: 'bool', l: 'Numerada'}],
   input: [{k: 'kind', t: 'sel', l: 'Tipo', o: [['text', 'Texto'], ['email', 'E-mail'], ['tel', 'Telefone'], ['number', 'Número'], ['textarea', 'Texto longo'], ['select', 'Lista']]}, {k: 'name', t: 'text', l: 'Nome do campo'}, {k: 'label', t: 'text', l: 'Rótulo'}, {k: 'placeholder', t: 'text', l: 'Dica'}, {k: 'required', t: 'bool', l: 'Obrigatório'}, {k: 'options', t: 'lines', l: 'Opções (tipo Lista)'}],
   checkbox: [{k: 'name', t: 'text', l: 'Nome'}, {k: 'label', t: 'area', l: 'Texto'}, {k: 'required', t: 'bool', l: 'Obrigatório'}],
@@ -23200,7 +23212,7 @@ const MZ_FIELDS = {
 /* ===== Mesa de edição · motor do canvas =====
    Estado global MZ, quadros (iframes por breakpoint), sobreposição de seleção, seleção, arrastar (mover, inserir), redimensionar,
    guias, edição de texto no lugar e histórico (desfazer/refazer). Eventos por ponteiro, não por drag-and-drop HTML5. */
-const MZ = {open: false, p: null, sel: '', hover: '', bp: 'd', view: 'one', zoom: 0, fit: true, tab: 'content', left: 'elements', q: '', comp: '', hist: [], hi: -1, clip: null, frames: {}, imgs: new Map(), drag: null, editing: null, lastSnap: 0, saveT: 0, dirty: false, guides: true, rulers: true, cols: {}};
+const MZ = {open: false, p: null, sel: '', hover: '', bp: 'd', view: 'one', zoom: 0, fit: true, tab: 'content', left: 'elements', q: '', comp: '', hist: [], hi: -1, clip: null, frames: {}, imgs: new Map(), drag: null, editing: null, lastSnap: 0, saveT: 0, dirty: false, guides: true, rulers: true, cols: {}, free: true, draw: {on: false, tool: 'pen', color: '#111111', size: 4}};
 const mzM = () => MZ.p.mesa;
 const mzPg = () => mzPage(mzM());
 const mzRoot = () => MZ.comp ? (mzM().comps.find(c => c.id === MZ.comp) || {}).root || mzPg().root : mzPg().root;
@@ -23232,7 +23244,7 @@ function mzTouch() { MZ.dirty = true; mzM().rev++; clearTimeout(MZ.saveT); MZ.sa
 const MZ_ED_CSS = `html{overflow:hidden}body{margin:0;min-height:100vh;cursor:default;-webkit-user-select:none;user-select:none}[contenteditable]{-webkit-user-select:text;user-select:text;outline:none}
 [data-type=section]:empty,[data-type=container]:empty,[data-type=column]:empty,[data-type=div]:empty,[data-type=form]:empty,[data-type=link]:empty,.mz-in:empty{min-height:64px;outline:1px dashed rgba(110,110,170,.55);outline-offset:-1px;position:relative}
 [data-type=section]:empty::after,[data-type=container]:empty::after,[data-type=column]:empty::after,[data-type=div]:empty::after,[data-type=form]:empty::after,.mz-in:empty::after{content:"Solte um elemento aqui";position:absolute;inset:0;display:grid;place-items:center;font:12px system-ui;color:#8888a8;pointer-events:none}
-#mzOv{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:2147483000;--u:1;font-family:system-ui,sans-serif}#mzOv *{pointer-events:none;box-sizing:border-box}
+body.mz-drawing,body.mz-drawing *{cursor:crosshair!important}#mzOv{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:2147483000;--u:1;font-family:system-ui,sans-serif}#mzOv *{pointer-events:none;box-sizing:border-box}
 .ov-box{position:absolute;border:calc(2px*var(--u)) solid #2f6bff}.ov-hover{position:absolute;border:calc(1.5px*var(--u)) solid rgba(47,107,255,.55)}.ov-par{position:absolute;border:calc(1px*var(--u)) dashed rgba(47,107,255,.6)}
 .ov-lab{position:absolute;background:#2f6bff;color:#fff;font:700 calc(11px*var(--u))/1 system-ui;padding:calc(4px*var(--u)) calc(7px*var(--u));border-radius:calc(4px*var(--u)) calc(4px*var(--u)) 0 0;white-space:nowrap;transform-origin:0 100%}
 .ov-dim{position:absolute;background:#2f6bff;color:#fff;font:600 calc(10px*var(--u))/1 system-ui;padding:calc(3px*var(--u)) calc(6px*var(--u));border-radius:calc(4px*var(--u));white-space:nowrap}
@@ -23249,7 +23261,7 @@ function mzBuildFrames() {
     const wrap = document.createElement('div'); wrap.className = 'mz-fr' + (bp === MZ.bp ? ' on' : ''); wrap.dataset.bp = bp;
     wrap.innerHTML = `<div class="mz-fr-h"><b>${MZ_BPN[bp]}</b> <span>${MZ_BP[bp]} px</span></div><div class="mz-fr-w"><iframe title="${MZ_BPN[bp]}" scrolling="no"></iframe></div>`;
     cv.appendChild(wrap); const ifr = wrap.querySelector('iframe'), fr = {bp, wrap, ifr, doc: null, ready: false}; MZ.frames[bp] = fr;
-    ifr.addEventListener('load', () => { fr.doc = ifr.contentDocument; fr.ready = true; mzBindFrame(fr); mzRender(); });
+    ifr.addEventListener('load', () => { fr.doc = ifr.contentDocument; fr.ready = true; mzBindFrame(fr); if (MZ.draw.on) fr.doc.body.classList.add('mz-drawing'); mzRender(); });
     ifr.srcdoc = mzFrameHtml(bp);
     wrap.querySelector('.mz-fr-h').addEventListener('pointerdown', () => { if (MZ.bp !== bp) mzSetBp(bp); });
   });
@@ -23319,7 +23331,7 @@ function mzHoverSet(id) { if (MZ.hover === id) return; MZ.hover = id; mzOverlayA
 
 /* ---------- eventos do quadro ---------- */
 function mzBindFrame(fr) {
-  const d = fr.doc, win = d.defaultView;
+  const d = fr.doc, win = d.defaultView; d.addEventListener('pointerdown', e => { if (MZ.draw && MZ.draw.on && e.button === 0) { e.preventDefault(); e.stopImmediatePropagation(); mzDrawStart(fr, e); } }, true);
   d.addEventListener('pointermove', e => { if (MZ.drag || MZ.editing) return; const t = mzNodeAt(fr, e.clientX, e.clientY); mzHoverSet(t ? t.dataset.n : ''); });
   d.addEventListener('pointerleave', () => { if (!MZ.drag) mzHoverSet(''); });
   d.addEventListener('pointerdown', e => {
@@ -23372,7 +23384,8 @@ function mzDropDraw(fr, drop) {
 }
 function mzDragMove(fr, x, y, e) {
   const dr = MZ.drag; if (!dr) return; if (!dr.on) { if (Math.hypot(x - dr.x0, y - dr.y0) < 5) return; dr.on = true; fr.dragging = true; mzGhost(true, dr.label || 'Mover'); }
-  const f = mzFind(mzRoot(), dr.id); if (dr.kind === 'move' && f) { const st = mzStyleAt(f.node, MZ.bp); if (st.position === 'absolute' || st.position === 'fixed') { dr.free = true; const dx = (x - dr.x0), dy = (y - dr.y0); if (!dr.base) dr.base = {l: parseFloat(st.left) || 0, t: parseFloat(st.top) || 0}; const o = mzStyleSet(f.node, MZ.bp); o.left = Math.round(dr.base.l + dx) + 'px'; o.top = Math.round(dr.base.t + dy) + 'px'; mzRenderNow(); return; } }
+  const f = mzFind(mzRoot(), dr.id); if (dr.kind === 'move' && f && !dr.freed) { dr.freed = true; if (MZ.free !== !!(e && e.altKey)) mzFreeConvert(fr, dr, f); }
+  if (dr.kind === 'move' && f) { const st = mzStyleAt(f.node, MZ.bp); if (st.position === 'absolute' || st.position === 'fixed') { dr.free = true; const dx = (x - dr.x0), dy = (y - dr.y0); if (!dr.base) dr.base = {l: parseFloat(st.left) || 0, t: parseFloat(st.top) || 0}; const o = mzStyleSet(f.node, MZ.bp); o.left = Math.round(dr.base.l + dx) + 'px'; o.top = Math.round(dr.base.t + dy) + 'px'; mzRenderNow(); return; } }
   const item = dr.kind === 'move' ? f.node : {type: dr.type, id: ''}; dr.drop = mzDropAt(fr, x, y, item); mzDropDraw(fr, dr.drop);
 }
 function mzDragEnd(fr, x, y, e) {
@@ -23447,7 +23460,7 @@ function mzKey(e) {
   if (mod && k.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? mzRedo() : mzUndo(); return; } if (mod && k.toLowerCase() === 'y') { e.preventDefault(); mzRedo(); return; }
   if (mod && k.toLowerCase() === 'c') { e.preventDefault(); mzCopy(); return; } if (mod && k.toLowerCase() === 'x') { e.preventDefault(); mzCopy(); mzDelete(); return; } if (mod && k.toLowerCase() === 'v') { e.preventDefault(); mzPaste(); return; }
   if (mod && k.toLowerCase() === 'd') { e.preventDefault(); mzDup(); return; } if (mod && k.toLowerCase() === 'g') { e.preventDefault(); e.shiftKey ? mzUngroup() : mzGroup(); return; } if (mod && k.toLowerCase() === 's') { e.preventDefault(); persist(); toast('Salvo.'); return; }
-  if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); mzDelete(); return; } if (k === 'Escape') { if (MZ.sel) mzSelect(''); else mzClose(); return; }
+  if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); mzDelete(); return; } if (k === 'Escape') { if (MZ.draw && MZ.draw.on) { mzDrawToggle(false); return; } if (MZ.sel) mzSelect(''); else mzClose(); return; }
   if (k === 'Enter' && MZ.sel) { const fr = MZ.frames[MZ.bp]; if (fr) mzStartEdit(fr, MZ.sel); return; }
   if (k === '[') { mzMoveStep(-1); return; } if (k === ']') { mzMoveStep(1); return; }
   if (/^Arrow/.test(k) && MZ.sel) { const n = mzSelNode(); if (!n) return; const st = mzStyleAt(n, MZ.bp); if (st.position === 'absolute') { e.preventDefault(); const s = e.shiftKey ? 10 : 1, o = mzStyleSet(n, MZ.bp); if (k === 'ArrowLeft') o.left = ((parseFloat(st.left) || 0) - s) + 'px'; if (k === 'ArrowRight') o.left = ((parseFloat(st.left) || 0) + s) + 'px'; if (k === 'ArrowUp') o.top = ((parseFloat(st.top) || 0) - s) + 'px'; if (k === 'ArrowDown') o.top = ((parseFloat(st.top) || 0) + s) + 'px'; mzCommit({panels: true}); } else if (k === 'ArrowUp') { e.preventDefault(); mzMoveStep(-1); } else if (k === 'ArrowDown') { e.preventDefault(); mzMoveStep(1); } }
@@ -23621,6 +23634,7 @@ function mzShellHtml() {
     <div class="mz-bps"><button data-mzbp="d" class="on" onclick="mzSetBp('d')" title="Desktop 1440">🖥 1440</button><button data-mzbp="t" onclick="mzSetBp('t')" title="Tablet 768">▭ 768</button><button data-mzbp="m" onclick="mzSetBp('m')" title="Celular 390">▯ 390</button><button data-mzview="three" onclick="mzSetView(MZ.view==='three'?'one':'three')" title="Ver os três tamanhos lado a lado">⫼ 3 telas</button></div>
     <div class="mz-zoom"><button onclick="mzZoom(-0.1)" title="Menos zoom">−</button><span id="mzZoomL">100%</span><button onclick="mzZoom(0.1)" title="Mais zoom">＋</button><button onclick="mzZoomFit()" title="Ajustar à tela">Ajustar</button></div>
     <div class="mz-acts"><button class="mz-btn-i" id="mzUndo" onclick="mzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="mz-btn-i" id="mzRedo" onclick="mzRedo()" title="Refazer (Ctrl+Y)">↷</button><span class="mz-sep"></span>
+      <button class="mz-btn-i ${MZ.free ? 'on' : ''}" id="mzFreeBtn" onclick="mzFreeToggle()" title="Modo livre: arraste qualquer elemento para onde quiser (Alt+arrastar faz o contrário)">✋ Livre</button><button class="mz-btn-i" id="mzDrawBtn" onclick="mzDrawToggle()" title="Desenhar com pincéis sobre a página">✏️ Desenhar</button>
       <button class="mz-btn-i ai" onclick="mzAiToggle()" title="Comandos de IA no layout">✨ IA</button><button class="mz-btn-i" onclick="mzModalPreview()">👁 Prévia</button><button class="mz-btn-i" onclick="mzModalVersions()">🕘 Versões</button><button class="mz-btn-i" onclick="mzModalDs()">🎨 Sistema</button><button class="mz-btn-i" onclick="mzModalImport()">⬆ Importar</button><button class="mz-btn-i dark" onclick="mzModalExport()">⬇ Exportar</button><span id="mzSaved" class="mz-saved"></span></div>
   </div>
   <div class="mz-body">
@@ -24103,6 +24117,67 @@ async function mzAiRun(text) {
 async function mzAiRewrite() {
   const n = mzSelNode(); if (!n) return; if (typeof aiReady !== 'function' || !aiReady()) { toast('Ligue a IA em Configurações → Integrações para reescrever textos.'); return; }
   const cur = n.type === 'text' ? n.props.html.replace(/<[^>]+>/g, ' ') : (n.props.text || (n.props.items || []).join('\n')); try { const t = await aiText('Você reescreve textos de landing page em português do Brasil: claro, direto, uma ideia só. Não invente números, depoimentos nem preços; use [marcadores] se faltar dado. Responda só com o texto novo.', `${projectContext(MZ.p).slice(0, 2000)}\n\nTexto atual:\n${cur}`, 400); if (!t) return; const v = t.trim(); if (n.type === 'heading') n.props.text = v.slice(0, 300); else if (n.type === 'text') n.props.html = mzRich(v); else if (n.type === 'list') n.props.items = v.split('\n').map(x => x.replace(/^[-•*\d.)\s]+/, '').trim()).filter(Boolean); else n.props.text = v.slice(0, 200); mzCommit({panels: true}); toast('Texto reescrito. Revise antes de publicar.'); } catch (e) { toast(e.message); }
+}
+
+</script>
+<script>
+/* Mesa de páginas — modo livre (arrastar como no Canva) e ferramenta de desenho (pincéis) */
+
+/* ---------- modo livre ---------- */
+function mzFreeToggle() { MZ.free = !MZ.free; const b = document.getElementById('mzFreeBtn'); if (b) b.classList.toggle('on', MZ.free); toast(MZ.free ? 'Modo livre: arraste para onde quiser. Alt+arrastar reordena.' : 'Modo livre desligado: arrastar reordena dentro do layout.'); }
+/* tira o elemento do fluxo e o deixa solto (absoluto) onde ele está agora */
+function mzFreeConvert(fr, dr, f) {
+  const n = f.node, par = f.parent; if (!par || par.type === 'page' || n.type === 'section' || n.locked) return;
+  const st = mzStyleAt(n, MZ.bp); if (st.position === 'absolute' || st.position === 'fixed') return;
+  const el = mzElOf(fr, n.id), pel = mzElOf(fr, par.id); if (!el || !pel) return; const r = mzRectOf(el), pr = mzRectOf(pel); if (!r || !pr) return;
+  const cs = fr.doc.defaultView.getComputedStyle(pel), bl = parseFloat(cs.borderLeftWidth) || 0, bt = parseFloat(cs.borderTopWidth) || 0;
+  const ps = mzStyleAt(par, 'd'); if (!ps.position || ps.position === 'static') mzStyleSet(par, 'd').position = 'relative'; if (!ps.minHeight && !ps.height) mzStyleSet(par, 'd').minHeight = Math.round(pr.height) + 'px';
+  const o = mzStyleSet(n, MZ.bp); o.position = 'absolute'; o.left = Math.round(r.left - pr.left - bl) + 'px'; o.top = Math.round(r.top - pr.top - bt) + 'px'; o.width = Math.round(r.width) + 'px'; o.margin = '0'; if (!st.zIndex) o.zIndex = '5';
+  dr.base = {l: parseFloat(o.left), t: parseFloat(o.top)};
+}
+
+/* ---------- desenho ---------- */
+const MZ_BRUSH = {pen: {n: 'Caneta', k: 'pen', w: 1, o: 1}, marker: {n: 'Pincel', k: 'marker', w: 2.5, o: .85}, hl: {n: 'Marca-texto', k: 'hl', w: 6, o: .35}, eraser: {n: 'Borracha'}};
+const MZ_SW = ['#111111', '#ffffff', '#e53935', '#fb8c00', '#fdd835', '#43a047', '#1e88e5', '#8e24aa'];
+function mzDrawToggle(on) {
+  const D = MZ.draw; D.on = on == null ? !D.on : !!on;
+  if (D.on && mzRoot().type !== 'page') { D.on = false; toast('Desenhe na página (saia da edição do componente).'); }
+  if (D.on) { MZ.sel = ''; mzOverlayAll(); mzRefreshPanels(); }
+  Object.values(MZ.frames).forEach(f => f.doc && f.doc.body.classList.toggle('mz-drawing', D.on));
+  const b = document.getElementById('mzDrawBtn'); if (b) b.classList.toggle('on', D.on); mzDrawBar();
+}
+function mzDrawBar() {
+  const c = document.querySelector('.mz-center'); if (!c) return; let bar = document.getElementById('mzDrawBar');
+  if (!MZ.draw.on) { if (bar) bar.remove(); return; }
+  if (!bar) { bar = document.createElement('div'); bar.id = 'mzDrawBar'; bar.className = 'mz-drawbar'; c.appendChild(bar); }
+  const D = MZ.draw;
+  bar.innerHTML = Object.keys(MZ_BRUSH).map(k => `<button class="${D.tool === k ? 'on' : ''}" onclick="MZ.draw.tool='${k}';mzDrawBar()" title="${MZ_BRUSH[k].n}">${{pen: '✒️', marker: '🖌️', hl: '🖍️', eraser: '🧽'}[k]} ${MZ_BRUSH[k].n}</button>`).join('')
+    + `<span class="sep"></span>` + MZ_SW.map(c => `<i class="sw ${D.color === c ? 'on' : ''}" style="background:${c}" onclick="MZ.draw.color='${c}';if(MZ.draw.tool==='eraser')MZ.draw.tool='pen';mzDrawBar()"></i>`).join('')
+    + `<input type="color" value="${D.color}" onchange="MZ.draw.color=this.value;if(MZ.draw.tool==='eraser')MZ.draw.tool='pen';mzDrawBar()" title="Outra cor">`
+    + `<label class="sz">Tamanho <input type="range" min="1" max="30" value="${D.size}" oninput="MZ.draw.size=+this.value;this.nextElementSibling.textContent=this.value"><b>${D.size}</b></label>`
+    + `<span class="sep"></span><button onclick="mzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button onclick="mzRedo()" title="Refazer">↷</button><button onclick="mzDrawClear()" title="Apagar todo o desenho">🗑 Limpar</button><button class="ok" onclick="mzDrawToggle(false)">✓ Concluir</button>`;
+}
+/* camada de desenho da página (uma só, no fim da página, acima do conteúdo) */
+function mzDrawLayer(create) {
+  const root = mzRoot(); let n = root.children.find(c => c.type === 'draw'); if (n || !create) return n;
+  n = mzNode('draw', {w: MZ_BP[MZ.bp], h: 800, strokes: []}); n.name = 'Desenho'; root.children.push(n); return n;
+}
+function mzDrawClear() { const n = mzDrawLayer(false); if (!n || !n.props.strokes.length) { toast('Não há desenho.'); return; } n.props.strokes = []; mzCommit({panels: true}); }
+function mzDrawStart(fr, e) {
+  const D = MZ.draw, root = mzRoot(); if (root.type !== 'page') return; if (MZ.editing) mzEndEdit(true);
+  const layer = mzDrawLayer(true), P = layer.props, sc = P.w / MZ_BP[fr.bp], doc = fr.doc, rootEl = doc.getElementById('mzRootEl');
+  if (P.strokes.length >= 500 && D.tool !== 'eraser') { toast('Limite de traços atingido. Limpe parte do desenho.'); return; }
+  const pt = ev => [Math.round(ev.clientX * sc * 10) / 10, Math.round((ev.clientY + (doc.defaultView.scrollY || 0)) * sc * 10) / 10];
+  const eraser = D.tool === 'eraser', br = MZ_BRUSH[D.tool] || MZ_BRUSH.pen, pts = [], w = Math.max(1, D.size * (br.w || 1)) * sc;
+  P.h = Math.max(P.h, Math.ceil(rootEl.scrollHeight * sc)); MZ.drag = {kind: 'draw', fr}; let live = null, path = null, changed = false;
+  if (!eraser) { live = doc.createElementNS('http://www.w3.org/2000/svg', 'svg'); live.setAttribute('style', `position:absolute;left:0;top:0;width:100%;height:${rootEl.scrollHeight}px;pointer-events:none;z-index:2147482000;overflow:visible`); live.setAttribute('viewBox', `0 0 ${P.w} ${P.h}`); live.setAttribute('preserveAspectRatio', 'none'); path = doc.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('fill', 'none'); path.setAttribute('stroke', D.color); path.setAttribute('stroke-width', w); path.setAttribute('stroke-opacity', br.o); path.setAttribute('stroke-linecap', br.k === 'hl' ? 'square' : 'round'); path.setAttribute('stroke-linejoin', 'round'); live.appendChild(path); doc.body.appendChild(live); }
+  const add = ev => { const p = pt(ev), l = pts.length; if (l && Math.hypot(p[0] - pts[l - 2], p[1] - pts[l - 1]) < 1.5 * sc) return; pts.push(p[0], p[1]); if (pts.length > 3200) return;
+    if (eraser) { const r = (D.size * 2 + 6) * sc, before = P.strokes.length; P.strokes = P.strokes.filter(k => { for (let i = 0; i < k.pts.length; i += 2) if (Math.hypot(k.pts[i] - p[0], k.pts[i + 1] - p[1]) < r + k.w / 2) return false; return true; }); if (P.strokes.length !== before) { changed = true; mzRenderNow(); } }
+    else path.setAttribute('d', mzDrawPath(pts.length < 2 ? [p[0], p[1]] : pts)); };
+  const mv = ev => { ev.preventDefault(); add(ev); }, up = ev => { doc.removeEventListener('pointermove', mv, true); doc.removeEventListener('pointerup', up, true); doc.removeEventListener('pointercancel', up, true); if (live) live.remove(); MZ.drag = null;
+    if (!eraser && pts.length >= 2) { P.strokes.push({c: D.color, w: Math.round(w * 10) / 10, o: br.o, k: br.k, pts: pts.slice(0, 1600)}); changed = true; }
+    if (changed) mzCommit({panels: false}); };
+  doc.addEventListener('pointermove', mv, true); doc.addEventListener('pointerup', up, true); doc.addEventListener('pointercancel', up, true); add(e);
 }
 
 </script>

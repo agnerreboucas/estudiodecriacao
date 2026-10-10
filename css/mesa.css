@@ -60,3 +60,8 @@ body.mz-lock{overflow:hidden}
 @media(max-width:1100px){.mz-body{grid-template-columns:240px 1fr 260px}.mz-launch{grid-template-columns:1fr}}
 
 .mz-shield{position:fixed;inset:0;z-index:9997;background:transparent;touch-action:none}
+.mz-drawbar{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #cfd0d6;border-radius:12px;padding:6px 10px;box-shadow:0 8px 24px rgba(0,0,0,.18);flex-wrap:wrap;max-width:94%}
+.mz-drawbar button{border:1px solid #dcdde3;background:#fff;border-radius:8px;padding:5px 9px;cursor:pointer;font-weight:600;font-size:12px}.mz-drawbar button.on{background:#111;color:#fff;border-color:#111}.mz-drawbar button.ok{background:#2f6bff;color:#fff;border-color:#2f6bff}
+.mz-drawbar .sw{width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #bbb;cursor:pointer}.mz-drawbar .sw.on{box-shadow:0 0 0 2px #2f6bff}.mz-drawbar .sep{width:1px;height:22px;background:#dcdde3}.mz-drawbar .sz{font-size:12px;display:flex;gap:6px;align-items:center}.mz-drawbar input[type=color]{width:26px;height:26px;padding:0;border:0;background:none}
+.mz-btn-i.on{background:#111;color:#fff;border-color:#111}
+.mz-top .mz-btn-i{padding:6px 8px;font-size:12.5px}.mz-top{gap:6px}.mz-saved{min-width:0}

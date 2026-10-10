@@ -126,6 +126,7 @@ const MZ_FIELDS = {
   button: [{k: 'text', t: 'text', l: 'Texto'}, {k: 'href', t: 'url', l: 'Link'}, {k: 'variant', t: 'sel', l: 'Estilo', o: [['solid', 'Cheio'], ['outline', 'Contorno'], ['ghost', 'Sem fundo']]}, {k: 'newTab', t: 'bool', l: 'Abrir em nova aba'}],
   icon: [{k: 'name', t: 'icon', l: 'Ícone'}, {k: 'size', t: 'num', l: 'Tamanho (px)'}],
   svg: [{k: 'svg', t: 'area', l: 'Código SVG'}],
+  draw: [],
   list: [{k: 'items', t: 'lines', l: 'Itens (um por linha)'}, {k: 'icon', t: 'icon', l: 'Ícone dos itens (vazio = marcador)'}, {k: 'ordered', t: 'bool', l: 'Numerada'}],
   input: [{k: 'kind', t: 'sel', l: 'Tipo', o: [['text', 'Texto'], ['email', 'E-mail'], ['tel', 'Telefone'], ['number', 'Número'], ['textarea', 'Texto longo'], ['select', 'Lista']]}, {k: 'name', t: 'text', l: 'Nome do campo'}, {k: 'label', t: 'text', l: 'Rótulo'}, {k: 'placeholder', t: 'text', l: 'Dica'}, {k: 'required', t: 'bool', l: 'Obrigatório'}, {k: 'options', t: 'lines', l: 'Opções (tipo Lista)'}],
   checkbox: [{k: 'name', t: 'text', l: 'Nome'}, {k: 'label', t: 'area', l: 'Texto'}, {k: 'required', t: 'bool', l: 'Obrigatório'}],
