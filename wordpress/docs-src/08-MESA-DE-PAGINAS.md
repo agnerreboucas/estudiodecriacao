@@ -43,6 +43,15 @@ A Mesa é o editor visual de sites do Studio. Você monta a página arrastando, 
 - **Qual IA e qual nível:** em *Configurações → Escolha da IA* (e dentro do modal) você escolhe Claude ou GPT para texto e o modelo (mais rápido e barato × mais inteligente e caro), e GPT Image ou Magnific para imagem. O que aparece depende das chaves configuradas no servidor.
 - Observação: o Magnific ainda não foi testado com chave real.
 
+## Banco de temas (templates que você baixou)
+1. Na Mesa, aba **Biblioteca → ⬆ Subir tema** (ou *🎁 Subir tema* na tela inicial da Mesa).
+2. Envie o arquivo do Envato Elements/ThemeForest/outro: pode ser o **pacote inteiro** (o Studio abre os ZIPs que estão dentro), um site em **HTML**, um **tema do WordPress**, um **kit do Elementor** ou o **XML de demonstração**. Pode enviar vários de uma vez: cada pacote vira um tema.
+3. Revise o que foi encontrado, marque as páginas e a identidade (cores e fontes) e importe.
+4. Use: **Usar como página**, arrastar uma **seção** do tema para a página, ou **🎨 Aplicar cores e fontes** (dá para voltar em Versões).
+- Traz estrutura, textos, imagens e estilos. Não traz sliders, animações, códigos do tema nem fontes próprias do pacote (a fonte vira o nome dela; escolha uma equivalente se não for do Google Fonts).
+- Um tema de WordPress sem XML de demonstração e sem kit entra só com cores e fontes (os .php dependem do WordPress).
+- Use só pacotes com licença. O banco fica no seu navegador/servidor e não vai dentro do pacote do Studio.
+
 ## Exportar e importar
 - HTML, CSS, ZIP (página + imagens), JSON da Mesa.
 - **Elementor:** gera widgets do Elementor **grátis** (nada do Pro). Em Elementor → Modelos → Importar. O que o Elementor grátis não tem fica como CSS extra (arquivo `mesa-css-extra.css`).

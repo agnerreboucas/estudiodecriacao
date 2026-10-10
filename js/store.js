@@ -346,13 +346,20 @@ function normalizeEbooks(x) {
 }
 /* escolhas de IA da usuária (provedor/modelo de texto e de imagem); o servidor só aceita modelos da lista dele */
 function normalizeAiPrefs(x) { x = x && typeof x === 'object' ? x : {}; const t = (v, n) => String(v == null ? '' : v).replace(/[^\w.:\/-]/g, '').slice(0, n || 80); return {textProvider: ['anthropic', 'openai'].includes(x.textProvider) ? x.textProvider : '', textModel: t(x.textModel), imgProvider: ['openai', 'magnific'].includes(x.imgProvider) ? x.imgProvider : '', imgModel: t(x.imgModel), imgQuality: ['low', 'medium', 'high'].includes(x.imgQuality) ? x.imgQuality : 'medium'}; }
+function normalizeMesaThemes(x) {
+  const hex = v => /^#[0-9a-f]{6}$/i.test(String(v || '')) ? String(v).toLowerCase() : '', nm = (v, n) => String(v == null ? '' : v).replace(/[<>]/g, '').slice(0, n), id = v => /^[\w-]{1,40}$/.test(String(v || '')) ? String(v) : '';
+  return (Array.isArray(x) ? x : []).slice(0, 30).filter(t => t && typeof t === 'object' && id(t.id)).map(t => ({id: id(t.id), name: nm(t.name, 80) || 'Tema', kind: ['html', 'wordpress', 'elementor', 'mix'].includes(t.kind) ? t.kind : 'html', ts: nm(t.ts, 40), source: nm(t.source, 120),
+    ds: {colors: Object.fromEntries(Object.entries(t.ds && t.ds.colors || {}).filter(([k, v]) => /^\w{2,20}$/.test(k) && hex(v)).slice(0, 12).map(([k, v]) => [k, hex(v)])), fonts: {heading: nm(t.ds && t.ds.fonts && t.ds.fonts.heading, 60).replace(/[^\w \-]/g, ''), body: nm(t.ds && t.ds.fonts && t.ds.fonts.body, 60).replace(/[^\w \-]/g, '')}},
+    pages: (Array.isArray(t.pages) ? t.pages : []).slice(0, 40).filter(p => p && id(p.id)).map(p => ({id: id(p.id), name: nm(p.name, 80)})), sections: (Array.isArray(t.sections) ? t.sections : []).slice(0, 120).filter(p => p && id(p.id)).map(p => ({id: id(p.id), name: nm(p.name, 80), n: Math.max(0, Math.min(2000, +p.n || 0))})),
+    imgs: (Array.isArray(t.imgs) ? t.imgs : []).slice(0, 400).map(id).filter(Boolean), notes: (Array.isArray(t.notes) ? t.notes : []).slice(0, 12).map(n => nm(n, 240))}));
+}
 function normalize(s) {
   const base = seedState();
   if (!s || typeof s !== 'object' || !Array.isArray(s.projects)) return base;
   s.schema = SCHEMA;
   s.meta = mergeDefaults(s.meta, base.meta);
   s.workspace = mergeDefaults(s.workspace, base.workspace);
-  s.credits = Number.isFinite(+s.credits) ? +s.credits : 30; s.aiPrefs = normalizeAiPrefs(s.aiPrefs);
+  s.credits = Number.isFinite(+s.credits) ? +s.credits : 30; s.aiPrefs = normalizeAiPrefs(s.aiPrefs); s.mesaThemes = normalizeMesaThemes(s.mesaThemes);
   s.inspo = normalizeInspo(s.inspo);
   s.imglib = normalizeImglib(s.imglib); s.tplbank = normalizeTplbank(s.tplbank); s.lpRefs = normalizeLpRefs(s.lpRefs); s.myFonts = normalizeMyFonts(s.myFonts); s.skills = normalizeSkills(s.skills); s.mesaLib = typeof normalizeMesaLib === 'function' ? normalizeMesaLib(s.mesaLib) : (s.mesaLib || {items: []});
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });

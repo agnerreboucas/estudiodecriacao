@@ -76,3 +76,6 @@ body.mz-lock{overflow:hidden}
 .mz-genres{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}.mz-genr{border:1px solid #dcdde3;border-radius:10px;padding:6px}.mz-genr img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}
 .modal-back{z-index:9900!important}
 .toast{z-index:9950!important}
+.mz-drop{border:2px dashed #b8bcc8;border-radius:12px;padding:26px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;background:#fafafc}.mz-drop.on{border-color:#2f6bff;background:#eef3ff}
+.mz-thsw{display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid #0002;margin-right:3px;vertical-align:middle}.mz-thpk{border:1px solid #dcdde3;border-radius:10px;padding:10px;margin-bottom:10px}.mz-thpk-h{display:flex;justify-content:space-between;gap:8px;align-items:center}.mz-thbadge{background:#eef0f6;border-radius:99px;padding:2px 8px;font-size:11px;font-weight:600}
+.mz-thitems{max-height:200px;overflow:auto;display:grid;gap:3px;margin-top:6px}.mz-thtok{margin:6px 0}.mz-th{border:1px solid #dcdde3;border-radius:10px;padding:6px 8px;margin-bottom:8px}.mz-th summary{cursor:pointer}.mz-throw{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:3px 0;font-size:12px}

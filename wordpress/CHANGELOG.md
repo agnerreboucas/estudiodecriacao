@@ -13,6 +13,7 @@
 - **Imagem com IA na Mesa:** na imagem, *✨ Gerar com IA*: descreva digitando, **falando (🎤)** ou **colando** um prompt; ✨ melhorar o prompt; 📋 copiar o prompt; até 4 **imagens de referência** (ou a imagem atual) para variar/editar; proporção automática; vários resultados na tela com *Usar aqui* e *↻ Variar*. Tudo vai para a Biblioteca.
 - **Escolha da IA e do nível** (Configurações → *Escolha da IA*, e também na ✨ IA da Mesa e no modal de imagem): texto com Claude ou GPT e o modelo (rápido/equilibrado/mais inteligente); imagem com GPT Image ou Magnific, modelo e qualidade. O servidor só aceita modelos da lista dele (`api/models.php`, ajustável no `config.php`).
 - Correção: janelas do Studio (escolher imagem, fontes, etc.) abriam por trás da Mesa.
+- **Banco de temas (templates de site):** na Mesa, *🎁 Subir tema* (também na aba Biblioteca). Aceita o pacote do Envato inteiro (com ZIPs dentro), site em **HTML**, tema do **WordPress** (cores e fontes do `theme.json`/`style.css`, páginas do XML de demonstração), **kit do Elementor** e JSON/XML soltos. Vários ZIPs de uma vez viram vários temas. Cada tema guarda páginas, seções reutilizáveis (arraste para a página), imagens e a identidade (cores e fontes, com *Aplicar* e volta em Versões). Scripts e rastreadores são removidos.
 - Módulo isolado: Landings antigas continuam como estavam.
 
 ## 1.5.0
