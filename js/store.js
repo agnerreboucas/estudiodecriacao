@@ -350,8 +350,8 @@ function normalizeMesaThemes(x) {
   const hex = v => /^#[0-9a-f]{6}$/i.test(String(v || '')) ? String(v).toLowerCase() : '', nm = (v, n) => String(v == null ? '' : v).replace(/[<>]/g, '').slice(0, n), id = v => /^[\w-]{1,40}$/.test(String(v || '')) ? String(v) : '';
   return (Array.isArray(x) ? x : []).slice(0, 30).filter(t => t && typeof t === 'object' && id(t.id)).map(t => ({id: id(t.id), name: nm(t.name, 80) || 'Tema', kind: ['html', 'wordpress', 'elementor', 'mix'].includes(t.kind) ? t.kind : 'html', ts: nm(t.ts, 40), source: nm(t.source, 120),
     ds: {colors: Object.fromEntries(Object.entries(t.ds && t.ds.colors || {}).filter(([k, v]) => /^\w{2,20}$/.test(k) && hex(v)).slice(0, 12).map(([k, v]) => [k, hex(v)])), fonts: {heading: nm(t.ds && t.ds.fonts && t.ds.fonts.heading, 60).replace(/[^\w \-]/g, ''), body: nm(t.ds && t.ds.fonts && t.ds.fonts.body, 60).replace(/[^\w \-]/g, '')}},
-    pages: (Array.isArray(t.pages) ? t.pages : []).slice(0, 40).filter(p => p && id(p.id)).map(p => ({id: id(p.id), name: nm(p.name, 80)})), sections: (Array.isArray(t.sections) ? t.sections : []).slice(0, 120).filter(p => p && id(p.id)).map(p => ({id: id(p.id), name: nm(p.name, 80), n: Math.max(0, Math.min(2000, +p.n || 0))})),
-    imgs: (Array.isArray(t.imgs) ? t.imgs : []).slice(0, 400).map(id).filter(Boolean), notes: (Array.isArray(t.notes) ? t.notes : []).slice(0, 12).map(n => nm(n, 240))}));
+    pages: (Array.isArray(t.pages) ? t.pages : []).slice(0, 60).filter(p => p && id(p.id)).map(p => ({id: id(p.id), name: nm(p.name, 80), th: id(p.th)})), sections: (Array.isArray(t.sections) ? t.sections : []).slice(0, 200).filter(p => p && id(p.id)).map(p => ({id: id(p.id), name: nm(p.name, 80), n: Math.max(0, Math.min(2000, +p.n || 0)), th: id(p.th)})),
+    imgs: (Array.isArray(t.imgs) ? t.imgs : []).slice(0, 600).map(id).filter(Boolean), notes: (Array.isArray(t.notes) ? t.notes : []).slice(0, 12).map(n => nm(n, 240))}));
 }
 function normalize(s) {
   const base = seedState();

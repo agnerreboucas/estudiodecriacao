@@ -5,7 +5,7 @@ const MZTH = {cache: new Map(), pkgs: [], busy: false, files: []};
 const mzThList = () => state.mesaThemes || (state.mesaThemes = []);
 const mzThBase = n => String(n || '').replace(/\.[^.\/]+$/, '').replace(/^.*\//, '').replace(/[-_]+/g, ' ').trim();
 const mzThHex = v => { v = String(v || '').trim().toLowerCase(); if (/^#[0-9a-f]{3}$/.test(v)) v = '#' + v[1] + v[1] + v[2] + v[2] + v[3] + v[3]; return /^#[0-9a-f]{6}$/.test(v) ? v : ''; };
-const mzThFont = v => String(v || '').split(',')[0].replace(/['"]/g, '').replace(/[^\w \-]/g, '').trim().slice(0, 50);
+const mzThFont = v => { const f = String(v || '').split(',')[0].replace(/['"]/g, '').replace(/[^\w \-]/g, '').trim().slice(0, 50); return /^(inherit|initial|unset|system-ui|sans-serif|serif)$/i.test(f) ? '' : f; };
 
 /* ---------- interface: subir ---------- */
 function mzThOpen() {
@@ -40,6 +40,15 @@ async function mzThScanZip(blob, label, depth) {
   const jsons = names.filter(n => /\.json$/i.test(n) && !/(^|\/)(package|composer|manifest|theme|tsconfig|\.eslintrc|bower|settings|site-settings)\.json$/i.test(n) && !/node_modules|vendor|\/lang|translations/i.test(n)); let manifest = {};
   const mf = names.find(n => /(^|\/)manifest\.json$/i.test(n)); if (mf) { try { manifest = JSON.parse(await z.text(mf)); } catch (e) { /* sem manifesto */ } }
   const ss = names.find(n => /(^|\/)site-settings\.json$/i.test(n)); if (ss) { try { Object.assign(pkg.tokens, mzThKitTokens(JSON.parse(await z.text(ss)))); kinds.add('elementor'); } catch (e) { /* ok */ } }
+  if (Array.isArray(manifest.templates) && manifest.templates.some(t => t && t.source)) {
+    pkg.kit = {G: {}, T: {}}; kinds.add('elementor'); pkg.label = manifest.title || label;
+    for (const t of manifest.templates) {
+      if (!t || !t.source || !z.find(t.source)) continue; const tt = (t.metadata && t.metadata.template_type) || '', thumb = t.screenshot && z.find(t.screenshot) ? z.find(t.screenshot).name : '';
+      if (/global/i.test(tt) || /global/i.test(t.source)) { try { const r = mzThGlobalKit((JSON.parse(await z.text(z.find(t.source).name)) || {}).page_settings); pkg.kit = {G: r.G, T: r.T}; mzThMergeTok(pkg.tokens, r.tokens); } catch (e) { /* sem global */ } continue; }
+      pkg.items.push({type: 'kit', label: t.name || mzThBase(t.source), path: z.find(t.source).name, thumb, kind: t.category === 'section' || t.type === 'section' && !/^single/.test(tt) ? 'block' : 'page', tt});
+    }
+    jsons.length = 0;
+  }
   for (const n of jsons.slice(0, 200)) { const e = z.ents.get(n); if (e.us > 8e6 || e.us < 40) continue; try { const j = JSON.parse(await z.text(n)); const its = mzThJsonItems(j, (manifest.templates && manifest.templates[(n.match(/(\d+)\.json$/) || [])[1]] || {}).title || mzThBase(n)); if (its.length) { kinds.add('elementor'); its.forEach(i => pkg.items.push(i)); } } catch (e2) { /* json qualquer */ } }
   /* tema do WordPress */
   const sty = names.find(n => /(^|\/)style\.css$/i.test(n) && n.split('/').length <= 3); let styCss = '';
@@ -49,11 +58,14 @@ async function mzThScanZip(blob, label, depth) {
   for (const n of names.filter(x => /\.xml$/i.test(x) && z.ents.get(x).us < 90e6).slice(0, 6)) { try { const t = await z.text(n); if (/wp:wxr_version/.test(t.slice(0, 4000))) { const its = mzThWxrItems(t); if (its.length) { kinds.add('wordpress'); its.forEach(i => pkg.items.push(i)); } } } catch (e) { /* ok */ } }
   /* site em HTML (ou PHP simples) */
   if (!pkg.items.length || kinds.has('wordpress') && !kinds.has('elementor')) {
-    const pages = tplPages(z).filter(p => !p.doc).slice(0, 60);
-    if (pages.length && !(kinds.has('wordpress') && pkg.items.length)) { pages.forEach(p => pkg.items.push({type: 'html', label: p.path, path: p.path})); kinds.add('html'); }
+    const bad = /(^|\/)(fonts?|docs?|documentation|help|licen[cs]e\w*|plugins?|examples?|samples?|vendor|node_modules|assets?|demo-?content)\/|preview\.html$|(^|\/)(login|register|login-register|blank)\.(html?|php)$/i, per = new Map();
+    const rank = pth => { const f = pth.split('/').pop(); return (/^index(-?v?\d*)?\.(html?|php)$|^home/i.test(f) ? 0 : /about|service|contact|team|faq|pricing|project|portfolio|practice|case|blog|gallery|testimonial|review/i.test(f) ? 1 : 2) * 100 + pth.split('/').length; };
+    const pages = tplPages(z).filter(p => !p.doc && !bad.test(p.path)).sort((a, b) => rank(a.path) - rank(b.path)).filter(p => { const d = p.path.split('/').slice(0, -1).join('/'); const c = (per.get(d) || 0) + 1; per.set(d, c); return c <= 30; }).slice(0, 120);
+    if (pages.length && !kinds.has('wordpress') && !pkg.items.length) { pages.forEach(p => pkg.items.push({type: 'html', label: p.path, path: p.path})); kinds.add('html'); }
   }
   /* cores e fontes do CSS, quando o pacote não disse nada */
-  if (!Object.keys(pkg.tokens.colors).length || !pkg.tokens.fonts.heading) { let css = styCss; for (const n of names.filter(x => /\.css$/i.test(x) && !/(bootstrap|font-?awesome|animate|swiper|slick|owl|magnific|normalize|reset|\.min\.css$)/i.test(x)).slice(0, 6)) { if (z.ents.get(n).us < 900000) css += '\n' + await z.text(n); } mzThMergeTok(pkg.tokens, mzThCssTokens(css)); }
+  if (!Object.keys(pkg.tokens.colors).length || !pkg.tokens.fonts.heading) { let css = styCss; const cssSort = x => (/(style|main|theme|custom|color|app|base|template)/i.test(x.split('/').pop()) ? 0 : 1); for (const n of names.filter(x => /\.css$/i.test(x) && !/(bootstrap|font-?awesome|fontawesome|flaticon|linear|icon|animate|swiper|slick|owl|magnific|normalize|reset|jquery|fancybox|nice-select|datepicker|slider|carousel|aos|lightbox|\/fonts?\/|skins?\/.*\/assets)/i.test(x)).sort((a, b) => cssSort(a) - cssSort(b)).slice(0, 6)) { if (z.ents.get(n).us < 900000) css += '\n' + await z.text(n); } mzThMergeTok(pkg.tokens, mzThCssTokens(css)); }
+  if (kinds.has('html')) { const first = pkg.items.find(i => i.type === 'html'); if (first) { try { const g = await mzThHtmlTokens((await z.text(first.path)).slice(0, 60000)); if (g.fonts.heading) pkg.tokens.fonts = g.fonts; } catch (e) { /* ok */ } } }
   pkg.kind = kinds.size > 1 ? 'mix' : ([...kinds][0] || 'html');
   if (kinds.has('wordpress') && !pkg.items.length) pkg.notes.push('É um tema de WordPress sem páginas de demonstração no pacote (os .php dependem do WordPress). Trago só as cores e as fontes. Se o pacote tem um XML de demonstração ou um kit do Elementor, suba-o também.');
   if (pkg.items.length || Object.keys(pkg.tokens.colors).length || pkg.tokens.fonts.heading) MZTH.pkgs.push(pkg);
@@ -71,6 +83,17 @@ function mzThWxrItems(xml) {
   return out;
 }
 /* ---------- cores e fontes ---------- */
+/* kit do Envato: templates/global.json → page_settings (cores e tipografias globais) */
+function mzThGlobalKit(ps) {
+  ps = ps || {}; const G = {}, T = {}, t = {colors: {}, fonts: {}}, sat = h => { const n = parseInt(h.slice(1), 16), r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b); return mx === 0 ? 0 : (mx - mn) / mx; };
+  const all = [].concat(ps.system_colors || [], ps.custom_colors || []); all.forEach(c => { const h = mzThHex(c.color); if (c._id && h) G[c._id] = h; });
+  (ps.system_typography || []).concat(ps.custom_typography || []).forEach(x => { if (x._id) T[x._id] = x; });
+  const sc = id => G[id] || ''; t.colors.primary = sc('primary'); t.colors.secondary = sc('secondary'); t.colors.text = sc('text'); t.colors.accent = sc('accent');
+  const vivid = Object.values(G).filter(h => sat(h) > 0.3).sort((a, b) => sat(b) - sat(a)); if (vivid[0] && (!t.colors.accent || sat(t.colors.accent) < 0.25)) t.colors.accent = vivid[0];
+  const bg = mzThHex(ps.body_background_color); if (bg) t.colors.background = bg; Object.keys(t.colors).forEach(k => { if (!t.colors[k]) delete t.colors[k]; });
+  const f1 = mzThFont(ps.h1_typography_font_family || (T.primary && T.primary.typography_font_family)), f2 = mzThFont(ps.body_typography_font_family || (T.text && T.text.typography_font_family)); if (f1) t.fonts.heading = f1; if (f2 || f1) t.fonts.body = f2 || f1;
+  return {G, T, tokens: t};
+}
 function mzThKitTokens(j) {
   const t = {colors: {}, fonts: {}}, S = (j && j.settings) || {}, sc = Array.isArray(S.system_colors) ? S.system_colors : [], map = {primary: 'primary', secondary: 'secondary', text: 'text', accent: 'accent'};
   sc.forEach(c => { const k = map[c._id], h = mzThHex(c.color); if (k && h) t.colors[k] = h; }); (Array.isArray(S.custom_colors) ? S.custom_colors : []).slice(0, 4).forEach((c, i) => { const h = mzThHex(c.color); if (h && !Object.values(t.colors).includes(h) && !t.colors.extra1) t.colors['extra' + (i + 1)] = h; });
@@ -83,10 +106,10 @@ function mzThThemeJsonTokens(j) {
   const ff = (S.typography && S.typography.fontFamilies) || []; const F = Array.isArray(ff) ? ff : (ff.theme || []); if (F[0]) t.fonts.heading = mzThFont(F[0].fontFamily); if (F[1] || F[0]) t.fonts.body = mzThFont((F[1] || F[0]).fontFamily); return t;
 }
 function mzThCssTokens(css) {
-  const t = {colors: {}, fonts: {}}, cs = tplColors(css), fs = tplFonts(css).map(mzThFont).filter(Boolean); if (cs[0]) t.colors.primary = cs[0]; if (cs[1]) t.colors.accent = cs[1]; if (cs[2]) t.colors.secondary = cs[2];
+  const t = {colors: {}, fonts: {}}, cs = tplColors(css), fs = tplFonts(css).map(mzThFont).filter(f => f && !/^(helvetica|arial|georgia|times|verdana|tahoma|courier|monospace|sans|serif|inherit|initial|apple|blinkmacsystemfont|segoe|ui|system|open sans condensed)/i.test(f)); if (cs[0]) t.colors.primary = cs[0]; if (cs[1]) t.colors.accent = cs[1]; if (cs[2]) t.colors.secondary = cs[2];
   if (fs[0]) { t.fonts.heading = fs[0]; t.fonts.body = fs[1] || fs[0]; } return t;
 }
-async function mzThHtmlTokens(html) { const t = mzThCssTokens((html.match(/<style[\s\S]*?<\/style>/gi) || []).join('\n')); const g = [...html.matchAll(/fonts\.googleapis\.com\/css2?\?[^"'>\s]*family=([^"'&>\s:]+)/gi)].map(m => mzThFont(decodeURIComponent(m[1]).replace(/\+/g, ' '))).filter(Boolean); if (g[0]) { t.fonts.heading = g[0]; t.fonts.body = g[1] || g[0]; } return t; }
+async function mzThHtmlTokens(html) { const t = mzThCssTokens((html.match(/<style[\s\S]*?<\/style>/gi) || []).join('\n')); const g = []; (html.match(/fonts\.googleapis\.com\/css2?\?[^"'>\s]*/gi) || []).forEach(u => { u.replace(/[?&]family=([^&:;]+)/g, (m, f) => { try { g.push(mzThFont(decodeURIComponent(f).replace(/\+/g, ' '))); } catch (e) { /* ok */ } return m; }); }); const gg = g.filter(Boolean); if (gg[0]) { t.fonts.heading = gg[0]; t.fonts.body = gg[1] || gg[0]; } return t; }
 function mzThMergeTok(a, b) { if (!b) return; a.colors = a.colors || {}; a.fonts = a.fonts || {}; Object.keys(b.colors || {}).forEach(k => { if (!a.colors[k]) a.colors[k] = b.colors[k]; }); ['heading', 'body'].forEach(k => { if (!a.fonts[k] && b.fonts && b.fonts[k]) a.fonts[k] = b.fonts[k]; }); }
 
 /* ---------- revisão ---------- */
@@ -95,7 +118,7 @@ function mzThReview() {
   showModal('Revisar o que foi encontrado', `${MZTH.pkgs.length > 1 ? `<p class="mz-hint">Foram encontrados ${MZTH.pkgs.length} pacotes. Cada um vira um tema separado no seu banco de templates.</p>` : ''}
     ${MZTH.pkgs.map((p, pi) => `<div class="mz-thpk"><div class="field" style="margin:0 0 6px"><label>Nome do tema</label><input data-th-name="${pi}" value="${esc(p.label.slice(0, 60))}"></div><div class="mz-thpk-h"><span></span><span class="mz-thbadge">${({html: 'Site em HTML', wordpress: 'Tema/Demo WordPress', elementor: 'Kit/Modelos Elementor', mix: 'Pacote misto'})[p.kind]}</span></div>
       ${(p.tokens && (Object.keys(p.tokens.colors || {}).length || p.tokens.fonts.heading)) ? `<div class="mz-thtok"><label class="mz-ck"><input type="checkbox" data-th-tok="${pi}" checked> Guardar identidade: ${sw(p.tokens)} ${p.tokens.fonts && p.tokens.fonts.heading ? '<span>fontes: <b>' + esc(p.tokens.fonts.heading) + '</b>' + (p.tokens.fonts.body && p.tokens.fonts.body !== p.tokens.fonts.heading ? ' + <b>' + esc(p.tokens.fonts.body) + '</b>' : '') + '</span>' : ''}</label></div>` : ''}
-      ${p.items.length ? `<div class="mz-thitems">${p.items.slice(0, 60).map((it, ii) => `<label class="mz-ck"><input type="checkbox" data-th-it="${pi}:${ii}" ${ii < 14 ? 'checked' : ''}> ${esc(String(it.label).replace(/^.*\//, '').slice(0, 60))} <small class="muted">${({elementor: 'Elementor', html: 'HTML', htmlfile: 'HTML', mesa: 'Mesa'})[it.type] || ''}</small></label>`).join('')}${p.items.length > 60 ? `<small class="muted">+ ${p.items.length - 60} não listados</small>` : ''}</div>` : ''}
+      ${p.items.length ? `<div class="mz-thitems">${p.items.slice(0, 120).map((it, ii) => `<label class="mz-ck"><input type="checkbox" data-th-it="${pi}:${ii}" ${(p.kit || ii < 14) ? 'checked' : ''}> ${esc(String(it.label).replace(/^.*\//, '').slice(0, 60))} <small class="muted">${({kit: it.kind === 'block' ? 'bloco' : 'página', elementor: 'Elementor', html: 'HTML', htmlfile: 'HTML', mesa: 'Mesa'})[it.type] || ''}</small></label>`).join('')}${p.items.length > 120 ? `<small class="muted">+ ${p.items.length - 120} não listados</small>` : ''}</div>` : ''}
       ${p.notes.map(n => `<p class="mz-hint">⚠ ${esc(n)}</p>`).join('')}</div>`).join('')}
     <small class="muted block" id="mzThMsg">Marque o que quer trazer. Cada página vira uma página da Mesa e cada bloco dela vira uma seção reutilizável.</small>
     <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" id="mzThGo" onclick="mzThImport()">Importar tema</button></div>`);
@@ -106,22 +129,26 @@ async function mzThImport() {
   try {
     for (let pi = 0; pi < MZTH.pkgs.length; pi++) {
       const p = MZTH.pkgs[pi], toks = {colors: {}, fonts: {}}, tk = document.querySelector(`[data-th-tok="${pi}"]`); if (tk && tk.checked) mzThMergeTok(toks, p.tokens);
-      const mine = checks.filter(([a]) => a === pi), ctx = {miss: 0, imgs: new Map(), created: new Set(), fonts: new Map()}, pages = [], notes = [];
+      const mine = checks.filter(([a]) => a === pi), ctx = {miss: 0, imgs: new Map(), created: new Set(), fonts: new Map()}, pages = [], notes = [], unsup = {};
       for (const [, ii] of mine) {
         const it = p.items[ii]; if (!it) continue; btn.textContent = `Importando ${++done}/${total}…`;
         try {
           let pg = null;
-          if (it.type === 'elementor') pg = (mzFromElementor(it.json, it.label) || [])[0]; else if (it.type === 'mesa') pg = it.page; else if (it.type === 'htmlfile') pg = await mzFromHtml(await it.file.text(), mzThBase(it.label)); else if (it.type === 'html') pg = await mzThHtmlPage(p.zip, it.path, ctx);
-          if (pg && pg.root && pg.root.children.length) { pg.name = String(it.label.replace(/^.*\//, '').replace(/\.[^.]+$/, '') || pg.name).slice(0, 60) || pg.name; pages.push(pg); } else notes.push('Sem conteúdo visível: ' + it.label);
+          if (it.type === 'kit') { pg = (mzFromElementor(JSON.parse(await p.zip.text(it.path)), it.label, {G: (p.kit || {}).G, T: (p.kit || {}).T, unsup}) || [])[0]; if (pg) { pg.kind = it.kind; if (it.thumb) pg.th = await mzThThumb(p.zip, it.thumb); } }
+          else if (it.type === 'elementor') pg = (mzFromElementor(it.json, it.label, {unsup}) || [])[0]; else if (it.type === 'mesa') pg = it.page; else if (it.type === 'htmlfile') pg = await mzFromHtml(await it.file.text(), mzThBase(it.label)); else if (it.type === 'html') pg = await mzThHtmlPage(p.zip, it.path, ctx);
+          if (pg && pg.root && pg.root.children.length) { const base = it.label.replace(/^.*\//, '').replace(/\.[^.]+$/, ''), dup = mine.filter(([, k]) => p.items[k] && p.items[k].label.replace(/^.*\//, '') === it.label.replace(/^.*\//, '')).length > 1, parent = it.label.split('/').slice(-2, -1)[0] || ''; pg.name = String((dup && parent ? parent + ' · ' : '') + (base || pg.name)).slice(0, 60); pages.push(pg); } else notes.push('Sem conteúdo visível: ' + it.label);
         } catch (e) { notes.push(it.label + ': ' + e.message); }
       }
-      if (!pages.length && !Object.keys(toks.colors).length && !toks.fonts.heading) { if (mine.length) errs.push(p.label + ': nada pôde ser importado. ' + (notes[0] || '')); continue; }
+      if (!pages.length && !bsecs.length && !Object.keys(toks.colors).length && !toks.fonts.heading) { if (mine.length) errs.push(p.label + ': nada pôde ser importado. ' + (notes[0] || '')); continue; }
+      const blocks = pages.filter(x => x.kind === 'block'); const realPages = pages.filter(x => x.kind !== 'block'); const bsecs = [];
+      blocks.forEach(b => { const nodes = b.root.children; if (!nodes.length) return; const wrap = nodes.length === 1 ? nodes[0] : mzNode('section', {}, {display: 'flex', flexDirection: 'column'}, nodes); wrap.name = b.name.replace(/^block:\s*/i, ''); bsecs.push({id: mzId(), name: wrap.name, root: wrap, n: mzCount(wrap), th: b.th || ''}); });
+      pages.length = 0; realPages.forEach(x => pages.push(x));
       const name = ((document.querySelector(`[data-th-name="${pi}"]`) || {}).value || p.label || 'Tema').trim().slice(0, 80) || 'Tema', id = 'th_' + uid('x').replace(/^x_?/, ''), secs = [], seen = new Set();
-      pages.forEach(pg => pg.root.children.forEach((s, i) => { if (secs.length >= 120) return; const nodes = mzCount(s); if (nodes < 2) return; let nm = ''; mzWalk(s, n => { if (!nm && n.type === 'heading' && n.props.text) nm = n.props.text.replace(/\s+/g, ' ').slice(0, 40); }); nm = nm || 'Seção ' + (i + 1); const key = nm + nodes; if (seen.has(key)) return; seen.add(key); s.name = s.name || nm; secs.push({id: mzId(), name: nm, root: s, n: nodes}); }));
-      const used = new Set(); pages.forEach(pg => mzWalk(pg.root, n => { if (n.props && n.props.imgId) used.add(n.props.imgId); ['d', 't', 'm'].forEach(b => { const m = /mzimg:([\w-]+)/.exec((n.style[b] || {}).backgroundImage || ''); if (m) used.add(m[1]); }); }));
-      const payload = {pages: pages.map(pg => ({id: mzId(), name: pg.name, root: pg.root})), sections: secs};
+      bsecs.forEach(b => secs.push(b)); pages.forEach(pg => pg.root.children.forEach((s, i) => { if (secs.length >= 160) return; const nodes = mzCount(s); if (nodes < 2) return; let nm = ''; mzWalk(s, n => { if (!nm && n.type === 'heading' && n.props.text) nm = n.props.text.replace(/\s+/g, ' ').slice(0, 40); }); nm = nm || 'Seção ' + (i + 1); const key = nm + nodes; if (seen.has(key)) return; seen.add(key); s.name = s.name || nm; secs.push({id: mzId(), name: nm, root: s, n: nodes}); }));
+      let extImgs = 0; const used = new Set(); pages.concat(bsecs.map(b => ({root: b.root}))).forEach(pg => mzWalk(pg.root, n => { if (n.type === 'image' && /^https?:/.test(n.props.src || '')) extImgs++; if (n.props && n.props.imgId) used.add(n.props.imgId); ['d', 't', 'm'].forEach(b => { const m = /mzimg:([\w-]+)/.exec((n.style[b] || {}).backgroundImage || ''); if (m) used.add(m[1]); }); }));
+      const payload = {pages: pages.map(pg => ({id: mzId(), name: pg.name, root: pg.root, th: pg.th || ''})), sections: secs};
       await imgPut('mzth_' + id, new Blob([JSON.stringify(payload)], {type: 'application/json'}));
-      const meta = {id, name, kind: p.kind, ts: new Date().toISOString(), source: (MZTH.files[0] || {}).name || '', ds: toks, pages: payload.pages.map(x => ({id: x.id, name: x.name})), sections: secs.map(x => ({id: x.id, name: x.name, n: x.n})), imgs: [...new Set([...used, ...ctx.created])].slice(0, 400), notes: notes.slice(0, 8).concat(ctx.miss ? [ctx.miss + ' imagem(ns) não encontrada(s) ou grande(s) demais foram ignoradas.'] : [])};
+      const meta = {id, name, kind: p.kind, ts: new Date().toISOString(), source: (MZTH.files[0] || {}).name || '', ds: toks, pages: payload.pages.map(x => ({id: x.id, name: x.name, th: x.th || ''})), sections: secs.map(x => ({id: x.id, name: x.name, n: x.n, th: x.th || ''})), imgs: [...new Set([...used, ...ctx.created, ...payload.pages.map(x => x.th), ...secs.map(x => x.th)].filter(Boolean))].slice(0, 500), notes: notes.slice(0, 8).concat(Object.keys(unsup).length ? ['Widgets sem equivalente na Mesa (textos aproveitados quando havia): ' + Object.entries(unsup).map(([k, v]) => k + ' ×' + v).slice(0, 8).join(', ') + '.'] : []).concat(extImgs ? ['As imagens deste modelo apontam para o site de demonstração do autor (' + extImgs + '). Troque pelas suas antes de publicar.'] : []).concat(ctx.miss ? [ctx.miss + ' imagem(ns) não encontrada(s) ou grande(s) demais foram ignoradas.'] : [])};
       mzThList().unshift(normalizeMesaThemes([meta])[0]); MZTH.cache.set(id, payload); made++; np += payload.pages.length; ns += secs.length;
     }
     if (!made) throw new Error(errs[0] || 'Nada foi importado: marque pelo menos uma página ou a identidade.');
@@ -132,15 +159,17 @@ async function mzThImport() {
 /* uma página HTML do ZIP: CSS e imagens locais entram no documento, o resto é descartado */
 async function mzThHtmlPage(z, path, ctx) {
   const root = path.split('/').slice(0, -1).join('/'), html = /\.php$/i.test(path) ? await tplPhp(z, path, 0, root) : await z.text(path), doc = new DOMParser().parseFromString(html, 'text/html');
-  doc.querySelectorAll('script,noscript,iframe,object,embed').forEach(n => n.remove()); const ph = r => 'https://mz-theme.invalid/' + String(r).replace(/^tplimg:/, '');
-  const fixCss = async (css, base) => (await tplUrls(css, z, base, ctx, null)).replace(/url\(\s*["']?tplimg:([\w-]+)["']?\s*\)/g, (m, id) => `url(${ph(id)})`).replace(/url\(\s*["']?data:image\/svg[^)]*\)/g, 'none');
+  doc.querySelectorAll('script,noscript,iframe,object,embed').forEach(n => n.remove()); const GIF = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=', ph = r => GIF + '#mzimg-' + String(r).replace(/^tplimg:/, '');
+  const fixCss = async (css, base) => (await tplUrls(css, z, base, ctx, null)).replace(/url\(\s*["']?tplimg:([\w-]+)["']?\s*\)/g, (m, id) => `url("${ph(id)}")`).replace(/url\(\s*["']?data:image\/svg[^)]*\)/g, 'none');
   for (const st of Array.from(doc.querySelectorAll('style'))) st.textContent = (await fixCss(st.textContent.replace(/@import[^;]+;/g, ''), path)).replace(/@font-face\s*\{[^}]*\}/gi, '');
   for (const l of Array.from(doc.querySelectorAll('link[rel~=stylesheet][href]'))) { const h = l.getAttribute('href') || ''; if (/^(https?:)?\/\//i.test(h)) { l.remove(); continue; } const e = z.find(tplJoin(path, h)); if (!e || e.us > 1.5e6) { l.remove(); continue; } try { const st = doc.createElement('style'); st.textContent = (await fixCss((await z.text(e.name)).replace(/@import[^;]+;/g, ''), e.name)).replace(/@font-face\s*\{[^}]*\}/gi, ''); l.replaceWith(st); } catch (er) { l.remove(); } }
-  for (const im of Array.from(doc.querySelectorAll('img'))) { const src = (im.getAttribute('src') || im.getAttribute('data-src') || '').trim(); im.removeAttribute('srcset'); if (/^data:image\/(png|jpe?g|webp|gif)/i.test(src)) continue; if (!src || /^(https?:)?\/\//i.test(src)) continue; const r = await tplImgData(z, tplJoin(path, src), ctx); if (r && r.startsWith('tplimg:')) im.setAttribute('src', ph(r)); else im.removeAttribute('src'); }
+  for (const im of Array.from(doc.querySelectorAll('img'))) { const src = (im.getAttribute('src') || im.getAttribute('data-src') || '').trim(); im.removeAttribute('srcset'); if (/^data:image\/(png|jpe?g|webp|gif)/i.test(src)) continue; if (!src || /^(https?:)?\/\//i.test(src)) continue; const r = await tplImgData(z, tplJoin(path, src), ctx); if (r && r.startsWith('tplimg:')) { im.setAttribute('src', GIF); im.setAttribute('data-mzimg', r.slice(7)); } else im.removeAttribute('src'); }
   for (const el of Array.from(doc.querySelectorAll('[style*="url("]'))) el.setAttribute('style', await fixCss(el.getAttribute('style'), path));
   return mzFromHtml('<!doctype html>' + doc.documentElement.outerHTML, mzThBase(path));
 }
 
+/* miniatura (captura de tela do kit) guardada como imagem pequena */
+async function mzThThumb(z, path) { try { const u8 = await z.read(path), bm = await createImageBitmap(new Blob([u8])), sc = Math.min(1, 360 / bm.width), c = document.createElement('canvas'); c.width = Math.max(1, Math.round(bm.width * sc)); c.height = Math.max(1, Math.round(Math.min(bm.height, bm.width * 1.6) * sc)); c.getContext('2d').drawImage(bm, 0, 0, bm.width, Math.min(bm.height, bm.width * 1.6), 0, 0, c.width, c.height); const bl = await new Promise(r => c.toBlob(r, 'image/webp', .72)); if (!bl) return ''; const id = uid('img'); await imgPut(id, bl); return id; } catch (e) { return ''; } }
 /* ---------- usar o tema ---------- */
 async function mzThPayload(id) {
   if (MZTH.cache.has(id)) return MZTH.cache.get(id); const b = await imgGet('mzth_' + id); if (!b) throw new Error('Os dados deste tema não estão mais neste navegador. Suba o pacote de novo.');
@@ -161,14 +190,14 @@ function mzThPanel() {
   const L = mzThList(); return `<h4>Temas importados</h4><div class="row-gap" style="margin-bottom:8px"><button class="btn sm dark" onclick="mzThOpen()">⬆ Subir tema (ZIP, Elementor, HTML)</button></div>` + (L.length ? L.map(t => `<details class="mz-th" ${L.length === 1 ? 'open' : ''} ontoggle="if(this.open)mzThEnsure('${t.id}')"><summary><b>${esc(t.name)}</b> <small>${t.pages.length} pág. · ${t.sections.length} seç.</small></summary>
     <div class="mz-thtok">${Object.values(t.ds.colors).map(c => `<i class="mz-thsw" style="background:${c}"></i>`).join('')} ${t.ds.fonts.heading ? `<small>${esc(t.ds.fonts.heading)}${t.ds.fonts.body && t.ds.fonts.body !== t.ds.fonts.heading ? ' + ' + esc(t.ds.fonts.body) : ''}</small>` : ''}</div>
     <div class="row-gap" style="flex-wrap:wrap;margin:6px 0">${Object.keys(t.ds.colors).length || t.ds.fonts.heading ? `<button class="btn sm" onclick="mzThApply('${t.id}')">🎨 Aplicar cores e fontes</button>` : ''}<button class="btn sm" onclick="mzThDelete('${t.id}')">Excluir</button></div>
-    ${t.pages.length ? `<h5>Páginas</h5>${t.pages.map(p => `<div class="mz-throw"><span>${esc(p.name)}</span><button class="btn sm" onclick="mzThUsePage('${t.id}','${p.id}')">Usar como página</button></div>`).join('')}` : ''}
-    ${t.sections.length ? `<h5>Seções (arraste para a página)</h5><div class="mz-grid one">${t.sections.map(s => `<div class="mz-card row" onpointerdown='mzThDrag(event,${esc(JSON.stringify({kind: 'themeSec', th: t.id, id: s.id, type: 'section', label: s.name}))})' title="Arraste ou clique para inserir"><i>${mzI('layers', 22)}</i><span>${esc(s.name)}<small>${s.n} elementos</small></span></div>`).join('')}</div>` : ''}
+    ${t.pages.length ? `<h5>Páginas</h5>${t.pages.map(p => `<div class="mz-throw">${p.th ? `<img class="mz-thimg" data-lib="${p.th}" alt="">` : ''}<span>${esc(p.name)}</span><button class="btn sm" onclick="mzThUsePage('${t.id}','${p.id}')">Usar como página</button></div>`).join('')}` : ''}
+    ${t.sections.length ? `<h5>Seções (arraste para a página)</h5><div class="mz-grid one">${t.sections.map(s => `<div class="mz-card row" onpointerdown='mzThDrag(event,${esc(JSON.stringify({kind: 'themeSec', th: t.id, id: s.id, type: 'section', label: s.name}))})' title="Arraste ou clique para inserir">${s.th ? `<img class="mz-thimg" data-lib="${s.th}" alt="">` : `<i>${mzI('layers', 22)}</i>`}<span>${esc(s.name)}<small>${s.n} elementos</small></span></div>`).join('')}</div>` : ''}
     ${t.notes.map(n => `<p class="mz-hint">⚠ ${esc(n)}</p>`).join('')}</details>`).join('') : '<p class="mz-hint">Nenhum tema ainda. Suba o pacote que você baixou do Envato (ou de outro site) para usar as páginas e seções dele aqui.</p>');
 }
 async function mzThEnsure(id) { if (MZTH.cache.has(id)) return; try { await mzThPayload(id); } catch (e) { toast(e.message); } }
 function mzThDrag(e, spec) { if (!MZTH.cache.has(spec.th)) { mzThEnsure(spec.th).then(() => toast('Tema carregado: tente de novo.')); return; } mzLibDrag(e, spec); }
 /* ---------- ligação aos painéis ---------- */
 const mzRefreshLeftBase = window.mzRefreshLeft;
-window.mzRefreshLeft = function () { mzRefreshLeftBase(); if (MZ.left === 'lib') { const c = document.getElementById('mzLeftC'); if (c) c.insertAdjacentHTML('beforeend', '<div class="mz-thwrap">' + mzThPanel() + '</div>'); } };
+window.mzRefreshLeft = function () { mzRefreshLeftBase(); if (MZ.left === 'lib') { const c = document.getElementById('mzLeftC'); if (c) { c.insertAdjacentHTML('beforeend', '<div class="mz-thwrap">' + mzThPanel() + '</div>'); libFill(c); } } };
 const mzMakeSpecBase = window.mzMakeSpec;
 window.mzMakeSpec = function (spec) { if (spec.kind === 'themeSec') return mzThSection(spec.th, spec.id); return mzMakeSpecBase(spec); };
