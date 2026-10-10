@@ -7,6 +7,9 @@
 - Exporta JSON, HTML, CSS, ZIP e **Elementor (somente widgets gratuitos)**; importa Elementor, HTML e JSON da Mesa.
 - **Modo livre (como no Canva):** arraste qualquer elemento para onde quiser (ele sai do fluxo e fica solto); Alt+arrastar reordena no layout; botão ✋ Livre liga/desliga. Setas movem 1 px (Shift = 10 px).
 - **Desenhar (✏️):** caneta, pincel, marca-texto e borracha, 8 cores + cor livre, tamanho ajustável; o desenho vira uma camada da página, sai no HTML/CSS exportado (SVG) e entra no Elementor como bloco HTML. Desfazer/refazer guardam 80 passos.
+- **Auto layout (como no Figma):** Horizontal/Vertical/Quebra/Grade, alinhamento 3×3, espaço e padding, filhos Ajustar/Preencher/Fixa, **Shift+A**, e **Adaptar Tablet e Celular** (no contêiner ou na página inteira): arruma no Desktop e o Studio ajusta as outras telas.
+- **Texto:** aumentar/diminuir a letra arrastando o canto; barra por palavra com fonte, tamanho, cor, destaque e efeitos (também em títulos); fonte e efeitos do texto inteiro (sombra, contorno, neon, brilho, gradiente).
+- **Ferramentas do Estúdio de Design na Mesa:** transparência, rotação, mesclagem, Frente/Trás, formas e recortes, gradiente rápido, tratamentos e ajustes de foto, banco de imagens e geração por IA. **Alt+arrastar duplica.**
 - Módulo isolado: Landings antigas continuam como estavam.
 
 ## 1.5.0

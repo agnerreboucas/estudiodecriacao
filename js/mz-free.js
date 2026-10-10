@@ -1,7 +1,7 @@
 /* Mesa de páginas — modo livre (arrastar como no Canva) e ferramenta de desenho (pincéis) */
 
 /* ---------- modo livre ---------- */
-function mzFreeToggle() { MZ.free = !MZ.free; const b = document.getElementById('mzFreeBtn'); if (b) b.classList.toggle('on', MZ.free); toast(MZ.free ? 'Modo livre: arraste para onde quiser. Alt+arrastar reordena.' : 'Modo livre desligado: arrastar reordena dentro do layout.'); }
+function mzFreeToggle() { MZ.free = !MZ.free; const b = document.getElementById('mzFreeBtn'); if (b) b.classList.toggle('on', MZ.free); toast(MZ.free ? 'Modo livre: arraste para onde quiser. Alt+arrastar duplica.' : 'Modo livre desligado: arrastar reordena dentro do layout. Alt+arrastar duplica.'); }
 /* tira o elemento do fluxo e o deixa solto (absoluto) onde ele está agora */
 function mzFreeConvert(fr, dr, f) {
   const n = f.node, par = f.parent; if (!par || par.type === 'page' || n.type === 'section' || n.locked) return;

@@ -39,7 +39,7 @@ function mzDelete(id) {
   id = id || MZ.sel; const f = id && mzFind(mzRoot(), id); if (!f || !f.parent) return; if (f.node.locked) { toast('Elemento bloqueado.'); return; } f.parent.children.splice(f.idx, 1);
   const nx = f.parent.children[Math.min(f.idx, f.parent.children.length - 1)]; MZ.sel = nx ? nx.id : (f.parent.type === 'page' ? '' : f.parent.id); mzCommit({panels: true});
 }
-function mzDup(id) { id = id || MZ.sel; const f = id && mzFind(mzRoot(), id); if (!f || !f.parent) return; const c = mzFresh(f.node); c.name = f.node.name ? f.node.name + ' (cópia)' : ''; f.parent.children.splice(f.idx + 1, 0, c); MZ.sel = c.id; mzCommit({panels: true}); }
+function mzDup(id) { id = id || MZ.sel; const f = id && mzFind(mzRoot(), id); if (!f || !f.parent) return; const c = mzFresh(f.node); c.name = f.node.name ? f.node.name + ' (cópia)' : ''; const st = mzStyleAt(f.node, MZ.bp); if (st.position === 'absolute') { const o = mzStyleSet(c, MZ.bp); o.left = ((parseFloat(st.left) || 0) + 24) + 'px'; o.top = ((parseFloat(st.top) || 0) + 24) + 'px'; } f.parent.children.splice(f.idx + 1, 0, c); MZ.sel = c.id; mzCommit({panels: true}); }
 function mzCopy() { const n = mzSelNode(); if (!n || n.type === 'page') return; MZ.clip = JSON.stringify(n); try { localStorage.setItem('mz_clip', MZ.clip); } catch (e) { /* sem armazenamento */ } toast('Copiado.'); }
 function mzPaste() {
   let j = MZ.clip; if (!j) { try { j = localStorage.getItem('mz_clip'); } catch (e) { /* ok */ } } if (!j) { toast('Nada copiado.'); return; } let n; try { n = mzNormNode(JSON.parse(j)); } catch (e) { return; } if (!n) return; mzWalk(n, x => { x.id = mzId(); });

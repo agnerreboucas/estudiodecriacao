@@ -17,9 +17,25 @@ A Mesa é o editor visual de sites do Studio. Você monta a página arrastando, 
 7. Botão ✨: peça em texto (ex.: "fundo escuro", "3 colunas", "mais conversão").
 
 ## Mover livre e desenhar
-- **✋ Livre** (ligado por padrão): arraste qualquer elemento e solte onde quiser, como no Canva. Segure **Alt** ao arrastar para reordenar dentro do layout. Para devolver ao fluxo, em Layout → Posição escolha "Normal".
+- **✋ Livre** (ligado por padrão): arraste qualquer elemento e solte onde quiser, como no Canva. Segure **Alt** ao arrastar para **duplicar**. Desligue o ✋ Livre para reordenar dentro do layout. Para devolver ao fluxo, em Layout → Posição escolha "Normal".
 - **✏️ Desenhar:** caneta, pincel, marca-texto e borracha, com cores e tamanho. O desenho fica numa camada "Desenho" (aparece em Camadas) por cima da página. Esc ou ✓ Concluir sai do modo.
 - **Desfazer/refazer:** Ctrl+Z / Ctrl+Y (ou os botões ↶ ↷), até 80 passos.
+
+## Auto layout (como no Figma)
+- Selecione uma seção/contêiner → **Layout → Auto layout** (ou **Shift+A**): escolha Horizontal, Vertical, Quebra ou Grade, alinhe pelo quadradinho 3×3, defina o espaço entre itens e o padding.
+- Nos itens de dentro: **Ajustar ao conteúdo / Preencher / Fixa** para largura e altura.
+- **↺ Adaptar Tablet e Celular** (no contêiner ou em *Página → Adaptar a página inteira*): arrume no Desktop e o Studio empilha colunas no celular, quebra linhas no tablet e reduz títulos e espaços. Só preenche o que você ainda não ajustou; depois dá para refinar.
+
+## Texto
+- **Aumentar/diminuir pelo canto:** selecione o texto e arraste um canto: a letra cresce junto (como no Canva). Arrastar pelo lado só muda a largura.
+- **Só uma palavra:** dois cliques no texto ou título, selecione e use a barra: negrito, itálico, sublinhado, riscado, **fonte** (lista + "Mais fontes"), **tamanho**, **cor**, **destaque**, **efeitos** (sombra, contorno, neon, brilho, gradiente, marca-texto) e ⌫ limpar.
+- **Texto inteiro:** Estilo → *Fonte e efeitos do texto*.
+
+## Design (trazido do Estúdio de Design)
+- **Aparência e camadas:** transparência, rotação, mesclagem (multiplicar, sobrepor…), Frente/Trás/Subir/Descer, duplicar, copiar, colar. Para uma imagem sobre outra: arraste no modo Livre e ajuste Frente/Trás e a transparência.
+- **Formas:** Retângulo, Círculo, Triângulo, Losango, Hexágono, Estrela, Seta, Balão, Linha e Anel (aba Elementos → Formas); recorte de qualquer imagem ou forma em Estilo → *Forma / recorte*.
+- **Gradiente rápido** (cores do projeto) e gradiente livre.
+- **Imagem:** tratamentos de foto do Estúdio (30 estilos), brilho, contraste, saturação, preto e branco, sépia, desfoque, cor por cima com mistura; trocar por Biblioteca, envio, Banco de imagens ou ✨ gerar com IA.
 
 ## Exportar e importar
 - HTML, CSS, ZIP (página + imagens), JSON da Mesa.

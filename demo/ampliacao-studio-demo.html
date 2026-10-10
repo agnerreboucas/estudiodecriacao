@@ -952,6 +952,13 @@ body.mz-lock{overflow:hidden}
 .mz-drawbar .sw{width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #bbb;cursor:pointer}.mz-drawbar .sw.on{box-shadow:0 0 0 2px #2f6bff}.mz-drawbar .sep{width:1px;height:22px;background:#dcdde3}.mz-drawbar .sz{font-size:12px;display:flex;gap:6px;align-items:center}.mz-drawbar input[type=color]{width:26px;height:26px;padding:0;border:0;background:none}
 .mz-btn-i.on{background:#111;color:#fff;border-color:#111}
 .mz-top .mz-btn-i{padding:6px 8px;font-size:12.5px}.mz-top{gap:6px}.mz-saved{min-width:0}
+.mz-rb select,.mz-rb input[type=number]{background:#2a2f35;color:#fff;border:1px solid #555c66;border-radius:6px;padding:4px 5px;font-size:12px;max-width:110px}.mz-rb input[type=number]{width:54px}.mz-rb input[type=color]{width:26px;height:26px;padding:0;border:0;background:none}.mz-rb .sp{width:1px;height:20px;background:#666;margin:0 4px}
+.mz-seg-row{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}.mz-seg-row button{flex:1;min-width:64px;border:1px solid #cfd0d6;background:#fff;border-radius:7px;padding:6px 4px;font-size:12px;cursor:pointer;font-weight:600}.mz-seg-row button.on,.mz-seg button.on{background:#111;color:#fff;border-color:#111}
+.mz-auto{display:flex;gap:12px;align-items:flex-start;margin-top:8px}.mz-al{display:grid;grid-template-columns:repeat(3,22px);gap:4px;background:#f2f2f5;padding:8px;border-radius:8px}.mz-al button{width:22px;height:22px;border:1px solid #bfc2cb;background:#fff;border-radius:4px;cursor:pointer;padding:0}.mz-al button.on{background:#2f6bff;border-color:#2f6bff}.mz-auto-f{flex:1;min-width:0}
+.mz-seg{display:flex;gap:3px}.mz-seg button{flex:1;border:1px solid #cfd0d6;background:#fff;border-radius:6px;padding:4px 2px;font-size:11px;cursor:pointer}
+.mz-fxgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px}.mz-fxgrid button{border:1px solid #cfd0d6;background:#fff;border-radius:7px;padding:6px 2px;font-size:11.5px;cursor:pointer;font-weight:600}.mz-fxgrid button:hover{background:#f3f3f6}
+.mz-pre{display:flex;gap:6px;margin-bottom:8px}.mz-pre button{width:38px;height:26px;border-radius:6px;border:1px solid #ccc;cursor:pointer}
+.mz-tabs button{font-size:10.8px!important;padding:10px 0!important;letter-spacing:-.1px}
 
 </style>
 </head>
@@ -22814,7 +22821,7 @@ const MZ_CONT = ['page', 'section', 'container', 'column', 'div', 'form', 'link'
 const MZ_LEAF = ['heading', 'text', 'image', 'video', 'button', 'icon', 'svg', 'list', 'divider', 'spacer', 'input', 'checkbox', 'radio', 'menu', 'logo', 'badge', 'accordion', 'tabs', 'countdown', 'table', 'gallery', 'timeline', 'draw', 'component'];
 const MZ_TYPES = MZ_CONT.concat(MZ_LEAF);
 const MZ_NAMES = {page: 'Página', section: 'Seção', container: 'Contêiner', column: 'Coluna', div: 'Bloco', form: 'Formulário', link: 'Link', heading: 'Título', text: 'Texto', image: 'Imagem', video: 'Vídeo', button: 'Botão', icon: 'Ícone', svg: 'SVG', draw: 'Desenho', list: 'Lista', divider: 'Divisor', spacer: 'Espaço', input: 'Campo', checkbox: 'Caixa de seleção', radio: 'Opção', menu: 'Menu', logo: 'Logo', badge: 'Selo', accordion: 'Perguntas (acordeão)', tabs: 'Abas', countdown: 'Contagem regressiva', table: 'Tabela', gallery: 'Galeria', timeline: 'Linha do tempo', component: 'Componente'};
-const MZ_PROPS = ('display flexDirection flexWrap justifyContent alignItems alignContent alignSelf flex flexGrow flexShrink flexBasis order gap rowGap columnGap gridTemplateColumns gridTemplateRows gridColumn gridRow gridAutoFlow placeItems position top right bottom left zIndex width height minWidth minHeight maxWidth maxHeight margin marginTop marginRight marginBottom marginLeft padding paddingTop paddingRight paddingBottom paddingLeft overflow overflowX overflowY color background backgroundColor backgroundImage backgroundSize backgroundPosition backgroundRepeat border borderTop borderRight borderBottom borderLeft borderWidth borderStyle borderColor borderRadius boxShadow opacity filter backdropFilter transform transition fontFamily fontSize fontWeight fontStyle lineHeight letterSpacing textAlign textTransform textDecoration whiteSpace objectFit objectPosition aspectRatio cursor mixBlendMode textShadow listStyle verticalAlign wordBreak').split(' ');
+const MZ_PROPS = ('display flexDirection flexWrap justifyContent alignItems alignContent alignSelf flex flexGrow flexShrink flexBasis order gap rowGap columnGap gridTemplateColumns gridTemplateRows gridColumn gridRow gridAutoFlow placeItems position top right bottom left zIndex width height minWidth minHeight maxWidth maxHeight margin marginTop marginRight marginBottom marginLeft padding paddingTop paddingRight paddingBottom paddingLeft overflow overflowX overflowY color background backgroundColor backgroundImage backgroundSize backgroundPosition backgroundRepeat border borderTop borderRight borderBottom borderLeft borderWidth borderStyle borderColor borderRadius boxShadow opacity filter backdropFilter transform transition fontFamily fontSize fontWeight fontStyle lineHeight letterSpacing textAlign textTransform textDecoration whiteSpace objectFit objectPosition aspectRatio cursor mixBlendMode textShadow listStyle verticalAlign wordBreak clipPath WebkitTextStroke WebkitBackgroundClip backgroundClip WebkitTextFillColor isolation').split(' ');
 const MZ_PROPSET = new Set(MZ_PROPS);
 const MZ_INNER = new Set(['display', 'flexDirection', 'flexWrap', 'justifyContent', 'alignItems', 'alignContent', 'gap', 'rowGap', 'columnGap', 'gridTemplateColumns', 'gridTemplateRows', 'gridAutoFlow', 'placeItems']);
 const MZ_PX = new Set(['top', 'right', 'bottom', 'left', 'width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight', 'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft', 'padding', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'gap', 'rowGap', 'columnGap', 'fontSize', 'borderRadius', 'borderWidth', 'letterSpacing', 'flexBasis']);
@@ -22889,18 +22896,37 @@ function mzCssVal(k, v) {
 }
 function mzNormStyle(s) { const o = {}; if (s && typeof s === 'object') Object.keys(s).slice(0, 80).forEach(k => { if (MZ_PROPSET.has(k)) { const v = mzCssVal(k, s[k]); if (v !== '') o[k] = v; } }); return o; }
 const mzSafeSvg = h => { try { const d = new DOMParser().parseFromString(String(h || ''), 'image/svg+xml'), svg = d.documentElement; if (!svg || svg.nodeName.toLowerCase() !== 'svg' || d.querySelector('parsererror')) return ''; const ok = new Set(['svg', 'g', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'ellipse', 'defs', 'lineargradient', 'radialgradient', 'stop', 'title', 'clippath', 'use']); const clean = n => { Array.from(n.childNodes).forEach(c => { if (c.nodeType === 1) { if (!ok.has(c.nodeName.toLowerCase())) { c.remove(); return; } Array.from(c.attributes).forEach(a => { if (/^on/i.test(a.name) || /javascript:/i.test(a.value) || (a.name === 'href' || a.name === 'xlink:href') && !/^#/.test(a.value)) c.removeAttribute(a.name); }); clean(c); } else if (c.nodeType !== 3) c.remove(); }); }; Array.from(svg.attributes).forEach(a => { if (/^on/i.test(a.name)) svg.removeAttribute(a.name); }); clean(svg); return new XMLSerializer().serializeToString(svg).slice(0, 20000); } catch (e) { return ''; } };
+/* estilo de trecho: só propriedades de texto conhecidas, com valores restritos */
+function mzRichStyle(v) {
+  const out = []; String(v || '').split(';').forEach(d => { const i = d.indexOf(':'); if (i < 0) return; const k = d.slice(0, i).trim().toLowerCase(), x = d.slice(i + 1).trim(); if (!x || x.length > 160) return;
+    const col = /^(#[0-9a-f]{3,8}|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*[\d.]+\s*)?\)|[a-z]{3,20}|var\(--mz-c-\w+\))$/i;
+    if ((k === 'color' || k === 'background-color' || k === '-webkit-text-stroke-color') && col.test(x)) out.push(k + ':' + x);
+    else if (k === 'font-weight' && /^(normal|bold|[1-9]00)$/.test(x)) out.push(k + ':' + x);
+    else if (k === 'font-style' && /^(normal|italic)$/.test(x)) out.push(k + ':' + x);
+    else if (k === 'font-size' && /^\d{1,3}(\.\d+)?(px|em|%)$/.test(x)) out.push(k + ':' + x);
+    else if (k === 'font-family' && /^[\w ,'"-]{2,80}$/.test(x)) out.push(k + ':' + x);
+    else if (k === 'letter-spacing' && /^-?\d{1,2}(\.\d+)?(px|em)$/.test(x)) out.push(k + ':' + x);
+    else if (k === 'text-transform' && /^(none|uppercase|lowercase|capitalize)$/.test(x)) out.push(k + ':' + x);
+    else if (k === 'text-decoration' && /^(none|underline|line-through)$/.test(x)) out.push(k + ':' + x);
+    else if (k === '-webkit-text-stroke-width' && /^\d(\.\d+)?px$/.test(x)) out.push(k + ':' + x);
+    else if (k === 'text-shadow' && /^[\w\s#%.,()-]+$/.test(x) && !/url|expression/i.test(x)) out.push(k + ':' + x);
+    else if (k === 'background-image' && /^linear-gradient\([\w\s#%.,()-]+\)$/.test(x)) out.push(k + ':' + x);
+    else if ((k === '-webkit-background-clip' || k === 'background-clip') && x === 'text') out.push(k + ':text');
+    else if (k === '-webkit-text-fill-color' && col.test(x)) out.push(k + ':' + x); });
+  return out.join(';');
+}
 /* texto rico: só negrito, itálico, sublinhado, link, quebra, marca-texto e cor */
 function mzRich(h) {
   h = String(h == null ? '' : h).slice(0, MZ_LIMITS.text); if (!/[<&]/.test(h)) return mzEsc(h).replace(/\n/g, '<br>');
   try { const d = new DOMParser().parseFromString('<body>' + h + '</body>', 'text/html'), ok = new Set(['B', 'STRONG', 'I', 'EM', 'U', 'A', 'BR', 'SPAN', 'MARK', 'SMALL', 'SUP', 'SUB', 'P', 'DIV', 'UL', 'OL', 'LI']);
-    const walk = n => { Array.from(n.childNodes).forEach(c => { if (c.nodeType === 1) { if (/^(SCRIPT|STYLE|IFRAME|OBJECT|EMBED|NOSCRIPT|TEMPLATE|SVG|MATH)$/.test(c.tagName)) { c.remove(); return; } if (!ok.has(c.tagName)) { c.replaceWith(...Array.from(c.childNodes)); return; } Array.from(c.attributes).forEach(a => { const nm = a.name.toLowerCase(); if (c.tagName === 'A' && nm === 'href' && MZ_URL(a.value)) return; if (c.tagName === 'A' && (nm === 'target' || nm === 'rel')) return; if (nm === 'style' && /^(?:\s*(?:color|background-color|font-weight)\s*:\s*[#\w(),.\s%-]+;?)+$/i.test(a.value)) return; c.removeAttribute(a.name); }); walk(c); } else if (c.nodeType !== 3) c.remove(); }); };
+    const walk = n => { Array.from(n.childNodes).forEach(c => { if (c.nodeType === 1) { if (/^(SCRIPT|STYLE|IFRAME|OBJECT|EMBED|NOSCRIPT|TEMPLATE|SVG|MATH)$/.test(c.tagName)) { c.remove(); return; } if (!ok.has(c.tagName)) { c.replaceWith(...Array.from(c.childNodes)); return; } Array.from(c.attributes).forEach(a => { const nm = a.name.toLowerCase(); if (c.tagName === 'A' && nm === 'href' && MZ_URL(a.value)) return; if (c.tagName === 'A' && (nm === 'target' || nm === 'rel')) return; if (nm === 'style') { const ok2 = mzRichStyle(a.value); if (ok2) { c.setAttribute('style', ok2); return; } } c.removeAttribute(a.name); }); walk(c); } else if (c.nodeType !== 3) c.remove(); }); };
     walk(d.body); return d.body.innerHTML; } catch (e) { return mzEsc(h); }
 }
 function mzNormProps(type, p) {
   p = p && typeof p === 'object' ? p : {}; const o = {}, S = MZ_STR, id = v => /^[\w-]{1,80}$/.test(String(v || '')) ? String(v) : '', items = (arr, f, max) => (Array.isArray(arr) ? arr : []).slice(0, max || 40).map(f).filter(Boolean);
-  if (type === 'heading') { o.text = S(p.text, 1500); o.level = [1, 2, 3, 4, 5, 6].includes(+p.level) ? +p.level : 2; }
+  if (type === 'heading') { o.text = S(p.text, 1500); o.html = p.html ? mzRich(p.html) : ''; o.hOf = S(p.hOf, 1500); o.level = [1, 2, 3, 4, 5, 6].includes(+p.level) ? +p.level : 2; }
   else if (type === 'text') o.html = mzRich(p.html != null ? p.html : p.text || '');
-  else if (type === 'image' || type === 'logo') { o.imgId = id(p.imgId); o.src = MZ_URL(p.src); o.alt = S(p.alt, 200); o.href = MZ_URL(p.href); }
+  else if (type === 'image' || type === 'logo') { o.imgId = id(p.imgId); o.src = MZ_URL(p.src); o.alt = S(p.alt, 200); o.href = MZ_URL(p.href); o.ovC = /^#[0-9a-fA-F]{3,8}$|^rgba?\([\d\s,.]{5,30}\)$/.test(p.ovC || '') ? p.ovC : ''; o.ovM = ['normal', 'multiply', 'screen', 'overlay', 'soft-light', 'hard-light', 'color', 'luminosity', 'darken', 'lighten', 'color-burn', 'color-dodge', 'difference'].includes(p.ovM) ? p.ovM : 'normal'; }
   else if (type === 'video') { o.url = MZ_URL(p.url); o.poster = id(p.poster); o.ratio = ['16/9', '4/3', '1/1', '9/16'].includes(p.ratio) ? p.ratio : '16/9'; }
   else if (type === 'button') { o.text = S(p.text, 120); o.href = MZ_URL(p.href); o.newTab = !!p.newTab; o.variant = ['solid', 'outline', 'ghost'].includes(p.variant) ? p.variant : 'solid'; }
   else if (type === 'icon') { o.name = /^[\w-]{1,30}$/.test(p.name || '') ? p.name : 'star'; o.size = Math.max(8, Math.min(200, +p.size || 32)); }
@@ -22985,9 +23011,9 @@ function mzNodeHtml(n, ctx, root) {
     case 'column': case 'div': return `<div class="${cls.join(' ')}" ${at.join(' ')}>${kids()}</div>`;
     case 'form': return `<form class="${cls.join(' ')} mz-form" ${at.join(' ')} ${ed ? 'onsubmit="return false"' : `data-leads="${mzEsc(P.action)}" data-thanks="${mzEsc(P.thanks)}" data-source="${mzEsc(P.source)}" novalidate`}>${kids()}</form>`;
     case 'link': return `<a class="${cls.join(' ')}" ${at.join(' ')} href="${ed ? '#' : mzEsc(P.href || '#')}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${kids()}</a>`;
-    case 'heading': return `<h${P.level || 2} class="${cls.join(' ')}" ${at.join(' ')}>${mzEsc(P.text).replace(/\n/g, '<br>')}</h${P.level || 2}>`;
+    case 'heading': return `<h${P.level || 2} class="${cls.join(' ')}" ${at.join(' ')}>${P.html && P.hOf === P.text ? P.html : mzEsc(P.text).replace(/\n/g, '<br>')}</h${P.level || 2}>`;
     case 'text': return `<div class="${cls.join(' ')}" ${at.join(' ')}>${P.html}</div>`;
-    case 'image': case 'logo': { const u = P.imgId ? img(P.imgId) : P.src; const im = u ? `<img src="${mzEsc(u)}" alt="${mzEsc(P.alt)}" ${ed ? 'draggable="false"' : 'loading="lazy"'}>` : '<span class="mz-ph">Imagem</span>'; return `<div class="${cls.join(' ')} mz-img" ${at.join(' ')}>${P.href && !ed ? `<a href="${mzEsc(P.href)}">${im}</a>` : im}</div>`; }
+    case 'image': case 'logo': { const u = P.imgId ? img(P.imgId) : P.src; const im = u ? `<img src="${mzEsc(u)}" alt="${mzEsc(P.alt)}" ${ed ? 'draggable="false"' : 'loading="lazy"'}>` : '<span class="mz-ph">Imagem</span>'; return `<div class="${cls.join(' ')} mz-img" ${at.join(' ')}>${P.href && !ed ? `<a href="${mzEsc(P.href)}">${im}</a>` : im}${P.ovC ? `<span class="mz-ov" style="background:${P.ovC};mix-blend-mode:${P.ovM}"></span>` : ''}</div>`; }
     case 'video': { const v = mzVideoEmbed(P.url); let inner = '<span class="mz-ph">Cole o endereço do vídeo</span>'; if (v && v.iframe) inner = ed ? `<div class="mz-vph">▶ Vídeo</div>` : `<iframe src="${mzEsc(v.iframe)}" loading="lazy" allowfullscreen title="Vídeo"></iframe>`; else if (v && v.file) inner = ed ? `<div class="mz-vph">▶ Vídeo</div>` : `<video src="${mzEsc(v.file)}" controls playsinline${P.poster ? ` poster="${mzEsc(img(P.poster))}"` : ''}></video>`; return `<div class="${cls.join(' ')} mz-video" ${at.join(' ')} style="aspect-ratio:${P.ratio}">${inner}</div>`; }
     case 'button': return `<a class="${cls.join(' ')} mz-btn mz-btn-${P.variant}" ${at.join(' ')} href="${ed ? '#' : mzEsc(P.href || '#')}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${mzEsc(P.text)}</a>`;
     case 'icon': return `<span class="${cls.join(' ')} mz-icon" ${at.join(' ')} style="font-size:${P.size}px">${mzIcon(P.name, '1em')}</span>`;
@@ -23029,7 +23055,7 @@ img{max-width:100%}.mz-img img{display:block;max-width:100%;height:auto;width:10
 h1,h2,h3,h4,h5,h6,p{margin:0}.mz-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 26px;border-radius:var(--mz-r-md);background:var(--mz-c-primary);color:#fff;text-decoration:none;cursor:pointer;border:2px solid var(--mz-c-primary);width:fit-content}
 .mz-btn-outline{background:transparent;color:var(--mz-c-primary)}.mz-btn-ghost{background:transparent;border-color:transparent;color:var(--mz-c-primary)}
 .mz-icon{display:inline-flex;line-height:1}.mz-list{margin:0;padding-left:1.2em}.mz-list-i{list-style:none;padding:0}.mz-list-i li{display:flex;gap:10px;align-items:flex-start;margin:6px 0}.mz-li{color:var(--mz-c-accent);flex:none;margin-top:3px}
-hr.mz-e{border:0;border-top:var(--mz-bw) solid var(--mz-bc);margin:0;width:100%}.mz-spacer{height:32px;width:100%}.mz-page{position:relative}.mz-draw{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:40}.mz-field{display:flex;flex-direction:column;gap:6px;font-size:15px}.mz-lab{font-weight:600}
+hr.mz-e{border:0;border-top:var(--mz-bw) solid var(--mz-bc);margin:0;width:100%}.mz-spacer{height:32px;width:100%}.mz-img{position:relative}.mz-ov{position:absolute;inset:0;pointer-events:none;border-radius:inherit}.mz-page{position:relative}.mz-draw{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:40}.mz-field{display:flex;flex-direction:column;gap:6px;font-size:15px}.mz-lab{font-weight:600}
 .mz-field input,.mz-field select,.mz-field textarea{font:inherit;padding:13px 14px;border:1.5px solid var(--mz-bc);border-radius:var(--mz-r-md);background:#fff;color:#111;width:100%}.mz-check{display:flex;gap:10px;align-items:flex-start;font-size:14px}
 .mz-menu ul{display:flex;gap:24px;list-style:none;margin:0;padding:0;flex-wrap:wrap}.mz-menu a{color:inherit;text-decoration:none;font-weight:600}.mz-badge{display:inline-block;padding:4px 12px;border-radius:99px;background:var(--mz-c-accent);color:#fff;width:fit-content}
 .mz-acc details{border-bottom:var(--mz-bw) solid var(--mz-bc);padding:14px 0}.mz-acc summary{cursor:pointer;font-weight:700}.mz-acc-a{margin-top:8px;color:var(--mz-c-muted)}
@@ -23050,10 +23076,12 @@ function mzTreeCss(root, ds, ctx) {
   return mzDsCss(ds) + MZ_BASE_CSS + c.d + (c.t ? `@media (max-width:1024px){${c.t}}` : '') + (c.m ? `@media (max-width:767px){${c.m}}` : '');
 }
 const MZ_FONT_LIST = ['Poppins', 'Inter', 'Montserrat', 'Roboto', 'Open Sans', 'Lato', 'Playfair Display', 'Merriweather', 'Raleway', 'Nunito', 'DM Sans', 'Work Sans', 'Oswald', 'Bebas Neue', 'Lora', 'Space Grotesk'];
-const mzFontsUrl = ds => { const f = [...new Set([ds.fonts.heading, ds.fonts.body])].filter(x => MZ_FONT_LIST.includes(x)); return f.length ? 'https://fonts.googleapis.com/css2?' + f.map(x => 'family=' + x.replace(/ /g, '+') + ':wght@300;400;500;600;700;800;900').join('&') + '&display=swap' : ''; };
+function mzTreeFonts(root, set) { set = set || new Set(); const take = v => { String(v || '').replace(/['"]?([A-Z][\w ]{1,38})['"]?\s*(?:,|$)/g, (m, f) => { if (!/^(Arial|Helvetica|Georgia|Times|Courier|Verdana|Tahoma|Trebuchet|Impact)/i.test(f)) set.add(f.trim()); return m; }); };
+  mzWalk(root, n => { ['d', 't', 'm'].forEach(b => { const f = n.style && n.style[b] && n.style[b].fontFamily; if (f) take(String(f).split(',')[0]); }); const h = n.props && (n.props.html || ''); if (h) String(h).replace(/font-family:\s*([^;"]+)/gi, (m, f) => { take(f.split(',')[0]); return m; }); }); return set; }
+const mzFontsUrl = (ds, root) => { const s = new Set([ds.fonts.heading, ds.fonts.body]); if (root) mzTreeFonts(root, s); const f = [...s].filter(x => /^[A-Za-z][\w ]{1,38}$/.test(x) && (MZ_FONT_LIST.includes(x) || (root && x !== 'system-ui' && x !== 'sans-serif' && x !== 'serif'))); return f.length ? 'https://fonts.googleapis.com/css2?' + f.map(x => 'family=' + x.replace(/ /g, '+') + ':wght@300;400;500;600;700;800;900').join('&') + '&display=swap' : ''; };
 /* documento completo (saída: HTML, preview, exportação) */
 function mzDoc(m, page, o) {
-  o = o || {}; const ctx = {mode: 'out', comps: m.comps, img: o.img || (() => '')}, body = mzNodeHtml(page.root, ctx), css = mzTreeCss(page.root, m.ds, ctx), fu = mzFontsUrl(m.ds);
+  o = o || {}; const ctx = {mode: 'out', comps: m.comps, img: o.img || (() => '')}, body = mzNodeHtml(page.root, ctx), css = mzTreeCss(page.root, m.ds, ctx), fu = mzFontsUrl(m.ds, page.root);
   const seo = page.seo || {}, title = seo.title || page.name;
   return `<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${mzEsc(title)}</title>\n${seo.desc ? `<meta name="description" content="${mzEsc(seo.desc)}">\n` : ''}${page.priv ? '<meta name="robots" content="noindex,nofollow">\n' : ''}${fu ? `<link rel="stylesheet" href="${fu}">\n` : ''}${o.cssFile ? `<link rel="stylesheet" href="${o.cssFile}">` : `<style>\n${css}\n</style>`}\n</head>\n<body>\n${body}\n<script>${MZ_RUNTIME}<\/script>\n</body>\n</html>`;
 }
@@ -23244,7 +23272,7 @@ function mzTouch() { MZ.dirty = true; mzM().rev++; clearTimeout(MZ.saveT); MZ.sa
 const MZ_ED_CSS = `html{overflow:hidden}body{margin:0;min-height:100vh;cursor:default;-webkit-user-select:none;user-select:none}[contenteditable]{-webkit-user-select:text;user-select:text;outline:none}
 [data-type=section]:empty,[data-type=container]:empty,[data-type=column]:empty,[data-type=div]:empty,[data-type=form]:empty,[data-type=link]:empty,.mz-in:empty{min-height:64px;outline:1px dashed rgba(110,110,170,.55);outline-offset:-1px;position:relative}
 [data-type=section]:empty::after,[data-type=container]:empty::after,[data-type=column]:empty::after,[data-type=div]:empty::after,[data-type=form]:empty::after,.mz-in:empty::after{content:"Solte um elemento aqui";position:absolute;inset:0;display:grid;place-items:center;font:12px system-ui;color:#8888a8;pointer-events:none}
-body.mz-drawing,body.mz-drawing *{cursor:crosshair!important}#mzOv{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:2147483000;--u:1;font-family:system-ui,sans-serif}#mzOv *{pointer-events:none;box-sizing:border-box}
+[data-type=div].mz-shape:empty::after{display:none!important}body.mz-drawing,body.mz-drawing *{cursor:crosshair!important}#mzOv{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:2147483000;--u:1;font-family:system-ui,sans-serif}#mzOv *{pointer-events:none;box-sizing:border-box}
 .ov-box{position:absolute;border:calc(2px*var(--u)) solid #2f6bff}.ov-hover{position:absolute;border:calc(1.5px*var(--u)) solid rgba(47,107,255,.55)}.ov-par{position:absolute;border:calc(1px*var(--u)) dashed rgba(47,107,255,.6)}
 .ov-lab{position:absolute;background:#2f6bff;color:#fff;font:700 calc(11px*var(--u))/1 system-ui;padding:calc(4px*var(--u)) calc(7px*var(--u));border-radius:calc(4px*var(--u)) calc(4px*var(--u)) 0 0;white-space:nowrap;transform-origin:0 100%}
 .ov-dim{position:absolute;background:#2f6bff;color:#fff;font:600 calc(10px*var(--u))/1 system-ui;padding:calc(3px*var(--u)) calc(6px*var(--u));border-radius:calc(4px*var(--u));white-space:nowrap}
@@ -23276,9 +23304,11 @@ function mzLayoutFrames() {
 }
 let MZ_RAF = 0;
 function mzRender() { if (MZ_RAF) return; MZ_RAF = requestAnimationFrame(() => { MZ_RAF = 0; mzRenderNow(); }); }
-async function mzRenderNow() {
-  if (!MZ.open) return; await mzLoadImgs(); const m = mzM(), root = mzRoot(), ctx = {mode: 'edit', comps: m.comps, img: mzImgFn};
-  const css = mzTreeCss(root, m.ds, ctx) + (mzPg().bg ? `body{background:${mzPg().bg}}` : ''), html = mzNodeHtml(root, ctx), fu = mzFontsUrl(m.ds);
+async function mzRenderNow() { if (!MZ.open) return; await mzLoadImgs(); mzPaint(); }
+function mzRenderNowSync() { mzPaint(); }
+function mzPaint() {
+  if (!MZ.open) return; const m = mzM(), root = mzRoot(), ctx = {mode: 'edit', comps: m.comps, img: mzImgFn};
+  const css = mzTreeCss(root, m.ds, ctx) + (mzPg().bg ? `body{background:${mzPg().bg}}` : ''), html = mzNodeHtml(root, ctx), fu = mzFontsUrl(m.ds, root);
   Object.values(MZ.frames).forEach(fr => {
     if (!fr.ready || !fr.doc) return; if (MZ.editing && MZ.editing.fr === fr) return;
     fr.doc.getElementById('mzPg').textContent = css; const f = fr.doc.getElementById('mzFonts'); if (fu && f.getAttribute('href') !== fu) f.setAttribute('href', fu);
@@ -23384,7 +23414,8 @@ function mzDropDraw(fr, drop) {
 }
 function mzDragMove(fr, x, y, e) {
   const dr = MZ.drag; if (!dr) return; if (!dr.on) { if (Math.hypot(x - dr.x0, y - dr.y0) < 5) return; dr.on = true; fr.dragging = true; mzGhost(true, dr.label || 'Mover'); }
-  const f = mzFind(mzRoot(), dr.id); if (dr.kind === 'move' && f && !dr.freed) { dr.freed = true; if (MZ.free !== !!(e && e.altKey)) mzFreeConvert(fr, dr, f); }
+  const f = mzFind(mzRoot(), dr.id); if (dr.kind === 'move' && f && !dr.freed) { dr.freed = true; if (e && e.altKey && f.parent && f.node.type !== 'page') { const c = mzFresh(f.node); c.name = f.node.name ? f.node.name + ' (cópia)' : ''; f.parent.children.splice(f.idx + 1, 0, c); mzRenderNowSync(); dr.id = c.id; MZ.sel = c.id; dr.dup = true; }
+    const f2 = mzFind(mzRoot(), dr.id); if (MZ.free && f2) mzFreeConvert(fr, dr, f2); }
   if (dr.kind === 'move' && f) { const st = mzStyleAt(f.node, MZ.bp); if (st.position === 'absolute' || st.position === 'fixed') { dr.free = true; const dx = (x - dr.x0), dy = (y - dr.y0); if (!dr.base) dr.base = {l: parseFloat(st.left) || 0, t: parseFloat(st.top) || 0}; const o = mzStyleSet(f.node, MZ.bp); o.left = Math.round(dr.base.l + dx) + 'px'; o.top = Math.round(dr.base.t + dy) + 'px'; mzRenderNow(); return; } }
   const item = dr.kind === 'move' ? f.node : {type: dr.type, id: ''}; dr.drop = mzDropAt(fr, x, y, item); mzDropDraw(fr, dr.drop);
 }
@@ -23414,7 +23445,7 @@ function mzToFrame(fr, cx, cy) { const b = fr.ifr.getBoundingClientRect(), z = f
 
 /* ---------- redimensionar ---------- */
 function mzResizeStart(fr, h, e) {
-  const f = mzFind(mzRoot(), MZ.sel); if (!f) return; const el = mzElOf(fr, MZ.sel), r = mzRectOf(el); MZ.drag = {kind: 'resize', fr, id: MZ.sel, h, x0: e.clientX, y0: e.clientY, r, on: true, aspect: r.width / Math.max(1, r.height), node: f.node};
+  const f = mzFind(mzRoot(), MZ.sel); if (!f) return; const el = mzElOf(fr, MZ.sel), r = mzRectOf(el); MZ.drag = {kind: 'resize', fr, id: MZ.sel, h, x0: e.clientX, y0: e.clientY, r, on: true, aspect: r.width / Math.max(1, r.height), node: f.node, fs: parseFloat(fr.doc.defaultView.getComputedStyle(el).fontSize) || 16};
   const move = ev => mzResizeMove(fr, ev), up = ev => { fr.doc.removeEventListener('pointermove', move); fr.doc.removeEventListener('pointerup', up); fr.doc.removeEventListener('pointercancel', up); MZ.drag = null; mzCommit({panels: true}); }; fr.doc.addEventListener('pointermove', move); fr.doc.addEventListener('pointerup', up); fr.doc.addEventListener('pointercancel', up);
 }
 function mzResizeMove(fr, e) {
@@ -23424,6 +23455,8 @@ function mzResizeMove(fr, e) {
   // encaixe nas guias verticais/horizontais e na largura da página
   const snap = (v, arr) => { const t = arr.find(g => Math.abs(g - v) < 6); return t == null ? v : t; };
   const o = mzStyleSet(n, MZ.bp), stp = mzStyleAt(n, MZ.bp), abs = stp.position === 'absolute';
+  const TXT = ['heading', 'text', 'button', 'badge'].includes(n.type) && sx && sy && !e.altKey;   // canto em texto = aumentar/diminuir a letra (como no Canva)
+  if (TXT) { const sc = Math.max(.15, w / dr.r.width), o2 = mzStyleSet(n, MZ.bp), st2 = mzStyleAt(n, MZ.bp); o2.fontSize = Math.max(8, Math.round(dr.fs * sc * 10) / 10) + 'px'; if (st2.lineHeight && /px$/.test(st2.lineHeight)) o2.lineHeight = Math.round(parseFloat(st2.lineHeight) * sc) + 'px'; if (n.type !== 'button' && n.type !== 'badge') o2.width = Math.round(w) + 'px'; mzRenderNow(); return; }
   if (sx) { const right = snap(dr.r.left + w, mzPg().guides.v.concat([MZ_BP[MZ.bp]])); w = right - dr.r.left; o.width = Math.round(w) + 'px'; if (abs && sx < 0) o.left = Math.round((parseFloat(stp.left) || 0) + (dr.r.width - w)) + 'px'; }
   if (sy) { const bot = snap(dr.r.top + hh, mzPg().guides.h); hh = bot - dr.r.top; if (n.type === 'image' || n.type === 'logo' || n.type === 'video' || n.type === 'spacer') o.height = Math.round(hh) + 'px'; else o.minHeight = Math.round(hh) + 'px'; if (n.type === 'image') o.aspectRatio = 'auto'; }
   mzRenderNow();
@@ -23433,22 +23466,43 @@ function mzResizeMove(fr, e) {
 const MZ_EDITABLE = ['heading', 'text', 'button', 'badge'];
 function mzStartEdit(fr, id) {
   const f = mzFind(mzRoot(), id); if (!f || f.node.locked || !MZ_EDITABLE.includes(f.node.type)) { if (f && f.node.type === 'image') mzPickImage(id); return; } const el = mzElOf(fr, id); if (!el) return;
-  mzSelect(id); MZ.editing = {fr, id, el, type: f.node.type}; el.contentEditable = f.node.type === 'text' ? 'true' : 'plaintext-only'; if (el.contentEditable !== 'true' && el.contentEditable !== 'plaintext-only') el.contentEditable = 'true'; el.focus();
+  mzSelect(id); MZ.editing = {fr, id, el, type: f.node.type}; el.contentEditable = f.node.type === 'text' || f.node.type === 'heading' ? 'true' : 'plaintext-only'; if (el.contentEditable !== 'true' && el.contentEditable !== 'plaintext-only') el.contentEditable = 'true'; el.focus();
   const r = fr.doc.createRange(); r.selectNodeContents(el); const s = fr.doc.defaultView.getSelection(); s.removeAllRanges(); s.addRange(r);
-  el.addEventListener('blur', () => { if (MZ.editing && MZ.editing.el === el) mzEndEdit(true); }, {once: true}); el.addEventListener('keydown', ev => { ev.stopPropagation(); if (ev.key === 'Escape') { mzEndEdit(false); } else if (ev.key === 'Enter' && f.node.type !== 'text' && !ev.shiftKey) { ev.preventDefault(); mzEndEdit(true); } else if ((ev.ctrlKey || ev.metaKey) && /^[biu]$/i.test(ev.key) && f.node.type === 'text') { /* formatação nativa */ } });
+  el.addEventListener('blur', () => setTimeout(() => { if (!MZ.editing || MZ.editing.el !== el) return; if (MZ_RB && MZ_RB.contains(document.activeElement)) return; mzEndEdit(true); }, 0)); el.addEventListener('keydown', ev => { ev.stopPropagation(); if (ev.key === 'Escape') { mzEndEdit(false); } else if (ev.key === 'Enter' && f.node.type !== 'text' && !ev.shiftKey) { ev.preventDefault(); mzEndEdit(true); } else if ((ev.ctrlKey || ev.metaKey) && /^[biu]$/i.test(ev.key) && f.node.type === 'text') { /* formatação nativa */ } });
   mzRichBar(fr, el, f.node.type === 'text');
+  if (f.node.type === 'heading') el.addEventListener('paste', ev => { ev.preventDefault(); const t = (ev.clipboardData || window.clipboardData).getData('text/plain'); fr.doc.execCommand('insertText', false, t); });
 }
 function mzEndEdit(save) {
   const ed = MZ.editing; if (!ed) return; MZ.editing = null; const f = mzFind(mzRoot(), ed.id); mzRichBarClose(); if (!f) { mzRender(); return; }
-  if (save) { const n = f.node; if (ed.type === 'text') n.props.html = mzRich(ed.el.innerHTML); else if (ed.type === 'heading') n.props.text = ed.el.innerText.replace(/\n+/g, '\n').slice(0, 1500); else n.props.text = ed.el.innerText.replace(/\s+/g, ' ').trim().slice(0, 200); mzCommit({panels: true}); } else mzRender();
+  if (save) { const n = f.node; if (ed.type === 'text') n.props.html = mzRich(ed.el.innerHTML); else if (ed.type === 'heading') { n.props.text = ed.el.innerText.replace(/\n+/g, '\n').slice(0, 1500); n.props.html = /<(span|b|strong|i|em|u|s|strike|a)\b/i.test(ed.el.innerHTML) ? mzRich(ed.el.innerHTML) : ''; n.props.hOf = n.props.text; } else n.props.text = ed.el.innerText.replace(/\s+/g, ' ').trim().slice(0, 200); mzCommit({panels: true}); } else mzRender();
 }
 /* barra de formatação (negrito, itálico, sublinhado, link, cor, lista) no texto rico */
 let MZ_RB = null;
+const MZ_FX = {none: ['Sem efeito', ''], shadow: ['Sombra suave', 'text-shadow:0 2px 8px rgba(0,0,0,.35)'], hard: ['Sombra dura', 'text-shadow:3px 3px 0 rgba(0,0,0,.85)'], outline: ['Contorno', '-webkit-text-stroke-width:1.5px;-webkit-text-stroke-color:#111111;-webkit-text-fill-color:transparent'], neon: ['Brilho neon', 'color:#ffffff;text-shadow:0 0 6px #ff2bd6,0 0 14px #ff2bd6,0 0 28px #ff2bd6'], glow: ['Brilho suave', 'text-shadow:0 0 12px rgba(255,214,0,.9)'], grad: ['Gradiente', 'background-image:linear-gradient(90deg,#ff512f,#dd2476);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent'], mark: ['Marca-texto', 'background-color:#fff176']};
+let MZ_RANGE = null;
+function mzRichFont(fr, fam) { if (!/^[A-Za-z][\w ]{1,38}$/.test(fam)) return; const l = fr.doc.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=' + fam.replace(/ /g, '+') + ':wght@300;400;500;600;700;800;900&display=swap'; fr.doc.head.appendChild(l); }
+/* aplica um estilo só ao trecho selecionado (palavra ou letras) */
+function mzRichApply(fr, el, css) {
+  const sel = fr.doc.getSelection(); let r = sel && sel.rangeCount && !sel.isCollapsed ? sel.getRangeAt(0) : null; if (!r && MZ_RANGE && !MZ_RANGE.collapsed) { r = MZ_RANGE; }
+  if (!r || !el.contains(r.commonAncestorContainer)) { toast('Selecione uma palavra ou um trecho do texto primeiro.'); return false; }
+  const span = fr.doc.createElement('span'); const ok = mzRichStyle(css); if (!ok) return false; span.setAttribute('style', ok); const frag = r.extractContents(); frag.querySelectorAll && frag.querySelectorAll('span[style]').forEach(x => { const keys = ok.split(';').map(d => d.split(':')[0]); const kept = (x.getAttribute('style') || '').split(';').filter(d => d && !keys.includes(d.split(':')[0].trim())).join(';'); kept ? x.setAttribute('style', kept) : x.removeAttribute('style'); });
+  span.appendChild(frag); r.insertNode(span); const nr = fr.doc.createRange(); nr.selectNodeContents(span); sel.removeAllRanges(); sel.addRange(nr); MZ_RANGE = nr.cloneRange(); return true;
+}
 function mzRichBar(fr, el, rich) {
-  mzRichBarClose(); if (!rich) return; const b = fr.ifr.getBoundingClientRect(), z = fr.z || 1, r = el.getBoundingClientRect(); MZ_RB = document.createElement('div'); MZ_RB.className = 'mz-rb'; MZ_RB.style.left = Math.max(8, b.left + r.left * z) + 'px'; MZ_RB.style.top = Math.max(60, b.top + r.top * z - 46) + 'px';
-  MZ_RB.innerHTML = `<button data-c="bold"><b>B</b></button><button data-c="underline"><u>U</u></button><button data-c="italic"><i>I</i></button><button data-c="link">🔗</button><input type="color" data-c="foreColor" value="#e4572e" title="Cor do texto"><button data-c="insertUnorderedList">• Lista</button>`;
-  MZ_RB.addEventListener('pointerdown', ev => ev.preventDefault()); MZ_RB.addEventListener('click', ev => { const t = ev.target.closest('[data-c]'); if (!t) return; const c = t.dataset.c; fr.doc.defaultView.focus(); el.focus(); if (c === 'link') { const u = prompt('Endereço do link (https://...)'); if (u && MZ_URL(u)) fr.doc.execCommand('createLink', false, u); } else if (c !== 'foreColor') fr.doc.execCommand(c, false, null); });
-  MZ_RB.querySelector('input').addEventListener('input', ev => { el.focus(); fr.doc.execCommand('foreColor', false, ev.target.value); }); document.body.appendChild(MZ_RB);
+  mzRichBarClose(); const b = fr.ifr.getBoundingClientRect(), z = fr.z || 1, r = el.getBoundingClientRect(); MZ_RB = document.createElement('div'); MZ_RB.className = 'mz-rb'; MZ_RB.style.left = Math.max(8, Math.min(b.left + r.left * z, innerWidth - 640)) + 'px'; MZ_RB.style.top = Math.max(60, b.top + r.top * z - 46) + 'px';
+  const fonts = [...new Set(MZ_FONT_LIST.concat([mzM().ds.fonts.heading, mzM().ds.fonts.body]))];
+  MZ_RB.innerHTML = `<button data-c="bold" title="Negrito"><b>B</b></button><button data-c="italic" title="Itálico"><i>I</i></button><button data-c="underline" title="Sublinhado"><u>U</u></button><button data-c="strikeThrough" title="Riscado"><s>S</s></button><button data-c="link" title="Link">🔗</button>`
+    + (rich || el.dataset.type === 'heading' ? `<span class="sp"></span><select data-f="font" title="Fonte da seleção"><option value="">Fonte…</option>${fonts.map(f => `<option style="font-family:'${f}'">${f}</option>`).join('')}<option value="__more">Mais fontes…</option></select><input data-f="size" type="number" min="8" max="400" placeholder="px" title="Tamanho da seleção (px)"><input type="color" data-f="color" value="#e4572e" title="Cor da seleção"><input type="color" data-f="bg" value="#fff176" title="Cor de destaque (marca-texto)"><select data-f="fx" title="Efeito na seleção">${Object.keys(MZ_FX).map(k => `<option value="${k}">${k === 'none' ? 'Efeito…' : MZ_FX[k][0]}</option>`).join('')}</select><button data-c="clear" title="Limpar formatação da seleção">⌫</button>` : '')
+    + (rich ? `<button data-c="insertUnorderedList">• Lista</button>` : '') + `<span class="sp"></span><button data-c="done" title="Concluir (Esc)">✓</button>`;
+  const keep = () => { const sl = fr.doc.getSelection(); if (sl && sl.rangeCount && !sl.isCollapsed && el.contains(sl.anchorNode)) MZ_RANGE = sl.getRangeAt(0).cloneRange(); }; fr.doc.addEventListener('selectionchange', keep);
+  MZ_RB.addEventListener('pointerdown', ev => { if (!ev.target.closest('select,input')) ev.preventDefault(); }); MZ_RB.addEventListener('click', ev => { const t = ev.target.closest('[data-c]'); if (!t) return; const c = t.dataset.c; fr.doc.defaultView.focus(); el.focus();
+    if (c === 'link') { const u = prompt('Endereço do link (https://...)'); if (u && MZ_URL(u)) fr.doc.execCommand('createLink', false, u); } else if (c === 'done') mzEndEdit(true);
+    else if (c === 'clear') { fr.doc.execCommand('removeFormat'); el.querySelectorAll('span[style]').forEach(x => { const sl = fr.doc.getSelection(); if (sl && sl.rangeCount && sl.getRangeAt(0).intersectsNode(x)) x.removeAttribute('style'); }); } else fr.doc.execCommand(c, false, null); });
+  const act = (css, restore) => { el.focus(); if (restore && MZ_RANGE) { const sl = fr.doc.getSelection(); sl.removeAllRanges(); sl.addRange(MZ_RANGE); } mzRichApply(fr, el, css); };
+  MZ_RB.querySelectorAll('[data-f]').forEach(inp => inp.addEventListener(inp.tagName === 'INPUT' && inp.type === 'color' ? 'input' : 'change', ev => { const k = inp.dataset.f, v = inp.value;
+    if (k === 'font') { if (v === '__more') { fbOpen(fam => { closeModal(); fam = String(fam).replace(/[^\w ]/g, '').slice(0, 40); mzRichFont(fr, fam); act(`font-family:'${fam}'`, true); }, ''); inp.value = ''; return; } if (v) { mzRichFont(fr, v); act(`font-family:'${v}'`, true); } }
+    else if (k === 'size' && v) act(`font-size:${Math.max(8, Math.min(400, +v))}px`, true); else if (k === 'color') act('color:' + v, true); else if (k === 'bg') act('background-color:' + v, true); else if (k === 'fx') { const fx = MZ_FX[v]; if (fx && fx[1]) act(fx[1], true); inp.value = 'none'; } }));
+  document.body.appendChild(MZ_RB);
 }
 function mzRichBarClose() { if (MZ_RB) MZ_RB.remove(); MZ_RB = null; }
 function mzPickImage(id) { libPick(r => { const f = mzFind(mzRoot(), id); if (!f) return; const li = libItem(r); f.node.props.imgId = li ? li.imgId : r; mzCommit({panels: true}); }, {raw: true, title: 'Escolher imagem'}); }
@@ -23462,6 +23516,7 @@ function mzKey(e) {
   if (mod && k.toLowerCase() === 'd') { e.preventDefault(); mzDup(); return; } if (mod && k.toLowerCase() === 'g') { e.preventDefault(); e.shiftKey ? mzUngroup() : mzGroup(); return; } if (mod && k.toLowerCase() === 's') { e.preventDefault(); persist(); toast('Salvo.'); return; }
   if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); mzDelete(); return; } if (k === 'Escape') { if (MZ.draw && MZ.draw.on) { mzDrawToggle(false); return; } if (MZ.sel) mzSelect(''); else mzClose(); return; }
   if (k === 'Enter' && MZ.sel) { const fr = MZ.frames[MZ.bp]; if (fr) mzStartEdit(fr, MZ.sel); return; }
+  if (k === 'A' && e.shiftKey && !mod) { e.preventDefault(); mzAutoKey(); return; }
   if (k === '[') { mzMoveStep(-1); return; } if (k === ']') { mzMoveStep(1); return; }
   if (/^Arrow/.test(k) && MZ.sel) { const n = mzSelNode(); if (!n) return; const st = mzStyleAt(n, MZ.bp); if (st.position === 'absolute') { e.preventDefault(); const s = e.shiftKey ? 10 : 1, o = mzStyleSet(n, MZ.bp); if (k === 'ArrowLeft') o.left = ((parseFloat(st.left) || 0) - s) + 'px'; if (k === 'ArrowRight') o.left = ((parseFloat(st.left) || 0) + s) + 'px'; if (k === 'ArrowUp') o.top = ((parseFloat(st.top) || 0) - s) + 'px'; if (k === 'ArrowDown') o.top = ((parseFloat(st.top) || 0) + s) + 'px'; mzCommit({panels: true}); } else if (k === 'ArrowUp') { e.preventDefault(); mzMoveStep(-1); } else if (k === 'ArrowDown') { e.preventDefault(); mzMoveStep(1); } }
 }
@@ -23512,7 +23567,7 @@ function mzDelete(id) {
   id = id || MZ.sel; const f = id && mzFind(mzRoot(), id); if (!f || !f.parent) return; if (f.node.locked) { toast('Elemento bloqueado.'); return; } f.parent.children.splice(f.idx, 1);
   const nx = f.parent.children[Math.min(f.idx, f.parent.children.length - 1)]; MZ.sel = nx ? nx.id : (f.parent.type === 'page' ? '' : f.parent.id); mzCommit({panels: true});
 }
-function mzDup(id) { id = id || MZ.sel; const f = id && mzFind(mzRoot(), id); if (!f || !f.parent) return; const c = mzFresh(f.node); c.name = f.node.name ? f.node.name + ' (cópia)' : ''; f.parent.children.splice(f.idx + 1, 0, c); MZ.sel = c.id; mzCommit({panels: true}); }
+function mzDup(id) { id = id || MZ.sel; const f = id && mzFind(mzRoot(), id); if (!f || !f.parent) return; const c = mzFresh(f.node); c.name = f.node.name ? f.node.name + ' (cópia)' : ''; const st = mzStyleAt(f.node, MZ.bp); if (st.position === 'absolute') { const o = mzStyleSet(c, MZ.bp); o.left = ((parseFloat(st.left) || 0) + 24) + 'px'; o.top = ((parseFloat(st.top) || 0) + 24) + 'px'; } f.parent.children.splice(f.idx + 1, 0, c); MZ.sel = c.id; mzCommit({panels: true}); }
 function mzCopy() { const n = mzSelNode(); if (!n || n.type === 'page') return; MZ.clip = JSON.stringify(n); try { localStorage.setItem('mz_clip', MZ.clip); } catch (e) { /* sem armazenamento */ } toast('Copiado.'); }
 function mzPaste() {
   let j = MZ.clip; if (!j) { try { j = localStorage.getItem('mz_clip'); } catch (e) { /* ok */ } } if (!j) { toast('Nada copiado.'); return; } let n; try { n = mzNormNode(JSON.parse(j)); } catch (e) { return; } if (!n) return; mzWalk(n, x => { x.id = mzId(); });
@@ -23634,7 +23689,7 @@ function mzShellHtml() {
     <div class="mz-bps"><button data-mzbp="d" class="on" onclick="mzSetBp('d')" title="Desktop 1440">🖥 1440</button><button data-mzbp="t" onclick="mzSetBp('t')" title="Tablet 768">▭ 768</button><button data-mzbp="m" onclick="mzSetBp('m')" title="Celular 390">▯ 390</button><button data-mzview="three" onclick="mzSetView(MZ.view==='three'?'one':'three')" title="Ver os três tamanhos lado a lado">⫼ 3 telas</button></div>
     <div class="mz-zoom"><button onclick="mzZoom(-0.1)" title="Menos zoom">−</button><span id="mzZoomL">100%</span><button onclick="mzZoom(0.1)" title="Mais zoom">＋</button><button onclick="mzZoomFit()" title="Ajustar à tela">Ajustar</button></div>
     <div class="mz-acts"><button class="mz-btn-i" id="mzUndo" onclick="mzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="mz-btn-i" id="mzRedo" onclick="mzRedo()" title="Refazer (Ctrl+Y)">↷</button><span class="mz-sep"></span>
-      <button class="mz-btn-i ${MZ.free ? 'on' : ''}" id="mzFreeBtn" onclick="mzFreeToggle()" title="Modo livre: arraste qualquer elemento para onde quiser (Alt+arrastar faz o contrário)">✋ Livre</button><button class="mz-btn-i" id="mzDrawBtn" onclick="mzDrawToggle()" title="Desenhar com pincéis sobre a página">✏️ Desenhar</button>
+      <button class="mz-btn-i ${MZ.free ? 'on' : ''}" id="mzFreeBtn" onclick="mzFreeToggle()" title="Modo livre: arraste qualquer elemento para onde quiser (Alt+arrastar duplica)">✋ Livre</button><button class="mz-btn-i" id="mzDrawBtn" onclick="mzDrawToggle()" title="Desenhar com pincéis sobre a página">✏️ Desenhar</button>
       <button class="mz-btn-i ai" onclick="mzAiToggle()" title="Comandos de IA no layout">✨ IA</button><button class="mz-btn-i" onclick="mzModalPreview()">👁 Prévia</button><button class="mz-btn-i" onclick="mzModalVersions()">🕘 Versões</button><button class="mz-btn-i" onclick="mzModalDs()">🎨 Sistema</button><button class="mz-btn-i" onclick="mzModalImport()">⬆ Importar</button><button class="mz-btn-i dark" onclick="mzModalExport()">⬇ Exportar</button><span id="mzSaved" class="mz-saved"></span></div>
   </div>
   <div class="mz-body">
@@ -23651,8 +23706,8 @@ function mzRefreshLeft() {
   const c = document.getElementById('mzLeftC'); if (!c) return; const q = dnorm(MZ.q), ok = t => !q || dnorm(t).includes(q), favs = mzM().favs;
   const card = (key, spec, ic, name) => `<div class="mz-card" onpointerdown='mzLibDrag(event,${esc(JSON.stringify(spec))})' title="Arraste para a página ou clique para inserir"><i>${mzI(ic, 24)}</i><span>${esc(name)}</span><button class="mz-fav ${favs.includes(key) ? 'on' : ''}" onpointerdown="event.stopPropagation()" onclick="event.stopPropagation();mzFav('${key}')" title="Favorito">★</button></div>`;
   if (MZ.left === 'elements') {
-    const els = MZ_EL.filter(e => ok(e.name)), grp = (t, a) => a.length ? `<h4>${t}</h4><div class="mz-grid">${a.map(e => card('el:' + e.id, {kind: 'el', id: e.id, type: e.id === 'columns2' || e.id === 'columns3' ? 'container' : e.id, label: e.name}, e.icon, e.name)).join('')}</div>` : '';
-    c.innerHTML = grp('★ Favoritos', els.filter(e => favs.includes('el:' + e.id))) + grp('Básicos', els.filter(e => e.cat === 'basic')) + grp('Avançados', els.filter(e => e.cat === 'adv')) + (els.length ? '' : '<p class="muted">Nada encontrado.</p>');
+    const els = MZ_EL.filter(e => ok(e.name)), grp = (t, a) => a.length ? `<h4>${t}</h4><div class="mz-grid">${a.map(e => card('el:' + e.id, {kind: 'el', id: e.id, type: e.id === 'columns2' || e.id === 'columns3' ? 'container' : (e.nodeType || e.id), label: e.name}, e.icon, e.name)).join('')}</div>` : '';
+    c.innerHTML = grp('★ Favoritos', els.filter(e => favs.includes('el:' + e.id))) + grp('Básicos', els.filter(e => e.cat === 'basic')) + grp('Formas', els.filter(e => e.cat === 'shape')) + grp('Avançados', els.filter(e => e.cat === 'adv')) + (els.length ? '' : '<p class="muted">Nada encontrado.</p>');
   } else if (MZ.left === 'blocks') {
     const bl = MZ_BLOCKS.filter(b => ok(b.name));
     c.innerHTML = `<h4>Blocos prontos</h4><p class="mz-hint">Árvores de elementos básicos, preenchidas com o seu projeto. Você edita cada peça. O que falta está entre [colchetes].</p><div class="mz-grid one">${bl.map(b => card('pre:' + b.id, {kind: 'block', id: b.id, type: 'section', label: b.name}, b.icon, b.name)).join('')}</div>`;
@@ -23705,6 +23760,7 @@ function mzPageSettingsHtml() {
     <div class="mz-sec"><h5>SEO</h5>${mzTxt('Título da página', pg.seo.title, `mzPageSet('${pg.id}','seoTitle',this.value)`)}${mzArea('Descrição', pg.seo.desc, `mzPageSet('${pg.id}','seoDesc',this.value)`)}</div>
     <div class="mz-sec"><h5>Página</h5>${mzTxt('Nome', pg.name, `mzPageSet('${pg.id}','name',this.value);mzPageSelUpdate()`)}${mzTxt('Endereço (slug)', pg.slug, `mzPageSet('${pg.id}','slug',this.value)`)}<label class="mz-ck"><input type="checkbox" ${pg.home ? 'checked' : ''} onchange="mzPageSet('${pg.id}','home',1);mzPageSelUpdate()"> Página inicial</label><label class="mz-ck"><input type="checkbox" ${pg.priv ? 'checked' : ''} onchange="mzPageSet('${pg.id}','priv',this.checked)"> Privada (não indexar)</label><label class="mz-ck"><input type="checkbox" ${pg.kind === 'campaign' ? 'checked' : ''} onchange="mzPageSet('${pg.id}','kind',this.checked?'campaign':'page')"> Página de campanha</label>
     <label class="mz-f"><span>Cor de fundo da página</span><input type="color" value="${pg.bg || '#ffffff'}" oninput="mzPageSet('${pg.id}','bg',this.value)"></label></div>
+    <div class="mz-sec"><h5>Adaptar tela</h5><p class="mz-hint">Arrume no Desktop; um clique ajusta Tablet e Celular (empilha colunas, reduz títulos e espaços). Só preenche o que você ainda não ajustou.</p><button class="btn sm dark" onclick="mzAutoAdaptPage()">↺ Adaptar a página inteira</button></div>
     <div class="mz-sec"><h5>Guias</h5><p class="mz-hint">Arraste das réguas (topo e lateral) para criar. ${g.v.length + g.h.length} guia(s).</p><button class="btn sm" onclick="mzGuidesClear()">Limpar guias</button> <label class="mz-ck inline"><input type="checkbox" ${MZ.guides ? 'checked' : ''} onchange="MZ.guides=this.checked;mzOverlayAll()"> Mostrar</label></div>
     <div class="mz-sec"><h5>Atalhos</h5><p class="mz-hint">Duplo clique: editar texto · Ctrl+D duplicar · Ctrl+C/V · Ctrl+G agrupar · Del excluir · [ ] ordem · Ctrl+Z/Y · Ctrl + roda: zoom · botão direito: menu</p></div>`;
 }
@@ -24124,7 +24180,7 @@ async function mzAiRewrite() {
 /* Mesa de páginas — modo livre (arrastar como no Canva) e ferramenta de desenho (pincéis) */
 
 /* ---------- modo livre ---------- */
-function mzFreeToggle() { MZ.free = !MZ.free; const b = document.getElementById('mzFreeBtn'); if (b) b.classList.toggle('on', MZ.free); toast(MZ.free ? 'Modo livre: arraste para onde quiser. Alt+arrastar reordena.' : 'Modo livre desligado: arrastar reordena dentro do layout.'); }
+function mzFreeToggle() { MZ.free = !MZ.free; const b = document.getElementById('mzFreeBtn'); if (b) b.classList.toggle('on', MZ.free); toast(MZ.free ? 'Modo livre: arraste para onde quiser. Alt+arrastar duplica.' : 'Modo livre desligado: arrastar reordena dentro do layout. Alt+arrastar duplica.'); }
 /* tira o elemento do fluxo e o deixa solto (absoluto) onde ele está agora */
 function mzFreeConvert(fr, dr, f) {
   const n = f.node, par = f.parent; if (!par || par.type === 'page' || n.type === 'section' || n.locked) return;
@@ -24179,6 +24235,173 @@ function mzDrawStart(fr, e) {
     if (changed) mzCommit({panels: false}); };
   doc.addEventListener('pointermove', mv, true); doc.addEventListener('pointerup', up, true); doc.addEventListener('pointercancel', up, true); add(e);
 }
+
+</script>
+<script>
+/* Mesa de páginas — auto layout (estilo Figma), ferramentas de design (efeitos, gradientes, formas, imagem, camadas) */
+
+/* ---------- ajuda: alteração ao vivo (sem lotar o histórico) ---------- */
+function mzLive(k, v, commit) { const n = mzSelNode(); if (!n) return; const o = mzStyleSet(n, MZ.bp), cv = v === '' || v == null ? '' : mzCssVal(k, v); if (cv === '') delete o[k]; else o[k] = cv; if (commit) mzCommit({panels: false}); else mzRender(); }
+const mzIsTexty = n => ['heading', 'text', 'button', 'badge', 'list'].includes(n.type);
+const mzIsImg = n => n.type === 'image' || n.type === 'logo';
+
+/* ---------- AUTO LAYOUT ---------- */
+const mzDirOf = n => { const st = mzStyleAt(n, MZ.bp); return String(st.flexDirection || 'row').startsWith('column') ? 'column' : 'row'; };
+function mzAutoSec(n) {
+  if (!mzIsCont(n) || n.type === 'page') return '';
+  const st = mzStyleAt(n, MZ.bp), flex = (st.display || '').includes('flex'), grid = (st.display || '').includes('grid'), on = flex || grid, dir = mzDirOf(n), wrap = st.flexWrap === 'wrap';
+  if (!on) return mzSection('Auto layout', `<p class="mz-hint">Organiza os filhos sozinho (como o Auto layout do Figma): espaçamento, alinhamento e adaptação ao Tablet e ao Celular.</p><div class="row-gap"><button class="btn sm dark" onclick="mzAutoOn()">＋ Ativar auto layout</button></div>`);
+  const jc = st.justifyContent || 'flex-start', ai = st.alignItems || 'stretch', Xv = ['flex-start', 'center', 'flex-end'];
+  const cell = (r, c) => { const mainIdx = dir === 'row' ? c : r, crossIdx = dir === 'row' ? r : c, mainOk = jc === Xv[mainIdx], crossOk = ai === Xv[crossIdx] || (ai === 'stretch' && false); return `<button class="${mainOk && crossOk ? 'on' : ''}" onclick="mzAutoAlign(${r},${c})"></button>`; };
+  const pad = mzStV(n, 'padding') || '';
+  return mzSection('Auto layout', `<div class="mz-seg-row"><button class="${flex && dir === 'row' && !wrap ? 'on' : ''}" onclick="mzAutoDir('row')" title="Lado a lado">→ Horizontal</button><button class="${flex && dir === 'column' ? 'on' : ''}" onclick="mzAutoDir('column')" title="Um embaixo do outro">↓ Vertical</button><button class="${flex && wrap ? 'on' : ''}" onclick="mzAutoDir('wrap')" title="Quebra de linha">↩ Quebra</button><button class="${grid ? 'on' : ''}" onclick="mzAutoDir('grid')" title="Grade">▦ Grade</button></div>
+    ${flex ? `<div class="mz-auto"><div class="mz-al">${[0, 1, 2].map(r => [0, 1, 2].map(c => cell(r, c)).join('')).join('')}</div><div class="mz-auto-f">${mzNum(n, 'gap', 'Espaço entre itens (px)', '0')}<label class="mz-f s"><span>Padding (px)</span><input type="number" value="${parseFloat(pad) || ''}" placeholder="0" onchange="mzSetStyle('padding',this.value)"></label><label class="mz-ck"><input type="checkbox" ${jc === 'space-between' ? 'checked' : ''} onchange="mzSetStyle('justifyContent',this.checked?'space-between':'flex-start');mzRefreshPanels()"> Distribuir (espaço entre)</label></div></div>` : mzTxt('Colunas', mzStV(n, 'gridTemplateColumns'), `mzSetStyle('gridTemplateColumns',this.value)`, 'repeat(3,1fr)') + mzNum(n, 'gap', 'Espaço entre itens (px)', '0')}
+    <div class="row-gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn sm dark" onclick="mzAutoAdaptSel()" title="Empilha no celular, quebra no tablet e ajusta espaçamentos">↺ Adaptar Tablet e Celular</button><button class="btn sm" onclick="mzAutoOff()">Desativar</button></div><p class="mz-hint">Dica: Shift+A liga o auto layout no selecionado.</p>`);
+}
+function mzAutoOn() {
+  const n = mzSelNode(); if (!n || !mzIsCont(n) || n.type === 'page') { toast('Selecione uma seção, contêiner ou coluna.'); return; }
+  const o = mzStyleSet(n, MZ.bp), st = mzStyleAt(n, MZ.bp); o.display = 'flex'; if (!st.flexDirection) o.flexDirection = n.children.length > 1 && n.children.every(c => mzStyleAt(c, MZ.bp).width && /%|px/.test(mzStyleAt(c, MZ.bp).width)) ? 'row' : 'column'; if (!st.gap) o.gap = '16px';
+  if (MZ.bp === 'd') mzAutoAdapt(n, false); mzCommit({panels: true});
+}
+function mzAutoOff() { const n = mzSelNode(); if (!n) return; mzStyleSet(n, MZ.bp).display = 'block'; mzCommit({panels: true}); }
+function mzAutoDir(k) {
+  const n = mzSelNode(); if (!n) return; const o = mzStyleSet(n, MZ.bp);
+  if (k === 'grid') { o.display = 'grid'; if (!mzStyleAt(n, MZ.bp).gridTemplateColumns) o.gridTemplateColumns = 'repeat(3,1fr)'; if (!mzStyleAt(n, MZ.bp).gap) o.gap = '16px'; }
+  else { o.display = 'flex'; o.flexDirection = k === 'column' ? 'column' : 'row'; o.flexWrap = k === 'wrap' ? 'wrap' : 'nowrap'; if (!mzStyleAt(n, MZ.bp).gap) o.gap = '16px'; }
+  mzCommit({panels: true});
+}
+function mzAutoAlign(r, c) { const n = mzSelNode(); if (!n) return; const X = ['flex-start', 'center', 'flex-end'], dir = mzDirOf(n), o = mzStyleSet(n, MZ.bp); o.justifyContent = X[dir === 'row' ? c : r]; o.alignItems = X[dir === 'row' ? r : c]; mzCommit({panels: true}); }
+/* tamanho do filho dentro de um auto layout: ajustar ao conteúdo / preencher / fixo */
+function mzSizeSec(n, par) {
+  if (!par || par.type === 'page') return ''; const pst = mzStyleAt(par, MZ.bp), pf = (pst.display || '').includes('flex'); if (!pf) return '';
+  const dir = mzDirOf(par), st = mzStyleAt(n, MZ.bp), abs = st.position === 'absolute'; if (abs) return '';
+  const mode = ax => { const w = st[ax === 'w' ? 'width' : 'height']; const main = (dir === 'row') === (ax === 'w'); if (main) { if (/^1/.test(String(st.flex || '')) || st.flexGrow) return 'fill'; } else if (st.alignSelf === 'stretch') return 'fill'; if (!w || w === 'auto' || w === 'fit-content') return 'hug'; return 'fixed'; };
+  const seg = ax => `<div class="mz-f s"><span>${ax === 'w' ? 'Largura' : 'Altura'}</span><div class="mz-seg">${[['hug', 'Ajustar'], ['fill', 'Preencher'], ['fixed', 'Fixa']].map(([k, l]) => `<button class="${mode(ax) === k ? 'on' : ''}" onclick="mzSizing('${ax}','${k}')">${l}</button>`).join('')}</div></div>`;
+  return mzSection('Tamanho no auto layout', seg('w') + seg('h'));
+}
+function mzSizing(ax, m) {
+  const n = mzSelNode(), f = n && mzFind(mzRoot(), n.id); if (!f || !f.parent) return; const dir = mzDirOf(f.parent), main = (dir === 'row') === (ax === 'w'), o = mzStyleSet(n, MZ.bp), dim = ax === 'w' ? 'width' : 'height';
+  const fr = MZ.frames[MZ.bp], el = fr && mzElOf(fr, n.id), r = el && mzRectOf(el);
+  if (m === 'fill') { if (main) { o.flex = '1 1 0'; o.minWidth = ax === 'w' ? '0' : o.minWidth; delete o[dim]; if (!o.minWidth) delete o.minWidth; } else { o.alignSelf = 'stretch'; delete o[dim]; } }
+  else if (m === 'hug') { if (main) { delete o.flex; delete o.flexGrow; } else if (o.alignSelf === 'stretch') delete o.alignSelf; o[dim] = ax === 'w' ? 'fit-content' : 'auto'; if (ax === 'h') delete o.height; }
+  else { if (main) { delete o.flex; delete o.flexGrow; } else if (o.alignSelf === 'stretch') delete o.alignSelf; o[dim] = Math.round(r ? (ax === 'w' ? r.width : r.height) : 200) + 'px'; }
+  mzCommit({panels: true});
+}
+/* adapta Tablet/Celular a partir do Desktop (só preenche o que ainda não foi ajustado à mão) */
+function mzAutoAdapt(root, deep) {
+  const px = v => { const m = /^(-?\d+(?:\.\d+)?)px$/.exec(String(v || '').trim()); return m ? +m[1] : null; }, setIf = (n, bp, k, v) => { const o = mzStyleSet(n, bp); if (o[k] == null) o[k] = v; }; let changed = 0;
+  const one = n => {
+    const d = n.style.d || {}, flex = (d.display || '').includes('flex'), row = flex && !String(d.flexDirection || 'row').startsWith('column'), grid = (d.display || '').includes('grid');
+    if (MZ_CONT.includes(n.type) && n.type !== 'page') {
+      if (row) { setIf(n, 't', 'flexWrap', 'wrap'); setIf(n, 'm', 'flexDirection', 'column'); setIf(n, 'm', 'alignItems', 'stretch'); changed++;
+        n.children.forEach(c => { const cd = c.style.d || {}; if (cd.position === 'absolute') return; if (/^1/.test(String(cd.flex || '')) || cd.flexGrow) setIf(c, 't', 'minWidth', '260px'); setIf(c, 'm', 'width', '100%'); setIf(c, 'm', 'maxWidth', '100%'); setIf(c, 'm', 'flex', 'none'); setIf(c, 'm', 'minWidth', '0'); }); }
+      if (grid) { const cols = (/repeat\((\d+)/.exec(d.gridTemplateColumns || '') || [])[1]; if (cols && +cols > 2) setIf(n, 't', 'gridTemplateColumns', 'repeat(2,1fr)'); setIf(n, 'm', 'gridTemplateColumns', '1fr'); changed++; }
+      const gp = px(d.gap); if (gp && gp > 24) { setIf(n, 'm', 'gap', Math.round(gp * .6) + 'px'); setIf(n, 't', 'gap', Math.round(gp * .8) + 'px'); }
+      ['padding', 'paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight'].forEach(k => { const v = px(d[k]); if (v && v >= 40) { setIf(n, 't', k, Math.round(v * .8) + 'px'); setIf(n, 'm', k, Math.round(v * .55) + 'px'); } });
+      if (typeof d.padding === 'string' && /\s/.test(d.padding.trim())) { const ps = d.padding.trim().split(/\s+/).map(px); if (ps.every(v => v != null) && ps.some(v => v >= 40)) { setIf(n, 't', 'padding', ps.map(v => Math.round(v * .8) + 'px').join(' ')); setIf(n, 'm', 'padding', ps.map(v => Math.round(v * .55) + 'px').join(' ')); } }
+    }
+    const fs = px(d.fontSize); if (fs && (n.type === 'heading' || n.type === 'text' || n.type === 'button')) { if (fs >= 36) { setIf(n, 't', 'fontSize', Math.round(fs * .8) + 'px'); setIf(n, 'm', 'fontSize', Math.max(26, Math.round(fs * .6)) + 'px'); } else if (fs >= 20) setIf(n, 'm', 'fontSize', Math.round(fs * .88) + 'px'); }
+    const w = px(d.width); if (w && w > 390 && !(d.position === 'absolute') && !['spacer', 'divider'].includes(n.type)) setIf(n, 'm', 'maxWidth', '100%');
+  };
+  if (deep) mzWalk(root, one); else { one(root); }
+  return changed;
+}
+function mzAutoAdaptSel() { const n = mzSelNode(); if (!n) return; mzAutoAdapt(n, true); mzCommit({panels: true}); toast('Tablet e Celular ajustados a partir do Desktop. Confira na visão de 3 telas e refine se quiser.'); }
+function mzAutoAdaptPage() { mzAutoAdapt(mzRoot(), true); mzCommit({panels: true}); toast('Página adaptada: empilha no celular, quebra no tablet e reduz títulos e espaços.'); }
+function mzAutoKey() { const n = mzSelNode(); if (!n || n.type === 'page') return; if (!mzIsCont(n)) { mzGroup(); } mzAutoOn(); }
+
+/* ---------- APARÊNCIA e CAMADAS (todo elemento) ---------- */
+function mzSecAppear(n) {
+  const op = Math.round((parseFloat(mzStV(n, 'opacity')) || (mzStV(n, 'opacity') === '0' ? 0 : 1)) * 100), rot = parseFloat((/rotate\((-?[\d.]+)deg\)/.exec(mzStV(n, 'transform')) || [])[1]) || 0, blend = mzStV(n, 'mixBlendMode') || 'normal', abs = mzStyleAt(n, MZ.bp).position === 'absolute';
+  const bm = [['normal', 'Normal'], ['multiply', 'Multiplicar'], ['screen', 'Clarear (screen)'], ['overlay', 'Sobrepor (overlay)'], ['soft-light', 'Luz suave'], ['hard-light', 'Luz forte'], ['color-burn', 'Queimar cor'], ['color-dodge', 'Subexpor cor'], ['darken', 'Escurecer'], ['lighten', 'Clarear'], ['difference', 'Diferença'], ['luminosity', 'Luminosidade']];
+  return mzSection('Aparência e camadas', `<label class="mz-f s"><span>Transparência <b id="mzOpV">${100 - op}%</b></span><input type="range" min="0" max="100" value="${100 - op}" oninput="document.getElementById('mzOpV').textContent=this.value+'%';mzLive('opacity',(100-this.value)/100)" onchange="mzLive('opacity',(100-this.value)/100,1);mzRefreshPanels()"></label>
+    <label class="mz-f s"><span>Rotação <b id="mzRotV">${rot}°</b></span><input type="range" min="-180" max="180" value="${rot}" oninput="document.getElementById('mzRotV').textContent=this.value+'°';mzLive('transform',this.value==0?'':'rotate('+this.value+'deg)')" onchange="mzLive('transform',this.value==0?'':'rotate('+this.value+'deg)',1);mzRefreshPanels()"></label>
+    <label class="mz-f"><span>Mesclagem com o que está embaixo</span><select onchange="mzLive('mixBlendMode',this.value==='normal'?'':this.value,1)">${bm.map(([v, l]) => `<option value="${v}" ${blend === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <div class="mz-seg-row" style="margin-top:6px"><button onclick="mzLayerMove('front')" title="Fica por cima de tudo">⤒ Frente</button><button onclick="mzLayerMove('up')">▲ Subir</button><button onclick="mzLayerMove('down')">▼ Descer</button><button onclick="mzLayerMove('back')" title="Fica por baixo de tudo">⤓ Trás</button></div>
+    <div class="mz-seg-row"><button onclick="mzDup()" title="Ctrl+D ou Alt+arrastar">⧉ Duplicar</button><button onclick="mzCopy()">Copiar</button><button onclick="mzPaste()">Colar</button></div>${abs ? '' : '<p class="mz-hint">Para sobrepor um elemento a outro, arraste-o no modo ✋ Livre; depois use Frente/Trás.</p>'}`, true);
+}
+function mzLayerMove(dir) {
+  const f = MZ.sel && mzFind(mzRoot(), MZ.sel); if (!f || !f.parent) return; const n = f.node, st = mzStyleAt(n, MZ.bp), sibs = f.parent.children.filter(c => c !== n);
+  if (st.position === 'absolute' || st.position === 'relative' || st.position === 'fixed') { const zs = sibs.map(c => parseInt(mzStyleAt(c, MZ.bp).zIndex) || 0), cur = parseInt(st.zIndex) || 0, mx = Math.max(0, ...zs), mn = Math.min(0, ...zs); const o = mzStyleSet(n, MZ.bp); o.zIndex = String(dir === 'front' ? Math.max(cur, mx + 1) : dir === 'back' ? Math.min(cur, mn - 1) : dir === 'up' ? cur + 1 : cur - 1); mzCommit({panels: true}); return; }
+  const a = f.parent.children; a.splice(f.idx, 1); const j = dir === 'front' ? a.length : dir === 'back' ? 0 : Math.max(0, Math.min(a.length, f.idx + (dir === 'up' ? 1 : -1))); a.splice(j, 0, n); mzCommit({panels: true});
+}
+
+/* ---------- TEXTO: fonte, efeitos ---------- */
+const MZ_FXS = {shadow: 'Sombra', hard: 'Sombra dura', outline: 'Contorno', neon: 'Neon', glow: 'Brilho', grad: 'Gradiente', none: 'Sem efeito'};
+function mzSecText(n) {
+  const fam = (mzStV(n, 'fontFamily') || '').split(',')[0].replace(/['"]/g, '') || 'Padrão do projeto', fx = MZ.fx || (MZ.fx = {c: '#e4572e', s: 6});
+  return mzSection('Fonte e efeitos do texto', `<div class="row-gap" style="margin-bottom:8px;flex-wrap:wrap"><button class="btn sm dark" onclick="mzPickFont()" title="Escolha entre mais de 1.000 fontes">Aa ${esc(fam)}</button><button class="btn sm" onclick="mzSetStyle('fontFamily','');mzRefreshPanels()">Padrão</button></div>
+    <div class="mz-fxgrid">${Object.keys(MZ_FXS).map(k => `<button onclick="mzTextFx('${k}')">${MZ_FXS[k]}</button>`).join('')}</div>
+    <div class="two"><label class="mz-f s"><span>Cor do efeito</span><input type="color" value="${fx.c}" oninput="MZ.fx.c=this.value"></label><label class="mz-f s"><span>Força</span><input type="range" min="1" max="20" value="${fx.s}" oninput="MZ.fx.s=+this.value"></label></div>
+    <p class="mz-hint">Para mexer só numa palavra: dê dois cliques no texto, selecione a palavra e use a barra (fonte, tamanho, cor, efeito).</p>`);
+}
+function mzPickFont() { const n = mzSelNode(); if (!n) return; fbOpen(fam => { closeModal(); fam = String(fam).replace(/[^\w ]/g, '').slice(0, 40); if (!fam) return; mzSetStyle('fontFamily', `'${fam}', sans-serif`); mzRefreshPanels(); }, (mzStV(n, 'fontFamily') || '').split(',')[0].replace(/['"]/g, '')); }
+function mzTextFx(k) {
+  const n = mzSelNode(); if (!n) return; const o = mzStyleSet(n, MZ.bp), fx = MZ.fx || {c: '#e4572e', s: 6}, c = fx.c, s = fx.s;
+  ['textShadow', 'WebkitTextStroke', 'WebkitTextFillColor', 'WebkitBackgroundClip', 'backgroundClip'].forEach(x => delete o[x]); if (k === 'grad' || mzStV(n, 'backgroundImage').includes('linear-gradient') && o.backgroundImage && k === 'none') { if (k === 'none') delete o.backgroundImage; }
+  if (k === 'shadow') o.textShadow = `0 ${Math.round(s / 2)}px ${s * 2}px ${c}`; else if (k === 'hard') o.textShadow = `${s}px ${s}px 0 ${c}`; else if (k === 'outline') { o.WebkitTextStroke = `${Math.max(1, s / 3).toFixed(1)}px ${c}`; o.WebkitTextFillColor = 'transparent'; }
+  else if (k === 'neon') { o.color = '#ffffff'; o.textShadow = `0 0 ${s}px ${c}, 0 0 ${s * 2.5}px ${c}, 0 0 ${s * 5}px ${c}`; } else if (k === 'glow') o.textShadow = `0 0 ${s * 2}px ${c}`;
+  else if (k === 'grad') { o.backgroundImage = `linear-gradient(90deg, ${c}, #7b3ff2)`; o.WebkitBackgroundClip = 'text'; o.backgroundClip = 'text'; o.WebkitTextFillColor = 'transparent'; }
+  mzCommit({panels: true});
+}
+
+/* ---------- FUNDO: gradiente rápido ---------- */
+function mzSecGrad(n) {
+  const ds = mzM().ds, cs = Object.keys(ds.colors).map(k => ds.colors[k]).filter(v => /^#[0-9a-f]{6}$/i.test(v)), g = MZ.grad || (MZ.grad = {a: cs[0] || '#111111', b: cs[2] || '#e4572e', ang: 135});
+  const pre = [[0, 1], [1, 2], [0, 2], [2, 3], [3, 0], [1, 3]].filter(([x, y]) => cs[x] && cs[y]);
+  return mzSection('Gradiente rápido', `<div class="mz-pre">${pre.map(([x, y]) => `<button style="background:linear-gradient(135deg,${cs[x]},${cs[y]})" onclick="mzApplyGrad('${cs[x]}','${cs[y]}',135)"></button>`).join('')}</div>
+    <div class="two"><label class="mz-f s"><span>De</span><input type="color" value="${g.a}" oninput="MZ.grad.a=this.value"></label><label class="mz-f s"><span>Para</span><input type="color" value="${g.b}" oninput="MZ.grad.b=this.value"></label></div>
+    <label class="mz-f s"><span>Ângulo</span><input type="range" min="0" max="360" value="${g.ang}" oninput="MZ.grad.ang=+this.value"></label><div class="row-gap"><button class="btn sm dark" onclick="mzApplyGrad(MZ.grad.a,MZ.grad.b,MZ.grad.ang)">Aplicar gradiente</button><button class="btn sm" onclick="mzSetStyle('backgroundImage','');mzRefreshPanels()">Remover</button></div>`, false);
+}
+function mzApplyGrad(a, b, ang) { mzSetStyles({backgroundImage: `linear-gradient(${ang}deg, ${a}, ${b})`}); }
+
+/* ---------- FORMAS ---------- */
+const MZ_CLIPS = {circle: ['Círculo', {borderRadius: '50%', clipPath: ''}], round: ['Arredondado', {borderRadius: '24px', clipPath: ''}], square: ['Reto', {borderRadius: '0', clipPath: ''}], tri: ['Triângulo', {clipPath: 'polygon(50% 0,0 100%,100% 100%)'}], diamond: ['Losango', {clipPath: 'polygon(50% 0,100% 50%,50% 100%,0 50%)'}], hex: ['Hexágono', {clipPath: 'polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)'}], star: ['Estrela', {clipPath: 'polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)'}], arrow: ['Seta', {clipPath: 'polygon(0 30%,60% 30%,60% 10%,100% 50%,60% 90%,60% 70%,0 70%)'}], bubble: ['Balão', {clipPath: 'polygon(0 0,100% 0,100% 75%,60% 75%,50% 100%,40% 75%,0 75%)'}]};
+function mzSecShape(n) {
+  return mzSection('Forma / recorte', `<div class="mz-fxgrid">${Object.keys(MZ_CLIPS).map(k => `<button onclick="mzClip('${k}')">${MZ_CLIPS[k][0]}</button>`).join('')}</div>`, mzIsImg(n) ? true : n.cls === 'mz-shape');
+}
+function mzClip(k) { const n = mzSelNode(); if (!n) return; const c = MZ_CLIPS[k]; if (!c) return; const o = mzStyleSet(n, MZ.bp); if (k === 'circle' && !o.aspectRatio && !(mzStyleAt(n, MZ.bp).aspectRatio)) { o.aspectRatio = '1/1'; } if (c[1].clipPath === '') delete o.clipPath; Object.keys(c[1]).forEach(x => { if (c[1][x] !== '') o[x] = c[1][x]; }); if (!['circle', 'round', 'square'].includes(k)) o.borderRadius = '0'; mzCommit({panels: true}); }
+/* elementos do tipo forma na biblioteca */
+(function () {
+  const sh = (id, name, st) => ({id: 'shape-' + id, cat: 'shape', nodeType: 'div', name, icon: 'target', make: () => { const n = mzNode('div', {}, Object.assign({width: 140, height: 140, backgroundColor: 'var(--mz-c-accent)'}, st), [], {name}); n.cls = 'mz-shape'; return n; }});
+  [sh('rect', 'Retângulo', {width: 200, height: 120}), sh('round', 'Retângulo arredondado', {width: 200, height: 120, borderRadius: 24}), sh('circle', 'Círculo', {borderRadius: '50%'}), sh('tri', 'Triângulo', {clipPath: 'polygon(50% 0,0 100%,100% 100%)'}), sh('diamond', 'Losango', {clipPath: MZ_CLIPS.diamond[1].clipPath}), sh('hex', 'Hexágono', {clipPath: MZ_CLIPS.hex[1].clipPath}), sh('star', 'Estrela', {clipPath: MZ_CLIPS.star[1].clipPath}), sh('arrow', 'Seta', {width: 200, height: 100, clipPath: MZ_CLIPS.arrow[1].clipPath}), sh('bubble', 'Balão', {width: 200, height: 140, clipPath: MZ_CLIPS.bubble[1].clipPath}), sh('line', 'Linha', {width: 240, height: 4, borderRadius: 2}), sh('ring', 'Anel', {borderRadius: '50%', backgroundColor: 'transparent', border: '8px solid var(--mz-c-accent)'})].forEach(e => MZ_EL.push(e));
+})();
+
+/* ---------- IMAGEM: tratamentos, ajustes, fontes de imagem ---------- */
+const mzPS = x => Array.isArray(x) ? {id: x[0], name: x[1], filter: x[3] || '', ovColor: x[4] || '', ovMode: x[5] || ''} : x;
+function mzFilterVals(n) { const f = mzStV(n, 'filter'), g = (re, d) => { const m = re.exec(f); return m ? parseFloat(m[1]) : d; }; return {br: g(/brightness\(([\d.]+)/, 1) * 100, ct: g(/contrast\(([\d.]+)/, 1) * 100, sa: g(/saturate\(([\d.]+)/, 1) * 100, bl: g(/blur\(([\d.]+)px/, 0), gr: g(/grayscale\(([\d.]+)/, 0) * 100, sp: g(/sepia\(([\d.]+)/, 0) * 100}; }
+function mzFilterSet(k, v, commit) { const n = mzSelNode(); if (!n) return; const F = mzFilterVals(n); F[k] = +v; const parts = []; if (F.br !== 100) parts.push(`brightness(${F.br / 100})`); if (F.ct !== 100) parts.push(`contrast(${F.ct / 100})`); if (F.sa !== 100) parts.push(`saturate(${F.sa / 100})`); if (F.gr) parts.push(`grayscale(${F.gr / 100})`); if (F.sp) parts.push(`sepia(${F.sp / 100})`); if (F.bl) parts.push(`blur(${F.bl}px)`); mzLive('filter', parts.join(' '), commit); }
+function mzSecImage(n) {
+  const F = mzFilterVals(n), sl = (k, l, min, max, step) => `<label class="mz-f s"><span>${l}</span><input type="range" min="${min}" max="${max}" step="${step || 1}" value="${F[k]}" oninput="mzFilterSet('${k}',this.value)" onchange="mzFilterSet('${k}',this.value,1)"></label>`;
+  const PS = (typeof PHOTO_STYLES !== 'undefined' ? PHOTO_STYLES : []).map(mzPS), P = n.props;
+  return mzSection('Imagem: tratamento e ajustes', `<label class="mz-f"><span>Tratamento (${PS.length} estilos)</span><select onchange="mzPhotoStyle(this.value)"><option value="">Sem tratamento</option>${PS.map(x => `<option value="${x.id}" ${mzStV(n, 'filter') === x.filter && (P.ovC || '') === (x.ovColor || '') && x.filter ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
+    ${sl('br', 'Brilho', 20, 200)}${sl('ct', 'Contraste', 20, 200)}${sl('sa', 'Saturação', 0, 250)}${sl('gr', 'Preto e branco', 0, 100)}${sl('sp', 'Sépia', 0, 100)}${sl('bl', 'Desfoque (px)', 0, 30, .5)}
+    <div class="two"><label class="mz-f s"><span>Cor por cima</span><input type="color" value="${/^#[0-9a-f]{6}$/i.test(P.ovC || '') ? P.ovC : '#1e40af'}" onchange="mzSetProp('ovC',this.value,{panels:true})"></label><label class="mz-f"><span>Mistura</span><select onchange="mzSetProp('ovM',this.value,{panels:true})">${['normal', 'multiply', 'screen', 'overlay', 'soft-light', 'color', 'luminosity', 'darken', 'lighten'].map(m => `<option ${P.ovM === m ? 'selected' : ''}>${m}</option>`).join('')}</select></label></div>
+    <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="mzSetProp('ovC','',{panels:true})">Tirar cor</button><button class="btn sm" onclick="mzLive('filter','',1);mzRefreshPanels()">Zerar ajustes</button></div>`, true);
+}
+function mzPhotoStyle(id) { const n = mzSelNode(); if (!n) return; const x = (typeof PHOTO_STYLES !== 'undefined' ? PHOTO_STYLES : []).map(mzPS).find(s => s.id === id); const o = mzStyleSet(n, MZ.bp); if (x && x.filter) o.filter = x.filter; else delete o.filter; n.props.ovC = x && x.ovColor && /^rgba?\(/.test(x.ovColor) ? x.ovColor : ''; n.props.ovM = x && x.ovMode ? x.ovMode : 'normal'; mzCommit({panels: true}); }
+function mzImgSources(n) {
+  if (!mzIsImg(n)) return '';
+  const stock = typeof stockReady === 'function' && stockReady(), ai = typeof imageReady === 'function' && imageReady();
+  return `<div class="row-gap" style="flex-wrap:wrap;margin:6px 0"><button class="btn sm" onclick="mzChooseImg('imgId')">📚 Biblioteca</button><button class="btn sm" onclick="mzUploadInto()">⬆ Enviar</button>${stock ? '<button class="btn sm" onclick="mzStockInto()">🔎 Banco</button>' : ''}<button class="btn sm" onclick="mzGenInto()" title="${ai ? 'Gerar com IA' : 'Requer a chave de imagem no servidor'}">✨ Gerar</button></div>`;
+}
+function mzUploadInto() { const n = mzSelNode(); const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/png,image/jpeg,image/webp,image/svg+xml'; i.onchange = async () => { const f = i.files[0]; if (!f || !n) return; try { const r = await libAddBlob(f, {name: f.name.replace(/\.[^.]+$/, '')}); const id = r && (r.imgId || r.id || r); n.props.imgId = typeof id === 'string' ? id : (id && id.imgId) || n.props.imgId; mzCommit({panels: true}); } catch (e) { toast(e.message); } }; i.click(); }
+function mzStockInto() { const n = mzSelNode(); stockPick(r => { if (!n) return; n.props.imgId = r.id; mzCommit({panels: true}); }); }
+function mzGenInto() {
+  const n = mzSelNode(); if (!n) return; if (!imageReady()) { toast(needsLogin() ? 'Entre no Studio para gerar imagens.' : 'Geração de imagem indisponível: configure a chave de imagem em api/config.php no servidor.'); return; }
+  const c = mzCtx(MZ.p), base = [c.name ? 'imagem para o site de ' + c.name : 'imagem profissional para site', 'sem texto, sem logotipo, sem marca d’água'].join('. ');
+  showModal('✨ Gerar imagem com IA', `<div class="field"><label>O que a imagem deve mostrar</label><textarea id="mzGenP" rows="4">${esc(base)}</textarea></div><label class="mz-f"><span>Qualidade</span><select id="mzGenQ"><option value="low">Rascunho (mais barata)</option><option value="medium" selected>Média</option><option value="high">Alta (mais cara)</option></select></label><small class="muted block">Consome créditos da sua conta de imagem.</small><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" id="mzGenGo" onclick="mzGenRun('${n.id}')">Gerar</button></div>`);
+}
+async function mzGenRun(id) {
+  const f = mzFind(mzRoot(), id), btn = document.getElementById('mzGenGo'), prompt = (document.getElementById('mzGenP') || {}).value || ''; if (!f || !prompt.trim()) return; btn.disabled = true; btn.textContent = 'Gerando…';
+  try { const blob = await generateImage({prompt: prompt.trim(), size: 'landscape', quality: document.getElementById('mzGenQ').value, refs: []}), imgId = uid('img'); await imgPut(imgId, blob); f.node.props.imgId = imgId; closeModal(); mzCommit({panels: true}); toast('Imagem gerada e aplicada.'); } catch (e) { btn.disabled = false; btn.textContent = 'Gerar'; toast(e.message); }
+}
+
+/* ---------- ligação aos painéis ---------- */
+const mzTabStyleBase = window.mzTabStyle, mzTabLayoutBase = window.mzTabLayout, mzTabContentBase = window.mzTabContent;
+window.mzTabContent = function (n) { return mzTabContentBase(n) + (mzIsImg(n) ? `<div class="mz-sec"><h5>Trocar imagem</h5>${mzImgSources(n)}</div>` : ''); };
+window.mzTabStyle = function (n) { return mzTabStyleBase(n) + (mzIsImg(n) ? mzSecImage(n) : '') + (mzIsTexty(n) ? mzSecText(n) : '') + mzSecShape(n) + mzSecGrad(n) + mzSecAppear(n); };
+window.mzTabLayout = function (n) { const f = mzFind(mzRoot(), n.id); return mzAutoSec(n) + mzSizeSec(n, f && f.parent) + mzTabLayoutBase(n); };
 
 </script>
 <script>
