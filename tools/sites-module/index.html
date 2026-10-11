@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="css/menu.css">
 <link rel="stylesheet" href="css/bulk.css">
 <link rel="stylesheet" href="css/mesa.css">
+<link rel="stylesheet" href="css/sites.css">
 </head>
 <body>
 <div class="app">
@@ -20,6 +21,8 @@
   <div class="logo">S</div>
   <nav class="rail-nav">
     <button data-page="projects" title="Projetos"><span data-ico="folder"></span><span class="rail-lb">Projetos</span></button>
+    <button data-page="briefing" title="Briefing do cliente"><span data-ico="inbox"></span><span class="rail-lb">Briefing do cliente</span></button>
+    <button data-page="templates" title="Banco de templates"><span data-ico="layout"></span><span class="rail-lb">Banco de templates</span></button>
     <button class="active" data-page="landings" title="Sites e landing pages"><span data-ico="globe"></span><span class="rail-lb">Sites e landing pages</span></button>
     <button data-page="mesa" title="Mesa de páginas"><span data-ico="layout"></span><span class="rail-lb">Mesa de páginas</span></button>
     <button data-page="biblioteca" title="Imagens"><span data-ico="image"></span><span class="rail-lb">Imagens</span></button>
@@ -42,6 +45,8 @@
   <div class="page-head"><div><h1>Projetos</h1><p>Cada projeto é um cliente ou negócio. Os sites e landing pages ficam dentro dele.</p></div></div>
   <div id="projectsBar" style="margin:0 0 10px;display:flex;justify-content:flex-end"></div>
   <div class="project-grid" id="projectsGrid"></div></div></section>
+<section id="page-briefing" class="page"><div class="subpage dz-wide" id="briefingRoot"></div></section>
+<section id="page-templates" class="page"><div class="subpage dz-wide" id="templatesRoot"></div></section>
 <section id="page-landings" class="page active"><div class="subpage dz-wide" id="landingsRoot"></div></section>
 <section id="page-mesa" class="page"><div class="subpage" id="mesaRoot"></div></section>
 <section id="page-biblioteca" class="page"><div class="subpage dz-wide" id="bibliotecaRoot"></div></section>
