@@ -1,5 +1,9 @@
 # Histórico de versões
 
+## 1.16.1
+- **Briefing do cliente na ordem do fluxo:** agora o cliente responde primeiro a empresa e os **produtos e serviços**, e só depois a **construção da marca** (valores, atitudes, tom e arquétipo).
+- **Módulos separados:** `tools/build_sites_module.py` (Sites) e `tools/build_marca_module.py` (Marca e Briefing) geram cada módulo como mini-app em `export/`. Correção nos dois: o carregamento de dados salvos dependia de uma função do Motor de Ofertas que não vinha junto (agora vem). PRD do módulo de Marca em `docs/produto-marca/`.
+
 ## 1.16.0
 - **Marca explicada.** O passo "Seu arquétipo" agora começa com **O que é um arquétipo?** (em português simples) e explica os três papéis: **principal** (manda no tom e no visual), **secundário** (tempera o principal) e **terciário** (um toque de apoio). Cada um aparece com a afinidade (%) e um cartão completo: quem é, características, atitudes, o que deseja e teme, como se comunica (com frases de exemplo), palavras que usa e evita, e **como influencia o seu trabalho** (texto, visual e conteúdo). O secundário agora pode ser qualquer arquétipo; o terciário é o próximo mais forte.
 - **PDFs.** Botão **Guia dos 12 arquétipos (PDF)** (todos os arquétipos com atitudes, características, tom de voz e comunicação) e **Relatório da marca (PDF)** (as respostas da marca + os três arquétipos explicados). O guia também está pronto em `docs/Guia-dos-12-arquetipos.pdf`.

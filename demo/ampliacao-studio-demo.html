@@ -27652,6 +27652,8 @@ const BF_SECTIONS = [
     ['jafeito', 'Materiais de comunicação que a empresa já fez: posts, anúncios, folders, site antigo (cole os links, um por linha)', 'area'], ['outros', 'Outros materiais úteis (apresentações, tabelas de preço…)', 'area']]},
   {k: 'arquivos', t: 'Fotos e arquivos', d: 'Envie direto daqui: logo, fotos, materiais que já usa, prints de depoimentos. Imagens (JPG, PNG, WebP) e PDF.', files: [['logo', 'Logo'], ['fotos', 'Fotos da empresa e da equipe'], ['produtos', 'Fotos dos produtos'], ['materiais', 'Materiais de comunicação que já fez (posts, anúncios, folders, PDF)'], ['depoimentos', 'Prints e fotos de depoimentos']], f: []}
 ];
+/* ordem do fluxo: primeiro a empresa e os produtos e serviços, depois a construção da marca (valores, arquétipo e voz) */
+{ const idn = BF_SECTIONS.splice(BF_SECTIONS.findIndex(s => s.k === 'identidade'), 1)[0]; BF_SECTIONS.splice(BF_SECTIONS.findIndex(s => s.k === 'produtos') + 1, 0, idn); }
 /* respostas antigas (concorrência em campos soltos) → formato novo */
 function bfMigrate(a) {
   a = a && typeof a === 'object' && !Array.isArray(a) ? a : {};

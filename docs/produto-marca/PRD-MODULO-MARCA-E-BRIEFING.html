@@ -1,0 +1,698 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PRD-MODULO-MARCA-E-BRIEFING</title><style>:root{--ink:#16181d;--mut:#5d6470;--line:#e3e5ea;--acc:#e8590c;--soft:#f6f6f3}*{box-sizing:border-box}body{font:13.5px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);margin:0}
+.wrap{max-width:860px;margin:0 auto;padding:30px 24px}h1{font-size:30px;line-height:1.15;margin:0 0 10px;border-bottom:3px solid var(--ink);padding-bottom:10px}h2{font-size:19px;margin:28px 0 8px;padding-top:8px;border-top:1px solid var(--line)}h3{font-size:15px;margin:18px 0 4px}
+p{margin:6px 0}ul,ol{margin:6px 0 10px;padding-left:22px}li{margin:3px 0}table{border-collapse:collapse;width:100%;margin:8px 0;font-size:12.5px}th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{background:var(--soft)}
+blockquote{border-left:4px solid var(--acc);background:#fff7f1;margin:10px 0;padding:6px 12px;border-radius:0 8px 8px 0}code{background:#f1f1ee;border-radius:4px;padding:1px 5px;font-size:12px}hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+@media print{.wrap{padding:0}h2{break-after:avoid}tr{break-inside:avoid}}</style></head><body><div class="wrap"><h1>PRD · Módulo de Marca e Briefing do Cliente</h1>
+<p><strong>Produto:</strong> Estúdio de Marca e Briefing do Cliente (nome provisório)
+<strong>Versão do documento:</strong> 1.0
+<strong>Parte de:</strong> produto de criação de sites e landing pages
+<strong>Estado do código:</strong> o módulo já existe e roda (versão 1.0.0 do pacote, baseada no Ampliação Studio 1.16). Este PRD descreve o que ele é, o que já está pronto e o que falta para entrar no produto de sites.</p>
+<blockquote>
+<p><strong>Como ler os status:</strong> <strong>Pronto</strong> = existe e foi testado em navegador com servidor PHP. <strong>Parcial</strong> = existe, mas com limite dito na linha. <strong>Novo</strong> = proposta, ainda não foi construída.</p>
+</blockquote>
+<hr />
+<h2>1. Resumo</h2>
+<p>O site de um cliente só fica bom se a gente souber <strong>quem ele é, o que vende e como fala</strong>. Hoje isso chega por conversa solta, áudio e arquivo perdido. Este módulo transforma essa coleta em um fluxo único:</p>
+<ol>
+<li>O consultor cria o cliente e manda <strong>um link</strong>.</li>
+<li>O cliente informa o nome da marca e da empresa, cadastra <strong>produtos e serviços</strong>, passa pela <strong>construção da marca</strong> (valores, atitudes, tom de voz e arquétipo explicado), envia <strong>fotos</strong> e <strong>links</strong> (site, vídeos, redes, materiais).</li>
+<li>Tudo fica salvo em três formatos: <strong>no projeto</strong>, <strong>em planilha</strong> e <strong>na nuvem</strong> (o link guarda no servidor).</li>
+<li>O resultado vira o <strong>briefing do projeto de site</strong>: o módulo de Sites usa os mesmos dados para escrever e montar as páginas, sem inventar fatos.</li>
+</ol>
+<h2>2. Problema</h2>
+<table>
+<thead>
+<tr>
+<th>Dor hoje</th>
+<th>Consequência</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Informação do cliente vem em pedaços (WhatsApp, áudio, e-mail)</td>
+<td>O site começa com lacunas e retrabalho</td>
+</tr>
+<tr>
+<td>Cliente não sabe descrever a própria marca</td>
+<td>Texto genérico, sem personalidade</td>
+</tr>
+<tr>
+<td>Fotos e links chegam sem organização</td>
+<td>Tempo perdido procurando material</td>
+</tr>
+<tr>
+<td>Preço, prazo, garantia e provas faltam</td>
+<td>Risco de a página prometer o que o cliente não cumpre</td>
+</tr>
+<tr>
+<td>Cada cliente responde de um jeito</td>
+<td>Impossível padronizar o trabalho da agência</td>
+</tr>
+</tbody>
+</table>
+<h2>3. Objetivos e não-objetivos</h2>
+<p><strong>Objetivos</strong>
+- O1. Coletar, <strong>num só link</strong>, tudo o que o projeto de site precisa.
+- O2. Ajudar o cliente a <strong>entender e definir a personalidade da marca</strong> sem conhecer o jargão.
+- O3. Guardar as respostas de forma <strong>estruturada</strong> (para a IA e para o módulo de Sites) e <strong>portátil</strong> (planilha, projeto, nuvem).
+- O4. Nunca usar dado que o cliente não informou: o que falta fica marcado, não é inventado.</p>
+<p><strong>Não-objetivos da v1</strong>
+- Gerar o site (isso é o módulo de Sites).
+- Anúncios, redes sociais, vídeo, aprovação e publicação.
+- Contas de usuário, cobrança e planos.
+- Edição colaborativa em tempo real.</p>
+<p><strong>Como saberemos que deu certo</strong> (metas <strong>[DEFINIR]</strong>, não levantei números de mercado):
+- % de links enviados que chegam a "enviado" pelo cliente
+- tempo médio entre enviar o link e receber o briefing completo
+- % de briefings com produtos, marca, pelo menos 1 link e pelo menos 3 fotos
+- nº de campos que o consultor precisa corrigir à mão depois de importar</p>
+<h2>4. Usuários</h2>
+<table>
+<thead>
+<tr>
+<th>Usuário</th>
+<th>Quem é</th>
+<th>O que precisa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Consultor / agência</strong></td>
+<td>Quem vai fazer o site e a marca</td>
+<td>Criar o cliente, mandar o link, acompanhar, importar, exportar para o site</td>
+</tr>
+<tr>
+<td><strong>Cliente final</strong></td>
+<td>Dono ou gestor da empresa; pouco técnico; usa celular</td>
+<td>Responder sem se perder, salvar e voltar depois, entender o que está sendo perguntado</td>
+</tr>
+</tbody>
+</table>
+<h2>5. Jornada</h2>
+<h3>Consultor</h3>
+<ol>
+<li>Cria o <strong>cliente</strong> (nome da empresa).</li>
+<li>Em <strong>Briefing do cliente</strong>, clica em criar link e envia (copiar ou WhatsApp).</li>
+<li>Acompanha o status (aguardando, em andamento, enviado).</li>
+<li>Clica em <strong>Importar respostas</strong>.</li>
+<li>Em <strong>Marca e arquétipo</strong>, revisa com o cliente; pode enviar um link só da marca.</li>
+<li>Em <strong>Resumo para o site</strong>, baixa o briefing (.md) ou <strong>exporta o projeto (.json)</strong> para o módulo de Sites.</li>
+</ol>
+<h3>Cliente (nesta ordem)</h3>
+<ol>
+<li><strong>Quem está respondendo</strong> (nome, WhatsApp, e-mail).</li>
+<li><strong>Sobre a empresa</strong>: nome da marca e da empresa, site, Instagram e redes, cidade, história, diferenciais.</li>
+<li><strong>O cliente do cliente</strong> (público).</li>
+<li><strong>Produtos e serviços</strong> (um cartão por item, até 8).</li>
+<li><strong>Construção da marca</strong>: valores, atitudes, tom de voz, resultado do arquétipo (com explicação), palavras que usa e que nunca usa.</li>
+<li><strong>Concorrentes</strong> e <strong>referências</strong> (o que admira, o que evitar).</li>
+<li><strong>Marketing e vendas hoje.</strong></li>
+<li><strong>Depoimentos</strong> (com marcação de autorização).</li>
+<li><strong>Links</strong>: logo, fotos, <strong>vídeos</strong>, manual de marca, materiais já feitos, site antigo.</li>
+<li><strong>Fotos e arquivos</strong>: logo, fotos da empresa, fotos de produtos, materiais, prints de depoimentos.</li>
+<li>Aceite de uso das informações e <strong>Enviar</strong>.</li>
+</ol>
+<p>Tudo salva sozinho a cada alteração; o cliente pode fechar e voltar pelo mesmo link.</p>
+<h2>6. Escopo da v1</h2>
+<p><strong>Inclui:</strong> cliente/projeto, link de briefing, formulário completo, formulário só da marca, marca com arquétipo explicado, produtos e serviços, links, fotos, depoimentos, importação para o projeto, planilha, resumo e exportação para o site, biblioteca de imagens, configurações de e-mail de aviso e IA.</p>
+<p><strong>Não inclui:</strong> módulo de Sites, anúncios, redes sociais, publicação, performance, CRM, contas e cobrança.</p>
+<h2>7. Requisitos funcionais</h2>
+<h3>A. Cliente e projeto</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requisito</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF&#8209;A1</td>
+<td>Criar, listar e abrir clientes (projetos)</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;A2</td>
+<td>Dados guardados no navegador e, com servidor, sincronizados</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;A3</td>
+<td>Exportar o projeto (.json) e importar em outro módulo</td>
+<td>Pronto (testado Marca → Sites)</td>
+</tr>
+</tbody>
+</table>
+<h3>B. Briefing do cliente (link)</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requisito</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF&#8209;B1</td>
+<td>Criar link com código aleatório de 24 caracteres, ligado ao projeto</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;B2</td>
+<td>Copiar o link e enviar por WhatsApp</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;B3</td>
+<td>Cliente responde pelo celular, salvamento automático, volta pelo mesmo link</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;B4</td>
+<td>11 partes, na ordem do fluxo (produtos antes da marca)</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;B5</td>
+<td>Barra de progresso e parte "preenchida"</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;B6</td>
+<td>Obrigatórios no envio: nome da empresa, nome e WhatsApp de quem responde, 1 produto ou serviço, aceite</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;B7</td>
+<td>Cliente pode reenviar depois de editar</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;B8</td>
+<td>Desativar o link</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;B9</td>
+<td>Aviso por e-mail ao consultor quando o cliente envia</td>
+<td>Parcial (depende do servidor; <strong>não testado com e-mail real</strong>)</td>
+</tr>
+<tr>
+<td>RF&#8209;B10</td>
+<td>Lembrete automático ao cliente que não terminou</td>
+<td>Novo</td>
+</tr>
+<tr>
+<td>RF&#8209;B11</td>
+<td>Perguntas e partes configuráveis por tipo de projeto</td>
+<td>Novo</td>
+</tr>
+</tbody>
+</table>
+<h3>C. Empresa, produtos e serviços</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requisito</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF&#8209;C1</td>
+<td>Nome da marca/empresa, razão social, site, Instagram, outras redes, cidade, tempo, equipe, história, missão, diferenciais</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;C2</td>
+<td>Até 8 produtos/serviços com 26 campos: tipo, o que é, para quem, como funciona, incluso, preço, prazo, diferencial, perguntas, provas, objeções, formato, duração, peso, tamanho, entrega, validade, garantia, pagamento, para quem não serve, problemas, tempo para resolver, link de fotos, ação desejada, link de compra</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;C3</td>
+<td>Importar os produtos para o projeto sem duplicar</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;C4</td>
+<td>Medidor de ficha completa por produto</td>
+<td>Pronto</td>
+</tr>
+</tbody>
+</table>
+<h3>D. Construção da marca</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requisito</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF&#8209;D1</td>
+<td>Escolher valores (44 opções) e atitudes (30 opções), com campo "outro"</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;D2</td>
+<td>Tom de voz em 5 escalas (formal, humor, técnico, calor, ousadia)</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;D3</td>
+<td>Resultado: arquétipo <strong>principal, secundário e terciário</strong> (12 arquétipos), com % de afinidade; o usuário pode trocar</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;D4</td>
+<td>Explicação em português simples: o que é arquétipo e o papel de cada um dos três</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;D5</td>
+<td>Cartão por arquétipo: quem é, características, atitudes, deseja/teme, como se comunica (com frases de exemplo), palavras que usa e evita, <strong>como influencia o trabalho</strong></td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;D6</td>
+<td>Voz e palavras: o que fala/não fala, atitudes que tem/não tem, admira/repudia, palavras que usa e <strong>proibidas</strong></td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;D7</td>
+<td><strong>Marcas parecidas clicáveis</strong>: site, Instagram, campanhas, anúncios (Biblioteca de Anúncios da Meta)</td>
+<td>Parcial (os links abrem buscas, não páginas verificadas; o módulo não lê os sites)</td>
+</tr>
+<tr>
+<td>RF&#8209;D8</td>
+<td><strong>Guia dos 12 arquétipos (PDF)</strong> e <strong>Relatório da marca (PDF)</strong></td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;D9</td>
+<td>Enviar para o Voice Brain (personalidade, vocabulário, proibidas, regras)</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;D10</td>
+<td>Análise de comunicação de uma marca por IA a partir do site dela</td>
+<td>Novo</td>
+</tr>
+<tr>
+<td>RF&#8209;D11</td>
+<td>Escolha de paleta e fontes a partir do logo enviado</td>
+<td>Novo</td>
+</tr>
+</tbody>
+</table>
+<h3>E. Formulário só da Marca (opcional)</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requisito</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF&#8209;E1</td>
+<td>Link separado só com valores, atitudes, tom, arquétipo, voz e marcas admiradas</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;E2</td>
+<td>Resultado ao vivo para o cliente, com explicações</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;E3</td>
+<td>Cliente baixa <strong>sua própria planilha</strong> (.xlsx) e <strong>seu relatório (PDF)</strong></td>
+<td>Pronto</td>
+</tr>
+</tbody>
+</table>
+<h3>F. Três formatos de saída</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requisito</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF&#8209;F1</td>
+<td><strong>Projeto:</strong> importar as respostas para o projeto do cliente</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;F2</td>
+<td><strong>Planilha:</strong> baixar .xlsx e CSV, em branco ou preenchida; importar de volta pela coluna "Chave"</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;F3</td>
+<td><strong>Nuvem:</strong> respostas guardadas no servidor, ligadas ao link, mesmo com a página fechada</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;F4</td>
+<td>Guia de arquétipos dentro da própria planilha</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;F5</td>
+<td>Histórico de versões das respostas</td>
+<td>Novo</td>
+</tr>
+</tbody>
+</table>
+<h3>G. Links, fotos e depoimentos</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requisito</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF&#8209;G1</td>
+<td>Links: site, Instagram, outras redes, logo, fotos, <strong>vídeos</strong>, manual de marca, materiais já feitos</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;G2</td>
+<td>Link por produto (compra/agendamento) e link de fotos por produto</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;G3</td>
+<td><strong>Upload de fotos e PDF</strong> em 5 categorias (logo, fotos da empresa, fotos de produtos, materiais, prints de depoimentos); imagem até 4 MB, PDF até 6 MB, até 60 arquivos; conferidos pelo conteúdo</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;G4</td>
+<td>Fotos importadas vão para a Biblioteca de imagens</td>
+<td>Parcial (importação testada com imagem mínima; <strong>não testada com fotos reais grandes</strong>)</td>
+</tr>
+<tr>
+<td>RF&#8209;G5</td>
+<td>Depoimentos com autorização (sim, falta pedir, não pode usar); só os autorizados vão para a IA</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;G6</td>
+<td>Upload de <strong>vídeo</strong></td>
+<td>Novo (hoje só por link)</td>
+</tr>
+<tr>
+<td>RF&#8209;G7</td>
+<td>Upload de fotos <strong>por produto</strong> (hoje é por categoria + link por produto)</td>
+<td>Novo</td>
+</tr>
+<tr>
+<td>RF&#8209;G8</td>
+<td>Ler o conteúdo dos links (site, Instagram) e resumir</td>
+<td>Novo</td>
+</tr>
+</tbody>
+</table>
+<h3>H. Resumo e exportação para o site</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requisito</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF&#8209;H1</td>
+<td><strong>Resumo para o site</strong> na tela, com contagem de produtos, marca, links, depoimentos e arquivos</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;H2</td>
+<td>Baixar briefing em Markdown</td>
+<td>Pronto</td>
+</tr>
+<tr>
+<td>RF&#8209;H3</td>
+<td>Exportar o projeto (.json) e <strong>importar no módulo de Sites</strong></td>
+<td>Pronto (testado)</td>
+</tr>
+<tr>
+<td>RF&#8209;H4</td>
+<td>Botão "Criar site com este briefing" dentro do módulo de Sites (cria o site e as páginas já preenchidas)</td>
+<td><strong>Novo</strong> (hoje o consultor importa o projeto e cria o site)</td>
+</tr>
+</tbody>
+</table>
+<h2>8. Como o briefing alimenta o site</h2>
+<table>
+<thead>
+<tr>
+<th>Dado do briefing</th>
+<th>Onde aparece no site</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nome da marca/empresa</td>
+<td>Cabeçalho, título, rodapé, textos</td>
+</tr>
+<tr>
+<td>Produtos e serviços (nome, o que é, para quem, preço, link)</td>
+<td>Páginas de serviços e landing pages por produto; botões e links de compra</td>
+</tr>
+<tr>
+<td>Benefícios, objeções, provas</td>
+<td>Blocos da página (benefícios, perguntas frequentes, prova)</td>
+</tr>
+<tr>
+<td>Preço, prazo, garantia <strong>ausentes</strong></td>
+<td>Aparecem como <strong>[CONFIRMAR]</strong>, nunca inventados</td>
+</tr>
+<tr>
+<td>Valores, atitudes, arquétipo, tom, palavras que usa e proibidas</td>
+<td>Tom dos textos escritos pela IA e lista de palavras proibidas</td>
+</tr>
+<tr>
+<td>Depoimentos <strong>autorizados</strong></td>
+<td>Prova social</td>
+</tr>
+<tr>
+<td>Fotos e logo</td>
+<td>Biblioteca de imagens, que alimenta as páginas</td>
+</tr>
+<tr>
+<td>Links (site antigo, redes, vídeos, materiais)</td>
+<td>Rodapé, redes, referências de conteúdo</td>
+</tr>
+<tr>
+<td>Cores e manual de marca (texto)</td>
+<td>Estilo da página (ajuste manual hoje)</td>
+</tr>
+<tr>
+<td>Concorrentes e diferenciais</td>
+<td>Argumentos e SEO (uso manual hoje)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Contrato de dados:</strong> os dois módulos usam o mesmo esquema de projeto (versão de esquema 1). Cada projeto leva: <code>brief</code>, <code>products[]</code>, <code>identity</code>, <code>intake</code> (links, depoimentos, arquivos), <code>voice</code>, <code>brand</code>, <code>competitors[]</code>. Quando os módulos forem unidos num só produto, o briefing já estará no projeto e o botão RF&#8209;H4 deve ler esses campos diretamente.</p>
+<h2>9. Requisitos não funcionais</h2>
+<ul>
+<li><strong>Segurança:</strong> código do link aleatório; limite de acessos e de tentativas por endereço; escritas só em JSON; respostas limpas e com tamanho limitado antes de salvar; arquivos validados pelo <strong>conteúdo</strong> (não pelo nome); chaves de API <strong>só no servidor</strong>; pasta de dados fora do alcance da web.</li>
+<li><strong>Privacidade:</strong> o cliente aceita o uso das informações antes de enviar; depoimentos só com autorização. <strong>Política de privacidade, prazo de guarda e pedido de exclusão: [DEFINIR]</strong> (são dados de terceiros guardados no servidor do consultor).</li>
+<li><strong>Mobile primeiro:</strong> formulário pensado para celular.</li>
+<li><strong>Hospedagem comum:</strong> PHP 8+, sem banco de dados (arquivos JSON).</li>
+<li><strong>Confiabilidade:</strong> salvamento automático; se a conexão cair, o texto continua na tela e o aviso aparece.</li>
+<li><strong>Leveza:</strong> JavaScript puro, sem framework e sem instalação.</li>
+<li><strong>Honestidade dos dados:</strong> o que o cliente não preencheu continua em branco.</li>
+</ul>
+<h2>10. Dados e API (resumo técnico)</h2>
+<p><strong>No servidor</strong> (<code>api/data/briefings/&lt;código&gt;.json</code> + pasta de arquivos): <code>t</code>, <code>kind</code> (<code>briefing</code> ou <code>marca</code>), <code>project</code>, <code>name</code>, <code>status</code> (<code>rascunho</code>, <code>enviado</code>), <code>answers</code>, datas, <code>revoked</code>.</p>
+<p><strong>Respostas (<code>answers</code>)</strong> por seção: <code>contato</code>, <code>empresa</code>, <code>publico</code>, <code>produtos[]</code>, <code>identidade</code>, <code>concorrencia[]</code>, <code>referencias</code>, <code>marketing</code>, <code>depoimentos[]</code>, <code>materiais</code>, <code>arquivos[]</code>, <code>aceite</code>.</p>
+<p><strong><code>api/briefing.php</code>:</strong>
+- Público (só com o código): <code>GET ?t=</code> ler; <code>save</code>, <code>submit</code>, <code>upload</code>, <code>rmfile</code>.
+- Consultor (com login): <code>create</code> (com <code>kind</code>), <code>get</code>, <code>list</code>, <code>revoke</code>.</p>
+<p><strong>Planilha da Marca:</strong> abas <em>Como preencher</em>, <em>Marca</em> (Seção, Pergunta, Sua resposta, <strong>Chave</strong>), <em>Opções</em>, <em>Guia dos arquétipos</em>, <em>Resultado</em>. A coluna Chave é o que permite importar de volta.</p>
+<h2>11. O que já foi testado e o que não foi</h2>
+<p><strong>Testado (navegador + servidor PHP):</strong>
+- criar cliente, criar link, cliente preencher, enviar foto, enviar, importar respostas
+- ordem das partes (produtos antes da marca)
+- marca: papéis principal/secundário/terciário, marcas clicáveis, PDFs
+- planilha .xlsx e CSV: baixar e importar de volta (Studio e cliente)
+- exportar projeto do módulo de Marca e importar no módulo de Sites
+- recarregar a página e os dados continuam</p>
+<p><strong>Não testado:</strong>
+- e-mail de aviso e envio para planilha do Google com serviço real
+- IA (só com respostas simuladas)
+- fotos reais grandes e muitos arquivos
+- instalação num WordPress de verdade
+- acessibilidade com leitor de tela e testes com clientes reais</p>
+<h2>12. Riscos</h2>
+<table>
+<thead>
+<tr>
+<th>Risco</th>
+<th>Mitigação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Formulário longo e o cliente desiste</td>
+<td>Salvar sozinho; partes curtas; opção de link só da marca; lembrete (RF&#8209;B10)</td>
+</tr>
+<tr>
+<td>Cliente envia dado errado ou promete o que não cumpre</td>
+<td>Importar não apaga o que já existe; [CONFIRMAR] no que falta; revisão do consultor antes de gerar o site</td>
+</tr>
+<tr>
+<td>Dados pessoais de terceiros no servidor</td>
+<td>Aceite, depoimentos com autorização, política e prazo de guarda a definir</td>
+</tr>
+<tr>
+<td>Textos de arquétipo vistos como "verdade"</td>
+<td>Aviso na tela: são interpretações, não regra</td>
+</tr>
+<tr>
+<td>Links das marcas levarem à página errada</td>
+<td>São buscas; o módulo avisa e não lê os sites</td>
+</tr>
+<tr>
+<td>Spam em link público</td>
+<td>Código aleatório, limite de acessos, possibilidade de desativar</td>
+</tr>
+</tbody>
+</table>
+<h2>13. Critérios de aceite da v1</h2>
+<ol>
+<li>O consultor cria o cliente e o link em até 3 cliques e consegue copiar ou mandar por WhatsApp.</li>
+<li>O cliente preenche no celular, fecha a página, reabre o mesmo link e encontra o que escreveu.</li>
+<li>A ordem das partes é: quem responde, empresa, público, <strong>produtos e serviços</strong>, <strong>marca</strong>, concorrentes, referências, marketing, depoimentos, links, fotos.</li>
+<li>O cliente envia uma foto (JPG, PNG ou WebP) e um PDF; arquivos inválidos são recusados com mensagem clara.</li>
+<li>O envio só é aceito com nome da empresa, nome e WhatsApp, um produto e o aceite.</li>
+<li>Depois de <strong>Importar respostas</strong>, produtos, links, depoimentos, fotos e marca aparecem no projeto e nada que já estava preenchido é apagado.</li>
+<li>A marca mostra principal, secundário e terciário com explicação, e cada marca citada abre os 4 atalhos.</li>
+<li>A planilha baixada, preenchida e importada de volta reproduz as respostas.</li>
+<li><strong>Resumo para o site</strong> lista produtos, marca, links, depoimentos e arquivos, e o projeto exportado abre no módulo de Sites com produtos e marca.</li>
+<li>Nenhum campo em branco é preenchido pelo sistema com dado inventado.</li>
+</ol>
+<h2>14. Roadmap sugerido</h2>
+<table>
+<thead>
+<tr>
+<th>Fase</th>
+<th>Entrega</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0. Validar</strong></td>
+<td>Testar com 3 clientes reais; e-mail de aviso real; fotos reais; ajustar perguntas e textos</td>
+</tr>
+<tr>
+<td><strong>1. Ligar ao site</strong></td>
+<td>RF&#8209;H4: botão "Criar site com este briefing" no módulo de Sites</td>
+</tr>
+<tr>
+<td><strong>2. Material</strong></td>
+<td>Upload de vídeo (RF&#8209;G6) e fotos por produto (RF&#8209;G7); lembrete ao cliente (RF&#8209;B10)</td>
+</tr>
+<tr>
+<td><strong>3. Inteligência</strong></td>
+<td>Ler links e resumir (RF&#8209;G8, RF&#8209;D10); paleta e fontes a partir do logo (RF&#8209;D11)</td>
+</tr>
+<tr>
+<td><strong>4. Produto</strong></td>
+<td>Contas, permissões, histórico de versões, política de privacidade, cobrança (se for serviço na nuvem)</td>
+</tr>
+</tbody>
+</table>
+<h2>15. Decisões que dependem de você</h2>
+<ol>
+<li>Nome do produto e do módulo.</li>
+<li>O briefing fica <strong>dentro do produto de sites</strong> (mesmo projeto) ou continua separado com importação?</li>
+<li>Fase 1 antes do lançamento? (botão que cria o site direto do briefing)</li>
+<li>Prazo de guarda dos dados do cliente e texto da política de privacidade.</li>
+<li>Quem tem acesso ao link: apenas por código (hoje) ou também com senha do cliente?</li>
+<li>Perguntas obrigatórias: manter as atuais ou reduzir para um briefing "rápido" (só empresa, 1 produto, marca e logo)?</li>
+</ol>
+<h2>Apêndice · Partes do formulário</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Parte</th>
+<th>Conteúdo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Quem está respondendo</td>
+<td>4 campos</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Sobre a empresa</td>
+<td>12 campos</td>
+</tr>
+<tr>
+<td>3</td>
+<td>O cliente do seu cliente</td>
+<td>10 campos</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Produtos e serviços</td>
+<td>26 campos, até 8 itens</td>
+</tr>
+<tr>
+<td>5</td>
+<td>A marca: valores, atitudes e voz</td>
+<td>17 campos (valores, atitudes, tom e voz)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Concorrentes</td>
+<td>9 campos, até 8 itens</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Referências e o que evitar</td>
+<td>2 campos</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Marketing e vendas hoje</td>
+<td>7 campos</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Depoimentos de clientes</td>
+<td>5 campos, até 10 itens</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Links e materiais que já existem</td>
+<td>6 campos</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Fotos e arquivos</td>
+<td>5 categorias de upload</td>
+</tr>
+</tbody>
+</table></div></body></html>
