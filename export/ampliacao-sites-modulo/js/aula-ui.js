@@ -1,185 +1,48 @@
-/* ===== Sites de aula: tela de aulas (lista + editor com prévia ao vivo) ===== */
-const AUS = {id: '', sel: '', step: '', dev: 'desk', tab: 'bloco', t: 0};
-const auList = p => (p && p.aulas) || (p.aulas = []);
-const auCur = p => auList(p || curProject()).find(a => a.id === AUS.id) || null;
-const auSlideCur = a => a && (a.slides.find(s => s.id === AUS.sel) || a.slides[0] || null);
-/* árvore: faixa/estação → passos (mapa) → blocos de uma sequência → … */
-const auKids = n => n.layout === 'estacao' ? n.steps : n.layout === 'grupo' ? n.blocks : null;
-function auFind(a, id, arr, parent) {
-  arr = arr || a.slides; for (let i = 0; i < arr.length; i++) { const n = arr[i]; if (n.id === id) return {node: n, arr, i, parent: parent || null}; const k = auKids(n); if (k) { const r = auFind(a, id, k, n); if (r) return r; } } return null;
-}
-function auTarget(a) { const s = auSlideCur(a); if (!s) return null; if (AUS.step) { const f = auFind(a, AUS.step, auKids(s) || []); if (f) return f.node; } return s; }
-const AU_STARTERS = [
-  ['horizontal', 'Curso em faixas', 'Faixas de tela cheia que deslizam para o lado, com menu no topo, setas e barra de progresso. Bom para curso, projeto social, evento.', 'editorial'],
-  ['mapa', 'Jornada em mapa', 'Um mapa com estações. Tocar numa estação dá zoom e abre os passos da aula, um de cada vez. Bom para aula ao vivo, projeção, série de encontros.', 'vivo'],
-  ['vertical', 'Aula vertical', 'Seções empilhadas com rolagem encaixada e pontos de navegação. Bom para aula gravada, material de apoio, página de turma.', 'escuro']
-];
-const auPending = a => { const t = JSON.stringify(a.slides); return (t.match(/\[CONFIRMAR/g) || []).length; };
-const auFileName = a => (typeof slug === 'function' ? slug(a.name) : 'aula') || 'aula';
+/* ===== Sites de aula: tela de entrada =====
+   O site de aula é um site da Mesa de páginas, só com outro jeito de navegar (faixas horizontais, rolagem vertical, mapa com zoom) e blocos próprios
+   (carrossel, antes e depois, perguntas que revelam a resposta, sequências com zoom). Esta tela escolhe o modelo, abre na Mesa (com todas as ferramentas)
+   e lista os sites de aula do projeto. As aulas feitas no editor anterior (p.aulas) podem ser convertidas para a Mesa. */
+const AUS = {fromMesa: false};
+const auTemplates = () => MZ_TEMPLATES.filter(t => /^aula-/.test(t.id));
+const auPagesOf = p => ((p && p.mesa && p.mesa.pages) || []).filter(x => x.nav);
+const NAV_LBL = {horizontal: 'Horizontal', vertical: 'Vertical', mapa: 'Mapa com zoom'};
 
-/* ---------- tela ---------- */
 function renderAulas() {
   const root = $('aulasRoot'); if (!root) return; const p = curProject();
-  const head = esHead('Sites de aula', 'Aulas em HTML: faixas horizontais, rolagem vertical ou mapa com zoom. Carrosséis, antes e depois, perguntas e formulário dentro.');
+  const head = esHead('Sites de aula', 'Apresentações interativas em HTML. São sites da Mesa de páginas: você edita com todas as ferramentas.');
   if (!p) { root.innerHTML = head + '<div class="panel es-empty">Crie um projeto para começar.<br><br><button class="btn pri" onclick="openWizard()">Novo projeto</button></div>'; return; }
-  const a = auCur(p); if (!a) { AUS.id = ''; root.innerHTML = head + auListHTML(p); return; }
-  root.innerHTML = auEditorHTML(p, a); auRightFill(); auLeftFill(); auFit(); auPreview();
+  const mine = auPagesOf(p), old = p.aulas || [];
+  root.innerHTML = head + `<div class="au-new"><h3>Começar por um modelo</h3><p class="muted" style="margin:0 0 12px">O modelo cria uma página na Mesa já com a navegação, os blocos e o estilo (cores e fontes). Você troca tudo.</p><div class="au-starters">${auTemplates().map(t => `<div class="au-st-c" style="cursor:default"><div class="au-th" data-t="${t.id}"><iframe sandbox="allow-scripts" title="${esc(t.name)}" tabindex="-1"></iframe></div><b>${esc(t.name)}</b><small>${esc(t.desc)}</small><button class="btn sm pri" onclick="auStart('${t.id}')">Criar na Mesa</button></div>`).join('')}</div></div>
+    <h3 style="margin:26px 0 10px">Sites de aula de ${esc(p.name)} (${mine.length})</h3>${mine.length ? `<div class="au-grid">${mine.map(pg => `<div class="au-card-l"><div><b>${esc(pg.name)}</b><small>Navegação: ${esc(NAV_LBL[pg.nav] || pg.nav)} · ${(pg.root.children || []).length} seção(ões)</small></div><div class="row-gap"><button class="btn sm pri" onclick="auOpenPage('${pg.id}')">Abrir na Mesa</button></div></div>`).join('')}</div>` : '<p class="muted">Nenhum ainda. Escolha um modelo acima, ou, na Mesa, abra uma página e escolha a navegação dela no painel da página.</p>'}
+    ${old.length ? `<h3 style="margin:26px 0 10px">Aulas do editor anterior (${old.length})</h3><p class="muted" style="margin:0 0 8px">Converta para a Mesa para editar com todas as ferramentas.</p><div class="au-grid">${old.map(a => `<div class="au-card-l"><div><b>${esc(a.name)}</b><small>${esc(a.mode)} · ${a.slides.length} item(ns)</small></div><div class="row-gap"><button class="btn sm pri" onclick="auConvert('${a.id}')">Converter para a Mesa</button><button class="btn sm" onclick="auOldDel('${a.id}')">Excluir</button></div></div>`).join('')}</div>` : ''}`;
+  auThumbs(root, p);
 }
-function auListHTML(p) {
-  const L = auList(p);
-  return `<div class="au-new"><h3>Começar por um modelo</h3><div class="au-starters">${AU_STARTERS.map(([k, n, d]) => `<button class="au-st-c" onclick="auCreate('${k}')"><b>${esc(n)}</b><small>${esc(d)}</small><span class="btn sm pri">Criar</span></button>`).join('')}</div></div>
-    <h3 style="margin:26px 0 10px">Aulas de ${esc(p.name)} (${L.length})</h3>${L.length ? `<div class="au-grid">${L.map(a => `<div class="au-card-l"><div><b>${esc(a.name)}</b><small>${esc(AU_MODES[a.mode])} · ${a.slides.length} ${a.mode === 'mapa' ? 'estações' : 'faixas'}${auPending(a) ? ` · <span style="color:#d9480f">${auPending(a)} a confirmar</span>` : ''}</small></div><div class="row-gap"><button class="btn sm pri" onclick="auOpen('${a.id}')">Abrir</button><button class="btn sm" onclick="auDup('${a.id}')">Duplicar</button><button class="btn sm" onclick="auDel('${a.id}')">Excluir</button></div></div>`).join('')}</div>` : '<p class="muted">Nenhuma aula ainda. Escolha um modelo acima.</p>'}`;
-}
-function auCreate(kind) { const p = curProject(); if (!p) { toast('Crie um projeto primeiro.'); return; } const a = auStarter(kind); a.brand = a.brand === 'Meu curso' || a.brand === 'Minha aula' ? (p.name || a.brand) : a.brand; a.name = a.name + ' · ' + p.name; auList(p).push(a); persist(); AUS.id = a.id; AUS.sel = a.slides[0].id; AUS.step = ''; AUS.tab = 'bloco'; if (typeof ui !== 'undefined' && ui.page !== 'aulas') go('aulas'); else renderAulas(); toast('Aula criada. O que falta está como [CONFIRMAR].'); }
-function auOpen(id) { const p = curProject(), a = auList(p).find(x => x.id === id); if (!a) return; AUS.id = id; AUS.sel = a.slides[0] ? a.slides[0].id : ''; AUS.step = ''; AUS.tab = 'bloco'; renderAulas(); }
-function auBack() { AUS.id = ''; renderAulas(); }
-function auDup(id) { const p = curProject(), a = auList(p).find(x => x.id === id); if (!a) return; const c = normalizeAulas([JSON.parse(JSON.stringify(a))])[0]; c.id = auId(); c.name = a.name + ' (cópia)'; c.previewT = ''; c.slides.forEach(s => { s.id = auId(); (s.steps || []).forEach(x => { x.id = auId(); }); }); auList(p).push(c); persist(); renderAulas(); }
-function auDel(id) { const p = curProject(), a = auList(p).find(x => x.id === id); if (!a || !confirm('Excluir a aula “' + a.name + '”?')) return; p.aulas = auList(p).filter(x => x.id !== id); if (AUS.id === id) AUS.id = ''; persist(); renderAulas(); }
-
-/* ---------- editor ---------- */
-function auEditorHTML(p, a) {
-  return `<div class="au-ed">
-    <div class="au-bar-t"><button class="btn sm" onclick="auBack()">‹ Aulas</button><input class="au-name" value="${esc(a.name)}" oninput="auCfg('name',this.value,true)" aria-label="Nome da aula"><span class="au-sp"></span>
-      <div class="ps-seg">${[['desk', 'Computador'], ['tab', 'Tablet'], ['mob', 'Celular']].map(([k, n]) => `<button class="${AUS.dev === k ? 'on' : ''}" onclick="AUS.dev='${k}';auDev()">${n}</button>`).join('')}</div>
-      <button class="btn sm" onclick="auOpenTab()">Abrir em outra aba</button><button class="btn sm" onclick="auDownload('html')">Baixar HTML</button><button class="btn sm" onclick="auDownload('zip')">ZIP com imagens</button><button class="btn sm pri" onclick="auPvwOpen()">Link para o cliente</button></div>
-    <div class="au-body"><aside class="au-left" id="auLeft"></aside><div class="au-center"><div class="au-frame" id="auFrameBox" data-dev="${AUS.dev}"><iframe id="auFrame" title="Prévia da aula" sandbox="allow-scripts"></iframe></div></div><aside class="au-right" id="auRight"></aside></div></div>`;
-}
-function auDev() { const b = $('auFrameBox'); if (b) b.dataset.dev = AUS.dev; document.querySelectorAll('.au-bar-t .ps-seg button').forEach((x, i) => x.classList.toggle('on', ['desk', 'tab', 'mob'][i] === AUS.dev)); auFit(); }
-/* a prévia é desenhada na largura real (1280, 820 ou 390 px) e reduzida para caber no quadro */
-function auFit() {
-  const box = $('auFrameBox'), fr = $('auFrame'), c = box && box.parentElement; if (!box || !fr || !c) return; const base = {desk: 1280, tab: 820, mob: 390}[AUS.dev] || 1280, W = c.clientWidth - 24, H = c.clientHeight - 24, k = Math.min(1, W / base);
-  box.style.width = Math.round(base * k) + 'px'; box.style.height = H + 'px'; fr.style.cssText = 'width:' + base + 'px;height:' + Math.round(H / k) + 'px;transform:scale(' + k + ');transform-origin:0 0';
-}
-window.addEventListener('resize', () => { if (typeof ui !== 'undefined' && ui.page === 'aulas') auFit(); });
-function auTreeHTML(list, depth, parentLabel) {
-  return list.map((x, j) => `<li class="${x.id === AUS.step ? 'on' : ''}" style="--d:${depth}"><button class="au-sb" onclick="auSelStep('${x.id}')"><i>${j + 1}</i><span>${esc(x.layout === 'grupo' ? '▤ ' : '')}${esc(auNodeName(x))}</span></button><span class="au-sa"><button onclick="auNodeMove('${x.id}',-1)" ${j ? '' : 'disabled'} aria-label="Subir">↑</button><button onclick="auNodeMove('${x.id}',1)" ${j < list.length - 1 ? '' : 'disabled'} aria-label="Descer">↓</button><button onclick="auNodeDup('${x.id}')" title="Duplicar">⧉</button><button onclick="auNodeDel('${x.id}')" title="Excluir">×</button></span></li>${auKids(x) && x.layout === 'grupo' ? auTreeHTML(x.blocks, depth + 1) + `<li style="--d:${depth + 1}"><button class="btn sm" onclick="auAddChild('${x.id}')">+ Bloco na sequência</button></li>` : ''}`).join('');
-}
-const auNodeName = x => x.layout === 'estacao' ? x.title : (x.label || (['grupo', 'mesa'].includes(x.layout) ? '' : '') || auPlain(x.title) || auPlain(x.kicker) || (AU_L[x.layout] ? AU_L[x.layout].label.split(' (')[0] : x.layout) || 'Bloco');
-function auLeftFill() {
-  const box = $('auLeft'), a = auCur(); if (!box || !a) return; const mapa = a.mode === 'mapa';
-  box.innerHTML = `<div class="au-lh"><b>${mapa ? 'Estações' : 'Faixas'}</b><button class="btn sm pri" onclick="auAddSlide()">+ ${mapa ? 'Estação' : 'Bloco'}</button></div><ul class="au-sl">${a.slides.map((s, i) => `<li class="${s.id === AUS.sel && !AUS.step ? 'on' : ''}"><button class="au-sb" onclick="auSelect('${s.id}')"><i>${i + 1}</i><span>${esc(s.layout === 'grupo' ? '▤ ' : '')}${esc(auNodeName(s))}</span></button><span class="au-sa"><button onclick="auMove('${s.id}',-1)" ${i ? '' : 'disabled'} aria-label="Subir">↑</button><button onclick="auMove('${s.id}',1)" ${i < a.slides.length - 1 ? '' : 'disabled'} aria-label="Descer">↓</button><button onclick="auDupSlide('${s.id}')" aria-label="Duplicar" title="Duplicar">⧉</button><button onclick="auDelSlide('${s.id}')" aria-label="Excluir" title="Excluir">×</button></span></li>${s.id === AUS.sel && auKids(s) ? `<li class="au-steps-l"><ul>${auTreeHTML(auKids(s), 0)}<li style="--d:0"><button class="btn sm" onclick="${mapa ? 'auAddStep()' : `auAddChild('${s.id}')`}">+ ${mapa ? 'Passo' : 'Bloco na sequência'}</button></li></ul></li>` : ''}`).join('')}</ul>`;
-}
-function auSelect(id) { AUS.sel = id; AUS.step = ''; AUS.tab = 'bloco'; auLeftFill(); auRightFill(); auGoPreview(); }
-function auSelStep(id) { AUS.step = id; AUS.tab = 'bloco'; auLeftFill(); auRightFill(); auGoPreview(); }
-function auSave(refreshAll) { persist(); clearTimeout(AUS.t); AUS.t = setTimeout(auPreview, 350); if (refreshAll) { auLeftFill(); } }
-function auCfg(k, v, light) { const a = auCur(); if (!a) return; a[k] = k === 'name' ? String(v).slice(0, 120) : v; auSave(); if (!light) auRightFill(); }
-function auTheme(k, v) { const a = auCur(); a.theme[k] = v; auSave(); }
-function auNav(k, v) { const a = auCur(); a.nav[k] = v; auSave(); if (k === 'cta') return; auRightFill(); }
-function auSetMode(m) { const a = auCur(); if (!a || a.mode === m) return; if (!confirm('Trocar o modo de navegação converte as faixas ' + (m === 'mapa' ? 'em estações (cada faixa vira uma estação com um passo)' : a.mode === 'mapa' ? 'de volta em blocos (cada passo vira uma faixa)' : '') + '. Continuar?')) { auRightFill(); return; }
-  if (m === 'mapa') { a.slides = a.slides.map(s => normalizeAulas([{mode: 'mapa', slides: [{id: s.id, title: s.title ? String(s.title).replace(/\*/g, '').slice(0, 60) : (s.label || AU_L[s.layout].label.split(' (')[0]), phrase: '', steps: [Object.assign({}, s, {layout: s.layout === 'capa' ? 'passo' : s.layout})]}]}])[0].slides[0]); a.mode = 'mapa'; }
-  else if (a.mode === 'mapa') { a.slides = a.slides.flatMap(s => s.steps.length ? s.steps.map(x => Object.assign({}, x, {label: x.label || s.title})) : []); a.mode = m; a.slides = normalizeAulas([{mode: m, slides: a.slides}])[0].slides; if (!a.slides.length) a.slides = [auNewBlock('texto')]; }
-  else a.mode = m;
-  AUS.sel = a.slides[0] ? a.slides[0].id : ''; AUS.step = ''; persist(); renderAulas(); }
-function auAddSlide() {
-  const a = auCur(); if (!a) return; AUS.addTo = '';
-  if (a.mode === 'mapa') { const s = normalizeAulas([{mode: 'mapa', slides: [{title: 'Nova estação', phrase: auPH('ideia central'), color: ['#0B57D0', '#CD0002', '#2E9B2A', '#C99100'][a.slides.length % 4], icon: ['livro', 'coracao', 'pessoas', 'estrela', 'lampada', 'alvo'][a.slides.length % 6], steps: [auNewBlock('passo')]}]}])[0].slides[0]; a.slides.push(s); AUS.sel = s.id; AUS.step = ''; persist(); auLeftFill(); auRightFill(); auPreview(); return; }
-  showModal('Que bloco entra?', `<div class="au-lay">${Object.entries(AU_L).filter(([k]) => k !== 'passo').map(([k, d]) => `<button class="au-lay-b" onclick="auAddLayout('${k}')"><b>${esc(d.label)}</b></button>`).join('')}</div>`);
-}
-function auAddLayout(k) {
-  const a = auCur(), b = auNewBlock(k); closeModal();
-  if (AUS.addTo) { const f = auFind(a, AUS.addTo); AUS.addTo = ''; if (f && f.node.layout === 'grupo' || f && auKids(f.node)) { auKids(f.node).push(b); AUS.step = b.id; if (!AUS.sel) AUS.sel = a.slides[0].id; } }
-  else { const i = a.slides.findIndex(s => s.id === AUS.sel); a.slides.splice(i < 0 ? a.slides.length : i + 1, 0, b); AUS.sel = b.id; AUS.step = ''; }
-  persist(); auLeftFill(); auRightFill(); auPreview();
-}
-function auAddStep() { const a = auCur(), s = auSlideCur(a); if (!s || !s.steps) return; const b = auNewBlock('passo'); s.steps.push(b); AUS.step = b.id; persist(); auLeftFill(); auRightFill(); auPreview(); }
-/* adicionar bloco dentro de uma sequência: abre o seletor de modelos */
-function auAddChild(gid) { AUS.addTo = gid; showModal('Que bloco entra na sequência?', `<div class="au-lay">${Object.entries(AU_L).map(([k, d]) => `<button class="au-lay-b" onclick="auAddLayout('${k}')"><b>${esc(d.label)}</b></button>`).join('')}</div>`); }
-function auNodeMove(id, d) { const a = auCur(), f = auFind(a, id); if (!f) return; const j = f.i + d; if (j < 0 || j >= f.arr.length) return; [f.arr[f.i], f.arr[j]] = [f.arr[j], f.arr[f.i]]; persist(); auLeftFill(); auPreview(); }
-function auNodeDup(id) { const a = auCur(), f = auFind(a, id); if (!f) return; const c = auBlock(JSON.parse(JSON.stringify(f.node))); const fresh = n => { n.id = auId(); (auKids(n) || []).forEach(fresh); }; fresh(c); f.arr.splice(f.i + 1, 0, c); AUS.step = c.id; persist(); auLeftFill(); auRightFill(); auPreview(); }
-function auNodeDel(id) { const a = auCur(), f = auFind(a, id); if (!f) return; if (f.parent && f.parent.layout === 'estacao' && f.arr.length < 2) { toast('A estação precisa de pelo menos um passo.'); return; } if (!confirm('Excluir este bloco?')) return; f.arr.splice(f.i, 1); if (AUS.step === id) AUS.step = f.parent && f.parent.layout === 'grupo' ? f.parent.id : ''; persist(); auLeftFill(); auRightFill(); auPreview(); }
-/* pôr o bloco selecionado dentro de uma sequência nova (e tirar de volta) */
-function auWrap() { const a = auCur(), t = auTarget(a); if (!t || t.layout === 'estacao') return; const f = auFind(a, t.id, a.mode === 'mapa' ? auKids(auSlideCur(a)) : a.slides); if (!f) return; const g = auNewBlock('grupo'); g.title = ''; g.kicker = ''; g.blocks = [f.node]; f.arr[f.i] = g; if (!AUS.step) AUS.sel = g.id; else AUS.step = g.id; persist(); auLeftFill(); auRightFill(); auPreview(); toast('Bloco dentro de uma sequência. Adicione outros blocos a ela na lista da esquerda.'); }
-function auUnwrap() { const a = auCur(), t = auTarget(a); if (!t) return; const f = auFind(a, t.id); if (!f || !f.parent) return; const g = auFind(a, f.parent.id); if (!g) return; f.arr.splice(f.i, 1); g.arr.splice(g.i + 1, 0, f.node); AUS.step = g.parent && g.parent.layout === 'estacao' || g.parent && g.parent.layout === 'grupo' ? f.node.id : ''; if (!AUS.step) AUS.sel = f.node.id; persist(); auLeftFill(); auRightFill(); auPreview(); }
-function auMove(id, d) { const a = auCur(), i = a.slides.findIndex(s => s.id === id), j = i + d; if (i < 0 || j < 0 || j >= a.slides.length) return; [a.slides[i], a.slides[j]] = [a.slides[j], a.slides[i]]; persist(); auLeftFill(); auPreview(); }
-function auDupSlide(id) { const a = auCur(), i = a.slides.findIndex(s => s.id === id); if (i < 0) return; const c = normalizeAulas([{mode: a.mode, slides: [JSON.parse(JSON.stringify(a.slides[i]))]}])[0].slides[0]; c.id = auId(); (c.steps || []).forEach(x => { x.id = auId(); }); a.slides.splice(i + 1, 0, c); AUS.sel = c.id; AUS.step = ''; persist(); auLeftFill(); auRightFill(); auPreview(); }
-function auDelSlide(id) { const a = auCur(); if (a.slides.length < 2) { toast('A aula precisa de pelo menos um item.'); return; } if (!confirm('Excluir este item?')) return; a.slides = a.slides.filter(s => s.id !== id); if (AUS.sel === id) { AUS.sel = a.slides[0].id; AUS.step = ''; } persist(); auLeftFill(); auRightFill(); auPreview(); }
-
-/* ---------- painel da direita ---------- */
-function auDestOpts(a, cur) {
-  const O = ['<option value="">Sem destino</option>']; a.slides.forEach((s, i) => O.push(`<option value="slide:${s.id}"${cur === 'slide:' + s.id ? ' selected' : ''}>${a.mode === 'mapa' ? 'Estação' : 'Faixa'} ${i + 1}: ${esc((a.mode === 'mapa' ? s.title : s.label) || '')}</option>`));
-  O.push(`<option value="url:https://exemplo.com.br"${/^url:/.test(cur) ? ' selected' : ''}>Endereço de fora…</option>`); return O.join('');
-}
-function auFieldHTML(a, b, f, path) {
-  const [k, lab, kind] = f, v = b[k], on = `auSet('${k}',this.value)`;
-  if (kind === 'mesapage') { const p = curProject(), pgs = (p.mesa && p.mesa.pages) || []; return `<div class="es-f">${esc(lab)}<select onchange="auSet('${k}',this.value,true)"><option value="">— escolha —</option>${pgs.map(x => `<option value="${x.id}"${v === x.id ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select><div class="au-wr" style="margin-top:6px"><button class="btn sm" onclick="auMesaNew()">+ Nova página da Mesa</button>${v ? '<button class="btn sm pri" onclick="auMesaEdit()">Desenhar na Mesa</button>' : ''}</div><small class="es-note">Na Mesa você usa todos os elementos, camadas, desenho e IA. Ao fechar a Mesa, a prévia da aula atualiza.</small></div>`; }
-  if (kind === 'children') return `<div class="es-f">${esc(lab)} (${(v || []).length})<small class="es-note">Os blocos da sequência ficam na lista da esquerda, abaixo desta faixa.</small><button class="btn sm" onclick="auAddChild('${b.id}')">+ Adicionar bloco à sequência</button></div>`;
-  if (kind === 'line') return `<label class="es-f">${esc(lab)}<input value="${esc(v || '')}" oninput="${on}"></label>`;
-  if (kind === 'area') return `<label class="es-f">${esc(lab)}<textarea rows="${k === 'text' ? 6 : 3}" oninput="${on}">${esc(v || '')}</textarea></label>`;
-  if (kind === 'date') return `<label class="es-f">${esc(lab)}<input type="date" value="${esc(v || '')}" onchange="${on}"></label>`;
-  if (kind === 'color') return `<label class="es-f">${esc(lab)}<input type="color" value="${esc(v || '#0B57D0')}" onchange="${on}"></label>`;
-  if (kind === 'bool') return `<label class="es-f" style="flex-direction:row;gap:8px;align-items:center"><input type="checkbox" ${v ? 'checked' : ''} onchange="auSet('${k}',this.checked)"> ${esc(lab)}</label>`;
-  if (kind === 'icon') return `<div class="es-f">${esc(lab)}<div class="au-icons">${Object.keys(AU_ICONS).map(i => `<button class="${v === i ? 'on' : ''}" title="${i}" onclick="auSet('icon','${i}',true)">${auSvg(i)}</button>`).join('')}</div></div>`;
-  if (kind === 'dest') return `<label class="es-f">${esc(lab)}<select onchange="${on}">${auDestOpts(a, v || '')}</select>${/^url:/.test(v || '') ? `<input class="fx-url" value="${esc(v.slice(4))}" onchange="auSet('${k}',this.value?'url:'+this.value.trim():'')">` : ''}</label>`;
-  if (kind.startsWith('sel:')) return `<label class="es-f">${esc(lab)}<select onchange="${on}">${kind.slice(4).split(',').map(o => { const [x, n] = o.split('|'); return `<option value="${x}"${v === x ? ' selected' : ''}>${esc(n)}</option>`; }).join('')}</select></label>`;
-  if (kind === 'img') return auImgField(lab, v, b[k + 'Url'], `auImg('${k}')`, `auImg('${k}',true)`, `auSet('${k}Url',this.value,true)`);
-  if (kind.startsWith('rows:')) {
-    const spec = kind.slice(5).split(';').map(x => x.split('|')), rows = v || [];
-    return `<div class="es-f">${esc(lab)}${rows.map((r, i) => `<div class="au-row"><div class="au-row-h"><b>${i + 1}</b><span class="au-sp"></span><button onclick="auRowMove('${k}',${i},-1)" ${i ? '' : 'disabled'}>↑</button><button onclick="auRowMove('${k}',${i},1)" ${i < rows.length - 1 ? '' : 'disabled'}>↓</button><button onclick="auRowDel('${k}',${i})" aria-label="Remover">×</button></div>${spec.map(([kk, ll, tt]) => tt === 'img' ? auImgField(ll, r[kk], r[kk + 'Url'], `auRowImg('${k}',${i},'${kk}')`, `auRowImg('${k}',${i},'${kk}',true)`, `auRowSet('${k}',${i},'${kk}Url',this.value,true)`) : tt === 'area' ? `<textarea rows="2" placeholder="${esc(ll)}" oninput="auRowSet('${k}',${i},'${kk}',this.value)">${esc(r[kk] || '')}</textarea>` : `<input placeholder="${esc(ll)}" value="${esc(r[kk] || '')}" oninput="auRowSet('${k}',${i},'${kk}',this.value)">`).join('')}</div>`).join('')}<button class="btn sm" onclick="auRowAdd('${k}')">+ Adicionar</button></div>`;
+/* miniaturas: a página do modelo montada de verdade (HTML da Mesa), com a navegação */
+async function auThumbs(root, p) {
+  for (const th of root.querySelectorAll('.au-th')) {
+    try { const t = MZ_TEMPLATES.find(x => x.id === th.dataset.t); if (!t) continue; const rt = mzBuildTemplate(t.id, mzCtx(p)), pg = mzNormPage({id: 'tmp', name: t.name, root: rt, nav: t.nav}), ds = mzAulaSkinDs(t.skin) || mzDsDefault(); th.querySelector('iframe').srcdoc = mzDoc({pages: [pg], comps: [], ds}, pg, {img: () => ''}); } catch (e) { /* miniatura opcional */ }
   }
-  return '';
 }
-function auImgField(lab, id, url, pick, clear, onUrl) { return `<div class="es-f">${esc(lab)}<div class="es-row">${id ? `<img class="es-th" data-lib="${esc(id)}" alt="">` : ''}<button class="btn sm" onclick="${pick}">${id ? 'Trocar' : 'Escolher da biblioteca'}</button>${id ? `<button class="btn sm" onclick="${clear}">Tirar</button>` : ''}</div><input class="fx-url" placeholder="ou endereço da imagem (https://…)" value="${esc(url || '')}" oninput="${onUrl}"></div>`; }
-function auRightFill() {
-  const box = $('auRight'), a = auCur(); if (!box || !a) return; const t = auTarget(a), s = auSlideCur(a), isSt = a.mode === 'mapa' && s && t === s;
-  const tabs = `<div class="ps-tabs"><button class="${AUS.tab === 'bloco' ? 'on' : ''}" onclick="AUS.tab='bloco';auRightFill()">${a.mode === 'mapa' ? (isSt ? 'Estação' : 'Passo') : 'Bloco'}</button><button class="${AUS.tab === 'aula' ? 'on' : ''}" onclick="AUS.tab='aula';auRightFill()">Aula</button></div>`;
-  let body = '';
-  if (AUS.tab === 'aula') body = auConfigHTML(a);
-  else if (!t) body = '<p class="es-note">Adicione um item para editar.</p>';
-  else if (isSt) body = `<div class="es-p"><strong class="es-h">Estação</strong>${AU_ESTACAO.map(f => auFieldHTML(a, t, f)).join('')}<p class="es-note">Os passos da estação ficam na lista da esquerda. Clique num passo para editar.</p></div>`;
-  else { const def = AU_L[t.layout], fo = auFind(a, t.id), inGrp = fo && fo.parent && fo.parent.layout === 'grupo'; body = `<div class="es-p"><strong class="es-h">${esc(def.label)}</strong>${t.layout !== 'grupo' ? `<div class="au-wr"><button class="btn sm" onclick="auWrap()" title="Põe este bloco dentro de uma sequência com navegação própria">Pôr dentro de uma sequência</button>${inGrp ? '<button class="btn sm" onclick="auUnwrap()">Tirar da sequência</button>' : ''}</div>` : (inGrp ? '<div class="au-wr"><button class="btn sm" onclick="auUnwrap()">Tirar da sequência</button></div>' : '')}<label class="es-f">Nome no menu<input value="${esc(t.label || '')}" oninput="auSet('label',this.value)"></label>${def.f.map(f => auFieldHTML(a, t, f)).join('')}</div>`; }
-  box.innerHTML = tabs + `<div class="au-rb">${body}</div>`; if (typeof libFill === 'function') libFill(box);
+function auEnsureMesa(p) { if (!p.mesa) p.mesa = normalizeMesa({}); if (!state.mesaLib) state.mesaLib = normalizeMesaLib({}); MZ.p = p; return p.mesa; }
+function auStart(tid) {
+  const p = curProject(); if (!p) { toast('Crie um projeto primeiro.'); return; } auEnsureMesa(p); const t = MZ_TEMPLATES.find(x => x.id === tid); if (!t) return;
+  const pg = mzPageNew(tid, t.name.replace(/^Aula · /, 'Aula ') + ' · ' + p.name); if (!pg) return; persist(); AUS.fromMesa = true; mzOpen(); setTimeout(() => { try { mzPageOpen(pg.id); } catch (e) { /* já abre na página atual */ } }, 700);
+  toast('Aberto na Mesa. Edite como qualquer site; veja a navegação em Prévia.');
 }
-function auConfigHTML(a) {
-  const sk = AU_SKINS[a.skin].v, th = a.theme, n = a.nav;
-  return `<div class="es-p"><strong class="es-h">Navegação</strong><label class="es-f">Como a aula navega<select onchange="auSetMode(this.value)">${Object.entries(AU_MODES).map(([k, l]) => `<option value="${k}"${a.mode === k ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>
-    <label class="es-f" style="flex-direction:row;gap:8px;align-items:center"><input type="checkbox" ${n.top ? 'checked' : ''} onchange="auNav('top',this.checked)"> Menu no topo</label>
-    ${a.mode === 'horizontal' ? `<label class="es-f" style="flex-direction:row;gap:8px;align-items:center"><input type="checkbox" ${n.arrows ? 'checked' : ''} onchange="auNav('arrows',this.checked)"> Setas</label><label class="es-f" style="flex-direction:row;gap:8px;align-items:center"><input type="checkbox" ${n.progress ? 'checked' : ''} onchange="auNav('progress',this.checked)"> Barra de progresso</label>` : ''}
-    <label class="es-f">Botão do topo (texto)<input value="${esc(n.cta || '')}" oninput="auNav('cta',this.value)" placeholder="Ex.: Inscreva-se"></label>${n.cta ? `<label class="es-f">Leva a<select onchange="auNav('ctaTo',this.value)">${auDestOpts(a, n.ctaTo)}</select></label>` : ''}
-    <label class="es-f">Nome da marca<input value="${esc(a.brand || '')}" oninput="auCfg('brand',this.value,true)"></label>
-    ${auImgField('Logo', a.logo, '', "auLogo()", "auLogo(true)", "void 0").replace(/<input class="fx-url"[^>]*>/, '')}
-    <label class="es-f">Descrição (aparece ao compartilhar)<textarea rows="2" oninput="auCfg('desc',this.value,true)">${esc(a.desc || '')}</textarea></label></div>
-    <div class="es-p"><strong class="es-h">Aparência</strong><label class="es-f">Estilo<select onchange="auSkin(this.value)">${Object.entries(AU_SKINS).map(([k, s]) => `<option value="${k}"${a.skin === k ? ' selected' : ''}>${esc(s.label)}</option>`).join('')}</select></label>
-    <div class="au-cols"><label class="es-f">Destaque<input type="color" value="${th.accent || sk.accent}" onchange="auTheme('accent',this.value)"></label><label class="es-f">Fundo<input type="color" value="${th.bg || (/^#/.test(sk.bg) ? sk.bg : '#1565d8')}" onchange="auTheme('bg',this.value)"></label><label class="es-f">Texto<input type="color" value="${th.ink || (/^#/.test(sk.ink) ? sk.ink : '#ffffff')}" onchange="auTheme('ink',this.value)"></label></div>
-    <label class="es-f">Fonte dos títulos<input list="auFonts" value="${esc(th.head || '')}" placeholder="${esc(sk.head)}" onchange="auTheme('head',this.value)"></label><label class="es-f">Fonte do texto<input list="auFonts" value="${esc(th.body || '')}" placeholder="${esc(sk.body)}" onchange="auTheme('body',this.value)"></label><datalist id="auFonts">${(typeof MZ_FONT_LIST !== 'undefined' ? MZ_FONT_LIST : []).map(f => `<option value="${esc(f)}">`).join('')}</datalist>
-    <button class="btn sm" onclick="auResetTheme()">Voltar às cores do estilo</button><small class="es-note">As fontes vêm do Google Fonts: o nome precisa existir lá.</small></div>`;
+function auOpenPage(id) { const p = curProject(); if (!p) return; auEnsureMesa(p); AUS.fromMesa = true; mzOpen(); setTimeout(() => { try { mzPageOpen(id); } catch (e) { /* ok */ } }, 700); }
+function auOldDel(id) { const p = curProject(), a = (p.aulas || []).find(x => x.id === id); if (!a || !confirm('Excluir a aula “' + a.name + '”? (Ela não foi convertida.)')) return; p.aulas = p.aulas.filter(x => x.id !== id); persist(); renderAulas(); }
+/* aula do editor anterior → página da Mesa */
+function auConvert(id) {
+  const p = curProject(), a = (p.aulas || []).find(x => x.id === id); if (!a) return; const m = auEnsureMesa(p); if (m.pages.length >= MZ_LIMITS.pages) { toast('Limite de páginas da Mesa atingido.'); return; }
+  const root = mzNode('page', {}, {display: 'flex', flexDirection: 'column'});
+  root.children = a.mode === 'mapa' ? a.slides.map(s => AUM.estacao(s)) : a.slides.map(s => s.layout === 'mesa' ? null : AUM.build(s, false)).filter(Boolean);
+  const pg = mzNormPage({id: mzId(), name: a.name, slug: '', root, nav: a.mode, navBrand: a.brand, navCta: a.nav && a.nav.cta, navArrows: !a.nav || a.nav.arrows !== false, navProgress: !a.nav || a.nav.progress !== false});
+  pg.slug = mzUniqueSlug(slug(pg.name)); if (!m.pages.length) pg.home = true; m.pages.push(pg); m.cur = pg.id;
+  const ds = mzAulaSkinDs(a.skin); if (ds && (m.pages.length === 1 || confirm('Aplicar o estilo (cores e fontes) da aula ao site todo?'))) { m.ds = ds; if (a.theme && a.theme.accent) m.ds.colors.accent = a.theme.accent; }
+  p.aulas = p.aulas.filter(x => x.id !== id); persist(); toast('Aula convertida. Abrindo na Mesa…'); AUS.fromMesa = true; mzOpen(); setTimeout(() => { try { mzPageOpen(pg.id); } catch (e) { /* ok */ } }, 700);
 }
-function auSkin(k) { const a = auCur(); a.skin = k; a.theme = {accent: '', bg: '', ink: '', head: '', body: ''}; persist(); auRightFill(); auPreview(); }
-function auResetTheme() { const a = auCur(); a.theme = {accent: '', bg: '', ink: '', head: '', body: ''}; persist(); auRightFill(); auPreview(); }
-function auLogo(clear) { const a = auCur(); if (clear) { a.logo = ''; persist(); auRightFill(); auPreview(); return; } libPick(r => { a.logo = r.id; persist(); auRightFill(); auPreview(); }); }
-/* edição de campos */
-function auSet(k, v, redraw) { const a = auCur(), t = auTarget(a); if (!t) return; if (k === 'root' && v) { a.slides.forEach(s => { s.root = false; }); } t[k] = v; if (['dest'].includes(k)) redraw = true; auSave(k === 'title' || k === 'label' || k === 'kicker'); if (redraw) auRightFill(); }
-function auImg(k, clear) { const a = auCur(), t = auTarget(a); if (clear) { t[k] = ''; auSave(); auRightFill(); return; } libPick(r => { t[k] = r.id; auSave(); auRightFill(); }); }
-function auRowSet(k, i, kk, v, redraw) { const t = auTarget(auCur()); if (!t[k][i]) return; t[k][i][kk] = v; auSave(); if (redraw) auRightFill(); }
-function auRowImg(k, i, kk, clear) { const t = auTarget(auCur()); if (clear) { t[k][i][kk] = ''; auSave(); auRightFill(); return; } libPick(r => { t[k][i][kk] = r.id; auSave(); auRightFill(); }); }
-function auRowAdd(k) { const a = auCur(), t = auTarget(a), f = AU_L[t.layout].f.find(x => x[0] === k), spec = f[2].slice(5).split(';').map(x => x.split('|')), row = {}; spec.forEach(([kk, , tt]) => { if (tt === 'img') { row[kk] = ''; row[kk + 'Url'] = ''; } else row[kk] = ''; }); t[k].push(row); auSave(); auRightFill(); }
-function auRowDel(k, i) { const t = auTarget(auCur()); t[k].splice(i, 1); auSave(); auRightFill(); }
-function auRowMove(k, i, d) { const t = auTarget(auCur()), j = i + d; if (j < 0 || j >= t[k].length) return; [t[k][i], t[k][j]] = [t[k][j], t[k][i]]; auSave(); auRightFill(); }
-
-/* ---------- prévia ---------- */
-async function auPreview() {
-  const a = auCur(), fr = $('auFrame'); if (!a || !fr) return; const my = ++AUS.n || (AUS.n = 1); AUS.n = my;
-  try { const h = await auHTML(a, curProject(), {preview: true}); if (my !== AUS.n) return; fr.onload = () => auGoPreview(); fr.srcdoc = h; } catch (e) { toast('Prévia: ' + e.message); }
-}
-function auGoPreview() {
-  const a = auCur(), fr = $('auFrame'); if (!a || !fr || !fr.contentWindow) return; const i = a.slides.findIndex(s => s.id === AUS.sel); if (i < 0) return;
-  let msg = i; if (a.mode === 'mapa') { msg = AUS.sel ? i : -1; } fr.contentWindow.postMessage({auGo: msg}, '*');
-}
-async function auOpenTab() { const a = auCur(); if (!a) return; const h = await auHTML(a, curProject(), {preview: true}), u = URL.createObjectURL(new Blob([h], {type: 'text/html'})); window.open(u, '_blank'); setTimeout(() => URL.revokeObjectURL(u), 60000); }
-async function auDownload(kind) {
-  const a = auCur(), p = curProject(); if (!a) return; if (auPending(a)) toast(`Atenção: ${auPending(a)} item(ns) ainda como [CONFIRMAR].`); toast('Montando…');
-  if (kind === 'html') { const h = await auHTML(a, p, {}); download(auFileName(a) + '.html', h, 'text/html'); toast('HTML único baixado: abra no navegador ou suba em qualquer hospedagem.'); return; }
-  const f = await auFiles(a, p); download(auFileName(a) + '.zip', makeZip(f), 'application/zip'); toast('ZIP com index.html e as imagens em WebP (pasta img).');
-}
-async function auFiles(a, p) { const h = await auHTML(a, p, {}), ex = lpExtractImgs(h), enc = new TextEncoder(); return [{name: 'index.html', data: enc.encode(ex.html)}].concat(ex.files); }
-
-/* ---------- galeria de modelos (aba "Sites de aula" do Banco de templates) ---------- */
+/* aba "Sites de aula" do Banco de templates */
 function auGalleryHTML() {
-  return `<p class="sb-note">Sites de aula são feitos para ensinar: faixas que deslizam, rolagem vertical ou um mapa com zoom. Saem em HTML. Escolha um modelo e edite na tela <b>Sites de aula</b>.</p><div class="au-starters">${AU_STARTERS.map(([k, n, d]) => `<div class="au-st-c" style="cursor:default"><div class="au-th" data-k="${k}"><iframe sandbox="allow-scripts" title="${esc(n)}" tabindex="-1"></iframe></div><b>${esc(n)}</b><small>${esc(d)}</small><button class="btn sm pri" onclick="auCreate('${k}');go('aulas')">Usar este modelo</button></div>`).join('')}</div>`;
+  return `<p class="sb-note">Sites de aula são sites da Mesa com navegação própria: faixas que deslizam, rolagem vertical ou mapa com zoom. Escolha um modelo: ele abre na Mesa, com todas as ferramentas.</p><div class="au-starters">${auTemplates().map(t => `<div class="au-st-c" style="cursor:default"><div class="au-th" data-t="${t.id}"><iframe sandbox="allow-scripts" title="${esc(t.name)}" tabindex="-1"></iframe></div><b>${esc(t.name)}</b><small>${esc(t.desc)}</small><button class="btn sm pri" onclick="auStart('${t.id}')">Usar este modelo</button></div>`).join('')}</div>`;
 }
-async function auGalleryFill(root) {
-  for (const th of root.querySelectorAll('.au-th')) { try { const a = auStarter(th.dataset.k); a.name = 'Exemplo'; th.querySelector('iframe').srcdoc = await auHTML(a, curProject() || {}, {preview: true}); } catch (e) { /* miniatura opcional */ } }
-}
-
-/* página da Mesa dentro da aula: cria, abre e volta */
-function auMesaNew() { const p = curProject(), a = auCur(), t = auTarget(a); if (!p || !t) return; if (!p.mesa) p.mesa = normalizeMesa({}); if (!state.mesaLib) state.mesaLib = normalizeMesaLib({}); MZ.p = p; const pg = mzPageNew('blank', 'Aula · ' + (auNodeName(t) || 'bloco')); if (!pg) { toast('Limite de páginas da Mesa atingido.'); return; } t.page = pg.id; persist(); auRightFill(); auPreview(); auMesaEdit(); }
-function auMesaEdit() { const t = auTarget(auCur()); if (!t || !t.page) return; AUS.fromMesa = true; mzOpen(); setTimeout(() => { try { mzPageOpen(t.page); } catch (e) { /* abre na página atual */ } }, 700); }
+function auGalleryFill(root) { auThumbs(root, curProject()); }

@@ -8,7 +8,7 @@ const MZF = {st: {}, css: {}, busy: null};
 const MZF_SYS = /^(Arial|Helvetica|Georgia|Times|Courier|Verdana|Tahoma|Trebuchet|Impact|system-ui|sans-serif|serif|monospace|inherit|initial|ui-)/i;
 const mzFontInLib = f => typeof myFonts === 'function' && (myFonts().some(x => x.family === f) || (typeof PROJFONTS !== 'undefined' && PROJFONTS.some(x => x.family === f)));
 function mzFontsUsed(roots) {
-  const m = mzM(), s = new Set(); if (!roots) { [m.ds.fonts.heading, m.ds.fonts.body].forEach(f => f && s.add(f)); }
+  const s = new Set(), m = roots ? null : mzM(); if (m) { [m.ds.fonts.heading, m.ds.fonts.body].forEach(f => f && s.add(f)); }
   (roots || m.pages.map(p => p.root)).forEach(r => mzTreeFonts(r, s));
   return [...s].map(f => String(f).trim()).filter(f => f && !MZF_SYS.test(f) && /^[A-Za-z][\w \-]{1,38}$/.test(f)).sort();
 }

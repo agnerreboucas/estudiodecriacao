@@ -1,6 +1,9 @@
 /* ===== Mesa de edição · presets: ícones, catálogo de elementos, blocos prontos e modelos de página =====
    Blocos "avançados" são árvores de elementos básicos: o usuário edita um a um. Nada de widgets opacos.
    Regra de conteúdo do Studio: não inventar depoimentos, números nem preços. Marcadores [entre colchetes] marcam o que falta. */
+/* campos de navegação de aula nas seções e contêineres (painel Conteúdo) */
+const MZ_AULA_FIELDS_BOX = [{k: 'seq', t: 'sel', l: 'Navegação dos itens desta área (sequência)', o: [['', 'Normal (um embaixo do outro)'], ['horizontal', 'Horizontal: desliza para o lado'], ['vertical', 'Vertical: empilhados com separação'], ['zoom', 'Zoom: cartões que abrem em tela cheia']]}, {k: 'navLabel', t: 'text', l: 'Nome (menu da aula, cartão do zoom)'}];
+const MZ_AULA_FIELDS_SEC = MZ_AULA_FIELDS_BOX.concat([{k: 'stTitle', t: 'text', l: 'Estação do mapa: nome'}, {k: 'stPhrase', t: 'text', l: 'Estação do mapa: frase curta'}, {k: 'stIcon', t: 'sel', l: 'Estação do mapa: ícone', o: [['', 'Estrela'], ['livro', 'Livro'], ['camera', 'Câmera'], ['coracao', 'Coração'], ['pessoas', 'Pessoas'], ['lampada', 'Lâmpada'], ['alvo', 'Alvo'], ['lapis', 'Lápis'], ['musica', 'Música'], ['mapa', 'Mapa'], ['chave', 'Chave'], ['sol', 'Sol']]}, {k: 'stColor', t: 'color', l: 'Estação do mapa: cor'}, {k: 'stDate', t: 'text', l: 'Estação do mapa: data (AAAA-MM-DD)'}, {k: 'stRoot', t: 'bool', l: 'Estação do mapa: é a base (fica embaixo)'}]);
 Object.assign(MZ_ICONS, {
   star: '<polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/>',
   check: '<polyline points="4 12 10 18 20 6"/>', 'check-circle': '<circle cx="12" cy="12" r="10"/><polyline points="7 12.5 10.5 16 17 8.5"/>',
@@ -82,7 +85,7 @@ const MZ_TEMPLATES = [
   {id: 'local', name: 'Serviço local', desc: 'Sobre, passos, perguntas e contato.', blocks: ['header', 'hero', 'about', 'steps', 'faq', 'lead', 'footer']},
   {id: 'event', name: 'Evento', desc: 'Contagem regressiva, benefícios e inscrição.', blocks: ['header', 'hero', 'benefits', 'steps', 'lead', 'footer']}
 ];
-function mzBuildBlock(id, ctx) { const b = MZ_BLOCKS.find(x => x.id === id); return b ? b.make(ctx) : null; }
+function mzBuildBlock(id, ctx) { const [bid, arg] = String(id).split(':'), b = MZ_BLOCKS.find(x => x.id === bid); return b ? b.make(ctx, arg) : null; }
 function mzBuildTemplate(id, ctx) { const t = MZ_TEMPLATES.find(x => x.id === id) || MZ_TEMPLATES[0], root = mzNode('page', {}, {display: 'flex', flexDirection: 'column'}); root.children = t.blocks.map(b => mzBuildBlock(b, ctx)).filter(Boolean); if (id === 'event') { const hero = root.children.find(c => c.htmlId === 'topo'); if (hero) hero.children[0].children[0].children.splice(3, 0, MZB.N('countdown', {date: '', done: 'O evento começou!'}, MZB.st({fontWeight: 800}))); } return root; }
 /* ---------- catálogo de elementos ---------- */
 const MZ_EL = [
@@ -114,6 +117,9 @@ const MZ_EL = [
   {id: 'countdown', cat: 'adv', name: 'Contagem regressiva', icon: 'clock', make: () => mzNode('countdown', {date: '', done: 'Acabou!'}, {})},
   {id: 'table', cat: 'adv', name: 'Tabela', icon: 'layers', make: () => mzNode('table', {rows: [['Item', 'Descrição'], ['A', '[texto]'], ['B', '[texto]']]}, {width: '100%'})},
   {id: 'gallery', cat: 'adv', name: 'Galeria', icon: 'camera', make: () => mzNode('gallery', {imgs: [], cols: 3}, {width: '100%'})},
+  {id: 'carousel', cat: 'adv', name: 'Carrossel', icon: 'camera', make: () => mzNode('carousel', {imgs: [], caps: ['Primeiro slide | Legenda', 'Segundo slide | Legenda']}, {width: '100%'})},
+  {id: 'compare', cat: 'adv', name: 'Antes e depois', icon: 'eye', make: () => mzNode('compare', {before: '', after: ''}, {width: '100%', maxWidth: 820})},
+  {id: 'reveal', cat: 'adv', name: 'Pergunta que revela a resposta', icon: 'search', make: () => mzNode('reveal', {items: [{q: 'Qual é a pergunta?', a: 'A resposta aparece ao tocar.'}]}, {width: '100%'})},
   {id: 'timeline', cat: 'adv', name: 'Linha do tempo', icon: 'calendar', make: () => mzNode('timeline', {items: [{w: '2024', t: 'Marco 1', d: '[descrição]'}, {w: '2025', t: 'Marco 2', d: '[descrição]'}]}, {})}
 ];
 /* esquema de campos do painel Conteúdo, por tipo. t: text | area | num | url | img | sel | bool | items */
@@ -139,8 +145,11 @@ const MZ_FIELDS = {
   table: [{k: 'rows', t: 'table', l: 'Linhas (colunas separadas por | , primeira linha = cabeçalho)'}],
   gallery: [{k: 'imgs', t: 'imgs', l: 'Imagens'}, {k: 'cols', t: 'num', l: 'Colunas'}],
   timeline: [{k: 'items', t: 'tl', l: 'Marcos (Quando | Título | Descrição, uma por linha)'}],
-  section: [{k: 'boxed', t: 'bool', l: 'Conteúdo em caixa (largura máxima)'}, {k: 'w', t: 'num', l: 'Largura máxima (px, 0 = padrão do site)'}, {k: 'tag', t: 'sel', l: 'Etiqueta HTML', o: [['section', 'section'], ['header', 'header'], ['footer', 'footer'], ['main', 'main'], ['div', 'div']]}],
-  container: [{k: 'boxed', t: 'bool', l: 'Conteúdo em caixa'}, {k: 'w', t: 'num', l: 'Largura máxima (px)'}],
+  carousel: [{k: 'imgs', t: 'imgs', l: 'Imagens (na ordem dos slides)'}, {k: 'caps', t: 'lines', l: 'Legendas (Título | Legenda, uma linha por slide, na mesma ordem)'}],
+  compare: [{k: 'before', t: 'img', l: 'Imagem de ANTES'}, {k: 'after', t: 'img', l: 'Imagem de DEPOIS'}, {k: 'bl', t: 'text', l: 'Rótulo do antes'}, {k: 'al', t: 'text', l: 'Rótulo do depois'}],
+  reveal: [{k: 'items', t: 'qa', l: 'Perguntas (Pergunta :: Resposta, uma por linha). A resposta aparece ao tocar.'}],
+  section: [{k: 'boxed', t: 'bool', l: 'Conteúdo em caixa (largura máxima)'}, {k: 'w', t: 'num', l: 'Largura máxima (px, 0 = padrão do site)'}, {k: 'tag', t: 'sel', l: 'Etiqueta HTML', o: [['section', 'section'], ['header', 'header'], ['footer', 'footer'], ['main', 'main'], ['div', 'div']]}].concat(MZ_AULA_FIELDS_SEC),
+  container: [{k: 'boxed', t: 'bool', l: 'Conteúdo em caixa'}, {k: 'w', t: 'num', l: 'Largura máxima (px)'}].concat(MZ_AULA_FIELDS_BOX),
   link: [{k: 'href', t: 'link', l: 'Link'}, {k: 'newTab', t: 'bool', l: 'Abrir em nova aba'}],
   form: [{k: 'action', t: 'url', l: 'Endereço que recebe os contatos (leads)'}, {k: 'thanks', t: 'url', l: 'Página de obrigado'}, {k: 'source', t: 'text', l: 'Origem (rótulo)'}]
 };
