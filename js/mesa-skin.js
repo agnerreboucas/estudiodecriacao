@@ -70,7 +70,7 @@ function mzsBuild() {
 (function () {
   const open0 = mzOpen, close0 = mzClose, tab0 = mzLeftTab;
   mzOpen = function () { document.body.classList.add('mz-dark'); const r = open0.apply(this, arguments); if (MZ.open) mzsBuild(); else document.body.classList.remove('mz-dark'); return r; };
-  mzClose = async function () { const r = await close0.apply(this, arguments); if (!MZ.open) { document.body.classList.remove('mz-dark', 'mz-refwide'); MRF.on = false; } return r; };
+  mzClose = async function () { const r = await close0.apply(this, arguments); if (!MZ.open) { document.body.classList.remove('mz-dark', 'mz-refwide'); MRF.on = false; if (typeof AUS !== 'undefined' && AUS.fromMesa) { AUS.fromMesa = false; if (typeof go === 'function') go('aulas'); } } return r; };
   mzLeftTab = function (k) { tab0.apply(this, arguments); if (!MSK.open.l && document.querySelector('.mz-rail')) { MSK.open.l = true; mskApply(); } mzsState(); mzRefWide(); };
   const aiT = mzAiToggle; mzAiToggle = function () { const r = aiT.apply(this, arguments); mzsState(); return r; };
   const fr = mzFreeToggle; mzFreeToggle = function () { const r = fr.apply(this, arguments); mzsState(); return r; };

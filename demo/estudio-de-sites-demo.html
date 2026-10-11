@@ -1432,6 +1432,7 @@ body.es-solo .rail,body.es-solo .topbar,body.es-solo .rail-back{display:none!imp
 @media(max-width:1100px){.au-body{grid-template-columns:200px minmax(0,1fr) 280px}}
 .au-th{position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;border-radius:10px;border:1px solid #ddd;background:#eee;pointer-events:none}.au-th iframe{position:absolute;left:0;top:0;width:1440px;height:900px;border:0;transform-origin:0 0;transform:scale(.2)}
 @media(min-width:900px){.au-th iframe{transform:scale(.235)}}
+.au-sl li[style*='--d']{padding-left:calc(var(--d)*14px)}.au-wr{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 
 </style>
 </head>
@@ -11906,6 +11907,8 @@ const AU_L = {
   video: {label: 'Vídeo (YouTube ou Vimeo)', f: [['kicker', 'Etiqueta', 'line'], ['title', 'Título', 'area'], ['url', 'Endereço do vídeo', 'line'], ['text', 'Legenda', 'area']]},
   passo: {label: 'Passo da aula (história, texto, versículo…)', f: [['kicker', 'Etapa (ex.: Pra começar)', 'line'], ['title', 'Título', 'area'], ['text', 'Texto (parágrafos separados por linha em branco)', 'area'], ['quote', 'Destaque / citação', 'area'], ['ref', 'Fonte da citação', 'line'], ['image', 'Imagem (opcional)', 'img'], ['items', 'Perguntas que revelam a resposta', 'rows:h|Pergunta|line;t|Resposta|area'], ['goal', 'Quadro de objetivo (opcional)', 'line']]},
   formulario: {label: 'Formulário e contato', f: [['kicker', 'Etiqueta', 'line'], ['title', 'Título', 'area'], ['text', 'Texto', 'area'], ['contacts', 'Contatos', 'rows:l|Rótulo|line;v|Valor|line'], ['button', 'Texto do botão', 'line'], ['ok', 'Mensagem de sucesso', 'line']]},
+  grupo: {label: 'Sequência (agrupa blocos com a própria navegação)', f: [['kicker', 'Etiqueta', 'line'], ['title', 'Título (opcional)', 'area'], ['text', 'Texto (opcional)', 'area'], ['nav', 'Como esta sequência navega', 'sel:horizontal|Horizontal (desliza para o lado),vertical|Vertical (um bloco embaixo do outro),zoom|Zoom (cartões que abrem em tela cheia)'], ['blocks', 'Blocos da sequência', 'children']]},
+  mesa: {label: 'Página da Mesa (design livre com todos os elementos)', f: [['page', 'Página da Mesa', 'mesapage'], ['height', 'Altura da área', 'sel:fit|Acompanha o conteúdo,screen|Tela inteira,tall|Alta (2200 px)']]},
   cta: {label: 'Chamada final', f: [['title', 'Título', 'area'], ['text', 'Texto', 'area'], ['btn1', 'Botão: texto', 'line'], ['to1', 'Botão leva a', 'dest']]}
 };
 const AU_ESTACAO = [['title', 'Nome da estação', 'line'], ['phrase', 'Frase curta (aparece no mapa)', 'line'], ['ref', 'Referência (ex.: texto base)', 'line'], ['date', 'Data do encontro', 'date'], ['color', 'Cor', 'color'], ['icon', 'Ícone', 'icon'], ['root', 'É a base (fica embaixo do mapa)', 'bool']];
@@ -11916,11 +11919,13 @@ const auImgId = v => /^[\w-]{1,60}$/.test(String(v || '')) ? String(v) : '';
 const auUrl = v => /^https?:\/\/[^\s"'<>]{1,400}$/.test(String(v || '')) ? String(v) : '';
 const auColor = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v || '')) ? String(v) : d;
 
-function auBlock(b) {
-  b = b && typeof b === 'object' ? b : {}; const L = AU_L[b.layout] ? b.layout : 'texto', def = AU_L[L], o = {id: /^[\w-]{1,20}$/.test(b.id || '') ? b.id : auId(), layout: L, label: auS(b.label, 40)};
+function auBlock(b, depth) {
+  depth = depth || 0; b = b && typeof b === 'object' ? b : {}; const L = AU_L[b.layout] ? b.layout : 'texto', def = AU_L[L], o = {id: /^[\w-]{1,20}$/.test(b.id || '') ? b.id : auId(), layout: L, label: auS(b.label, 40)};
   def.f.forEach(([k, , kind]) => {
     if (kind === 'img') { o[k] = auImgId(b[k]); o[k + 'Url'] = auUrl(b[k + 'Url']); }
     else if (kind === 'dest') o[k] = auDest(b[k]);
+    else if (kind === 'mesapage') o[k] = /^[\w-]{1,40}$/.test(b[k] || '') ? b[k] : '';
+    else if (kind === 'children') o[k] = depth >= 3 ? [] : (Array.isArray(b[k]) ? b[k] : []).slice(0, 30).map(x => auBlock(x, depth + 1));
     else if (kind.startsWith('sel:')) { const ok = kind.slice(4).split(',').map(x => x.split('|')[0]); o[k] = ok.includes(b[k]) ? b[k] : ok[0]; }
     else if (kind.startsWith('rows:')) {
       const spec = kind.slice(5).split(';').map(x => x.split('|')); o[k] = (Array.isArray(b[k]) ? b[k] : []).slice(0, 40).map(r => { r = r && typeof r === 'object' ? r : {}; const x = {}; spec.forEach(([kk, , tt]) => { if (tt === 'img') { x[kk] = auImgId(r[kk]); x[kk + 'Url'] = auUrl(r[kk + 'Url']); } else x[kk] = auS(r[kk], tt === 'area' ? 1500 : 160); }); return x; });
@@ -11965,7 +11970,8 @@ function auNewBlock(layout) {
     formulario: {kicker: 'Inscrições', title: 'Fale com a gente', text: '', contacts: [{l: 'WhatsApp', v: auPH('número')}, {l: 'E-mail', v: auPH('e-mail')}], button: 'Enviar', ok: 'Recebemos! Entraremos em contato.'},
     cta: {title: auPH('chamada final'), text: '', btn1: 'Quero participar'}
   }[layout] || {};
-  return auBlock(Object.assign({layout, label: AU_L[layout] ? AU_L[layout].label.split(' (')[0] : ''}, d));
+  const g = layout === 'grupo' ? {kicker: 'Sequência', title: '', nav: 'horizontal', blocks: [auNewBlock('texto'), auNewBlock('passos'), auNewBlock('pergunta')]} : null;   // fora do objeto acima: ele é montado por inteiro a cada chamada
+  return auBlock(Object.assign({layout, label: AU_L[layout] && !['grupo', 'mesa'].includes(layout) ? AU_L[layout].label.split(' (')[0] : ''}, g || d));
 }
 function auStarter(kind) {
   const B = (l, o) => Object.assign(auNewBlock(l), o || {});
@@ -11987,6 +11993,7 @@ function auStarter(kind) {
 const auE = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]);
 /* *destaque* vira <em>; **negrito** vira <strong>; quebra de linha vira <br> */
 const auR = s => auE(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>').replace(/\n/g, '<br>');
+const auPlain = s => String(s || '').replace(/\*\*?/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
 const auParas = s => String(s || '').split(/\n\s*\n/).map(x => x.trim()).filter(Boolean).map(x => `<p>${auR(x)}</p>`).join('');
 const auVars = a => { const sk = AU_SKINS[a.skin] || AU_SKINS.editorial, v = Object.assign({}, sk.v), t = a.theme || {}; ['accent', 'bg', 'ink'].forEach(k => { if (t[k]) v[k] = t[k]; }); if (t.head) v.head = t.head; if (t.body) v.body = t.body; return v; };
 function auFontsLink(v) {
@@ -12056,6 +12063,22 @@ const AU_R = {
     const ct = (b.contacts || []).filter(x => x.l || x.v).map(x => `<div class="au-ct"><span>${auE(x.l)}</span><b>${auR(x.v)}</b></div>`).join('');
     return `<div class="au-wrap"><div class="au-split"><div class="au-col">${auHead(b)}${b.text ? `<div class="au-body">${auParas(b.text)}</div>` : ''}${ct ? `<div class="au-contacts">${ct}</div>` : ''}</div><form class="au-form" data-leads="${c.preview ? '' : auE(lu)}" data-source="${auE(a.name)}" novalidate><label>Seu nome<input name="name" autocomplete="name" required></label><label>WhatsApp<input name="phone" type="tel" autocomplete="tel" required></label><label>E-mail<input name="email" type="email" autocomplete="email"></label><label>Mensagem<textarea name="message" rows="3"></textarea></label><input name="website" class="au-hp" tabindex="-1" autocomplete="off" aria-hidden="true"><label class="au-ck"><input type="checkbox" name="consent"> Concordo em ser contatado(a) sobre esta aula.</label><button class="au-btn acc" type="submit">${auE(b.button || 'Enviar')}</button><p class="au-ok" hidden>${auE(b.ok || 'Recebemos!')}</p></form></div></div>`;
   },
+  async mesa(a, b, c) {
+    const m = c.p && c.p.mesa, pg = m && (m.pages || []).find(x => x.id === b.page);
+    if (!pg) return `<div class="au-wrap"><div class="au-noimg">Escolha uma página da Mesa para aparecer aqui (ou crie uma nova no painel da direita).</div></div>`;
+    let doc = ''; try { doc = await mzInlineImgDoc(m, pg); } catch (e) { return `<div class="au-wrap"><div class="au-noimg">Não consegui montar a página da Mesa: ${auE(e.message)}</div></div>`; }
+    const k = auE(b.id), fit = `<script>(function(){function s(){parent.postMessage({auH:document.documentElement.scrollHeight,k:'${b.id}'},'*')}addEventListener('load',s);if(window.ResizeObserver)new ResizeObserver(s).observe(document.documentElement)})()<\/script>`;
+    doc = doc.replace(/<\/body>(?![\s\S]*<\/body>)/i, fit + '</body>');
+    return `<div class="au-mesa ${b.height || 'fit'}"><iframe data-k="${k}" title="${auE(pg.name)}" srcdoc="${auE(doc)}" loading="lazy"></iframe></div>`;
+  },
+  async grupo(a, b, c) {
+    const kids = []; for (const k of b.blocks || []) kids.push({k, html: await auBlockHTML(a, k, Object.assign({}, c, {depth: (c.depth || 0) + 1}))});
+    const nm = k => auPlain(k.title) || auPlain(k.label) || auPlain(k.kicker) || (AU_L[k.layout] ? AU_L[k.layout].label.split(' (')[0] : '');
+    const head = (b.kicker || b.title || b.text) ? `<div class="au-gh0">${auHead(b)}${b.text ? `<div class="au-lead">${auParas(b.text)}</div>` : ''}</div>` : '';
+    if (b.nav === 'vertical') return `<div class="au-grp v">${head}${kids.map(x => `<div class="au-gi">${x.html}</div>`).join('')}</div>`;
+    if (b.nav === 'zoom') return `<div class="au-grp z">${head}<div class="au-tiles">${kids.map((x, i) => `<button type="button" class="au-tile" data-z="${i}"><span class="au-tn">${String(i + 1).padStart(2, '0')}</span><b>${auE(nm(x.k))}</b>${x.k.kicker && x.k.kicker !== nm(x.k) ? `<small>${auE(x.k.kicker)}</small>` : ''}<i>Abrir</i></button>`).join('')}</div><div class="au-zdata" hidden>${kids.map(x => `<div class="au-zc" data-t="${auE(nm(x.k))}">${x.html}</div>`).join('')}</div></div>`;
+    return `<div class="au-grp h" data-n="${kids.length}">${head}<div class="au-gbar"><span class="au-gn">1 / ${kids.length}</span><span class="au-gdots">${kids.map((x, i) => `<button type="button" class="${i ? '' : 'on'}" data-gi="${i}" aria-label="${auE(nm(x.k))}" title="${auE(nm(x.k))}"></button>`).join('')}</span><span class="au-gar"><button type="button" class="au-gb l" aria-label="Anterior">‹</button><button type="button" class="au-gb r" aria-label="Próximo">›</button></span></div><div class="au-gt">${kids.map(x => `<div class="au-gp">${x.html}</div>`).join('')}</div></div>`;
+  },
   async cta(a, b, c) { return `<div class="au-wrap narrow au-cta"><h2 class="au-h">${auR(b.title)}</h2>${b.text ? `<div class="au-body">${auParas(b.text)}</div>` : ''}${b.btn1 ? `<a class="au-btn acc" ${auHref(a, b.to1, c.mode).attr}>${auE(b.btn1)}</a>` : ''}</div>`; }
 };
 async function auBlockHTML(a, b, c) { const f = AU_R[b.layout]; return f ? await f(a, b, c) : ''; }
@@ -12114,6 +12137,13 @@ body.sk-vivo .au-arr{background:rgba(8,60,140,.6)}.au-arr.l{left:50%;transform:t
 .au-form{display:grid;gap:14px;background:var(--paper);border:1px solid var(--line);border-radius:var(--rad);padding:26px}.au-form label{display:grid;gap:6px;font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ash)}.au-form input:not([type=checkbox]),.au-form textarea{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:calc(var(--rad)*.5);padding:12px;font:15px var(--body)}.au-ck{display:flex!important;grid-template-columns:none;gap:10px;align-items:flex-start;text-transform:none!important;letter-spacing:0!important;font:14px var(--body)!important}.au-hp{position:absolute!important;left:-9999px}.au-ok{color:var(--accent);font-weight:600}
 .au-cta{text-align:center;padding-top:90px}.au-cta .au-body{margin:0 auto 26px}
 .au-passo{max-width:760px}.au-etapa{font:600 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}.au-ph3{font:var(--hw) clamp(26px,3.2vw,42px)/1.15 var(--head);margin-bottom:18px}.au-pq{border-left:4px solid var(--accent);padding:6px 0 6px 18px;margin:18px 0;font:italic 20px/1.5 var(--head)}.au-pq cite,.au-ref{display:block;margin-top:8px;font:600 12px var(--mono);letter-spacing:.1em;color:var(--accent);font-style:normal}.au-pimg{border-radius:var(--rad);margin:0 0 18px;max-height:340px;object-fit:cover;width:100%}.au-goal{margin-top:22px;background:var(--accent);color:var(--on);border-radius:var(--rad);padding:16px 20px;font:600 18px var(--head);text-align:center}
+.au-mesa iframe{display:block;width:100%;border:0;background:transparent;min-height:300px}.au-mesa.screen iframe{height:calc(100vh - var(--nav))}.au-mesa.tall iframe{height:2200px}.au-mesa.fit iframe{height:900px}
+/* sequências (grupos) */
+.au-grp.v .au-gi+.au-gi{border-top:1px solid var(--line)}.au-gh0{max-width:1180px;margin:0 auto;padding:48px 48px 0}.au-gh0 .au-h{margin-bottom:8px}
+.au-gbar{max-width:1180px;margin:0 auto;padding:18px 48px 0;display:flex;align-items:center;gap:16px}.au-gn{font:500 11px var(--mono);letter-spacing:.12em;color:var(--ash)}.au-gdots{display:flex;gap:8px;flex:1}.au-gdots button{width:26px;height:4px;border:0;border-radius:3px;background:var(--line);padding:0}.au-gdots button.on{background:var(--accent)}.au-gar{display:flex;gap:8px}.au-gb{width:40px;height:40px;border-radius:50%;border:0;background:var(--accent);color:var(--on);font-size:22px;line-height:1}
+.au-gt{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.au-gt::-webkit-scrollbar{display:none}.au-gp{flex:0 0 100%;scroll-snap-align:start;min-width:0;max-height:calc(100vh - var(--nav) - 90px);overflow-y:auto}
+.au-tiles{max-width:1180px;margin:0 auto;padding:26px 48px 64px;display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.au-tile{position:relative;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:var(--rad);padding:22px 20px 54px;min-height:160px;display:flex;flex-direction:column;gap:8px;transition:transform .25s,border-color .25s}.au-tile:hover{transform:translateY(-4px);border-color:var(--accent)}.au-tile b{font:var(--hw) 24px/1.15 var(--head)}.au-tile small{color:var(--ash)}.au-tn{font:500 11px var(--mono);letter-spacing:.14em;color:var(--accent)}.au-tile i{position:absolute;left:20px;bottom:16px;font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;font-style:normal;color:var(--accent)}
+.au-zm{position:fixed;inset:0;z-index:1500;background:color-mix(in srgb,var(--bg) 88%,#000);display:none;flex-direction:column}.au-zm.on{display:flex}body.sk-vivo .au-zm{background:#0a3f93}.au-zbox{flex:1;overflow-y:auto;position:relative;padding-top:14px}.au-zh{display:flex;align-items:center;gap:12px;padding:12px 24px;border-bottom:1px solid var(--line)}.au-zh b{flex:1;font:var(--hw) 20px var(--head)}.au-zh button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:9px 16px;font:600 13px var(--body);color:var(--ink)}.au-zh button.x{background:var(--accent);color:var(--on);border-color:var(--accent)}
 /* modo horizontal */
 body.m-horizontal{overflow:hidden;height:100vh}.m-horizontal .au-reel{display:flex;height:100vh;width:calc(var(--n)*100vw);transition:transform .75s cubic-bezier(.77,0,.18,1)}.m-horizontal .au-slide{width:100vw;height:100vh;overflow-y:auto;padding-top:var(--nav);flex:none;scrollbar-width:thin}
 .m-horizontal .au-capa{min-height:calc(100vh - var(--nav))}
@@ -12147,7 +12177,7 @@ if(mode==='horizontal'||mode==='vertical'){
  function mark(){links.forEach(function(a,k){a.classList.toggle('on',k===cur)});dots.forEach(function(a,k){a.classList.toggle('on',k===cur)});if(pc)pc.textContent=String(cur+1).padStart(2,'0');if(pb)pb.style.setProperty('--p',(n>1?cur/(n-1)*100:0)+'%');if(aL)aL.classList.toggle('off',cur===0);if(aR){aR.classList.toggle('off',cur===n-1);var l=$('span',aR);if(l)l.textContent=cur<n-1?lab(cur+1):''}D.title=(M.title||'')}
  window.go=go;D.addEventListener('click',function(e){var g=e.target.closest&&e.target.closest('[data-go]');if(g){e.preventDefault();go(+g.getAttribute('data-go'));var l=$('.au-links');if(l)l.classList.remove('on')}});
  D.addEventListener('keydown',function(e){if(/INPUT|TEXTAREA|SELECT/.test((e.target||{}).tagName||''))return;if(e.key==='ArrowRight'||(mode==='vertical'&&e.key==='ArrowDown'&&false))go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
- var tx=0,ty=0;D.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});D.addEventListener('touchend',function(e){if(mode!=='horizontal')return;if(e.target.closest&&e.target.closest('.au-car-t,.au-ba'))return;var dx=tx-e.changedTouches[0].clientX,dy=ty-e.changedTouches[0].clientY;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.3)go(dx>0?cur+1:cur-1)},{passive:true});
+ var tx=0,ty=0;D.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});D.addEventListener('touchend',function(e){if(mode!=='horizontal')return;if(e.target.closest&&e.target.closest('.au-car-t,.au-ba,.au-gt'))return;var dx=tx-e.changedTouches[0].clientX,dy=ty-e.changedTouches[0].clientY;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.3)go(dx>0?cur+1:cur-1)},{passive:true});
  if(mode==='vertical'&&'IntersectionObserver'in window){var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting&&en.intersectionRatio>.5){cur=+en.target.id.slice(1);mark()}})},{threshold:[.5]});$$('.au-slide').forEach(function(s){io.observe(s)})}
  var h=parseInt((location.hash||'').replace('#s',''),10);if(!isNaN(h))go(h,true);else mark();
  window.addEventListener('message',function(e){if(e.data&&e.data.auGo!==undefined)go(+e.data.auGo,true)});
@@ -12180,6 +12210,17 @@ if(mode==='mapa'){
  addEventListener('resize',function(){layout();fit()});layout();fit();
  window.addEventListener('message',function(e){if(e.data&&e.data.auGo!==undefined){var i=+e.data.auGo;if(i<0)closeSt();else openSt(i)}});
 }
+/* sequências: horizontal (desliza) e zoom (cartões que abrem) */
+D.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('.au-gb,.au-gdots button');if(t){var g=t.closest('.au-grp'),tr=$('.au-gt',g),w=tr.clientWidth;if(t.classList.contains('au-gb'))tr.scrollBy({left:t.classList.contains('l')?-w:w,behavior:'smooth'});else tr.scrollTo({left:w*(+t.getAttribute('data-gi')),behavior:'smooth'})}});
+D.addEventListener('scroll',function(e){var tr=e.target;if(!tr||!tr.classList||!tr.classList.contains('au-gt'))return;var g=tr.closest('.au-grp'),i=Math.round(tr.scrollLeft/Math.max(1,tr.clientWidth)),n=+g.getAttribute('data-n')||1;$$('.au-gdots button',g).forEach(function(b,k){b.classList.toggle('on',k===i)});var c=$('.au-gn',g);if(c)c.textContent=(i+1)+' / '+n},true);
+var zm=$('#zm'),zi=0,zk=[],zg=null;
+function zshow(i,from){zi=(i+zk.length)%zk.length;var box=$('.au-zbox',zm);box.innerHTML=zk[zi].innerHTML;box.scrollTop=0;$('.au-zh b',zm).textContent=zk[zi].getAttribute('data-t')||'';$('.zn',zm).textContent=(zi+1)+' / '+zk.length;
+ if(from&&box.animate){var r=from.getBoundingClientRect(),W=innerWidth,H=innerHeight;zm.animate([{transform:'translate('+(r.left+r.width/2-W/2)+'px,'+(r.top+r.height/2-H/2)+'px) scale('+(r.width/W)+','+(r.height/H)+')',opacity:.3,borderRadius:'18px'},{transform:'none',opacity:1,borderRadius:'0px'}],{duration:480,easing:'cubic-bezier(.2,.8,.2,1)'})}}
+function zclose(){zm.classList.remove('on');D.body.style.overflow=''}
+D.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('.au-tile');if(t){zg=t.closest('.au-grp');zk=$$('.au-zc',zg);zm.classList.add('on');zshow(+t.getAttribute('data-z'),t);return}
+ if(!zm.classList.contains('on'))return;if(e.target.closest('.x'))zclose();else if(e.target.closest('.zp'))zshow(zi-1);else if(e.target.closest('.zn2'))zshow(zi+1)});
+D.addEventListener('keydown',function(e){if(!zm.classList.contains('on'))return;if(e.key==='Escape'){zclose();e.stopImmediatePropagation()}else if(e.key==='ArrowRight'){zshow(zi+1);e.stopImmediatePropagation()}else if(e.key==='ArrowLeft'){zshow(zi-1);e.stopImmediatePropagation()}},true);
+window.addEventListener('message',function(e){var d=e.data;if(d&&d.auH&&d.k){var f=$('.au-mesa.fit iframe[data-k="'+d.k+'"]');if(f)f.style.height=d.auH+'px'}});
 /* componentes comuns */
 D.addEventListener('click',function(e){var q=e.target.closest&&e.target.closest('.au-q');if(q){var a=q.parentNode.querySelector('.au-a');a.hidden=!a.hidden;q.querySelector('i').textContent=a.hidden?'Ver a resposta':'Esconder'}
  var cb=e.target.closest&&e.target.closest('.au-car-b');if(cb){var t=cb.parentNode.querySelector('.au-car-t'),w=t.firstElementChild?t.firstElementChild.offsetWidth+18:300;t.scrollBy({left:cb.classList.contains('l')?-w:w,behavior:'smooth'})}
@@ -12193,7 +12234,7 @@ $$('.au-form').forEach(function(f){f.addEventListener('submit',function(e){e.pre
 /* ---------- página inteira ---------- */
 async function auHTML(a, p, opts) {
   opts = opts || {}; const v = auVars(a), mode = a.mode, ctx = {mode, preview: !!opts.preview, p}, n = a.slides.length, nav = a.nav || {};
-  const labels = a.slides.map((s, i) => s.label || s.title || ('Parte ' + (i + 1))); let body = '', title = a.name;
+  const labels = a.slides.map((s, i) => s.label || auPlain(s.title) || auPlain(s.kicker) || ('Parte ' + (i + 1))); let body = '', title = a.name;
   const logo = a.logo ? await lpImg(a.logo, 300) : '';
   const brand = `<a class="au-brand" href="#s0" ${mode === 'mapa' ? 'data-open-none' : 'data-go="0"'}>${logo ? `<img src="${logo}" alt="">` : ''}${auE(a.brand || a.name)}</a>`;
   const cta = nav.cta ? `<a class="au-ncta" ${auHref(a, nav.ctaTo || (a.slides.length ? 'slide:' + a.slides[a.slides.length - 1].id : ''), mode).attr}>${auE(nav.cta)}</a>` : '';
@@ -12212,7 +12253,7 @@ async function auHTML(a, p, opts) {
   }
   const data = {mode, n, labels, title, st: mode === 'mapa' ? a.slides.map(s => ({root: !!s.root, date: s.date, title: s.title, phrase: s.phrase, ref: s.ref, color: s.color})) : []};
   const json = JSON.stringify(data).replace(/</g, '\\u003c');
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${auE(a.name)}</title>${a.desc ? `<meta name="description" content="${auE(a.desc)}">` : ''}${auFontsLink(v)}<style>${auCss(a)}</style></head><body class="sk-${a.skin} m-${mode}"><script>document.documentElement.classList.add('m-${mode}')<\/script>${head}${body}<div class="au-lb" id="lb"><img alt=""></div><script>window.AULA=${json};${AU_JS}<\/script></body></html>`;
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${auE(a.name)}</title>${a.desc ? `<meta name="description" content="${auE(a.desc)}">` : ''}${auFontsLink(v)}<style>${auCss(a)}</style></head><body class="sk-${a.skin} m-${mode}"><script>document.documentElement.classList.add('m-${mode}')<\/script>${head}${body}<div class="au-lb" id="lb"><img alt=""></div><div class="au-zm" id="zm"><div class="au-zh"><b></b><button type="button" class="zp">‹ Anterior</button><span class="zn" style="font:500 12px var(--mono);color:var(--ash)"></span><button type="button" class="zn2">Próximo ›</button><button type="button" class="x">Fechar</button></div><div class="au-zbox"></div></div><script>window.AULA=${json};${AU_JS}<\/script></body></html>`;
 }
 
 </script>
@@ -12222,7 +12263,12 @@ const AUS = {id: '', sel: '', step: '', dev: 'desk', tab: 'bloco', t: 0};
 const auList = p => (p && p.aulas) || (p.aulas = []);
 const auCur = p => auList(p || curProject()).find(a => a.id === AUS.id) || null;
 const auSlideCur = a => a && (a.slides.find(s => s.id === AUS.sel) || a.slides[0] || null);
-function auTarget(a) { const s = auSlideCur(a); if (!s) return null; if (a.mode === 'mapa' && AUS.step) { const st = s.steps.find(x => x.id === AUS.step); if (st) return st; } return s; }
+/* árvore: faixa/estação → passos (mapa) → blocos de uma sequência → … */
+const auKids = n => n.layout === 'estacao' ? n.steps : n.layout === 'grupo' ? n.blocks : null;
+function auFind(a, id, arr, parent) {
+  arr = arr || a.slides; for (let i = 0; i < arr.length; i++) { const n = arr[i]; if (n.id === id) return {node: n, arr, i, parent: parent || null}; const k = auKids(n); if (k) { const r = auFind(a, id, k, n); if (r) return r; } } return null;
+}
+function auTarget(a) { const s = auSlideCur(a); if (!s) return null; if (AUS.step) { const f = auFind(a, AUS.step, auKids(s) || []); if (f) return f.node; } return s; }
 const AU_STARTERS = [
   ['horizontal', 'Curso em faixas', 'Faixas de tela cheia que deslizam para o lado, com menu no topo, setas e barra de progresso. Bom para curso, projeto social, evento.', 'editorial'],
   ['mapa', 'Jornada em mapa', 'Um mapa com estações. Tocar numa estação dá zoom e abre os passos da aula, um de cada vez. Bom para aula ao vivo, projeção, série de encontros.', 'vivo'],
@@ -12265,9 +12311,13 @@ function auFit() {
   box.style.width = Math.round(base * k) + 'px'; box.style.height = H + 'px'; fr.style.cssText = 'width:' + base + 'px;height:' + Math.round(H / k) + 'px;transform:scale(' + k + ');transform-origin:0 0';
 }
 window.addEventListener('resize', () => { if (typeof ui !== 'undefined' && ui.page === 'aulas') auFit(); });
+function auTreeHTML(list, depth, parentLabel) {
+  return list.map((x, j) => `<li class="${x.id === AUS.step ? 'on' : ''}" style="--d:${depth}"><button class="au-sb" onclick="auSelStep('${x.id}')"><i>${j + 1}</i><span>${esc(x.layout === 'grupo' ? '▤ ' : '')}${esc(auNodeName(x))}</span></button><span class="au-sa"><button onclick="auNodeMove('${x.id}',-1)" ${j ? '' : 'disabled'} aria-label="Subir">↑</button><button onclick="auNodeMove('${x.id}',1)" ${j < list.length - 1 ? '' : 'disabled'} aria-label="Descer">↓</button><button onclick="auNodeDup('${x.id}')" title="Duplicar">⧉</button><button onclick="auNodeDel('${x.id}')" title="Excluir">×</button></span></li>${auKids(x) && x.layout === 'grupo' ? auTreeHTML(x.blocks, depth + 1) + `<li style="--d:${depth + 1}"><button class="btn sm" onclick="auAddChild('${x.id}')">+ Bloco na sequência</button></li>` : ''}`).join('');
+}
+const auNodeName = x => x.layout === 'estacao' ? x.title : (x.label || (['grupo', 'mesa'].includes(x.layout) ? '' : '') || auPlain(x.title) || auPlain(x.kicker) || (AU_L[x.layout] ? AU_L[x.layout].label.split(' (')[0] : x.layout) || 'Bloco');
 function auLeftFill() {
   const box = $('auLeft'), a = auCur(); if (!box || !a) return; const mapa = a.mode === 'mapa';
-  box.innerHTML = `<div class="au-lh"><b>${mapa ? 'Estações' : 'Faixas'}</b><button class="btn sm pri" onclick="auAddSlide()">+ ${mapa ? 'Estação' : 'Bloco'}</button></div><ul class="au-sl">${a.slides.map((s, i) => `<li class="${s.id === AUS.sel && !AUS.step ? 'on' : ''}"><button class="au-sb" onclick="auSelect('${s.id}')"><i>${i + 1}</i><span>${esc(mapa ? s.title : (AU_L[s.layout] || {}).label ? s.label || AU_L[s.layout].label.split(' (')[0] : s.layout)}</span></button><span class="au-sa"><button onclick="auMove('${s.id}',-1)" ${i ? '' : 'disabled'} aria-label="Subir">↑</button><button onclick="auMove('${s.id}',1)" ${i < a.slides.length - 1 ? '' : 'disabled'} aria-label="Descer">↓</button><button onclick="auDupSlide('${s.id}')" aria-label="Duplicar" title="Duplicar">⧉</button><button onclick="auDelSlide('${s.id}')" aria-label="Excluir" title="Excluir">×</button></span></li>${mapa && s.id === AUS.sel ? `<li class="au-steps-l"><ul>${s.steps.map((x, j) => `<li class="${x.id === AUS.step ? 'on' : ''}"><button class="au-sb" onclick="auSelStep('${x.id}')"><i>${j + 1}</i><span>${esc(x.kicker || x.title || 'Passo')}</span></button><span class="au-sa"><button onclick="auStepMove('${x.id}',-1)" ${j ? '' : 'disabled'}>↑</button><button onclick="auStepMove('${x.id}',1)" ${j < s.steps.length - 1 ? '' : 'disabled'}>↓</button><button onclick="auStepDel('${x.id}')">×</button></span></li>`).join('')}<li><button class="btn sm" onclick="auAddStep()">+ Passo</button></li></ul></li>` : ''}`).join('')}</ul>`;
+  box.innerHTML = `<div class="au-lh"><b>${mapa ? 'Estações' : 'Faixas'}</b><button class="btn sm pri" onclick="auAddSlide()">+ ${mapa ? 'Estação' : 'Bloco'}</button></div><ul class="au-sl">${a.slides.map((s, i) => `<li class="${s.id === AUS.sel && !AUS.step ? 'on' : ''}"><button class="au-sb" onclick="auSelect('${s.id}')"><i>${i + 1}</i><span>${esc(s.layout === 'grupo' ? '▤ ' : '')}${esc(auNodeName(s))}</span></button><span class="au-sa"><button onclick="auMove('${s.id}',-1)" ${i ? '' : 'disabled'} aria-label="Subir">↑</button><button onclick="auMove('${s.id}',1)" ${i < a.slides.length - 1 ? '' : 'disabled'} aria-label="Descer">↓</button><button onclick="auDupSlide('${s.id}')" aria-label="Duplicar" title="Duplicar">⧉</button><button onclick="auDelSlide('${s.id}')" aria-label="Excluir" title="Excluir">×</button></span></li>${s.id === AUS.sel && auKids(s) ? `<li class="au-steps-l"><ul>${auTreeHTML(auKids(s), 0)}<li style="--d:0"><button class="btn sm" onclick="${mapa ? 'auAddStep()' : `auAddChild('${s.id}')`}">+ ${mapa ? 'Passo' : 'Bloco na sequência'}</button></li></ul></li>` : ''}`).join('')}</ul>`;
 }
 function auSelect(id) { AUS.sel = id; AUS.step = ''; AUS.tab = 'bloco'; auLeftFill(); auRightFill(); auGoPreview(); }
 function auSelStep(id) { AUS.step = id; AUS.tab = 'bloco'; auLeftFill(); auRightFill(); auGoPreview(); }
@@ -12281,17 +12331,28 @@ function auSetMode(m) { const a = auCur(); if (!a || a.mode === m) return; if (!
   else a.mode = m;
   AUS.sel = a.slides[0] ? a.slides[0].id : ''; AUS.step = ''; persist(); renderAulas(); }
 function auAddSlide() {
-  const a = auCur(); if (!a) return;
+  const a = auCur(); if (!a) return; AUS.addTo = '';
   if (a.mode === 'mapa') { const s = normalizeAulas([{mode: 'mapa', slides: [{title: 'Nova estação', phrase: auPH('ideia central'), color: ['#0B57D0', '#CD0002', '#2E9B2A', '#C99100'][a.slides.length % 4], icon: ['livro', 'coracao', 'pessoas', 'estrela', 'lampada', 'alvo'][a.slides.length % 6], steps: [auNewBlock('passo')]}]}])[0].slides[0]; a.slides.push(s); AUS.sel = s.id; AUS.step = ''; persist(); auLeftFill(); auRightFill(); auPreview(); return; }
   showModal('Que bloco entra?', `<div class="au-lay">${Object.entries(AU_L).filter(([k]) => k !== 'passo').map(([k, d]) => `<button class="au-lay-b" onclick="auAddLayout('${k}')"><b>${esc(d.label)}</b></button>`).join('')}</div>`);
 }
-function auAddLayout(k) { const a = auCur(), b = auNewBlock(k), i = a.slides.findIndex(s => s.id === AUS.sel); a.slides.splice(i < 0 ? a.slides.length : i + 1, 0, b); AUS.sel = b.id; closeModal(); persist(); auLeftFill(); auRightFill(); auPreview(); }
-function auAddStep() { const a = auCur(), s = auSlideCur(a); if (!s) return; const b = auNewBlock('passo'); s.steps.push(b); AUS.step = b.id; persist(); auLeftFill(); auRightFill(); auPreview(); }
+function auAddLayout(k) {
+  const a = auCur(), b = auNewBlock(k); closeModal();
+  if (AUS.addTo) { const f = auFind(a, AUS.addTo); AUS.addTo = ''; if (f && f.node.layout === 'grupo' || f && auKids(f.node)) { auKids(f.node).push(b); AUS.step = b.id; if (!AUS.sel) AUS.sel = a.slides[0].id; } }
+  else { const i = a.slides.findIndex(s => s.id === AUS.sel); a.slides.splice(i < 0 ? a.slides.length : i + 1, 0, b); AUS.sel = b.id; AUS.step = ''; }
+  persist(); auLeftFill(); auRightFill(); auPreview();
+}
+function auAddStep() { const a = auCur(), s = auSlideCur(a); if (!s || !s.steps) return; const b = auNewBlock('passo'); s.steps.push(b); AUS.step = b.id; persist(); auLeftFill(); auRightFill(); auPreview(); }
+/* adicionar bloco dentro de uma sequência: abre o seletor de modelos */
+function auAddChild(gid) { AUS.addTo = gid; showModal('Que bloco entra na sequência?', `<div class="au-lay">${Object.entries(AU_L).map(([k, d]) => `<button class="au-lay-b" onclick="auAddLayout('${k}')"><b>${esc(d.label)}</b></button>`).join('')}</div>`); }
+function auNodeMove(id, d) { const a = auCur(), f = auFind(a, id); if (!f) return; const j = f.i + d; if (j < 0 || j >= f.arr.length) return; [f.arr[f.i], f.arr[j]] = [f.arr[j], f.arr[f.i]]; persist(); auLeftFill(); auPreview(); }
+function auNodeDup(id) { const a = auCur(), f = auFind(a, id); if (!f) return; const c = auBlock(JSON.parse(JSON.stringify(f.node))); const fresh = n => { n.id = auId(); (auKids(n) || []).forEach(fresh); }; fresh(c); f.arr.splice(f.i + 1, 0, c); AUS.step = c.id; persist(); auLeftFill(); auRightFill(); auPreview(); }
+function auNodeDel(id) { const a = auCur(), f = auFind(a, id); if (!f) return; if (f.parent && f.parent.layout === 'estacao' && f.arr.length < 2) { toast('A estação precisa de pelo menos um passo.'); return; } if (!confirm('Excluir este bloco?')) return; f.arr.splice(f.i, 1); if (AUS.step === id) AUS.step = f.parent && f.parent.layout === 'grupo' ? f.parent.id : ''; persist(); auLeftFill(); auRightFill(); auPreview(); }
+/* pôr o bloco selecionado dentro de uma sequência nova (e tirar de volta) */
+function auWrap() { const a = auCur(), t = auTarget(a); if (!t || t.layout === 'estacao') return; const f = auFind(a, t.id, a.mode === 'mapa' ? auKids(auSlideCur(a)) : a.slides); if (!f) return; const g = auNewBlock('grupo'); g.title = ''; g.kicker = ''; g.blocks = [f.node]; f.arr[f.i] = g; if (!AUS.step) AUS.sel = g.id; else AUS.step = g.id; persist(); auLeftFill(); auRightFill(); auPreview(); toast('Bloco dentro de uma sequência. Adicione outros blocos a ela na lista da esquerda.'); }
+function auUnwrap() { const a = auCur(), t = auTarget(a); if (!t) return; const f = auFind(a, t.id); if (!f || !f.parent) return; const g = auFind(a, f.parent.id); if (!g) return; f.arr.splice(f.i, 1); g.arr.splice(g.i + 1, 0, f.node); AUS.step = g.parent && g.parent.layout === 'estacao' || g.parent && g.parent.layout === 'grupo' ? f.node.id : ''; if (!AUS.step) AUS.sel = f.node.id; persist(); auLeftFill(); auRightFill(); auPreview(); }
 function auMove(id, d) { const a = auCur(), i = a.slides.findIndex(s => s.id === id), j = i + d; if (i < 0 || j < 0 || j >= a.slides.length) return; [a.slides[i], a.slides[j]] = [a.slides[j], a.slides[i]]; persist(); auLeftFill(); auPreview(); }
-function auStepMove(id, d) { const s = auSlideCur(auCur()), i = s.steps.findIndex(x => x.id === id), j = i + d; if (i < 0 || j < 0 || j >= s.steps.length) return; [s.steps[i], s.steps[j]] = [s.steps[j], s.steps[i]]; persist(); auLeftFill(); auPreview(); }
 function auDupSlide(id) { const a = auCur(), i = a.slides.findIndex(s => s.id === id); if (i < 0) return; const c = normalizeAulas([{mode: a.mode, slides: [JSON.parse(JSON.stringify(a.slides[i]))]}])[0].slides[0]; c.id = auId(); (c.steps || []).forEach(x => { x.id = auId(); }); a.slides.splice(i + 1, 0, c); AUS.sel = c.id; AUS.step = ''; persist(); auLeftFill(); auRightFill(); auPreview(); }
 function auDelSlide(id) { const a = auCur(); if (a.slides.length < 2) { toast('A aula precisa de pelo menos um item.'); return; } if (!confirm('Excluir este item?')) return; a.slides = a.slides.filter(s => s.id !== id); if (AUS.sel === id) { AUS.sel = a.slides[0].id; AUS.step = ''; } persist(); auLeftFill(); auRightFill(); auPreview(); }
-function auStepDel(id) { const s = auSlideCur(auCur()); if (s.steps.length < 2) { toast('A estação precisa de pelo menos um passo.'); return; } s.steps = s.steps.filter(x => x.id !== id); if (AUS.step === id) AUS.step = ''; persist(); auLeftFill(); auRightFill(); auPreview(); }
 
 /* ---------- painel da direita ---------- */
 function auDestOpts(a, cur) {
@@ -12300,6 +12361,8 @@ function auDestOpts(a, cur) {
 }
 function auFieldHTML(a, b, f, path) {
   const [k, lab, kind] = f, v = b[k], on = `auSet('${k}',this.value)`;
+  if (kind === 'mesapage') { const p = curProject(), pgs = (p.mesa && p.mesa.pages) || []; return `<div class="es-f">${esc(lab)}<select onchange="auSet('${k}',this.value,true)"><option value="">— escolha —</option>${pgs.map(x => `<option value="${x.id}"${v === x.id ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select><div class="au-wr" style="margin-top:6px"><button class="btn sm" onclick="auMesaNew()">+ Nova página da Mesa</button>${v ? '<button class="btn sm pri" onclick="auMesaEdit()">Desenhar na Mesa</button>' : ''}</div><small class="es-note">Na Mesa você usa todos os elementos, camadas, desenho e IA. Ao fechar a Mesa, a prévia da aula atualiza.</small></div>`; }
+  if (kind === 'children') return `<div class="es-f">${esc(lab)} (${(v || []).length})<small class="es-note">Os blocos da sequência ficam na lista da esquerda, abaixo desta faixa.</small><button class="btn sm" onclick="auAddChild('${b.id}')">+ Adicionar bloco à sequência</button></div>`;
   if (kind === 'line') return `<label class="es-f">${esc(lab)}<input value="${esc(v || '')}" oninput="${on}"></label>`;
   if (kind === 'area') return `<label class="es-f">${esc(lab)}<textarea rows="${k === 'text' ? 6 : 3}" oninput="${on}">${esc(v || '')}</textarea></label>`;
   if (kind === 'date') return `<label class="es-f">${esc(lab)}<input type="date" value="${esc(v || '')}" onchange="${on}"></label>`;
@@ -12323,7 +12386,7 @@ function auRightFill() {
   if (AUS.tab === 'aula') body = auConfigHTML(a);
   else if (!t) body = '<p class="es-note">Adicione um item para editar.</p>';
   else if (isSt) body = `<div class="es-p"><strong class="es-h">Estação</strong>${AU_ESTACAO.map(f => auFieldHTML(a, t, f)).join('')}<p class="es-note">Os passos da estação ficam na lista da esquerda. Clique num passo para editar.</p></div>`;
-  else { const def = AU_L[t.layout]; body = `<div class="es-p"><strong class="es-h">${esc(def.label)}</strong><label class="es-f">Nome no menu<input value="${esc(t.label || '')}" oninput="auSet('label',this.value)"></label>${def.f.map(f => auFieldHTML(a, t, f)).join('')}</div>`; }
+  else { const def = AU_L[t.layout], fo = auFind(a, t.id), inGrp = fo && fo.parent && fo.parent.layout === 'grupo'; body = `<div class="es-p"><strong class="es-h">${esc(def.label)}</strong>${t.layout !== 'grupo' ? `<div class="au-wr"><button class="btn sm" onclick="auWrap()" title="Põe este bloco dentro de uma sequência com navegação própria">Pôr dentro de uma sequência</button>${inGrp ? '<button class="btn sm" onclick="auUnwrap()">Tirar da sequência</button>' : ''}</div>` : (inGrp ? '<div class="au-wr"><button class="btn sm" onclick="auUnwrap()">Tirar da sequência</button></div>' : '')}<label class="es-f">Nome no menu<input value="${esc(t.label || '')}" oninput="auSet('label',this.value)"></label>${def.f.map(f => auFieldHTML(a, t, f)).join('')}</div>`; }
   box.innerHTML = tabs + `<div class="au-rb">${body}</div>`; if (typeof libFill === 'function') libFill(box);
 }
 function auConfigHTML(a) {
@@ -12376,6 +12439,10 @@ function auGalleryHTML() {
 async function auGalleryFill(root) {
   for (const th of root.querySelectorAll('.au-th')) { try { const a = auStarter(th.dataset.k); a.name = 'Exemplo'; th.querySelector('iframe').srcdoc = await auHTML(a, curProject() || {}, {preview: true}); } catch (e) { /* miniatura opcional */ } }
 }
+
+/* página da Mesa dentro da aula: cria, abre e volta */
+function auMesaNew() { const p = curProject(), a = auCur(), t = auTarget(a); if (!p || !t) return; if (!p.mesa) p.mesa = normalizeMesa({}); if (!state.mesaLib) state.mesaLib = normalizeMesaLib({}); MZ.p = p; const pg = mzPageNew('blank', 'Aula · ' + (auNodeName(t) || 'bloco')); if (!pg) { toast('Limite de páginas da Mesa atingido.'); return; } t.page = pg.id; persist(); auRightFill(); auPreview(); auMesaEdit(); }
+function auMesaEdit() { const t = auTarget(auCur()); if (!t || !t.page) return; AUS.fromMesa = true; mzOpen(); setTimeout(() => { try { mzPageOpen(t.page); } catch (e) { /* abre na página atual */ } }, 700); }
 
 </script>
 <script>
@@ -12666,7 +12733,7 @@ function mzsBuild() {
 (function () {
   const open0 = mzOpen, close0 = mzClose, tab0 = mzLeftTab;
   mzOpen = function () { document.body.classList.add('mz-dark'); const r = open0.apply(this, arguments); if (MZ.open) mzsBuild(); else document.body.classList.remove('mz-dark'); return r; };
-  mzClose = async function () { const r = await close0.apply(this, arguments); if (!MZ.open) { document.body.classList.remove('mz-dark', 'mz-refwide'); MRF.on = false; } return r; };
+  mzClose = async function () { const r = await close0.apply(this, arguments); if (!MZ.open) { document.body.classList.remove('mz-dark', 'mz-refwide'); MRF.on = false; if (typeof AUS !== 'undefined' && AUS.fromMesa) { AUS.fromMesa = false; if (typeof go === 'function') go('aulas'); } } return r; };
   mzLeftTab = function (k) { tab0.apply(this, arguments); if (!MSK.open.l && document.querySelector('.mz-rail')) { MSK.open.l = true; mskApply(); } mzsState(); mzRefWide(); };
   const aiT = mzAiToggle; mzAiToggle = function () { const r = aiT.apply(this, arguments); mzsState(); return r; };
   const fr = mzFreeToggle; mzFreeToggle = function () { const r = fr.apply(this, arguments); mzsState(); return r; };

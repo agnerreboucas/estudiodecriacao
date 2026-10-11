@@ -44,6 +44,8 @@ const AU_L = {
   video: {label: 'Vídeo (YouTube ou Vimeo)', f: [['kicker', 'Etiqueta', 'line'], ['title', 'Título', 'area'], ['url', 'Endereço do vídeo', 'line'], ['text', 'Legenda', 'area']]},
   passo: {label: 'Passo da aula (história, texto, versículo…)', f: [['kicker', 'Etapa (ex.: Pra começar)', 'line'], ['title', 'Título', 'area'], ['text', 'Texto (parágrafos separados por linha em branco)', 'area'], ['quote', 'Destaque / citação', 'area'], ['ref', 'Fonte da citação', 'line'], ['image', 'Imagem (opcional)', 'img'], ['items', 'Perguntas que revelam a resposta', 'rows:h|Pergunta|line;t|Resposta|area'], ['goal', 'Quadro de objetivo (opcional)', 'line']]},
   formulario: {label: 'Formulário e contato', f: [['kicker', 'Etiqueta', 'line'], ['title', 'Título', 'area'], ['text', 'Texto', 'area'], ['contacts', 'Contatos', 'rows:l|Rótulo|line;v|Valor|line'], ['button', 'Texto do botão', 'line'], ['ok', 'Mensagem de sucesso', 'line']]},
+  grupo: {label: 'Sequência (agrupa blocos com a própria navegação)', f: [['kicker', 'Etiqueta', 'line'], ['title', 'Título (opcional)', 'area'], ['text', 'Texto (opcional)', 'area'], ['nav', 'Como esta sequência navega', 'sel:horizontal|Horizontal (desliza para o lado),vertical|Vertical (um bloco embaixo do outro),zoom|Zoom (cartões que abrem em tela cheia)'], ['blocks', 'Blocos da sequência', 'children']]},
+  mesa: {label: 'Página da Mesa (design livre com todos os elementos)', f: [['page', 'Página da Mesa', 'mesapage'], ['height', 'Altura da área', 'sel:fit|Acompanha o conteúdo,screen|Tela inteira,tall|Alta (2200 px)']]},
   cta: {label: 'Chamada final', f: [['title', 'Título', 'area'], ['text', 'Texto', 'area'], ['btn1', 'Botão: texto', 'line'], ['to1', 'Botão leva a', 'dest']]}
 };
 const AU_ESTACAO = [['title', 'Nome da estação', 'line'], ['phrase', 'Frase curta (aparece no mapa)', 'line'], ['ref', 'Referência (ex.: texto base)', 'line'], ['date', 'Data do encontro', 'date'], ['color', 'Cor', 'color'], ['icon', 'Ícone', 'icon'], ['root', 'É a base (fica embaixo do mapa)', 'bool']];
@@ -54,11 +56,13 @@ const auImgId = v => /^[\w-]{1,60}$/.test(String(v || '')) ? String(v) : '';
 const auUrl = v => /^https?:\/\/[^\s"'<>]{1,400}$/.test(String(v || '')) ? String(v) : '';
 const auColor = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v || '')) ? String(v) : d;
 
-function auBlock(b) {
-  b = b && typeof b === 'object' ? b : {}; const L = AU_L[b.layout] ? b.layout : 'texto', def = AU_L[L], o = {id: /^[\w-]{1,20}$/.test(b.id || '') ? b.id : auId(), layout: L, label: auS(b.label, 40)};
+function auBlock(b, depth) {
+  depth = depth || 0; b = b && typeof b === 'object' ? b : {}; const L = AU_L[b.layout] ? b.layout : 'texto', def = AU_L[L], o = {id: /^[\w-]{1,20}$/.test(b.id || '') ? b.id : auId(), layout: L, label: auS(b.label, 40)};
   def.f.forEach(([k, , kind]) => {
     if (kind === 'img') { o[k] = auImgId(b[k]); o[k + 'Url'] = auUrl(b[k + 'Url']); }
     else if (kind === 'dest') o[k] = auDest(b[k]);
+    else if (kind === 'mesapage') o[k] = /^[\w-]{1,40}$/.test(b[k] || '') ? b[k] : '';
+    else if (kind === 'children') o[k] = depth >= 3 ? [] : (Array.isArray(b[k]) ? b[k] : []).slice(0, 30).map(x => auBlock(x, depth + 1));
     else if (kind.startsWith('sel:')) { const ok = kind.slice(4).split(',').map(x => x.split('|')[0]); o[k] = ok.includes(b[k]) ? b[k] : ok[0]; }
     else if (kind.startsWith('rows:')) {
       const spec = kind.slice(5).split(';').map(x => x.split('|')); o[k] = (Array.isArray(b[k]) ? b[k] : []).slice(0, 40).map(r => { r = r && typeof r === 'object' ? r : {}; const x = {}; spec.forEach(([kk, , tt]) => { if (tt === 'img') { x[kk] = auImgId(r[kk]); x[kk + 'Url'] = auUrl(r[kk + 'Url']); } else x[kk] = auS(r[kk], tt === 'area' ? 1500 : 160); }); return x; });
@@ -103,7 +107,8 @@ function auNewBlock(layout) {
     formulario: {kicker: 'Inscrições', title: 'Fale com a gente', text: '', contacts: [{l: 'WhatsApp', v: auPH('número')}, {l: 'E-mail', v: auPH('e-mail')}], button: 'Enviar', ok: 'Recebemos! Entraremos em contato.'},
     cta: {title: auPH('chamada final'), text: '', btn1: 'Quero participar'}
   }[layout] || {};
-  return auBlock(Object.assign({layout, label: AU_L[layout] ? AU_L[layout].label.split(' (')[0] : ''}, d));
+  const g = layout === 'grupo' ? {kicker: 'Sequência', title: '', nav: 'horizontal', blocks: [auNewBlock('texto'), auNewBlock('passos'), auNewBlock('pergunta')]} : null;   // fora do objeto acima: ele é montado por inteiro a cada chamada
+  return auBlock(Object.assign({layout, label: AU_L[layout] && !['grupo', 'mesa'].includes(layout) ? AU_L[layout].label.split(' (')[0] : ''}, g || d));
 }
 function auStarter(kind) {
   const B = (l, o) => Object.assign(auNewBlock(l), o || {});

@@ -23,3 +23,4 @@
 @media(max-width:1100px){.au-body{grid-template-columns:200px minmax(0,1fr) 280px}}
 .au-th{position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;border-radius:10px;border:1px solid #ddd;background:#eee;pointer-events:none}.au-th iframe{position:absolute;left:0;top:0;width:1440px;height:900px;border:0;transform-origin:0 0;transform:scale(.2)}
 @media(min-width:900px){.au-th iframe{transform:scale(.235)}}
+.au-sl li[style*='--d']{padding-left:calc(var(--d)*14px)}.au-wr{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
