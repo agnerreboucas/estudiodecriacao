@@ -119,7 +119,7 @@
 
 <section id="page-projects" class="page">
   <div class="subpage">
-    <div class="page-head"><div><h1>Projetos</h1><p>Todos os trabalhos do seu workspace.</p></div><div class="actions"><button class="btn" onclick="docOpen()" title="Sobe o briefing completo para o projeto atual">📄 Subir documento do projeto</button><button class="btn" onclick="openModal('newproject')">＋ Novo projeto</button></div></div>
+    <div class="page-head"><div><h1>Projetos</h1><p>Todos os trabalhos do seu workspace.</p></div><div class="actions"><button class="btn" onclick="docOpen()" title="Sobe o briefing completo para o projeto atual">📄 Subir documento do projeto</button><button class="btn dark" onclick="fpNewModal()" title="Cria o projeto já com todas as perguntas">📋 Novo projeto (modelo completo)</button><button class="btn" onclick="openModal('newproject')" title="Assistente rápido: conte o contexto e o Studio organiza">＋ Novo projeto (assistente rápido)</button></div></div>
     <div id="projectsBar" style="margin:0 0 10px;display:flex;justify-content:flex-end"></div>
     <div class="project-grid" id="projectsGrid"></div>
   </div>
@@ -174,6 +174,7 @@
     </div>
     <nav class="project-nav" id="projectNav">
       <button class="active" data-tab="overview">Visão geral</button>
+      <button data-tab="ficha">Ficha completa</button>
       <button data-tab="preproject">Pré-Projeto</button>
       <button data-tab="identity">Marca e arquétipo</button>
       <button data-tab="products">Produtos e serviços</button>
@@ -316,6 +317,7 @@
 <script src="js/identidade-guia.js?v=1.16.0"></script>
 <script src="js/xlsx-mini.js?v=1.16.0"></script>
 <script src="js/marca-planilha.js?v=1.16.0"></script>
+<script src="js/ficha-projeto.js?v=1.17.0"></script>
 <script src="js/briefing-form.js?v=1.5.0"></script>
 <script src="js/briefing-ui.js?v=1.5.0"></script>
 <script src="js/briefing-google.js?v=1.5.0"></script>

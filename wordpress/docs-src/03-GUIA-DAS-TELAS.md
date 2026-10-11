@@ -103,6 +103,13 @@ Menu **5 · Mostrar ao cliente → Aprovação de arte**.
 4. No servidor, configure um cron a cada 5 minutos chamando `api/meta_social.php?action=run&key=SUA_CHAVE` (a chave é `META_CRON_KEY`). Sem cron, use o botão *Rodar a fila agora*.
 5. Sem token (ou com `META_DRY_RUN`) tudo é simulado: nada é enviado à Meta.
 
+## Ficha completa (modelo de projeto)
+1. Em **Projetos**, clique em **Novo projeto (modelo completo)**, dê o nome e crie. O projeto abre na aba **Ficha completa**, com todas as perguntas.
+2. Responda na tela (salva sozinho), ou **mande o link ao cliente** (o bloco "Mandar para o cliente preencher") e depois use **Trazer as respostas do cliente**. Também dá para **baixar o template (.xlsx)**, preencher no Excel e usar **Importar planilha preenchida**, ou **imprimir o template em PDF** para responder à mão.
+3. A barra mostra quantas partes já têm resposta e o que ainda falta de essencial (nome da empresa, quem responde, WhatsApp, um produto).
+4. Clique em **Aplicar ao projeto**: produtos e serviços, marca, materiais, voz e briefing ficam prontos (o que já estava no projeto é mantido). Com **Aplicar e gerar o pré-projeto**, a IA monta o pré-projeto em seguida (precisa da chave da IA em Configurações → Integrações).
+5. Fotos: use o botão **Adicionar fotos** na parte "Fotos e arquivos"; elas vão para a Biblioteca de imagens.
+
 ## Marca e arquétipo, Produtos e serviços (aba do projeto)
 - **Marca e arquétipo:** escolha valores (5 a 7), depois atitudes; o Studio mostra o arquétipo mais próximo, marcas parecidas e o tom. No passo 4 defina o que a marca fala e não fala, o que admira e repudia, e as palavras que usa e que **nunca** usa. No resumo, "Enviar para o Brand/Voice Brain" copia isso para o Voice Brain.
 - **Entenda o arquétipo:** o passo 3 explica o que é um arquétipo e o papel do **principal**, do **secundário** e do **terciário**. Abra cada um para ver características, atitudes, como se comunica e como influencia o seu trabalho. Clique no nome de uma marca para ver o site, o Instagram, as campanhas e os anúncios dela. Os botões **Guia dos arquétipos (PDF)** e **Relatório da marca (PDF)** abrem o documento (use Imprimir → Salvar como PDF).

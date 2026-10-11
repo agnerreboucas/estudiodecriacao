@@ -1,5 +1,10 @@
 # Histórico de versões
 
+## 1.17.0
+- **Modelo de projeto completo.** Em **Projetos**, o botão **Novo projeto (modelo completo)** cria o projeto já com a **Ficha completa**: uma aba nova com **todas as perguntas** que o projeto precisa (as 11 partes do briefing: quem responde, empresa, público, produtos e serviços, marca, concorrentes, referências, marketing e vendas, depoimentos, links e fotos). O assistente rápido continua existindo e agora avisa do modelo completo.
+- **Quatro jeitos de preencher:** responder na própria tela (salva sozinho, com barra de progresso); **mandar o link ao cliente** e **trazer as respostas dele** para a ficha; baixar o **template em planilha (.xlsx)** (uma aba para as perguntas, uma para cada parte com vários itens e uma com as opções) e **importar a planilha preenchida**; ou **imprimir o template em PDF** para responder à mão. As fotos da ficha vão direto para a Biblioteca.
+- **Aplicar ao projeto:** um clique leva as respostas para produtos e serviços, marca e arquétipo, materiais, voz e briefing (sem apagar o que já estava preenchido). **Aplicar e gerar o pré-projeto** faz isso e chama a IA para montar o pré-projeto.
+
 ## 1.16.1
 - **Briefing do cliente na ordem do fluxo:** agora o cliente responde primeiro a empresa e os **produtos e serviços**, e só depois a **construção da marca** (valores, atitudes, tom e arquétipo).
 - **Módulos separados:** `tools/build_sites_module.py` (Sites) e `tools/build_marca_module.py` (Marca e Briefing) geram cada módulo como mini-app em `export/`. Correção nos dois: o carregamento de dados salvos dependia de uma função do Motor de Ofertas que não vinha junto (agora vem). PRD do módulo de Marca em `docs/produto-marca/`.
