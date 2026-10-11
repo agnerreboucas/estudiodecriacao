@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#111111">
-<title>Estúdio de Sites e Landing Pages</title>
+<title>Estúdio de Sites</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/studio.css">
@@ -13,6 +15,7 @@
 <link rel="stylesheet" href="css/bulk.css">
 <link rel="stylesheet" href="css/mesa.css">
 <link rel="stylesheet" href="css/sites.css">
+<link rel="stylesheet" href="css/estudio.css">
 </head>
 <body>
 <div class="app">
@@ -20,11 +23,11 @@
 <aside class="rail" id="rail" aria-label="Menu principal">
   <div class="logo">S</div>
   <nav class="rail-nav">
-    <button data-page="projects" title="Projetos"><span data-ico="folder"></span><span class="rail-lb">Projetos</span></button>
+    <button class="active" data-page="home" title="Início"><span data-ico="home"></span><span class="rail-lb">Início</span></button>
     <button data-page="briefing" title="Briefing do cliente"><span data-ico="inbox"></span><span class="rail-lb">Briefing do cliente</span></button>
     <button data-page="templates" title="Banco de templates"><span data-ico="layout"></span><span class="rail-lb">Banco de templates</span></button>
-    <button class="active" data-page="landings" title="Sites e landing pages"><span data-ico="globe"></span><span class="rail-lb">Sites e landing pages</span></button>
-    <button data-page="mesa" title="Mesa de páginas"><span data-ico="layout"></span><span class="rail-lb">Mesa de páginas</span></button>
+    <button data-page="dev" title="Desenvolvimento"><span data-ico="globe"></span><span class="rail-lb">Desenvolvimento</span></button>
+    <button data-page="mesa" title="Mesa de páginas"><span data-ico="grid"></span><span class="rail-lb">Mesa de páginas</span></button>
     <button data-page="biblioteca" title="Imagens"><span data-ico="image"></span><span class="rail-lb">Imagens</span></button>
   </nav>
   <div class="rail-bottom">
@@ -40,14 +43,16 @@
   <button class="top-btn sync-badge local" id="syncBadge" onclick="syncBadgeClick()">● Local</button>
   <span id="credits" hidden>0</span>
 </header>
-<section id="page-home" class="page"><div class="subpage"><div class="masonry" id="homeGallery"></div><button id="contextButton" hidden></button><small id="contextHint" hidden></small></div></section>
+<section id="page-home" class="page active"><div class="subpage dz-wide" id="homeRoot"></div><div class="masonry" id="homeGallery" hidden></div><button id="contextButton" hidden></button><small id="contextHint" hidden></small></section>
 <section id="page-projects" class="page"><div class="subpage">
   <div class="page-head"><div><h1>Projetos</h1><p>Cada projeto é um cliente ou negócio. Os sites e landing pages ficam dentro dele.</p></div></div>
   <div id="projectsBar" style="margin:0 0 10px;display:flex;justify-content:flex-end"></div>
   <div class="project-grid" id="projectsGrid"></div></div></section>
 <section id="page-briefing" class="page"><div class="subpage dz-wide" id="briefingRoot"></div></section>
 <section id="page-templates" class="page"><div class="subpage dz-wide" id="templatesRoot"></div></section>
-<section id="page-landings" class="page active"><div class="subpage dz-wide" id="landingsRoot"></div></section>
+<section id="page-dev" class="page"><div class="subpage dz-wide" id="devRoot"></div></section>
+<section id="page-cliente" class="page"><div id="clienteRoot"></div></section>
+<section id="page-landings" class="page"><div class="subpage dz-wide" id="landingsRoot"></div></section>
 <section id="page-mesa" class="page"><div class="subpage" id="mesaRoot"></div></section>
 <section id="page-biblioteca" class="page"><div class="subpage dz-wide" id="bibliotecaRoot"></div></section>
 <section id="page-settings" class="page"><div class="subpage" id="settingsRoot"></div></section>
@@ -112,6 +117,7 @@
 <script src="js/site-ui.js"></script>
 <script src="js/sites-briefing.js"></script>
 <script src="js/sites-templates.js"></script>
+<script src="js/estudio-shell.js"></script>
 <script src="js/sites-boot.js"></script>
 <script src="js/app.js"></script>
 <script src="js/acc.js"></script>

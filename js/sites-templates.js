@@ -69,7 +69,7 @@ function sbGRefresh() { const g = $('sbgGrid'); if (g) { g.innerHTML = sbGGrid()
 function sbGRender() { if (SBG.modal) { const b = $('modalBox'); if (b && $('sbgRoot')) { $('sbgRoot').innerHTML = sbGHTML(); sbThumbFill($('sbgRoot')); } } else renderTemplatesBank(); }
 function renderTemplatesBank() {
   const root = $('templatesRoot'); if (!root) return; SBG.modal = false;
-  root.innerHTML = `<div class="page-head"><div><h1>Banco de templates</h1><p>Sua base de modelos. Todos seguem a estrutura StoryBrand: o cliente é o herói e a empresa é o guia. Escolha um e o texto do briefing entra na página.</p></div></div><div id="sbgRoot">${sbGHTML()}</div>`; sbThumbFill(root);
+  root.innerHTML = esHead('Banco de templates', 'Sua base de modelos. Todos seguem a estrutura StoryBrand: o cliente é o herói e a empresa é o guia. Escolha um e o texto do briefing entra na página.') + `<div id="sbgRoot">${sbGHTML()}</div>`; sbThumbFill(root);
 }
 function sbOpenGallery() { SBG.modal = true; showModal('Escolha o template do site', `<div id="sbgRoot">${sbGHTML()}</div>`); $('modalBox').classList.add('wide'); sbThumbFill($('sbgRoot')); }
 async function sbPreview(tid) {
@@ -87,13 +87,13 @@ async function sbCreateSite(tid) {
   const p = curProject(), t = SBT.find(x => x.id === tid), S = SITE_TPL[t.est], ai = !!($('sbAI') && $('sbAI').checked), nm = ($('sbName') && $('sbName').value.trim()) || '';
   try { if (Object.keys(sbAns(p)).length) bfApply(p, bfMigrate(sbAns(p))); } catch (e) { /* o briefing já está guardado; só a cópia para Produtos e Marca falhou */ }
   const f = sbFacts(p), bs = sbBS(f), name = nm || f.nome || p.name || 'Meu site', pr = (p.products || [])[0], theme = Object.assign({}, lpTheme(p), sbThemeFor(t, f));
-  const site = normalizeSites([{id: uid('st'), name, tpl: t.est, productId: pr ? pr.id : '', brand: name, headerCta: f.direto, brief: bfStore(p).text || '', footer: f.cidade ? 'Atendemos em ' + f.cidade + '.' : '', contact: [f.whats && 'WhatsApp: ' + f.whats, f.email].filter(Boolean).join('\n'), bs}])[0];
+  const site = normalizeSites([{id: uid('st'), name, tpl: t.est, productId: pr ? pr.id : '', brand: name, headerCta: f.direto, style: t.id, brief: bfStore(p).text || '', footer: f.cidade ? 'Atendemos em ' + f.cidade + '.' : '', contact: [f.whats && 'WhatsApp: ' + f.whats, f.email].filter(Boolean).join('\n'), bs}])[0];
   p.sites.push(site);
   S.pages.forEach(pg => {
     const l = normalizeLandings([{id: uid('lp'), name: name + ' — ' + pg.label, siteId: site.id, slug: pg.slug, navLabel: pg.label, type: 'generico', productId: pr ? pr.id : '', product: pr ? {nome: pr.name, preco: pr.price, publico: pr.audience, checkout: pr.checkout} : {}, theme, cta: bs.direct, whatsapp: f.whats, blocks: pg.blocks.map(lpBlockNew), status: 'Rascunho'}])[0];
     l.siteRole = pg.role; lpMerge(l, sbBlocksFor(l, f, bs, pg.role)); const h = l.blocks.find(b => b.t === 'hero'); if (h && f.foto) h.imgId = f.foto; p.landings.push(l);
   });
-  persist(); closeModal(); lpUI.main = 'sites'; lpUI.site = site.id; go('landings');
+  persist(); closeModal(); lpUI.main = 'sites'; lpUI.site = site.id; ES.site = site.id; ES.page = ''; ES.sel = ''; go('dev');
   toast(`Site criado com o template ${t.nome}. Revise o que estiver em [CONFIRMAR].`);
-  if (ai && typeof siteBSText === 'function' && siteBSText(site)) { try { await siteGenAll(); } catch (e) { toast(e.message); } }
+  if (ai && typeof siteBSText === 'function' && siteBSText(site)) { try { await siteGenAll(); } catch (e) { toast(e.message); } if (ui.page === 'dev') renderDev(); }
 }

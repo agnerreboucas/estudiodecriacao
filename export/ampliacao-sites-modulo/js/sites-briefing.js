@@ -38,7 +38,7 @@ function sbBS(f) {
 }
 /* texto das páginas por regras (quando não há IA, ou como ponto de partida): um objeto por bloco, no formato do lpMerge */
 function sbBlocksFor(l, f, bs, role) {
-  const p1 = f.prods[0] || {}, CF = sbCF, tr = (a, n) => a.slice(0, n), items = (arr, mk) => arr.map(mk);
+  const p1 = Object.assign({nome: '', tipo: '', oque: '', paraquem: '', como: [], incluso: [], preco: '', prazo: '', diferencial: [], perguntas: [], objecoes: [], garantia: '', pagamento: '', naoserve: [], problemas: [], acao: '', link: ''}, f.prods[0] || {}), CF = sbCF, tr = (a, n) => a.slice(0, n), items = (arr, mk) => arr.map(mk);
   const faqQ = tr([].concat(p1.perguntas || [], f.objecoes, p1.objecoes || []), 6).map(x => ({t: x.charAt(0).toUpperCase() + x.slice(1).replace(/[?.!]+$/, '') + '?', d: CF('resposta')}));
   const steps = [bs.step1, bs.step2, bs.step3].map((x, i) => ({t: 'Passo ' + (i + 1), d: x || CF('o que acontece neste passo')}));
   const mk = {
@@ -163,18 +163,17 @@ function renderBriefing() {
       (L ? `<div class="form-grid"><div class="panel"><strong>O que o agente entendeu</strong><small class="muted block">Lido por: ${esc(L.via)}</small>${L.found.length || L.n ? `<ul class="sb-ul y">${L.found.map(x => `<li><b>${esc(x[0])}:</b> ${esc(x[1].length > 70 ? x[1].slice(0, 70) + '…' : x[1])}</li>`).join('')}${L.n - L.found.length > 0 ? `<li>${L.n - L.found.length} campo(s) preenchido(s) pela IA</li>` : ''}</ul>` : '<p class="muted">Nada que ele consiga ler neste texto.</p>'}</div>
         <div class="panel"><strong>O que ainda falta perguntar ao cliente</strong>${L.falta.length ? `<ul class="sb-ul n">${L.falta.map(x => `<li>${esc(x)}</li>`).join('')}</ul><button class="btn sm" onclick="SBR.tab='form';renderBriefing()">Abrir o formulário</button>` : '<p class="muted">Tudo o que é essencial já veio.</p>'}</div></div>` : '');
   } else if (SBR.tab === 'form') {
-    body = `${typeof briefingPanel === 'function' ? briefingPanel(p) : ''}<div class="row-gap" style="margin:10px 0;flex-wrap:wrap"><button class="btn sm" onclick="sbPull()">⬇ Trazer as respostas do link</button><small class="muted">Você também pode preencher pelo cliente: é o mesmo formulário de 11 partes. ${n} de ${t} partes preenchidas.</small></div>${sbFormHTML(p)}`;
+    body = `${typeof briefingPanel === 'function' ? briefingPanel(p) : ''}<div class="row-gap" style="margin:10px 0;flex-wrap:wrap"><button class="btn sm pri" onclick="esVerCliente()">Ver como o cliente vê</button><button class="btn sm" onclick="sbPull()">⬇ Trazer as respostas do link</button><small class="muted">Você também pode preencher pelo cliente: é o mesmo formulário de 11 partes. ${n} de ${t} partes preenchidas.</small></div>${sbFormHTML(p)}`;
   } else {
     const f = sbFacts(p), aut = (Array.isArray(sbAns(p).depoimentos) ? sbAns(p).depoimentos : []).filter(d => d && bfStr(d.texto));
     body = `<div class="panel"><div class="sb-kp"><div><b>${f.prods.length}</b><span>Produtos</span></div><div><b>${f.dep.length} de ${aut.length}</b><span>Depoimentos autorizados</span></div><div><b>${(Array.isArray(sbAns(p).arquivos) ? sbAns(p).arquivos : []).length}</b><span>Fotos e arquivos</span></div><div><b>${n} de ${t}</b><span>Partes do formulário</span></div></div></div>
       <div class="panel"><strong>Como o briefing vira site</strong><small class="muted block" style="margin-bottom:8px">O que o cliente não preencheu aparece como [CONFIRMAR]. Nada é inventado.</small><div style="overflow-x:auto"><table class="sb-tb"><thead><tr><th>Dado do briefing</th><th>Onde aparece no site</th><th>Situação</th></tr></thead><tbody>${SB_MAP.map(m => { const ok = !!m[2](f); return `<tr><td>${m[0]}</td><td>${m[1]}</td><td class="${ok ? 'y' : 'n'}">${ok ? 'recebido' : 'faltando'}</td></tr>`; }).join('')}</tbody></table></div></div>
       <div class="panel row-gap" style="justify-content:space-between;flex-wrap:wrap"><div><strong>Criar site com este briefing</strong><small class="muted block">Escolha um template do banco. O BrandScript e o texto das páginas saem do briefing.</small></div><button class="btn dark" onclick="sbOpenGallery()">Escolher o template e criar o site</button></div>`;
   }
-  root.innerHTML = `<div class="page-head"><div><h1>Briefing do cliente</h1><p>Receba o cliente do jeito que ele preferir: texto corrido, formulário completo ou link para ele preencher. Projeto: <strong>${esc(p.name)}</strong></p></div></div>
-    <div class="sb-tabs" role="tablist">${tabs.map(x => `<button class="chip${SBR.tab === x[0] ? ' on' : ''}" role="tab" aria-selected="${SBR.tab === x[0]}" onclick="SBR.tab='${x[0]}';renderBriefing()">${x[1]}</button>`).join('')}</div>${body}`;
+  root.innerHTML = esHead('Briefing do cliente', 'Receba o cliente do jeito que ele preferir: texto corrido, formulário completo ou link para ele preencher.') + `<div class="sb-tabs" role="tablist">${tabs.map(x => `<button class="chip${SBR.tab === x[0] ? ' on' : ''}" role="tab" aria-selected="${SBR.tab === x[0]}" onclick="SBR.tab='${x[0]}';renderBriefing()">${x[1]}</button>`).join('')}</div>${body}`;
   if (typeof libFill === 'function') libFill(root);
 }
-const sbRender = () => { if (ui.page !== 'briefing') return; if (typeof keepScroll === 'function') keepScroll(renderBriefing); else renderBriefing(); };
+const sbRender = () => { const fn = ui.page === 'cliente' ? renderCliente : ui.page === 'briefing' ? renderBriefing : null; if (!fn) return; if (typeof keepScroll === 'function') keepScroll(fn); else fn(); };
 /* o gerador de páginas por IA usa motJSON (do módulo de e-books); aqui há uma cópia mínima para o módulo de Sites */
 if (typeof motJSON !== 'function') { var motJSON = async function (system, user, max) { const t = await aiText(system + '\nResponda APENAS com JSON válido, sem markdown nem comentários.', user, max || 4000), s = t.replace(/```json|```/g, '').trim(), a = s.search(/[\[{]/), z = Math.max(s.lastIndexOf('}'), s.lastIndexOf(']')); try { return JSON.parse(s.slice(a, z + 1)); } catch (e) { throw new Error('a IA devolveu um formato inesperado; tente de novo.'); } }; }
 

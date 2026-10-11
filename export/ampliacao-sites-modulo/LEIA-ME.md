@@ -1,14 +1,16 @@
-# Módulo de Criação de Sites e Landing Pages (versão 1.1.0)
+# Módulo de Criação de Sites e Landing Pages (versão 1.2.0)
 
 Este é **só o módulo de sites** do Ampliação Studio, separado para virar um produto novo.
-Ele abre sozinho, com 7 telas: **Projetos**, **Briefing do cliente**, **Banco de templates**, **Sites e landing pages**, **Mesa de páginas**, **Imagens** e **Configurações**.
+Ele abre sozinho, no formato do **Estúdio de Sites**: **Início**, **Briefing do cliente**, **Banco de templates**, **Desenvolvimento**, **Mesa de páginas**, **Imagens** e **Configurações**. A página do cliente (formulário de 11 partes) abre em **Briefing → Ver como o cliente vê**.
 Não vem nenhum projeto, cliente ou fonte licenciada junto: o app começa vazio.
 
-## Do briefing ao site (novo na 1.1.0)
+## Do briefing ao site
+0. **Início:** explica a conversa de venda (StoryBrand) que todo site faz e lista os projetos, cada um com a etapa em que está (Briefing, Escolher template, Em edição).
 1. **Briefing do cliente:** três jeitos de receber o cliente. (a) **Texto corrido:** cole a conversa, a bio do Instagram ou anotações; o agente preenche o formulário e diz o que ainda falta perguntar. (b) **Formulário completo:** as 11 partes do briefing (empresa, cliente do cliente, produtos e serviços, marca, concorrentes, depoimentos, links, fotos), para você preencher pelo cliente. (c) **Link para o cliente** (`briefing.html`, precisa de servidor PHP): ele preenche no celular e você traz as respostas.
 2. **Resumo e criar site:** mostra o que chegou e onde cada dado aparece no site. O botão abre o **Banco de templates**.
 3. **Banco de templates:** galeria com busca, filtros e prévia, já com o texto e a cor do cliente. Todo template segue a estrutura **StoryBrand** (o cliente é o herói, a empresa é o guia): promessa, problema, guia, plano em 3 passos, oferta e prazo, prova, objeções, chamada final.
-4. **Criar site:** o BrandScript e o texto das páginas saem do briefing. O que o cliente não disse fica como **[CONFIRMAR]**; depoimento só entra se estiver marcado como autorizado. Com a IA ligada, dá para reescrever as páginas a partir do BrandScript.
+4. **Desenvolvimento:** a página aparece ao lado das ferramentas. Clique em qualquer seção para editar o texto (ou use a lista de seções, que também liga, desliga e reordena). Computador e celular, troca de template sem perder o texto, lista de pendências ([CONFIRMAR]) e o checklist do vendedor consultivo. **Entregar:** HTML da página, ZIP do site, modelo do Elementor e tema/pacote de WordPress. Para mais controle: editor de blocos, editor visual e Mesa de páginas.
+5. **Criar site:** o BrandScript e o texto das páginas saem do briefing. O que o cliente não disse fica como **[CONFIRMAR]**; depoimento só entra se estiver marcado como autorizado. Com a IA ligada, dá para reescrever as páginas a partir do BrandScript.
 
 ## Como usar (3 jeitos)
 1. **Só para testar:** abra `index.html` no navegador. Funciona sem servidor (os dados ficam no navegador). A IA e o envio de leads não funcionam assim.
