@@ -72,7 +72,7 @@ function mzPaint() {
   const css = mzTreeCss(root, m.ds, ctx) + (mzPg().bg ? `body{background:${mzPg().bg}}` : ''), html = mzNodeHtml(root, ctx), fu = mzFontsUrl(m.ds, root);
   Object.values(MZ.frames).forEach(fr => {
     if (!fr.ready || !fr.doc) return; if (MZ.editing && MZ.editing.fr === fr) return;
-    fr.doc.getElementById('mzPg').textContent = css; const f = fr.doc.getElementById('mzFonts'); if (fu && f.getAttribute('href') !== fu) f.setAttribute('href', fu);
+    fr.doc.getElementById('mzPg').textContent = css; if (typeof mzFontFaceCss === 'function') { let uf = fr.doc.getElementById('mzUF'); if (!uf) { uf = fr.doc.createElement('style'); uf.id = 'mzUF'; fr.doc.head.appendChild(uf); } const t = mzFontFaceCss(root); if (uf.textContent !== t) uf.textContent = t; } const f = fr.doc.getElementById('mzFonts'); if (fu && f.getAttribute('href') !== fu) f.setAttribute('href', fu);
     fr.doc.getElementById('mzRootEl').innerHTML = html;
   });
   mzLayoutFrames(); mzOverlayAll(); mzTreeRefresh();

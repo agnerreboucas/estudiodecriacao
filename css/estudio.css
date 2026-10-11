@@ -168,3 +168,12 @@ body.es-solo .rail,body.es-solo .topbar,body.es-solo .rail-back{display:none!imp
 .mz-lbad{padding-left:18px;display:flex;flex-direction:column;gap:6px}
 .ps-right.fx-on .ps-pan:first-child .ps-pb{max-height:none}
 .fx .es-note{color:#bbb}
+
+/* ===== Mesa: janela de fontes ===== */
+.mz-fonts{display:flex;flex-direction:column;gap:8px}
+.mz-frow{display:grid;grid-template-columns:minmax(120px,1fr) minmax(170px,auto) 2fr;gap:8px;align-items:center;padding:8px;border:1px solid rgba(255,255,255,.12);border-radius:8px}
+.mz-frow b{font-size:17px}
+.mz-fst{font-size:12px;padding:2px 8px;border-radius:10px;justify-self:start}
+.mz-fst.ok{background:rgba(47,158,68,.25);color:#7bd98f}.mz-fst.bad{background:rgba(217,72,15,.25);color:#ff9a5c}.mz-fst.warn{background:rgba(232,163,23,.2);color:#e8c04a}
+.mz-fact{display:flex;gap:6px;flex-wrap:wrap}.mz-fact select{max-width:150px}
+@media(max-width:700px){.mz-frow{grid-template-columns:1fr}}

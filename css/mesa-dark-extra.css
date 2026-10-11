@@ -21,3 +21,5 @@ body.mz-dark .mz-rimg{overflow:auto;max-height:calc(100vh - 360px);border:1px so
 body.mz-dark .mz-left .mz-tabs{flex-wrap:wrap}body.mz-dark .mz-left .mz-tabs button{flex:1 1 30%;padding:8px 2px}
 body.mz-dark .mz-app .btn{background:#4a4a4a;border-color:#666;color:#eee}body.mz-dark .mz-app .btn:hover{background:#585858}body.mz-dark .mz-app .btn.dark,body.mz-dark .mz-app .btn.pri{background:#d9480f;border-color:#d9480f;color:#fff}
 body.mz-dark .mz-app textarea,body.mz-dark .mz-app select,body.mz-dark .mz-app input[type=text],body.mz-dark .mz-app input[type=number],body.mz-dark .mz-app input:not([type]){background:#262626;color:#e6e6e6;border-color:#555}
+/* barra de cima mais compacta: com Links e Fontes ela passava de 1500 px */
+body.mz-dark .mz-top{gap:4px}body.mz-dark .mz-top .mz-btn-i{padding:6px 7px}body.mz-dark .mz-title select{max-width:120px}
