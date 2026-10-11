@@ -1,5 +1,5 @@
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'mesa', 'projects', 'landings', 'brand', 'settings', 'project', 'biblioteca', 'briefing', 'templates', 'dev', 'cliente', 'refs'];
+const PAGES = ['home', 'mesa', 'projects', 'landings', 'brand', 'settings', 'project', 'biblioteca', 'briefing', 'templates', 'dev', 'cliente', 'refs', 'aulas'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -24,7 +24,7 @@ function go(page) { if (typeof bkReset === 'function' && typeof ui !== 'undefine
   ui.page = page; renderPage(page); window.scrollTo(0, 0);
 }
 function renderPage(page) {
-  const MAP = {home: 'renderHome', projects: 'renderProjects', brand: 'renderBrand', settings: 'renderSettings', mesa: 'renderMesaLauncher', project: 'renderProjectTab', biblioteca: 'renderBiblioteca', landings: 'renderLandings', briefing: 'renderBriefing', templates: 'renderTemplatesBank', dev: 'renderDev', cliente: 'renderCliente', refs: 'renderRefs'};
+  const MAP = {home: 'renderHome', projects: 'renderProjects', brand: 'renderBrand', settings: 'renderSettings', mesa: 'renderMesaLauncher', project: 'renderProjectTab', biblioteca: 'renderBiblioteca', landings: 'renderLandings', briefing: 'renderBriefing', templates: 'renderTemplatesBank', dev: 'renderDev', cliente: 'renderCliente', refs: 'renderRefs', aulas: 'renderAulas'};
   const fn = window[MAP[page]]; if (typeof fn === 'function') fn();
   try { if (typeof docInjectStrip === 'function') docInjectStrip(page); } catch (e) { /* faixa é só um aviso */ }
 }
