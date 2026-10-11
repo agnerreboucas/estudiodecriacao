@@ -124,4 +124,5 @@ A tela é o portal de aprovação, o mesmo que o cliente abre, em modo equipe.
 - Escolha o formato que vai produzir (Anúncios, Carrosséis, **Posts simples** ou **Stories**) e veja a **Tabela de exemplo**: os cabeçalhos laranja são obrigatórios, e em "O que colocar em cada coluna" há a explicação de cada campo.
 - Baixe a matriz do formato, preencha (as linhas "(exemplo)" são ignoradas), escolha o destino e envie. O Studio mostra uma prévia antes de importar e avisa o que está errado.
 - Posts simples e stories viram artes no Estúdio de Design e **rascunhos** em Publicação, com a data que você informar. Nada é agendado sozinho.
+- Além do .xlsx, a tela aceita **.csv** e a tabela **colada** na caixa de texto (a primeira linha é o cabeçalho). Serve para colar direto do Excel, do Google Planilhas ou de um texto separado por ponto e vírgula.
 

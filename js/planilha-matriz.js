@@ -425,29 +425,52 @@ async function pmImport() {
     if (fresh.length) { const cars = fresh.map(it => pmBuildCarousel(p, it, o)); p.carousels = cars.concat(p.carousels).slice(0, 600); res.car = cars.length; carHome.page = 0; carHome.q = ''; carHome.day = ''; }
     if (freshP.length) { toast(`Montando os posts simples… ${freshP.length}`); await pmBuildSingles(p, freshP, o, 'post1'); res.posts = freshP.length; }
     if (freshS.length) { toast(`Montando os stories… ${freshS.length}`); await pmBuildSingles(p, freshS, o, 'story'); res.stories = freshS.length; }
-    persist(); PM.result = res; PM.plan = null; PM.fileName = ''; PM.dest = 'cur'; toast('Importação concluída.');
+    persist(); PM.result = res; PM.plan = null; PM.fileName = ''; PM.paste = ''; PM.dest = 'cur'; toast('Importação concluída.');
   } catch (e) { persist(); PM.error = 'A importação parou no meio: ' + (e && e.message || e) + '. O que já foi criado ficou salvo no projeto; confira antes de enviar de novo.'; }
   PM.busy = false; pmRender();
 }
 
 /* ---------- tela ---------- */
-const PM = {ex: 'ads', plan: null, fileName: '', busy: false, result: null, error: '', mode: '', dest: 'cur', newName: '', campName: '', adLook: '', adLogo: true, carLook: 'brand', carTpl: 'foto', carWhere: 'title', carStyle: ''};
+const PM = {paste: '', ex: 'ads', plan: null, fileName: '', busy: false, result: null, error: '', mode: '', dest: 'cur', newName: '', campName: '', adLook: '', adLogo: true, carLook: 'brand', carTpl: 'foto', carWhere: 'title', carStyle: ''};
+/* ---------- CSV / texto colado: uma tabela só (o formato é reconhecido pelos cabeçalhos) ---------- */
+function pmCsvRows(text) {
+  text = String(text == null ? '' : text).replace(/^﻿/, '').replace(/\r\n?/g, '\n'); const lines = text.split('\n'); let first = lines.find(l => l.trim()) || '';
+  const cnt = ch => { let n = 0, q = false; for (const c of first) { if (c === '"') q = !q; else if (!q && c === ch) n++; } return n; }, cand = [[';', cnt(';')], ['\t', cnt('\t')], [',', cnt(',')]].sort((a, b) => b[1] - a[1]), d = cand[0][1] > 0 ? cand[0][0] : ';';
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) { const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+    else if (c === '"' && cur === '') q = true; else if (c === d) { row.push(cur); cur = ''; } else if (c === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; } else cur += c; }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); } return rows.filter(r => r.some(v => String(v).trim() !== ''));
+}
+const pmCsvSheets = (text, name) => { const rows = pmCsvRows(text); if (rows.length < 2) throw new Error('Não achei linhas na tabela. Cole o cabeçalho (primeira linha) e pelo menos uma linha de dados.'); return [{name: name || 'Colado', rows}]; };
+async function pmReadCsvFile(f) { const buf = await f.arrayBuffer(); let t; try { t = new TextDecoder('utf-8', {fatal: true}).decode(buf); } catch (e) { t = new TextDecoder('windows-1252').decode(buf); } return pmCsvSheets(t, f.name.replace(/\.[a-z]+$/i, '').slice(0, 40) || 'CSV'); }
+function pmLoad(sheets, label) {
+  PM.fileName = label; PM.campName = /\.(xlsx|csv|tsv|txt)$/i.test(label) ? label.replace(/\.(xlsx|csv|tsv|txt)$/i, '').replace(/_+/g, ' ').replace(/\b\d+\s+(an[uú]ncios?|posts?)\b/i, '').replace(/\bcampanha\b/i, '').replace(/\s+/g, ' ').trim() : ''; if (!PM.newName.trim()) PM.newName = PM.campName;
+  PM.plan = pmParseWorkbook(sheets, pmCtx());
+}
+function pmPaste() {
+  PM.error = ''; PM.result = null; PM.plan = null; const t = (document.getElementById('pmPasteTxt') || {}).value || '';
+  if (!t.trim()) { PM.error = 'Cole a tabela na caixa de texto primeiro.'; pmRender(); return; }
+  try { PM.paste = t; pmLoad(pmCsvSheets(t, 'Colado'), 'Tabela colada'); } catch (e) { PM.error = (e && e.message) || 'Não consegui ler o texto.'; }
+  pmRender();
+}
 /* botão "Subir tabela": abre o seletor de arquivo na hora, em qualquer tela; ao escolher, abre a prévia da importação já com a tabela lida */
 function pmQuick(mode) {
   let inp = document.getElementById('pmQuickIn');
-  if (!inp) { inp = document.createElement('input'); inp.type = 'file'; inp.id = 'pmQuickIn'; inp.accept = '.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'; inp.style.display = 'none'; document.body.appendChild(inp); }
+  if (!inp) { inp = document.createElement('input'); inp.type = 'file'; inp.id = 'pmQuickIn'; inp.accept = '.xlsx,.csv,.tsv,.txt,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'; inp.style.display = 'none'; document.body.appendChild(inp); }
   inp.onchange = () => { PM.mode = mode || ''; if (typeof ui !== 'undefined' && ui.page !== 'planilha') go('planilha'); pmPick(inp); };
   inp.click();
 }
 function pmGo(mode) { PM.mode = mode || ''; go('planilha'); }
 async function pmPick(input) {
   const f = input.files && input.files[0]; input.value = ''; if (!f) return; PM.error = ''; PM.result = null; PM.plan = null;
-  if (!/\.xlsx$/i.test(f.name)) { PM.error = 'Envie um arquivo .xlsx. No Google Planilhas: Arquivo → Fazer download → Microsoft Excel (.xlsx).'; pmRender(); return; }
+  const isCsv = /\.(csv|tsv|txt)$/i.test(f.name);
+  if (!isCsv && !/\.xlsx$/i.test(f.name)) { PM.error = 'Envie um arquivo .xlsx ou .csv. No Google Planilhas: Arquivo → Fazer download → Microsoft Excel (.xlsx) ou Valores separados por vírgula (.csv). Também dá para colar a tabela na caixa de texto abaixo.'; pmRender(); return; }
   if (f.size > 20 * 1024 * 1024) { PM.error = 'O arquivo tem mais de 20 MB. A planilha leva só texto: confira se não há imagens coladas nela.'; pmRender(); return; }
-  try { PM.fileName = f.name; PM.campName = f.name.replace(/\.xlsx$/i, '').replace(/_+/g, ' ').replace(/\b\d+\s+(an[uú]ncios?|posts?)\b/i, '').replace(/\bcampanha\b/i, '').replace(/\s+/g, ' ').trim(); if (!PM.newName.trim()) PM.newName = PM.campName; PM.plan = pmParseWorkbook(await pmReadXlsx(f), pmCtx()); } catch (e) { PM.error = (e && e.message) || 'Não consegui ler o arquivo.'; }
+  try { pmLoad(isCsv ? await pmReadCsvFile(f) : await pmReadXlsx(f), f.name); } catch (e) { PM.error = (e && e.message) || 'Não consegui ler o arquivo.'; }
   pmRender();
 }
-function pmClear() { PM.plan = null; PM.fileName = ''; PM.error = ''; PM.result = null; pmRender(); }
+function pmClear() { PM.plan = null; PM.fileName = ''; PM.paste = ''; PM.error = ''; PM.result = null; pmRender(); }
 function pmSet(k, v) { PM[k] = v; if (k === 'campName' || k === 'newName') return; pmRender(); }
 function pmRender() {
   const root = $('planilhaRoot'); if (!root) return; const cur = curProject(), plan = PM.plan, R = PM.result, dest = !cur ? 'new' : PM.dest, p = dest === 'new' ? null : cur, mode = PM.mode;
@@ -458,7 +481,7 @@ function pmRender() {
   const sel = (cur, opts, cb) => `<select onchange="${cb}">${opts.map(([v, l]) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
   const tab = (k, l) => `<button class="btn sm ${mode === k ? 'dark' : ''}" onclick="pmSet('mode','${k}')">${l}</button>`, showA = ['', 'ads'].includes(mode), showC = ['', 'car'].includes(mode), showP = ['', 'post1'].includes(mode), showS = ['', 'story'].includes(mode);
   const styles = p ? lyStyles(p) : [];
-  root.innerHTML = `<div class="page-head"><div><h1>Criar a partir de planilha</h1><p class="sub">Suba um planejamento inteiro de uma vez: anúncios (ID, Fase, Headline, Texto Principal, Descrição...), carrosséis (um por linha, ou POSTS e SLIDES), posts simples ou stories, com legendas. Funciona num projeto que já existe ou cria um projeto novo só com a planilha.</p></div></div>
+  root.innerHTML = `<div class="page-head"><div><h1>Criar a partir de planilha</h1><p class="sub">Suba um planejamento inteiro de uma vez: anúncios (ID, Fase, Headline, Texto Principal, Descrição...), carrosséis (um por linha, ou POSTS e SLIDES), posts simples ou stories, com legendas. Aceita planilha (.xlsx), arquivo .csv ou a tabela colada aqui mesmo. Funciona num projeto que já existe ou cria um projeto novo só com a planilha.</p></div></div>
   <div class="row-gap" style="margin-bottom:10px">${tab('', 'Tudo')}${tab('ads', 'Anúncios')}${tab('car', 'Carrosséis')}${tab('post1', 'Posts simples')}${tab('story', 'Stories')}</div>
   <div class="panel"><h3 style="margin-top:0">1 · Matrizes (opcional)</h3><p style="font-size:13px;margin:0 0 10px">Já tem a planilha pronta? Pule para o passo 2: o Studio lê o seu arquivo como está. Para partir do formato certo, baixe a matriz do que vai produzir. Cada uma já traz linhas de exemplo (começam com “(exemplo)” e são ignoradas) e uma aba LEIA-ME com o que colocar em cada coluna.</p>
     <div class="row-gap" style="flex-wrap:wrap">${showA ? '<button class="btn" onclick="pmDownload(\'ads\')">⬇ Anúncios (.xlsx)</button>' : ''}${showC ? '<button class="btn" onclick="pmDownload(\'car1\')">⬇ Carrosséis, um por linha (.xlsx)</button><button class="btn" onclick="pmDownload(\'car\')">⬇ Carrosséis, POSTS + SLIDES + LEGENDAS (.xlsx)</button>' : ''}${showP ? '<button class="btn" onclick="pmDownload(\'post1\')">⬇ Posts simples (.xlsx)</button>' : ''}${showS ? '<button class="btn" onclick="pmDownload(\'story\')">⬇ Stories (.xlsx)</button>' : ''}</div></div>
@@ -467,7 +490,8 @@ function pmRender() {
     <div class="field"><label class="pm-radio"><input type="radio" name="pmDest" ${dest === 'cur' ? 'checked' : ''} ${cur ? '' : 'disabled'} onchange="pmSet('dest','cur')"> No projeto aberto: <b>${esc(cur ? cur.name : 'nenhum projeto aberto')}</b>${cur && state.projects.length > 1 ? ` <a href="#" onclick="openModal('context');return false">trocar</a>` : ''}</label>
       <label class="pm-radio"><input type="radio" name="pmDest" ${dest === 'new' ? 'checked' : ''} onchange="pmSet('dest','new')"> ＋ Criar um projeto novo a partir da planilha</label>${dest === 'new' ? `<input value="${esc(PM.newName)}" oninput="PM.newName=this.value" placeholder="Nome do novo projeto" style="max-width:360px;margin-top:4px">` : ''}</div>
     <p class="muted" style="font-size:12.5px;margin:0 0 10px">Tudo entra como <b>novo e em rascunho</b>. Nada que já existe é alterado ou apagado. Não precisa ter pré-projeto nem briefing.</p>
-    <div class="row-gap" style="flex-wrap:wrap"><label class="btn ${PM.busy ? '' : 'orange'}" style="cursor:pointer">Escolher a planilha (.xlsx)<input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="pmPick(this)" ${PM.busy ? 'disabled' : ''}></label>${PM.fileName ? `<span class="muted" style="font-size:12.5px">${esc(PM.fileName)}</span><button class="btn sm" onclick="pmClear()" ${PM.busy ? 'disabled' : ''}>Limpar</button>` : ''}</div>
+    <div class="row-gap" style="flex-wrap:wrap"><label class="btn ${PM.busy ? '' : 'orange'}" style="cursor:pointer">Escolher a planilha (.xlsx ou .csv)<input type="file" accept=".xlsx,.csv,.tsv,.txt,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="pmPick(this)" ${PM.busy ? 'disabled' : ''}></label>${PM.fileName ? `<span class="muted" style="font-size:12.5px">${esc(PM.fileName)}</span><button class="btn sm" onclick="pmClear()" ${PM.busy ? 'disabled' : ''}>Limpar</button>` : ''}</div>
+    <details style="margin-top:12px" ${PM.paste || (PM.fileName === 'Tabela colada') ? 'open' : ''}><summary style="cursor:pointer;font-size:13px"><b>Ou cole a tabela aqui</b> <span class="muted">(copiada do Excel ou do Google Planilhas, ou texto CSV com ; ou ,)</span></summary><textarea id="pmPasteTxt" rows="7" style="width:100%;margin-top:6px;font:12px/1.4 ui-monospace,monospace" placeholder="ID;Fase;Ângulo;Headline;Sub-headline;Texto Principal;Descrição;Botão (CTA);Imagem (nome na biblioteca);Campanha&#10;D01;Descoberta;Presença profissional;Sua advocacia merece um site próprio;..." oninput="PM.paste=this.value">${esc(PM.paste)}</textarea><div class="row-gap" style="margin-top:6px"><button class="btn sm dark" onclick="pmPaste()" ${PM.busy ? 'disabled' : ''}>Ler o texto colado</button><small class="muted">A primeira linha precisa ser o cabeçalho (os nomes das colunas da matriz). O formato (anúncios, carrosséis, posts simples ou stories) é reconhecido pelos cabeçalhos.</small></div></details>
     ${PM.error ? `<p style="color:#b42318;font-size:13px;margin:10px 0 0">${esc(PM.error)}</p>` : ''}
     ${plan ? `<div class="cards" style="margin-top:14px">${nAds || !(nCar || nPo || nSt) ? `<div class="card"><div class="label">Anúncios</div><div class="metric">${nAds}</div><small class="muted">em ${plan.campaigns.length} campanha(s) · ${nAds * 3} artes</small></div>` : ''}${nCar || !(nAds || nPo || nSt) ? `<div class="card"><div class="label">Carrosséis</div><div class="metric">${nCar}</div><small class="muted">${nSl} slides${nCar ? ` · ${nCap} com legenda${nAd ? ` · ${nAd} como anúncio` : ''}` : ''}${dup ? ` · ${dup} já importado(s), serão ignorados` : ''}</small></div>` : ''}${nPo ? `<div class="card"><div class="label">Posts simples</div><div class="metric">${nPo}</div><small class="muted">${nPo - dupP} novo(s) · ${plan.singles.filter(x => x.date).length} com data${dupP ? ` · ${dupP} já importado(s)` : ''}</small></div>` : ''}${nSt ? `<div class="card"><div class="label">Stories</div><div class="metric">${nSt}</div><small class="muted">${new Set(plan.stories.map(x => pmNorm(x.code))).size} sequência(s) · ${nSt - dupS} novo(s)${dupS ? ` · ${dupS} já importado(s)` : ''}</small></div>` : ''}</div>
       ${nAds ? `<div class="panel" style="margin-top:12px;background:#faf8f3"><b>Anúncios</b><div class="form-grid" style="margin-top:8px">${plan.campaigns.some(g => !g.name) ? `<div class="field"><label>Nome da campanha</label><input value="${esc(PM.campName)}" oninput="PM.campName=this.value" placeholder="Ex.: Laboratório de Luz"></div>` : ''}${p ? `<div class="field"><label>Layout e cores</label>${sel(PM.adLook, [['', 'Padrão do Studio (cores do Kit de marca)']].concat(p.campaigns.map(c => [c.id, 'Copiar da campanha: ' + c.name])), "pmSet('adLook',this.value)")}</div>` : ''}<div class="field"><label class="ins inl" style="display:block;margin-top:22px"><input type="checkbox" ${PM.adLogo ? 'checked' : ''} onchange="pmSet('adLogo',this.checked)"> Logo do Kit de marca na arte</label></div></div><small class="muted block">${esc(brandLine(p))} As artes usam as cores e a fonte do Kit de marca. Cada peça guarda ID, Ângulo, Texto Principal e Descrição.</small></div>` : ''}

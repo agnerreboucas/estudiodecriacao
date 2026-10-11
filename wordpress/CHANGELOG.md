@@ -1,5 +1,8 @@
 # Histórico de versões
 
+## 1.15.1
+- **Subir tabela aceita .csv e texto colado.** Além do .xlsx, a tela lê arquivos **.csv** (separados por ponto e vírgula, vírgula ou tab; com ou sem BOM; salvos em UTF-8 ou em Windows-1252 do Excel brasileiro; campos com aspas e quebra de linha) e tem a caixa **Ou cole a tabela aqui**: dá para colar o texto direto, inclusive o copiado do Excel ou do Google Planilhas. O formato (anúncios, carrosséis, posts simples ou stories) é reconhecido pelos cabeçalhos, e a coluna Campanha separa as campanhas.
+
 ## 1.15.0
 - **Subir tabela (em lote): tabela de exemplo na tela e dois formatos novos.** A tela ganhou o painel **Tabela de exemplo: veja como preencher**, com uma aba para cada formato (Anúncios, Carrosséis um por linha, Carrosséis POSTS + SLIDES, **Posts simples** e **Stories**): mostra os cabeçalhos certos (obrigatórios em laranja), linhas já preenchidas e, em "O que colocar em cada coluna", a explicação de cada campo e os valores aceitos. Há botão para baixar a matriz de cada formato.
 - **Posts simples** (uma imagem): colunas Código, Data de publicação, Título da arte, Texto de apoio, Botão (CTA), Legenda, Hashtags, Formato (4:5 ou 1:1), Imagem e Observações. Cada linha vira uma arte no Estúdio de Design e um **rascunho** em Publicação, com a legenda e a data (sem agendar).
