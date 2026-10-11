@@ -1,6 +1,6 @@
 /* ===== Mesa de trabalho do Desenvolvimento, no estilo dos editores de imagem (barra de opções em cima, ferramentas à esquerda, tela escura no centro,
    painéis com abas à direita e barra de estado). Substitui o renderDev simples de estudio-shell.js. Inclui a gaveta de referências, Estilo e Layout. ===== */
-Object.assign(ES, {tool: 'sel', tabA: 'prop', tabB: 'cam', ref: {open: false, id: '', mode: 'side', op: 45, q: ''}, snap: null, deliver: true});
+Object.assign(ES, {sys: {}, focus: false, tool: 'sel', tabA: 'prop', tabB: 'cam', ref: {open: false, id: '', mode: 'side', op: 45, q: ''}, snap: null, deliver: true});
 const ES_FONTS = ['Poppins', 'Inter', 'Manrope', 'Sora', 'Fraunces', 'DM Serif Display', 'Playfair Display', 'Lora', 'Merriweather', 'Montserrat', 'Raleway', 'Nunito', 'Oswald', 'Anton'];
 const ES_LY = [['w', 'Largura do conteúdo', [['narrow', 'Estreita'], ['normal', 'Normal'], ['wide', 'Ampla']]], ['sh', 'Títulos das seções', [['left', 'À esquerda'], ['center', 'Centralizados']]], ['band', 'Faixas de fundo', [['alt', 'Alternadas'], ['tint', 'Cor da marca'], ['line', 'Só linhas'], ['none', 'Sem faixas']]],
   ['ben', 'Benefícios', [['cards', 'Cartões'], ['rows', 'Linhas numeradas'], ['nums', 'Colunas']]], ['st', 'Plano em passos', [['cards', 'Cartões'], ['line', 'Linha do tempo']]], ['pr', 'Prova', [['cards', 'Cartões'], ['quote', 'Citação grande']]], ['dor', 'Problema', [['list', 'Lista'], ['cards', 'Cartões']]], ['faq', 'Dúvidas', [['acc', 'Sanfona estreita'], ['cols', 'Duas colunas']]]];
@@ -63,28 +63,52 @@ function renderDev() {
   if (!s) { const hasBf = sbProgress(p)[0] > 0; root.innerHTML = head + `<div class="panel es-empty">Este projeto ainda não tem site.<br><br><button class="btn pri" onclick="go('${hasBf ? 'templates' : 'briefing'}')">${hasBf ? 'Escolher um template' : 'Ir ao briefing'}</button></div>`; return; }
   ES.site = s.id; const pages = esPageOf(p), l = esCur(p); ES.page = l ? l.id : '';
   const t = SBT.find(x => x.id === s.style), nb = l ? l.blocks.filter(b => b.on).length : 0;
-  root.innerHTML = head + `<div class="ps">
+  root.innerHTML = head + `<div class="ps${ES.focus ? ' ps-focus' : ''}" id="psRoot">
     <div class="ps-opt"><div class="ps-pages">${pages.map(x => `<button class="${x.id === ES.page ? 'on' : ''}" onclick="esPage('${x.id}')">${esc(x.navLabel || x.name)}</button>`).join('')}</div><span class="ps-sp"></span>
-      <div class="ps-seg"><button class="${ES.device === 'desk' ? 'on' : ''}" onclick="ES.device='desk';esDevice()">Computador</button><button class="${ES.device === 'mob' ? 'on' : ''}" onclick="ES.device='mob';esDevice()">Celular</button></div>
+      <div class="ps-seg" id="psSeg">${[['desk', 'Computador'], ['tab', 'Tablet'], ['mob', 'Celular'], ['all', '3 telas']].map(([k, n]) => `<button class="${ES.device === k ? 'on' : ''}" onclick="esSetDevice('${k}')">${n}</button>`).join('')}</div><button class="ps-btn" id="psFocus" onclick="esFocusToggle()" title="Esconde os painéis para dar mais espaço à página">Ampliar</button>
       <button class="ps-btn" onclick="esRandom()" title="Sorteia um layout diferente para o site">Sortear layout</button><button class="ps-btn" onclick="esRefToggle()">Referências</button></div>
     <div class="ps-body"><div class="ps-tools" role="toolbar" aria-label="Ferramentas">${ES_TOOLS.map(([k, tt, d]) => `<button class="${ES.tool === k ? 'on' : ''}${k === 'ref' && ES.ref.open ? ' on' : ''}" title="${esc(tt)}" aria-label="${esc(tt)}" onclick="esTool('${k}')">${esSvg(d)}</button>`).join('')}</div>
       <aside class="ps-ref" id="psRef" ${ES.ref.open ? '' : 'hidden'}></aside>
-      <div class="ps-canvas" id="psCanvas"><div class="ps-stage"><div class="es-frame${ES.device === 'mob' ? ' mob' : ''}" id="esFrameBox"><iframe id="esFrame" sandbox="allow-scripts" title="Prévia do site"></iframe><img class="ps-over" id="psOver" alt="" hidden></div></div></div>
+      <div class="ps-canvas" id="psCanvas"><div class="ps-stage" id="psStage"><div class="ps-devs" id="psDevs">${esDevsHTML()}</div></div></div>
       <div class="ps-right" id="psRight"></div></div>
     <div class="ps-status"><span>${esc(s.name)}${t ? ' · ' + esc(t.nome) : ''}</span><span>${l ? esc(l.navLabel || l.name) : ''} · ${nb} seções ativas</span><span id="psZoom"></span><span class="ps-sp"></span><span>${ES.sel ? 'Seção selecionada' : 'Nada selecionado'}</span></div></div>`;
   esRight(); esFit(); esPreview(); esRefRefresh();
 }
-function esFit() {
-  const box = $('esFrameBox'), fr = $('esFrame'), st = box && box.parentElement; if (!box || !fr || !st) return; const H = Math.max(420, Math.round(st.clientHeight - 24)) || Math.round(window.innerHeight * 0.7);
-  const z = $('psZoom');
-  if (ES.device === 'mob') { fr.style.cssText = 'width:100%;height:' + H + 'px;transform:none'; box.style.height = H + 'px'; if (z) z.textContent = '390 px'; return; }
-  const W = st.clientWidth - 24, k = Math.min(1, W / 1060); fr.style.cssText = 'width:' + Math.round(W / k) + 'px;height:' + Math.round(H / k) + 'px;transform:scale(' + k + ');transform-origin:0 0'; box.style.height = H + 'px'; if (z) z.textContent = Math.round(k * 100) + '%';
+const ES_DEV = {desk: ['Computador', 1060], tab: ['Tablet', 768], mob: ['Celular', 390]};
+const esDevList = () => ES.device === 'all' ? ['desk', 'tab', 'mob'] : [ES.device in ES_DEV ? ES.device : 'desk'];
+const esFrames = () => [...document.querySelectorAll('.esFr')];
+function esDevsHTML() {
+  return esDevList().map((d, i) => `<div class="ps-dv" data-dev="${d}">${ES.device === 'all' ? `<div class="ps-dl">${ES_DEV[d][0]} · ${ES_DEV[d][1]} px</div>` : ''}<div class="es-frame"><iframe class="esFr" ${i === 0 ? 'id="esFrame" ' : ''}data-dev="${d}" sandbox="allow-scripts" title="Prévia: ${ES_DEV[d][0]}"></iframe>${i === 0 ? '<img class="ps-over" id="psOver" alt="" hidden>' : ''}</div></div>`).join('');
 }
-function esDevice() { const b = $('esFrameBox'); if (b) b.classList.toggle('mob', ES.device === 'mob'); document.querySelectorAll('.ps-seg button').forEach((x, i) => x.classList.toggle('on', (i === 0) === (ES.device === 'desk'))); esFit(); }
+/* cada tela é desenhada na largura real (1060, 768 ou 390 px) e reduzida para caber */
+function esFit() {
+  const st = $('psStage'), boxes = [...document.querySelectorAll('.ps-dv')]; if (!st || !boxes.length) return; const all = boxes.length > 1;
+  const H = Math.max(380, Math.round(st.clientHeight - 24 - (all ? 20 : 0))) || Math.round(window.innerHeight * 0.7), W = st.clientWidth - 24, bases = boxes.map(b => ES_DEV[b.dataset.dev][1]);
+  const k = all ? Math.max(0.28, Math.min(0.62, (W - 16 * (boxes.length - 1)) / bases.reduce((a, b) => a + b, 0))) : bases[0] === 390 ? 1 : Math.min(1, W / bases[0]);
+  boxes.forEach(b => { const base = ES_DEV[b.dataset.dev][1], fr = b.querySelector('iframe'), box = b.querySelector('.es-frame'); fr.style.cssText = 'width:' + base + 'px;height:' + Math.round(H / k) + 'px;transform:scale(' + k + ');transform-origin:0 0'; box.style.width = Math.round(base * k) + 'px'; box.style.height = H + 'px'; });
+  const z = $('psZoom'); if (z) z.textContent = all ? '3 telas · ' + Math.round(k * 100) + '%' : bases[0] + ' px · ' + Math.round(k * 100) + '%';
+}
+function esSetDevice(d) {
+  ES.device = d; const dv = $('psDevs'); if (dv) dv.innerHTML = esDevsHTML(); document.querySelectorAll('#psSeg button').forEach((x, i) => x.classList.toggle('on', ['desk', 'tab', 'mob', 'all'][i] === d));
+  esFit(); esPreview(); esOver();
+}
+function esFocusToggle() { ES.focus = !ES.focus; const r = $('psRoot'); if (r) r.classList.toggle('ps-focus', ES.focus); const b = $('psFocus'); if (b) b.textContent = ES.focus ? 'Mostrar painéis' : 'Ampliar'; setTimeout(esFit, 30); }
+const esDevice = () => esSetDevice(ES.device);
+/* pré-visualização em todas as telas abertas */
+async function esPreview() {
+  const p = curProject(), l = esCur(p), frs = esFrames(); if (!l || !frs.length) return; const my = ++ES.t;
+  const h = await lpHTML(l, p, {preview: true, edit: true}); if (my !== ES.t) return;
+  frs.forEach(fr => { const d = fr.dataset.dev; fr.srcdoc = h.replace(/<\/body>/i, '<script>window.__sy=' + (+ES.sys[d] || 0) + ';window.__sel=' + JSON.stringify(ES.sel || '') + ';' + ES_INJECT + '<\/script></body>'); });
+}
+window.addEventListener('message', e => {
+  const fr = esFrames().find(f => f.contentWindow === e.source); if (!fr || !e.data || !e.data.es) return; const d = e.data;
+  if (d.es === 'sy') ES.sys[fr.dataset.dev] = d.y; else if (d.es === 'sel') esSelect(d.id, false);
+  else if (d.es === 'nav') { const p = curProject(), pg = esPageOf(p).find(x => lpFile(x) === d.href.replace(/^.*\//, '').replace(/#.*$/, '')); if (pg) esPage(pg.id); }
+});
 function esSelect(bid, scroll) {
   ES.sel = bid; if (ES.tabA !== 'prop') { ES.tabA = 'prop'; esRight(); } else esBlockEditor();
   document.querySelectorAll('.ps-lay li').forEach(li => li.classList.toggle('sel', li.dataset.bid === bid));
-  const fr = $('esFrame'); if (fr && fr.contentWindow) fr.contentWindow.postMessage({es: 'mark', id: bid, go: !!scroll}, '*');
+  esFrames().forEach(fr => { if (fr.contentWindow) fr.contentWindow.postMessage({es: 'mark', id: bid, go: !!scroll}, '*'); });
   const sb = document.querySelector('.ps-status span:last-child'); if (sb) sb.textContent = 'Seção selecionada';
 }
 /* ferramentas */

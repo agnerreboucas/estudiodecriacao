@@ -1,4 +1,4 @@
-# Módulo de Criação de Sites e Landing Pages (versão 1.3.0)
+# Módulo de Criação de Sites e Landing Pages (versão 1.3.1)
 
 Este é **só o módulo de sites** do Ampliação Studio, separado para virar um produto novo.
 Ele abre sozinho, no formato do **Estúdio de Sites**: **Início**, **Briefing do cliente**, **Banco de templates**, **Desenvolvimento**, **Referências**, **Mesa de páginas**, **Imagens** e **Configurações**. A página do cliente (formulário de 11 partes) abre em **Briefing → Ver como o cliente vê**.
@@ -14,7 +14,7 @@ Não vem nenhum projeto, cliente ou fonte licenciada junto: o app começa vazio.
 
 ## Referências, mesa de trabalho e seus templates
 - **Referências:** suba prints e imagens de layouts que você admira (arraste, escolha ou cole com Ctrl+V). Ficam salvas, com nome, etiquetas e anotação. Na edição, a ferramenta **Referências** abre uma gaveta ao lado da página: **lado a lado** ou **sobreposta** com transparência.
-- **Desenvolvimento** tem a mesa de trabalho: barra de opções em cima, ferramentas à esquerda, página no centro e painéis à direita (Propriedades, **Estilo**, **Layout**, Camadas com arrastar, Pendências, Vendedor consultivo e Entrega). **Sortear variação** muda o layout e dá para voltar.
+- **Desenvolvimento** tem a mesa de trabalho: barra de opções em cima, ferramentas à esquerda, página no centro e painéis à direita (Propriedades, **Estilo**, **Layout**, Camadas com arrastar, Pendências, Vendedor consultivo e Entrega). **Sortear variação** muda o layout e dá para voltar. A barra de opções tem **Computador, Tablet, Celular e 3 telas**: as três aparecem lado a lado, ao vivo, e o clique em uma seção seleciona nas três. **Ampliar** esconde os painéis para dar mais espaço.
 - **Meus templates** (em Banco de templates): suba o ZIP do Envato (kit do Elementor, site em HTML ou tema de WordPress), JSON do Elementor ou HTML. Cada página vira uma página da Mesa de páginas. Pacotes só de fontes não são templates.
 - **Exportar** pela Mesa de páginas: HTML, ZIP, **Kit do Elementor (.zip)** e modelo do Elementor (.json), com **animação de entrada** (aparecer, subir, esquerda, zoom). Só widgets e contêineres grátis do Elementor.
 

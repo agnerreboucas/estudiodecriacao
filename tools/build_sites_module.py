@@ -3,7 +3,7 @@
 Copia os arquivos necessários, monta um index.html enxuto e corrige o roteador (core.js) para as telas que existem."""
 import re, shutil, pathlib, zipfile, sys
 root = pathlib.Path(__file__).resolve().parent.parent
-VERSION = '1.3.0'
+VERSION = '1.3.1'
 out = root / 'export' / 'ampliacao-sites-modulo'
 if out.exists(): shutil.rmtree(out)
 (out / 'js').mkdir(parents=True); (out / 'css').mkdir(); (out / 'api').mkdir()

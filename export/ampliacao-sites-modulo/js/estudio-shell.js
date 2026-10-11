@@ -92,11 +92,6 @@ async function esPreview() {
   h = h.replace(/<\/body>/i, '<script>window.__sy=' + (+ES.sy || 0) + ';window.__sel=' + JSON.stringify(ES.sel || '') + ';' + ES_INJECT + '<\/script></body>'); fr.srcdoc = h;
 }
 const esPreviewLater = (() => { let h; return () => { clearTimeout(h); h = setTimeout(esPreview, 350); }; })();
-window.addEventListener('message', e => {
-  const fr = $('esFrame'); if (!fr || e.source !== fr.contentWindow || !e.data || !e.data.es) return; const d = e.data;
-  if (d.es === 'sy') ES.sy = d.y; else if (d.es === 'sel') esSelect(d.id, false);
-  else if (d.es === 'nav') { const p = curProject(), pg = esPageOf(p).find(x => lpFile(x) === d.href.replace(/^.*\//, '').replace(/#.*$/, '')); if (pg) esPage(pg.id); }
-});
 function esPage(id) { ES.page = id; ES.sel = ''; ES.sy = 0; renderDev(); }
 function esSelect(bid, scroll) {
   ES.sel = bid; esBlockEditor(); document.querySelectorAll('.es-secs li').forEach(li => li.classList.remove('sel'));
