@@ -127,3 +127,9 @@ body.es-solo .rail,body.es-solo .topbar,body.es-solo .rail-back{display:none!imp
 .ps-dl{font-size:11px;color:#9a9a9a;margin-bottom:4px;text-align:center}
 .ps .es-frame{width:auto}.ps .es-frame iframe{display:block;border:0;background:#fff}
 .ps-focus .ps-ref,.ps-focus .ps-right{display:none}
+
+.ps-tabs{flex-wrap:wrap}
+.ps-btn.pri{background:var(--es-accent);border-color:var(--es-accent);color:#fff}
+.ps-h{margin:10px 0 6px;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:#bbb}.ps-h small{text-transform:none;letter-spacing:0;color:var(--pm);font-weight:400}
+.ps-ig{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.ps-ig button{border:2px solid transparent;padding:0;background:#222;border-radius:4px;aspect-ratio:1;overflow:hidden;cursor:pointer}.ps-ig button:hover{border-color:var(--es-accent)}.ps-ig img{width:100%;height:100%;object-fit:cover;display:block}
+.ps-kit{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #444}.ps-kit small{display:block;color:var(--pm);font-size:11px}

@@ -47,11 +47,25 @@ function esRightHTML(p, s, l) {
   const pend = esPending(p), ck = esChecklist(p, s), n = ck.filter(x => x[1]).length, ready = typeof aiReady === 'function' && aiReady();
   const tabs = (cur, set, list) => `<div class="ps-tabs">${list.map(([k, n2]) => `<button class="${cur === k ? 'on' : ''}" onclick="${set}('${k}')">${n2}</button>`).join('')}</div>`;
   const A = ES.tabA === 'style' ? esStyleHTML(p, s, l) : ES.tabA === 'lay' ? esLayoutHTML(l) : '<div id="esEdit"></div>';
-  const B = ES.tabB === 'pend' ? esPendHTML(p) : ES.tabB === 'vend' ? esVendHTML(p, s) : esLayersHTML(l);
+  const B = ES.tabB === 'pend' ? esPendHTML(p) : ES.tabB === 'vend' ? esVendHTML(p, s) : ES.tabB === 'bib' ? esBibHTML(p) : esLayersHTML(l);
   return `<section class="ps-pan">${tabs(ES.tabA, 'esTabA', [['prop', 'Propriedades'], ['style', 'Estilo'], ['lay', 'Layout']])}<div class="ps-pb">${A}</div></section>
-    <section class="ps-pan">${tabs(ES.tabB, 'esTabB', [['cam', 'Camadas'], ['pend', 'Pendências ' + pend.length], ['vend', 'Vendedor ' + n + '/' + ck.length]])}<div class="ps-pb">${B}</div></section>
+    <section class="ps-pan">${tabs(ES.tabB, 'esTabB', [['cam', 'Camadas'], ['pend', 'Pendências ' + pend.length], ['vend', 'Vendedor ' + n + '/' + ck.length], ['bib', 'Biblioteca']])}<div class="ps-pb">${B}</div></section>
     <section class="ps-pan" id="esDeliver"><div class="ps-tabs"><button class="on" onclick="ES.deliver=!ES.deliver;esRight()">Entrega ${ES.deliver ? '▾' : '▸'}</button></div>${ES.deliver ? `<div class="ps-pb">${esDeliverHTML(s, l, ready)}</div>` : ''}</section>`;
 }
+/* Biblioteca: imagens, referências, seus templates e a Mesa (o que o painel Biblioteca da Mesa tem, aqui à mão) */
+function esBibHTML(p) {
+  const imgs = libList().filter(i => i.kind !== 'referencia').slice(0, 24), refs = refList().slice(0, 12), kits = typeof mzThList === 'function' ? mzThList() : [], mm = p.mesa || {}, comps = (mm.comps || []).length, mlib = (state.mesaLib && state.mesaLib.items || []).length;
+  return `<h6 class="ps-h">Imagens <small>clique para usar na seção selecionada</small></h6>${imgs.length ? `<div class="ps-ig">${imgs.map(i => `<button onclick="esUseImg('${i.imgId}')" title="${esc(i.name)}"><img data-lib="${i.imgId}" alt="${esc(i.name)}"></button>`).join('')}</div>` : '<p class="ps-note">Nenhuma imagem. Suba na tela Imagens.</p>'}
+    <h6 class="ps-h">Referências</h6>${refs.length ? `<div class="ps-ig">${refs.map(i => `<button onclick="ES.ref.open=true;ES.ref.id='${i.id}';esRefToggleOpen()" title="${esc(i.name)}"><img data-lib="${i.imgId}" alt="${esc(i.name)}"></button>`).join('')}</div>` : '<p class="ps-note">Nenhuma referência ainda.</p>'}<div class="ps-row"><button class="btn sm" onclick="go('refs')">Biblioteca de referências</button></div>
+    <h6 class="ps-h">Meus templates</h6>${kits.length ? kits.map(t => `<div class="ps-kit"><span>${esc(t.name.slice(0, 34))}<small>${t.pages.length} páginas · ${t.sections.length} seções</small></span><button class="btn sm" onclick="sbKitPages('${t.id}')">Usar</button></div>`).join('') : '<p class="ps-note">Nenhum template seu ainda.</p>'}<div class="ps-row"><button class="btn sm" onclick="go('templates');SBG.tab='meus';renderTemplatesBank()">Subir ou gerenciar</button></div>
+    <h6 class="ps-h">Na Mesa</h6><p class="ps-note">${comps} componente(s) global(is) e ${mlib} item(ns) salvos na sua biblioteca. Tudo isso fica no painel Biblioteca da Mesa.</p><div class="ps-row"><button class="btn sm pri" onclick="esToMesa()">Abrir o site na Mesa</button></div>`;
+}
+function esUseImg(imgId) {
+  const l = esCur(curProject()), b = l && l.blocks.find(x => x.id === ES.sel); if (!b) { toast('Clique em uma seção da página primeiro.'); return; }
+  const f = ((LP_BLOCK[b.t] || {}).fields || []).find(x => x[2] === 'img'); if (!f) { toast('Esta seção não tem imagem. Escolha o topo ou a autoridade.'); return; }
+  b[f[0]] = imgId; persist(); esBlockEditor(); esPreview(); toast('Imagem aplicada na seção.');
+}
+function esRefToggleOpen() { const a = $('psRef'); if (a) a.hidden = false; esRefRefresh(); setTimeout(esFit, 30); document.querySelectorAll('.ps-tools button').forEach((x, i) => { if (ES_TOOLS[i][0] === 'ref') x.classList.add('on'); }); }
 function esRight() { const box = $('psRight'); if (!box) return; const p = curProject(), s = esSiteOf(p), l = esCur(p); box.innerHTML = esRightHTML(p, s, l); esBlockEditor(); }
 const esTabA = t => { ES.tabA = t; esRight(); }, esTabB = t => { ES.tabB = t; esRight(); };
 
@@ -66,7 +80,7 @@ function renderDev() {
   root.innerHTML = head + `<div class="ps${ES.focus ? ' ps-focus' : ''}" id="psRoot">
     <div class="ps-opt"><div class="ps-pages">${pages.map(x => `<button class="${x.id === ES.page ? 'on' : ''}" onclick="esPage('${x.id}')">${esc(x.navLabel || x.name)}</button>`).join('')}</div><span class="ps-sp"></span>
       <div class="ps-seg" id="psSeg">${[['desk', 'Computador'], ['tab', 'Tablet'], ['mob', 'Celular'], ['all', '3 telas']].map(([k, n]) => `<button class="${ES.device === k ? 'on' : ''}" onclick="esSetDevice('${k}')">${n}</button>`).join('')}</div><button class="ps-btn" id="psFocus" onclick="esFocusToggle()" title="Esconde os painéis para dar mais espaço à página">Ampliar</button>
-      <button class="ps-btn" onclick="esRandom()" title="Sorteia um layout diferente para o site">Sortear layout</button><button class="ps-btn" onclick="esRefToggle()">Referências</button></div>
+      <button class="ps-btn" onclick="esRandom()" title="Sorteia um layout diferente para o site">Sortear layout</button><button class="ps-btn pri" onclick="esToMesa()" title="Abre o site na Mesa de páginas, com todas as ferramentas: camadas, desenho, modo livre, IA, versões e mais">Editar na Mesa</button><button class="ps-btn" onclick="esRefToggle()">Referências</button></div>
     <div class="ps-body"><div class="ps-tools" role="toolbar" aria-label="Ferramentas">${ES_TOOLS.map(([k, tt, d]) => `<button class="${ES.tool === k ? 'on' : ''}${k === 'ref' && ES.ref.open ? ' on' : ''}" title="${esc(tt)}" aria-label="${esc(tt)}" onclick="esTool('${k}')">${esSvg(d)}</button>`).join('')}</div>
       <aside class="ps-ref" id="psRef" ${ES.ref.open ? '' : 'hidden'}></aside>
       <div class="ps-canvas" id="psCanvas"><div class="ps-stage" id="psStage"><div class="ps-devs" id="psDevs">${esDevsHTML()}</div></div></div>
@@ -115,7 +129,7 @@ function esSelect(bid, scroll) {
 function esTool(k) {
   const p = curProject(), l = esCur(p), b = l && l.blocks.find(x => x.id === ES.sel);
   if (k === 'ref') { esRefToggle(); return; }
-  if (k === 'more') { showModal('Mais ferramentas', `<div class="es-col"><button class="btn" onclick="closeModal();go('mesa')">Mesa de páginas (editor visual livre)</button><button class="btn" onclick="closeModal();esAdvanced()">Editor de blocos, SEO e publicação</button><button class="btn" onclick="closeModal();go('templates')">Banco de templates</button><button class="btn" onclick="closeModal();go('refs')">Biblioteca de referências</button></div><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`); return; }
+  if (k === 'more') { showModal('Mais ferramentas', `<div class="es-col"><button class="btn" onclick="closeModal();esToMesa()">Abrir este site na Mesa de páginas (todas as ferramentas)</button><button class="btn" onclick="closeModal();go('mesa')">Mesa de páginas (páginas em branco)</button><button class="btn" onclick="closeModal();esAdvanced()">Editor de blocos, SEO e publicação</button><button class="btn" onclick="closeModal();go('templates')">Banco de templates</button><button class="btn" onclick="closeModal();go('refs')">Biblioteca de referências</button></div><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`); return; }
   ES.tool = k;
   if (k === 'txt') { if (!b) { toast('Clique em uma seção da página primeiro.'); return; } ES.tabA = 'prop'; esRight(); const i = document.querySelector('#esEdit input,#esEdit textarea'); if (i) i.focus(); }
   else if (k === 'img') { if (!b) { toast('Clique em uma seção da página primeiro.'); return; } const f = ((LP_BLOCK[b.t] || {}).fields || []).find(x => x[2] === 'img'); if (!f) { toast('Esta seção não tem imagem.'); return; } esImg(f[0]); }
