@@ -103,6 +103,13 @@ Menu **5 · Mostrar ao cliente → Aprovação de arte**.
 4. No servidor, configure um cron a cada 5 minutos chamando `api/meta_social.php?action=run&key=SUA_CHAVE` (a chave é `META_CRON_KEY`). Sem cron, use o botão *Rodar a fila agora*.
 5. Sem token (ou com `META_DRY_RUN`) tudo é simulado: nada é enviado à Meta.
 
+## Esteira do projeto (do documento até o site)
+1. Em **Projetos**, clique em **Subir documento do projeto**. Escolha o arquivo (Word, PDF, texto, Markdown) ou cole o texto. Marque **Criar um projeto novo com este documento** se ainda não tiver o projeto.
+2. Sem documento? Baixe o **template em Word ou Markdown**, preencha (troque ☐ por ☑ nas escolhas, não mude o texto das perguntas) e suba. Com a IA ligada, um documento livre também é entendido.
+3. Confira a tela **O que o Studio entendeu** e clique em **Levar e montar o projeto**. O Studio abre a aba **Esteira** e cria, só com o que foi informado: base do projeto, campanha de anúncios, posts simples e stories (rascunhos em Publicação), carrosséis e o site. O pré-projeto e o texto das páginas precisam da IA.
+4. Cada etapa tem **Abrir** para corrigir nas telas de sempre. Se você mudar a ficha, use **Aplicar a ficha de novo** (só acrescenta o que falta). **Gerar tudo que falta** nunca duplica nem apaga.
+5. Para criar mais, use **Acrescentar ao que já existe**: novo story, anúncio, post simples, carrossel, campanha, página, site ou tabela em lote.
+
 ## Ficha completa (modelo de projeto)
 1. Em **Projetos**, clique em **Novo projeto (modelo completo)**, dê o nome e crie. O projeto abre na aba **Ficha completa**, com todas as perguntas.
 2. Responda na tela (salva sozinho), ou **mande o link ao cliente** (o bloco "Mandar para o cliente preencher") e depois use **Trazer as respostas do cliente**. Também dá para **baixar o template (.xlsx)**, preencher no Excel e usar **Importar planilha preenchida**, ou **imprimir o template em PDF** para responder à mão.

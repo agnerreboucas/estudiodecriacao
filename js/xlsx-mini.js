@@ -21,6 +21,10 @@ function xmBuild(sheets) {
   f('xl/workbook.xml', `${H}<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((s, i) => `<sheet name="${xmX(String(s.name).replace(/[\\/?*\[\]:]/g, ' ').slice(0, 31))}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets></workbook>`);
   f('xl/_rels/workbook.xml.rels', `${H}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`);
   f('xl/styles.xml', XM_STYLES); sheets.forEach((s, i) => f(`xl/worksheets/sheet${i + 1}.xml`, xmSheetXml(s, i === 0)));
+  return xmZip(files, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+}
+function xmZip(files, mime) {
+  const enc = new TextEncoder();
   const chunks = [], central = []; let off = 0;
   files.forEach(fl => {
     const name = enc.encode(fl.name), crc = xmCrc(fl.data), h = new DataView(new ArrayBuffer(30));
@@ -32,5 +36,5 @@ function xmBuild(sheets) {
   });
   const csize = central.reduce((a, b) => a + b.length, 0), e = new DataView(new ArrayBuffer(22));
   e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, csize, true); e.setUint32(16, off, true);
-  return new Blob([...chunks, ...central, new Uint8Array(e.buffer)], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  return new Blob([...chunks, ...central, new Uint8Array(e.buffer)], {type: mime || 'application/zip'});
 }

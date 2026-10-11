@@ -316,6 +316,8 @@ function projIcps(p) {
 }
 
 /* ---------- tela ---------- */
+/* com a ficha completa carregada, o botão abre o novo fluxo (documento → ficha); sem ela, o leitor antigo */
+function docOpenAny() { if (typeof fdOpen === 'function') fdOpen(); else docOpen(); }
 function docOpen() {
   const p = curProject(); if (!p) { toast('Crie ou escolha um projeto primeiro.'); return; }
   docUI.K = null; docUI.text = ''; docUI.name = ''; docUI.via = '';
@@ -355,7 +357,7 @@ function docReview() {
     ${K.icps.length ? `<h4>Públicos</h4><div class="list">${K.icps.slice(0, 6).map(x => `<div class="list-item"><div><strong>${esc(x.name)}</strong><small>${docLines(x.pains).length} dores · ${docLines(x.doubts).length} dúvidas · ${docLines(x.desires).length} desejos · ${docLines(x.hidden).length} urgências</small></div></div>`).join('')}</div>` : ''}
     ${fld.length ? `<h4>Campos reconhecidos</h4><div class="list">${fld.map(x => `<div class="list-item"><div><strong>${x[0]}</strong><small>${esc(String(x[1]).slice(0, 160))}</small></div></div>`).join('')}</div>` : ''}
     <label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" ${docUI.opt.banks ? 'checked' : ''} onchange="docUI.opt.banks=this.checked"> Também acrescentar às campanhas que já existem (bancos de dores, dúvidas, desejos e urgências). Peças prontas não mudam.</label>
-    <div class="modal-actions"><button class="btn" onclick="docOpen()">← Voltar</button><button class="btn dark" onclick="docConfirm()">Aplicar ao projeto</button></div>`);
+    <div class="modal-actions"><button class="btn" onclick="docOpenAny()">← Voltar</button><button class="btn dark" onclick="docConfirm()">Aplicar ao projeto</button></div>`);
   $('modalBox').classList.add('wide');
 }
 function docConfirm() {
@@ -370,7 +372,7 @@ function docConfirm() {
 function docStrip(p) {
   const ic = (p.pre && p.pre.icps || []).length, pr = (p.products || []).length, d = (p.brief || {}).doc, lg = ((p.design || {}).brand || {}).logos || [];
   const empty = !ic && !pr && !String((p.brief || {}).audience || '').trim();
-  return `<div class="doc-strip ${empty ? 'warn' : ''}"><span><b>Projeto: ${esc(p.name)}</b> · ${ic} público(s) · ${pr} produto(s)/serviço(s) · ${lg.length} logo(s)${d && d.name ? ' · documento: ' + esc(d.name) : ''}</span><span class="doc-strip-act">${empty ? 'As peças estão sem informações do projeto. ' : ''}<button class="btn sm ${empty ? 'dark' : ''}" onclick="docOpen()">📄 ${d && d.name ? 'Atualizar com outro documento' : 'Subir o documento do projeto'}</button></span></div>`;
+  return `<div class="doc-strip ${empty ? 'warn' : ''}"><span><b>Projeto: ${esc(p.name)}</b> · ${ic} público(s) · ${pr} produto(s)/serviço(s) · ${lg.length} logo(s)${d && d.name ? ' · documento: ' + esc(d.name) : ''}</span><span class="doc-strip-act">${empty ? 'As peças estão sem informações do projeto. ' : ''}<button class="btn sm ${empty ? 'dark' : ''}" onclick="docOpenAny()">📄 ${d && d.name ? 'Atualizar com outro documento' : 'Subir o documento do projeto'}</button></span></div>`;
 }
 const DOC_STRIP_PAGES = ['ofertas', 'design', 'stories', 'campaigns', 'carrosseis', 'videoLab', 'landings', 'feed', 'editorial'];
 function docInjectStrip(page) {
@@ -380,5 +382,5 @@ function docInjectStrip(page) {
 
 function docCard(p) {
   const d = (p.brief || {}).doc;
-  return `<div class="jp-panel" style="border-left:4px solid #111"><div class="section-row"><div><h3 style="margin:0">📄 Documento do projeto</h3><p class="sub" style="margin:2px 0 0">Suba o briefing completo (Word, PDF, texto). O Studio reconhece produtos, públicos, dores, dúvidas, desejos, urgências, tom de voz e cores, e leva para o projeto e para <b>todas as peças</b>, sem apagar o que você já fez.${d && d.name ? ' Último: <b>' + esc(d.name) + '</b>.' : ''}</p></div><button class="btn dark" onclick="docOpen()">${d && d.name ? 'Subir outro documento' : 'Subir o documento'}</button></div></div>`;
+  return `<div class="jp-panel" style="border-left:4px solid #111"><div class="section-row"><div><h3 style="margin:0">📄 Documento do projeto</h3><p class="sub" style="margin:2px 0 0">Suba o briefing completo (Word, PDF, texto). O Studio reconhece produtos, públicos, dores, dúvidas, desejos, urgências, tom de voz e cores, e leva para o projeto e para <b>todas as peças</b>, sem apagar o que você já fez.${d && d.name ? ' Último: <b>' + esc(d.name) + '</b>.' : ''}</p></div><button class="btn dark" onclick="docOpenAny()">${d && d.name ? 'Subir outro documento' : 'Subir o documento'}</button></div></div>`;
 }

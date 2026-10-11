@@ -1142,7 +1142,7 @@ body.mz-lock{overflow:hidden}
 
 <section id="page-projects" class="page">
   <div class="subpage">
-    <div class="page-head"><div><h1>Projetos</h1><p>Todos os trabalhos do seu workspace.</p></div><div class="actions"><button class="btn" onclick="docOpen()" title="Sobe o briefing completo para o projeto atual">📄 Subir documento do projeto</button><button class="btn dark" onclick="fpNewModal()" title="Cria o projeto já com todas as perguntas">📋 Novo projeto (modelo completo)</button><button class="btn" onclick="openModal('newproject')" title="Assistente rápido: conte o contexto e o Studio organiza">＋ Novo projeto (assistente rápido)</button></div></div>
+    <div class="page-head"><div><h1>Projetos</h1><p>Todos os trabalhos do seu workspace.</p></div><div class="actions"><button class="btn" onclick="docOpenAny()" title="Sobe o briefing completo para o projeto atual">📄 Subir documento do projeto</button><button class="btn dark" onclick="fpNewModal()" title="Cria o projeto já com todas as perguntas">📋 Novo projeto (modelo completo)</button><button class="btn" onclick="openModal('newproject')" title="Assistente rápido: conte o contexto e o Studio organiza">＋ Novo projeto (assistente rápido)</button></div></div>
     <div id="projectsBar" style="margin:0 0 10px;display:flex;justify-content:flex-end"></div>
     <div class="project-grid" id="projectsGrid"></div>
   </div>
@@ -1197,6 +1197,7 @@ body.mz-lock{overflow:hidden}
     </div>
     <nav class="project-nav" id="projectNav">
       <button class="active" data-tab="overview">Visão geral</button>
+      <button data-tab="esteira">Esteira</button>
       <button data-tab="ficha">Ficha completa</button>
       <button data-tab="preproject">Pré-Projeto</button>
       <button data-tab="identity">Marca e arquétipo</button>
@@ -20876,14 +20877,20 @@ function cmpNewModal() {
   <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="cmpCreate()">Gerar campanha</button></div>`);
 }
 function cmpCount() { const n = Math.max(1, Math.min(10, +$('cmQ').value || 1)); $('cmCt').innerHTML = `5 fases × ${n} anúncio${n > 1 ? 's' : ''} = ${n * 5} anúncios × 3 medidas = <b>${n * 15} artes</b>. Gerar não gasta crédito de IA e leva alguns segundos.`; }
+/* monta a campanha (as 5 fases, com as artes); usado pelo botão "Gerar campanha" e pela Esteira do projeto */
+async function cmpCreateRun(p, o) {
+  const n = Math.max(1, Math.min(10, +o.n || 5)), ff = o.ff === 'square' ? 'square' : 'feed45', name = String(o.name || 'Campanha').trim().slice(0, 120);
+  const c = {id: uid('cm'), name, objective: o.objective || 'Leads', budget: 0, channel: 'Meta Ads', status: 'Rascunho', period: '', audience: ((p.pre.icps[0] || {}).name || ''), feedFmt: ff, layout: 'auto', align: 'left', bank: cmpDraftBank(p, n), test: {macro: '', micro: '', format: '', notes: ''}, notes: [], landings: [], pieces: [], created: new Date().toISOString()};
+  c.test = {macro: `Teste de ângulo: dentro de cada fase, compare os ${n} anúncios (headlines de tipos diferentes: dor, dúvida, desejo, urgência oculta), mesmo público e mesmo orçamento. (sugestão, edite)`, micro: 'Com o ângulo vencedor de cada fase, troque uma coisa por vez: imagem, cor ou CTA, usando a faixa de variações.', format: 'Compare feed, vertical e horizontal do mesmo anúncio para ver qual medida rende mais.', notes: ''};
+  p.campaigns.push(c); cmpUI.id = c.id; cmpUI.phase = 'descoberta'; cmpUI.tab = 'geral'; cmpUI.busy = true; const used = new Set(), total = n * 5; let gi = 0;
+  try { for (const st of CMP_STAGES5) for (let k = 0; k < n; k++) { if (!o.quiet) toast(`Montando as artes… ${gi + 1}/${total}`); const q = cmpNewPiece(c, st, k, cmpPickHead(c, st, k, used), gi++); c.pieces.push(q); await cmpBuildPiece(p, c, q); } } finally { cmpUI.busy = false; }
+  persist(); return {c, n, total};
+}
 async function cmpCreate() {
   const p = curProject(), name = $('cmN').value.trim(); if (!name) { toast('Dê um nome à campanha.'); return; }
   const n = Math.max(1, Math.min(10, +$('cmQ').value || 5)), ff = (document.querySelector('input[name=cmF]:checked') || {}).value || 'feed45';
-  const c = {id: uid('cm'), name, objective: $('cmO').value, budget: 0, channel: 'Meta Ads', status: 'Rascunho', period: '', audience: ((p.pre.icps[0] || {}).name || ''), feedFmt: ff, layout: 'auto', align: 'left', bank: cmpDraftBank(p, n), test: {macro: '', micro: '', format: '', notes: ''}, notes: [], landings: [], pieces: [], created: new Date().toISOString()};
-  c.test = {macro: `Teste de ângulo: dentro de cada fase, compare os ${n} anúncios (headlines de tipos diferentes: dor, dúvida, desejo, urgência oculta), mesmo público e mesmo orçamento. (sugestão, edite)`, micro: 'Com o ângulo vencedor de cada fase, troque uma coisa por vez: imagem, cor ou CTA, usando a faixa de variações.', format: 'Compare feed, vertical e horizontal do mesmo anúncio para ver qual medida rende mais.', notes: ''};
-  p.campaigns.push(c); closeModal(); cmpUI.id = c.id; cmpUI.phase = 'descoberta'; cmpUI.tab = 'geral'; cmpUI.busy = true; const used = new Set(), total = n * 5; let gi = 0;
-  try { for (const st of CMP_STAGES5) for (let k = 0; k < n; k++) { toast(`Montando as artes… ${gi + 1}/${total}`); const q = cmpNewPiece(c, st, k, cmpPickHead(c, st, k, used), gi++); c.pieces.push(q); await cmpBuildPiece(p, c, q); } } finally { cmpUI.busy = false; }
-  persist(); cmpRender(); toast(`Campanha criada: ${total} anúncios, ${total * 3} artes. Troque o que quiser na faixa de variações.`);
+  closeModal(); const r = await cmpCreateRun(p, {name, objective: $('cmO').value, n, ff});
+  cmpRender(); toast(`Campanha criada: ${r.total} anúncios, ${r.total * 3} artes. Troque o que quiser na faixa de variações.`);
 }
 
 /* ---------- variações em um clique ---------- */
@@ -23675,6 +23682,8 @@ function projIcps(p) {
 }
 
 /* ---------- tela ---------- */
+/* com a ficha completa carregada, o botão abre o novo fluxo (documento → ficha); sem ela, o leitor antigo */
+function docOpenAny() { if (typeof fdOpen === 'function') fdOpen(); else docOpen(); }
 function docOpen() {
   const p = curProject(); if (!p) { toast('Crie ou escolha um projeto primeiro.'); return; }
   docUI.K = null; docUI.text = ''; docUI.name = ''; docUI.via = '';
@@ -23714,7 +23723,7 @@ function docReview() {
     ${K.icps.length ? `<h4>Públicos</h4><div class="list">${K.icps.slice(0, 6).map(x => `<div class="list-item"><div><strong>${esc(x.name)}</strong><small>${docLines(x.pains).length} dores · ${docLines(x.doubts).length} dúvidas · ${docLines(x.desires).length} desejos · ${docLines(x.hidden).length} urgências</small></div></div>`).join('')}</div>` : ''}
     ${fld.length ? `<h4>Campos reconhecidos</h4><div class="list">${fld.map(x => `<div class="list-item"><div><strong>${x[0]}</strong><small>${esc(String(x[1]).slice(0, 160))}</small></div></div>`).join('')}</div>` : ''}
     <label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" ${docUI.opt.banks ? 'checked' : ''} onchange="docUI.opt.banks=this.checked"> Também acrescentar às campanhas que já existem (bancos de dores, dúvidas, desejos e urgências). Peças prontas não mudam.</label>
-    <div class="modal-actions"><button class="btn" onclick="docOpen()">← Voltar</button><button class="btn dark" onclick="docConfirm()">Aplicar ao projeto</button></div>`);
+    <div class="modal-actions"><button class="btn" onclick="docOpenAny()">← Voltar</button><button class="btn dark" onclick="docConfirm()">Aplicar ao projeto</button></div>`);
   $('modalBox').classList.add('wide');
 }
 function docConfirm() {
@@ -23729,7 +23738,7 @@ function docConfirm() {
 function docStrip(p) {
   const ic = (p.pre && p.pre.icps || []).length, pr = (p.products || []).length, d = (p.brief || {}).doc, lg = ((p.design || {}).brand || {}).logos || [];
   const empty = !ic && !pr && !String((p.brief || {}).audience || '').trim();
-  return `<div class="doc-strip ${empty ? 'warn' : ''}"><span><b>Projeto: ${esc(p.name)}</b> · ${ic} público(s) · ${pr} produto(s)/serviço(s) · ${lg.length} logo(s)${d && d.name ? ' · documento: ' + esc(d.name) : ''}</span><span class="doc-strip-act">${empty ? 'As peças estão sem informações do projeto. ' : ''}<button class="btn sm ${empty ? 'dark' : ''}" onclick="docOpen()">📄 ${d && d.name ? 'Atualizar com outro documento' : 'Subir o documento do projeto'}</button></span></div>`;
+  return `<div class="doc-strip ${empty ? 'warn' : ''}"><span><b>Projeto: ${esc(p.name)}</b> · ${ic} público(s) · ${pr} produto(s)/serviço(s) · ${lg.length} logo(s)${d && d.name ? ' · documento: ' + esc(d.name) : ''}</span><span class="doc-strip-act">${empty ? 'As peças estão sem informações do projeto. ' : ''}<button class="btn sm ${empty ? 'dark' : ''}" onclick="docOpenAny()">📄 ${d && d.name ? 'Atualizar com outro documento' : 'Subir o documento do projeto'}</button></span></div>`;
 }
 const DOC_STRIP_PAGES = ['ofertas', 'design', 'stories', 'campaigns', 'carrosseis', 'videoLab', 'landings', 'feed', 'editorial'];
 function docInjectStrip(page) {
@@ -23739,7 +23748,7 @@ function docInjectStrip(page) {
 
 function docCard(p) {
   const d = (p.brief || {}).doc;
-  return `<div class="jp-panel" style="border-left:4px solid #111"><div class="section-row"><div><h3 style="margin:0">📄 Documento do projeto</h3><p class="sub" style="margin:2px 0 0">Suba o briefing completo (Word, PDF, texto). O Studio reconhece produtos, públicos, dores, dúvidas, desejos, urgências, tom de voz e cores, e leva para o projeto e para <b>todas as peças</b>, sem apagar o que você já fez.${d && d.name ? ' Último: <b>' + esc(d.name) + '</b>.' : ''}</p></div><button class="btn dark" onclick="docOpen()">${d && d.name ? 'Subir outro documento' : 'Subir o documento'}</button></div></div>`;
+  return `<div class="jp-panel" style="border-left:4px solid #111"><div class="section-row"><div><h3 style="margin:0">📄 Documento do projeto</h3><p class="sub" style="margin:2px 0 0">Suba o briefing completo (Word, PDF, texto). O Studio reconhece produtos, públicos, dores, dúvidas, desejos, urgências, tom de voz e cores, e leva para o projeto e para <b>todas as peças</b>, sem apagar o que você já fez.${d && d.name ? ' Último: <b>' + esc(d.name) + '</b>.' : ''}</p></div><button class="btn dark" onclick="docOpenAny()">${d && d.name ? 'Subir outro documento' : 'Subir o documento'}</button></div></div>`;
 }
 
 </script>
@@ -27525,6 +27534,10 @@ function xmBuild(sheets) {
   f('xl/workbook.xml', `${H}<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((s, i) => `<sheet name="${xmX(String(s.name).replace(/[\\/?*\[\]:]/g, ' ').slice(0, 31))}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets></workbook>`);
   f('xl/_rels/workbook.xml.rels', `${H}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`);
   f('xl/styles.xml', XM_STYLES); sheets.forEach((s, i) => f(`xl/worksheets/sheet${i + 1}.xml`, xmSheetXml(s, i === 0)));
+  return xmZip(files, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+}
+function xmZip(files, mime) {
+  const enc = new TextEncoder();
   const chunks = [], central = []; let off = 0;
   files.forEach(fl => {
     const name = enc.encode(fl.name), crc = xmCrc(fl.data), h = new DataView(new ArrayBuffer(30));
@@ -27536,7 +27549,7 @@ function xmBuild(sheets) {
   });
   const csize = central.reduce((a, b) => a + b.length, 0), e = new DataView(new ArrayBuffer(22));
   e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, csize, true); e.setUint32(16, off, true);
-  return new Blob([...chunks, ...central, new Uint8Array(e.buffer)], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  return new Blob([...chunks, ...central, new Uint8Array(e.buffer)], {type: mime || 'application/zip'});
 }
 
 </script>
@@ -27669,8 +27682,8 @@ function fichaHTML(p) {
   fpSt(p); const secs = BF_SECTIONS, b = typeof bfStore === 'function' ? bfStore(p) : {};
   const bar = `<div class="panel"><div class="section-row"><div><h3 style="margin:0">📋 Ficha completa do projeto</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">O modelo com todas as perguntas que o projeto precisa. Responda aqui, mande o link ao cliente ou use a planilha. Depois clique em <b>Aplicar ao projeto</b>: produtos e serviços, marca, materiais, voz e briefing já ficam prontos para seguir.</p></div></div>
     <div class="prog" style="height:8px;background:#e6e6ea;border-radius:99px;overflow:hidden;margin:12px 0 4px"><i id="fpBar" style="display:block;height:100%;background:#111;width:0"></i></div><div class="row-gap" style="justify-content:space-between;flex-wrap:wrap"><small class="muted" id="fpProgT"></small><small class="muted" id="fpMiss"></small></div>
-    <div class="row-gap" style="flex-wrap:wrap;margin-top:12px"><button class="btn dark" onclick="fpApply(false)">✔ Aplicar ao projeto</button><button class="btn dark" onclick="fpApply(true)" title="Aplica e a IA monta o pré-projeto com as respostas">✦ Aplicar e gerar o pré-projeto</button>${b.t ? '<button class="btn" onclick="fpPull()">↧ Trazer as respostas do cliente</button>' : ''}</div>
-    <div class="row-gap" style="flex-wrap:wrap;margin-top:8px"><button class="btn sm" onclick="fpXlsx(false)">⬇ Template em branco (.xlsx)</button><button class="btn sm" onclick="fpXlsx(true)">⬇ Ficha preenchida (.xlsx)</button><button class="btn sm" onclick="fpPrint(false)">🖨 Template para imprimir (PDF)</button><button class="btn sm" onclick="fpPrint(true)">🖨 Ficha preenchida (PDF)</button><label class="btn sm" style="cursor:pointer">⬆ Importar planilha preenchida<input type="file" accept=".xlsx" hidden onchange="if(this.files[0])fpImportFile(this.files[0]);this.value=''"></label><button class="btn sm" onclick="fpClear()">Limpar respostas</button></div></div>
+    <div class="row-gap" style="flex-wrap:wrap;margin-top:12px"><button class="btn" onclick="fdOpen('cur')">⬆ Subir documento do projeto</button><button class="btn dark" onclick="fpApply(false)">✔ Aplicar ao projeto</button><button class="btn dark" onclick="fpApply(true)" title="Aplica e a IA monta o pré-projeto com as respostas">✦ Aplicar e gerar o pré-projeto</button>${b.t ? '<button class="btn" onclick="fpPull()">↧ Trazer as respostas do cliente</button>' : ''}</div>
+    <div class="row-gap" style="flex-wrap:wrap;margin-top:8px"><button class="btn sm" onclick="fpXlsx(false)">⬇ Template em branco (.xlsx)</button><button class="btn sm" onclick="fpXlsx(true)">⬇ Ficha preenchida (.xlsx)</button><button class="btn sm" onclick="fdDownload('docx',false)">⬇ Template em Word (.docx)</button><button class="btn sm" onclick="fdDownload('md',false)">⬇ Template em Markdown</button><button class="btn sm" onclick="fpPrint(false)">🖨 Template para imprimir (PDF)</button><button class="btn sm" onclick="fpPrint(true)">🖨 Ficha preenchida (PDF)</button><label class="btn sm" style="cursor:pointer">⬆ Importar planilha preenchida<input type="file" accept=".xlsx" hidden onchange="if(this.files[0])fpImportFile(this.files[0]);this.value=''"></label><button class="btn sm" onclick="fpClear()">Limpar respostas</button></div></div>
     <details class="fp-sec" style="margin-top:12px"><summary><span class="fp-n">↗</span><b>Mandar para o cliente preencher (link)</b><span class="fp-st">${b.t ? 'link criado' : 'sem link'}</span></summary><div class="fp-body">${typeof briefingPanel === 'function' ? briefingPanel(p) : ''}</div></details>`;
   return `${bar}<div style="margin-top:12px">${secs.map((s, i) => s.files ? fpFilesHTML() : fpSecHTML(s, i)).join('')}</div>`;
 }
@@ -27778,6 +27791,331 @@ function fpCreate() {
 const FP_STYLE = `.fp-sec{border:1px solid #e6e6ea;border-radius:12px;background:#fff;margin:8px 0}.fp-sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px}.fp-sec>summary::-webkit-details-marker{display:none}
 .fp-n{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#111;color:#fff;font-size:12px;flex:none}.fp-st{margin-left:auto;font-size:12px;color:#777}.fp-st.ok{color:#176b30;font-weight:700}.fp-body{padding:2px 14px 14px;border-top:1px solid #eee}`;
 (function () { if (typeof document === 'undefined' || document.getElementById('fpStyle')) return; const s = document.createElement('style'); s.id = 'fpStyle'; s.textContent = FP_STYLE; document.head.appendChild(s); })();
+
+</script>
+<script>
+/* Subir o documento do projeto → Ficha completa.
+   Lê Word (.docx), PDF, texto, Markdown, HTML, RTF, CSV e JSON. Três leitores, do mais exato ao mais livre:
+   1) pelo formato do TEMPLATE da ficha (pergunta → resposta; ☑ nas escolhas) — baixe o template em Word ou Markdown, preencha e suba;
+   2) com IA ligada, a IA lê um documento livre e preenche as perguntas (só com o que está escrito);
+   3) o leitor de seções do Studio (Produtos, Público, Dores, Tom de voz…), que já existia.
+   O que o documento trouxer entra na ficha SEM apagar o que já estava respondido (a não ser que você escolha substituir). */
+const FD = {text: '', name: '', res: null, target: 'cur', newName: '', replace: false, icp: true};
+const fdNorm = s => String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\*|_{2,}/g, '').replace(/[^a-z0-9]+/g, '');
+const fdOpts = f => (Array.isArray(f[3]) ? f[3] : f[4]) || [];
+const fdSecs = () => BF_SECTIONS.filter(s => !s.files);
+
+/* ---------- template: linhas → Markdown / Word ---------- */
+function fdTplLines(a, blank) {
+  a = a || {}; const L = [];
+  L.push(['h1', 'Ficha completa do projeto'], ['p', 'Como preencher: escreva a resposta logo abaixo de cada pergunta. Nas escolhas, troque ☐ por ☑ (e ○ por ◉). Não mude o texto das perguntas nem dos títulos. Escreva só o que for verdadeiro; o que não souber, deixe em branco. * = obrigatório.']);
+  BF_SECTIONS.forEach((s, i) => {
+    L.push(['h2', `${i + 1} · ${s.t}`]); if (s.d) L.push(['p', s.d]);
+    if (s.files) { L.push(['p', 'Fotos e arquivos não vão neste documento: envie pelo link do cliente ou pela Biblioteca de imagens do Studio.']); return; }
+    const n = s.repeat ? (blank ? Math.min(3, s.repeat) : Math.max(1, (a[s.k] || []).length)) : 1;
+    for (let k = 0; k < n; k++) {
+      if (s.repeat) L.push(['h3', `${s.item} ${k + 1}`]);
+      const src = s.repeat ? ((a[s.k] || [])[k] || {}) : (a[s.k] || {});
+      s.f.forEach(f => {
+        L.push(['q', f[1] + (f[3] === 1 ? ' *' : '')]); const o = fdOpts(f), v = src[f[0]];
+        if (f[2] === 'checks') o.forEach(x => L.push(['o', ((Array.isArray(v) && v.includes(x)) ? '☑ ' : '☐ ') + x]));
+        else if (f[2] === 'select') o.forEach(x => L.push(['o', (v === x ? '◉ ' : '○ ') + x]));
+        else { const t = FP_CELL(v); (t ? t.split('\n') : ['']).forEach(x => L.push(['a', x])); }
+      });
+    }
+    if (s.repeat && blank) L.push(['p', `Precisa de mais? Copie o bloco "${s.item}" quantas vezes quiser (até ${s.repeat}).`]);
+  });
+  return L;
+}
+const fdTplMd = (a, blank) => fdTplLines(a, blank).map(([t, x]) => t === 'h1' ? '# ' + x : t === 'h2' ? '\n## ' + x : t === 'h3' ? '\n### ' + x : t === 'q' ? '\n**' + x + '**' : x).join('\n');
+function fdDocx(a, blank) {
+  const E = s => String(s == null ? '' : s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const ST = {h1: {b: 1, sz: 40, after: 120}, h2: {b: 1, sz: 30, before: 320, after: 80, color: 'E8590C'}, h3: {b: 1, sz: 26, before: 200, after: 60}, p: {sz: 20, color: '5D6470', after: 80}, q: {b: 1, sz: 22, before: 160, after: 40}, o: {sz: 22}, a: {sz: 22, after: 20}};
+  const para = ([t, x]) => { const s = ST[t] || {}; return `<w:p><w:pPr><w:spacing w:before="${s.before || 0}" w:after="${s.after || 0}"/></w:pPr><w:r><w:rPr>${s.b ? '<w:b/>' : ''}${s.color ? `<w:color w:val="${s.color}"/>` : ''}<w:sz w:val="${s.sz || 22}"/></w:rPr><w:t xml:space="preserve">${E(x)}</w:t></w:r></w:p>`; };
+  const H = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', enc = new TextEncoder(), f = (name, text) => ({name, data: enc.encode(text)});
+  const doc = `${H}<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${fdTplLines(a, blank).map(para).join('')}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+  return xmZip([f('[Content_Types].xml', `${H}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`),
+    f('_rels/.rels', `${H}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`), f('word/document.xml', doc)], 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+}
+function fdDownload(kind, filled) {
+  const p = curProject(), a = filled && p ? fpA() : {}, nm = 'ficha-' + (p ? slug(p.name) : 'projeto') + (filled ? '' : '-template');
+  if (kind === 'docx') download(nm + '.docx', fdDocx(a, !filled), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'); else download(nm + '.md', fdTplMd(a, !filled), 'text/markdown');
+}
+
+/* ---------- leitor 1: pelo formato do template ---------- */
+const fdPlaceholder = l => /^[_\-–—.…\s]{3,}$/.test(l) || /^\((escreva|responda|preencha)[^)]*\)$/i.test(l) || /^precisa de mais\?/i.test(l);
+function fdConv(f, buf) {
+  let lines = buf.map(x => x.replace(/^[-•*]\s+/, '')).filter((x, i, a) => !fdPlaceholder(x)); while (lines.length && !lines[0].trim()) lines.shift(); while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+  const o = fdOpts(f), SEL = /^(☑|☒|✔|✓|◉|●|\[[xX✓]\]|\([xX]\)|[xX]\s)\s*(.*)$/, UN = /^(☐|○|◯|\[\s?\]|\(\s?\))\s*(.*)$/;
+  if (f[2] === 'checks') { const out = []; lines.forEach(l => { if (UN.test(l)) return; const m = SEL.exec(l), tx = m ? m[2] : l; let hit = o.find(x => fdNorm(x) === fdNorm(tx)); const parts = hit ? [tx] : tx.split(/;/); parts.forEach(pt => { const op = o.find(x => fdNorm(x) === fdNorm(pt)); if (op && !out.includes(op)) out.push(op); }); }); return out; }
+  if (f[2] === 'select') { for (const l of lines) { if (UN.test(l)) continue; const m = SEL.exec(l), tx = m ? m[2] : l, op = o.find(x => fdNorm(x) === fdNorm(tx)); if (op) return op; } return ''; }
+  const t = lines.join(f[2] === 'area' ? '\n' : ' ').replace(/\n{3,}/g, '\n\n').trim(); return t.slice(0, 4000);
+}
+function fdParse(text) {
+  const idx = fdSecs().map(s => ({s, key: fdNorm(s.t), labels: s.f.map(f => ({f, text: f[1], key: fdNorm(f[1].replace(/\s*\*$/, ''))}))})), ans = {}, hit = {}; let cur = null, item = 0, fld = null, buf = [], count = 0;
+  const flush = () => { if (cur && fld) { const v = fdConv(fld.f, buf); if (fpFilled(v)) { if (cur.s.repeat) { if (!Array.isArray(ans[cur.s.k])) ans[cur.s.k] = []; (ans[cur.s.k][item] = ans[cur.s.k][item] || {})[fld.f[0]] = v; } else (ans[cur.s.k] = ans[cur.s.k] || {})[fld.f[0]] = v; count++; hit[cur.s.k] = (hit[cur.s.k] || 0) + 1; } } fld = null; buf = []; };
+  for (const raw of String(text || '').replace(/\r/g, '').replace(/ /g, ' ').split('\n')) {
+    const t = raw.trim().replace(/^[#>\s]+/, '').replace(/\*\*|__/g, '').trim(); if (!t) { if (fld) buf.push(''); continue; }
+    const hk = fdNorm(t.replace(/^\d+\s*[·.\-)]\s*/, '')), sh = idx.find(x => x.key === hk); if (sh) { flush(); cur = sh; item = 0; continue; }
+    if (BF_SECTIONS.some(x => x.files && fdNorm(x.t) === hk)) { flush(); cur = null; continue; }
+    if (cur && cur.s.repeat) { const m = t.match(/^(.*?)\s*(\d+)$/); if (m && fdNorm(m[1]) === fdNorm(cur.s.item)) { flush(); item = Math.max(0, Math.min(cur.s.repeat - 1, +m[2] - 1)); continue; } }
+    const k = fdNorm(t.replace(/\s*\*$/, '')); let lb = cur && cur.labels.find(l => l.key === k), inline = '';
+    if (!lb && cur) { const l2 = cur.labels.find(l => t.length > l.text.length && fdNorm(t.slice(0, l.text.length)) === l.key && /^\s*[:\-–→]/.test(t.slice(l.text.length))); if (l2) { lb = l2; inline = t.slice(l2.text.length).replace(/^\s*[:\-–→]\s*/, ''); } }
+    if (!lb && !cur) { const g = idx.flatMap(x => x.labels.filter(l => l.key === k).map(l => ({x, l}))); if (g.length === 1) { flush(); cur = g[0].x; lb = g[0].l; } }
+    if (lb) { flush(); fld = lb; buf = inline ? [inline] : []; continue; }
+    if (/^\s*(#{1,6}\s|\*\*[^*]+\*\*\s*$)/.test(raw)) { flush(); continue; }   // título ou pergunta em negrito que não conheço: não entra na resposta anterior
+    if (fld) buf.push(raw.trim().replace(/^[#>\s]+/, '').replace(/\*\*|__/g, ''));
+  }
+  flush(); return {answers: ans, count, hit};
+}
+
+/* ---------- leitor 2: IA (só com IA ligada) ---------- */
+function fdSanitize(j) {
+  const out = {}, S = v => (Array.isArray(v) ? v.join('\n') : String(v == null ? '' : v)).trim().slice(0, 4000);
+  const conv = (f, v) => { if (f[2] === 'checks') { const arr = Array.isArray(v) ? v : String(v || '').split(/;|\n/); return arr.map(x => fdOpts(f).find(o => fdNorm(o) === fdNorm(x))).filter((x, i, a) => x && a.indexOf(x) === i); } if (f[2] === 'select') return fdOpts(f).find(o => fdNorm(o) === fdNorm(v)) || ''; return S(v); };
+  j = j && typeof j === 'object' ? j : {};
+  fdSecs().forEach(s => {
+    if (s.repeat) { const list = (Array.isArray(j[s.k]) ? j[s.k] : []).slice(0, s.repeat).map(it => { const o = {}; s.f.forEach(f => { const v = conv(f, (it || {})[f[0]]); if (fpFilled(v)) o[f[0]] = v; }); return o; }).filter(o => Object.keys(o).length); if (list.length) out[s.k] = list; }
+    else { const o = {}, src = j[s.k] && typeof j[s.k] === 'object' ? j[s.k] : {}; s.f.forEach(f => { const v = conv(f, src[f[0]]); if (fpFilled(v)) o[f[0]] = v; }); if (Object.keys(o).length) out[s.k] = o; }
+  });
+  return out;
+}
+async function fdAI(text) {
+  const schema = fdSecs().map(s => `${s.k}${s.repeat ? ' (LISTA de até ' + s.repeat + ' itens)' : ''}: {${s.f.map(f => f[0] + (f[2] === 'checks' ? ' [lista; só destes: ' + fdOpts(f).join(' | ') + ']' : f[2] === 'select' ? ' [um destes: ' + fdOpts(f).join(' | ') + ']' : '')).join(', ')}}`).join('\n');
+  const j = await aiJSON('Você lê um documento de briefing e preenche um formulário. Responda SÓ em JSON com as chaves do esquema. Use SOMENTE o que está escrito no documento: não invente nada, não complete preço, prazo, garantia, número ou resultado. O que não estiver no documento fica de fora. Campos de texto: português do Brasil, no jeito do documento. Campos "um destes"/"só destes" aceitam apenas as opções listadas.', 'ESQUEMA:\n' + schema + '\n\nDOCUMENTO:\n' + String(text).slice(0, 26000));
+  return fdSanitize(j);
+}
+
+/* ---------- leitor 3: leitor de seções que já existia (docParse) → perguntas da ficha ---------- */
+function fdFromK(K) {
+  const a = {}, put = (path, v) => { v = Array.isArray(v) ? v.join('\n') : String(v == null ? '' : v).trim(); if (v) fpPutIn(a, path, v.slice(0, 4000)); }, L = x => (Array.isArray(x) ? x : String(x || '').split('\n')).map(t => String(t).trim()).filter(Boolean);
+  put('empresa.nome', K.client); put('empresa.regras', K.rules); put('publico.quem', K.audience || (K.icps || []).map(x => x.name + (x.profile ? ': ' + x.profile : '')).join('\n'));
+  put('publico.problemas', K.problem || (K.icps || []).flatMap(x => L(x.pains)).join('\n')); put('publico.perguntas', (K.icps || []).flatMap(x => L(x.doubts)).join('\n')); put('publico.desejos', (K.icps || []).flatMap(x => L(x.desires)).join('\n')); put('publico.ocultas', (K.icps || []).flatMap(x => L(x.hidden)).join('\n'));
+  put('publico.situacoes', (K.icps || []).map(x => x.situation).filter(Boolean).join('\n'));
+  put('marketing.metas', K.goal); put('marketing.canais', K.channels); put('marketing.orcamento', K.budget); put('marketing.prazo', K.deadline); put('identidade.usa', K.vocab); put('identidade.naoUsa', K.antivocab);
+  put('materiais.marca', [K.positioning, K.visual, K.palette || ((K.colors || []).length ? 'Cores: ' + K.colors.join(' · ') : ''), K.fonts ? 'Fontes: ' + K.fonts : ''].filter(Boolean).join('\n'));
+  const prods = (K.products || []).slice(0, 8).map(x => { const o = {}, s = (k, v) => { v = Array.isArray(v) ? v.join('\n') : String(v || '').trim(); if (v) o[k] = v.slice(0, 4000); }; s('nome', x.name); s('oque', x.summary); s('paraquem', x.audience); s('preco', x.price); s('diferencial', x.benefits); s('incluso', x.features); s('objecoes', x.objections); s('provas', x.proofs); s('link', /^https?:\/\//i.test(x.checkout || '') ? x.checkout : ''); s('prazo', x.prazo); return o; }).filter(o => o.nome); if (prods.length) a.produtos = prods;
+  const comp = L(K.competitors).slice(0, 8).map(t => ({nome: t.replace(/^[-•*]\s*/, '').slice(0, 120)})); if (comp.length) a.concorrencia = comp;
+  return a;
+}
+const fdCountAnswers = a => { let n = 0; const walk = v => { if (Array.isArray(v)) { if (v.length && typeof v[0] !== 'object') n++; else v.forEach(walk); } else if (v && typeof v === 'object') Object.values(v).forEach(walk); else if (fpFilled(v)) n++; }; walk(a); return n; };
+
+/* ---------- juntar sem apagar: só preenche o que está vazio ---------- */
+function fdFillEmpty(loc, inc) {
+  if (Array.isArray(inc)) {
+    if (!inc.length) return loc; if (typeof inc[0] !== 'object') return Array.isArray(loc) && loc.length ? loc : inc;
+    const base = Array.isArray(loc) ? loc : [], has = base.filter(x => x && Object.keys(x).length), key = x => fdNorm((x || {}).nome || (x || {}).who || '');
+    if (!has.length) return inc; const out = base.slice(), seen = new Set(has.map(key)); inc.forEach(x => { if (!seen.has(key(x))) { out.push(x); seen.add(key(x)); } }); return out;
+  }
+  if (inc && typeof inc === 'object') { const o = loc && typeof loc === 'object' && !Array.isArray(loc) ? loc : {}; Object.keys(inc).forEach(k => { o[k] = fdFillEmpty(o[k], inc[k]); }); return o; }
+  return fpFilled(loc) ? loc : inc;
+}
+
+/* ---------- tela: subir e conferir ---------- */
+function fdOpen(target) {
+  const p = curProject(); FD.text = ''; FD.name = ''; FD.res = null; FD.target = target || (p ? 'cur' : 'new'); FD.newName = ''; FD.replace = false;
+  showModal('Subir o documento do projeto', `<p style="margin-top:0;font-size:13.5px">Suba o documento com <b>todas as informações do projeto</b> (Word, PDF, texto, Markdown, HTML). O Studio preenche a <b>Ficha completa</b> e, depois, você pode montar o resto do projeto até o site. <b>Nada que já está respondido é apagado.</b></p>
+    <div class="row-gap" style="flex-wrap:wrap;margin:8px 0"><small class="muted">Sem documento? Baixe o template e preencha:</small><button class="btn sm" onclick="fdDownload('docx',false)">Word (.docx)</button><button class="btn sm" onclick="fdDownload('md',false)">Markdown (.md)</button><button class="btn sm" onclick="fpXlsx(false)" ${p ? '' : 'disabled'}>Planilha (.xlsx)</button></div>
+    <input type="file" id="fdFile" accept=".docx,.pdf,.txt,.md,.markdown,.html,.htm,.rtf,.csv,.json" onchange="fdPick(this)">
+    <div class="field" style="margin-top:10px"><label>Ou cole o texto do documento</label><textarea id="fdPaste" rows="6" placeholder="Cole aqui o briefing..."></textarea></div>
+    <div class="id-chips" style="margin:6px 0">${p ? `<label class="pm-radio"><input type="radio" name="fdT" value="cur" ${FD.target === 'cur' ? 'checked' : ''} onchange="FD.target='cur'"> Neste projeto: <b>${esc(p.name)}</b></label>` : ''}<label class="pm-radio"><input type="radio" name="fdT" value="new" ${FD.target === 'new' ? 'checked' : ''} onchange="FD.target='new'"> Criar um projeto novo com este documento</label></div>
+    <div id="fdMsg" class="muted" style="font-size:13px;margin:6px 0"></div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="fdRead()">Ler o documento</button></div>`);
+  $('modalBox').classList.add('wide');
+}
+async function fdPick(inp) {
+  const f = inp.files[0]; if (!f) return; if (f.size > 12e6) { $('fdMsg').textContent = 'Arquivo grande demais (máx. 12 MB).'; return; }
+  $('fdMsg').textContent = 'Lendo ' + f.name + '…';
+  try { FD.text = await docReadFile(f); FD.name = f.name; $('fdMsg').textContent = `Li ${FD.text.length.toLocaleString('pt-BR')} caracteres de ${f.name}. Clique em “Ler o documento”.`; $('fdPaste').value = FD.text.slice(0, 4000); } catch (e) { FD.text = ''; $('fdMsg').textContent = e.message; }
+}
+async function fdRead() {
+  const pasted = ($('fdPaste') || {}).value || '', text = FD.text && (!pasted || pasted === FD.text.slice(0, 4000)) ? FD.text : pasted;
+  if (String(text).trim().length < 40) { $('fdMsg').textContent = 'Escolha um arquivo ou cole o texto (pelo menos algumas linhas).'; return; }
+  FD.text = text; if (!FD.name) FD.name = 'texto colado'; $('fdMsg').textContent = 'Lendo e reconhecendo…';
+  const T = fdParse(text), K = docParse(text); let A = null, via = [], err = '';
+  if (T.count) via.push('formato do template');
+  if (typeof aiReady === 'function' && aiReady()) { try { A = await fdAI(text); via.push('IA'); } catch (e) { err = e.message; } }
+  const KA = fdFromK(K); via.push('leitor de seções');
+  let ans = fpMerge(fpMerge({}, KA), A || {}); ans = fpMerge(ans, T.answers);
+  FD.res = {T, A, K, ans, via, err}; fdReview();
+}
+function fdReview() {
+  const r = FD.res, p = curProject(), s = fdSecs(), n = fdCountAnswers(r.ans), prods = (r.ans.produtos || []).map(x => x.nome).filter(Boolean);
+  const rows = s.map(sec => { const v = r.ans[sec.k]; const c = sec.repeat ? (Array.isArray(v) ? v.length : 0) : (v ? Object.keys(v).length : 0); return c ? `<div class="list-item"><div><strong>${esc(sec.t)}</strong><small>${sec.repeat ? c + ' item(ns)' : c + ' resposta(s)'}</small></div></div>` : ''; }).join('');
+  showModal('O que o Studio entendeu', `<p style="margin-top:0">Reconheci <b>${n}</b> resposta(s) por: <b>${esc(r.via.join(' + '))}</b>.${r.err ? ` <span class="muted">(A IA falhou: ${esc(r.err)})</span>` : ''}</p>
+    ${n < 3 ? '<div class="note" style="background:#fff8e6;border:1px solid #f0dca8;border-radius:10px;padding:8px 12px;margin:8px 0">Reconheci pouco. Para o Studio ler tudo certinho, use o <b>template</b> (Word ou Markdown) ou ligue a IA em Configurações → Integrações.</div>' : ''}
+    ${rows ? `<h4>Por parte da ficha</h4><div class="list">${rows}</div>` : ''}${prods.length ? `<h4>Produtos e serviços encontrados</h4><div class="list">${prods.map(x => `<div class="list-item"><div><strong>${esc(x)}</strong></div></div>`).join('')}</div>` : ''}
+    <label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" ${r.K.icps.length ? (FD.icp ? 'checked' : '') : 'disabled'} onchange="FD.icp=this.checked"> Também levar os públicos (ICP), dores, dúvidas e desejos do documento para o pré-projeto${r.K.icps.length ? ` (${r.K.icps.length} encontrado(s))` : ' (não encontrei)'}</label>
+    ${FD.target === 'cur' && p ? `<label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" onchange="FD.replace=this.checked"> Substituir o que já está na ficha pelo que o documento trouxe (padrão: só preencher o que está vazio)</label>` : `<div class="field" style="margin-top:8px"><label>Nome do projeto novo</label><input value="${esc(FD.newName || (r.ans.empresa || {}).nome || FD.name.replace(/\.[a-z0-9]+$/i, ''))}" oninput="FD.newName=this.value"></div>`}
+    <div class="modal-actions" style="flex-wrap:wrap"><button class="btn" onclick="fdOpen(FD.target)">← Voltar</button><button class="btn" onclick="fdConfirm(false)">Levar para a ficha</button><button class="btn dark" onclick="fdConfirm(true)" title="Leva para a ficha e já monta o projeto até o site">✦ Levar e montar o projeto</button></div>`);
+  $('modalBox').classList.add('wide');
+}
+async function fdConfirm(build) {
+  const r = FD.res; if (!r) return; let p = curProject();
+  if (FD.target === 'new' || !p) {
+    const nm = (FD.newName || (r.ans.empresa || {}).nome || FD.name.replace(/\.[a-z0-9]+$/i, '') || 'Novo projeto').trim().slice(0, 80);
+    p = newProject(nm, 'Criado a partir de um documento', {category: 'Marketing'}); p.client = (r.ans.empresa || {}).nome || nm; state.projects.push(p); state.activeProjectId = p.id; if (typeof updateContextUI === 'function') updateContextUI();
+  }
+  const st = fpSt(p); st.answers = FD.replace && FD.target === 'cur' ? fpMerge(st.answers, r.ans) : fdFillEmpty(st.answers, r.ans); st.updatedAt = new Date().toISOString();
+  const br = p.brief || (p.brief = {}), doc = br.doc || (br.doc = {name: '', at: '', text: '', prev: {}}); doc.name = FD.name.slice(0, 120); doc.at = new Date().toISOString(); doc.text = String(FD.text).slice(0, 60000);
+  FD.icpDoc = FD.icp && r.K.icps.length ? r.K : null; persist(); closeModal(); FP.open = {}; setActiveProject(p.id);
+  if (build && typeof esAutoRun === 'function') { ui.tab = 'esteira'; go('project'); await esAutoRun({icpDoc: FD.icpDoc}); return; }
+  if (FD.icpDoc && typeof docApply === 'function') { try { docApply(p, FD.icpDoc, {banks: true}); persist(); } catch (e) { /* os públicos são um extra */ } }
+  ui.tab = 'ficha'; go('project'); toast('Documento levado para a ficha. Confira as respostas e clique em Aplicar ao projeto.');
+}
+
+</script>
+<script>
+/* Esteira do projeto: do documento até o site, em etapas que dá para corrigir, ampliar e refazer a qualquer momento.
+   "Gerar tudo que falta" completa SÓ o que ainda não existe, na ordem: base (ficha → marca, produtos, materiais, públicos) → pré-projeto (IA) → campanha de anúncios →
+   posts simples e stories → carrosséis → site. Tudo é montado com os fatos informados (nada é inventado; o que falta fica em branco ou [CONFIRMAR]). Nunca apaga nem sobrescreve.
+   Sem IA, o pré-projeto e o texto das páginas do site não são escritos (o resto nasce igual). Cada item criado é um item comum: edite nas telas de sempre. */
+const ES = {busy: false, rows: [], note: ''};
+const esAIOn = () => typeof aiReady === 'function' && aiReady();
+const esL = t => (Array.isArray(t) ? t : String(t == null ? '' : t).split('\n')).map(x => String(x).trim()).filter(Boolean);
+const esFirst = (t, n) => { const s = String(t || '').replace(/\s+/g, ' ').trim(), m = s.split(/(?<=[.!?])\s/)[0] || ''; return (m.length > n ? m.slice(0, n - 1).trim() + '…' : m); };
+const esClip = (t, n) => { t = String(t || '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n - 1).trim() + '…' : t; };
+const esSets = p => (p.design && p.design.sets) || [];
+
+/* ---------- situação de cada etapa (lida do projeto, sempre atual) ---------- */
+function esState(p) {
+  const a = fpSt(p).answers, secs = BF_SECTIONS.filter(s => !s.files), doneSecs = secs.filter(fpSecDone).length, essential = !!(((a.empresa || {}).nome) && (a.produtos || []).some(x => x && x.nome));
+  const prods = (p.products || []).length, idOk = !!(p.identity && (p.identity.values.length || p.identity.attitudes.length)), icps = ((p.pre && p.pre.icps) || []).length, preOk = !!(p.pre && p.pre.summary && p.pre.summary.blocks && p.pre.summary.blocks.length);
+  const camps = (p.campaigns || []), ads = camps.reduce((n, c) => n + (c.pieces || []).length, 0), posts = esSets(p).filter(x => /^Post · /.test(x.name || '')).length, stories = esSets(p).filter(x => /^Stories · /.test(x.name || '')).length, cars = (p.carousels || []).length, sites = (p.sites || []).length, pages = (p.landings || []).filter(l => l.siteId).length;
+  const st = (ok, part) => ok ? 'feito' : part ? 'parcial' : 'pendente';
+  return {
+    ficha: {s: st(essential, doneSecs > 0), t: `${doneSecs} de ${secs.length} partes respondidas${essential ? '' : ' · falta o nome da empresa e um produto'}`},
+    base: {s: st(prods > 0 && (idOk || !((a.identidade || {}).valores || []).length), doneSecs > 0), t: `${prods} produto(s) e serviço(s) · marca ${idOk ? 'definida' : 'ainda não definida'} · ${icps} público(s)`},
+    pre: {s: st(preOk, icps > 0), t: preOk ? 'diagnóstico, resumo e jornada prontos' : icps ? `${icps} público(s) com dores e desejos; falta o diagnóstico e a jornada` : 'ainda não gerado'},
+    camp: {s: st(camps.length > 0, false), t: camps.length ? `${camps.length} campanha(s) · ${ads} anúncio(s)` : 'nenhuma campanha ainda'},
+    org: {s: st(posts > 0 && stories > 0, posts > 0 || stories > 0), t: `${posts} post(s) simples · ${stories} quadro(s) de story`},
+    car: {s: st(cars > 0, false), t: `${cars} carrossel(is)`},
+    site: {s: st(sites > 0, false), t: sites ? `${sites} site(s) · ${pages} página(s)` : 'nenhum site ainda'}
+  };
+}
+const ES_DEF = [
+  ['ficha', 'Ficha e documento', 'Todas as respostas do projeto num lugar só: suba o documento, responda na tela, mande o link ao cliente ou use a planilha.'],
+  ['base', 'Base do projeto', 'Marca e arquétipo, produtos e serviços, materiais e públicos (dores, dúvidas e desejos) vindos da ficha.'],
+  ['pre', 'Pré-projeto', 'Diagnóstico, resumo, públicos e jornada. A IA escreve; você corrige em cada bloco.'],
+  ['camp', 'Anúncios', 'Campanha com as 5 fases da jornada de compra, já com as artes (feed, vertical e horizontal).'],
+  ['org', 'Posts simples e stories', 'Artes prontas a partir das dores, desejos e benefícios informados, já como rascunho em Publicação.'],
+  ['car', 'Carrosséis', 'Um carrossel por produto, com o que foi informado (benefícios e chamada final).'],
+  ['site', 'Site', 'Site de várias páginas (StoryBrand) com o BrandScript preenchido pelos fatos; com IA, as páginas são escritas.']
+];
+
+/* ---------- etapas: cada uma só cria o que falta ---------- */
+function esToK(a, icpDoc) {
+  const pub = a.publico || {}, K = icpDoc ? JSON.parse(JSON.stringify(icpDoc)) : docParse(''); K.products = []; K.client = K.client || '';
+  if (!(K.icps || []).length && ['quem', 'problemas', 'perguntas', 'desejos', 'ocultas', 'situacoes'].some(k => esL(pub[k]).length)) K.icps = [{name: esFirst(pub.quem, 60) || 'Cliente ideal', profile: String(pub.quem || ''), situation: String(pub.situacoes || ''), need: '', behavior: '', intent: '', pains: esL(pub.problemas).join('\n'), doubts: esL(pub.perguntas).join('\n'), desires: esL(pub.desejos).join('\n'), hidden: esL(pub.ocultas).join('\n')}];
+  return K;
+}
+const ES_RUN = {
+  async base(p, o) {
+    const a = fpSt(p).answers; if (!BF_SECTIONS.filter(s => !s.files).some(fpSecDone) && !o.icpDoc) return {s: 'pulado', note: 'a ficha está vazia'};
+    const x = bfApply(p, a); let icp = 0; try { const r = docApply(p, esToK(a, o.icpDoc), {banks: true}); icp = r.icpNew + r.icpUpd; } catch (e) { /* públicos são um extra */ }
+    persist(); return {s: 'feito', note: `${x.added} produto(s) novo(s), ${x.upd} atualizado(s)${x.ident ? ', marca definida' : ''}${icp ? ', ' + icp + ' público(s)' : ''}`};
+  },
+  async pre(p) {
+    if (!esAIOn()) return {s: 'pulado', note: 'precisa da IA (Configurações → Integrações). Os públicos da ficha já servem para a campanha'};
+    if (typeof preGenAll !== 'function') return {s: 'pulado', note: 'indisponível aqui'}; await preGenAll(false); return {s: 'feito', note: 'pré-projeto gerado (confira os blocos)'};
+  },
+  async camp(p) {
+    if ((p.campaigns || []).length) return {s: 'ja', note: 'já existe campanha'};
+    const r = await cmpCreateRun(p, {name: (p.client || p.name) + ' · campanha inicial', objective: 'Leads', n: 3, ff: 'feed45', quiet: true}); return {s: 'feito', note: `${r.total} anúncios (${r.total * 3} artes)`};
+  },
+  async org(p) {
+    const bank = cmpDraftBank(p, 6), prods = p.products || [], heads = []; const add = t => { t = esClip(t, 88); if (t && !heads.includes(t)) heads.push(t); };
+    const mk = cmpMakeHeads(bank, 8); mk.h.forEach(add); prods.forEach(x => (x.benefits || []).slice(0, 2).forEach(add)); if (!heads.length) return {s: 'pulado', note: 'faltam dores, desejos ou benefícios para escrever os títulos'};
+    const cta = (bank.c || [])[0] || 'Fale no WhatsApp', posts = [], frames = [], nP = Math.min(6, heads.length);
+    for (let i = 0; i < nP; i++) { const pr = prods.length ? prods[i % prods.length] : null, sub = pr ? esFirst(pr.summary, 190) : esFirst((p.brief || {}).offer, 190); posts.push({code: 'ES-P' + String(i + 1).padStart(2, '0'), n: 0, h: heads[i], s: sub, btn: cta, caption: [pr && pr.summary, pr && pr.checkout ? 'Saiba mais: ' + pr.checkout : ''].filter(Boolean).join('\n\n').slice(0, 2200), hashtags: '', fmt: '4:5', imgId: '', date: '', obs: ''}); }
+    for (let si = 0; si < Math.min(2, heads.length); si++) { const pr = prods.length ? prods[si % prods.length] : null, code = 'ES-S' + (si + 1), body = pr ? esFirst(((pr.benefits || [])[0] || pr.summary), 140) : esFirst((p.brief || {}).offer, 140);
+      frames.push({code, n: 1, h: esClip(heads[si], 66), s: '', btn: '-'}, {code, n: 2, h: esClip(pr ? pr.name : (p.client || p.name), 66), s: body, btn: '-'}, {code, n: 3, h: 'Vamos conversar?', s: '', btn: cta}); }
+    const base = {caption: '', hashtags: '', fmt: '9:16', imgId: '', date: '', obs: ''}, fp = posts.filter(it => !pmHaveSingle(p, it, false)), fs = frames.map(f => Object.assign({}, base, f, {btn: f.btn === '-' ? null : f.btn})).filter(it => !pmHaveSingle(p, it, true));
+    if (!fp.length && !fs.length) return {s: 'ja', note: 'já existem'}; if (fp.length) await pmBuildSingles(p, fp, {adLogo: true}, 'post1'); if (fs.length) await pmBuildSingles(p, fs, {adLogo: true}, 'story'); persist();
+    return {s: 'feito', note: `${fp.length} post(s) e ${fs.length} quadro(s) de story (rascunhos em Publicação)`};
+  },
+  async car(p) {
+    if ((p.carousels || []).length) return {s: 'ja', note: 'já existe carrossel'};
+    const made = [], o = {carLook: 'brand', carTpl: 'foto', carWhere: 'title', carStyle: ''};
+    (p.products || []).slice(0, 3).forEach((pr, k) => {
+      const mid = (pr.benefits || []).slice(0, 4).concat((pr.features || []).filter(f => !/^(Incluso|Prazo):/.test(f))).slice(0, 4); if (mid.length < 2) return;
+      const items = [{text: esClip(pr.name, 90), text2: esFirst(pr.summary, 180)}].concat(mid.map(t => ({text: esClip(t, 110), text2: ''})), [{text: 'Fale com a gente', text2: ''}]); const code = 'ES-C' + (k + 1);
+      try { made.push(pmBuildCarousel(p, Object.assign({code, name: esClip(pr.name, 60) + ' · o essencial', n: items.length, items, refs: [], idea: '', src: {code, day: '', order: 0, theme: '', type: '', tension: ''}}, pmPub(), {stage: 'topo', caption: pr.summary || '', cta: 'Fale com a gente'}), o)); } catch (e) { /* esse produto fica sem carrossel */ }
+    });
+    if (!made.length) return {s: 'pulado', note: 'cada produto precisa de pelo menos 2 benefícios ou características'}; p.carousels = made.concat(p.carousels).slice(0, 600); persist(); return {s: 'feito', note: `${made.length} carrossel(is)`};
+  },
+  async site(p) {
+    if ((p.sites || []).length) return {s: 'ja', note: 'já existe site'};
+    const r = await esSiteAuto(p); return {s: 'feito', note: r};
+  }
+};
+/* site: modelo pelo tipo dos produtos; BrandScript preenchido SÓ com os fatos informados; com IA, as páginas são escritas */
+async function esSiteAuto(p) {
+  const a = fpSt(p).answers, pub = a.publico || {}, icp = ((p.pre && p.pre.icps) || [])[0] || {}, prods = p.products || [], f = prods[0] || {}, types = prods.map(x => x.type);
+  const tpl = types.length && types.every(t => t === 'produto') ? 'produtos' : types.includes('curso') ? 'autoridade' : 'servicos', T = SITE_TPL[tpl], name = String(p.client || p.name).slice(0, 80);
+  const steps = (f.features || []).filter(x => !/^(Incluso|Prazo):/.test(x)), pains = esL(pub.problemas).length ? esL(pub.problemas) : esL(icp.pains), des = esL(pub.desejos).length ? esL(pub.desejos) : esL(icp.desires), hid = esL(pub.ocultas).length ? esL(pub.ocultas) : esL(icp.hidden);
+  const site = normalizeSites([{id: uid('st'), name, tpl, productId: f.id || '', brand: name, headerCta: 'Fale com a gente', brief: [(p.brief || {}).offer, ...prods.map(x => x.name + (x.summary ? ': ' + x.summary : ''))].filter(Boolean).join('\n').slice(0, 8000),
+    bs: {who: String(pub.quem || icp.profile || ''), wants: des[0] || '', external: pains.slice(0, 3).join('; '), step1: steps[0] || '', step2: steps[1] || '', step3: steps[2] || '', agreement: String(f.warranty || ''), direct: 'Fale com a gente', failure: hid[0] || '', success: des.slice(0, 2).join('; '), authority: (f.proofs || []).join('; ')}}])[0];
+  p.sites.push(site); const theme = lpTheme(p), pages = [];
+  T.pages.forEach(pg => { const l = normalizeLandings([{id: uid('lp'), name: name + ' — ' + pg.label, siteId: site.id, slug: pg.slug, navLabel: pg.label, type: 'generico', productId: f.id || '', product: f.id ? {nome: f.name, preco: f.price, publico: f.audience, checkout: f.checkout} : {}, theme, cta: 'Fale com a gente', blocks: pg.blocks.map(lpBlockNew), status: 'Rascunho'}])[0]; l.siteRole = pg.role; p.landings.push(l); pages.push(l); });
+  persist(); let note = `${T.label}: ${pages.length} páginas, BrandScript com os fatos informados (o que falta fica em branco)`;
+  if (esAIOn() && typeof siteGenPage === 'function' && siteBSText(site)) { try { for (const l of pages) { await siteGenPage(site, l); persist(); } note += '; páginas escritas com IA (revise os [CONFIRMAR])'; } catch (e) { note += '; a IA não conseguiu escrever as páginas (' + (e.message || e) + ')'; } }
+  else note += esAIOn() ? '; sem BrandScript suficiente para a IA escrever' : '; sem IA, as páginas ficam como esqueleto';
+  return note;
+}
+
+/* ---------- gerar tudo que falta (com painel de andamento) ---------- */
+const ES_ORDER = [['base', 'Base do projeto'], ['pre', 'Pré-projeto (IA)'], ['camp', 'Campanha de anúncios'], ['org', 'Posts simples e stories'], ['car', 'Carrosséis'], ['site', 'Site']];
+const ES_ICON = {espera: '○', rodando: '⏳', feito: '✔', ja: '✔', pulado: '⚠', erro: '✖'};
+function esPanel(done) {
+  showModal(done ? 'Projeto montado' : 'Montando o projeto…', `<p class="muted" style="margin-top:0;font-size:13px">${done ? 'Veja o que foi criado. Tudo continua editável: abra cada etapa para corrigir ou acrescentar.' : 'Isto leva alguns segundos. Não feche a página.'}</p><div class="list">${ES.rows.map(r => `<div class="list-item"><div><strong>${ES_ICON[r.s] || '○'} ${esc(r.label)}</strong><small>${esc(r.note || (r.s === 'rodando' ? 'em andamento…' : r.s === 'espera' ? 'na fila' : ''))}</small></div></div>`).join('')}</div>${done ? `<div class="modal-actions"><button class="btn dark" onclick="closeModal();esTab('esteira')">Ver a esteira</button></div>` : ''}`);
+}
+async function esAutoRun(o) {
+  o = o || {}; if (ES.busy) { toast('A esteira já está rodando.'); return; } const p = curProject(); if (!p) { toast('Abra um projeto.'); return; }
+  ES.busy = true; ES.rows = ES_ORDER.map(([k, label]) => ({k, label, s: 'espera', note: ''})); esPanel(false);
+  try {
+    for (const r of ES.rows) {
+      r.s = 'rodando'; if (r.k !== 'pre') esPanel(false);
+      try { const x = await ES_RUN[r.k](p, o); r.s = x.s; r.note = x.note; } catch (e) { r.s = 'erro'; r.note = (e && e.message) || String(e); }
+      if (r.k === 'pre') { /* a geração do pré-projeto usa o próprio painel */ }
+      esPanel(false);
+    }
+  } finally { ES.busy = false; persist(); }
+  esPanel(true); if (ui.page === 'project' && ui.tab === 'esteira') keepScroll(renderProjectTab);
+}
+async function esRunOne(k) {
+  const p = curProject(); if (!p || ES.busy) return; ES.busy = true; toast('Montando…');
+  try { const x = await ES_RUN[k](p, {}); toast(x.note ? (x.s === 'pulado' ? 'Não foi possível: ' : '') + x.note : 'Pronto.'); } catch (e) { toast('Não consegui: ' + ((e && e.message) || e)); } finally { ES.busy = false; persist(); }
+  if (ui.page === 'project') keepScroll(renderProjectTab);
+}
+
+/* ---------- tela ---------- */
+function esTab(t) { ui.tab = t; if (ui.page !== 'project') go('project'); else renderProjectTab(); }
+function esGo(where) {
+  ({ficha: () => esTab('ficha'), base: () => esTab('identity'), produtos: () => esTab('products'), pre: () => esTab('preproject'), camp: () => go('campaigns'), org: () => go('design'), car: () => go('carrosseis'), site: () => { go('landings'); lpUI.main = 'sites'; lpUI.id = ''; renderLandings(); }})[where]();
+}
+function esNew(kind) {
+  const f = {story: () => openCreation('story'), ad: () => openCreation('ad'), post: () => openCreation('post'), carousel: () => openCreation('carousel'), camp: () => { go('campaigns'); setTimeout(cmpNewModal, 60); }, page: () => { go('landings'); lpUI.main = 'paginas'; lpUI.id = ''; renderLandings(); setTimeout(lpNewModal, 60); }, site: () => { go('landings'); lpUI.main = 'sites'; lpUI.id = ''; renderLandings(); setTimeout(siteNewModal, 60); }, sheet: () => pmQuick('')};
+  (f[kind] || (() => {}))();
+}
+function esHTML(p) {
+  const S = esState(p), done = ES_DEF.filter(d => S[d[0]].s === 'feito').length, chip = s => ({feito: ['Pronto', '#176b30', '#e9f7ee'], parcial: ['Em andamento', '#7a5a00', '#fff5db'], pendente: ['Falta', '#666', '#eee']}[s]);
+  const act = {
+    ficha: `<button class="btn sm" onclick="fdOpen('cur')">⬆ Subir documento</button><button class="btn sm" onclick="esTab('ficha')">Abrir a ficha</button>`,
+    base: `<button class="btn sm dark" onclick="esRunOne('base')">↻ Aplicar a ficha de novo</button><button class="btn sm" onclick="esGo('base')">Marca e arquétipo</button><button class="btn sm" onclick="esGo('produtos')">Produtos e serviços</button>`,
+    pre: `<button class="btn sm dark" onclick="esRunOne('pre')">✦ ${S.pre.s === 'feito' ? 'Refazer' : 'Gerar'} com IA</button><button class="btn sm" onclick="esGo('pre')">Abrir o pré-projeto</button>`,
+    camp: `${S.camp.s === 'feito' ? '' : '<button class="btn sm dark" onclick="esRunOne(\'camp\')">Gerar campanha</button>'}<button class="btn sm" onclick="esGo('camp')">Abrir campanhas</button><button class="btn sm" onclick="esNew('camp')">＋ Nova campanha</button>`,
+    org: `${S.org.s === 'feito' ? '' : '<button class="btn sm dark" onclick="esRunOne(\'org\')">Gerar posts e stories</button>'}<button class="btn sm" onclick="esGo('org')">Abrir o Estúdio de Design</button><button class="btn sm" onclick="esNew('post')">＋ Novo post</button><button class="btn sm" onclick="esNew('story')">＋ Novo story</button>`,
+    car: `${S.car.s === 'feito' ? '' : '<button class="btn sm dark" onclick="esRunOne(\'car\')">Gerar carrosséis</button>'}<button class="btn sm" onclick="esGo('car')">Abrir carrosséis</button><button class="btn sm" onclick="esNew('carousel')">＋ Novo carrossel</button>`,
+    site: `${S.site.s === 'feito' ? '' : '<button class="btn sm dark" onclick="esRunOne(\'site\')">Gerar o site</button>'}<button class="btn sm" onclick="esGo('site')">Abrir os sites</button><button class="btn sm" onclick="esNew('site')">＋ Novo site</button><button class="btn sm" onclick="esNew('page')">＋ Nova página</button>`
+  };
+  return `<div class="panel"><div class="section-row"><div><h3 style="margin:0">🚀 Esteira do projeto</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">Suba o documento e o Studio monta o caminho completo até o site. Cada etapa continua sua: corrija, acrescente ou crie coisas novas quando quiser. <b>Nada é apagado nem sobrescrito.</b></p></div></div>
+    <div class="prog" style="height:8px;background:#e6e6ea;border-radius:99px;overflow:hidden;margin:12px 0 4px"><i style="display:block;height:100%;background:#111;width:${Math.round(done / ES_DEF.length * 100)}%"></i></div><small class="muted">${done} de ${ES_DEF.length} etapas prontas${esAIOn() ? '' : ' · IA desligada: o pré-projeto e o texto das páginas do site precisam dela'}</small>
+    <div class="row-gap" style="flex-wrap:wrap;margin-top:12px"><button class="btn dark" onclick="esAutoRun()" ${ES.busy ? 'disabled' : ''}>✦ Gerar tudo que falta</button><button class="btn" onclick="fdOpen('cur')">⬆ Subir documento do projeto</button></div></div>
+  <div style="margin-top:12px">${ES_DEF.map(([k, title, desc], i) => { const c = chip(S[k].s); return `<div class="list-item" style="display:block;border:1px solid #e6e6ea;border-radius:12px;margin:8px 0;padding:12px 14px"><div class="row-gap" style="justify-content:space-between;flex-wrap:wrap"><div style="display:flex;gap:10px;align-items:center"><span class="fp-n">${i + 1}</span><b>${esc(title)}</b></div><span style="font-size:12px;font-weight:700;border-radius:99px;padding:2px 10px;background:${c[2]};color:${c[1]}">${c[0]}</span></div><p class="muted" style="margin:6px 0 2px;font-size:12.5px">${esc(desc)}</p><small style="display:block;margin-bottom:8px"><b>${esc(S[k].t)}</b></small><div class="row-gap" style="flex-wrap:wrap">${act[k]}</div></div>`; }).join('')}</div>
+  <div class="panel" style="margin-top:12px"><h3 style="margin:0 0 4px">＋ Acrescentar ao que já existe</h3><p class="muted" style="margin:0 0 10px;font-size:12.5px">O caminho completo já está montado? Crie coisas novas quando precisar, sem mexer no que existe.</p>
+    <div class="row-gap" style="flex-wrap:wrap"><button class="btn sm" onclick="esNew('story')">▯ Novo story</button><button class="btn sm" onclick="esNew('ad')">◉ Novo anúncio</button><button class="btn sm" onclick="esNew('post')">▣ Novo post simples</button><button class="btn sm" onclick="esNew('carousel')">▤ Novo carrossel</button><button class="btn sm" onclick="esNew('camp')">📣 Nova campanha (5 fases)</button><button class="btn sm" onclick="esNew('page')">◍ Nova página</button><button class="btn sm" onclick="esNew('site')">🌐 Novo site</button><button class="btn sm" onclick="esNew('sheet')">⊞ Subir tabela em lote</button></div></div>`;
+}
+TABS.esteira = esHTML;
 
 </script>
 <script>

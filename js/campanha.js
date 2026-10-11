@@ -115,14 +115,20 @@ function cmpNewModal() {
   <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn dark" onclick="cmpCreate()">Gerar campanha</button></div>`);
 }
 function cmpCount() { const n = Math.max(1, Math.min(10, +$('cmQ').value || 1)); $('cmCt').innerHTML = `5 fases × ${n} anúncio${n > 1 ? 's' : ''} = ${n * 5} anúncios × 3 medidas = <b>${n * 15} artes</b>. Gerar não gasta crédito de IA e leva alguns segundos.`; }
+/* monta a campanha (as 5 fases, com as artes); usado pelo botão "Gerar campanha" e pela Esteira do projeto */
+async function cmpCreateRun(p, o) {
+  const n = Math.max(1, Math.min(10, +o.n || 5)), ff = o.ff === 'square' ? 'square' : 'feed45', name = String(o.name || 'Campanha').trim().slice(0, 120);
+  const c = {id: uid('cm'), name, objective: o.objective || 'Leads', budget: 0, channel: 'Meta Ads', status: 'Rascunho', period: '', audience: ((p.pre.icps[0] || {}).name || ''), feedFmt: ff, layout: 'auto', align: 'left', bank: cmpDraftBank(p, n), test: {macro: '', micro: '', format: '', notes: ''}, notes: [], landings: [], pieces: [], created: new Date().toISOString()};
+  c.test = {macro: `Teste de ângulo: dentro de cada fase, compare os ${n} anúncios (headlines de tipos diferentes: dor, dúvida, desejo, urgência oculta), mesmo público e mesmo orçamento. (sugestão, edite)`, micro: 'Com o ângulo vencedor de cada fase, troque uma coisa por vez: imagem, cor ou CTA, usando a faixa de variações.', format: 'Compare feed, vertical e horizontal do mesmo anúncio para ver qual medida rende mais.', notes: ''};
+  p.campaigns.push(c); cmpUI.id = c.id; cmpUI.phase = 'descoberta'; cmpUI.tab = 'geral'; cmpUI.busy = true; const used = new Set(), total = n * 5; let gi = 0;
+  try { for (const st of CMP_STAGES5) for (let k = 0; k < n; k++) { if (!o.quiet) toast(`Montando as artes… ${gi + 1}/${total}`); const q = cmpNewPiece(c, st, k, cmpPickHead(c, st, k, used), gi++); c.pieces.push(q); await cmpBuildPiece(p, c, q); } } finally { cmpUI.busy = false; }
+  persist(); return {c, n, total};
+}
 async function cmpCreate() {
   const p = curProject(), name = $('cmN').value.trim(); if (!name) { toast('Dê um nome à campanha.'); return; }
   const n = Math.max(1, Math.min(10, +$('cmQ').value || 5)), ff = (document.querySelector('input[name=cmF]:checked') || {}).value || 'feed45';
-  const c = {id: uid('cm'), name, objective: $('cmO').value, budget: 0, channel: 'Meta Ads', status: 'Rascunho', period: '', audience: ((p.pre.icps[0] || {}).name || ''), feedFmt: ff, layout: 'auto', align: 'left', bank: cmpDraftBank(p, n), test: {macro: '', micro: '', format: '', notes: ''}, notes: [], landings: [], pieces: [], created: new Date().toISOString()};
-  c.test = {macro: `Teste de ângulo: dentro de cada fase, compare os ${n} anúncios (headlines de tipos diferentes: dor, dúvida, desejo, urgência oculta), mesmo público e mesmo orçamento. (sugestão, edite)`, micro: 'Com o ângulo vencedor de cada fase, troque uma coisa por vez: imagem, cor ou CTA, usando a faixa de variações.', format: 'Compare feed, vertical e horizontal do mesmo anúncio para ver qual medida rende mais.', notes: ''};
-  p.campaigns.push(c); closeModal(); cmpUI.id = c.id; cmpUI.phase = 'descoberta'; cmpUI.tab = 'geral'; cmpUI.busy = true; const used = new Set(), total = n * 5; let gi = 0;
-  try { for (const st of CMP_STAGES5) for (let k = 0; k < n; k++) { toast(`Montando as artes… ${gi + 1}/${total}`); const q = cmpNewPiece(c, st, k, cmpPickHead(c, st, k, used), gi++); c.pieces.push(q); await cmpBuildPiece(p, c, q); } } finally { cmpUI.busy = false; }
-  persist(); cmpRender(); toast(`Campanha criada: ${total} anúncios, ${total * 3} artes. Troque o que quiser na faixa de variações.`);
+  closeModal(); const r = await cmpCreateRun(p, {name, objective: $('cmO').value, n, ff});
+  cmpRender(); toast(`Campanha criada: ${r.total} anúncios, ${r.total * 3} artes. Troque o que quiser na faixa de variações.`);
 }
 
 /* ---------- variações em um clique ---------- */
