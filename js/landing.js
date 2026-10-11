@@ -53,7 +53,20 @@ function lpSeedBlocks(l) {
 const lpE = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]);
 const lpRich = s => lpE(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
 const lpPending = l => (l.vis ? (JSON.stringify(l.vis).match(/\[CONFIRMAR/g) || []).length : 0) + (l.blocks || []).filter(b => b.on && !l.vis).reduce((n, b) => n + (JSON.stringify([b.title, b.text, b.note, b.price, b.items, b.yes, b.no]).match(/\[CONFIRMAR/g) || []).length, 0);
+/* destino de links: 'page:<id>[#sec]' página do site, 'thanks' página de obrigado, 'wa' WhatsApp da página, 'url:...' endereço externo */
+let LP_P = null;
+function lpDest(to, l, p) {
+  p = p || LP_P; if (!to) return null; let m;
+  if ((m = /^page:([\w-]+)(#[\w-]+)?$/.exec(to))) { const pg = p && p.landings.find(x => x.id === m[1]); if (!pg) return null; return {href: (pg.id === l.id ? '' : lpFile(pg)) + (m[2] || ''), ext: false, page: pg}; }
+  if (to === 'thanks') return {href: 'obrigado.html', ext: false, thanks: true};
+  if (to === 'wa') return l.whatsapp ? {href: 'https://wa.me/' + l.whatsapp + '?text=' + encodeURIComponent('Olá! Vim pela página: ' + (l.name || '')), ext: true} : null;
+  if (/^url:/.test(to)) return {href: to.slice(4), ext: true};
+  if (/^(tel:|mailto:)/.test(to)) return {href: to, ext: false};
+  if (/^#/.test(to)) return {href: to, ext: false};
+  return null;
+}
 function lpCta(l, b) {
+  const own = lpDest(b && b.to, l) || lpDest(l.ctaTo, l); if (own) return own;
   const P = l.product, hasForm = (l.blocks || []).some(x => x.t === 'form' && x.on);
   if (P.checkout && l.type !== 'servico') return {href: P.checkout, ext: true};
   if (hasForm) return {href: '#form', ext: false};
@@ -143,8 +156,8 @@ function lpBlockHTML(l, b, ctx) {
 const lpFile = l => (l.slug && l.slug !== 'index' ? l.slug : 'index') + '.html';
 function lpChrome(l, p) {
   const site = (p.sites || []).find(x => x.id === l.siteId); if (!site) return null; const E = lpE, pages = p.landings.filter(x => x.siteId === site.id), me = l.id;
-  const nav = pages.map(x => `<a href="${E(lpFile(x))}"${x.id === me ? ' class="on"' : ''}>${E(x.navLabel || x.name)}</a>`).join(''), brand = site.brand || p.name;
-  const formPage = pages.find(x => (x.blocks || []).some(b => b.t === 'form' && b.on)), cta = site.headerCta ? (l.blocks.some(b => b.t === 'form' && b.on) ? '#form' : formPage ? lpFile(formPage) + '#form' : (l.product.checkout || '#')) : '';
+  const nav = site.navMode === 'cta' ? '' : pages.filter(x => x.inMenu !== false).map(x => `<a href="${E(lpFile(x))}"${x.id === me ? ' class="on"' : ''}>${E(x.navLabel || x.name)}</a>`).join('') + (site.menu || []).map(m => { const d = lpDest(m.to, l, p); return d ? `<a href="${E(d.href || '#')}"${d.ext ? ' target="_blank" rel="noopener"' : ''}>${E(m.label)}</a>` : ''; }).join(''), brand = site.brand || p.name;
+  const formPage = pages.find(x => (x.blocks || []).some(b => b.t === 'form' && b.on)), hd = lpDest(site.headerTo, l, p), cta = site.headerCta ? (hd ? hd.href || '#' : l.blocks.some(b => b.t === 'form' && b.on) ? '#form' : formPage ? lpFile(formPage) + '#form' : (l.product.checkout || '#')) : '';
   return {site, header: `<header class="sh"><div class="w sh-in"><a class="sh-brand" href="index.html">${E(brand)}</a><input type="checkbox" id="mn" class="mn-i" aria-label="Abrir menu"><label for="mn" class="mn-b" aria-hidden="true"><i></i><i></i><i></i></label><nav class="sh-nav">${nav}${cta ? `<a class="btn sh-cta" href="${E(cta)}">${E(site.headerCta)}</a>` : ''}</nav></div></header>`,
     footer: `<footer class="sf"><div class="w"><div class="sf-g"><div><b>${E(brand)}</b>${site.footer ? `<p>${lpRich(site.footer)}</p>` : ''}</div><div class="sf-n">${nav}</div>${site.contact ? `<div>${lpRich(site.contact)}</div>` : ''}</div><div class="sf-c">${E(brand)} · ${new Date().getFullYear()}${l.privacyUrl ? ` · <a href="${E(l.privacyUrl)}">Privacidade</a>` : ''}</div></div></footer>`,
     css: `.sh{position:sticky;top:0;z-index:60;background:var(--bg);border-bottom:1px solid var(--line)}.sh-in{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}.sh-brand{font-weight:800;font-size:19px;color:var(--fg);text-decoration:none;font-family:'${l.theme.head}',sans-serif}.sh-nav{display:flex;align-items:center;gap:22px}.sh-nav a{color:var(--fg);text-decoration:none;font-size:15px;font-weight:600}.sh-nav a.on{color:var(--a)}.sh-nav .btn{padding:10px 18px;font-size:14px;color:var(--on);box-shadow:none}.mn-i,.mn-b{display:none}
@@ -173,7 +186,7 @@ async function lpAssets(l, p) {
   const o = lpSeoOf(l, p); if (!o.ogId) return []; const bl = await lpCover(o.ogId, 1200, 630, 'image/jpeg', 0.86); return bl ? [{name: o.ogFile, data: new Uint8Array(await bl.arrayBuffer())}] : [];
 }
 async function lpHTML(l, p, opts) {
-  opts = opts || {}; const T0 = l.theme || {}, hx = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? v : d, fn = (v, d) => (String(v || '').replace(/[^\w \-]/g, '').trim().slice(0, 60) || d);
+  opts = opts || {}; LP_P = p; const T0 = l.theme || {}, hx = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? v : d, fn = (v, d) => (String(v || '').replace(/[^\w \-]/g, '').trim().slice(0, 60) || d);
   const th = {accent: hx(T0.accent, '#e4572e'), bg: hx(T0.bg, '#ffffff'), fg: hx(T0.fg, '#141414'), dark: !!T0.dark, head: fn(T0.head, 'Poppins'), body: fn(T0.body, 'Inter'), rad: T0.rad, hw: T0.hw, hero: T0.hero, ly: T0.ly};
   const TR = {metaPixel: /^\d{5,20}$/.test(l.tracking && l.tracking.metaPixel || '') ? l.tracking.metaPixel : '', ga4: /^G-[A-Z0-9]{4,14}$/.test(l.tracking && l.tracking.ga4 || '') ? l.tracking.ga4 : ''};
   const blocks = (l.blocks || []).filter(b => b.on), hero = blocks.find(b => b.t === 'hero'), leadsUrl = state.workspace.leadsUrl || '';

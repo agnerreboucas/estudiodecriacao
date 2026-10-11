@@ -30,6 +30,7 @@ def from_hls(h, l, s, a):
 def map_bg(c):
     h, l, s = hls(c); a = c[3]
     if a < 0.05: return None
+    if a < 0.95 and l < 0.22: return fmt(0, 0, 0, a)                     # fundo escuro translúcido (cortina de janela): continua preto
     if l < 0.22 and s < 0.35: return fmt(*ACC, a)                       # preto/escuro neutro: vira o laranja do Estúdio
     if l >= 0.85: return from_hls(h, max(0.09, 0.235 - (1 - l) * 0.95), min(s, 0.35) if s > 0.15 else s * 0.4, a)   # claro: cinza escuro em camadas
     if l < 0.35: return from_hls(h, 0.2, s, a)

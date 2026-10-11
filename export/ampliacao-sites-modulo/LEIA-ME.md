@@ -46,3 +46,10 @@ Anúncios, carrosséis, stories, vídeo, aprovação com o cliente, publicação
 - O tema de WordPress e os modelos do Elementor foram conferidos por arquivo (estrutura, PHP sem erro, instalação simulada). **Não foram abertos num WordPress com Elementor de verdade.**
 - Templates de terceiros (ex.: Envato) **não** vêm no pacote. Cada cliente importa o dele, com a licença dele.
 - A medição de visitas (`lp.php`) só funciona no servidor.
+
+## Ligando as páginas (aba Fluxo)
+No Desenvolvimento, aba **Fluxo** (painel da direita): menu do site, para onde cada botão leva, página de obrigado e um verificador de links.
+- **Ligar tudo automaticamente**: monta o menu, leva os botões ao formulário (ou ao WhatsApp) e o formulário à página de obrigado. Todo site novo já nasce assim.
+- **Modelo: landing page + obrigado**: sem menu, botões levam ao formulário. **Modelo: site institucional**: Início, Serviços, Sobre e Contato ligados.
+- Cada seção tem "Para onde o botão leva" (aba Propriedades). Os links são guardados por página: se você trocar nome, ordem ou endereço, continuam certos.
+- Na **Mesa de páginas**: botão **Links** (mapa, links quebrados, páginas soltas), campo de link com a lista das páginas e "Montar o menu com as páginas".

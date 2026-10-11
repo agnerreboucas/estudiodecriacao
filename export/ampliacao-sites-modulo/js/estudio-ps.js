@@ -46,9 +46,9 @@ function esDeliverHTML(s, l, ready) {
 function esRightHTML(p, s, l) {
   const pend = esPending(p), ck = esChecklist(p, s), n = ck.filter(x => x[1]).length, ready = typeof aiReady === 'function' && aiReady();
   const tabs = (cur, set, list) => `<div class="ps-tabs">${list.map(([k, n2]) => `<button class="${cur === k ? 'on' : ''}" onclick="${set}('${k}')">${n2}</button>`).join('')}</div>`;
-  const A = ES.tabA === 'style' ? esStyleHTML(p, s, l) : ES.tabA === 'lay' ? esLayoutHTML(l) : '<div id="esEdit"></div>';
+  const A = ES.tabA === 'fluxo' ? fxHTML(p, s) : ES.tabA === 'style' ? esStyleHTML(p, s, l) : ES.tabA === 'lay' ? esLayoutHTML(l) : '<div id="esEdit"></div>';
   const B = ES.tabB === 'pend' ? esPendHTML(p) : ES.tabB === 'vend' ? esVendHTML(p, s) : ES.tabB === 'bib' ? esBibHTML(p) : esLayersHTML(l);
-  return `<section class="ps-pan">${tabs(ES.tabA, 'esTabA', [['prop', 'Propriedades'], ['style', 'Estilo'], ['lay', 'Layout']])}<div class="ps-pb">${A}</div></section>
+  return `<section class="ps-pan">${tabs(ES.tabA, 'esTabA', [['prop', 'Propriedades'], ['style', 'Estilo'], ['lay', 'Layout'], ['fluxo', 'Fluxo']])}<div class="ps-pb">${A}</div></section>
     <section class="ps-pan">${tabs(ES.tabB, 'esTabB', [['cam', 'Camadas'], ['pend', 'Pendências ' + pend.length], ['vend', 'Vendedor ' + n + '/' + ck.length], ['bib', 'Biblioteca']])}<div class="ps-pb">${B}</div></section>
     <section class="ps-pan" id="esDeliver"><div class="ps-tabs"><button class="on" onclick="ES.deliver=!ES.deliver;esRight()">Entrega ${ES.deliver ? '▾' : '▸'}</button></div>${ES.deliver ? `<div class="ps-pb">${esDeliverHTML(s, l, ready)}</div>` : ''}</section>`;
 }
@@ -66,7 +66,7 @@ function esUseImg(imgId) {
   b[f[0]] = imgId; persist(); esBlockEditor(); esPreview(); toast('Imagem aplicada na seção.');
 }
 function esRefToggleOpen() { const a = $('psRef'); if (a) a.hidden = false; esRefRefresh(); setTimeout(esFit, 30); document.querySelectorAll('.ps-tools button').forEach((x, i) => { if (ES_TOOLS[i][0] === 'ref') x.classList.add('on'); }); }
-function esRight() { const box = $('psRight'); if (!box) return; const p = curProject(), s = esSiteOf(p), l = esCur(p); box.innerHTML = esRightHTML(p, s, l); esBlockEditor(); }
+function esRight() { const box = $('psRight'); if (!box) return; const p = curProject(), s = esSiteOf(p), l = esCur(p); box.innerHTML = esRightHTML(p, s, l); box.classList.toggle('fx-on', ES.tabA === 'fluxo'); esBlockEditor(); }
 const esTabA = t => { ES.tabA = t; esRight(); }, esTabB = t => { ES.tabB = t; esRight(); };
 
 function renderDev() {
@@ -78,7 +78,7 @@ function renderDev() {
   ES.site = s.id; const pages = esPageOf(p), l = esCur(p); ES.page = l ? l.id : '';
   const t = SBT.find(x => x.id === s.style), nb = l ? l.blocks.filter(b => b.on).length : 0;
   root.innerHTML = head + `<div class="ps${ES.focus ? ' ps-focus' : ''}" id="psRoot">
-    <div class="ps-opt"><div class="ps-pages">${pages.map(x => `<button class="${x.id === ES.page ? 'on' : ''}" onclick="esPage('${x.id}')">${esc(x.navLabel || x.name)}</button>`).join('')}</div><span class="ps-sp"></span>
+    <div class="ps-opt"><div class="ps-pages">${pages.map(x => `<button class="${x.id === ES.page && !ES.thx ? 'on' : ''}" onclick="esPage('${x.id}')">${esc(x.navLabel || x.name)}</button>`).join('')}${fxFormPage(p) ? `<button class="${ES.thx ? 'on' : ''}" onclick="esThx()" title="Página que abre depois de enviar o formulário">Obrigado</button>` : ''}</div><span class="ps-sp"></span>
       <div class="ps-seg" id="psSeg">${[['desk', 'Computador'], ['tab', 'Tablet'], ['mob', 'Celular'], ['all', '3 telas']].map(([k, n]) => `<button class="${ES.device === k ? 'on' : ''}" onclick="esSetDevice('${k}')">${n}</button>`).join('')}</div><button class="ps-btn" id="psFocus" onclick="esFocusToggle()" title="Esconde os painéis para dar mais espaço à página">Ampliar</button>
       <button class="ps-btn" onclick="esRandom()" title="Sorteia um layout diferente para o site">Sortear layout</button><button class="ps-btn pri" onclick="esToMesa()" title="Abre o site na Mesa de páginas, com todas as ferramentas: camadas, desenho, modo livre, IA, versões e mais">Editar na Mesa</button><button class="ps-btn" onclick="esRefToggle()">Referências</button></div>
     <div class="ps-body"><div class="ps-tools" role="toolbar" aria-label="Ferramentas">${ES_TOOLS.map(([k, tt, d]) => `<button class="${ES.tool === k ? 'on' : ''}${k === 'ref' && ES.ref.open ? ' on' : ''}" title="${esc(tt)}" aria-label="${esc(tt)}" onclick="esTool('${k}')">${esSvg(d)}</button>`).join('')}</div>
@@ -111,13 +111,13 @@ const esDevice = () => esSetDevice(ES.device);
 /* pré-visualização em todas as telas abertas */
 async function esPreview() {
   const p = curProject(), l = esCur(p), frs = esFrames(); if (!l || !frs.length) return; const my = ++ES.t;
-  const h = await lpHTML(l, p, {preview: true, edit: true}); if (my !== ES.t) return;
+  const fpg = ES.thx && fxFormPage(p), h = fpg ? await lpThanksHTML(fpg, p) : await lpHTML(l, p, {preview: true, edit: true}); if (my !== ES.t) return;
   frs.forEach(fr => { const d = fr.dataset.dev; fr.srcdoc = h.replace(/<\/body>/i, '<script>window.__sy=' + (+ES.sys[d] || 0) + ';window.__sel=' + JSON.stringify(ES.sel || '') + ';' + ES_INJECT + '<\/script></body>'); });
 }
 window.addEventListener('message', e => {
   const fr = esFrames().find(f => f.contentWindow === e.source); if (!fr || !e.data || !e.data.es) return; const d = e.data;
   if (d.es === 'sy') ES.sys[fr.dataset.dev] = d.y; else if (d.es === 'sel') esSelect(d.id, false);
-  else if (d.es === 'nav') { const p = curProject(), pg = esPageOf(p).find(x => lpFile(x) === d.href.replace(/^.*\//, '').replace(/#.*$/, '')); if (pg) esPage(pg.id); }
+  else if (d.es === 'nav') { const p = curProject(), pg = esPageOf(p).find(x => lpFile(x) === d.href.replace(/^.*\//, '').replace(/#.*$/, '')); if (pg) esPage(pg.id); else if (/obrigado\.html/.test(d.href) && fxFormPage(p)) esThx(); }
 });
 function esSelect(bid, scroll) {
   ES.sel = bid; if (ES.tabA !== 'prop') { ES.tabA = 'prop'; esRight(); } else esBlockEditor();

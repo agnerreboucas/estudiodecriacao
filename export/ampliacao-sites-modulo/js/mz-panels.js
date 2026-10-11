@@ -25,7 +25,7 @@ function mzOnResize() { if (MZ.fit) { mzLayoutFrames(); mzOverlayAll(); } }
 function mzShellHtml() {
   return `<div class="mz-top">
     <button class="mz-btn-i" onclick="mzClose()" title="Voltar (Esc sem seleção)">← Voltar</button>
-    <div class="mz-title"><b>${esc(MZ.p.name)}</b><select id="mzPageSel" onchange="mzPageOpen(this.value)" title="Página"></select><button class="mz-btn-i" onclick="mzModalPages()" title="Gerenciar páginas">Páginas</button></div>
+    <div class="mz-title"><b>${esc(MZ.p.name)}</b><select id="mzPageSel" onchange="mzPageOpen(this.value)" title="Página"></select><button class="mz-btn-i" onclick="mzModalPages()" title="Gerenciar páginas">Páginas</button><button class="mz-btn-i" onclick="mzModalLinks()" title="Mapa de links entre as páginas, menus e verificador">Links</button></div>
     <div class="mz-bps"><button data-mzbp="d" class="on" onclick="mzSetBp('d')" title="Desktop 1440">🖥 1440</button><button data-mzbp="t" onclick="mzSetBp('t')" title="Tablet 768">▭ 768</button><button data-mzbp="m" onclick="mzSetBp('m')" title="Celular 390">▯ 390</button><button data-mzview="three" onclick="mzSetView(MZ.view==='three'?'one':'three')" title="Ver os três tamanhos lado a lado">⫼ 3 telas</button></div>
     <div class="mz-zoom"><button onclick="mzZoom(-0.1)" title="Menos zoom">−</button><span id="mzZoomL">100%</span><button onclick="mzZoom(0.1)" title="Mais zoom">＋</button><button onclick="mzZoomFit()" title="Ajustar à tela">Ajustar</button></div>
     <div class="mz-acts"><button class="mz-btn-i" id="mzUndo" onclick="mzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="mz-btn-i" id="mzRedo" onclick="mzRedo()" title="Refazer (Ctrl+Y)">↷</button><span class="mz-sep"></span>
@@ -136,6 +136,7 @@ function mzField(n, f) {
   const v = n.props[f.k], on = `mzSetProp('${f.k}',this.value)`;
   switch (f.t) {
     case 'text': case 'url': return mzTxt(f.l, v, on);
+    case 'link': return mzLinkField(f.l, v, f.k);
     case 'area': return mzArea(f.l, v, on);
     case 'rich': return mzArea(f.l, v, on, 5);
     case 'num': return `<label class="mz-f"><span>${f.l}</span><input type="number" value="${esc(v)}" onchange="mzSetProp('${f.k}',+this.value)"></label>`;
@@ -146,7 +147,7 @@ function mzField(n, f) {
     case 'imgs': return `<div class="mz-f"><span>${f.l} (${(v || []).length})</span><div class="mz-imgsel">${(v || []).slice(0, 6).map(i => `<img data-lib="${esc(i)}" alt="">`).join('')}<button class="btn sm" onclick="mzAddGalleryImg()">＋ Adicionar</button>${(v || []).length ? `<button class="btn sm" onclick="mzSetProp('imgs',[],{panels:true})">Limpar</button>` : ''}</div></div>`;
     case 'icon': return `<div class="mz-f"><span>${f.l}</span><div class="mz-icons sm">${f.k === 'icon' ? `<button class="${!v ? 'on' : ''}" onclick="mzSetProp('icon','',{panels:true})">∅</button>` : ''}${Object.keys(MZ_ICONS).map(k => `<button class="${v === k ? 'on' : ''}" title="${k}" onclick="mzSetProp('${f.k}','${k}',{panels:true})">${mzI(k, 18)}</button>`).join('')}</div></div>`;
     case 'lines': return mzArea(f.l, (v || []).join('\n'), `mzSetProp('${f.k}',this.value.split('\\n').map(function(x){return x.trim()}).filter(Boolean))`, 5);
-    case 'pairs': return mzArea(f.l, (v || []).map(i => i.label + ' | ' + i.href).join('\n'), `mzSetProp('${f.k}',this.value.split('\\n').map(function(l){var p=l.split('|');return {label:(p[0]||'').trim(),href:(p[1]||'#').trim()}}).filter(function(x){return x.label}))`, 5);
+    case 'pairs': return mzArea(f.l + ' (um por linha: Texto | destino. Destino: @pagina, #secao ou https://…)', (v || []).map(i => i.label + ' | ' + mzLinkShow(i.href)).join('\n'), `mzSetProp('${f.k}',mzPairsParse(this.value))`, 5) + `<div class="mz-sec"><button class="btn sm" onclick="mzMenuFromPages()">Montar o menu com as páginas</button></div>`;
     case 'qa': return mzArea(f.l, (v || []).map(i => i.q + ' :: ' + i.a.replace(/<[^>]+>/g, '')).join('\n'), `mzSetProp('${f.k}',this.value.split('\\n').map(function(l){var p=l.split('::');return {q:(p[0]||'').trim(),a:(p.slice(1).join('::')||'').trim()}}).filter(function(x){return x.q}))`, 6);
     case 'tabs': return mzArea(f.l, (v || []).map(i => i.t + ' :: ' + i.c.replace(/<[^>]+>/g, '')).join('\n'), `mzSetProp('${f.k}',this.value.split('\\n').map(function(l){var p=l.split('::');return {t:(p[0]||'').trim(),c:(p.slice(1).join('::')||'').trim()}}).filter(function(x){return x.t}))`, 6);
     case 'table': return mzArea(f.l, (v || []).map(r => r.join(' | ')).join('\n'), `mzSetProp('${f.k}',this.value.split('\\n').map(function(l){return l.split('|').map(function(c){return c.trim()})}).filter(function(r){return r.join('')}))`, 6);

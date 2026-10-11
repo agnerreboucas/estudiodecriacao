@@ -1031,7 +1031,7 @@ body.mz-dark .mz-menu small{color:#999999}
 body.mz-dark .mz-menu hr{border-top:1px solid #1f1f1f}
 body.mz-dark .mz-rb{background:#2e3338}
 body.mz-dark .mz-rb button{color:#1a1a1a}
-body.mz-dark .mz-modal{background:rgba(217,72,15,0.50)}
+body.mz-dark .mz-modal{background:rgba(0,0,0,0.50)}
 body.mz-dark .mz-mbox{background:#3c3c3c}
 body.mz-dark .mz-mh{border-bottom:1px solid #1f1f1f}
 body.mz-dark .mz-mh button{background:#2c2c2c}
@@ -1341,6 +1341,41 @@ body.es-solo .rail,body.es-solo .topbar,body.es-solo .rail-back{display:none!imp
 .ps-h{margin:10px 0 6px;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:#bbb}.ps-h small{text-transform:none;letter-spacing:0;color:var(--pm);font-weight:400}
 .ps-ig{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.ps-ig button{border:2px solid transparent;padding:0;background:#222;border-radius:4px;aspect-ratio:1;overflow:hidden;cursor:pointer}.ps-ig button:hover{border-color:var(--es-accent)}.ps-ig img{width:100%;height:100%;object-fit:cover;display:block}
 .ps-kit{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #444}.ps-kit small{display:block;color:var(--pm);font-size:11px}
+
+/* ===== Fluxo: ligação entre páginas (aba do painel direito) ===== */
+.fx{display:flex;flex-direction:column;gap:8px;font-size:12.5px}
+.fx-pre{display:flex;flex-wrap:wrap;gap:6px}
+.fx-sec{border:1px solid var(--ps-line,#333);border-radius:8px;background:rgba(255,255,255,.03)}
+.fx-sec>summary{cursor:pointer;padding:8px 10px;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
+.fx-sec>summary::-webkit-details-marker{display:none}
+.fx-sec>summary::before{content:'▸';opacity:.6;font-size:11px}
+.fx-sec[open]>summary::before{content:'▾'}
+.fx-b{padding:4px 10px 10px;display:flex;flex-direction:column;gap:8px}
+.fx-n{background:#d9480f;color:#fff;border-radius:10px;padding:0 7px;font-size:11px}
+.fx-ok{background:#2f9e44;color:#fff;border-radius:10px;padding:0 7px;font-size:11px}
+.fx-iss{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.fx-iss li{display:flex;gap:8px;align-items:flex-start;line-height:1.35}
+.fx-iss li>span{flex:0 0 18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff}
+.fx-iss .ok>span{background:#2f9e44}.fx-iss .warn>span{background:#e8a317;color:#111}.fx-iss .err>span{background:#d9480f}
+.fx-iss .btn{margin-left:4px}
+.fx-map{display:flex;flex-direction:column;gap:6px}
+.fx-pg{border:1px solid var(--ps-line,#333);border-radius:8px;padding:7px 9px;background:rgba(255,255,255,.02)}
+.fx-pg.on{border-color:#ff6a18}
+.fx-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fx-h code{opacity:.65;font-size:11px}
+.fx-tag{font-size:10.5px;border-radius:9px;padding:1px 7px;background:rgba(255,106,24,.18);color:#ff9a5c}
+.fx-tag.off{background:rgba(255,255,255,.08);color:inherit;opacity:.7}
+.fx-r{display:flex;gap:6px;opacity:.9;margin-top:3px}.fx-r span{opacity:.65}
+.fx-t{width:100%;border-collapse:collapse}.fx-t td{padding:4px 3px;vertical-align:middle}.fx-t input{width:100%}
+.fx-mv{white-space:nowrap}.fx-ck{white-space:nowrap}
+.fx-add{display:flex;gap:6px;flex-wrap:wrap}.fx-add select,.fx-add input{flex:1 1 90px;min-width:0}
+.fx-mi{display:grid;grid-template-columns:1fr 1fr auto;gap:5px;margin-bottom:4px}
+.fx-url{margin-top:4px}
+.fx select,.fx input,.fx textarea{background:#1c1c1c;color:#eee;border:1px solid #3a3a3a;border-radius:6px;padding:5px 7px;font:inherit}
+.mz-lmap{display:flex;flex-direction:column;gap:6px}.mz-lrow{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.mz-lrow small{opacity:.6;margin-left:auto}
+.mz-lbad{padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.ps-right.fx-on .ps-pan:first-child .ps-pb{max-height:none}
+.fx .es-note{color:#bbb}
 
 </style>
 </head>
@@ -1692,10 +1727,11 @@ function normalizeFeeds(arr) {
         return {kind: ['carousel', 'post', 'video'].includes(s.kind) ? s.kind : ['carousel', 'post', 'video'].includes(f.defKind) ? f.defKind : 'carousel', tone: ['D', 'M', 'L', 'B', 'S'].includes(s.tone) ? s.tone : 'M', label: str(s.label, 80), ref: {t: ['car', 'set'].includes(r.t) ? r.t : '', id: sid(r.id)}, postId: sid(s.postId)}; }), created: str(f.created, 40) || new Date().toISOString()};
   });
 }
+const LK_TO = v => { v = String(v || '').slice(0, 400); return /^(page:[\w-]{1,40}(#[\w-]{1,30})?|thanks|wa|tel:[\d+ ()-]{5,20}|mailto:[^\s"'<>]{3,120}|url:https?:\/\/[^\s"'<>]{1,300}|#[\w-]{1,40})$/.test(v) ? v : ''; };
 function normalizeSites(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || ''));
   return (Array.isArray(x) ? x : []).filter(s => s && sid(s.id)).slice(0, 50).map(s => { const b = s.bs || {}, o = (k, n) => str(b[k], n);
-    return {id: s.id, name: str(s.name, 120) || 'Site', tpl: str(s.tpl, 30), style: str(s.style, 30), productId: sid(s.productId) ? s.productId : '', brief: str(s.brief, 8000), brand: str(s.brand, 80), headerCta: str(s.headerCta, 40), footer: str(s.footer, 400), contact: str(s.contact, 300), desc: str(s.desc, 300), baseUrl: seoBase(s.baseUrl), ogImgId: sid(s.ogImgId) ? s.ogImgId : '', faviconImgId: sid(s.faviconImgId) ? s.faviconImgId : '',
+    return {id: s.id, name: str(s.name, 120) || 'Site', tpl: str(s.tpl, 30), style: str(s.style, 30), productId: sid(s.productId) ? s.productId : '', brief: str(s.brief, 8000), brand: str(s.brand, 80), headerCta: str(s.headerCta, 40), headerTo: LK_TO(s.headerTo), navMode: s.navMode === 'cta' ? 'cta' : 'full', menu: (Array.isArray(s.menu) ? s.menu : []).slice(0, 12).map(m => m && str(m.label, 40) && LK_TO(m.to) ? {id: sid(m.id) ? m.id : uid('mn'), label: str(m.label, 40), to: LK_TO(m.to)} : null).filter(Boolean), footer: str(s.footer, 400), contact: str(s.contact, 300), desc: str(s.desc, 300), baseUrl: seoBase(s.baseUrl), ogImgId: sid(s.ogImgId) ? s.ogImgId : '', faviconImgId: sid(s.faviconImgId) ? s.faviconImgId : '',
       bs: {who: o('who', 800), wants: o('wants', 800), external: o('external', 800), internal: o('internal', 800), philosophical: o('philosophical', 800), empathy: o('empathy', 800), authority: o('authority', 1200), step1: o('step1', 400), step2: o('step2', 400), step3: o('step3', 400), agreement: o('agreement', 800), direct: o('direct', 200), transitional: o('transitional', 300), failure: o('failure', 1000), success: o('success', 1000), identity: o('identity', 600)}, created: str(s.created, 40) || new Date().toISOString()}; });
 }
 /* Campanhas: peças × medidas (feed, vertical, horizontal), bancos de variações e plano de teste, tudo com limites fixos */
@@ -1790,12 +1826,12 @@ function normalizeLandings(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || '')), hex = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? String(v) : d, TY = ['curso', 'ebook', 'servico', 'evento', 'cadastro', 'generico'];
   return (Array.isArray(x) ? x : []).filter(l => l && typeof l === 'object').slice(0, 200).map(l => {
     const pr = l.product || {}, th = l.theme || {}, tr = l.tracking || {};
-    return {id: sid(l.id) ? l.id : uid('lp'), name: str(l.name, 120) || 'Landing page', goal: str(l.goal, 30) || 'Gerar lead', headline: str(l.headline, 300), sub: str(l.sub, 500), bullets: str(l.bullets, 3000), cta: str(l.cta, 80) || 'Enviar', whatsapp: str(l.whatsapp, 20).replace(/\D/g, ''), waFloat: l.waFloat !== false, waAfter: !!l.waAfter, waMsg: str(l.waMsg, 200), thanks: {mode: ['page', 'url', 'none'].includes((l.thanks || {}).mode) ? l.thanks.mode : 'page', url: /^https?:\/\/[^\s"'<>]{1,500}$/i.test((l.thanks || {}).url || '') ? l.thanks.url : '', title: str((l.thanks || {}).title, 120), text: str((l.thanks || {}).text, 400)}, status: str(l.status, 30) || 'Rascunho',
+    return {id: sid(l.id) ? l.id : uid('lp'), inMenu: l.inMenu !== false, ctaTo: LK_TO(l.ctaTo), name: str(l.name, 120) || 'Landing page', goal: str(l.goal, 30) || 'Gerar lead', headline: str(l.headline, 300), sub: str(l.sub, 500), bullets: str(l.bullets, 3000), cta: str(l.cta, 80) || 'Enviar', whatsapp: str(l.whatsapp, 20).replace(/\D/g, ''), waFloat: l.waFloat !== false, waAfter: !!l.waAfter, waMsg: str(l.waMsg, 200), thanks: {mode: ['page', 'url', 'none'].includes((l.thanks || {}).mode) ? l.thanks.mode : 'page', url: /^https?:\/\/[^\s"'<>]{1,500}$/i.test((l.thanks || {}).url || '') ? l.thanks.url : '', title: str((l.thanks || {}).title, 120), text: str((l.thanks || {}).text, 400)}, status: str(l.status, 30) || 'Rascunho',
       type: TY.includes(l.type) ? l.type : '', productId: sid(l.productId) ? l.productId : '', pick: {b: (l.pick && Array.isArray(l.pick.b) ? l.pick.b : []).slice(0, 40).map(n => Math.max(0, Math.round(+n) || 0)), f: (l.pick && Array.isArray(l.pick.f) ? l.pick.f : []).slice(0, 40).map(n => Math.max(0, Math.round(+n) || 0)), all: !l.pick || l.pick.all !== false}, siteId: sid(l.siteId) ? l.siteId : '', siteRole: str(l.siteRole, 20), slug: /^[a-z0-9-]{1,40}$/.test(l.slug || '') ? l.slug : '', navLabel: str(l.navLabel, 40), group: sid(l.group) ? l.group : '', variant: /^[A-Z]$/.test(l.variant || '') ? l.variant : '', angle: str(l.angle, 120), product: {nome: str(pr.nome, 160), preco: str(pr.preco, 80), publico: str(pr.publico, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(pr.checkout || '') ? pr.checkout : '', data: str(pr.data, 80), local: str(pr.local, 200)}, input: str(l.input, 60000),
       theme: {accent: hex(th.accent, '#e4572e'), bg: hex(th.bg, '#ffffff'), fg: hex(th.fg, '#141414'), dark: !!th.dark, head: str(th.head, 60) || 'Poppins', body: str(th.body, 60) || 'Inter', rad: th.rad == null || th.rad === '' ? 16 : Math.max(0, Math.min(32, Math.round(+th.rad) || 0)), hw: [400, 500, 600, 700, 800].includes(+th.hw) ? +th.hw : 800, hero: ['split', 'center', 'big'].includes(th.hero) ? th.hero : 'split', ly: (() => { const y = th.ly && typeof th.ly === 'object' ? th.ly : {}, pk = (v, a, d) => a.includes(v) ? v : d; return {w: pk(y.w, ['narrow', 'normal', 'wide'], 'normal'), sh: pk(y.sh, ['left', 'center'], 'left'), band: pk(y.band, ['alt', 'none', 'line', 'tint'], 'alt'), ben: pk(y.ben, ['cards', 'rows', 'nums'], 'cards'), st: pk(y.st, ['cards', 'line'], 'cards'), pr: pk(y.pr, ['cards', 'quote'], 'cards'), dor: pk(y.dor, ['list', 'cards'], 'list'), faq: pk(y.faq, ['acc', 'cols'], 'acc')}; })()},
       seo: lpSeoNorm(l.seo),
       tracking: {metaPixel: /^\d{5,20}$/.test(tr.metaPixel || '') ? tr.metaPixel : '', ga4: /^G-[A-Z0-9]{4,14}$/.test(tr.ga4 || '') ? tr.ga4 : ''}, privacyUrl: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(l.privacyUrl || '') ? l.privacyUrl : '',
-      blocks: (Array.isArray(l.blocks) ? l.blocks : []).filter(b => b && LP_BLOCK_TYPES.includes(b.t)).slice(0, 40).map(b => ({id: sid(b.id) ? b.id : uid('bk'), t: b.t, on: b.on !== false, title: str(b.title, 300), text: str(b.text, 3000), kicker: str(b.kicker, 120), cta: str(b.cta, 80), note: str(b.note, 300), name: str(b.name, 160), price: str(b.price, 80), imgId: sid(b.imgId) ? b.imgId : '',
+      blocks: (Array.isArray(l.blocks) ? l.blocks : []).filter(b => b && LP_BLOCK_TYPES.includes(b.t)).slice(0, 40).map(b => ({id: sid(b.id) ? b.id : uid('bk'), t: b.t, on: b.on !== false, title: str(b.title, 300), text: str(b.text, 3000), kicker: str(b.kicker, 120), cta: str(b.cta, 80), to: LK_TO(b.to), note: str(b.note, 300), name: str(b.name, 160), price: str(b.price, 80), imgId: sid(b.imgId) ? b.imgId : '',
         items: (Array.isArray(b.items) ? b.items : []).slice(0, 30).map(i => ({t: str(i && i.t, 400), d: str(i && i.d, 1200)})), yes: (Array.isArray(b.yes) ? b.yes : []).slice(0, 12).map(t => str(t, 300)), no: (Array.isArray(b.no) ? b.no : []).slice(0, 12).map(t => str(t, 300))})),
       vis: normalizeVis(l.vis), created: str(l.created, 40) || new Date().toISOString()};
   });
@@ -4946,7 +4982,20 @@ function lpSeedBlocks(l) {
 const lpE = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]);
 const lpRich = s => lpE(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
 const lpPending = l => (l.vis ? (JSON.stringify(l.vis).match(/\[CONFIRMAR/g) || []).length : 0) + (l.blocks || []).filter(b => b.on && !l.vis).reduce((n, b) => n + (JSON.stringify([b.title, b.text, b.note, b.price, b.items, b.yes, b.no]).match(/\[CONFIRMAR/g) || []).length, 0);
+/* destino de links: 'page:<id>[#sec]' página do site, 'thanks' página de obrigado, 'wa' WhatsApp da página, 'url:...' endereço externo */
+let LP_P = null;
+function lpDest(to, l, p) {
+  p = p || LP_P; if (!to) return null; let m;
+  if ((m = /^page:([\w-]+)(#[\w-]+)?$/.exec(to))) { const pg = p && p.landings.find(x => x.id === m[1]); if (!pg) return null; return {href: (pg.id === l.id ? '' : lpFile(pg)) + (m[2] || ''), ext: false, page: pg}; }
+  if (to === 'thanks') return {href: 'obrigado.html', ext: false, thanks: true};
+  if (to === 'wa') return l.whatsapp ? {href: 'https://wa.me/' + l.whatsapp + '?text=' + encodeURIComponent('Olá! Vim pela página: ' + (l.name || '')), ext: true} : null;
+  if (/^url:/.test(to)) return {href: to.slice(4), ext: true};
+  if (/^(tel:|mailto:)/.test(to)) return {href: to, ext: false};
+  if (/^#/.test(to)) return {href: to, ext: false};
+  return null;
+}
 function lpCta(l, b) {
+  const own = lpDest(b && b.to, l) || lpDest(l.ctaTo, l); if (own) return own;
   const P = l.product, hasForm = (l.blocks || []).some(x => x.t === 'form' && x.on);
   if (P.checkout && l.type !== 'servico') return {href: P.checkout, ext: true};
   if (hasForm) return {href: '#form', ext: false};
@@ -5036,8 +5085,8 @@ function lpBlockHTML(l, b, ctx) {
 const lpFile = l => (l.slug && l.slug !== 'index' ? l.slug : 'index') + '.html';
 function lpChrome(l, p) {
   const site = (p.sites || []).find(x => x.id === l.siteId); if (!site) return null; const E = lpE, pages = p.landings.filter(x => x.siteId === site.id), me = l.id;
-  const nav = pages.map(x => `<a href="${E(lpFile(x))}"${x.id === me ? ' class="on"' : ''}>${E(x.navLabel || x.name)}</a>`).join(''), brand = site.brand || p.name;
-  const formPage = pages.find(x => (x.blocks || []).some(b => b.t === 'form' && b.on)), cta = site.headerCta ? (l.blocks.some(b => b.t === 'form' && b.on) ? '#form' : formPage ? lpFile(formPage) + '#form' : (l.product.checkout || '#')) : '';
+  const nav = site.navMode === 'cta' ? '' : pages.filter(x => x.inMenu !== false).map(x => `<a href="${E(lpFile(x))}"${x.id === me ? ' class="on"' : ''}>${E(x.navLabel || x.name)}</a>`).join('') + (site.menu || []).map(m => { const d = lpDest(m.to, l, p); return d ? `<a href="${E(d.href || '#')}"${d.ext ? ' target="_blank" rel="noopener"' : ''}>${E(m.label)}</a>` : ''; }).join(''), brand = site.brand || p.name;
+  const formPage = pages.find(x => (x.blocks || []).some(b => b.t === 'form' && b.on)), hd = lpDest(site.headerTo, l, p), cta = site.headerCta ? (hd ? hd.href || '#' : l.blocks.some(b => b.t === 'form' && b.on) ? '#form' : formPage ? lpFile(formPage) + '#form' : (l.product.checkout || '#')) : '';
   return {site, header: `<header class="sh"><div class="w sh-in"><a class="sh-brand" href="index.html">${E(brand)}</a><input type="checkbox" id="mn" class="mn-i" aria-label="Abrir menu"><label for="mn" class="mn-b" aria-hidden="true"><i></i><i></i><i></i></label><nav class="sh-nav">${nav}${cta ? `<a class="btn sh-cta" href="${E(cta)}">${E(site.headerCta)}</a>` : ''}</nav></div></header>`,
     footer: `<footer class="sf"><div class="w"><div class="sf-g"><div><b>${E(brand)}</b>${site.footer ? `<p>${lpRich(site.footer)}</p>` : ''}</div><div class="sf-n">${nav}</div>${site.contact ? `<div>${lpRich(site.contact)}</div>` : ''}</div><div class="sf-c">${E(brand)} · ${new Date().getFullYear()}${l.privacyUrl ? ` · <a href="${E(l.privacyUrl)}">Privacidade</a>` : ''}</div></div></footer>`,
     css: `.sh{position:sticky;top:0;z-index:60;background:var(--bg);border-bottom:1px solid var(--line)}.sh-in{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}.sh-brand{font-weight:800;font-size:19px;color:var(--fg);text-decoration:none;font-family:'${l.theme.head}',sans-serif}.sh-nav{display:flex;align-items:center;gap:22px}.sh-nav a{color:var(--fg);text-decoration:none;font-size:15px;font-weight:600}.sh-nav a.on{color:var(--a)}.sh-nav .btn{padding:10px 18px;font-size:14px;color:var(--on);box-shadow:none}.mn-i,.mn-b{display:none}
@@ -5066,7 +5115,7 @@ async function lpAssets(l, p) {
   const o = lpSeoOf(l, p); if (!o.ogId) return []; const bl = await lpCover(o.ogId, 1200, 630, 'image/jpeg', 0.86); return bl ? [{name: o.ogFile, data: new Uint8Array(await bl.arrayBuffer())}] : [];
 }
 async function lpHTML(l, p, opts) {
-  opts = opts || {}; const T0 = l.theme || {}, hx = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? v : d, fn = (v, d) => (String(v || '').replace(/[^\w \-]/g, '').trim().slice(0, 60) || d);
+  opts = opts || {}; LP_P = p; const T0 = l.theme || {}, hx = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? v : d, fn = (v, d) => (String(v || '').replace(/[^\w \-]/g, '').trim().slice(0, 60) || d);
   const th = {accent: hx(T0.accent, '#e4572e'), bg: hx(T0.bg, '#ffffff'), fg: hx(T0.fg, '#141414'), dark: !!T0.dark, head: fn(T0.head, 'Poppins'), body: fn(T0.body, 'Inter'), rad: T0.rad, hw: T0.hw, hero: T0.hero, ly: T0.ly};
   const TR = {metaPixel: /^\d{5,20}$/.test(l.tracking && l.tracking.metaPixel || '') ? l.tracking.metaPixel : '', ga4: /^G-[A-Z0-9]{4,14}$/.test(l.tracking && l.tracking.ga4 || '') ? l.tracking.ga4 : ''};
   const blocks = (l.blocks || []).filter(b => b.on), hero = blocks.find(b => b.t === 'hero'), leadsUrl = state.workspace.leadsUrl || '';
@@ -8308,7 +8357,7 @@ function mzIsDesc(root, anc, id) { const f = mzFind(anc, id); return !!f; }
 
 /* ---------- normalização (todo JSON de fora passa por aqui) ---------- */
 const MZ_STR = (v, n) => String(v == null ? '' : v).slice(0, n);
-const MZ_URL = v => { v = String(v || '').trim(); return /^(https?:\/\/[^\s"'<>]{1,1500}|\/[^\s"'<>]{0,1500}|#[\w-]{0,80}|mailto:[^\s"'<>]{1,200}|tel:[+\d\s()\-]{3,30}|\{\{[\w.\-]{1,40}\}\})$/i.test(v) ? v : ''; };
+const MZ_URL = v => { v = String(v || '').trim(); return /^(https?:\/\/[^\s"'<>]{1,1500}|\/[^\s"'<>]{0,1500}|#[\w-]{0,80}|mailto:[^\s"'<>]{1,200}|tel:[+\d\s()\-]{3,30}|page:[\w-]{1,40}(?:#[\w-]{0,40})?|\{\{[\w.\-]{1,40}\}\})$/i.test(v) ? v : ''; };
 function mzCssVal(k, v) {
   if (typeof v === 'number') return isFinite(v) ? (MZ_PX.has(k) ? v + 'px' : String(v)) : '';
   v = String(v == null ? '' : v).trim(); if (!v || v.length > 400) return '';
@@ -8418,6 +8467,12 @@ function mzVideoEmbed(u) {
 function mzDrawPath(pts) { if (pts.length < 4) return `M${pts[0]} ${pts[1]}l.01 .01`; let d = `M${pts[0]} ${pts[1]}`; for (let i = 2; i < pts.length - 2; i += 2) { const mx = (pts[i] + pts[i + 2]) / 2, my = (pts[i + 1] + pts[i + 3]) / 2; d += `Q${pts[i]} ${pts[i + 1]} ${Math.round(mx * 10) / 10} ${Math.round(my * 10) / 10}`; } return d + `L${pts[pts.length - 2]} ${pts[pts.length - 1]}`; }
 function mzDrawSvg(P) { return `<svg viewBox="0 0 ${P.w} ${P.h}" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">${(P.strokes || []).map(k => `<path d="${mzDrawPath(k.pts)}" fill="none" stroke="${k.c}" stroke-width="${k.w}" stroke-opacity="${k.o}" stroke-linecap="${k.k === 'hl' ? 'square' : 'round'}" stroke-linejoin="round"/>`).join('')}</svg>`; }
 /* ctx: {mode:'edit'|'out', comps, img(imgId)→url, ds} */
+/* links entre páginas da Mesa: 'page:<id>[#ancora]' vira o arquivo da página na exportação (index.html, sobre.html…) ou /slug/ no Elementor */
+let MZ_LINKS = [];
+function mzHref(h, wp) {
+  const m = /^page:([\w-]+)(#[\w-]*)?$/.exec(h || ''); if (!m) return h || '#'; const pg = MZ_LINKS.find(x => x.id === m[1]); if (!pg) return '#';
+  const base = pg.home ? 'index' : mzSlug(pg.slug || pg.name); return (wp ? (pg.home ? '/' : '/' + base + '/') : base + '.html') + (m[2] || '');
+}
 function mzNodeHtml(n, ctx, root) {
   if (n.hidden) return ''; const ed = ctx.mode === 'edit', P = n.props, cls = ['mz-e', mzCls(n)], mt = mzTypoOf(n);
   if (mt) cls.push('mz-t-' + mt); if (n.cls) cls.push(n.cls); if (n.anim.type && !ed) cls.push('mz-an', 'mz-an-' + n.anim.type);
@@ -8432,12 +8487,12 @@ function mzNodeHtml(n, ctx, root) {
     case 'section': case 'container': { const t = P.tag || (n.type === 'section' ? 'section' : 'div'); if (P.boxed) return `<${t} class="${cls.join(' ')} mz-boxed" ${at.join(' ')}><div class="mz-in">${kids()}</div></${t}>`; return `<${t} class="${cls.join(' ')}" ${at.join(' ')}>${kids()}</${t}>`; }
     case 'column': case 'div': return `<div class="${cls.join(' ')}" ${at.join(' ')}>${kids()}</div>`;
     case 'form': return `<form class="${cls.join(' ')} mz-form" ${at.join(' ')} ${ed ? 'onsubmit="return false"' : `data-leads="${mzEsc(P.action)}" data-thanks="${mzEsc(P.thanks)}" data-source="${mzEsc(P.source)}" novalidate`}>${kids()}</form>`;
-    case 'link': return `<a class="${cls.join(' ')}" ${at.join(' ')} href="${ed ? '#' : mzEsc(P.href || '#')}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${kids()}</a>`;
+    case 'link': return `<a class="${cls.join(' ')}" ${at.join(' ')} href="${ed ? '#' : mzEsc(mzHref(P.href))}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${kids()}</a>`;
     case 'heading': return `<h${P.level || 2} class="${cls.join(' ')}" ${at.join(' ')}>${P.html && P.hOf === P.text ? P.html : mzEsc(P.text).replace(/\n/g, '<br>')}</h${P.level || 2}>`;
     case 'text': return `<div class="${cls.join(' ')}" ${at.join(' ')}>${P.html}</div>`;
-    case 'image': case 'logo': { const u = P.imgId ? img(P.imgId) : P.src; const im = u ? `<img src="${mzEsc(u)}" alt="${mzEsc(P.alt)}" ${ed ? 'draggable="false"' : 'loading="lazy"'}>` : '<span class="mz-ph">Imagem</span>'; return `<div class="${cls.join(' ')} mz-img" ${at.join(' ')}>${P.href && !ed ? `<a href="${mzEsc(P.href)}">${im}</a>` : im}${P.ovC ? `<span class="mz-ov" style="background:${P.ovC};mix-blend-mode:${P.ovM}"></span>` : ''}</div>`; }
+    case 'image': case 'logo': { const u = P.imgId ? img(P.imgId) : P.src; const im = u ? `<img src="${mzEsc(u)}" alt="${mzEsc(P.alt)}" ${ed ? 'draggable="false"' : 'loading="lazy"'}>` : '<span class="mz-ph">Imagem</span>'; return `<div class="${cls.join(' ')} mz-img" ${at.join(' ')}>${P.href && !ed ? `<a href="${mzEsc(mzHref(P.href))}">${im}</a>` : im}${P.ovC ? `<span class="mz-ov" style="background:${P.ovC};mix-blend-mode:${P.ovM}"></span>` : ''}</div>`; }
     case 'video': { const v = mzVideoEmbed(P.url); let inner = '<span class="mz-ph">Cole o endereço do vídeo</span>'; if (v && v.iframe) inner = ed ? `<div class="mz-vph">▶ Vídeo</div>` : `<iframe src="${mzEsc(v.iframe)}" loading="lazy" allowfullscreen title="Vídeo"></iframe>`; else if (v && v.file) inner = ed ? `<div class="mz-vph">▶ Vídeo</div>` : `<video src="${mzEsc(v.file)}" controls playsinline${P.poster ? ` poster="${mzEsc(img(P.poster))}"` : ''}></video>`; return `<div class="${cls.join(' ')} mz-video" ${at.join(' ')} style="aspect-ratio:${P.ratio}">${inner}</div>`; }
-    case 'button': return `<a class="${cls.join(' ')} mz-btn mz-btn-${P.variant}" ${at.join(' ')} href="${ed ? '#' : mzEsc(P.href || '#')}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${mzEsc(P.text)}</a>`;
+    case 'button': return `<a class="${cls.join(' ')} mz-btn mz-btn-${P.variant}" ${at.join(' ')} href="${ed ? '#' : mzEsc(mzHref(P.href))}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${mzEsc(P.text)}</a>`;
     case 'icon': return `<span class="${cls.join(' ')} mz-icon" ${at.join(' ')} style="font-size:${P.size}px">${mzIcon(P.name, '1em')}</span>`;
     case 'svg': return `<div class="${cls.join(' ')} mz-svg" ${at.join(' ')}>${P.svg || '<span class="mz-ph">SVG</span>'}</div>`;
     case 'list': { const t = P.ordered ? 'ol' : 'ul'; return `<${t} class="${cls.join(' ')} mz-list${P.icon ? ' mz-list-i' : ''}" ${at.join(' ')}>${P.items.map(i => `<li>${P.icon ? `<span class="mz-li">${mzIcon(P.icon, 18)}</span>` : ''}<span>${mzEsc(i)}</span></li>`).join('')}</${t}>`; }
@@ -8446,7 +8501,7 @@ function mzNodeHtml(n, ctx, root) {
     case 'spacer': return `<div class="${cls.join(' ')} mz-spacer" ${at.join(' ')}></div>`;
     case 'input': { const lab = P.label ? `<span class="mz-lab">${mzEsc(P.label)}${P.required ? ' *' : ''}</span>` : ''; let f; if (P.kind === 'textarea') f = `<textarea name="${P.name}" placeholder="${mzEsc(P.placeholder)}" rows="4"${P.required ? ' required' : ''}></textarea>`; else if (P.kind === 'select') f = `<select name="${P.name}"${P.required ? ' required' : ''}>${P.options.map(o => `<option>${mzEsc(o)}</option>`).join('')}</select>`; else f = `<input type="${P.kind}" name="${P.name}" placeholder="${mzEsc(P.placeholder)}"${P.required ? ' required' : ''}>`; return `<label class="${cls.join(' ')} mz-field" ${at.join(' ')}>${lab}${f}</label>`; }
     case 'checkbox': case 'radio': return `<label class="${cls.join(' ')} mz-check" ${at.join(' ')}><input type="${n.type}" name="${P.name}" value="${mzEsc(P.value)}"${P.required ? ' required' : ''}><span>${mzEsc(P.label)}</span></label>`;
-    case 'menu': return `<nav class="${cls.join(' ')} mz-menu" ${at.join(' ')}><ul>${P.items.map(i => `<li><a href="${ed ? '#' : mzEsc(i.href)}">${mzEsc(i.label)}</a></li>`).join('')}</ul></nav>`;
+    case 'menu': return `<nav class="${cls.join(' ')} mz-menu" ${at.join(' ')}><ul>${P.items.map(i => `<li><a href="${ed ? '#' : mzEsc(mzHref(i.href))}">${mzEsc(i.label)}</a></li>`).join('')}</ul></nav>`;
     case 'badge': return `<span class="${cls.join(' ')} mz-badge" ${at.join(' ')}>${mzEsc(P.text)}</span>`;
     case 'accordion': return `<div class="${cls.join(' ')} mz-acc" ${at.join(' ')}>${P.items.map((i, k) => `<details${k === 0 && ed ? ' open' : ''}><summary>${mzEsc(i.q)}</summary><div class="mz-acc-a">${i.a}</div></details>`).join('')}</div>`;
     case 'tabs': return `<div class="${cls.join(' ')} mz-tabs" ${at.join(' ')}><div class="mz-tabs-h" role="tablist">${P.items.map((i, k) => `<button type="button" class="${k === 0 ? 'on' : ''}" data-tab="${k}">${mzEsc(i.t)}</button>`).join('')}</div>${P.items.map((i, k) => `<div class="mz-tabs-p${k === 0 ? ' on' : ''}" data-pane="${k}">${i.c}</div>`).join('')}</div>`;
@@ -8513,7 +8568,7 @@ function mzDoc(m, page, o) {
   return mzAnimWrap(mzDocBase(m, page, o));
 }
 function mzDocBase(m, page, o) {
-  o = o || {}; const ctx = {mode: 'out', comps: m.comps, img: o.img || (() => '')}, body = mzNodeHtml(page.root, ctx), css = mzTreeCss(page.root, m.ds, ctx), fu = mzFontsUrl(m.ds, page.root);
+  o = o || {}; MZ_LINKS = m.pages; const ctx = {mode: 'out', comps: m.comps, img: o.img || (() => '')}, body = mzNodeHtml(page.root, ctx).replace(/href="(page:[^"]*)"/g, (x, h) => 'href="' + mzEsc(mzHref(h.replace(/&#39;|&quot;|&amp;/g, ''))) + '"'), css = mzTreeCss(page.root, m.ds, ctx), fu = mzFontsUrl(m.ds, page.root);
   const seo = page.seo || {}, title = seo.title || page.name;
   return `<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${mzEsc(title)}</title>\n${seo.desc ? `<meta name="description" content="${mzEsc(seo.desc)}">\n` : ''}${page.priv ? '<meta name="robots" content="noindex,nofollow">\n' : ''}${fu ? `<link rel="stylesheet" href="${fu}">\n` : ''}${o.cssFile ? `<link rel="stylesheet" href="${o.cssFile}">` : `<style>\n${css}\n</style>`}\n</head>\n<body>\n${body}\n<script>${MZ_RUNTIME}<\/script>\n</body>\n</html>`;
 }
@@ -8642,10 +8697,10 @@ const MZ_EL = [
 const MZ_FIELDS = {
   heading: [{k: 'text', t: 'area', l: 'Texto'}, {k: 'level', t: 'sel', l: 'Nível', o: [[1, 'H1'], [2, 'H2'], [3, 'H3'], [4, 'H4']]}],
   text: [{k: 'html', t: 'rich', l: 'Texto (duplo clique no canvas para formatar)'}],
-  image: [{k: 'imgId', t: 'img', l: 'Imagem da biblioteca'}, {k: 'src', t: 'url', l: 'ou endereço da imagem'}, {k: 'alt', t: 'text', l: 'Texto alternativo'}, {k: 'href', t: 'url', l: 'Link ao clicar'}],
-  logo: [{k: 'imgId', t: 'img', l: 'Logo'}, {k: 'alt', t: 'text', l: 'Texto alternativo'}, {k: 'href', t: 'url', l: 'Link'}],
+  image: [{k: 'imgId', t: 'img', l: 'Imagem da biblioteca'}, {k: 'src', t: 'url', l: 'ou endereço da imagem'}, {k: 'alt', t: 'text', l: 'Texto alternativo'}, {k: 'href', t: 'link', l: 'Link ao clicar'}],
+  logo: [{k: 'imgId', t: 'img', l: 'Logo'}, {k: 'alt', t: 'text', l: 'Texto alternativo'}, {k: 'href', t: 'link', l: 'Link'}],
   video: [{k: 'url', t: 'url', l: 'Endereço (YouTube, Vimeo ou arquivo)'}, {k: 'ratio', t: 'sel', l: 'Proporção', o: [['16/9', '16:9'], ['4/3', '4:3'], ['1/1', '1:1'], ['9/16', '9:16']]}],
-  button: [{k: 'text', t: 'text', l: 'Texto'}, {k: 'href', t: 'url', l: 'Link'}, {k: 'variant', t: 'sel', l: 'Estilo', o: [['solid', 'Cheio'], ['outline', 'Contorno'], ['ghost', 'Sem fundo']]}, {k: 'newTab', t: 'bool', l: 'Abrir em nova aba'}],
+  button: [{k: 'text', t: 'text', l: 'Texto'}, {k: 'href', t: 'link', l: 'Link'}, {k: 'variant', t: 'sel', l: 'Estilo', o: [['solid', 'Cheio'], ['outline', 'Contorno'], ['ghost', 'Sem fundo']]}, {k: 'newTab', t: 'bool', l: 'Abrir em nova aba'}],
   icon: [{k: 'name', t: 'icon', l: 'Ícone'}, {k: 'size', t: 'num', l: 'Tamanho (px)'}],
   svg: [{k: 'svg', t: 'area', l: 'Código SVG'}],
   draw: [],
@@ -8663,7 +8718,7 @@ const MZ_FIELDS = {
   timeline: [{k: 'items', t: 'tl', l: 'Marcos (Quando | Título | Descrição, uma por linha)'}],
   section: [{k: 'boxed', t: 'bool', l: 'Conteúdo em caixa (largura máxima)'}, {k: 'w', t: 'num', l: 'Largura máxima (px, 0 = padrão do site)'}, {k: 'tag', t: 'sel', l: 'Etiqueta HTML', o: [['section', 'section'], ['header', 'header'], ['footer', 'footer'], ['main', 'main'], ['div', 'div']]}],
   container: [{k: 'boxed', t: 'bool', l: 'Conteúdo em caixa'}, {k: 'w', t: 'num', l: 'Largura máxima (px)'}],
-  link: [{k: 'href', t: 'url', l: 'Link'}, {k: 'newTab', t: 'bool', l: 'Abrir em nova aba'}],
+  link: [{k: 'href', t: 'link', l: 'Link'}, {k: 'newTab', t: 'bool', l: 'Abrir em nova aba'}],
   form: [{k: 'action', t: 'url', l: 'Endereço que recebe os contatos (leads)'}, {k: 'thanks', t: 'url', l: 'Página de obrigado'}, {k: 'source', t: 'text', l: 'Origem (rótulo)'}]
 };
 
@@ -9117,7 +9172,7 @@ function mzOnResize() { if (MZ.fit) { mzLayoutFrames(); mzOverlayAll(); } }
 function mzShellHtml() {
   return `<div class="mz-top">
     <button class="mz-btn-i" onclick="mzClose()" title="Voltar (Esc sem seleção)">← Voltar</button>
-    <div class="mz-title"><b>${esc(MZ.p.name)}</b><select id="mzPageSel" onchange="mzPageOpen(this.value)" title="Página"></select><button class="mz-btn-i" onclick="mzModalPages()" title="Gerenciar páginas">Páginas</button></div>
+    <div class="mz-title"><b>${esc(MZ.p.name)}</b><select id="mzPageSel" onchange="mzPageOpen(this.value)" title="Página"></select><button class="mz-btn-i" onclick="mzModalPages()" title="Gerenciar páginas">Páginas</button><button class="mz-btn-i" onclick="mzModalLinks()" title="Mapa de links entre as páginas, menus e verificador">Links</button></div>
     <div class="mz-bps"><button data-mzbp="d" class="on" onclick="mzSetBp('d')" title="Desktop 1440">🖥 1440</button><button data-mzbp="t" onclick="mzSetBp('t')" title="Tablet 768">▭ 768</button><button data-mzbp="m" onclick="mzSetBp('m')" title="Celular 390">▯ 390</button><button data-mzview="three" onclick="mzSetView(MZ.view==='three'?'one':'three')" title="Ver os três tamanhos lado a lado">⫼ 3 telas</button></div>
     <div class="mz-zoom"><button onclick="mzZoom(-0.1)" title="Menos zoom">−</button><span id="mzZoomL">100%</span><button onclick="mzZoom(0.1)" title="Mais zoom">＋</button><button onclick="mzZoomFit()" title="Ajustar à tela">Ajustar</button></div>
     <div class="mz-acts"><button class="mz-btn-i" id="mzUndo" onclick="mzUndo()" title="Desfazer (Ctrl+Z)">↶</button><button class="mz-btn-i" id="mzRedo" onclick="mzRedo()" title="Refazer (Ctrl+Y)">↷</button><span class="mz-sep"></span>
@@ -9228,6 +9283,7 @@ function mzField(n, f) {
   const v = n.props[f.k], on = `mzSetProp('${f.k}',this.value)`;
   switch (f.t) {
     case 'text': case 'url': return mzTxt(f.l, v, on);
+    case 'link': return mzLinkField(f.l, v, f.k);
     case 'area': return mzArea(f.l, v, on);
     case 'rich': return mzArea(f.l, v, on, 5);
     case 'num': return `<label class="mz-f"><span>${f.l}</span><input type="number" value="${esc(v)}" onchange="mzSetProp('${f.k}',+this.value)"></label>`;
@@ -9238,7 +9294,7 @@ function mzField(n, f) {
     case 'imgs': return `<div class="mz-f"><span>${f.l} (${(v || []).length})</span><div class="mz-imgsel">${(v || []).slice(0, 6).map(i => `<img data-lib="${esc(i)}" alt="">`).join('')}<button class="btn sm" onclick="mzAddGalleryImg()">＋ Adicionar</button>${(v || []).length ? `<button class="btn sm" onclick="mzSetProp('imgs',[],{panels:true})">Limpar</button>` : ''}</div></div>`;
     case 'icon': return `<div class="mz-f"><span>${f.l}</span><div class="mz-icons sm">${f.k === 'icon' ? `<button class="${!v ? 'on' : ''}" onclick="mzSetProp('icon','',{panels:true})">∅</button>` : ''}${Object.keys(MZ_ICONS).map(k => `<button class="${v === k ? 'on' : ''}" title="${k}" onclick="mzSetProp('${f.k}','${k}',{panels:true})">${mzI(k, 18)}</button>`).join('')}</div></div>`;
     case 'lines': return mzArea(f.l, (v || []).join('\n'), `mzSetProp('${f.k}',this.value.split('\\n').map(function(x){return x.trim()}).filter(Boolean))`, 5);
-    case 'pairs': return mzArea(f.l, (v || []).map(i => i.label + ' | ' + i.href).join('\n'), `mzSetProp('${f.k}',this.value.split('\\n').map(function(l){var p=l.split('|');return {label:(p[0]||'').trim(),href:(p[1]||'#').trim()}}).filter(function(x){return x.label}))`, 5);
+    case 'pairs': return mzArea(f.l + ' (um por linha: Texto | destino. Destino: @pagina, #secao ou https://…)', (v || []).map(i => i.label + ' | ' + mzLinkShow(i.href)).join('\n'), `mzSetProp('${f.k}',mzPairsParse(this.value))`, 5) + `<div class="mz-sec"><button class="btn sm" onclick="mzMenuFromPages()">Montar o menu com as páginas</button></div>`;
     case 'qa': return mzArea(f.l, (v || []).map(i => i.q + ' :: ' + i.a.replace(/<[^>]+>/g, '')).join('\n'), `mzSetProp('${f.k}',this.value.split('\\n').map(function(l){var p=l.split('::');return {q:(p[0]||'').trim(),a:(p.slice(1).join('::')||'').trim()}}).filter(function(x){return x.q}))`, 6);
     case 'tabs': return mzArea(f.l, (v || []).map(i => i.t + ' :: ' + i.c.replace(/<[^>]+>/g, '')).join('\n'), `mzSetProp('${f.k}',this.value.split('\\n').map(function(l){var p=l.split('::');return {t:(p[0]||'').trim(),c:(p.slice(1).join('::')||'').trim()}}).filter(function(x){return x.t}))`, 6);
     case 'table': return mzArea(f.l, (v || []).map(r => r.join(' | ')).join('\n'), `mzSetProp('${f.k}',this.value.split('\\n').map(function(l){return l.split('|').map(function(c){return c.trim()})}).filter(function(r){return r.join('')}))`, 6);
@@ -9320,6 +9376,7 @@ function mzModalPages() {
   const m = mzM(); mzModal('Páginas do site', `<div class="mz-plist">${m.pages.map(p => `<div class="mz-prow ${p.id === m.cur ? 'on' : ''}"><div class="mz-pmeta"><input value="${esc(p.name)}" onchange="mzPageSet('${p.id}','name',this.value);mzPageSelUpdate()"><div class="mz-slug">/<input value="${esc(p.slug)}" onchange="mzPageSet('${p.id}','slug',this.value)" placeholder="${p.home ? '(início)' : 'slug'}"></div></div>
       <div class="mz-pflags"><label title="Página inicial"><input type="radio" name="mzhome" ${p.home ? 'checked' : ''} onchange="mzPageSet('${p.id}','home',1);mzModalPages()"> início</label><label><input type="checkbox" ${p.priv ? 'checked' : ''} onchange="mzPageSet('${p.id}','priv',this.checked)"> privada</label><select onchange="mzPageSet('${p.id}','kind',this.value)"><option value="page" ${p.kind === 'page' ? 'selected' : ''}>página</option><option value="campaign" ${p.kind === 'campaign' ? 'selected' : ''}>campanha</option></select></div>
       <div class="mz-pact"><button class="btn sm dark" onclick="mzPageOpen('${p.id}');mzModalClose()">Abrir</button><button class="btn sm" onclick="mzPageDup('${p.id}');mzModalPages();mzPageSelUpdate()">Duplicar</button><button class="btn sm" onclick="mzPageDel('${p.id}');mzModalPages();mzPageSelUpdate()">Excluir</button></div></div>`).join('')}</div>
+    <div class="mz-sec"><button class="btn sm dark" onclick="mzModalLinks()">Links entre as páginas</button> <button class="btn sm" onclick="mzMenusUpdate()">Atualizar menus com as páginas</button></div>
     <h4>Nova página</h4><div class="mz-tpls"><button class="mz-tpl" onclick="mzNewPageGo('blank')"><b>Em branco</b><small>Comece do zero</small></button>${MZ_TEMPLATES.map(t => `<button class="mz-tpl" onclick="mzNewPageGo('${t.id}')"><b>${t.name}</b><small>${t.desc}</small></button>`).join('')}${state.mesaLib.items.filter(i => i.kind === 'page').map(i => `<button class="mz-tpl" onclick="mzNewPageGo('lib:${i.id}')"><b>${esc(i.name)}</b><small>Da minha biblioteca</small></button>`).join('')}</div>`, {wide: true});
 }
 function mzNewPageGo(tpl) {
@@ -9463,9 +9520,9 @@ function mzElementorNode(n, ds, imgMap, comps) {
     case 'section': case 'container': case 'column': case 'div': case 'form': case 'link': { const set = Object.assign({}, S, {content_width: (n.props.boxed ? 'boxed' : 'full')}); if (n.props.boxed && n.props.w) set.boxed_width = {unit: 'px', size: n.props.w, sizes: []}; if (st.display === 'grid') { set.container_type = 'grid'; const m = /repeat\((\d+)/.exec(st.gridTemplateColumns || ''); if (m) set.grid_columns_grid = {unit: 'fr', size: +m[1], sizes: []}; } else if (!set.flex_direction) set.flex_direction = 'column'; if (n.type === 'form') return Object.assign(base, {elType: 'container', settings: set, isInner: false, elements: [w('shortcode', {shortcode: '[amp_lead_form title="" button="Enviar"]'})]}); return Object.assign(base, {elType: 'container', settings: set, isInner: false, elements: kids()}); }
     case 'heading': return w('heading', typo({title: P.text.replace(/\n/g, '<br>'), header_size: 'h' + (P.level || 2), align: st.textAlign || '', title_color: col('color') || ds.colors.text}));
     case 'text': return w('text-editor', typo({editor: P.html, text_color: col('color') || ''}));
-    case 'image': case 'logo': { const u = P.imgId ? (imgMap[P.imgId] || '') : P.src; const o = {image: {url: u, id: ''}, image_size: 'full', align: st.textAlign || ''}; if (P.href) o.link = {url: P.href, is_external: '', nofollow: ''}; if (st.width) { const wd = mzEl4(st.width); if (wd) o.width = wd; } return w('image', o); }
+    case 'image': case 'logo': { const u = P.imgId ? (imgMap[P.imgId] || '') : P.src; const o = {image: {url: u, id: ''}, image_size: 'full', align: st.textAlign || ''}; if (P.href) o.link = {url: mzHref(P.href, 1), is_external: '', nofollow: ''}; if (st.width) { const wd = mzEl4(st.width); if (wd) o.width = wd; } return w('image', o); }
     case 'video': { const v = mzVideoEmbed(P.url); if (v && v.iframe) return w('video', {video_type: /youtube/.test(v.iframe) ? 'youtube' : 'vimeo', [/youtube/.test(v.iframe) ? 'youtube_url' : 'vimeo_url']: P.url}); return html(`<video src="${mzEsc(P.url)}" controls style="width:100%"></video>`); }
-    case 'button': return w('button', typo({text: P.text, link: {url: P.href || '#', is_external: P.newTab ? 'on' : '', nofollow: ''}, align: st.textAlign || '', button_text_color: P.variant === 'solid' ? '#ffffff' : ds.colors.primary, background_color: P.variant === 'solid' ? ds.colors.primary : '', border_radius: {unit: 'px', top: String(ds.radius.md), right: String(ds.radius.md), bottom: String(ds.radius.md), left: String(ds.radius.md), isLinked: true}}));
+    case 'button': return w('button', typo({text: P.text, link: {url: mzHref(P.href, 1), is_external: P.newTab ? 'on' : '', nofollow: ''}, align: st.textAlign || '', button_text_color: P.variant === 'solid' ? '#ffffff' : ds.colors.primary, background_color: P.variant === 'solid' ? ds.colors.primary : '', border_radius: {unit: 'px', top: String(ds.radius.md), right: String(ds.radius.md), bottom: String(ds.radius.md), left: String(ds.radius.md), isLinked: true}}));
     case 'divider': return w('divider', {style: 'solid', weight: {unit: 'px', size: ds.border.width, sizes: []}, color: ds.border.color});
     case 'spacer': { const h = mzEl4(st.height) || {unit: 'px', size: 32, sizes: []}; return w('spacer', {space: h}); }
     case 'list': return w('icon-list', {icon_list: P.items.map(t => ({text: t, selected_icon: {value: 'fas fa-check', library: 'fa-solid'}, _id: mzEid()}))});
@@ -9475,7 +9532,7 @@ function mzElementorNode(n, ds, imgMap, comps) {
     default: { const ctx = {mode: 'out', comps, img: id => imgMap[id] || ''}; return html(mzNodeHtml(Object.assign({}, n, {hidden: false}), ctx)); }
   }
 }
-function mzElementor(pg, m, imgMap) { const arr = mzElementorNode(pg.root, m.ds, imgMap, m.comps) || []; const content = (Array.isArray(arr) ? arr : [arr]).map(e => Array.isArray(e) ? e : e).flat(); return {version: '0.4', title: pg.name, type: 'page', content, page_settings: {}, metadata: {mesa: 1}}; }
+function mzElementor(pg, m, imgMap) { MZ_LINKS = m.pages; const arr = mzElementorNode(pg.root, m.ds, imgMap, m.comps) || []; const content = (Array.isArray(arr) ? arr : [arr]).map(e => Array.isArray(e) ? e : e).flat(); return {version: '0.4', title: pg.name, type: 'page', content, page_settings: {}, metadata: {mesa: 1}}; }
 
 /* ---------- importar ---------- */
 function mzModalImport() {
@@ -9786,6 +9843,64 @@ function mzDrawStart(fr, e) {
     if (!eraser && pts.length >= 2) { P.strokes.push({c: D.color, w: Math.round(w * 10) / 10, o: br.o, k: br.k, pts: pts.slice(0, 1600)}); changed = true; }
     if (changed) mzCommit({panels: false}); };
   doc.addEventListener('pointermove', mv, true); doc.addEventListener('pointerup', up, true); doc.addEventListener('pointercancel', up, true); add(e);
+}
+
+</script>
+<script>
+/* ===== Mesa: ligação entre páginas =====
+   Um link interno é guardado como 'page:<id>' (e '#secao' opcional). Ao exportar vira o arquivo da página (index.html, sobre.html…) ou /slug/ no Elementor.
+   Se a página mudar de nome ou de endereço, o link continua certo. Aqui: seletor de destino, texto amigável '@slug', menu com todas as páginas e o verificador. */
+const mzPageLabel = pg => (pg.home ? 'Início' : pg.name);
+function mzLinkShow(h) { const m = /^page:([\w-]+)(#[\w-]*)?$/.exec(h || ''); if (!m) return h || '#'; const pg = mzM().pages.find(x => x.id === m[1]); return pg ? '@' + (pg.home ? 'inicio' : mzSlug(pg.slug || pg.name)) + (m[2] || '') : '#'; }
+function mzLinkParse(t) {
+  t = String(t || '').trim(); if (!t) return '#'; const m = /^@([\w-]+)(#[\w-]*)?$/.exec(t); if (!m) return t;
+  const pg = mzM().pages.find(x => (x.home && m[1] === 'inicio') || mzSlug(x.slug || x.name) === m[1]); return pg ? 'page:' + pg.id + (m[2] || '') : '#';
+}
+const mzPairsParse = txt => txt.split('\n').map(l => { const p = l.split('|'); return {label: (p[0] || '').trim(), href: mzLinkParse(p.slice(1).join('|') || '#')}; }).filter(x => x.label);
+function mzLinkField(label, v, k) {
+  const m = mzM(), cur = /^page:([\w-]+)(#[\w-]*)?$/.exec(v || ''), pid = cur ? cur[1] : '', anc = cur && cur[2] || '';
+  const opts = ['<option value="">Sem link</option>', '<option value="*" ' + (v && !cur ? 'selected' : '') + '>Endereço próprio…</option>'].concat(m.pages.map(pg => `<option value="${pg.id}" ${pg.id === pid ? 'selected' : ''}>Página: ${esc(mzPageLabel(pg))}</option>`)).join('');
+  return `<div class="mz-f"><span>${label}</span><select onchange="mzLinkPick('${k}',this.value)">${opts}</select>${cur ? `<input value="${esc(anc)}" placeholder="#secao (opcional)" onchange="mzSetProp('${k}','page:${pid}'+(this.value&&this.value[0]!=='#'?'#':'')+this.value.trim())">` : (v ? '' : '') }${!cur && v ? `<input value="${esc(v)}" onchange="mzSetProp('${k}',mzLinkParse(this.value),{panels:true})" placeholder="https://… ou #secao ou @pagina">` : ''}</div>`;
+}
+function mzLinkPick(k, val) { if (val === '') mzSetProp(k, '', {panels: true}); else if (val === '*') mzSetProp(k, 'https://', {panels: true}); else mzSetProp(k, 'page:' + val, {panels: true}); }
+function mzMenuFromPages() {
+  const m = mzM(), n = mzSelNode(); if (!n || n.type !== 'menu') return; const pgs = m.pages.filter(p => !p.priv && p.kind !== 'campaign' && !/^Site · Obrigado/i.test(p.name)).sort((a, b) => (b.home ? 1 : 0) - (a.home ? 1 : 0));
+  mzSetProp('items', pgs.map(p => ({label: mzPageLabel(p).replace(/^Site · /, ''), href: 'page:' + p.id})), {panels: true});
+}
+/* todos os links da Mesa: quem aponta para onde, quebrados e páginas soltas */
+function mzLinkScan() {
+  const m = mzM(), out = {links: [], bad: [], incoming: {}}; m.pages.forEach(p => { out.incoming[p.id] = 0; });
+  m.pages.forEach(pg => mzWalk(pg.root, n => {
+    const L = []; if (n.props) { if (n.props.href !== undefined && ['button', 'link', 'image', 'logo'].includes(n.type)) L.push([n.props.href, n.props.text || n.type]); if (n.type === 'menu') (n.props.items || []).forEach(i => L.push([i.href, i.label])); }
+    if (n.props && typeof n.props.html === 'string') [...n.props.html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g)].forEach(x => L.push([x[1].replace(/&amp;/g, '&'), x[2]]));
+    L.forEach(([h, t]) => {
+      const mm = /^page:([\w-]+)/.exec(h || ''); const rec = {page: pg, node: n.id, text: String(t || '').replace(/<[^>]+>/g, '').slice(0, 40), href: h || ''};
+      if (mm) { const to = m.pages.find(x => x.id === mm[1]); if (to) { rec.to = to; if (to.id !== pg.id) out.incoming[to.id]++; } else out.bad.push(Object.assign({why: 'a página de destino foi excluída'}, rec)); }
+      else if (!h || h === '#') out.bad.push(Object.assign({why: 'sem destino'}, rec));
+      else if (/^https:\/\/$/.test(h)) out.bad.push(Object.assign({why: 'endereço incompleto'}, rec));
+      out.links.push(rec);
+    });
+  }));
+  return out;
+}
+function mzModalLinks() {
+  const m = mzM(), s = mzLinkScan(), orphan = m.pages.filter(p => !p.home && !p.priv && !s.incoming[p.id]);
+  const body = `<p class="mz-hint">Os botões, imagens e menus da Mesa podem apontar para outra página do mesmo projeto. Assim, ao exportar, cada link vira o arquivo certo.</p>
+    <h4>Mapa</h4><div class="mz-lmap">${m.pages.map(p => { const to = s.links.filter(l => l.page.id === p.id && l.to && l.to.id !== p.id); const names = [...new Set(to.map(l => mzPageLabel(l.to)))]; return `<div class="mz-lrow"><b>${esc(mzPageLabel(p))}</b><span>${names.length ? '→ ' + names.map(esc).join(', ') : '<em>não leva a nenhuma página</em>'}</span><small>${s.incoming[p.id]} link(s) chegam aqui</small></div>`; }).join('')}</div>
+    <h4>Problemas ${s.bad.length + orphan.length ? '(' + (s.bad.length + orphan.length) + ')' : ''}</h4>
+    ${s.bad.length + orphan.length ? `<ul class="mz-lbad">${s.bad.map(b => `<li><b>${esc(mzPageLabel(b.page))}</b> · “${esc(b.text)}”: ${esc(b.why)} <button class="btn sm" onclick="mzPageOpen('${b.page.id}');mzModalClose();mzSelect('${b.node}')">Ir até lá</button></li>`).join('')}${orphan.map(p => `<li><b>${esc(mzPageLabel(p))}</b>: nenhum menu ou botão leva a esta página. <button class="btn sm" onclick="mzMenuAddPage('${p.id}')">Pôr no menu do início</button></li>`).join('')}</ul>` : '<p>Tudo ligado: nenhum link quebrado e nenhuma página solta.</p>'}
+    <div class="mz-sec"><button class="btn sm dark" onclick="mzMenusUpdate()">Atualizar todos os menus com as páginas</button> <small class="mz-hint">Reescreve os menus de todas as páginas com a lista atual de páginas (início primeiro).</small></div>`;
+  mzModal('Links entre páginas', body, {wide: true});
+}
+function mzMenusUpdate() {
+  const m = mzM(); let n = 0; const pgs = m.pages.filter(p => !p.priv && p.kind !== 'campaign' && !/obrigado/i.test(p.name) && !/obrigado/i.test(p.slug || '')).sort((a, b) => (b.home ? 1 : 0) - (a.home ? 1 : 0));
+  m.pages.forEach(pg => mzWalk(pg.root, nd => { if (nd.type === 'menu' && !nd.locked) { nd.props.items = pgs.map(p => ({label: mzPageLabel(p).replace(/^Site · /, ''), href: 'page:' + p.id})); n++; } }));
+  mzSnap(); mzTouch(); mzRender(); mzRefreshPanels(); mzModal('Links entre páginas', `<p>${n} menu(s) atualizado(s) com ${pgs.length} página(s).</p><button class="btn sm dark" onclick="mzModalLinks()">Ver o mapa</button>`);
+}
+function mzMenuAddPage(id) {
+  const m = mzM(), home = m.pages.find(p => p.home), pg = m.pages.find(p => p.id === id); if (!home || !pg) return; let n = 0;
+  mzWalk(home.root, nd => { if (nd.type === 'menu') { nd.props.items = (nd.props.items || []).concat([{label: mzPageLabel(pg).replace(/^Site · /, ''), href: 'page:' + pg.id}]); n++; } });
+  if (!n) { mzModal('Links entre páginas', '<p>A página inicial não tem um elemento de menu. Adicione um “Menu” (aba Elementos) e use “Montar o menu com as páginas”.</p>'); return; } mzSnap(); mzTouch(); mzRender(); mzModalLinks();
 }
 
 </script>
@@ -10873,7 +10988,7 @@ async function siteExport(id) {
   const pend = pages.reduce((n, l) => n + lpPending(l), 0); if (pend) toast(`Atenção: ${pend} item(ns) ainda como [CONFIRMAR].`); toast('Montando o ZIP…');
   const enc = new TextEncoder(), files = []; const imgSeen = new Set(); for (const l of pages) { const ex = lpExtractImgs(await lpHTML(l, p)); files.push({name: lpFile(l), data: enc.encode(ex.html)}); ex.files.forEach(f => { if (!imgSeen.has(f.name)) { imgSeen.add(f.name); files.push(f); } }); }
   const seen = new Set(); for (const l of pages) for (const a of await lpAssets(l, p)) if (!seen.has(a.name)) { seen.add(a.name); files.push(a); }
-  { const tl = pages.find(l => (l.thanks || {}).mode === 'page' || !l.thanks); if (tl && pages.some(l => (l.thanks || {}).mode !== 'none' && (l.thanks || {}).mode !== 'url' && (l.blocks.some(b => b.t === 'form' && b.on) || (l.vis && JSON.stringify(l.vis).includes('"t":"form"'))))) files.push({name: 'obrigado.html', data: enc.encode(await lpThanksHTML(pages.find(l => (l.thanks || {}).mode === 'page') || tl, p))}); }
+  { const hf = l => l.blocks.some(b => b.t === 'form' && b.on), tl = pages.find(l => hf(l) && ((l.thanks || {}).mode === 'page' || !l.thanks)) || pages.find(l => (l.thanks || {}).mode === 'page' || !l.thanks); if (tl && pages.some(l => (l.thanks || {}).mode !== 'none' && (l.thanks || {}).mode !== 'url' && (l.blocks.some(b => b.t === 'form' && b.on) || (l.vis && JSON.stringify(l.vis).includes('"t":"form"'))))) files.push({name: 'obrigado.html', data: enc.encode(await lpThanksHTML(tl, p))}); }
   if (!files.some(f => f.name === 'index.html')) files[0] = {name: 'index.html', data: files[0].data};
   download(slug(s.name) + '-site.zip', makeZip(files), 'application/zip'); pages.forEach(l => { l.status = 'Exportada'; }); persist();
 }
@@ -11176,7 +11291,7 @@ async function sbCreateSite(tid) {
     const l = normalizeLandings([{id: uid('lp'), name: name + ' — ' + pg.label, siteId: site.id, slug: pg.slug, navLabel: pg.label, type: 'generico', productId: pr ? pr.id : '', product: pr ? {nome: pr.name, preco: pr.price, publico: pr.audience, checkout: pr.checkout} : {}, theme, cta: bs.direct, whatsapp: f.whats, blocks: pg.blocks.map(lpBlockNew), status: 'Rascunho'}])[0];
     l.siteRole = pg.role; lpMerge(l, sbBlocksFor(l, f, bs, pg.role)); const h = l.blocks.find(b => b.t === 'hero'); if (h && f.foto) h.imgId = f.foto; p.landings.push(l);
   });
-  persist(); closeModal(); lpUI.main = 'sites'; lpUI.site = site.id; ES.site = site.id; ES.page = ''; ES.sel = ''; go('dev');
+  persist(); closeModal(); lpUI.main = 'sites'; lpUI.site = site.id; ES.site = site.id; ES.page = ''; ES.sel = ''; ES.thx = false; try { fxAuto(true); } catch (e) { /* o fluxo pode ser ligado depois, na aba Fluxo */ } go('dev');
   toast(`Site criado com o template ${t.nome}. Revise o que estiver em [CONFIRMAR].`);
   if (ai && typeof siteBSText === 'function' && siteBSText(site)) { try { await siteGenAll(); } catch (e) { toast(e.message); } if (ui.page === 'dev') renderDev(); }
 }
@@ -11277,7 +11392,7 @@ async function esPreview() {
   h = h.replace(/<\/body>/i, '<script>window.__sy=' + (+ES.sy || 0) + ';window.__sel=' + JSON.stringify(ES.sel || '') + ';' + ES_INJECT + '<\/script></body>'); fr.srcdoc = h;
 }
 const esPreviewLater = (() => { let h; return () => { clearTimeout(h); h = setTimeout(esPreview, 350); }; })();
-function esPage(id) { ES.page = id; ES.sel = ''; ES.sy = 0; renderDev(); }
+function esPage(id) { ES.page = id; ES.thx = false; ES.sel = ''; ES.sy = 0; renderDev(); }
 function esSelect(bid, scroll) {
   ES.sel = bid; esBlockEditor(); document.querySelectorAll('.es-secs li').forEach(li => li.classList.remove('sel'));
   const fr = $('esFrame'); if (fr && fr.contentWindow) fr.contentWindow.postMessage({es: 'mark', id: bid, go: !!scroll}, '*');
@@ -11302,7 +11417,7 @@ function esBlockEditor() {
     if (kind === 'img') return `<div class="es-f">${esc(lab)}<div class="es-row">${b[k] ? '<img class="es-th" data-lib="' + esc(b[k]) + '" alt="">' : ''}<button class="btn sm" onclick="esImg('${k}')">${b[k] ? 'Trocar' : 'Escolher da biblioteca'}</button>${b[k] ? `<button class="btn sm" onclick="esImg('${k}',true)">Tirar</button>` : ''}</div></div>`;
     if (kind.startsWith('items')) { const [a, c] = kind.split(':')[1].split('/'); return `<div class="es-f">${esc(lab)}${(b.items || []).map((it, i) => `<div class="es-it"><input placeholder="${esc(a)}" value="${esc(it.t || '')}" oninput="esItem(${i},'t',this.value)"><textarea rows="2" placeholder="${esc(c)}" oninput="esItem(${i},'d',this.value)">${esc(it.d || '')}</textarea><button class="es-mini" onclick="esItemDel(${i})" aria-label="Remover">×</button></div>`).join('')}<button class="btn sm" onclick="esItemAdd()">+ Adicionar</button></div>`; }
     return '';
-  }).join('')}<button class="btn sm" onclick="ES.sel='';esBlockEditor();esPreview()" style="margin-top:6px">Fechar</button></div>`;
+  }).join('')}${def.fields.some(f => f[0] === 'cta') ? `<label class="es-f">Para onde o botão leva<select onchange="fxBlockTo(this.value)">${fxOpts(p, l, b.to || '', {auto: 1})}</select>${fxUrlInput(b.to || '', 'fxBlockTo')}<small class="es-note">Automático = o destino da página. Veja tudo na aba Fluxo.</small></label>` : ''}<button class="btn sm" onclick="ES.sel='';esBlockEditor();esPreview()" style="margin-top:6px">Fechar</button></div>`;
   if (typeof libFill === 'function') libFill(box);
 }
 function esBlk() { const l = esCur(curProject()); return [l, l && l.blocks.find(x => x.id === ES.sel)]; }
@@ -11341,6 +11456,151 @@ function esVoltar() { esSent = false; esErr = []; SBR.tab = 'resumo'; go('briefi
 function esVerCliente() { esSent = false; esErr = []; go('cliente'); }
 /* modo da página do cliente: sem menu lateral */
 (function () { const g = go; go = function (page) { document.body.classList.toggle('es-solo', page === 'cliente'); return g.apply(this, arguments); }; })();
+
+</script>
+<script>
+/* ===== Estúdio de Sites: Fluxo (como as páginas se ligam) =====
+   Guarda DESTINOS, não endereços: 'page:<id>[#form]' = uma página do site, 'thanks' = página de obrigado, 'wa' = WhatsApp da página,
+   'url:https://…' = endereço de fora. Se a página mudar de nome ou de arquivo, os links continuam certos.
+   Onde entra: menu (site.menu + l.inMenu + site.navMode), botão do cabeçalho (site.headerTo), botão principal de cada página (l.ctaTo)
+   e botão de cada seção (bloco.to). A tela mostra o mapa, o menu, o botão principal e o verificador. */
+const FX = {open: {}};
+const fxSite = () => esSiteOf(curProject());
+const fxPages = p => esPageOf(p);
+const fxHasForm = l => (l.blocks || []).some(b => b.t === 'form' && b.on);
+const fxFormPage = p => fxPages(p).find(l => l.siteRole === 'contato' && fxHasForm(l)) || fxPages(p).find(fxHasForm) || null;
+const fxName = l => l.navLabel || l.name;
+/* opções de destino para um <select> */
+function fxOpts(p, l, cur, o) {
+  o = o || {}; const pg = fxPages(p), fp = fxFormPage(p), O = [], sel = v => (cur === v ? ' selected' : '');
+  if (o.auto) O.push(`<option value=""${sel('')}>Automático (formulário, compra ou WhatsApp)</option>`);
+  O.push('<optgroup label="Páginas do site">');
+  pg.forEach(x => { O.push(`<option value="page:${x.id}"${sel('page:' + x.id)}>${esc(fxName(x))}${x.id === l.id ? ' (esta página)' : ''}</option>`); if (fxHasForm(x)) O.push(`<option value="page:${x.id}#form"${sel('page:' + x.id + '#form')}>${esc(fxName(x))} → direto no formulário</option>`); });
+  O.push('</optgroup><optgroup label="Outros">');
+  if (fp) O.push(`<option value="thanks"${sel('thanks')}>Página de obrigado</option>`);
+  if (l.whatsapp) O.push(`<option value="wa"${sel('wa')}>WhatsApp (${esc(l.whatsapp)})</option>`);
+  O.push(`<option value="url:https://exemplo.com.br"${/^url:/.test(cur) ? ' selected' : ''}>Endereço de fora (link)…</option></optgroup>`);
+  return O.join('');
+}
+function fxUrlInput(cur, on) { return /^url:/.test(cur) ? `<input class="fx-url" value="${esc(cur.slice(4))}" placeholder="https://…" onchange="${on}(this.value?'url:'+this.value.trim():'')">` : ''; }
+function fxDestName(to, p, l) {
+  if (!to) return ''; const d = lpDest(to, l, p); if (!d) return 'destino que não existe mais'; if (d.page) return fxName(d.page) + (/#form$/.test(to) ? ' (formulário)' : ''); if (d.thanks) return 'Página de obrigado'; if (to === 'wa') return 'WhatsApp'; if (/^url:/.test(to)) return d.href.replace(/^https?:\/\//, '').slice(0, 40); return d.href;
+}
+/* destino real de um botão principal (o que a exportação vai gerar) */
+function fxCtaOf(p, l, b) { LP_P = p; return lpCta(l, b || {}); }
+function fxIssues(p, s) {
+  const pg = fxPages(p), out = [], inc = {}; pg.forEach(x => { inc[x.id] = 0; }); LP_P = p;
+  const seen = (to, from) => { const m = /^page:([\w-]+)/.exec(to || ''); if (m && inc[m[1]] !== undefined && m[1] !== from.id) inc[m[1]]++; };
+  (s.menu || []).forEach(m => seen(m.to, {})); seen(s.headerTo, {});
+  const menuOn = s.navMode !== 'cta'; if (menuOn) pg.forEach(x => { if (x.inMenu !== false) inc[x.id]++; });
+  pg.forEach(l => { seen(l.ctaTo, l); (l.blocks || []).forEach(b => seen(b.to, l)); });
+  const fp = fxFormPage(p);
+  pg.forEach(l => {
+    const nm = fxName(l), c = fxCtaOf(p, l);
+    if (l.ctaTo && !lpDest(l.ctaTo, l, p)) out.push({lvl: 'err', txt: `${nm}: o botão principal aponta para uma página que não existe mais.`, fix: ['Usar automático', `fxCta('${l.id}','')`]});
+    (l.blocks || []).filter(b => b.on && b.to && !lpDest(b.to, l, p)).forEach(b => out.push({lvl: 'err', txt: `${nm}: um botão da seção “${(LP_BLOCK[b.t] || {label: b.t}).label}” aponta para uma página que não existe mais.`}));
+    const hasBtn = (l.blocks || []).some(b => b.on && LP_BLOCK[b.t] && LP_BLOCK[b.t].fields.some(f => f[0] === 'cta'));
+    if (hasBtn && (!c.href || c.href === '#')) out.push({lvl: 'err', txt: `${nm}: o botão principal não leva a lugar nenhum (nem formulário, nem compra, nem WhatsApp).`, fix: fp && fp.id !== l.id ? ['Levar ao formulário de ' + fxName(fp), `fxCta('${l.id}','page:${fp.id}#form')`] : (l.whatsapp ? ['Levar ao WhatsApp', `fxCta('${l.id}','wa')`] : null)});
+    if (/exemplo\.com/.test(c.href)) out.push({lvl: 'warn', txt: `${nm}: o botão usa o endereço de exemplo. Troque pelo link real.`});
+    if (fxHasForm(l) && (l.thanks || {}).mode === 'none') out.push({lvl: 'warn', txt: `${nm}: o formulário não leva a nenhuma página de obrigado (não dá para medir a conversão).`, fix: ['Usar página de obrigado', `fxThanks('${l.id}','mode','page')`]});
+    if (fxHasForm(l) && (l.thanks || {}).mode === 'url' && !(l.thanks || {}).url) out.push({lvl: 'err', txt: `${nm}: obrigado em endereço de fora, mas o endereço está vazio.`});
+    if (l.siteRole !== 'home' && lpFile(l) !== 'index.html' && !inc[l.id]) out.push({lvl: 'warn', txt: `${nm}: nenhum menu ou botão leva a esta página (ela fica solta).`, fix: ['Pôr no menu', `fxMenuPage('${l.id}',true)`]});
+  });
+  if (s.headerCta) { const hd = lpDest(s.headerTo, pg[0] || {}, p); if (s.headerTo && !hd) out.push({lvl: 'err', txt: 'O botão do cabeçalho aponta para um destino que não existe mais.', fix: ['Usar automático', "fxHeader('headerTo','')"]}); }
+  if (!pg.some(x => lpFile(x) === 'index.html')) out.push({lvl: 'err', txt: 'Nenhuma página é a inicial (index.html). O site abriria vazio.', fix: pg[0] ? ['Definir “' + fxName(pg[0]) + '” como início', `fxHome('${pg[0].id}')`] : null});
+  (s.menu || []).forEach(m => { if (!lpDest(m.to, pg[0] || {}, p)) out.push({lvl: 'err', txt: `Item de menu “${m.label}”: o destino não existe mais.`}); });
+  if (!out.length) out.push({lvl: 'ok', txt: 'Tudo ligado: menu, botões e formulários levam a algum lugar que existe.'});
+  return out;
+}
+/* ---------- tela ---------- */
+function fxTable(p, s) {
+  const pg = fxPages(p);
+  return `<div class="fx-map">${pg.map((l, i) => {
+    const c = fxCtaOf(p, l), fm = fxHasForm(l), th = l.thanks || {}, to = l.ctaTo || '', menu = l.inMenu !== false;
+    const dest = to ? fxDestName(to, p, l) : (c.href === '#form' ? 'o formulário desta página' : c.href === '#' || !c.href ? '— nada —' : c.ext ? (c.href.indexOf('wa.me') > -1 ? 'WhatsApp' : 'compra / link externo') : c.href);
+    return `<div class="fx-pg${l.id === ES.page ? ' on' : ''}"><div class="fx-h"><b>${esc(fxName(l))}</b><code>${esc(lpFile(l))}</code>${menu ? '<span class="fx-tag">no menu</span>' : '<span class="fx-tag off">fora do menu</span>'}</div>
+      <div class="fx-r"><span>Botão principal →</span><b>${esc(dest)}</b></div>${fm ? `<div class="fx-r"><span>Formulário →</span><b>${th.mode === 'none' ? 'fica na mesma página' : th.mode === 'url' ? esc(th.url || '(endereço vazio)') : 'Página de obrigado'}</b></div>` : ''}</div>`;
+  }).join('')}${fxFormPage(p) ? `<div class="fx-pg fx-th${ES.thx ? ' on' : ''}"><div class="fx-h"><b>Obrigado</b><code>obrigado.html</code><span class="fx-tag off">fora do menu</span></div><div class="fx-r"><span>Botão →</span><b>WhatsApp ou Voltar ao início</b></div></div>` : ''}</div>`;
+}
+function fxHTML(p, s) {
+  const pg = fxPages(p), l = esCur(p), iss = fxIssues(p, s), bad = iss.filter(x => x.lvl !== 'ok').length;
+  const sec = (k, title, body, def) => `<details class="fx-sec" ${(FX.open[k] === undefined ? def : FX.open[k]) ? 'open' : ''} ontoggle="FX.open['${k}']=this.open"><summary>${title}</summary><div class="fx-b">${body}</div></details>`;
+  const verify = `<ul class="fx-iss">${iss.map(x => `<li class="${x.lvl}"><span>${x.lvl === 'ok' ? '✓' : x.lvl === 'err' ? '✕' : '!'}</span><div>${esc(x.txt)}${x.fix ? ` <button class="btn sm" onclick="${x.fix[1]}">${esc(x.fix[0])}</button>` : ''}</div></li>`).join('')}</ul>`;
+  const preset = `<div class="fx-pre"><button class="btn sm pri" onclick="fxAuto()" title="Liga menu, botões e formulário sozinho, do jeito mais comum">Ligar tudo automaticamente</button><button class="btn sm" onclick="fxPreset('lp')">Modelo: landing page + obrigado</button><button class="btn sm" onclick="fxPreset('inst')">Modelo: site institucional</button></div>`;
+  const pagesBody = `<table class="fx-t"><tbody>${pg.map((x, i) => `<tr><td class="fx-mv"><button class="es-mini" ${i ? '' : 'disabled'} onclick="fxMove('${x.id}',-1)" aria-label="Subir">↑</button><button class="es-mini" ${i < pg.length - 1 ? '' : 'disabled'} onclick="fxMove('${x.id}',1)" aria-label="Descer">↓</button></td>
+      <td><input value="${esc(x.navLabel || x.name)}" onchange="fxPageSet('${x.id}','navLabel',this.value)" title="Nome no menu"><small>${esc(lpFile(x))} · <a href="#" onclick="event.preventDefault();fxHome('${x.id}')">${lpFile(x) === 'index.html' ? 'é o início' : 'tornar início'}</a></small></td>
+      <td><label class="fx-ck"><input type="checkbox" ${x.inMenu !== false ? 'checked' : ''} onchange="fxMenuPage('${x.id}',this.checked)"> menu</label></td><td><button class="es-mini" onclick="fxDelPage('${x.id}')" aria-label="Remover página">×</button></td></tr>`).join('')}</tbody></table>
+    <div class="fx-add"><select id="fxNew"><option value="home">Início (StoryBrand)</option><option value="oferta" selected>Serviços / produtos</option><option value="sobre">Sobre</option><option value="contato">Contato</option></select><input id="fxNewN" placeholder="Nome no menu"><button class="btn sm" onclick="fxAddPage()">+ Página</button></div>`;
+  const menuBody = `<label class="es-f">Como fica o menu do cabeçalho<select onchange="fxHeader('navMode',this.value)"><option value="full" ${s.navMode !== 'cta' ? 'selected' : ''}>Todas as páginas marcadas “menu” (site com várias páginas)</option><option value="cta" ${s.navMode === 'cta' ? 'selected' : ''}>Sem menu, só o botão (landing page)</option></select></label>
+    <label class="es-f">Texto do botão do cabeçalho<input value="${esc(s.headerCta || '')}" onchange="fxHeader('headerCta',this.value)" placeholder="Ex.: Fale com a gente (vazio = sem botão)"></label>
+    ${s.headerCta ? `<label class="es-f">O botão do cabeçalho leva a<select onchange="fxHeaderTo(this.value)">${fxOpts(p, l || pg[0] || {}, s.headerTo || '', {auto: 1})}</select>${fxUrlInput(s.headerTo || '', 'fxHeaderTo')}</label>` : ''}
+    <div class="es-f">Itens extras no menu <small>link de fora ou outra página</small>${(s.menu || []).map(m => `<div class="fx-mi"><input value="${esc(m.label)}" onchange="fxMenuSet('${m.id}','label',this.value)"><select onchange="fxMenuTo('${m.id}',this.value)">${fxOpts(p, l || {}, m.to)}</select><button class="es-mini" onclick="fxMenuDel('${m.id}')" aria-label="Remover">×</button></div>${fxUrlInput(m.to, "fxMenuTo.bind(null,'" + m.id + "')")}`).join('')}<button class="btn sm" onclick="fxMenuAdd()">+ Item</button></div>
+    <small class="es-note">O rodapé repete o mesmo menu.</small>`;
+  const ctaBody = l ? `<label class="es-f">Em “${esc(fxName(l))}”, os botões das seções levam a<select onchange="fxCta('${l.id}',this.value)">${fxOpts(p, l, l.ctaTo || '', {auto: 1})}</select>${fxUrlInput(l.ctaTo || '', "fxCta.bind(null,'" + l.id + "')")}</label>
+    <small class="es-note">Hoje: <b>${esc((() => { const c = fxCtaOf(p, l); return l.ctaTo ? fxDestName(l.ctaTo, p, l) : c.href === '#form' ? 'o formulário desta página' : (!c.href || c.href === '#') ? 'nada (sem destino)' : c.href.slice(0, 50); })())}</b>. Para mudar só um botão, clique na seção e use “Para onde o botão leva”.</small>` : '';
+  const th = fxFormPage(p), tl = th && th.thanks || {};
+  const thxBody = th ? `<label class="es-f">Depois de enviar o formulário<select onchange="fxThanks('${th.id}','mode',this.value)"><option value="page" ${tl.mode !== 'url' && tl.mode !== 'none' ? 'selected' : ''}>Abrir a página de obrigado</option><option value="url" ${tl.mode === 'url' ? 'selected' : ''}>Ir para um endereço de fora</option><option value="none" ${tl.mode === 'none' ? 'selected' : ''}>Só mostrar um aviso na página</option></select></label>
+    ${tl.mode === 'url' ? `<label class="es-f">Endereço<input value="${esc(tl.url || '')}" onchange="fxThanks('${th.id}','url',this.value)" placeholder="https://…"></label>` : ''}
+    ${tl.mode !== 'url' && tl.mode !== 'none' ? `<label class="es-f">Título do obrigado<input value="${esc(tl.title || '')}" onchange="fxThanks('${th.id}','title',this.value)" placeholder="Recebemos os seus dados"></label><label class="es-f">Mensagem<textarea rows="3" onchange="fxThanks('${th.id}','text',this.value)" placeholder="Obrigado! Nossa equipe vai entrar em contato…">${esc(tl.text || '')}</textarea></label><button class="btn sm" onclick="esThx()">Ver a página de obrigado</button>` : ''}` : '<p class="es-note">Nenhuma página tem formulário. Adicione a seção “Formulário” em uma página para ter a página de obrigado.</p>';
+  return `<div class="fx"><p class="es-note">Aqui você liga as páginas: o menu, para onde cada botão vai e o que acontece depois do formulário. Os links são guardados por página, não por endereço, então continuam certos se você trocar nomes ou ordem.</p>${preset}
+    ${sec('v', 'Verificador ' + (bad ? `<span class="fx-n">${bad}</span>` : '<span class="fx-ok">ok</span>'), verify, true)}
+    ${sec('m', 'Mapa do site', fxTable(p, s), true)}
+    ${sec('p', 'Páginas e ordem do menu', pagesBody, false)}
+    ${sec('n', 'Menu e botão do cabeçalho', menuBody, false)}
+    ${sec('c', 'Botão principal da página', ctaBody, false)}
+    ${sec('t', 'Depois do formulário (obrigado)', thxBody, false)}</div>`;
+}
+/* ---------- ações ---------- */
+function fxDone(preview) { persist(); const p = curProject(); if (ES.tabA === 'fluxo') { const b = document.querySelector('#psRight .ps-pb'); if (b) { const sc = b.scrollTop; esRight(); const nb = document.querySelector('#psRight .ps-pb'); if (nb) nb.scrollTop = sc; } } if (preview !== false) esPreview(); }
+function fxPageSet(id, k, v) { const l = curProject().landings.find(x => x.id === id); if (!l) return; l[k] = String(v).trim().slice(0, 40) || l[k]; fxDone(); }
+function fxMenuPage(id, on) { const l = curProject().landings.find(x => x.id === id); if (l) l.inMenu = !!on; fxDone(); }
+function fxMove(id, d) { const p = curProject(), a = p.landings, i = a.findIndex(l => l.id === id), s = a[i].siteId; let j = i + d; while (j >= 0 && j < a.length && a[j].siteId !== s) j += d; if (j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; fxDone(); }
+function fxHome(id) {
+  const p = curProject(), pg = fxPages(p), l = pg.find(x => x.id === id), cur = pg.find(x => lpFile(x) === 'index.html' && x.id !== id); if (!l) return;
+  if (cur) { let b = slug(fxName(cur)) || 'pagina'; if (b === 'index') b = 'inicio'; const used = pg.map(x => x.slug); let sl = b.slice(0, 40); for (let i = 2; used.includes(sl); i++) sl = (b + '-' + i).slice(0, 40); cur.slug = sl; }
+  l.slug = 'index'; fxDone();
+}
+function fxDelPage(id) { const p = curProject(), l = p.landings.find(x => x.id === id); if (!l || fxPages(p).length < 2) { toast('O site precisa de pelo menos uma página.'); return; } if (!confirm('Remover a página “' + fxName(l) + '”? Os botões que levavam a ela voltam ao automático.')) return; p.landings = p.landings.filter(x => x.id !== id); fxClean(p, fxSite()); ES.page = ''; persist(); renderDev(); }
+function fxMakePage(role, nm) {
+  const p = curProject(), s = fxSite(), tpl = Object.values(SITE_TPL).flatMap(t => t.pages).find(x => x.role === role) || Object.values(SITE_TPL)[0].pages[0], base = slug(nm) || 'pagina', ex = fxPages(p).map(l => l.slug); let sl = base; for (let i = 2; ex.includes(sl); i++) sl = base + '-' + i;
+  const l = normalizeLandings([{id: uid('lp'), name: s.name + ' — ' + nm, siteId: s.id, slug: sl.slice(0, 40), navLabel: nm, type: 'generico', productId: s.productId, theme: (fxPages(p)[0] || {}).theme || lpTheme(p), blocks: tpl.blocks.map(lpBlockNew)}])[0]; l.siteRole = role;
+  if (typeof sbBlocksFor === 'function' && typeof lpMerge === 'function') { try { const f = sbFacts(p), bs = sbBS(f), bl = sbBlocksFor(l, f, bs, role); if (bl) lpMerge(l, bl); } catch (e) { /* segue com os textos-base */ } }
+  if (role === 'contato' && !l.blocks.some(b => b.t === 'form')) l.blocks.push(lpBlockNew('form'));
+  p.landings.push(l); return l;
+}
+function fxAddPage() { const role = $('fxNew').value, nm = ($('fxNewN').value || '').trim() || { home: 'Início', oferta: 'Serviços', sobre: 'Sobre', contato: 'Contato' }[role], l = fxMakePage(role, nm); ES.page = l.id; persist(); renderDev(); toast('Página criada: ' + nm); }
+function fxHeader(k, v) { const s = fxSite(); s[k] = k === 'navMode' ? (v === 'cta' ? 'cta' : 'full') : String(v).trim().slice(0, 40); fxDone(); }
+function fxHeaderTo(v) { const s = fxSite(); s.headerTo = LK_TO(v); fxDone(); }
+function fxMenuAdd() { const s = fxSite(), p = curProject(); s.menu = (s.menu || []).concat([{id: uid('mn'), label: 'Novo item', to: (fxPages(p)[0] ? 'page:' + fxPages(p)[0].id : 'url:https://exemplo.com.br')}]).slice(0, 12); fxDone(); }
+function fxMenuSet(id, k, v) { const m = (fxSite().menu || []).find(x => x.id === id); if (m) m[k] = String(v).trim().slice(0, 40) || m[k]; fxDone(); }
+function fxMenuTo(id, v) { const m = (fxSite().menu || []).find(x => x.id === id); if (m) m.to = LK_TO(v) || m.to; fxDone(); }
+function fxMenuDel(id) { const s = fxSite(); s.menu = (s.menu || []).filter(x => x.id !== id); fxDone(); }
+function fxCta(lid, v) { const l = curProject().landings.find(x => x.id === lid); if (l) l.ctaTo = LK_TO(v); fxDone(); }
+function fxBlockTo(v) { const [l, b] = esBlk(); if (b) { b.to = LK_TO(v); } persist(); esPreview(); esBlockEditor(); }
+function fxThanks(lid, k, v) { const l = curProject().landings.find(x => x.id === lid); if (!l) return; l.thanks = Object.assign({mode: 'page', url: '', title: '', text: ''}, l.thanks); l.thanks[k] = k === 'mode' ? (['page', 'url', 'none'].includes(v) ? v : 'page') : String(v).trim().slice(0, k === 'text' ? 400 : 200); fxDone(ES.thx); if (ES.thx) esPreview(); }
+function esThx() { if (!fxFormPage(curProject())) { toast('Nenhuma página tem formulário.'); return; } ES.thx = true; ES.tabA = 'fluxo'; ES.sel = ''; renderDev(); }
+/* um clique: menu com as páginas, botões levando ao formulário e o formulário levando ao obrigado */
+function fxClean(p, s) { const pg = fxPages(p); pg.forEach(l => { if (l.ctaTo && !lpDest(l.ctaTo, l, p)) l.ctaTo = ''; (l.blocks || []).forEach(b => { if (b.to && !lpDest(b.to, l, p)) b.to = ''; }); }); if (s.headerTo && !lpDest(s.headerTo, pg[0] || {}, p)) s.headerTo = ''; s.menu = (s.menu || []).filter(m => lpDest(m.to, pg[0] || {}, p)); }
+function fxAuto(quiet) {
+  const p = curProject(), s = fxSite(), pg = fxPages(p); if (!s || !pg.length) return; fxClean(p, s); const fp = fxFormPage(p), log = [];
+  if (!pg.some(x => lpFile(x) === 'index.html')) { fxHome(pg[0].id); log.push('Início definido'); }
+  pg.forEach(l => { if (l.inMenu === false && !/obrigado/i.test(l.slug)) { l.inMenu = true; } });
+  s.navMode = pg.length < 2 ? 'cta' : 'full'; log.push(pg.length < 2 ? 'sem menu (uma página)' : 'menu com ' + pg.length + ' páginas');
+  pg.forEach(l => { const hb = (l.blocks || []).find(b => b.t === 'hero'), waLabel = hb && /whats/i.test(hb.cta || ''); if (!l.ctaTo && !fxHasForm(l) && !(l.product && l.product.checkout)) { if (waLabel && l.whatsapp) { l.ctaTo = 'wa'; log.push(fxName(l) + ' → WhatsApp'); } else if (fp && fp.id !== l.id) { l.ctaTo = 'page:' + fp.id + '#form'; log.push(fxName(l) + ' → formulário'); } else if (l.whatsapp) { l.ctaTo = 'wa'; log.push(fxName(l) + ' → WhatsApp'); } } });
+  if (s.headerCta && !s.headerTo && fp) { s.headerTo = fp.id === pg[0].id ? 'page:' + fp.id + '#form' : 'page:' + fp.id + '#form'; }
+  pg.filter(fxHasForm).forEach(l => { l.thanks = Object.assign({mode: 'page', url: '', title: '', text: ''}, l.thanks); if (l.thanks.mode === 'none') l.thanks.mode = 'page'; });
+  persist(); if (!quiet) { toast('Fluxo ligado: ' + log.join(' · ')); } renderDev();
+}
+function fxPreset(kind) {
+  const p = curProject(), s = fxSite(), pg = fxPages(p); if (!s) return;
+  if (kind === 'lp') {
+    if (pg.length > 1 && !confirm('Este modelo é para página única: as outras ' + (pg.length - 1) + ' página(s) saem do menu. Continuar?')) return; pg.slice(1).forEach(x => { x.inMenu = false; });
+    const l = pg[0]; if (!fxHasForm(l)) { const f = (l.blocks || []).find(b => b.t === 'form'); if (f) f.on = true; else l.blocks.push(lpBlockNew('form')); }
+    s.navMode = 'cta'; l.thanks = Object.assign({}, l.thanks, {mode: 'page'}); if (!s.headerCta) s.headerCta = 'Quero começar'; s.headerTo = 'page:' + l.id + '#form'; l.ctaTo = ''; persist(); toast('Landing page: sem menu, botões levam ao formulário, e o formulário leva à página de obrigado.'); renderDev(); return;
+  }
+  [['home', 'Início'], ['oferta', 'Serviços'], ['sobre', 'Sobre'], ['contato', 'Contato']].forEach(([role, nm]) => { if (!pg.some(x => x.siteRole === role || (role === 'home' && lpFile(x) === 'index.html'))) fxMakePage(role, nm); });
+  s.navMode = 'full'; if (!s.headerCta) s.headerCta = 'Fale com a gente'; s.headerTo = ''; fxAuto(true); toast('Site institucional: Início, Serviços, Sobre e Contato ligados pelo menu; os botões levam ao formulário do Contato.');
+}
 
 </script>
 <script>
@@ -11428,9 +11688,9 @@ function esDeliverHTML(s, l, ready) {
 function esRightHTML(p, s, l) {
   const pend = esPending(p), ck = esChecklist(p, s), n = ck.filter(x => x[1]).length, ready = typeof aiReady === 'function' && aiReady();
   const tabs = (cur, set, list) => `<div class="ps-tabs">${list.map(([k, n2]) => `<button class="${cur === k ? 'on' : ''}" onclick="${set}('${k}')">${n2}</button>`).join('')}</div>`;
-  const A = ES.tabA === 'style' ? esStyleHTML(p, s, l) : ES.tabA === 'lay' ? esLayoutHTML(l) : '<div id="esEdit"></div>';
+  const A = ES.tabA === 'fluxo' ? fxHTML(p, s) : ES.tabA === 'style' ? esStyleHTML(p, s, l) : ES.tabA === 'lay' ? esLayoutHTML(l) : '<div id="esEdit"></div>';
   const B = ES.tabB === 'pend' ? esPendHTML(p) : ES.tabB === 'vend' ? esVendHTML(p, s) : ES.tabB === 'bib' ? esBibHTML(p) : esLayersHTML(l);
-  return `<section class="ps-pan">${tabs(ES.tabA, 'esTabA', [['prop', 'Propriedades'], ['style', 'Estilo'], ['lay', 'Layout']])}<div class="ps-pb">${A}</div></section>
+  return `<section class="ps-pan">${tabs(ES.tabA, 'esTabA', [['prop', 'Propriedades'], ['style', 'Estilo'], ['lay', 'Layout'], ['fluxo', 'Fluxo']])}<div class="ps-pb">${A}</div></section>
     <section class="ps-pan">${tabs(ES.tabB, 'esTabB', [['cam', 'Camadas'], ['pend', 'Pendências ' + pend.length], ['vend', 'Vendedor ' + n + '/' + ck.length], ['bib', 'Biblioteca']])}<div class="ps-pb">${B}</div></section>
     <section class="ps-pan" id="esDeliver"><div class="ps-tabs"><button class="on" onclick="ES.deliver=!ES.deliver;esRight()">Entrega ${ES.deliver ? '▾' : '▸'}</button></div>${ES.deliver ? `<div class="ps-pb">${esDeliverHTML(s, l, ready)}</div>` : ''}</section>`;
 }
@@ -11448,7 +11708,7 @@ function esUseImg(imgId) {
   b[f[0]] = imgId; persist(); esBlockEditor(); esPreview(); toast('Imagem aplicada na seção.');
 }
 function esRefToggleOpen() { const a = $('psRef'); if (a) a.hidden = false; esRefRefresh(); setTimeout(esFit, 30); document.querySelectorAll('.ps-tools button').forEach((x, i) => { if (ES_TOOLS[i][0] === 'ref') x.classList.add('on'); }); }
-function esRight() { const box = $('psRight'); if (!box) return; const p = curProject(), s = esSiteOf(p), l = esCur(p); box.innerHTML = esRightHTML(p, s, l); esBlockEditor(); }
+function esRight() { const box = $('psRight'); if (!box) return; const p = curProject(), s = esSiteOf(p), l = esCur(p); box.innerHTML = esRightHTML(p, s, l); box.classList.toggle('fx-on', ES.tabA === 'fluxo'); esBlockEditor(); }
 const esTabA = t => { ES.tabA = t; esRight(); }, esTabB = t => { ES.tabB = t; esRight(); };
 
 function renderDev() {
@@ -11460,7 +11720,7 @@ function renderDev() {
   ES.site = s.id; const pages = esPageOf(p), l = esCur(p); ES.page = l ? l.id : '';
   const t = SBT.find(x => x.id === s.style), nb = l ? l.blocks.filter(b => b.on).length : 0;
   root.innerHTML = head + `<div class="ps${ES.focus ? ' ps-focus' : ''}" id="psRoot">
-    <div class="ps-opt"><div class="ps-pages">${pages.map(x => `<button class="${x.id === ES.page ? 'on' : ''}" onclick="esPage('${x.id}')">${esc(x.navLabel || x.name)}</button>`).join('')}</div><span class="ps-sp"></span>
+    <div class="ps-opt"><div class="ps-pages">${pages.map(x => `<button class="${x.id === ES.page && !ES.thx ? 'on' : ''}" onclick="esPage('${x.id}')">${esc(x.navLabel || x.name)}</button>`).join('')}${fxFormPage(p) ? `<button class="${ES.thx ? 'on' : ''}" onclick="esThx()" title="Página que abre depois de enviar o formulário">Obrigado</button>` : ''}</div><span class="ps-sp"></span>
       <div class="ps-seg" id="psSeg">${[['desk', 'Computador'], ['tab', 'Tablet'], ['mob', 'Celular'], ['all', '3 telas']].map(([k, n]) => `<button class="${ES.device === k ? 'on' : ''}" onclick="esSetDevice('${k}')">${n}</button>`).join('')}</div><button class="ps-btn" id="psFocus" onclick="esFocusToggle()" title="Esconde os painéis para dar mais espaço à página">Ampliar</button>
       <button class="ps-btn" onclick="esRandom()" title="Sorteia um layout diferente para o site">Sortear layout</button><button class="ps-btn pri" onclick="esToMesa()" title="Abre o site na Mesa de páginas, com todas as ferramentas: camadas, desenho, modo livre, IA, versões e mais">Editar na Mesa</button><button class="ps-btn" onclick="esRefToggle()">Referências</button></div>
     <div class="ps-body"><div class="ps-tools" role="toolbar" aria-label="Ferramentas">${ES_TOOLS.map(([k, tt, d]) => `<button class="${ES.tool === k ? 'on' : ''}${k === 'ref' && ES.ref.open ? ' on' : ''}" title="${esc(tt)}" aria-label="${esc(tt)}" onclick="esTool('${k}')">${esSvg(d)}</button>`).join('')}</div>
@@ -11493,13 +11753,13 @@ const esDevice = () => esSetDevice(ES.device);
 /* pré-visualização em todas as telas abertas */
 async function esPreview() {
   const p = curProject(), l = esCur(p), frs = esFrames(); if (!l || !frs.length) return; const my = ++ES.t;
-  const h = await lpHTML(l, p, {preview: true, edit: true}); if (my !== ES.t) return;
+  const fpg = ES.thx && fxFormPage(p), h = fpg ? await lpThanksHTML(fpg, p) : await lpHTML(l, p, {preview: true, edit: true}); if (my !== ES.t) return;
   frs.forEach(fr => { const d = fr.dataset.dev; fr.srcdoc = h.replace(/<\/body>/i, '<script>window.__sy=' + (+ES.sys[d] || 0) + ';window.__sel=' + JSON.stringify(ES.sel || '') + ';' + ES_INJECT + '<\/script></body>'); });
 }
 window.addEventListener('message', e => {
   const fr = esFrames().find(f => f.contentWindow === e.source); if (!fr || !e.data || !e.data.es) return; const d = e.data;
   if (d.es === 'sy') ES.sys[fr.dataset.dev] = d.y; else if (d.es === 'sel') esSelect(d.id, false);
-  else if (d.es === 'nav') { const p = curProject(), pg = esPageOf(p).find(x => lpFile(x) === d.href.replace(/^.*\//, '').replace(/#.*$/, '')); if (pg) esPage(pg.id); }
+  else if (d.es === 'nav') { const p = curProject(), pg = esPageOf(p).find(x => lpFile(x) === d.href.replace(/^.*\//, '').replace(/#.*$/, '')); if (pg) esPage(pg.id); else if (/obrigado\.html/.test(d.href) && fxFormPage(p)) esThx(); }
 });
 function esSelect(bid, scroll) {
   ES.sel = bid; if (ES.tabA !== 'prop') { ES.tabA = 'prop'; esRight(); } else esBlockEditor();
@@ -11638,14 +11898,23 @@ function mzRefOver() {
 async function esToMesa() {
   const p = curProject(), pages = typeof esPageOf === 'function' ? esPageOf(p) : []; if (!p || !pages.length) { toast('Este projeto ainda não tem site.'); return; }
   toast('Levando as páginas do site para a Mesa…');
-  if (!MZ.open) { mzOpen(); await new Promise(r => setTimeout(r, 800)); } const m = mzM(); let first = '', n = 0;
+  if (!MZ.open) { mzOpen(); await new Promise(r => setTimeout(r, 800)); } const m = mzM(); let first = '', n = 0; const idOf = {}, mine = [];
+  const blank = m.pages.length === 1 && m.pages[0].home && m.pages[0].name === 'Página inicial' && confirm('A Mesa só tem a página de exemplo “Página inicial”. Trocar pelo site (OK) ou manter as duas (Cancelar)?') ? [m.pages[0]] : [];
   for (const l of pages) {
     try {
-      const html = (await lpHTML(l, p, {preview: true})).replace(/<script[\s\S]*?<\/script>/gi, ''), pg = await mzFromHtml(html, l.navLabel || l.name); if (!pg || !pg.root || m.pages.length >= MZ_LIMITS.pages) continue;
-      const c = mzNormPage(pg); c.id = mzId(); c.home = false; c.name = 'Site · ' + (l.navLabel || l.name); c.slug = mzUniqueSlug(mzSlug(l.navLabel || l.name)); m.pages.push(c); if (!first) first = c.id; n++;
+      /* links entre as páginas do site viram links de página da Mesa (guardados por id, continuam certos se mudar o nome) */
+      const html = (await lpHTML(l, p, {preview: true})).replace(/<script[\s\S]*?<\/script>/gi, '').replace(/href="([\w-]+\.html)(#[\w-]*)?"/g, 'href="/__pg/$1$2"'), pg = await mzFromHtml(html, l.navLabel || l.name); if (!pg || !pg.root || m.pages.length >= MZ_LIMITS.pages) continue;
+      const c = mzNormPage(pg); c.id = mzId(); c.home = false; c.name = l.navLabel || l.name; c.slug = mzUniqueSlug(mzSlug(l.navLabel || l.name)); idOf[lpFile(l)] = c.id; mine.push([c, l]); m.pages.push(c); if (!first) first = c.id; n++;
     } catch (e) { toast((l.navLabel || l.name) + ': ' + e.message); }
   }
-  if (!n) { toast('Não consegui levar as páginas para a Mesa.'); return; } persist(); mzPageOpen(first); mzRefreshPanels(); toast(n + ' página(s) do site na Mesa. Edite com camadas, desenho, modo livre, IA e o resto.');
+  if (!n) { toast('Não consegui levar as páginas para a Mesa.'); return; }
+  mine.forEach(([c]) => mzWalk(c.root, nd => {
+    const fix = h => { const k = /^\/__pg\/([\w-]+\.html)(#[\w-]*)?$/.exec(h || ''); return k ? (idOf[k[1]] ? 'page:' + idOf[k[1]] + (k[2] || '') : '#') : h; };
+    if (nd.props && typeof nd.props.html === 'string' && nd.props.html.indexOf('/__pg/') > -1) nd.props.html = nd.props.html.replace(/href="(\/__pg\/[\w-]+\.html(?:#[\w-]*)?)"/g, (x, h) => 'href="' + fix(h) + '"');
+    if (nd.props && nd.props.href) nd.props.href = fix(nd.props.href); if (nd.type === 'menu') (nd.props.items || []).forEach(i => { i.href = fix(i.href); });
+  }));
+  const hp = mine.find(([, l]) => lpFile(l) === 'index.html'); if (hp && blank.length) { m.pages.forEach(x => { x.home = false; }); hp[0].home = true; hp[0].slug = ''; m.pages = m.pages.filter(x => !blank.includes(x)); if (!m.pages.some(x => x.id === m.cur)) m.cur = hp[0].id; }
+  persist(); mzPageOpen(first); mzPageSelUpdate && mzPageSelUpdate(); mzRefreshPanels(); toast(n + ' página(s) do site na Mesa, já ligadas entre si. Use o botão Links para ver o mapa.');
 }
 
 </script>

@@ -92,7 +92,7 @@ async function esPreview() {
   h = h.replace(/<\/body>/i, '<script>window.__sy=' + (+ES.sy || 0) + ';window.__sel=' + JSON.stringify(ES.sel || '') + ';' + ES_INJECT + '<\/script></body>'); fr.srcdoc = h;
 }
 const esPreviewLater = (() => { let h; return () => { clearTimeout(h); h = setTimeout(esPreview, 350); }; })();
-function esPage(id) { ES.page = id; ES.sel = ''; ES.sy = 0; renderDev(); }
+function esPage(id) { ES.page = id; ES.thx = false; ES.sel = ''; ES.sy = 0; renderDev(); }
 function esSelect(bid, scroll) {
   ES.sel = bid; esBlockEditor(); document.querySelectorAll('.es-secs li').forEach(li => li.classList.remove('sel'));
   const fr = $('esFrame'); if (fr && fr.contentWindow) fr.contentWindow.postMessage({es: 'mark', id: bid, go: !!scroll}, '*');
@@ -117,7 +117,7 @@ function esBlockEditor() {
     if (kind === 'img') return `<div class="es-f">${esc(lab)}<div class="es-row">${b[k] ? '<img class="es-th" data-lib="' + esc(b[k]) + '" alt="">' : ''}<button class="btn sm" onclick="esImg('${k}')">${b[k] ? 'Trocar' : 'Escolher da biblioteca'}</button>${b[k] ? `<button class="btn sm" onclick="esImg('${k}',true)">Tirar</button>` : ''}</div></div>`;
     if (kind.startsWith('items')) { const [a, c] = kind.split(':')[1].split('/'); return `<div class="es-f">${esc(lab)}${(b.items || []).map((it, i) => `<div class="es-it"><input placeholder="${esc(a)}" value="${esc(it.t || '')}" oninput="esItem(${i},'t',this.value)"><textarea rows="2" placeholder="${esc(c)}" oninput="esItem(${i},'d',this.value)">${esc(it.d || '')}</textarea><button class="es-mini" onclick="esItemDel(${i})" aria-label="Remover">×</button></div>`).join('')}<button class="btn sm" onclick="esItemAdd()">+ Adicionar</button></div>`; }
     return '';
-  }).join('')}<button class="btn sm" onclick="ES.sel='';esBlockEditor();esPreview()" style="margin-top:6px">Fechar</button></div>`;
+  }).join('')}${def.fields.some(f => f[0] === 'cta') ? `<label class="es-f">Para onde o botão leva<select onchange="fxBlockTo(this.value)">${fxOpts(p, l, b.to || '', {auto: 1})}</select>${fxUrlInput(b.to || '', 'fxBlockTo')}<small class="es-note">Automático = o destino da página. Veja tudo na aba Fluxo.</small></label>` : ''}<button class="btn sm" onclick="ES.sel='';esBlockEditor();esPreview()" style="margin-top:6px">Fechar</button></div>`;
   if (typeof libFill === 'function') libFill(box);
 }
 function esBlk() { const l = esCur(curProject()); return [l, l && l.blocks.find(x => x.id === ES.sel)]; }

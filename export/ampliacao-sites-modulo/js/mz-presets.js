@@ -120,10 +120,10 @@ const MZ_EL = [
 const MZ_FIELDS = {
   heading: [{k: 'text', t: 'area', l: 'Texto'}, {k: 'level', t: 'sel', l: 'Nível', o: [[1, 'H1'], [2, 'H2'], [3, 'H3'], [4, 'H4']]}],
   text: [{k: 'html', t: 'rich', l: 'Texto (duplo clique no canvas para formatar)'}],
-  image: [{k: 'imgId', t: 'img', l: 'Imagem da biblioteca'}, {k: 'src', t: 'url', l: 'ou endereço da imagem'}, {k: 'alt', t: 'text', l: 'Texto alternativo'}, {k: 'href', t: 'url', l: 'Link ao clicar'}],
-  logo: [{k: 'imgId', t: 'img', l: 'Logo'}, {k: 'alt', t: 'text', l: 'Texto alternativo'}, {k: 'href', t: 'url', l: 'Link'}],
+  image: [{k: 'imgId', t: 'img', l: 'Imagem da biblioteca'}, {k: 'src', t: 'url', l: 'ou endereço da imagem'}, {k: 'alt', t: 'text', l: 'Texto alternativo'}, {k: 'href', t: 'link', l: 'Link ao clicar'}],
+  logo: [{k: 'imgId', t: 'img', l: 'Logo'}, {k: 'alt', t: 'text', l: 'Texto alternativo'}, {k: 'href', t: 'link', l: 'Link'}],
   video: [{k: 'url', t: 'url', l: 'Endereço (YouTube, Vimeo ou arquivo)'}, {k: 'ratio', t: 'sel', l: 'Proporção', o: [['16/9', '16:9'], ['4/3', '4:3'], ['1/1', '1:1'], ['9/16', '9:16']]}],
-  button: [{k: 'text', t: 'text', l: 'Texto'}, {k: 'href', t: 'url', l: 'Link'}, {k: 'variant', t: 'sel', l: 'Estilo', o: [['solid', 'Cheio'], ['outline', 'Contorno'], ['ghost', 'Sem fundo']]}, {k: 'newTab', t: 'bool', l: 'Abrir em nova aba'}],
+  button: [{k: 'text', t: 'text', l: 'Texto'}, {k: 'href', t: 'link', l: 'Link'}, {k: 'variant', t: 'sel', l: 'Estilo', o: [['solid', 'Cheio'], ['outline', 'Contorno'], ['ghost', 'Sem fundo']]}, {k: 'newTab', t: 'bool', l: 'Abrir em nova aba'}],
   icon: [{k: 'name', t: 'icon', l: 'Ícone'}, {k: 'size', t: 'num', l: 'Tamanho (px)'}],
   svg: [{k: 'svg', t: 'area', l: 'Código SVG'}],
   draw: [],
@@ -141,6 +141,6 @@ const MZ_FIELDS = {
   timeline: [{k: 'items', t: 'tl', l: 'Marcos (Quando | Título | Descrição, uma por linha)'}],
   section: [{k: 'boxed', t: 'bool', l: 'Conteúdo em caixa (largura máxima)'}, {k: 'w', t: 'num', l: 'Largura máxima (px, 0 = padrão do site)'}, {k: 'tag', t: 'sel', l: 'Etiqueta HTML', o: [['section', 'section'], ['header', 'header'], ['footer', 'footer'], ['main', 'main'], ['div', 'div']]}],
   container: [{k: 'boxed', t: 'bool', l: 'Conteúdo em caixa'}, {k: 'w', t: 'num', l: 'Largura máxima (px)'}],
-  link: [{k: 'href', t: 'url', l: 'Link'}, {k: 'newTab', t: 'bool', l: 'Abrir em nova aba'}],
+  link: [{k: 'href', t: 'link', l: 'Link'}, {k: 'newTab', t: 'bool', l: 'Abrir em nova aba'}],
   form: [{k: 'action', t: 'url', l: 'Endereço que recebe os contatos (leads)'}, {k: 'thanks', t: 'url', l: 'Página de obrigado'}, {k: 'source', t: 'text', l: 'Origem (rótulo)'}]
 };

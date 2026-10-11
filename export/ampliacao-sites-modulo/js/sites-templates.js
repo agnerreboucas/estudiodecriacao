@@ -112,7 +112,7 @@ async function sbCreateSite(tid) {
     const l = normalizeLandings([{id: uid('lp'), name: name + ' — ' + pg.label, siteId: site.id, slug: pg.slug, navLabel: pg.label, type: 'generico', productId: pr ? pr.id : '', product: pr ? {nome: pr.name, preco: pr.price, publico: pr.audience, checkout: pr.checkout} : {}, theme, cta: bs.direct, whatsapp: f.whats, blocks: pg.blocks.map(lpBlockNew), status: 'Rascunho'}])[0];
     l.siteRole = pg.role; lpMerge(l, sbBlocksFor(l, f, bs, pg.role)); const h = l.blocks.find(b => b.t === 'hero'); if (h && f.foto) h.imgId = f.foto; p.landings.push(l);
   });
-  persist(); closeModal(); lpUI.main = 'sites'; lpUI.site = site.id; ES.site = site.id; ES.page = ''; ES.sel = ''; go('dev');
+  persist(); closeModal(); lpUI.main = 'sites'; lpUI.site = site.id; ES.site = site.id; ES.page = ''; ES.sel = ''; ES.thx = false; try { fxAuto(true); } catch (e) { /* o fluxo pode ser ligado depois, na aba Fluxo */ } go('dev');
   toast(`Site criado com o template ${t.nome}. Revise o que estiver em [CONFIRMAR].`);
   if (ai && typeof siteBSText === 'function' && siteBSText(site)) { try { await siteGenAll(); } catch (e) { toast(e.message); } if (ui.page === 'dev') renderDev(); }
 }

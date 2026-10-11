@@ -73,7 +73,7 @@ function mzIsDesc(root, anc, id) { const f = mzFind(anc, id); return !!f; }
 
 /* ---------- normalização (todo JSON de fora passa por aqui) ---------- */
 const MZ_STR = (v, n) => String(v == null ? '' : v).slice(0, n);
-const MZ_URL = v => { v = String(v || '').trim(); return /^(https?:\/\/[^\s"'<>]{1,1500}|\/[^\s"'<>]{0,1500}|#[\w-]{0,80}|mailto:[^\s"'<>]{1,200}|tel:[+\d\s()\-]{3,30}|\{\{[\w.\-]{1,40}\}\})$/i.test(v) ? v : ''; };
+const MZ_URL = v => { v = String(v || '').trim(); return /^(https?:\/\/[^\s"'<>]{1,1500}|\/[^\s"'<>]{0,1500}|#[\w-]{0,80}|mailto:[^\s"'<>]{1,200}|tel:[+\d\s()\-]{3,30}|page:[\w-]{1,40}(?:#[\w-]{0,40})?|\{\{[\w.\-]{1,40}\}\})$/i.test(v) ? v : ''; };
 function mzCssVal(k, v) {
   if (typeof v === 'number') return isFinite(v) ? (MZ_PX.has(k) ? v + 'px' : String(v)) : '';
   v = String(v == null ? '' : v).trim(); if (!v || v.length > 400) return '';
@@ -183,6 +183,12 @@ function mzVideoEmbed(u) {
 function mzDrawPath(pts) { if (pts.length < 4) return `M${pts[0]} ${pts[1]}l.01 .01`; let d = `M${pts[0]} ${pts[1]}`; for (let i = 2; i < pts.length - 2; i += 2) { const mx = (pts[i] + pts[i + 2]) / 2, my = (pts[i + 1] + pts[i + 3]) / 2; d += `Q${pts[i]} ${pts[i + 1]} ${Math.round(mx * 10) / 10} ${Math.round(my * 10) / 10}`; } return d + `L${pts[pts.length - 2]} ${pts[pts.length - 1]}`; }
 function mzDrawSvg(P) { return `<svg viewBox="0 0 ${P.w} ${P.h}" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">${(P.strokes || []).map(k => `<path d="${mzDrawPath(k.pts)}" fill="none" stroke="${k.c}" stroke-width="${k.w}" stroke-opacity="${k.o}" stroke-linecap="${k.k === 'hl' ? 'square' : 'round'}" stroke-linejoin="round"/>`).join('')}</svg>`; }
 /* ctx: {mode:'edit'|'out', comps, img(imgId)→url, ds} */
+/* links entre páginas da Mesa: 'page:<id>[#ancora]' vira o arquivo da página na exportação (index.html, sobre.html…) ou /slug/ no Elementor */
+let MZ_LINKS = [];
+function mzHref(h, wp) {
+  const m = /^page:([\w-]+)(#[\w-]*)?$/.exec(h || ''); if (!m) return h || '#'; const pg = MZ_LINKS.find(x => x.id === m[1]); if (!pg) return '#';
+  const base = pg.home ? 'index' : mzSlug(pg.slug || pg.name); return (wp ? (pg.home ? '/' : '/' + base + '/') : base + '.html') + (m[2] || '');
+}
 function mzNodeHtml(n, ctx, root) {
   if (n.hidden) return ''; const ed = ctx.mode === 'edit', P = n.props, cls = ['mz-e', mzCls(n)], mt = mzTypoOf(n);
   if (mt) cls.push('mz-t-' + mt); if (n.cls) cls.push(n.cls); if (n.anim.type && !ed) cls.push('mz-an', 'mz-an-' + n.anim.type);
@@ -197,12 +203,12 @@ function mzNodeHtml(n, ctx, root) {
     case 'section': case 'container': { const t = P.tag || (n.type === 'section' ? 'section' : 'div'); if (P.boxed) return `<${t} class="${cls.join(' ')} mz-boxed" ${at.join(' ')}><div class="mz-in">${kids()}</div></${t}>`; return `<${t} class="${cls.join(' ')}" ${at.join(' ')}>${kids()}</${t}>`; }
     case 'column': case 'div': return `<div class="${cls.join(' ')}" ${at.join(' ')}>${kids()}</div>`;
     case 'form': return `<form class="${cls.join(' ')} mz-form" ${at.join(' ')} ${ed ? 'onsubmit="return false"' : `data-leads="${mzEsc(P.action)}" data-thanks="${mzEsc(P.thanks)}" data-source="${mzEsc(P.source)}" novalidate`}>${kids()}</form>`;
-    case 'link': return `<a class="${cls.join(' ')}" ${at.join(' ')} href="${ed ? '#' : mzEsc(P.href || '#')}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${kids()}</a>`;
+    case 'link': return `<a class="${cls.join(' ')}" ${at.join(' ')} href="${ed ? '#' : mzEsc(mzHref(P.href))}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${kids()}</a>`;
     case 'heading': return `<h${P.level || 2} class="${cls.join(' ')}" ${at.join(' ')}>${P.html && P.hOf === P.text ? P.html : mzEsc(P.text).replace(/\n/g, '<br>')}</h${P.level || 2}>`;
     case 'text': return `<div class="${cls.join(' ')}" ${at.join(' ')}>${P.html}</div>`;
-    case 'image': case 'logo': { const u = P.imgId ? img(P.imgId) : P.src; const im = u ? `<img src="${mzEsc(u)}" alt="${mzEsc(P.alt)}" ${ed ? 'draggable="false"' : 'loading="lazy"'}>` : '<span class="mz-ph">Imagem</span>'; return `<div class="${cls.join(' ')} mz-img" ${at.join(' ')}>${P.href && !ed ? `<a href="${mzEsc(P.href)}">${im}</a>` : im}${P.ovC ? `<span class="mz-ov" style="background:${P.ovC};mix-blend-mode:${P.ovM}"></span>` : ''}</div>`; }
+    case 'image': case 'logo': { const u = P.imgId ? img(P.imgId) : P.src; const im = u ? `<img src="${mzEsc(u)}" alt="${mzEsc(P.alt)}" ${ed ? 'draggable="false"' : 'loading="lazy"'}>` : '<span class="mz-ph">Imagem</span>'; return `<div class="${cls.join(' ')} mz-img" ${at.join(' ')}>${P.href && !ed ? `<a href="${mzEsc(mzHref(P.href))}">${im}</a>` : im}${P.ovC ? `<span class="mz-ov" style="background:${P.ovC};mix-blend-mode:${P.ovM}"></span>` : ''}</div>`; }
     case 'video': { const v = mzVideoEmbed(P.url); let inner = '<span class="mz-ph">Cole o endereço do vídeo</span>'; if (v && v.iframe) inner = ed ? `<div class="mz-vph">▶ Vídeo</div>` : `<iframe src="${mzEsc(v.iframe)}" loading="lazy" allowfullscreen title="Vídeo"></iframe>`; else if (v && v.file) inner = ed ? `<div class="mz-vph">▶ Vídeo</div>` : `<video src="${mzEsc(v.file)}" controls playsinline${P.poster ? ` poster="${mzEsc(img(P.poster))}"` : ''}></video>`; return `<div class="${cls.join(' ')} mz-video" ${at.join(' ')} style="aspect-ratio:${P.ratio}">${inner}</div>`; }
-    case 'button': return `<a class="${cls.join(' ')} mz-btn mz-btn-${P.variant}" ${at.join(' ')} href="${ed ? '#' : mzEsc(P.href || '#')}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${mzEsc(P.text)}</a>`;
+    case 'button': return `<a class="${cls.join(' ')} mz-btn mz-btn-${P.variant}" ${at.join(' ')} href="${ed ? '#' : mzEsc(mzHref(P.href))}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${mzEsc(P.text)}</a>`;
     case 'icon': return `<span class="${cls.join(' ')} mz-icon" ${at.join(' ')} style="font-size:${P.size}px">${mzIcon(P.name, '1em')}</span>`;
     case 'svg': return `<div class="${cls.join(' ')} mz-svg" ${at.join(' ')}>${P.svg || '<span class="mz-ph">SVG</span>'}</div>`;
     case 'list': { const t = P.ordered ? 'ol' : 'ul'; return `<${t} class="${cls.join(' ')} mz-list${P.icon ? ' mz-list-i' : ''}" ${at.join(' ')}>${P.items.map(i => `<li>${P.icon ? `<span class="mz-li">${mzIcon(P.icon, 18)}</span>` : ''}<span>${mzEsc(i)}</span></li>`).join('')}</${t}>`; }
@@ -211,7 +217,7 @@ function mzNodeHtml(n, ctx, root) {
     case 'spacer': return `<div class="${cls.join(' ')} mz-spacer" ${at.join(' ')}></div>`;
     case 'input': { const lab = P.label ? `<span class="mz-lab">${mzEsc(P.label)}${P.required ? ' *' : ''}</span>` : ''; let f; if (P.kind === 'textarea') f = `<textarea name="${P.name}" placeholder="${mzEsc(P.placeholder)}" rows="4"${P.required ? ' required' : ''}></textarea>`; else if (P.kind === 'select') f = `<select name="${P.name}"${P.required ? ' required' : ''}>${P.options.map(o => `<option>${mzEsc(o)}</option>`).join('')}</select>`; else f = `<input type="${P.kind}" name="${P.name}" placeholder="${mzEsc(P.placeholder)}"${P.required ? ' required' : ''}>`; return `<label class="${cls.join(' ')} mz-field" ${at.join(' ')}>${lab}${f}</label>`; }
     case 'checkbox': case 'radio': return `<label class="${cls.join(' ')} mz-check" ${at.join(' ')}><input type="${n.type}" name="${P.name}" value="${mzEsc(P.value)}"${P.required ? ' required' : ''}><span>${mzEsc(P.label)}</span></label>`;
-    case 'menu': return `<nav class="${cls.join(' ')} mz-menu" ${at.join(' ')}><ul>${P.items.map(i => `<li><a href="${ed ? '#' : mzEsc(i.href)}">${mzEsc(i.label)}</a></li>`).join('')}</ul></nav>`;
+    case 'menu': return `<nav class="${cls.join(' ')} mz-menu" ${at.join(' ')}><ul>${P.items.map(i => `<li><a href="${ed ? '#' : mzEsc(mzHref(i.href))}">${mzEsc(i.label)}</a></li>`).join('')}</ul></nav>`;
     case 'badge': return `<span class="${cls.join(' ')} mz-badge" ${at.join(' ')}>${mzEsc(P.text)}</span>`;
     case 'accordion': return `<div class="${cls.join(' ')} mz-acc" ${at.join(' ')}>${P.items.map((i, k) => `<details${k === 0 && ed ? ' open' : ''}><summary>${mzEsc(i.q)}</summary><div class="mz-acc-a">${i.a}</div></details>`).join('')}</div>`;
     case 'tabs': return `<div class="${cls.join(' ')} mz-tabs" ${at.join(' ')}><div class="mz-tabs-h" role="tablist">${P.items.map((i, k) => `<button type="button" class="${k === 0 ? 'on' : ''}" data-tab="${k}">${mzEsc(i.t)}</button>`).join('')}</div>${P.items.map((i, k) => `<div class="mz-tabs-p${k === 0 ? ' on' : ''}" data-pane="${k}">${i.c}</div>`).join('')}</div>`;
@@ -278,7 +284,7 @@ function mzDoc(m, page, o) {
   return mzAnimWrap(mzDocBase(m, page, o));
 }
 function mzDocBase(m, page, o) {
-  o = o || {}; const ctx = {mode: 'out', comps: m.comps, img: o.img || (() => '')}, body = mzNodeHtml(page.root, ctx), css = mzTreeCss(page.root, m.ds, ctx), fu = mzFontsUrl(m.ds, page.root);
+  o = o || {}; MZ_LINKS = m.pages; const ctx = {mode: 'out', comps: m.comps, img: o.img || (() => '')}, body = mzNodeHtml(page.root, ctx).replace(/href="(page:[^"]*)"/g, (x, h) => 'href="' + mzEsc(mzHref(h.replace(/&#39;|&quot;|&amp;/g, ''))) + '"'), css = mzTreeCss(page.root, m.ds, ctx), fu = mzFontsUrl(m.ds, page.root);
   const seo = page.seo || {}, title = seo.title || page.name;
   return `<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${mzEsc(title)}</title>\n${seo.desc ? `<meta name="description" content="${mzEsc(seo.desc)}">\n` : ''}${page.priv ? '<meta name="robots" content="noindex,nofollow">\n' : ''}${fu ? `<link rel="stylesheet" href="${fu}">\n` : ''}${o.cssFile ? `<link rel="stylesheet" href="${o.cssFile}">` : `<style>\n${css}\n</style>`}\n</head>\n<body>\n${body}\n<script>${MZ_RUNTIME}</script>\n</body>\n</html>`;
 }

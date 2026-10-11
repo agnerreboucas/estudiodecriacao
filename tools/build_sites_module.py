@@ -3,14 +3,14 @@
 Copia os arquivos necessários, monta um index.html enxuto e corrige o roteador (core.js) para as telas que existem."""
 import re, shutil, pathlib, zipfile, sys
 root = pathlib.Path(__file__).resolve().parent.parent
-VERSION = '1.4.0'
+VERSION = '1.5.0'
 out = root / 'export' / 'ampliacao-sites-modulo'
 if out.exists(): shutil.rmtree(out)
 (out / 'js').mkdir(parents=True); (out / 'css').mkdir(); (out / 'api').mkdir()
 SCRIPTS = ['util','icons','wizard','store','integrations','ai-prefs','core','design-data','logo-fonts','present','design-engine','design-brand','design-layouts','ai-layout','fonts-mine','imglib','bulk','integracoes',
   'editorial-skill','editorial','editorial-ent','landing','landing-ui','builder','builder-ui','sections','tpl-import','tpl-ui','wp-theme-php','wp-theme','wp-elementor','pacote',
-  'skills-text','skills-ui','doc-import','acc','mz-core','mz-presets','mz-editor','mz-actions','mz-panels','mz-modals','mz-export','mz-elementor-in','mz-ai','mz-free','mz-design','mz-aiimg','mz-themes',
-  'leads-ui','site-ui','briefing-form','briefing-google','briefing-ui','identidade-data','sites-briefing','sites-templates','estudio-shell','refs','estudio-ps','mesa-skin','sites-boot','nav','responsive']
+  'skills-text','skills-ui','doc-import','acc','mz-core','mz-presets','mz-editor','mz-actions','mz-panels','mz-modals','mz-export','mz-elementor-in','mz-ai','mz-free','mz-links','mz-design','mz-aiimg','mz-themes',
+  'leads-ui','site-ui','briefing-form','briefing-google','briefing-ui','identidade-data','sites-briefing','sites-templates','estudio-shell','sites-fluxo','refs','estudio-ps','mesa-skin','sites-boot','nav','responsive']
 CSS = ['base','bulk','studio','responsive','menu','mesa','mesa-dark','sites','estudio']
 API = ['.htaccess','_lib.php','_dispatch.php','ai.php','analyze.php','auth.php','config.sample.php','image.php','keys.php','leads.php','lp.php','models.php','status.php','workspace.php','briefing.php']
 for s in SCRIPTS:
@@ -41,7 +41,7 @@ shutil.copy(root / 'tools' / 'sites-module' / 'sites-boot.js', out / 'js' / 'sit
 tags = ''.join('<script src="js/%s.js"></script>\n' % x for x in SCRIPTS if x != 'sites-boot') 
 # ordem: arquivos do Studio, ajustes do módulo, app.js
 idx = [re.search(r'js/([\w-]+)\.js', l).group(1) for l in (root / 'index.html').read_text().splitlines() if '<script src="js/' in l]
-order = [x for x in idx if x in SCRIPTS and x not in ('sites-boot','app','nav','responsive','acc','sites-briefing','sites-templates','estudio-shell','refs','estudio-ps','mesa-skin')] + ['sites-briefing', 'sites-templates', 'estudio-shell', 'refs', 'estudio-ps', 'mesa-skin', 'sites-boot', 'app'] + [x for x in ('acc','nav','responsive') if x in SCRIPTS]
+order = [x for x in idx if x in SCRIPTS and x not in ('sites-boot','app','nav','responsive','acc','sites-briefing','sites-templates','estudio-shell','sites-fluxo','refs','estudio-ps','mesa-skin')] + ['sites-briefing', 'sites-templates', 'estudio-shell', 'sites-fluxo', 'refs', 'estudio-ps', 'mesa-skin', 'sites-boot', 'app'] + [x for x in ('acc','nav','responsive') if x in SCRIPTS]
 tags = ''.join('<script src="js/%s.js"></script>\n' % x for x in order)
 (out / 'index.html').write_text((root / 'tools' / 'sites-module' / 'index.html').read_text().replace('<!--SCRIPTS-->', tags))
 print('ok', out)

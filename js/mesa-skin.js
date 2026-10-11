@@ -77,12 +77,21 @@ function mzRefOver() {
 async function esToMesa() {
   const p = curProject(), pages = typeof esPageOf === 'function' ? esPageOf(p) : []; if (!p || !pages.length) { toast('Este projeto ainda não tem site.'); return; }
   toast('Levando as páginas do site para a Mesa…');
-  if (!MZ.open) { mzOpen(); await new Promise(r => setTimeout(r, 800)); } const m = mzM(); let first = '', n = 0;
+  if (!MZ.open) { mzOpen(); await new Promise(r => setTimeout(r, 800)); } const m = mzM(); let first = '', n = 0; const idOf = {}, mine = [];
+  const blank = m.pages.length === 1 && m.pages[0].home && m.pages[0].name === 'Página inicial' && confirm('A Mesa só tem a página de exemplo “Página inicial”. Trocar pelo site (OK) ou manter as duas (Cancelar)?') ? [m.pages[0]] : [];
   for (const l of pages) {
     try {
-      const html = (await lpHTML(l, p, {preview: true})).replace(/<script[\s\S]*?<\/script>/gi, ''), pg = await mzFromHtml(html, l.navLabel || l.name); if (!pg || !pg.root || m.pages.length >= MZ_LIMITS.pages) continue;
-      const c = mzNormPage(pg); c.id = mzId(); c.home = false; c.name = 'Site · ' + (l.navLabel || l.name); c.slug = mzUniqueSlug(mzSlug(l.navLabel || l.name)); m.pages.push(c); if (!first) first = c.id; n++;
+      /* links entre as páginas do site viram links de página da Mesa (guardados por id, continuam certos se mudar o nome) */
+      const html = (await lpHTML(l, p, {preview: true})).replace(/<script[\s\S]*?<\/script>/gi, '').replace(/href="([\w-]+\.html)(#[\w-]*)?"/g, 'href="/__pg/$1$2"'), pg = await mzFromHtml(html, l.navLabel || l.name); if (!pg || !pg.root || m.pages.length >= MZ_LIMITS.pages) continue;
+      const c = mzNormPage(pg); c.id = mzId(); c.home = false; c.name = l.navLabel || l.name; c.slug = mzUniqueSlug(mzSlug(l.navLabel || l.name)); idOf[lpFile(l)] = c.id; mine.push([c, l]); m.pages.push(c); if (!first) first = c.id; n++;
     } catch (e) { toast((l.navLabel || l.name) + ': ' + e.message); }
   }
-  if (!n) { toast('Não consegui levar as páginas para a Mesa.'); return; } persist(); mzPageOpen(first); mzRefreshPanels(); toast(n + ' página(s) do site na Mesa. Edite com camadas, desenho, modo livre, IA e o resto.');
+  if (!n) { toast('Não consegui levar as páginas para a Mesa.'); return; }
+  mine.forEach(([c]) => mzWalk(c.root, nd => {
+    const fix = h => { const k = /^\/__pg\/([\w-]+\.html)(#[\w-]*)?$/.exec(h || ''); return k ? (idOf[k[1]] ? 'page:' + idOf[k[1]] + (k[2] || '') : '#') : h; };
+    if (nd.props && typeof nd.props.html === 'string' && nd.props.html.indexOf('/__pg/') > -1) nd.props.html = nd.props.html.replace(/href="(\/__pg\/[\w-]+\.html(?:#[\w-]*)?)"/g, (x, h) => 'href="' + fix(h) + '"');
+    if (nd.props && nd.props.href) nd.props.href = fix(nd.props.href); if (nd.type === 'menu') (nd.props.items || []).forEach(i => { i.href = fix(i.href); });
+  }));
+  const hp = mine.find(([, l]) => lpFile(l) === 'index.html'); if (hp && blank.length) { m.pages.forEach(x => { x.home = false; }); hp[0].home = true; hp[0].slug = ''; m.pages = m.pages.filter(x => !blank.includes(x)); if (!m.pages.some(x => x.id === m.cur)) m.cur = hp[0].id; }
+  persist(); mzPageOpen(first); mzPageSelUpdate && mzPageSelUpdate(); mzRefreshPanels(); toast(n + ' página(s) do site na Mesa, já ligadas entre si. Use o botão Links para ver o mapa.');
 }
