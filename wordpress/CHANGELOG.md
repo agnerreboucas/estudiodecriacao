@@ -1,5 +1,8 @@
 # Histórico de versões
 
+## 1.15.2
+- **Subir tabela: caixa para colar o texto CSV sempre visível.** Na tela há agora uma área grande, com borda pontilhada, "Ou cole o texto CSV aqui" (antes ficava escondida num item recolhido). Cole o texto (com a linha de cabeçalho), clique em **Ler o texto colado** e veja a prévia; **Limpar o texto** esvazia a caixa.
+
 ## 1.15.1
 - **Subir tabela aceita .csv e texto colado.** Além do .xlsx, a tela lê arquivos **.csv** (separados por ponto e vírgula, vírgula ou tab; com ou sem BOM; salvos em UTF-8 ou em Windows-1252 do Excel brasileiro; campos com aspas e quebra de linha) e tem a caixa **Ou cole a tabela aqui**: dá para colar o texto direto, inclusive o copiado do Excel ou do Google Planilhas. O formato (anúncios, carrosséis, posts simples ou stories) é reconhecido pelos cabeçalhos, e a coluna Campanha separa as campanhas.
 
