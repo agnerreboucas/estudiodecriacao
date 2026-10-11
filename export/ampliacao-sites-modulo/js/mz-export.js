@@ -10,10 +10,11 @@ const mzSlug = s => String(s || 'pagina').toLowerCase().normalize('NFD').replace
 function mzModalExport() {
   const m = mzM(), pg = mzPg(); mzModal('Exportar', `<p class="mz-hint" style="margin-top:0">Escolha o que exportar. A principal saída é o Elementor (versão grátis, sem Pro): contêineres e widgets nativos, com o resto do visual em um CSS extra.</p>
     <label class="mz-ck"><input type="radio" name="mzxs" value="page" checked> Só a página atual (<b>${esc(pg.name)}</b>)</label><label class="mz-ck"><input type="radio" name="mzxs" value="all"> Todas as páginas (${m.pages.length})</label>
-    <div class="mz-xgrid"><button class="mz-tpl" onclick="mzDoExport('elementor')"><b>Elementor (.json)</b><small>Modelo para Modelos → Importar. Estrutura, estilos, responsivo e links.</small></button><button class="mz-tpl" onclick="mzDoExport('html')"><b>HTML</b><small>Arquivo único, com CSS e imagens dentro.</small></button><button class="mz-tpl" onclick="mzDoExport('css')"><b>CSS</b><small>O CSS da página (variáveis do Design System incluídas).</small></button><button class="mz-tpl" onclick="mzDoExport('zip')"><b>ZIP do site</b><small>HTML, CSS e pasta de imagens, pronto para hospedar.</small></button><button class="mz-tpl" onclick="mzDoExport('json')"><b>JSON do Studio</b><small>O site inteiro, para outro projeto ou backup.</small></button></div><div id="mzXmsg" class="mz-hint"></div>`, {wide: true});
+    <label class="mz-ck" style="margin-top:8px">Animação de entrada (HTML e Elementor): <select id="mzxAnim" style="margin-left:6px"><option value="none">Nenhuma</option><option value="fade">Aparecer</option><option value="up">Subir e aparecer</option><option value="left">Entrar da esquerda</option><option value="zoom">Zoom suave</option></select></label>
+    <div class="mz-xgrid"><button class="mz-tpl" onclick="mzDoExport('kit')"><b>Kit do Elementor (.zip)</b><small>Pacote no formato dos kits de modelos (manifest + um modelo por página). Importe pelo plugin de kits ou por Modelos → Importar, cada .json.</small></button><button class="mz-tpl" onclick="mzDoExport('elementor')"><b>Elementor (.json)</b><small>Modelo para Modelos → Importar. Estrutura, estilos, responsivo e links.</small></button><button class="mz-tpl" onclick="mzDoExport('html')"><b>HTML</b><small>Arquivo único, com CSS e imagens dentro.</small></button><button class="mz-tpl" onclick="mzDoExport('css')"><b>CSS</b><small>O CSS da página (variáveis do Design System incluídas).</small></button><button class="mz-tpl" onclick="mzDoExport('zip')"><b>ZIP do site</b><small>HTML, CSS e pasta de imagens, pronto para hospedar.</small></button><button class="mz-tpl" onclick="mzDoExport('json')"><b>JSON do Studio</b><small>O site inteiro, para outro projeto ou backup.</small></button></div><div id="mzXmsg" class="mz-hint"></div>`, {wide: true});
 }
 async function mzDoExport(fmt) {
-  const m = mzM(), scope = (document.querySelector('input[name=mzxs]:checked') || {}).value || 'page', pages = scope === 'all' ? m.pages : [mzPg()], msg = t => { const e = document.getElementById('mzXmsg'); if (e) e.textContent = t; }; msg('Gerando…'); await mzLoadImgs();
+  const m = mzM(), scope = (document.querySelector('input[name=mzxs]:checked') || {}).value || 'page', pages = scope === 'all' ? m.pages : [mzPg()], msg = t => { const e = document.getElementById('mzXmsg'); if (e) e.textContent = t; }; MZ.xAnim = (document.getElementById('mzxAnim') || {}).value || 'none'; msg('Gerando…'); await mzLoadImgs();
   try {
     if (fmt === 'json') { mzDl(mzSlug(MZ.p.name) + '-site.mesa.json', JSON.stringify({mesaStudio: 1, name: MZ.p.name, mesa: {ds: m.ds, pages: scope === 'all' ? m.pages : pages, comps: m.comps}}, null, 1), 'application/json'); msg('JSON baixado.'); return; }
     if (fmt === 'html') { for (const pg of pages) { const html = await mzInlineImgDoc(m, pg); mzDl(mzSlug(pg.slug || pg.name) + '.html', html, 'text/html'); } msg(pages.length + ' arquivo(s) HTML baixado(s).'); return; }
@@ -23,12 +24,26 @@ async function mzDoExport(fmt) {
       pages.forEach(pg => { const base = pg.home ? 'index' : mzSlug(pg.slug || pg.name), cssFile = `css/${base}.css`, ctxCss = {mode: 'out', comps: m.comps, img: id => map[id] ? '../' + map[id] : ''}; files.push({name: base + '.html', data: enc.encode(mzDoc(m, pg, {img: id => map[id] || '', cssFile}))}); files.push({name: cssFile, data: enc.encode(mzTreeCss(pg.root, m.ds, ctxCss))}); });
       files.push({name: 'LEIA-ME.txt', data: enc.encode(`Site exportado pela Mesa de páginas do Ampliação Studio.\nProjeto: ${MZ.p.name}\nPáginas: ${pages.map(p => p.name).join(', ')}\nAbra index.html. Os formulários precisam de um endereço de recebimento (leads) configurado em cada formulário.\n`)}); mzDl(mzSlug(MZ.p.name) + '-site.zip', makeZip(files), 'application/zip'); msg('ZIP baixado.'); return;
     }
+    if (fmt === 'kit') {
+      const ids = mzImgIds(m, pages), map = {}, enc = new TextEncoder(), files = [], ctx = {mode: 'out', comps: m.comps, img: () => ''}; let css = ''; for (const id of ids) map[id] = await mzBlobData(id);
+      const man = {manifest_version: '1.0.23', title: MZ.p.name + ' (Mesa de páginas)', page_builder: 'elementor', kit_version: '1.0.0', templates: [], required_plugins: [{name: 'Elementor', version: '3.20.0', file: 'elementor/elementor.php', author: 'Elementor.com'}]};
+      for (const pg of pages) {
+        const base = mzSlug(pg.slug || pg.name), json = mzElementor(pg, m, map); json.metadata = json.metadata || []; files.push({name: 'templates/' + base + '.json', data: enc.encode(JSON.stringify(json))});
+        const c = document.createElement('canvas'); c.width = 600; c.height = 400; const x = c.getContext('2d'); x.fillStyle = '#f1f1ee'; x.fillRect(0, 0, 600, 400); x.fillStyle = '#111'; x.font = '700 34px sans-serif'; x.fillText(pg.name.slice(0, 28), 36, 210);
+        const shot = await new Promise(r => c.toBlob(r, 'image/png')); files.push({name: 'screenshots/' + base + '.png', data: new Uint8Array(await shot.arrayBuffer())});
+        man.templates.push({name: pg.name, screenshot: 'screenshots/' + base + '.png', source: 'templates/' + base + '.json', preview_url: '', type: pg.home ? 'single-home' : 'single-page', category: 'page', metadata: {template_type: pg.home ? 'single-home' : 'single-page', include_in_zip: '1', elementor_pro_required: null}, elementor_pro_required: false});
+        const cc = mzNodeCss(pg.root, Object.assign({}, ctx, {img: id => map[id] || ''})); css += `/* ${pg.name} */\n` + cc.d + (cc.t ? `@media (max-width:1024px){${cc.t}}` : '') + (cc.m ? `@media (max-width:767px){${cc.m}}` : '') + '\n';
+      }
+      files.push({name: 'manifest.json', data: enc.encode(JSON.stringify(man, null, 2))}); files.push({name: 'mesa-css-extra.css', data: enc.encode(mzDsCss(m.ds) + MZ_BASE_CSS.replace(/body\{[^}]*\}/, '') + css)});
+      files.push({name: 'LEIA-ME.txt', data: enc.encode('Kit do Elementor gerado pela Mesa de páginas.\nUse só widgets e contêineres do Elementor grátis.\nO visual completo está em mesa-css-extra.css: cole em Aparência > Personalizar > CSS adicional.\nImporte cada página em Elementor > Modelos > Importar (arquivos da pasta templates), ou use o plugin de kits de modelos.\nAnimação de entrada: ' + (MZ.xAnim || 'nenhuma') + '.\n')});
+      mzDl(mzSlug(MZ.p.name) + '-kit-elementor.zip', makeZip(files), 'application/zip'); msg('Kit baixado (' + pages.length + ' página(s)).'); return;
+    }
     if (fmt === 'elementor') {
       const ctx = {mode: 'out', comps: m.comps, img: () => ''}; let css = ''; const ids = mzImgIds(m, pages), map = {}; for (const id of ids) map[id] = await mzBlobData(id);
       for (const pg of pages) { const json = mzElementor(pg, m, map); mzDl(mzSlug(pg.slug || pg.name) + '.elementor.json', JSON.stringify(json), 'application/json'); const c = mzNodeCss(pg.root, Object.assign({}, ctx, {img: id => map[id] || ''})); css += `/* ${pg.name} */\n` + c.d + (c.t ? `@media (max-width:1024px){${c.t}}` : '') + (c.m ? `@media (max-width:767px){${c.m}}` : '') + '\n'; }
       mzDl('mesa-css-extra.css', mzDsCss(m.ds) + MZ_BASE_CSS.replace(/body\{[^}]*\}/, '') + css, 'text/css'); msg('Elementor baixado. Importe em Elementor → Modelos → Importar. O visual completo vem em mesa-css-extra.css: cole em Aparência → Personalizar → CSS adicional.'); return;
     }
-  } catch (e) { msg('Erro: ' + e.message); }
+  } catch (e) { msg('Erro: ' + e.message); } finally { MZ.xAnim = 'none'; }   // a animação vale só para esta exportação (a prévia não usa)
 }
 /* ---------- Elementor ---------- */
 const mzEid = () => Math.random().toString(16).slice(2, 9);
@@ -44,6 +59,7 @@ function mzElSettings(n, ds, imgMap) {
     if (st.backgroundColor) { s.background_background = 'classic'; put(bp, 'background_color', R('backgroundColor')); } if (st.width) { const w = mzEl4(st.width); if (w) put(bp, 'width', w); } if (st.minHeight) { const w = mzEl4(st.minHeight); if (w) put(bp, 'min_height', w); }
     if (st.borderRadius) { const r = mzEDim(R('borderRadius')); if (r) put(bp, 'border_radius', r); } if (st.textAlign) put(bp, 'align', st.textAlign);
   });
+  if (MZ.xAnim && MZ.xAnim !== 'none') { const an = {fade: 'fadeIn', up: 'fadeInUp', left: 'fadeInLeft', zoom: 'zoomIn'}[MZ.xAnim]; if (an) { s.animation = an; s._animation = an; } }
   if (n.cls || true) s._css_classes = [mzCls(n), n.cls].filter(Boolean).join(' '); if (n.htmlId) s._element_id = n.htmlId; return s;
 }
 function mzElementorNode(n, ds, imgMap, comps) {

@@ -267,7 +267,17 @@ function mzTreeFonts(root, set) { set = set || new Set(); const take = v => { St
   mzWalk(root, n => { ['d', 't', 'm'].forEach(b => { const f = n.style && n.style[b] && n.style[b].fontFamily; if (f) take(String(f).split(',')[0]); }); const h = n.props && (n.props.html || ''); if (h) String(h).replace(/font-family:\s*([^;"]+)/gi, (m, f) => { take(f.split(',')[0]); return m; }); }); return set; }
 const mzFontsUrl = (ds, root) => { const s = new Set([ds.fonts.heading, ds.fonts.body]); if (root) mzTreeFonts(root, s); const f = [...s].filter(x => /^[A-Za-z][\w ]{1,38}$/.test(x) && (MZ_FONT_LIST.includes(x) || (root && x !== 'system-ui' && x !== 'sans-serif' && x !== 'serif'))); return f.length ? 'https://fonts.googleapis.com/css2?' + f.map(x => 'family=' + x.replace(/ /g, '+') + ':wght@300;400;500;600;700;800;900').join('&') + '&display=swap' : ''; };
 /* documento completo (saída: HTML, preview, exportação) */
+const MZ_ANIM_CSS = {fade: '', up: 'transform:translateY(32px);', left: 'transform:translateX(-44px);', zoom: 'transform:scale(.94);'};
+function mzAnimWrap(html) {
+  const k = typeof MZ !== 'undefined' && MZ.xAnim; if (!k || k === 'none' || !(k in MZ_ANIM_CSS)) return html;
+  const css = '<style>.mz-rv{opacity:0;' + MZ_ANIM_CSS[k] + 'transition:opacity .8s ease,transform .8s ease}.mz-rv.mz-in{opacity:1;transform:none}@media(prefers-reduced-motion:reduce){.mz-rv{opacity:1;transform:none;transition:none}}</style>';
+  const js = '<script>(function(){var els=document.querySelectorAll("section,header,footer");if(!("IntersectionObserver" in window)){return}var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("mz-in");io.unobserve(e.target)}})},{threshold:.12});els.forEach(function(el){el.classList.add("mz-rv");io.observe(el)})})();<\/script>';
+  return html.replace('</head>', css + '</head>').replace(/<\/body>(?![\s\S]*<\/body>)/, js + '</body>');
+}
 function mzDoc(m, page, o) {
+  return mzAnimWrap(mzDocBase(m, page, o));
+}
+function mzDocBase(m, page, o) {
   o = o || {}; const ctx = {mode: 'out', comps: m.comps, img: o.img || (() => '')}, body = mzNodeHtml(page.root, ctx), css = mzTreeCss(page.root, m.ds, ctx), fu = mzFontsUrl(m.ds, page.root);
   const seo = page.seo || {}, title = seo.title || page.name;
   return `<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${mzEsc(title)}</title>\n${seo.desc ? `<meta name="description" content="${mzEsc(seo.desc)}">\n` : ''}${page.priv ? '<meta name="robots" content="noindex,nofollow">\n' : ''}${fu ? `<link rel="stylesheet" href="${fu}">\n` : ''}${o.cssFile ? `<link rel="stylesheet" href="${o.cssFile}">` : `<style>\n${css}\n</style>`}\n</head>\n<body>\n${body}\n<script>${MZ_RUNTIME}</script>\n</body>\n</html>`;

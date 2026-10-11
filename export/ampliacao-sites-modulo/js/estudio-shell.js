@@ -86,7 +86,6 @@ function esFit() {
   const W = st.clientWidth - 30, k = Math.min(1, W / 1060); fr.style.cssText = 'width:' + Math.round(W / k) + 'px;height:' + Math.round(H / k) + 'px;transform:scale(' + k + ');transform-origin:0 0'; box.style.height = H + 'px';
 }
 window.addEventListener('resize', () => { if (ui.page === 'dev') esFit(); });
-const esDevice = () => { esFit(); const b = $('esFrameBox'); if (b) b.classList.toggle('mob', ES.device === 'mob'); document.querySelectorAll('.es-seg button').forEach((x, i) => x.classList.toggle('on', (i === 0) === (ES.device === 'desk'))); };
 async function esPreview() {
   const p = curProject(), l = esCur(p), fr = $('esFrame'); if (!l || !fr) return; const my = ++ES.t;
   let h = await lpHTML(l, p, {preview: true, edit: true}); if (my !== ES.t) return;

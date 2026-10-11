@@ -27,7 +27,7 @@ async function mzThScan(files) {
       else if (ext === 'xml') { const t = await f.text(); MZTH.pkgs.push({label: f.name, kind: 'wordpress', tokens: {}, items: mzThWxrItems(t), notes: []}); }
     }
     MZTH.pkgs = MZTH.pkgs.filter(p => p.items.length || (p.tokens && (Object.keys(p.tokens.colors || {}).length || (p.tokens.fonts || {}).heading)));
-    if (!MZTH.pkgs.length) throw new Error('Não encontrei páginas, modelos ou estilos neste arquivo. Se for um pacote com vários ZIPs, confira se o tema/kit está dentro.');
+    if (!MZTH.pkgs.length) throw new Error('Não encontrei páginas, modelos ou estilos neste arquivo. Se for um pacote com vários ZIPs, confira se o tema/kit está dentro. Pacotes só de FONTES (.ttf, .otf, .woff) não são templates: use a tela de fontes.');
     mzThReview();
   } catch (e) { mzThMsg(e.message); toast(e.message); } finally { MZTH.busy = false; }
 }
@@ -129,7 +129,7 @@ async function mzThImport() {
   try {
     for (let pi = 0; pi < MZTH.pkgs.length; pi++) {
       const p = MZTH.pkgs[pi], toks = {colors: {}, fonts: {}}, tk = document.querySelector(`[data-th-tok="${pi}"]`); if (tk && tk.checked) mzThMergeTok(toks, p.tokens);
-      const mine = checks.filter(([a]) => a === pi), ctx = {miss: 0, imgs: new Map(), created: new Set(), fonts: new Map()}, pages = [], notes = [], unsup = {};
+      const mine = checks.filter(([a]) => a === pi), ctx = {miss: 0, imgs: new Map(), created: new Set(), fonts: new Map()}, pages = [], notes = [], unsup = {}, bsecs = [];
       for (const [, ii] of mine) {
         const it = p.items[ii]; if (!it) continue; btn.textContent = `Importando ${++done}/${total}…`;
         try {
@@ -140,7 +140,7 @@ async function mzThImport() {
         } catch (e) { notes.push(it.label + ': ' + e.message); }
       }
       if (!pages.length && !bsecs.length && !Object.keys(toks.colors).length && !toks.fonts.heading) { if (mine.length) errs.push(p.label + ': nada pôde ser importado. ' + (notes[0] || '')); continue; }
-      const blocks = pages.filter(x => x.kind === 'block'); const realPages = pages.filter(x => x.kind !== 'block'); const bsecs = [];
+      const blocks = pages.filter(x => x.kind === 'block'); const realPages = pages.filter(x => x.kind !== 'block');
       blocks.forEach(b => { const nodes = b.root.children; if (!nodes.length) return; const wrap = nodes.length === 1 ? nodes[0] : mzNode('section', {}, {display: 'flex', flexDirection: 'column'}, nodes); wrap.name = b.name.replace(/^block:\s*/i, ''); bsecs.push({id: mzId(), name: wrap.name, root: wrap, n: mzCount(wrap), th: b.th || ''}); });
       pages.length = 0; realPages.forEach(x => pages.push(x));
       const name = ((document.querySelector(`[data-th-name="${pi}"]`) || {}).value || p.label || 'Tema').trim().slice(0, 80) || 'Tema', id = 'th_' + uid('x').replace(/^x_?/, ''), secs = [], seen = new Set();

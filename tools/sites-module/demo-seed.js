@@ -20,6 +20,15 @@
     q.client = 'Studio Raiz Pilates';
     bfStore(q).answers = {contato: {nome: 'Rafa', whatsapp: ''}, empresa: {nome: 'Studio Raiz Pilates', cidade: 'Belo Horizonte', diferenciais: 'Turmas de até quatro pessoas'}, publico: {quem: 'Adultos com dor nas costas e quem quer ganhar mobilidade'}, produtos: [{nome: 'Aula em grupo', tipo: 'Serviço', oque: 'Turma pequena com instrutor o tempo todo'}]};
     state.projects.push(p, q); state.activeProjectId = p.id; persist();
+    /* três referências de exemplo (desenhos de layout), para mostrar a gaveta de referências; as suas entram pela tela Referências */
+    const wire = (title, kind) => new Promise(res => { const c = document.createElement('canvas'); c.width = 900; c.height = 1100; const x = c.getContext('2d'); x.fillStyle = '#f4f4f1'; x.fillRect(0, 0, 900, 1100); x.fillStyle = '#d9d9d3';
+      const box = (a, b, w, h, t) => { x.fillStyle = '#d9d9d3'; x.fillRect(a, b, w, h); if (t) { x.fillStyle = '#555'; x.font = '600 22px sans-serif'; x.fillText(t, a + 16, b + 34); } };
+      x.fillStyle = '#222'; x.font = '700 30px sans-serif'; x.fillText(title, 40, 56); box(40, 90, 820, 40, 'Menu');
+      if (kind === 'a') { box(40, 150, 520, 300, 'Título grande + botão'); box(580, 150, 280, 300, 'Foto'); [0, 1, 2].forEach(i => box(40 + i * 280, 480, 260, 200, 'Benefício ' + (i + 1))); box(40, 710, 820, 160, 'Depoimento'); box(40, 900, 820, 120, 'Chamada final'); }
+      else if (kind === 'b') { box(40, 150, 820, 360, 'Título centralizado sobre foto'); [0, 1, 2, 3].forEach(i => box(40 + i * 208, 540, 196, 150, 'Passo ' + (i + 1))); box(40, 720, 400, 280, 'Foto'); box(460, 720, 400, 280, 'Texto + botão'); }
+      else { box(40, 150, 820, 90, 'Faixa de oferta'); box(40, 260, 400, 400, 'Foto grande'); box(460, 260, 400, 190, 'Texto'); box(460, 470, 400, 190, 'Lista de benefícios'); box(40, 690, 820, 120, 'Logos de clientes'); box(40, 840, 820, 200, 'Perguntas em duas colunas'); }
+      c.toBlob(res, 'image/png'); });
+    for (const [t, k] of [['Layout A: topo dividido', 'a'], ['Layout B: topo com foto de fundo', 'b'], ['Layout C: faixa de oferta', 'c']]) { try { await libAddBlob(await wire(t, k), {name: 'Exemplo · ' + t, tags: ['referencia', 'exemplo'], kind: 'referencia', prompt: 'Desenho de exemplo da demonstração. Suba os seus prints na tela Referências.'}); } catch (e) { /* segue sem as referências de exemplo */ } }
     await sbCreateSite('aurora');
     ES.sel = ''; go('home'); toast('Demonstração com dois clientes de exemplo. Abra o primeiro para ver o site pronto.');
   }, 400);

@@ -3,14 +3,14 @@
 Copia os arquivos necessários, monta um index.html enxuto e corrige o roteador (core.js) para as telas que existem."""
 import re, shutil, pathlib, zipfile, sys
 root = pathlib.Path(__file__).resolve().parent.parent
-VERSION = '1.2.0'
+VERSION = '1.3.0'
 out = root / 'export' / 'ampliacao-sites-modulo'
 if out.exists(): shutil.rmtree(out)
 (out / 'js').mkdir(parents=True); (out / 'css').mkdir(); (out / 'api').mkdir()
-SCRIPTS = ['util','icons','store','integrations','ai-prefs','core','design-data','logo-fonts','present','design-engine','design-brand','design-layouts','ai-layout','fonts-mine','imglib','bulk','integracoes',
+SCRIPTS = ['util','icons','wizard','store','integrations','ai-prefs','core','design-data','logo-fonts','present','design-engine','design-brand','design-layouts','ai-layout','fonts-mine','imglib','bulk','integracoes',
   'editorial-skill','editorial','editorial-ent','landing','landing-ui','builder','builder-ui','sections','tpl-import','tpl-ui','wp-theme-php','wp-theme','wp-elementor','pacote',
   'skills-text','skills-ui','doc-import','acc','mz-core','mz-presets','mz-editor','mz-actions','mz-panels','mz-modals','mz-export','mz-elementor-in','mz-ai','mz-free','mz-design','mz-aiimg','mz-themes',
-  'leads-ui','site-ui','briefing-form','briefing-google','briefing-ui','identidade-data','sites-briefing','sites-templates','estudio-shell','sites-boot','nav','responsive']
+  'leads-ui','site-ui','briefing-form','briefing-google','briefing-ui','identidade-data','sites-briefing','sites-templates','estudio-shell','refs','estudio-ps','sites-boot','nav','responsive']
 CSS = ['base','bulk','studio','responsive','menu','mesa','sites','estudio']
 API = ['.htaccess','_lib.php','_dispatch.php','ai.php','analyze.php','auth.php','config.sample.php','image.php','keys.php','leads.php','lp.php','models.php','status.php','workspace.php','briefing.php']
 for s in SCRIPTS:
@@ -21,9 +21,9 @@ for a in API: shutil.copy(root / 'api' / a, out / 'api' / a)
 (out / 'api' / 'data').mkdir(); (out / 'api' / 'data' / '.htaccess').write_text((root / 'api' / 'data' / '.htaccess').read_text())
 # roteador: só as telas deste módulo (funções que não existem aqui são ignoradas)
 core = (out / 'js' / 'core.js').read_text()
-core = re.sub(r"const PAGES = \[[^\]]*\];", "const PAGES = ['home', 'mesa', 'projects', 'landings', 'brand', 'settings', 'project', 'biblioteca', 'briefing', 'templates', 'dev', 'cliente'];", core, 1)
+core = re.sub(r"const PAGES = \[[^\]]*\];", "const PAGES = ['home', 'mesa', 'projects', 'landings', 'brand', 'settings', 'project', 'biblioteca', 'briefing', 'templates', 'dev', 'cliente', 'refs'];", core, 1)
 core = re.sub(r"function renderPage\(page\) \{\n  \(\{.*?\}\[page\] \|\| \(\(\) => \{\}\)\)\(\);",
-  "function renderPage(page) {\n  const MAP = {home: 'renderHome', projects: 'renderProjects', brand: 'renderBrand', settings: 'renderSettings', mesa: 'renderMesaLauncher', project: 'renderProjectTab', biblioteca: 'renderBiblioteca', landings: 'renderLandings', briefing: 'renderBriefing', templates: 'renderTemplatesBank', dev: 'renderDev', cliente: 'renderCliente'};\n  const fn = window[MAP[page]]; if (typeof fn === 'function') fn();", core, 1, re.S)
+  "function renderPage(page) {\n  const MAP = {home: 'renderHome', projects: 'renderProjects', brand: 'renderBrand', settings: 'renderSettings', mesa: 'renderMesaLauncher', project: 'renderProjectTab', biblioteca: 'renderBiblioteca', landings: 'renderLandings', briefing: 'renderBriefing', templates: 'renderTemplatesBank', dev: 'renderDev', cliente: 'renderCliente', refs: 'renderRefs'};\n  const fn = window[MAP[page]]; if (typeof fn === 'function') fn();", core, 1, re.S)
 (out / 'js' / 'core.js').write_text(core)
 assert 'renderBriefing' in core and 'briefing' in core, 'roteador do módulo não foi ajustado'
 store = (out / 'js' / 'store.js').read_text()
@@ -37,7 +37,7 @@ shutil.copy(root / 'tools' / 'sites-module' / 'sites-boot.js', out / 'js' / 'sit
 tags = ''.join('<script src="js/%s.js"></script>\n' % x for x in SCRIPTS if x != 'sites-boot') 
 # ordem: arquivos do Studio, ajustes do módulo, app.js
 idx = [re.search(r'js/([\w-]+)\.js', l).group(1) for l in (root / 'index.html').read_text().splitlines() if '<script src="js/' in l]
-order = [x for x in idx if x in SCRIPTS and x not in ('sites-boot','app','nav','responsive','acc','sites-briefing','sites-templates','estudio-shell')] + ['sites-briefing', 'sites-templates', 'estudio-shell', 'sites-boot', 'app'] + [x for x in ('acc','nav','responsive') if x in SCRIPTS]
+order = [x for x in idx if x in SCRIPTS and x not in ('sites-boot','app','nav','responsive','acc','sites-briefing','sites-templates','estudio-shell','refs','estudio-ps')] + ['sites-briefing', 'sites-templates', 'estudio-shell', 'refs', 'estudio-ps', 'sites-boot', 'app'] + [x for x in ('acc','nav','responsive') if x in SCRIPTS]
 tags = ''.join('<script src="js/%s.js"></script>\n' % x for x in order)
 (out / 'index.html').write_text((root / 'tools' / 'sites-module' / 'index.html').read_text().replace('<!--SCRIPTS-->', tags))
 print('ok', out)

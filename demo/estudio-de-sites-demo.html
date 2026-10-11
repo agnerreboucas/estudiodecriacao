@@ -984,12 +984,18 @@ body.mz-lock{overflow:hidden}
 .sbg-fil{display:flex;flex-direction:column;gap:14px;align-items:flex-start}.sbg-fg{display:flex;flex-direction:column;gap:7px}
 .sbg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:10px}
 .sbg-card{border:1px solid var(--line,#ddd);border-radius:10px;overflow:hidden;background:var(--panel,#fff);display:flex;flex-direction:column}
-.sbg-th{position:relative;aspect-ratio:3/2.2;overflow:hidden;background:#e9e9e6;border-bottom:1px solid var(--line,#ddd)}
+.sbg-th{position:relative;aspect-ratio:3/4.4;overflow:hidden;background:#e9e9e6;border-bottom:1px solid var(--line,#ddd)}
 .sbg-ov{position:absolute;inset:0;z-index:2;display:flex;gap:8px;align-items:center;justify-content:center;background:rgba(10,12,18,.55);opacity:0;transition:opacity .15s}
 .sbg-card:hover .sbg-ov,.sbg-card:focus-within .sbg-ov{opacity:1}
 .sbg-tb{padding:9px 12px;display:flex;flex-direction:column;gap:1px}
 .sbg-pg{display:flex;gap:6px;justify-content:center;margin-top:16px}.sbg-pg button{min-width:32px;height:32px;border:1px solid var(--line,#ddd);background:var(--panel,#fff);border-radius:7px;cursor:pointer}.sbg-pg button.on{background:var(--fg,#111);color:var(--bg,#fff);border-color:var(--fg,#111)}
 @media(max-width:860px){.sbg-wrap{grid-template-columns:1fr}}
+
+.sbg-mine{background:#e9e9e6;display:grid;place-items:center}
+.sbg-ph{display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;text-align:center;padding:12px;height:100%}.sbg-ph span{display:flex;gap:4px}.sbg-ph i{width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+.sb-kitp{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;max-height:60vh;overflow:auto}
+.sb-kp{border:1px solid var(--line,#ddd);background:var(--panel,#fff);border-radius:8px;padding:0;overflow:hidden;cursor:pointer;text-align:left;display:flex;flex-direction:column}.sb-kp:hover{border-color:var(--accent,#d9480f)}
+.sb-kp img{width:100%;aspect-ratio:4/3;object-fit:cover;object-position:top;display:block}.sb-kpn{display:block;aspect-ratio:4/3;background:#e9e9e6}.sb-kp b{padding:6px 8px;font-size:12.5px}
 
 </style>
 <style>
@@ -1064,6 +1070,60 @@ body.es-solo .rail,body.es-solo .topbar,body.es-solo .rail-back{display:none!imp
 @media(max-width:860px){.es-dev{grid-template-columns:1fr}.es-tools{position:static;max-height:none}}
 @media(prefers-reduced-motion:reduce){.es-frame{transition:none}}
 
+/* ===== Mesa de trabalho (Desenvolvimento) ===== */
+#devRoot .es-top h1{font-size:20px}#devRoot .es-sub{display:none}#devRoot .es-top{margin-bottom:8px}#devRoot .es-steps{margin-bottom:8px}
+.ps{--pb:#2b2b2b;--pp:#3a3a3a;--ph:#2f2f2f;--pl:#555;--pt:#dcdcdc;--pm:#9a9a9a;display:flex;flex-direction:column;height:calc(100vh - 175px);min-height:560px;background:var(--pb);color:var(--pt);border-radius:10px;overflow:hidden;font-size:12.5px}
+.ps button{font:inherit}
+.ps-opt{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:6px 10px;background:var(--pp);border-bottom:1px solid #1d1d1d}
+.ps-sp{flex:1}
+.ps-pages{display:flex;gap:2px;flex-wrap:wrap}.ps-pages button,.ps-btn{border:1px solid transparent;background:transparent;color:var(--pt);padding:5px 10px;border-radius:5px;cursor:pointer}
+.ps-pages button:hover,.ps-btn:hover{background:#4a4a4a}.ps-pages button.on{background:#1f1f1f;border-color:#555}
+.ps-btn{border-color:var(--pl)}
+.ps-seg{display:inline-flex;border:1px solid var(--pl);border-radius:5px;overflow:hidden}.ps-seg button{border:0;background:transparent;color:var(--pt);padding:5px 10px;cursor:pointer}.ps-seg button.on{background:var(--es-accent);color:#fff}
+.ps-body{flex:1;display:flex;min-height:0}
+.ps-tools{width:46px;background:var(--pp);border-right:1px solid #1d1d1d;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;overflow-y:auto}
+.ps-tools button{width:36px;height:36px;border:0;background:transparent;color:#cfcfcf;border-radius:6px;cursor:pointer;display:grid;place-items:center}
+.ps-tools button:hover{background:#4c4c4c}.ps-tools button.on{background:#1f1f1f;color:#fff;box-shadow:inset 2px 0 var(--es-accent)}
+.ps-ref{width:340px;flex:none;background:var(--pp);border-right:1px solid #1d1d1d;display:flex;flex-direction:column;overflow-y:auto;padding:8px}
+.ps-ref[hidden]{display:none}
+.ps-rh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:13px}
+.ps-rbar{display:flex;gap:6px;margin-bottom:8px}.ps-rbar input{flex:1}
+.ps-rlist{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-height:150px;overflow:auto;margin-bottom:8px}
+.ps-rlist button{border:2px solid transparent;padding:0;background:#222;border-radius:4px;aspect-ratio:1;overflow:hidden;cursor:pointer}.ps-rlist button.on{border-color:var(--es-accent)}.ps-rlist img{width:100%;height:100%;object-fit:cover;display:block}
+.ps-rmodes{display:flex;gap:4px;margin-bottom:6px}.ps-rmodes button{flex:1;border:1px solid var(--pl);background:transparent;color:var(--pt);padding:5px;border-radius:5px;cursor:pointer}.ps-rmodes button.on{background:var(--es-accent);border-color:var(--es-accent);color:#fff}
+.ps-rimg{overflow:auto;max-height:calc(100vh - 470px);border:1px solid var(--pl);border-radius:6px;background:#222}.ps-rimg img{width:100%;display:block}
+.ps-canvas{flex:1;min-width:0;background:var(--pb);display:flex}
+.ps-stage{flex:1;min-width:0;padding:12px;overflow:auto}
+.ps .es-frame{position:relative;box-shadow:0 6px 26px rgba(0,0,0,.55);margin:0 auto;border-radius:2px}
+.ps-over{position:absolute;left:0;top:0;width:100%;pointer-events:none;mix-blend-mode:normal}
+.ps-right{width:300px;flex:none;background:var(--pp);border-left:1px solid #1d1d1d;overflow-y:auto;display:flex;flex-direction:column}
+.ps-pan{border-bottom:1px solid #1d1d1d}
+.ps-tabs{display:flex;background:var(--ph)}.ps-tabs button{border:0;background:transparent;color:var(--pm);padding:7px 11px;cursor:pointer;border-bottom:2px solid transparent}.ps-tabs button.on{color:#fff;background:var(--pp);border-bottom-color:var(--es-accent)}
+.ps-pb{padding:10px;max-height:46vh;overflow:auto}
+.ps-note{color:var(--pm);margin:6px 0;font-size:12px}
+.ps-f{display:flex;flex-direction:column;gap:4px;margin-bottom:9px;color:#cfcfcf}.ps-f input[type=color]{width:100%;height:28px;padding:0;border:1px solid var(--pl);background:transparent}
+.ps-grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ps input,.ps select,.ps textarea{background:#262626;color:#e6e6e6;border:1px solid var(--pl);border-radius:4px;padding:5px 7px;width:100%}
+.ps input[type=checkbox]{width:auto}.ps input[type=range]{padding:0}
+.ps .btn{background:#4a4a4a;border-color:#666;color:#eee}.ps .btn:hover{background:#585858}.ps .btn.pri{background:var(--es-accent);border-color:var(--es-accent)}.ps .btn[disabled]{opacity:.45}
+.ps-col{display:flex;flex-direction:column;gap:6px}.ps-col hr{border:0;border-top:1px solid var(--pl);margin:4px 0;width:100%}.ps-row{display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+.ps-lay{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.ps-lay li{display:flex;align-items:center;gap:4px;background:#2f2f2f;border:1px solid #444;border-radius:4px;padding:4px 6px;cursor:grab}.ps-lay li.off{opacity:.5}.ps-lay li.sel{border-color:var(--es-accent);background:#3f3028}
+.ps-lay li span{flex:1;cursor:pointer}
+.ps-eye,.ps-mini{border:0;background:transparent;color:#bbb;cursor:pointer;padding:2px 5px;border-radius:4px}.ps-eye:hover,.ps-mini:hover{background:#4c4c4c;color:#fff}.ps-mini[disabled]{opacity:.3;cursor:default}
+.ps-pend{display:flex;flex-direction:column;gap:4px}.ps-pend button{text-align:left;border:0;background:#4a3d12;color:#ffd777;border-radius:4px;padding:5px 7px;cursor:pointer}
+.ps-cl{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:3px}.ps-cl li::before{display:inline-block;width:16px;font-weight:700}.ps-cl .y::before{content:'\2713';color:#5fd09a}.ps-cl .n{color:var(--pm)}.ps-cl .n::before{content:'\25CB'}
+.ps-status{display:flex;gap:16px;padding:4px 12px;background:var(--ph);border-top:1px solid #1d1d1d;color:var(--pm);font-size:11.5px}
+.ps .es-f{color:#cfcfcf}.ps .es-f input,.ps .es-f textarea,.ps .es-f select{background:#262626;color:#e6e6e6;border-color:var(--pl)}.ps .es-it{border-color:#555}.ps .es-mini{color:#bbb}.ps .es-h{color:#fff}.ps .panel{background:transparent;border:0;padding:0}
+.ps .es-th{border-color:#555}
+/* referências (tela) */
+.rf-drop{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;border:2px dashed var(--es-line)}.rf-drop.on{border-color:var(--es-accent);background:var(--es-soft)}
+.rf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:12px}
+.rf-card{background:#fff;border:1px solid var(--es-line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.rf-th{border:0;padding:0;background:#e9e9e6;aspect-ratio:4/3;overflow:hidden;cursor:zoom-in}.rf-th img{width:100%;height:100%;object-fit:cover;display:block}
+.rf-bd{padding:10px;display:flex;flex-direction:column;gap:6px}.rf-bd input,.rf-bd textarea{width:100%;border:1px solid var(--es-line);border-radius:6px;padding:6px 8px;font:inherit;font-size:12.5px}
+@media(max-width:1100px){.ps{height:auto}.ps-body{flex-wrap:wrap}.ps-canvas{order:1;flex:1 1 100%;min-height:520px}.ps-right{width:100%;order:2;flex-direction:row;flex-wrap:wrap}.ps-right .ps-pan{flex:1 1 280px}.ps-ref{width:100%;order:0}}
+
 </style>
 </head>
 <body>
@@ -1076,6 +1136,7 @@ body.es-solo .rail,body.es-solo .topbar,body.es-solo .rail-back{display:none!imp
     <button data-page="briefing" title="Briefing do cliente"><span data-ico="inbox"></span><span class="rail-lb">Briefing do cliente</span></button>
     <button data-page="templates" title="Banco de templates"><span data-ico="layout"></span><span class="rail-lb">Banco de templates</span></button>
     <button data-page="dev" title="Desenvolvimento"><span data-ico="globe"></span><span class="rail-lb">Desenvolvimento</span></button>
+    <button data-page="refs" title="Referências"><span data-ico="library"></span><span class="rail-lb">Referências</span></button>
     <button data-page="mesa" title="Mesa de páginas"><span data-ico="grid"></span><span class="rail-lb">Mesa de páginas</span></button>
     <button data-page="biblioteca" title="Imagens"><span data-ico="image"></span><span class="rail-lb">Imagens</span></button>
   </nav>
@@ -1100,6 +1161,7 @@ body.es-solo .rail,body.es-solo .topbar,body.es-solo .rail-back{display:none!imp
 <section id="page-briefing" class="page"><div class="subpage dz-wide" id="briefingRoot"></div></section>
 <section id="page-templates" class="page"><div class="subpage dz-wide" id="templatesRoot"></div></section>
 <section id="page-dev" class="page"><div class="subpage dz-wide" id="devRoot"></div></section>
+<section id="page-refs" class="page"><div class="subpage dz-wide" id="refsRoot"></div></section>
 <section id="page-cliente" class="page"><div id="clienteRoot"></div></section>
 <section id="page-landings" class="page"><div class="subpage dz-wide" id="landingsRoot"></div></section>
 <section id="page-mesa" class="page"><div class="subpage" id="mesaRoot"></div></section>
@@ -1281,7 +1343,7 @@ function normalizeLpRefs(x) {
 function normalizeImglib(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), items = x && Array.isArray(x.items) ? x.items : [];
   return {items: items.filter(i => i && safeId(i.id) && safeId(i.imgId)).slice(0, 1500).map(i => { const m = i.meta && typeof i.meta === 'object' ? i.meta : {};
-    return {id: i.id, imgId: i.imgId, name: str(i.name, 120) || 'Imagem', prompt: str(i.prompt, 4000), promptEn: str(i.promptEn, 4000), style: str(i.style, 80), tags: (Array.isArray(i.tags) ? i.tags : []).slice(0, 10).map(t => str(t, 40)), parent: safeId(i.parent) ? i.parent : '', kind: ['upload', 'gen', 'banco'].includes(i.kind) ? i.kind : 'upload', w: Math.max(0, +i.w || 0), h: Math.max(0, +i.h || 0), created: str(i.created, 40),
+    return {id: i.id, imgId: i.imgId, name: str(i.name, 120) || 'Imagem', prompt: str(i.prompt, 4000), promptEn: str(i.promptEn, 4000), style: str(i.style, 80), tags: (Array.isArray(i.tags) ? i.tags : []).slice(0, 10).map(t => str(t, 40)), parent: safeId(i.parent) ? i.parent : '', kind: ['upload', 'gen', 'banco', 'referencia'].includes(i.kind) ? i.kind : 'upload', w: Math.max(0, +i.w || 0), h: Math.max(0, +i.h || 0), created: str(i.created, 40),
       meta: {composition: str(m.composition, 200), light: str(m.light, 200), negative: str(m.negative, 300), palette: (Array.isArray(m.palette) ? m.palette : []).filter(c => /^#[0-9a-f]{6}$/i.test(String(c))).slice(0, 8), elements: (Array.isArray(m.elements) ? m.elements : []).slice(0, 12).map(e => str(e, 60))}}; })};
 }
 function normalizeMyFonts(x) {
@@ -1512,7 +1574,7 @@ function normalizeLandings(x) {
     const pr = l.product || {}, th = l.theme || {}, tr = l.tracking || {};
     return {id: sid(l.id) ? l.id : uid('lp'), name: str(l.name, 120) || 'Landing page', goal: str(l.goal, 30) || 'Gerar lead', headline: str(l.headline, 300), sub: str(l.sub, 500), bullets: str(l.bullets, 3000), cta: str(l.cta, 80) || 'Enviar', whatsapp: str(l.whatsapp, 20).replace(/\D/g, ''), waFloat: l.waFloat !== false, waAfter: !!l.waAfter, waMsg: str(l.waMsg, 200), thanks: {mode: ['page', 'url', 'none'].includes((l.thanks || {}).mode) ? l.thanks.mode : 'page', url: /^https?:\/\/[^\s"'<>]{1,500}$/i.test((l.thanks || {}).url || '') ? l.thanks.url : '', title: str((l.thanks || {}).title, 120), text: str((l.thanks || {}).text, 400)}, status: str(l.status, 30) || 'Rascunho',
       type: TY.includes(l.type) ? l.type : '', productId: sid(l.productId) ? l.productId : '', pick: {b: (l.pick && Array.isArray(l.pick.b) ? l.pick.b : []).slice(0, 40).map(n => Math.max(0, Math.round(+n) || 0)), f: (l.pick && Array.isArray(l.pick.f) ? l.pick.f : []).slice(0, 40).map(n => Math.max(0, Math.round(+n) || 0)), all: !l.pick || l.pick.all !== false}, siteId: sid(l.siteId) ? l.siteId : '', siteRole: str(l.siteRole, 20), slug: /^[a-z0-9-]{1,40}$/.test(l.slug || '') ? l.slug : '', navLabel: str(l.navLabel, 40), group: sid(l.group) ? l.group : '', variant: /^[A-Z]$/.test(l.variant || '') ? l.variant : '', angle: str(l.angle, 120), product: {nome: str(pr.nome, 160), preco: str(pr.preco, 80), publico: str(pr.publico, 400), checkout: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(pr.checkout || '') ? pr.checkout : '', data: str(pr.data, 80), local: str(pr.local, 200)}, input: str(l.input, 60000),
-      theme: {accent: hex(th.accent, '#e4572e'), bg: hex(th.bg, '#ffffff'), fg: hex(th.fg, '#141414'), dark: !!th.dark, head: str(th.head, 60) || 'Poppins', body: str(th.body, 60) || 'Inter', rad: th.rad == null || th.rad === '' ? 16 : Math.max(0, Math.min(32, Math.round(+th.rad) || 0)), hw: [400, 500, 600, 700, 800].includes(+th.hw) ? +th.hw : 800, hero: ['split', 'center', 'big'].includes(th.hero) ? th.hero : 'split'},
+      theme: {accent: hex(th.accent, '#e4572e'), bg: hex(th.bg, '#ffffff'), fg: hex(th.fg, '#141414'), dark: !!th.dark, head: str(th.head, 60) || 'Poppins', body: str(th.body, 60) || 'Inter', rad: th.rad == null || th.rad === '' ? 16 : Math.max(0, Math.min(32, Math.round(+th.rad) || 0)), hw: [400, 500, 600, 700, 800].includes(+th.hw) ? +th.hw : 800, hero: ['split', 'center', 'big'].includes(th.hero) ? th.hero : 'split', ly: (() => { const y = th.ly && typeof th.ly === 'object' ? th.ly : {}, pk = (v, a, d) => a.includes(v) ? v : d; return {w: pk(y.w, ['narrow', 'normal', 'wide'], 'normal'), sh: pk(y.sh, ['left', 'center'], 'left'), band: pk(y.band, ['alt', 'none', 'line', 'tint'], 'alt'), ben: pk(y.ben, ['cards', 'rows', 'nums'], 'cards'), st: pk(y.st, ['cards', 'line'], 'cards'), pr: pk(y.pr, ['cards', 'quote'], 'cards'), dor: pk(y.dor, ['list', 'cards'], 'list'), faq: pk(y.faq, ['acc', 'cols'], 'acc')}; })()},
       seo: lpSeoNorm(l.seo),
       tracking: {metaPixel: /^\d{5,20}$/.test(tr.metaPixel || '') ? tr.metaPixel : '', ga4: /^G-[A-Z0-9]{4,14}$/.test(tr.ga4 || '') ? tr.ga4 : ''}, privacyUrl: /^https?:\/\/[^\s"'<>]{1,500}$/i.test(l.privacyUrl || '') ? l.privacyUrl : '',
       blocks: (Array.isArray(l.blocks) ? l.blocks : []).filter(b => b && LP_BLOCK_TYPES.includes(b.t)).slice(0, 40).map(b => ({id: sid(b.id) ? b.id : uid('bk'), t: b.t, on: b.on !== false, title: str(b.title, 300), text: str(b.text, 3000), kicker: str(b.kicker, 120), cta: str(b.cta, 80), note: str(b.note, 300), name: str(b.name, 160), price: str(b.price, 80), imgId: sid(b.imgId) ? b.imgId : '',
@@ -1818,7 +1880,7 @@ function aiPickersRefresh() { document.querySelectorAll('.ai-pickbox').forEach(b
 </script>
 <script>
 /* Navegação, modais genéricos, home, projetos, biblioteca, Brand Brain, configurações */
-const PAGES = ['home', 'mesa', 'projects', 'landings', 'brand', 'settings', 'project', 'biblioteca', 'briefing', 'templates', 'dev', 'cliente'];
+const PAGES = ['home', 'mesa', 'projects', 'landings', 'brand', 'settings', 'project', 'biblioteca', 'briefing', 'templates', 'dev', 'cliente', 'refs'];
 const CREATION_NAMES = {project: 'Projeto', ad: 'Anúncio', video: 'Vídeo', post: 'Post', carousel: 'Post Carrossel', story: 'Story', stories: 'Sequência de Stories'};
 const CREATION_ICONS = {project: '□', ad: '◉', video: '▷', post: '▣', carousel: '▤', story: '▯', stories: '▥'};
 const CREATIVE_STATUS = ['Rascunho', 'Para aprovação', 'Aprovado', 'Ajustes', 'Em produção', 'Publicado'];
@@ -1843,7 +1905,7 @@ function go(page) { if (typeof bkReset === 'function' && typeof ui !== 'undefine
   ui.page = page; renderPage(page); window.scrollTo(0, 0);
 }
 function renderPage(page) {
-  const MAP = {home: 'renderHome', projects: 'renderProjects', brand: 'renderBrand', settings: 'renderSettings', mesa: 'renderMesaLauncher', project: 'renderProjectTab', biblioteca: 'renderBiblioteca', landings: 'renderLandings', briefing: 'renderBriefing', templates: 'renderTemplatesBank', dev: 'renderDev', cliente: 'renderCliente'};
+  const MAP = {home: 'renderHome', projects: 'renderProjects', brand: 'renderBrand', settings: 'renderSettings', mesa: 'renderMesaLauncher', project: 'renderProjectTab', biblioteca: 'renderBiblioteca', landings: 'renderLandings', briefing: 'renderBriefing', templates: 'renderTemplatesBank', dev: 'renderDev', cliente: 'renderCliente', refs: 'renderRefs'};
   const fn = window[MAP[page]]; if (typeof fn === 'function') fn();
   try { if (typeof docInjectStrip === 'function') docInjectStrip(page); } catch (e) { /* faixa é só um aviso */ }
 }
@@ -2016,6 +2078,166 @@ function renderSettings() {
   <div id="integracoesRoot" style="margin-top:22px"></div>`; renderIntegracoes(); if (typeof aiPickersRefresh === 'function') aiPickersRefresh();
 }
 function saveSettings() { state.workspace.name = $('workspaceName').value; state.workspace.instruction = $('globalInstruction').value; state.workspace.leadsUrl = $('leadsUrl').value.trim(); persist(); toast('Configurações salvas.'); }
+
+</script>
+<script>
+/* Assistente de novo projeto: briefing livre, áudio ou entrevista guiada → o Studio extrai contexto → usuário revisa → projeto nasce estruturado */
+const WIZ_STEPS = ['Sobre o projeto', 'Contexto', 'Revisão', 'Identidade'];
+const BRIEF_FIELDS = [['offer', 'Oferta (o que vende)'], ['audience', 'Público'], ['problem', 'Problema que resolve'], ['goal', 'Objetivo'], ['channels', 'Canais atuais'], ['budget', 'Orçamento'], ['deadline', 'Prazo'], ['competitors', 'Concorrentes e referências']];
+const CRITICAL = ['offer', 'audience', 'goal'];
+const INTERVIEW = [
+  ['offer', 'O que vocês vendem ou oferecem?', 'Produto, serviço, ticket médio, diferencial.'], ['audience', 'Quem compra hoje (e quem deveria comprar)?', 'Perfil, situação, de onde vêm.'],
+  ['problem', 'Que problema o cliente tem quando procura vocês?', 'Na palavra do cliente, se possível.'], ['goal', 'O que querem alcançar com este projeto?', 'Resultado desejado, mesmo que ainda sem número.'],
+  ['challenges', 'O que hoje atrapalha o crescimento?', 'Vendas, equipe, sistemas, tempo, marketing...'], ['channels', 'Quais canais já usam?', 'Instagram, WhatsApp, site, indicação, anúncios...'],
+  ['budget', 'Existe orçamento ou limite de investimento?', 'Pode ser uma faixa.'], ['deadline', 'Há prazo ou data importante?', 'Lançamento, sazonalidade.'], ['competitors', 'Concorrentes ou referências que admiram?', 'Nomes ou links.']
+];
+/* Palavras-chave que sugerem desafios do Pré-Projeto (sempre revisadas pelo usuário) */
+const DETECT = [
+  ['d1', /indica[çc][ãa]o|boca a boca/i],
+  ['d2', /previs[ãa]o de (fechamento|venda)|sem previsibilidade|n[ãa]o sabemos quanto (vamos )?(fechar|vender)/i],
+  ['d3', /(n[ãa]o (temos|tem|possu[ií]mos|possui|possuem)|sem) (uma |um )?(área|equipe|time|setor|departamento)( especializad[ao])? (comercial|de vendas)|n[ãa]o (temos|tem) vendedor/i],
+  ['d4', /(n[ãa]o (temos|tem|possu[ií]mos|possui|possuem)|sem) (uma |um )?(área|equipe|time|setor|departamento)( especializad[ao])? (de )?marketing/i],
+  ['d5', /marketing (é|e|como|visto como|encarado como) (um )?(custo|gasto|despesa)|marketing .{0,25}(custo|gasto)/i],
+  ['d6', /s[óo]cios|donos? .{0,40}(operaç|gest)|operaç[ãa]o.{0,40}gest[ãa]o/i],
+  ['d7', /n[ãa]o (temos|tem|focamos|possu[ií]mos).{0,30}(produto|servi[çc]o)|vendemos de tudo|v[áa]rios produtos|sem foco em (um )?produto/i],
+  ['d8', /(n[ãa]o (temos|tem|usamos|possu[ií]mos|possui|possuem)|sem) .{0,25}(crm|sistema de (vendas|gest[ãa]o)|controle de vendas)/i]
+];
+const SENT_KEYS = {
+  offer: /vend(emos|e)\b|oferec|nosso (produto|servi[çc]o)|trabalh(amos|a) com|atuamos|somos uma?\b/i, audience: /p[úu]blico|clientes? (s[ãa]o|ideal)|atendemos|quem (compra|contrata)|pessoas que/i,
+  problem: /problema|dificuldade|desafio|\bdor\b|n[ãa]o consegue|depende/i, goal: /objetivo|queremos|\bmeta\b|precisamos|pretendemos|gostar[ií]amos/i,
+  channels: /instagram|facebook|google|whatsapp|\bsite\b|tr[áa]fego|meta ads|youtube|tiktok|linkedin|e-?mail/i, budget: /R\$\s?[\d.,]+|or[çc]amento|invest/i,
+  deadline: /prazo|at[ée] (o dia|dia|\w+)|em \d+ (dias|semanas|meses)|lan[çc]amento/i, competitors: /concorrent|refer[êe]ncia|nos inspiramos/i
+};
+let wiz = null;
+const newWiz = () => ({step: 1, name: '', client: '', category: 'Marketing', desc: '', mode: 'livre', text: '', transcript: '', interview: {}, audioBlob: null, audioMs: 0, recording: false,
+  ext: {offer: '', audience: '', problem: '', goal: '', channels: '', budget: '', deadline: '', competitors: ''}, challenges: {}, hits: {}, other: [], extracted: false, brand: {tone: '', palette: '', visual: '', rule: ''}});
+
+/* ---- áudio: IndexedDB (o original é preservado junto com a transcrição) ---- */
+const idb = () => new Promise((res, rej) => { const r = indexedDB.open('ampliacao_studio_media', 2); r.onupgradeneeded = () => { ['audio', 'images'].forEach(n => { if (!r.result.objectStoreNames.contains(n)) r.result.createObjectStore(n); }); }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+async function audioPut(id, blob) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('audio', 'readwrite'); t.objectStore('audio').put(blob, id); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+async function audioGet(id) { const db = await idb(); return new Promise((res, rej) => { const q = db.transaction('audio').objectStore('audio').get(id); q.onsuccess = () => res(q.result || null); q.onerror = () => rej(q.error); }); }
+
+function openWizard(prefName) { wiz = newWiz(); if (typeof prefName === 'string') wiz.name = prefName; go('wizard'); }
+function renderWizard() {
+  const r = $('wizardRoot'); if (!wiz) wiz = newWiz();
+  const w = wiz, steps = `<div class="jp-progress">${WIZ_STEPS.map((s, i) => `<span class="jp-step ${i + 1 === w.step ? 'active' : i + 1 < w.step ? 'done' : ''}">${pad(i + 1, 2)} ${s}</span>`).join('')}</div>`;
+  let body = '';
+  if (w.step === 1) body = `<div class="panel wiz-panel"><h3>Sobre o projeto</h3><p class="sub">Só o essencial. O Studio cria o restante a partir do contexto no próximo passo.</p>
+    <div class="form-grid"><div class="field"><label>Nome do projeto *</label><input id="wzName" value="${esc(w.name)}" oninput="wiz.name=this.value" placeholder="Ex.: Mutuários Brasil"></div><div class="field"><label>Cliente / empresa</label><input value="${esc(w.client)}" oninput="wiz.client=this.value" placeholder="Quem é o dono do projeto"></div>
+    <div class="field"><label>Categoria</label><select onchange="wiz.category=this.value">${['Marketing', 'Branding', 'Conteúdo', 'Lançamento', 'Performance'].map(c => `<option ${c === w.category ? 'selected' : ''}>${c}</option>`).join('')}</select></div><div class="field"><label>Descrição curta</label><input value="${esc(w.desc)}" oninput="wiz.desc=this.value" placeholder="Em uma linha"></div></div></div>`;
+  if (w.step === 2) body = `<div class="panel wiz-panel"><h3>Conte o contexto</h3><p class="sub">Escreva, fale ou responda uma entrevista curta. Você não precisa organizar nada: o Studio extrai o que entendeu e você revisa no próximo passo.</p>
+    <div class="matrix-tabs wiz-tabs">${[['livre', 'Escrever ou colar'], ['audio', 'Falar (áudio)'], ['entrevista', 'Entrevista guiada']].map(([k, l]) => `<button class="${w.mode === k ? 'active' : ''}" onclick="wizMode('${k}')">${l}</button>`).join('')}</div>
+    ${w.mode === 'livre' ? `<textarea class="jp-ta wiz-big" id="wzText" rows="10" oninput="wiz.text=this.value" placeholder="Fale tudo de uma vez: o que a empresa vende, para quem, qual o problema, o que querem alcançar, o que hoje atrapalha, canais, prazos...">${esc(w.text)}</textarea>` : ''}
+    ${w.mode === 'audio' ? wizAudioHTML() : ''}
+    ${w.mode === 'entrevista' ? `<p class="muted" style="font-size:11px">Preencha só o que for realmente importante. Campos vazios viram lacunas que o Studio aponta depois.</p><div class="form-grid">${INTERVIEW.map(([k, q, h]) => `<div class="field full"><label>${esc(q)} <small class="muted">${esc(h)}</small></label><textarea rows="2" oninput="wiz.interview['${k}']=this.value">${esc(w.interview[k] || '')}</textarea></div>`).join('')}</div>` : ''}</div>`;
+  if (w.step === 3) body = wizReviewHTML();
+  if (w.step === 4) body = wizFinalHTML();
+  r.innerHTML = `<div class="page-head"><div><h1>Novo projeto</h1><p>O projeto é a unidade central: tudo que for criado fica ligado a ele.</p></div><div class="actions"><button class="btn" onclick="wizCancel()">Cancelar</button></div></div>${steps}${body}
+    <div class="wiz-nav">${w.step > 1 ? `<button class="btn" onclick="wizBack()">← Voltar</button>` : '<span></span>'}${w.step < 4 ? `<button class="btn dark" onclick="wizNext()">${w.step === 2 ? 'Extrair contexto →' : 'Continuar →'}</button>` : `<button class="btn orange" onclick="wizCreate()">Criar projeto e abrir o Pré-Projeto</button>`}</div>`;
+}
+function wizAudioHTML() {
+  const w = wiz;
+  return `<div class="wiz-audio"><div class="rec-row">${w.recording ? `<button class="btn dark rec-on" onclick="wizRecStop()">■ Parar</button><span class="mono" id="wizTimer">00:00</span><span class="rec-dot"></span><small class="muted">Gravando…</small>` : `<button class="btn dark" onclick="wizRecStart()">● ${w.audioBlob ? 'Gravar de novo' : 'Gravar'}</button><button class="btn" onclick="$('wizAudioFile').click()">⬆ Anexar áudio existente</button><input type="file" id="wizAudioFile" accept="audio/*" hidden onchange="wizAudioFile(this.files[0])">`}</div>
+    ${w.audioBlob ? `<audio controls src="${URL.createObjectURL(w.audioBlob)}" style="width:100%;margin:10px 0"></audio><small class="muted">O áudio original é guardado com o projeto (${Math.round(w.audioBlob.size / 1024)} KB).</small>` : ''}
+    <div class="field full" style="margin-top:12px"><label>Transcrição ${typeof (window.SpeechRecognition || window.webkitSpeechRecognition) === 'undefined' ? '<small class="muted">(este navegador não transcreve sozinho: digite ou cole o texto)</small>' : '<small class="muted">(gerada ao vivo no Chrome; edite se precisar)</small>'}</label><textarea class="jp-ta" id="wizTranscript" rows="7" oninput="wiz.transcript=this.value" placeholder="O que foi dito aparece aqui.">${esc(w.transcript)}</textarea></div></div>`;
+}
+function wizMode(m) { wiz.mode = m; renderWizard(); }
+function wizCancel() { if (wiz && wiz.recording) wizRecStop(); wiz = null; go('projects'); }
+function wizBack() { wiz.step--; renderWizard(); }
+async function wizNext() {
+  const w = wiz;
+  if (w.step === 1) { if (!w.name.trim()) { toast('Dê um nome ao projeto.'); return; } w.step = 2; return renderWizard(); }
+  if (w.step === 2) {
+    if (w.recording) wizRecStop();
+    if (!wizSource().trim()) { toast('Conte o contexto (escrevendo, falando ou na entrevista).'); return; }
+    toast('Lendo o contexto…'); await wizExtract(); w.step = 3; return renderWizard();
+  }
+  if (w.step === 3) { w.step = 4; return renderWizard(); }
+}
+/* texto-fonte do briefing, conforme o modo */
+function wizSource() {
+  const w = wiz;
+  if (w.mode === 'livre') return w.text;
+  if (w.mode === 'audio') return w.transcript;
+  return INTERVIEW.map(([k, q]) => w.interview[k] ? `${q}\n${w.interview[k]}` : '').filter(Boolean).join('\n\n');
+}
+const sentences = t => t.split(/(?<=[.!?])\s+|\n+/).map(s => s.trim()).filter(s => s.length > 8);
+
+async function wizExtract() {
+  const w = wiz, src = wizSource(), ext = {offer: '', audience: '', problem: '', goal: '', channels: '', budget: '', deadline: '', competitors: ''};
+  w.hits = {}; w.challenges = {}; w.other = []; w.aiUsed = false;
+  if (w.mode === 'entrevista') BRIEF_FIELDS.forEach(([k]) => ext[k] = (w.interview[k] || '').trim());
+  else { const ss = sentences(src); Object.keys(ext).forEach(k => { ext[k] = ss.filter(s => SENT_KEYS[k].test(s)).slice(0, 2).join(' '); }); }
+  DETECT.forEach(([id, rx]) => { const m = src.match(rx); if (m) { w.challenges[id] = true; w.hits[id] = m[0].trim(); } });
+  if (aiReady()) {
+    try {
+      const j = await aiJSON('Você extrai o contexto de um briefing de marketing. Use SOMENTE o que foi dito; se algo não foi dito, deixe string vazia (não invente). Responda só JSON: {"offer","audience","problem","goal","channels","budget","deadline","competitors","challenges":["d1".."d8"],"other":["..."]}. Desafios: d1 depende de indicação; d2 sem previsão de fechamento; d3 sem área comercial; d4 sem área de marketing; d5 vê marketing como custo; d6 donos divididos entre operação e gestão; d7 sem foco em produto; d8 sem sistema de gestão de vendas.', 'Briefing:\n' + src);
+      BRIEF_FIELDS.forEach(([k]) => { if (typeof j[k] === 'string' && j[k].trim()) ext[k] = j[k].trim(); });
+      if (Array.isArray(j.challenges)) { w.challenges = {}; w.hits = {}; j.challenges.filter(x => /^d[1-8]$/.test(x)).forEach(x => { w.challenges[x] = true; w.hits[x] = 'identificado pela IA'; }); }
+      w.other = (Array.isArray(j.other) ? j.other : []).map(String).filter(Boolean).slice(0, 5).map(t => ({id: uid('o'), title: t}));
+      w.aiUsed = true;
+    } catch (e) { toast('IA indisponível, usei a leitura por palavras-chave: ' + e.message); }
+  }
+  w.ext = ext; w.extracted = true;
+}
+function wizReviewHTML() {
+  const w = wiz, missing = CRITICAL.filter(k => !w.ext[k].trim());
+  return `<div class="panel wiz-panel"><h3>Revise o que o Studio entendeu</h3><p class="sub">${w.aiUsed ? 'Leitura feita pela IA' : 'Leitura por palavras-chave'} a partir do que você contou. O que veio do cliente é ${tag('dado')}; tudo que o Studio deduz é ${tag('hipotese')} e fica editável.</p>
+    ${missing.length ? `<div class="gap-box"><b>Lacunas críticas</b>: ${missing.map(k => BRIEF_FIELDS.find(f => f[0] === k)[1]).join(', ')}. Complete abaixo ou siga e valide com o cliente depois.</div>` : ''}
+    <div class="form-grid">${BRIEF_FIELDS.map(([k, l]) => `<div class="field full"><label>${l}${CRITICAL.includes(k) ? ' *' : ''}</label><textarea rows="2" oninput="wiz.ext['${k}']=this.value">${esc(w.ext[k])}</textarea></div>`).join('')}</div></div>
+  <div class="panel wiz-panel" style="margin-top:12px"><h3>Desafios identificados</h3><p class="sub">Cada desafio marcado gera uma hipótese no Pré-Projeto. Desmarque o que não se aplica e marque o que faltou.</p>
+    <div class="jp-diagnostic">${CHALLENGES.map(c => `<label class="jp-check ${w.challenges[c.id] ? 'selected' : ''}"><input type="checkbox" ${w.challenges[c.id] ? 'checked' : ''} onchange="wiz.challenges['${c.id}']=this.checked;this.parentNode.classList.toggle('selected',this.checked)"><span><strong>${esc(c.title)}</strong><small>${w.hits[c.id] ? 'Detectado: “' + esc(w.hits[c.id]) + '”' : esc(c.note)}</small></span></label>`).join('')}</div>
+    <div class="jp-other"><input id="wzOther" placeholder="Outro desafio..." onkeydown="if(event.key==='Enter')wizAddOther()"><button class="btn" onclick="wizAddOther()">＋ Adicionar</button></div>
+    <div class="jp-summary">${w.other.map(o => `<span class="jp-tag">${esc(o.title)} <b class="x" onclick="wizRemoveOther('${o.id}')">×</b></span>`).join('')}</div></div>`;
+}
+function wizAddOther() { const i = $('wzOther'), v = i && i.value.trim(); if (!v) return; wiz.other.push({id: uid('o'), title: v}); renderWizard(); }
+function wizRemoveOther(id) { wiz.other = wiz.other.filter(o => o.id !== id); renderWizard(); }
+function wizFinalHTML() {
+  const w = wiz, n = CHALLENGES.filter(c => w.challenges[c.id]).length + w.other.length;
+  return `<div class="panel wiz-panel"><h3>Identidade da marca <small class="muted">(opcional, dá para completar depois)</small></h3><p class="sub">Base do Brand Brain. O Voice Brain (como falamos) é editado na tela Brand Brain.</p>
+    <div class="form-grid"><div class="field"><label>Tom de voz</label><input value="${esc(w.brand.tone)}" oninput="wiz.brand.tone=this.value" placeholder="Claro, seguro, humano"></div><div class="field"><label>Paleta</label><input value="${esc(w.brand.palette)}" oninput="wiz.brand.palette=this.value" placeholder="Verde profundo · areia"></div><div class="field"><label>Direção visual</label><input value="${esc(w.brand.visual)}" oninput="wiz.brand.visual=this.value" placeholder="Editorial + performance"></div><div class="field"><label>Regra de ouro</label><input value="${esc(w.brand.rule)}" oninput="wiz.brand.rule=this.value" placeholder="Educar antes de converter"></div></div></div>
+  <div class="panel wiz-panel" style="margin-top:12px"><h3>O que será criado</h3><div class="wiz-sum">
+    <div><b>${esc(w.name)}</b><small>Projeto com Context ID próprio</small></div><div><b>Briefing original</b><small>${w.mode === 'audio' && w.audioBlob ? 'texto + áudio preservados' : 'texto preservado, sem alterações'}</small></div>
+    <div><b>Pré-Projeto</b><small>${n} desafio(s) → ${n} hipótese(s) para validar</small></div><div><b>Brand Brain e Voice Brain</b><small>${w.brand.tone || w.brand.palette ? 'iniciados com sua identidade' : 'vazios, para completar'}</small></div>
+    <div><b>Matriz, Video Lab, Aprovação</b><small>prontos para quando o pré-projeto for aprovado</small></div><div><b>Fluxo do projeto</b><small>do briefing à análise, com os gates</small></div></div></div>`;
+}
+
+async function wizCreate() {
+  const w = wiz, e = w.ext;
+  const p = newProject(w.name.trim(), w.desc.trim() || w.client.trim(), {category: w.category, client: w.client.trim(), goal: e.goal, brand: {positioning: '', tone: w.brand.tone, palette: w.brand.palette, visual: w.brand.visual, rule: w.brand.rule, instructions: ''}});
+  p.brief = Object.assign(p.brief, e, {source: w.mode, original: wizSource(), transcript: w.mode === 'audio' ? w.transcript : '', hasAudio: !!w.audioBlob, audioMs: w.audioMs, createdAt: new Date().toISOString()});
+  CHALLENGES.forEach(c => { if (w.challenges[c.id]) p.pre.challenges[c.id] = true; });
+  p.pre.other = w.other.slice();
+  p.pre.briefing = [e.offer && 'Oferta: ' + e.offer, e.audience && 'Público: ' + e.audience, e.problem && 'Problema: ' + e.problem, e.goal && 'Objetivo: ' + e.goal].filter(Boolean).join('\n') || wizSource().slice(0, 600);
+  p.pre.history.unshift({at: new Date().toISOString(), action: 'Projeto criado', note: 'A partir de briefing ' + ({livre: 'escrito', audio: 'em áudio', entrevista: 'por entrevista guiada'})[w.mode] + '.'});
+  if (w.audioBlob) { try { await audioPut(p.id, w.audioBlob); } catch (err) { p.brief.hasAudio = false; toast('Não consegui guardar o áudio neste navegador; o texto foi salvo.'); } }
+  refreshDrafts(p.pre);
+  state.projects.push(p); state.activeProjectId = p.id; persist(); wiz = null; updateContextUI();
+  ui.tab = 'preproject'; go('project'); toast('Projeto criado. Revise as hipóteses e siga o fluxo.');
+  if (typeof aiReady === 'function' && aiReady() && typeof preGenAll === 'function') setTimeout(() => { if (confirm('Gerar agora o pré-projeto completo com IA a partir das suas respostas? (ICPs, dores, dúvidas, produtos e linha editorial)')) preGenAll(true); }, 600);
+}
+
+/* ---- gravação ---- */
+async function wizRecStart() {
+  const w = wiz;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true}), chunks = [], mr = new MediaRecorder(stream), t0 = Date.now();
+    mr.ondataavailable = ev => { if (ev.data.size) chunks.push(ev.data); };
+    mr.onstop = () => { stream.getTracks().forEach(t => t.stop()); w.audioBlob = new Blob(chunks, {type: mr.mimeType || 'audio/webm'}); w.audioMs = Date.now() - t0; w.recording = false; clearInterval(w.tick); try { w.sr && w.sr.stop(); } catch (x) { /* ok */ } if (wiz === w) renderWizard(); };
+    mr.start(); w.mr = mr; w.recording = true; w.t0 = t0;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SR) {
+      const sr = new SR(); sr.lang = 'pt-BR'; sr.continuous = true; sr.interimResults = false;
+      sr.onresult = ev => { let f = ''; for (let i = ev.resultIndex; i < ev.results.length; i++) if (ev.results[i].isFinal) f += ev.results[i][0].transcript + ' '; if (f) { w.transcript += (w.transcript ? ' ' : '') + f.trim(); const t = $('wizTranscript'); if (t) t.value = w.transcript; } };
+      sr.onend = () => { if (w.recording) try { sr.start(); } catch (x) { /* ok */ } };
+      try { sr.start(); w.sr = sr; } catch (x) { /* ok */ }
+    }
+    renderWizard();
+    w.tick = setInterval(() => { const t = $('wizTimer'); if (t) { const s = Math.floor((Date.now() - t0) / 1000); t.textContent = pad(Math.floor(s / 60), 2) + ':' + pad(s % 60, 2); } }, 500);
+  } catch (e) { toast('Microfone indisponível (' + e.message + '). Anexe um áudio ou digite a transcrição.'); }
+}
+function wizRecStop() { if (wiz && wiz.mr && wiz.recording) wiz.mr.stop(); }
+function wizAudioFile(f) { if (!f) return; wiz.audioBlob = f; wiz.audioMs = 0; renderWizard(); toast('Áudio anexado. Digite ou cole a transcrição para o Studio ler o conteúdo.'); }
 
 </script>
 <script>
@@ -4531,11 +4753,11 @@ function lpExtractImgs(html) {
 }
 function lpFontsLink(th, extra, wts) { const f = [...new Set([th.head, th.body].concat(extra || []))].filter(Boolean).map(x => 'family=' + encodeURIComponent(x).replace(/%20/g, '+') + ':wght@' + (wts || [400, 600, 700, 800]).join(';')).join('&'); return f ? `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?${f}&display=swap">` : ''; }
 function lpCss(th) {
-  const lumA = (parseInt(th.accent.slice(1, 3), 16) * 299 + parseInt(th.accent.slice(3, 5), 16) * 587 + parseInt(th.accent.slice(5, 7), 16) * 114) / 1000, ON = lumA > 170 ? '#111111' : '#ffffff', RC = th.rad == null ? 16 : th.rad, RB = RC >= 24 ? 999 : Math.round(RC * 0.75), HW = th.hw || 800;
+  const LY = th.ly || {}, lumA = (parseInt(th.accent.slice(1, 3), 16) * 299 + parseInt(th.accent.slice(3, 5), 16) * 587 + parseInt(th.accent.slice(5, 7), 16) * 114) / 1000, ON = lumA > 170 ? '#111111' : '#ffffff', RC = th.rad == null ? 16 : th.rad, RB = RC >= 24 ? 999 : Math.round(RC * 0.75), HW = th.hw || 800;
   const dark = th.dark, bg = dark ? '#0e0e10' : th.bg, fg = dark ? '#f5f5f5' : th.fg, soft = dark ? '#18181b' : 'color-mix(in srgb,' + th.bg + ' 94%,' + th.fg + ')', line = dark ? '#2a2a2f' : 'color-mix(in srgb,' + th.fg + ' 14%,transparent)', mut = dark ? '#a1a1aa' : 'color-mix(in srgb,' + th.fg + ' 62%,' + th.bg + ')';
   return `:root{--a:${th.accent};--on:${ON};--bg:${bg};--fg:${fg};--soft:${soft};--line:${line};--mut:${mut}}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 '${th.body}',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:'${th.head}','${th.body}',system-ui,sans-serif;line-height:1.12;margin:0 0 .5em;letter-spacing:-.01em}h1{font-size:clamp(32px,6vw,58px);font-weight:${HW}}h2{font-size:clamp(25px,4vw,38px);font-weight:${HW}}h3{font-size:19px;font-weight:700}p{margin:0 0 1em}
-.w{max-width:1040px;margin:0 auto;padding:0 22px}section{padding:clamp(44px,7vw,84px) 0}section.alt{background:var(--soft)}.k{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--a);margin-bottom:12px}.mut{color:var(--mut)}
+.w{max-width:${LY.w === 'narrow' ? 900 : LY.w === 'wide' ? 1240 : 1040}px;margin:0 auto;padding:0 22px}section{padding:clamp(44px,7vw,84px) 0}section.alt{background:var(--soft)}.k{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--a);margin-bottom:12px}.mut{color:var(--mut)}
 .btn{display:inline-block;background:var(--a);color:var(--on);text-decoration:none;font-weight:700;padding:16px 30px;border-radius:${RB}px;font-size:17px;border:0;cursor:pointer;font-family:inherit;box-shadow:0 8px 24px color-mix(in srgb,var(--a) 35%,transparent);transition:transform .15s}.btn:hover{transform:translateY(-2px)}.note{font-size:13px;color:var(--mut);margin-top:10px}
 .hero{padding:clamp(48px,8vw,100px) 0}.hero .g{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}.hero.noimg .g{grid-template-columns:1fr;max-width:760px}.hero.hv-center .g{grid-template-columns:1fr;max-width:820px;margin:0 auto;text-align:center}.hero.hv-center img{margin:0 auto;max-width:560px}.hero.hv-big .g{grid-template-columns:1fr}.hero.hv-big h1{font-size:clamp(40px,8.5vw,92px);line-height:1.02;max-width:15ch}.hero img{width:100%;border-radius:18px;display:block;box-shadow:0 20px 60px rgba(0,0,0,.18)}.hero p.sub{font-size:clamp(18px,2.4vw,22px);color:var(--mut)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:24px}.card{background:var(--bg);border:1px solid var(--line);border-radius:${RC}px;padding:22px}section.alt .card{background:var(--bg)}.card h3{margin-bottom:.35em}.card p{margin:0;color:var(--mut);font-size:15.5px}
@@ -4546,6 +4768,14 @@ details{border-bottom:1px solid var(--line);padding:14px 0}summary{cursor:pointe
 .tl{border-left:3px solid var(--a);padding-left:18px;margin:0 0 18px}.tl b{display:block;color:var(--a)}.center{text-align:center}.cd{display:flex;gap:12px;margin:18px 0}.cd div{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 14px;text-align:center;min-width:64px}.cd b{display:block;font-size:26px;font-family:'${th.head}',sans-serif}.cd small{font-size:11px;color:var(--mut);text-transform:uppercase}
 form{max-width:480px;display:grid;gap:12px;margin-top:18px}.center form{margin-left:auto;margin-right:auto;text-align:left}input,textarea{width:100%;padding:14px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--bg);color:var(--fg)}.hp{position:absolute;left:-9999px}.lg{font-size:12.5px;color:var(--mut);display:flex;gap:8px;align-items:flex-start}.lg input{width:auto;margin-top:3px}#ok{display:none;background:#e6f6ea;color:#176b30;padding:12px;border-radius:10px}.wa{display:inline-block;margin-top:12px;font-weight:700;color:var(--a)}
 footer{padding:34px 0;border-top:1px solid var(--line);font-size:13px;color:var(--mut)}.bar{display:none;position:fixed;left:0;right:0;bottom:0;padding:10px 14px;background:var(--bg);border-top:1px solid var(--line);z-index:50}.bar .btn{display:block;text-align:center;padding:14px}
+${LY.sh === 'center' ? 'section h2{text-align:center}section .mut{text-align:center}' : ''}${LY.band === 'none' ? 'section.alt{background:transparent}' : LY.band === 'line' ? 'section.alt{background:transparent;border-block:1px solid var(--line)}' : LY.band === 'tint' ? 'section.alt{background:color-mix(in srgb,var(--a) 9%,var(--bg))}' : ''}
+.grid.rows{display:flex;flex-direction:column;gap:0;margin-top:22px;counter-reset:r}.grid.rows .card{display:grid;grid-template-columns:72px 1fr;gap:0 18px;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent;padding:22px 0}.grid.rows .card::before{counter-increment:r;content:counter(r,decimal-leading-zero);font:800 30px/1 '${th.head}',sans-serif;color:var(--a);grid-row:1/3}.grid.rows .card p{grid-column:2}
+.grid.nums .card{border:0;border-radius:0;background:transparent;border-top:4px solid var(--a);padding:16px 0 0}
+.grid.tl{gap:0}.grid.tl .card.step{background:transparent;border:0;border-radius:0;border-top:3px solid var(--a);padding:18px 18px 0 0}
+.bq{max-width:820px;margin:20px auto 0;text-align:center}.bq .q{font-size:clamp(22px,3.4vw,34px);line-height:1.3;font-style:normal;font-family:'${th.head}',serif}
+.dcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:22px}.dcards .card::before{content:'✕';color:#b3261e;font-weight:800;display:block;margin-bottom:6px}
+.faqc{display:grid;grid-template-columns:1fr 1fr;gap:0 44px}
+@media(max-width:760px){.faqc{grid-template-columns:1fr}}
 @media(max-width:760px){.hero .g{grid-template-columns:1fr}.bar{display:block}body{padding-bottom:74px}.btn{width:100%;text-align:center}}`;
 }
 function lpFormBox(l, b) {
@@ -4553,25 +4783,27 @@ function lpFormBox(l, b) {
   return `<form id="f" novalidate><input name="name" placeholder="Seu nome" required autocomplete="name"><input name="phone" placeholder="WhatsApp com DDD" required autocomplete="tel" inputmode="tel"><input name="email" type="email" placeholder="E-mail (opcional)" autocomplete="email"><textarea name="message" rows="2" maxlength="500" placeholder="Qual é o seu interesse? (opcional)"></textarea><input class="hp" name="website" tabindex="-1" autocomplete="off"><label class="lg"><input type="checkbox" name="consent" required> <span>Concordo em receber contato sobre ${E(l.product.nome || l.name)}${l.privacyUrl ? `. <a href="${E(l.privacyUrl)}" target="_blank" rel="noopener">Política de privacidade</a>` : ''}.</span></label><button class="btn" type="submit">${E(b.cta || 'Enviar')}</button><div id="ok">Recebemos seus dados. Entraremos em contato.</div></form>${l.whatsapp ? `<a class="wa" href="https://wa.me/${E(l.whatsapp)}?text=${encodeURIComponent('Olá! Vim pela página: ' + (l.name || ''))}" target="_blank" rel="noopener">Prefere falar no WhatsApp?</a>` : ''}`;
 }
 function lpBlockHTML(l, b, ctx) {
-  const E = lpE, R = lpRich, cta = lpCta(l, b), btn = (txt, id) => `<a class="btn" href="${E(cta.href)}"${cta.ext ? ' target="_blank" rel="noopener"' : ''}${id ? ' id="' + id + '"' : ''}>${E(txt || LP_TYPE_INFO[l.type || 'generico'].cta)}</a>`;
+  const LY = ctx.ly || {}, E = lpE, R = lpRich, cta = lpCta(l, b), btn = (txt, id) => `<a class="btn" href="${E(cta.href)}"${cta.ext ? ' target="_blank" rel="noopener"' : ''}${id ? ' id="' + id + '"' : ''}>${E(txt || LP_TYPE_INFO[l.type || 'generico'].cta)}</a>`;
   const head = (extra) => (b.title ? `<h2>${R(b.title)}</h2>` : '') + (extra || ''), items = (cls, fn) => `<div class="grid ${cls || ''}">${b.items.filter(i => i.t || i.d).map(fn).join('')}</div>`;
   const card = i => `<div class="card">${i.t ? `<h3>${R(i.t)}</h3>` : ''}${i.d ? `<p>${R(i.d)}</p>` : ''}</div>`;
   switch (b.t) {
     case 'hero': return `<header class="hero ${ctx.img ? '' : 'noimg'} hv-${ctx.hv || 'split'}"><div class="w"><div class="g"><div>${b.kicker ? `<span class="k">${E(b.kicker)}</span>` : ''}<h1>${R(b.title)}</h1>${b.text ? `<p class="sub">${R(b.text)}</p>` : ''}${ctx.countdown}${btn(b.cta, 'cta1')}${b.note ? `<div class="note">${E(b.note)}</div>` : ''}</div>${ctx.img ? `<div><img src="${ctx.img}" alt="${E(b.title)}"${lpImgAttr(ctx.img, true)}></div>` : ''}</div></div></header>`;
     case 'numeros': return `<section class="alt"><div class="w center"><div class="grid">${b.items.filter(i => i.t).map(i => `<div><div class="num">${E(i.t)}</div><div class="mut">${E(i.d)}</div></div>`).join('')}</div></div></section>`;
     case 'amostra': return `<section class="alt"><div class="w"><div class="hero ${ctx.img ? '' : 'noimg'}" style="padding:0"><div class="g">${ctx.img ? `<div><img src="${ctx.img}" alt="${E(b.title)}"${lpImgAttr(ctx.img)}></div>` : ''}<div>${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${btn(b.cta || 'Ler uma amostra grátis')}</div></div></div></div></section>`;
-    case 'dor': return `<section><div class="w">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${b.items.length ? `<ul class="ck no">${b.items.filter(i => i.t).map(i => `<li><strong>${R(i.t)}</strong>${i.d ? ' ' + R(i.d) : ''}</li>`).join('')}</ul>` : ''}</div></section>`;
+    case 'dor': if (LY.dor === 'cards') return `<section><div class="w">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}<div class="dcards">${b.items.filter(i => i.t).map(i => `<div class="card"><h3>${R(i.t)}</h3>${i.d ? `<p>${R(i.d)}</p>` : ''}</div>`).join('')}</div></div></section>`;
+      return `<section><div class="w">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${b.items.length ? `<ul class="ck no">${b.items.filter(i => i.t).map(i => `<li><strong>${R(i.t)}</strong>${i.d ? ' ' + R(i.d) : ''}</li>`).join('')}</ul>` : ''}</div></section>`;
     case 'solucao': return `<section class="alt"><div class="w">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}${items('', card)}</div></section>`;
-    case 'beneficios': return `<section><div class="w">${head()}${items('', card)}</div></section>`;
-    case 'passos': return `<section class="alt"><div class="w">${head()}<div class="grid steps">${b.items.filter(i => i.t || i.d).map(i => `<div class="card step">${i.t ? `<h3>${R(i.t)}</h3>` : ''}${i.d ? `<p>${R(i.d)}</p>` : ''}</div>`).join('')}</div></div></section>`;
+    case 'beneficios': return `<section><div class="w">${head()}${items(LY.ben === 'rows' ? 'rows' : LY.ben === 'nums' ? 'nums' : '', card)}</div></section>`;
+    case 'passos': return `<section class="alt"><div class="w">${head()}<div class="grid steps${LY.st === 'line' ? ' tl' : ''}">${b.items.filter(i => i.t || i.d).map(i => `<div class="card step">${i.t ? `<h3>${R(i.t)}</h3>` : ''}${i.d ? `<p>${R(i.d)}</p>` : ''}</div>`).join('')}</div></div></section>`;
     case 'conteudo': return `<section><div class="w">${head()}${items('', i => `<div class="card"><h3>${R(i.t)}</h3>${i.d ? `<p>${R(i.d)}</p>` : ''}</div>`)}</div></section>`;
     case 'para_quem': return `<section class="alt"><div class="w">${head()}<div class="grid"><div class="card"><h3>É para você se…</h3><ul class="ck">${b.yes.map(x => `<li>${R(x)}</li>`).join('')}</ul></div>${b.no.length ? `<div class="card"><h3>Não é para você se…</h3><ul class="ck no">${b.no.map(x => `<li>${R(x)}</li>`).join('')}</ul></div>` : ''}</div></div></section>`;
     case 'autoridade': return `<section><div class="w"><div class="hero ${ctx.img ? '' : 'noimg'}" style="padding:0"><div class="g" style="grid-template-columns:${ctx.img ? '.4fr 1fr' : '1fr'}">${ctx.img ? `<div><img src="${ctx.img}" alt="${E(b.name)}"${lpImgAttr(ctx.img)} style="border-radius:50%;aspect-ratio:1;object-fit:cover"></div>` : ''}<div>${head()}${b.name ? `<p><strong>${E(b.name)}</strong></p>` : ''}<p class="mut">${R(b.text)}</p></div></div></div></div></section>`;
-    case 'prova': return `<section class="alt"><div class="w">${head()}${items('', i => `<div class="card"><p class="q">“${R(i.t)}”</p><p><strong>${R(i.d)}</strong></p></div>`)}</div></section>`;
+    case 'prova': if (LY.pr === 'quote' && b.items.some(i => i.t)) { const q = b.items.filter(i => i.t); return `<section class="alt"><div class="w">${head()}<div class="bq"><p class="q">“${R(q[0].t)}”</p><p><strong>${R(q[0].d)}</strong></p></div>${q.length > 1 ? `<div class="grid">${q.slice(1).map(i => `<div class="card"><p class="q">“${R(i.t)}”</p><p><strong>${R(i.d)}</strong></p></div>`).join('')}</div>` : ''}</div></section>`; }
+      return `<section class="alt"><div class="w">${head()}${items('', i => `<div class="card"><p class="q">“${R(i.t)}”</p><p><strong>${R(i.d)}</strong></p></div>`)}</div></section>`;
     case 'oferta': return `<section id="oferta"><div class="w center">${head(b.text ? `<p class="mut">${R(b.text)}</p>` : '')}<div class="box">${b.items.length ? `<ul class="ck">${b.items.filter(i => i.t).map(i => `<li><strong>${R(i.t)}</strong>${i.d ? ' ' + R(i.d) : ''}</li>`).join('')}</ul>` : ''}${b.price ? `<div class="price">${E(b.price)}</div>` : ''}${b.note ? `<div class="note" style="margin:0 0 16px">${E(b.note)}</div>` : ''}${btn(b.cta)}</div></div></section>`;
     case 'bonus': return b.items.some(i => i.t) ? `<section class="alt"><div class="w">${head()}${items('', card)}</div></section>` : '';
     case 'garantia': return `<section><div class="w center" style="max-width:720px">${head(`<p class="mut">${R(b.text)}</p>`)}</div></section>`;
-    case 'faq': return `<section><div class="w" style="max-width:780px">${head()}${b.items.filter(i => i.t).map(i => `<details><summary>${R(i.t)}</summary><p>${R(i.d)}</p></details>`).join('')}</div></section>`;
+    case 'faq': { const fq = b.items.filter(i => i.t).map(i => `<details><summary>${R(i.t)}</summary><p>${R(i.d)}</p></details>`).join(''); return LY.faq === 'cols' ? `<section><div class="w">${head()}<div class="faqc">${fq}</div></div></section>` : `<section><div class="w" style="max-width:780px">${head()}${fq}</div></section>`; }
     case 'programa': return `<section class="alt"><div class="w" style="max-width:780px">${head()}${b.items.filter(i => i.t || i.d).map(i => `<div class="tl"><b>${E(i.t)}</b>${R(i.d)}</div>`).join('')}</div></section>`;
     case 'palestrantes': return `<section><div class="w">${head()}${items('', card)}</div></section>`;
     case 'local': return `<section class="alt"><div class="w center" style="max-width:760px">${head(b.note ? `<p><strong>${E(b.note)}</strong></p>` : '')}<p class="mut">${R(b.text)}</p></div></section>`;
@@ -4617,14 +4849,14 @@ async function lpAssets(l, p) {
 }
 async function lpHTML(l, p, opts) {
   opts = opts || {}; const T0 = l.theme || {}, hx = (v, d) => /^#[0-9a-f]{6}$/i.test(String(v)) ? v : d, fn = (v, d) => (String(v || '').replace(/[^\w \-]/g, '').trim().slice(0, 60) || d);
-  const th = {accent: hx(T0.accent, '#e4572e'), bg: hx(T0.bg, '#ffffff'), fg: hx(T0.fg, '#141414'), dark: !!T0.dark, head: fn(T0.head, 'Poppins'), body: fn(T0.body, 'Inter'), rad: T0.rad, hw: T0.hw, hero: T0.hero};
+  const th = {accent: hx(T0.accent, '#e4572e'), bg: hx(T0.bg, '#ffffff'), fg: hx(T0.fg, '#141414'), dark: !!T0.dark, head: fn(T0.head, 'Poppins'), body: fn(T0.body, 'Inter'), rad: T0.rad, hw: T0.hw, hero: T0.hero, ly: T0.ly};
   const TR = {metaPixel: /^\d{5,20}$/.test(l.tracking && l.tracking.metaPixel || '') ? l.tracking.metaPixel : '', ga4: /^G-[A-Z0-9]{4,14}$/.test(l.tracking && l.tracking.ga4 || '') ? l.tracking.ga4 : ''};
   const blocks = (l.blocks || []).filter(b => b.on), hero = blocks.find(b => b.t === 'hero'), leadsUrl = state.workspace.leadsUrl || '';
   const sections = []; let hasForm = false, countdown = '';
   if (l.type === 'evento' && /^\d{4}-\d{2}-\d{2}/.test(l.product.data || '')) countdown = `<div class="cd" id="cd" data-t="${lpE(l.product.data)}"><div><b class="cdd">0</b><small>dias</small></div><div><b class="cdh">0</b><small>horas</small></div><div><b class="cdm">0</b><small>min</small></div></div>`;
   const chrome = lpChrome(l, p);   let bxCssText = '', bxBtn = '';
   if (l.vis) { const r = await bxRender(l, opts); sections.push(r.html); bxCssText = r.css; bxBtn = r.firstBtn; }
-  else for (const b of blocks) { const img = b.imgId ? await lpImg(b.imgId) : ''; if (b.t === 'form') hasForm = true; { const hb = lpBlockHTML(l, b, {img, countdown: b.t === 'hero' ? countdown : '', hv: th.hero}); sections.push(opts.edit && hb ? `<div data-bk="${lpE(b.id)}" style="display:contents">${hb}</div>` : hb); } }
+  else for (const b of blocks) { const img = b.imgId ? await lpImg(b.imgId) : ''; if (b.t === 'form') hasForm = true; { const hb = lpBlockHTML(l, b, {img, countdown: b.t === 'hero' ? countdown : '', hv: th.hero, ly: th.ly}); sections.push(opts.edit && hb ? `<div data-bk="${lpE(b.id)}" style="display:contents">${hb}</div>` : hb); } }
   const SO = lpSeoOf(l, p), title = SO.title || ((hero && hero.title ? hero.title.replace(/\*\*/g, '') : l.name) + (l.product.nome ? ' · ' + l.product.nome : '')), desc = SO.desc || (hero && hero.text || l.sub || '').replace(/\*\*/g, '').slice(0, 160), cta = hero ? lpCta(l, hero) : null;
   const waOn = !!l.whatsapp && l.waFloat !== false, fav = await lpFavURL(SO.fav), wf = [], ww = new Set([400, 600, 700, 800]); if (l.vis) l.vis.sections.forEach(s => s.cols.forEach(c => c.widgets.forEach(w => { if (w.ff) wf.push(w.ff); if (w.fw) ww.add(w.fw); if (w.t === 'tpl') tplFontList(w).forEach(f => wf.push(f)); })));
   const track = opts.preview ? '' : [TR.metaPixel ? `<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${TR.metaPixel}');fbq('track','PageView');<\/script>` : '', TR.ga4 ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${TR.ga4}"><\/script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${TR.ga4}');<\/script>` : ''].join('');
@@ -8052,7 +8284,17 @@ function mzTreeFonts(root, set) { set = set || new Set(); const take = v => { St
   mzWalk(root, n => { ['d', 't', 'm'].forEach(b => { const f = n.style && n.style[b] && n.style[b].fontFamily; if (f) take(String(f).split(',')[0]); }); const h = n.props && (n.props.html || ''); if (h) String(h).replace(/font-family:\s*([^;"]+)/gi, (m, f) => { take(f.split(',')[0]); return m; }); }); return set; }
 const mzFontsUrl = (ds, root) => { const s = new Set([ds.fonts.heading, ds.fonts.body]); if (root) mzTreeFonts(root, s); const f = [...s].filter(x => /^[A-Za-z][\w ]{1,38}$/.test(x) && (MZ_FONT_LIST.includes(x) || (root && x !== 'system-ui' && x !== 'sans-serif' && x !== 'serif'))); return f.length ? 'https://fonts.googleapis.com/css2?' + f.map(x => 'family=' + x.replace(/ /g, '+') + ':wght@300;400;500;600;700;800;900').join('&') + '&display=swap' : ''; };
 /* documento completo (saída: HTML, preview, exportação) */
+const MZ_ANIM_CSS = {fade: '', up: 'transform:translateY(32px);', left: 'transform:translateX(-44px);', zoom: 'transform:scale(.94);'};
+function mzAnimWrap(html) {
+  const k = typeof MZ !== 'undefined' && MZ.xAnim; if (!k || k === 'none' || !(k in MZ_ANIM_CSS)) return html;
+  const css = '<style>.mz-rv{opacity:0;' + MZ_ANIM_CSS[k] + 'transition:opacity .8s ease,transform .8s ease}.mz-rv.mz-in{opacity:1;transform:none}@media(prefers-reduced-motion:reduce){.mz-rv{opacity:1;transform:none;transition:none}}</style>';
+  const js = '<script>(function(){var els=document.querySelectorAll("section,header,footer");if(!("IntersectionObserver" in window)){return}var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("mz-in");io.unobserve(e.target)}})},{threshold:.12});els.forEach(function(el){el.classList.add("mz-rv");io.observe(el)})})();<\/script>';
+  return html.replace('</head>', css + '</head>').replace(/<\/body>(?![\s\S]*<\/body>)/, js + '</body>');
+}
 function mzDoc(m, page, o) {
+  return mzAnimWrap(mzDocBase(m, page, o));
+}
+function mzDocBase(m, page, o) {
   o = o || {}; const ctx = {mode: 'out', comps: m.comps, img: o.img || (() => '')}, body = mzNodeHtml(page.root, ctx), css = mzTreeCss(page.root, m.ds, ctx), fu = mzFontsUrl(m.ds, page.root);
   const seo = page.seo || {}, title = seo.title || page.name;
   return `<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${mzEsc(title)}</title>\n${seo.desc ? `<meta name="description" content="${mzEsc(seo.desc)}">\n` : ''}${page.priv ? '<meta name="robots" content="noindex,nofollow">\n' : ''}${fu ? `<link rel="stylesheet" href="${fu}">\n` : ''}${o.cssFile ? `<link rel="stylesheet" href="${o.cssFile}">` : `<style>\n${css}\n</style>`}\n</head>\n<body>\n${body}\n<script>${MZ_RUNTIME}<\/script>\n</body>\n</html>`;
@@ -8940,10 +9182,11 @@ const mzSlug = s => String(s || 'pagina').toLowerCase().normalize('NFD').replace
 function mzModalExport() {
   const m = mzM(), pg = mzPg(); mzModal('Exportar', `<p class="mz-hint" style="margin-top:0">Escolha o que exportar. A principal saída é o Elementor (versão grátis, sem Pro): contêineres e widgets nativos, com o resto do visual em um CSS extra.</p>
     <label class="mz-ck"><input type="radio" name="mzxs" value="page" checked> Só a página atual (<b>${esc(pg.name)}</b>)</label><label class="mz-ck"><input type="radio" name="mzxs" value="all"> Todas as páginas (${m.pages.length})</label>
-    <div class="mz-xgrid"><button class="mz-tpl" onclick="mzDoExport('elementor')"><b>Elementor (.json)</b><small>Modelo para Modelos → Importar. Estrutura, estilos, responsivo e links.</small></button><button class="mz-tpl" onclick="mzDoExport('html')"><b>HTML</b><small>Arquivo único, com CSS e imagens dentro.</small></button><button class="mz-tpl" onclick="mzDoExport('css')"><b>CSS</b><small>O CSS da página (variáveis do Design System incluídas).</small></button><button class="mz-tpl" onclick="mzDoExport('zip')"><b>ZIP do site</b><small>HTML, CSS e pasta de imagens, pronto para hospedar.</small></button><button class="mz-tpl" onclick="mzDoExport('json')"><b>JSON do Studio</b><small>O site inteiro, para outro projeto ou backup.</small></button></div><div id="mzXmsg" class="mz-hint"></div>`, {wide: true});
+    <label class="mz-ck" style="margin-top:8px">Animação de entrada (HTML e Elementor): <select id="mzxAnim" style="margin-left:6px"><option value="none">Nenhuma</option><option value="fade">Aparecer</option><option value="up">Subir e aparecer</option><option value="left">Entrar da esquerda</option><option value="zoom">Zoom suave</option></select></label>
+    <div class="mz-xgrid"><button class="mz-tpl" onclick="mzDoExport('kit')"><b>Kit do Elementor (.zip)</b><small>Pacote no formato dos kits de modelos (manifest + um modelo por página). Importe pelo plugin de kits ou por Modelos → Importar, cada .json.</small></button><button class="mz-tpl" onclick="mzDoExport('elementor')"><b>Elementor (.json)</b><small>Modelo para Modelos → Importar. Estrutura, estilos, responsivo e links.</small></button><button class="mz-tpl" onclick="mzDoExport('html')"><b>HTML</b><small>Arquivo único, com CSS e imagens dentro.</small></button><button class="mz-tpl" onclick="mzDoExport('css')"><b>CSS</b><small>O CSS da página (variáveis do Design System incluídas).</small></button><button class="mz-tpl" onclick="mzDoExport('zip')"><b>ZIP do site</b><small>HTML, CSS e pasta de imagens, pronto para hospedar.</small></button><button class="mz-tpl" onclick="mzDoExport('json')"><b>JSON do Studio</b><small>O site inteiro, para outro projeto ou backup.</small></button></div><div id="mzXmsg" class="mz-hint"></div>`, {wide: true});
 }
 async function mzDoExport(fmt) {
-  const m = mzM(), scope = (document.querySelector('input[name=mzxs]:checked') || {}).value || 'page', pages = scope === 'all' ? m.pages : [mzPg()], msg = t => { const e = document.getElementById('mzXmsg'); if (e) e.textContent = t; }; msg('Gerando…'); await mzLoadImgs();
+  const m = mzM(), scope = (document.querySelector('input[name=mzxs]:checked') || {}).value || 'page', pages = scope === 'all' ? m.pages : [mzPg()], msg = t => { const e = document.getElementById('mzXmsg'); if (e) e.textContent = t; }; MZ.xAnim = (document.getElementById('mzxAnim') || {}).value || 'none'; msg('Gerando…'); await mzLoadImgs();
   try {
     if (fmt === 'json') { mzDl(mzSlug(MZ.p.name) + '-site.mesa.json', JSON.stringify({mesaStudio: 1, name: MZ.p.name, mesa: {ds: m.ds, pages: scope === 'all' ? m.pages : pages, comps: m.comps}}, null, 1), 'application/json'); msg('JSON baixado.'); return; }
     if (fmt === 'html') { for (const pg of pages) { const html = await mzInlineImgDoc(m, pg); mzDl(mzSlug(pg.slug || pg.name) + '.html', html, 'text/html'); } msg(pages.length + ' arquivo(s) HTML baixado(s).'); return; }
@@ -8953,12 +9196,26 @@ async function mzDoExport(fmt) {
       pages.forEach(pg => { const base = pg.home ? 'index' : mzSlug(pg.slug || pg.name), cssFile = `css/${base}.css`, ctxCss = {mode: 'out', comps: m.comps, img: id => map[id] ? '../' + map[id] : ''}; files.push({name: base + '.html', data: enc.encode(mzDoc(m, pg, {img: id => map[id] || '', cssFile}))}); files.push({name: cssFile, data: enc.encode(mzTreeCss(pg.root, m.ds, ctxCss))}); });
       files.push({name: 'LEIA-ME.txt', data: enc.encode(`Site exportado pela Mesa de páginas do Ampliação Studio.\nProjeto: ${MZ.p.name}\nPáginas: ${pages.map(p => p.name).join(', ')}\nAbra index.html. Os formulários precisam de um endereço de recebimento (leads) configurado em cada formulário.\n`)}); mzDl(mzSlug(MZ.p.name) + '-site.zip', makeZip(files), 'application/zip'); msg('ZIP baixado.'); return;
     }
+    if (fmt === 'kit') {
+      const ids = mzImgIds(m, pages), map = {}, enc = new TextEncoder(), files = [], ctx = {mode: 'out', comps: m.comps, img: () => ''}; let css = ''; for (const id of ids) map[id] = await mzBlobData(id);
+      const man = {manifest_version: '1.0.23', title: MZ.p.name + ' (Mesa de páginas)', page_builder: 'elementor', kit_version: '1.0.0', templates: [], required_plugins: [{name: 'Elementor', version: '3.20.0', file: 'elementor/elementor.php', author: 'Elementor.com'}]};
+      for (const pg of pages) {
+        const base = mzSlug(pg.slug || pg.name), json = mzElementor(pg, m, map); json.metadata = json.metadata || []; files.push({name: 'templates/' + base + '.json', data: enc.encode(JSON.stringify(json))});
+        const c = document.createElement('canvas'); c.width = 600; c.height = 400; const x = c.getContext('2d'); x.fillStyle = '#f1f1ee'; x.fillRect(0, 0, 600, 400); x.fillStyle = '#111'; x.font = '700 34px sans-serif'; x.fillText(pg.name.slice(0, 28), 36, 210);
+        const shot = await new Promise(r => c.toBlob(r, 'image/png')); files.push({name: 'screenshots/' + base + '.png', data: new Uint8Array(await shot.arrayBuffer())});
+        man.templates.push({name: pg.name, screenshot: 'screenshots/' + base + '.png', source: 'templates/' + base + '.json', preview_url: '', type: pg.home ? 'single-home' : 'single-page', category: 'page', metadata: {template_type: pg.home ? 'single-home' : 'single-page', include_in_zip: '1', elementor_pro_required: null}, elementor_pro_required: false});
+        const cc = mzNodeCss(pg.root, Object.assign({}, ctx, {img: id => map[id] || ''})); css += `/* ${pg.name} */\n` + cc.d + (cc.t ? `@media (max-width:1024px){${cc.t}}` : '') + (cc.m ? `@media (max-width:767px){${cc.m}}` : '') + '\n';
+      }
+      files.push({name: 'manifest.json', data: enc.encode(JSON.stringify(man, null, 2))}); files.push({name: 'mesa-css-extra.css', data: enc.encode(mzDsCss(m.ds) + MZ_BASE_CSS.replace(/body\{[^}]*\}/, '') + css)});
+      files.push({name: 'LEIA-ME.txt', data: enc.encode('Kit do Elementor gerado pela Mesa de páginas.\nUse só widgets e contêineres do Elementor grátis.\nO visual completo está em mesa-css-extra.css: cole em Aparência > Personalizar > CSS adicional.\nImporte cada página em Elementor > Modelos > Importar (arquivos da pasta templates), ou use o plugin de kits de modelos.\nAnimação de entrada: ' + (MZ.xAnim || 'nenhuma') + '.\n')});
+      mzDl(mzSlug(MZ.p.name) + '-kit-elementor.zip', makeZip(files), 'application/zip'); msg('Kit baixado (' + pages.length + ' página(s)).'); return;
+    }
     if (fmt === 'elementor') {
       const ctx = {mode: 'out', comps: m.comps, img: () => ''}; let css = ''; const ids = mzImgIds(m, pages), map = {}; for (const id of ids) map[id] = await mzBlobData(id);
       for (const pg of pages) { const json = mzElementor(pg, m, map); mzDl(mzSlug(pg.slug || pg.name) + '.elementor.json', JSON.stringify(json), 'application/json'); const c = mzNodeCss(pg.root, Object.assign({}, ctx, {img: id => map[id] || ''})); css += `/* ${pg.name} */\n` + c.d + (c.t ? `@media (max-width:1024px){${c.t}}` : '') + (c.m ? `@media (max-width:767px){${c.m}}` : '') + '\n'; }
       mzDl('mesa-css-extra.css', mzDsCss(m.ds) + MZ_BASE_CSS.replace(/body\{[^}]*\}/, '') + css, 'text/css'); msg('Elementor baixado. Importe em Elementor → Modelos → Importar. O visual completo vem em mesa-css-extra.css: cole em Aparência → Personalizar → CSS adicional.'); return;
     }
-  } catch (e) { msg('Erro: ' + e.message); }
+  } catch (e) { msg('Erro: ' + e.message); } finally { MZ.xAnim = 'none'; }   // a animação vale só para esta exportação (a prévia não usa)
 }
 /* ---------- Elementor ---------- */
 const mzEid = () => Math.random().toString(16).slice(2, 9);
@@ -8974,6 +9231,7 @@ function mzElSettings(n, ds, imgMap) {
     if (st.backgroundColor) { s.background_background = 'classic'; put(bp, 'background_color', R('backgroundColor')); } if (st.width) { const w = mzEl4(st.width); if (w) put(bp, 'width', w); } if (st.minHeight) { const w = mzEl4(st.minHeight); if (w) put(bp, 'min_height', w); }
     if (st.borderRadius) { const r = mzEDim(R('borderRadius')); if (r) put(bp, 'border_radius', r); } if (st.textAlign) put(bp, 'align', st.textAlign);
   });
+  if (MZ.xAnim && MZ.xAnim !== 'none') { const an = {fade: 'fadeIn', up: 'fadeInUp', left: 'fadeInLeft', zoom: 'zoomIn'}[MZ.xAnim]; if (an) { s.animation = an; s._animation = an; } }
   if (n.cls || true) s._css_classes = [mzCls(n), n.cls].filter(Boolean).join(' '); if (n.htmlId) s._element_id = n.htmlId; return s;
 }
 function mzElementorNode(n, ds, imgMap, comps) {
@@ -9553,7 +9811,7 @@ async function mzThScan(files) {
       else if (ext === 'xml') { const t = await f.text(); MZTH.pkgs.push({label: f.name, kind: 'wordpress', tokens: {}, items: mzThWxrItems(t), notes: []}); }
     }
     MZTH.pkgs = MZTH.pkgs.filter(p => p.items.length || (p.tokens && (Object.keys(p.tokens.colors || {}).length || (p.tokens.fonts || {}).heading)));
-    if (!MZTH.pkgs.length) throw new Error('Não encontrei páginas, modelos ou estilos neste arquivo. Se for um pacote com vários ZIPs, confira se o tema/kit está dentro.');
+    if (!MZTH.pkgs.length) throw new Error('Não encontrei páginas, modelos ou estilos neste arquivo. Se for um pacote com vários ZIPs, confira se o tema/kit está dentro. Pacotes só de FONTES (.ttf, .otf, .woff) não são templates: use a tela de fontes.');
     mzThReview();
   } catch (e) { mzThMsg(e.message); toast(e.message); } finally { MZTH.busy = false; }
 }
@@ -9655,7 +9913,7 @@ async function mzThImport() {
   try {
     for (let pi = 0; pi < MZTH.pkgs.length; pi++) {
       const p = MZTH.pkgs[pi], toks = {colors: {}, fonts: {}}, tk = document.querySelector(`[data-th-tok="${pi}"]`); if (tk && tk.checked) mzThMergeTok(toks, p.tokens);
-      const mine = checks.filter(([a]) => a === pi), ctx = {miss: 0, imgs: new Map(), created: new Set(), fonts: new Map()}, pages = [], notes = [], unsup = {};
+      const mine = checks.filter(([a]) => a === pi), ctx = {miss: 0, imgs: new Map(), created: new Set(), fonts: new Map()}, pages = [], notes = [], unsup = {}, bsecs = [];
       for (const [, ii] of mine) {
         const it = p.items[ii]; if (!it) continue; btn.textContent = `Importando ${++done}/${total}…`;
         try {
@@ -9666,7 +9924,7 @@ async function mzThImport() {
         } catch (e) { notes.push(it.label + ': ' + e.message); }
       }
       if (!pages.length && !bsecs.length && !Object.keys(toks.colors).length && !toks.fonts.heading) { if (mine.length) errs.push(p.label + ': nada pôde ser importado. ' + (notes[0] || '')); continue; }
-      const blocks = pages.filter(x => x.kind === 'block'); const realPages = pages.filter(x => x.kind !== 'block'); const bsecs = [];
+      const blocks = pages.filter(x => x.kind === 'block'); const realPages = pages.filter(x => x.kind !== 'block');
       blocks.forEach(b => { const nodes = b.root.children; if (!nodes.length) return; const wrap = nodes.length === 1 ? nodes[0] : mzNode('section', {}, {display: 'flex', flexDirection: 'column'}, nodes); wrap.name = b.name.replace(/^block:\s*/i, ''); bsecs.push({id: mzId(), name: wrap.name, root: wrap, n: mzCount(wrap), th: b.th || ''}); });
       pages.length = 0; realPages.forEach(x => pages.push(x));
       const name = ((document.querySelector(`[data-th-name="${pi}"]`) || {}).value || p.label || 'Tema').trim().slice(0, 80) || 'Tema', id = 'th_' + uid('x').replace(/^x_?/, ''), secs = [], seen = new Set();
@@ -10590,28 +10848,28 @@ if (typeof motJSON !== 'function') { var motJSON = async function (system, user,
    Cada template é uma estrutura de páginas (SITE_TPL) com um visual próprio (cores, fontes, cantos, peso dos títulos e layout do topo).
    Só a estrutura e o estilo: nenhum texto, logo ou foto de terceiros. A galeria mostra a página real, já com o texto do cliente quando há briefing. ===== */
 const SBT = [
-  {id: 'aurora', nome: 'Aurora', nicho: 'Saúde', tipo: 'Serviço local', est: 'servicos', th: {accent: '#0f8b7d', bg: '#f6fbfa', fg: '#12302d', head: 'Fraunces', body: 'Manrope', rad: 14, hw: 600, hero: 'split'}},
-  {id: 'calma', nome: 'Calma', nicho: 'Psicologia', tipo: 'Serviço local', est: 'servicos', th: {accent: '#7c5cc4', bg: '#faf7ff', fg: '#2a2140', head: 'Fraunces', body: 'Manrope', rad: 18, hw: 500, hero: 'center'}},
-  {id: 'sorriso', nome: 'Sorriso Claro', nicho: 'Odontologia', tipo: 'Serviço local', est: 'servicos', th: {accent: '#0a7fb0', bg: '#f4fbff', fg: '#0b2a3a', head: 'Sora', body: 'Manrope', rad: 12, hw: 700, hero: 'split'}},
-  {id: 'toga', nome: 'Toga', nicho: 'Direito', tipo: 'Serviço local', est: 'servicos', th: {accent: '#8a6a2f', bg: '#ffffff', fg: '#1b1f2a', head: 'DM Serif Display', body: 'Manrope', rad: 4, hw: 400, hero: 'center'}},
-  {id: 'foro', nome: 'Foro', nicho: 'Direito', tipo: 'Serviço local', est: 'servicos', th: {accent: '#c9a24b', bg: '#14161c', fg: '#f1efe9', dark: true, head: 'DM Serif Display', body: 'Manrope', rad: 4, hw: 400, hero: 'center'}},
-  {id: 'prumo', nome: 'Prumo', nicho: 'Contabilidade', tipo: 'Serviço local', est: 'servicos', th: {accent: '#1f6f50', bg: '#ffffff', fg: '#10243a', head: 'Manrope', body: 'Manrope', rad: 8, hw: 800, hero: 'center'}},
-  {id: 'cursopro', nome: 'Curso Pro', nicho: 'Cursos', tipo: 'Venda online', est: 'autoridade', th: {accent: '#ffb703', bg: '#0f1226', fg: '#f2f2fb', dark: true, head: 'Sora', body: 'Manrope', rad: 12, hw: 700, hero: 'big'}},
-  {id: 'mentoria', nome: 'Mentoria', nicho: 'Mentoria', tipo: 'Venda online', est: 'autoridade', th: {accent: '#ff4d2e', bg: '#0c0c0c', fg: '#f5f5f5', dark: true, head: 'Sora', body: 'Manrope', rad: 0, hw: 700, hero: 'big'}},
-  {id: 'ebook', nome: 'Lançamento', nicho: 'Infoproduto', tipo: 'Venda online', est: 'storybrand', th: {accent: '#1d6fe0', bg: '#ffffff', fg: '#0b2545', head: 'Sora', body: 'Manrope', rad: 10, hw: 600, hero: 'split'}},
-  {id: 'nuvem', nome: 'Nuvem', nicho: 'Tecnologia', tipo: 'Venda online', est: 'storybrand', th: {accent: '#5b8cff', bg: '#0b1020', fg: '#e8ecff', dark: true, head: 'Sora', body: 'Manrope', rad: 12, hw: 600, hero: 'center'}},
-  {id: 'brasa', nome: 'Brasa', nicho: 'Restaurante', tipo: 'Produtos', est: 'produtos', th: {accent: '#c2410c', bg: '#fff7ee', fg: '#3a1f10', head: 'DM Serif Display', body: 'Manrope', rad: 16, hw: 400, hero: 'split'}},
-  {id: 'grao', nome: 'Café Grão', nicho: 'Cafeteria', tipo: 'Produtos', est: 'produtos', th: {accent: '#7a4a21', bg: '#f6efe6', fg: '#2b1d14', head: 'Fraunces', body: 'Manrope', rad: 12, hw: 500, hero: 'split'}},
-  {id: 'petfeliz', nome: 'Pet Feliz', nicho: 'Pet', tipo: 'Produtos', est: 'produtos', th: {accent: '#d9480f', bg: '#fffdf5', fg: '#2a2a2a', head: 'Fraunces', body: 'Manrope', rad: 22, hw: 500, hero: 'split'}},
-  {id: 'lar', nome: 'Lar', nicho: 'Imobiliária', tipo: 'Produtos', est: 'produtos', th: {accent: '#b45309', bg: '#ffffff', fg: '#14213d', head: 'Manrope', body: 'Manrope', rad: 8, hw: 800, hero: 'split'}},
-  {id: 'estudio', nome: 'Estúdio', nicho: 'Agência', tipo: 'Portfólio', est: 'autoridade', th: {accent: '#e03e1a', bg: '#f1f1ee', fg: '#111111', head: 'Sora', body: 'Manrope', rad: 0, hw: 700, hero: 'big'}},
-  {id: 'forma', nome: 'Forma', nicho: 'Academia', tipo: 'Serviço local', est: 'servicos', th: {accent: '#ff6a00', bg: '#0e0e10', fg: '#ffffff', dark: true, head: 'Sora', body: 'Manrope', rad: 6, hw: 700, hero: 'big'}},
-  {id: 'viva', nome: 'Beleza Viva', nicho: 'Beleza', tipo: 'Serviço local', est: 'servicos', th: {accent: '#c2185b', bg: '#fff5f7', fg: '#3b1f2b', head: 'DM Serif Display', body: 'Manrope', rad: 24, hw: 400, hero: 'split'}},
-  {id: 'obra', nome: 'Obra Certa', nicho: 'Construção', tipo: 'Serviço local', est: 'servicos', th: {accent: '#b45309', bg: '#f4f4f2', fg: '#1d1d1d', head: 'Sora', body: 'Manrope', rad: 2, hw: 700, hero: 'big'}},
-  {id: 'casaverde', nome: 'Casa Verde', nicho: 'Jardinagem', tipo: 'Serviço local', est: 'servicos', th: {accent: '#2e7d32', bg: '#f4faf2', fg: '#1c3321', head: 'Manrope', body: 'Manrope', rad: 10, hw: 800, hero: 'split'}}
+  {id: 'aurora', nome: 'Aurora', nicho: 'Saúde', tipo: 'Serviço local', est: 'servicos', th: {accent: '#0f8b7d', bg: '#f6fbfa', fg: '#12302d', head: 'Fraunces', body: 'Manrope', rad: 14, hw: 600, hero: 'split', ly: {w:'normal',sh:'left',band:'alt',ben:'cards',st:'cards',pr:'cards',dor:'list',faq:'acc'}}},
+  {id: 'calma', nome: 'Calma', nicho: 'Psicologia', tipo: 'Serviço local', est: 'servicos', th: {accent: '#7c5cc4', bg: '#faf7ff', fg: '#2a2140', head: 'Fraunces', body: 'Manrope', rad: 18, hw: 500, hero: 'center', ly: {w:'narrow',sh:'center',band:'none',ben:'nums',st:'line',pr:'quote',dor:'cards',faq:'acc'}}},
+  {id: 'sorriso', nome: 'Sorriso Claro', nicho: 'Odontologia', tipo: 'Serviço local', est: 'servicos', th: {accent: '#0a7fb0', bg: '#f4fbff', fg: '#0b2a3a', head: 'Sora', body: 'Manrope', rad: 12, hw: 700, hero: 'split', ly: {w:'wide',sh:'left',band:'tint',ben:'rows',st:'cards',pr:'cards',dor:'cards',faq:'cols'}}},
+  {id: 'toga', nome: 'Toga', nicho: 'Direito', tipo: 'Serviço local', est: 'servicos', th: {accent: '#8a6a2f', bg: '#ffffff', fg: '#1b1f2a', head: 'DM Serif Display', body: 'Manrope', rad: 4, hw: 400, hero: 'center', ly: {w:'narrow',sh:'left',band:'line',ben:'rows',st:'line',pr:'quote',dor:'list',faq:'acc'}}},
+  {id: 'foro', nome: 'Foro', nicho: 'Direito', tipo: 'Serviço local', est: 'servicos', th: {accent: '#c9a24b', bg: '#14161c', fg: '#f1efe9', dark: true, head: 'DM Serif Display', body: 'Manrope', rad: 4, hw: 400, hero: 'center', ly: {w:'normal',sh:'center',band:'line',ben:'nums',st:'line',pr:'quote',dor:'list',faq:'acc'}}},
+  {id: 'prumo', nome: 'Prumo', nicho: 'Contabilidade', tipo: 'Serviço local', est: 'servicos', th: {accent: '#1f6f50', bg: '#ffffff', fg: '#10243a', head: 'Manrope', body: 'Manrope', rad: 8, hw: 800, hero: 'center', ly: {w:'wide',sh:'left',band:'alt',ben:'nums',st:'cards',pr:'cards',dor:'cards',faq:'cols'}}},
+  {id: 'cursopro', nome: 'Curso Pro', nicho: 'Cursos', tipo: 'Venda online', est: 'autoridade', th: {accent: '#ffb703', bg: '#0f1226', fg: '#f2f2fb', dark: true, head: 'Sora', body: 'Manrope', rad: 12, hw: 700, hero: 'big', ly: {w:'wide',sh:'center',band:'tint',ben:'cards',st:'line',pr:'cards',dor:'cards',faq:'cols'}}},
+  {id: 'mentoria', nome: 'Mentoria', nicho: 'Mentoria', tipo: 'Venda online', est: 'autoridade', th: {accent: '#ff4d2e', bg: '#0c0c0c', fg: '#f5f5f5', dark: true, head: 'Sora', body: 'Manrope', rad: 0, hw: 700, hero: 'big', ly: {w:'normal',sh:'left',band:'none',ben:'rows',st:'line',pr:'quote',dor:'list',faq:'acc'}}},
+  {id: 'ebook', nome: 'Lançamento', nicho: 'Infoproduto', tipo: 'Venda online', est: 'storybrand', th: {accent: '#1d6fe0', bg: '#ffffff', fg: '#0b2545', head: 'Sora', body: 'Manrope', rad: 10, hw: 600, hero: 'split', ly: {w:'narrow',sh:'center',band:'alt',ben:'cards',st:'cards',pr:'quote',dor:'cards',faq:'acc'}}},
+  {id: 'nuvem', nome: 'Nuvem', nicho: 'Tecnologia', tipo: 'Venda online', est: 'storybrand', th: {accent: '#5b8cff', bg: '#0b1020', fg: '#e8ecff', dark: true, head: 'Sora', body: 'Manrope', rad: 12, hw: 600, hero: 'center', ly: {w:'wide',sh:'center',band:'line',ben:'cards',st:'line',pr:'cards',dor:'cards',faq:'cols'}}},
+  {id: 'brasa', nome: 'Brasa', nicho: 'Restaurante', tipo: 'Produtos', est: 'produtos', th: {accent: '#c2410c', bg: '#fff7ee', fg: '#3a1f10', head: 'DM Serif Display', body: 'Manrope', rad: 16, hw: 400, hero: 'split', ly: {w:'normal',sh:'center',band:'tint',ben:'cards',st:'cards',pr:'quote',dor:'list',faq:'acc'}}},
+  {id: 'grao', nome: 'Café Grão', nicho: 'Cafeteria', tipo: 'Produtos', est: 'produtos', th: {accent: '#7a4a21', bg: '#f6efe6', fg: '#2b1d14', head: 'Fraunces', body: 'Manrope', rad: 12, hw: 500, hero: 'split', ly: {w:'narrow',sh:'left',band:'alt',ben:'rows',st:'cards',pr:'cards',dor:'list',faq:'acc'}}},
+  {id: 'petfeliz', nome: 'Pet Feliz', nicho: 'Pet', tipo: 'Produtos', est: 'produtos', th: {accent: '#d9480f', bg: '#fffdf5', fg: '#2a2a2a', head: 'Fraunces', body: 'Manrope', rad: 22, hw: 500, hero: 'split', ly: {w:'wide',sh:'center',band:'tint',ben:'nums',st:'cards',pr:'cards',dor:'cards',faq:'cols'}}},
+  {id: 'lar', nome: 'Lar', nicho: 'Imobiliária', tipo: 'Produtos', est: 'produtos', th: {accent: '#b45309', bg: '#ffffff', fg: '#14213d', head: 'Manrope', body: 'Manrope', rad: 8, hw: 800, hero: 'split', ly: {w:'wide',sh:'left',band:'none',ben:'cards',st:'line',pr:'cards',dor:'cards',faq:'cols'}}},
+  {id: 'estudio', nome: 'Estúdio', nicho: 'Agência', tipo: 'Portfólio', est: 'autoridade', th: {accent: '#e03e1a', bg: '#f1f1ee', fg: '#111111', head: 'Sora', body: 'Manrope', rad: 0, hw: 700, hero: 'big', ly: {w:'wide',sh:'left',band:'line',ben:'rows',st:'line',pr:'quote',dor:'list',faq:'acc'}}},
+  {id: 'forma', nome: 'Forma', nicho: 'Academia', tipo: 'Serviço local', est: 'servicos', th: {accent: '#ff6a00', bg: '#0e0e10', fg: '#ffffff', dark: true, head: 'Sora', body: 'Manrope', rad: 6, hw: 700, hero: 'big', ly: {w:'wide',sh:'left',band:'alt',ben:'nums',st:'cards',pr:'cards',dor:'cards',faq:'acc'}}},
+  {id: 'viva', nome: 'Beleza Viva', nicho: 'Beleza', tipo: 'Serviço local', est: 'servicos', th: {accent: '#c2185b', bg: '#fff5f7', fg: '#3b1f2b', head: 'DM Serif Display', body: 'Manrope', rad: 24, hw: 400, hero: 'split', ly: {w:'narrow',sh:'center',band:'tint',ben:'nums',st:'cards',pr:'quote',dor:'cards',faq:'acc'}}},
+  {id: 'obra', nome: 'Obra Certa', nicho: 'Construção', tipo: 'Serviço local', est: 'servicos', th: {accent: '#b45309', bg: '#f4f4f2', fg: '#1d1d1d', head: 'Sora', body: 'Manrope', rad: 2, hw: 700, hero: 'big', ly: {w:'wide',sh:'left',band:'none',ben:'rows',st:'line',pr:'cards',dor:'list',faq:'cols'}}},
+  {id: 'casaverde', nome: 'Casa Verde', nicho: 'Jardinagem', tipo: 'Serviço local', est: 'servicos', th: {accent: '#2e7d32', bg: '#f4faf2', fg: '#1c3321', head: 'Manrope', body: 'Manrope', rad: 10, hw: 800, hero: 'split', ly: {w:'normal',sh:'left',band:'tint',ben:'cards',st:'cards',pr:'cards',dor:'list',faq:'acc'}}}
 ];
 const SBT_HERO = {split: 'foto ao lado do texto', center: 'topo centralizado', big: 'título grande'};
-const SBG = {q: '', tipo: [], nicho: [], tom: [], sort: 'rel', page: 1, fil: true, more: false, modal: false}, SBG_PER = 12, SBG_CACHE = new Map();
+const SBG = {tab: 'estudio', q: '', tipo: [], nicho: [], tom: [], sort: 'rel', page: 1, fil: true, more: false, modal: false}, SBG_PER = 12, SBG_CACHE = new Map();
 const SBT_SAMPLE = {nome: 'Seu Negócio', cidade: 'Sua cidade', whats: '', email: '', contato: '', quem: 'Quem é o cliente', problemas: ['O problema que o cliente vê no dia a dia'], ocultas: ['como esse problema faz o cliente se sentir'], desejos: 'O resultado que o cliente quer, em uma frase', objecoes: ['Dúvida que trava a compra'], perdem: '', missao: 'Por que isso não deveria acontecer', diferenciais: ['O que você faz melhor'], tempo: '', equipe: '', historia: 'A história do negócio, em poucas linhas.', dep: [{texto: 'Aqui entra um depoimento real e autorizado.', nome: 'Nome do cliente'}], foto: '', logo: '', cor: '', naoUsa: [], tomN: 0, acao: '', direto: 'Falar com a equipe',
   prods: [{nome: 'Serviço um', tipo: 'Serviço', oque: 'Explicação curta do que o cliente recebe.', paraquem: '', como: ['Primeiro passo', 'Segundo passo', 'Terceiro passo'], incluso: ['O que está incluso'], preco: '', prazo: 'Quando o cliente é atendido', diferencial: ['Diferencial um', 'Diferencial dois', 'Diferencial três'], perguntas: ['Como faço para começar?'], objecoes: [], garantia: '', pagamento: '', naoserve: [], problemas: [], acao: '', link: ''}]};
 const sbThemeFor = (t, f) => { const th = Object.assign({}, t.th); if (f && f.cor) th.accent = f.cor; return th; };
@@ -10655,9 +10913,28 @@ function sbGHTML() {
 }
 function sbGRefresh() { const g = $('sbgGrid'); if (g) { g.innerHTML = sbGGrid(); sbThumbFill(g); } }
 function sbGRender() { if (SBG.modal) { const b = $('modalBox'); if (b && $('sbgRoot')) { $('sbgRoot').innerHTML = sbGHTML(); sbThumbFill($('sbgRoot')); } } else renderTemplatesBank(); }
+/* ---------- Meus templates: pacotes que você subiu (kit do Elementor, site em HTML, tema de WordPress) ---------- */
+const sbKindName = k => ({elementor: 'Kit do Elementor', html: 'Site em HTML', wordpress: 'Tema de WordPress'}[k] || 'Pacote');
+function sbMineHTML() {
+  const L = typeof mzThList === 'function' ? mzThList() : [];
+  const up = `<div class="panel es-p rf-drop"><div><strong>Suba os seus templates</strong><div class="es-note">ZIP do Envato (kit do Elementor, site em HTML ou tema de WordPress), JSON do Elementor ou um arquivo HTML. Eles ficam salvos neste navegador, só para você.</div></div><button class="btn pri" onclick="mzThOpen()">Subir template</button></div>`;
+  if (!L.length) return up + '<div class="panel es-empty">Nenhum template seu ainda. Suba os pacotes que você comprou: cada página vira uma página da Mesa de páginas e cada bloco vira uma seção reutilizável. Use só pacotes com licença.</div>';
+  return up + `<div class="sbg-grid">${L.map(t => { const th = (t.pages.find(p => p.th) || {}).th, cols = Object.values((t.ds && t.ds.colors) || {}).slice(0, 5);
+    return `<div class="sbg-card"><div class="sbg-th sbg-mine">${th ? `<img data-lib="${th}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:top">` : `<div class="sbg-ph"><b>${esc(t.name.slice(0, 40))}</b><span>${cols.map(c => `<i style="background:${c}"></i>`).join('')}</span></div>`}</div><div class="sbg-tb"><strong>${esc(t.name.slice(0, 48))}</strong><small class="muted">${sbKindName(t.kind)} · ${t.pages.length} página(s) · ${t.sections.length} seção(ões)</small><div class="row-gap" style="margin-top:6px;flex-wrap:wrap"><button class="btn sm dark" onclick="sbKitPages('${t.id}')">Usar na Mesa</button>${cols.length || (t.ds && t.ds.fonts && t.ds.fonts.heading) ? `<button class="btn sm" onclick="sbKitApply('${t.id}')">Cores e fontes</button>` : ''}<button class="btn sm" onclick="mzThDelete('${t.id}').then(()=>renderTemplatesBank())">Excluir</button></div></div></div>`; }).join('')}</div>`;
+}
+function sbKitPages(id) {
+  const t = mzThList().find(x => x.id === id); if (!t) return;
+  showModal(esc(t.name.slice(0, 50)), `<p class="muted" style="font-size:12.5px;margin-top:0">Escolha a página. Ela abre na Mesa de páginas, onde você edita, troca o texto pelo do cliente e exporta em HTML ou Kit do Elementor (com animação).</p><div class="sb-kitp">${t.pages.map(p => `<button class="sb-kp" onclick="sbKitUse('${t.id}','${p.id}')">${p.th ? `<img data-lib="${p.th}" alt="">` : '<span class="sb-kpn"></span>'}<b>${esc(p.name.slice(0, 40))}</b></button>`).join('')}</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`);
+  $('modalBox').classList.add('wide'); if (typeof libFill === 'function') libFill($('modalBox'));
+}
+async function sbKitUse(th, pid) { if (!curProject()) { toast('Crie um projeto primeiro.'); return; } closeModal(); if (!MZ.open) { mzOpen(); await new Promise(r => setTimeout(r, 700)); } await mzThUsePage(th, pid); }
+async function sbKitApply(th) { if (!curProject()) { toast('Crie um projeto primeiro.'); return; } if (!MZ.open) { mzOpen(); await new Promise(r => setTimeout(r, 700)); } await mzThApply(th); }
+/* depois de importar, a galeria atualiza sozinha */
+(function () { const imp = mzThImport; mzThImport = async function () { const r = await imp.apply(this, arguments); if (ui.page === 'templates') renderTemplatesBank(); return r; }; })();
 function renderTemplatesBank() {
   const root = $('templatesRoot'); if (!root) return; SBG.modal = false;
-  root.innerHTML = esHead('Banco de templates', 'Sua base de modelos. Todos seguem a estrutura StoryBrand: o cliente é o herói e a empresa é o guia. Escolha um e o texto do briefing entra na página.') + `<div id="sbgRoot">${sbGHTML()}</div>`; sbThumbFill(root);
+  const nm = typeof mzThList === 'function' ? mzThList().length : 0;
+  root.innerHTML = esHead('Banco de templates', 'Sua base de modelos. Os do estúdio seguem a estrutura StoryBrand (o cliente é o herói e a empresa é o guia). Os seus vêm dos pacotes que você subiu.') + `<div class="sb-tabs" role="tablist"><button class="chip${SBG.tab === 'estudio' ? ' on' : ''}" onclick="SBG.tab='estudio';renderTemplatesBank()">Modelos do estúdio (${SBT.length})</button><button class="chip${SBG.tab === 'meus' ? ' on' : ''}" onclick="SBG.tab='meus';renderTemplatesBank()">Meus templates (${nm})</button></div><div id="sbgRoot">${SBG.tab === 'meus' ? sbMineHTML() : sbGHTML()}</div>`; if (SBG.tab === 'meus') { if (typeof libFill === 'function') libFill(root); } else sbThumbFill(root);
 }
 function sbOpenGallery() { SBG.modal = true; showModal('Escolha o template do site', `<div id="sbgRoot">${sbGHTML()}</div>`); $('modalBox').classList.add('wide'); sbThumbFill($('sbgRoot')); }
 async function sbPreview(tid) {
@@ -10776,7 +11053,6 @@ function esFit() {
   const W = st.clientWidth - 30, k = Math.min(1, W / 1060); fr.style.cssText = 'width:' + Math.round(W / k) + 'px;height:' + Math.round(H / k) + 'px;transform:scale(' + k + ');transform-origin:0 0'; box.style.height = H + 'px';
 }
 window.addEventListener('resize', () => { if (ui.page === 'dev') esFit(); });
-const esDevice = () => { esFit(); const b = $('esFrameBox'); if (b) b.classList.toggle('mob', ES.device === 'mob'); document.querySelectorAll('.es-seg button').forEach((x, i) => x.classList.toggle('on', (i === 0) === (ES.device === 'desk'))); };
 async function esPreview() {
   const p = curProject(), l = esCur(p), fr = $('esFrame'); if (!l || !fr) return; const my = ++ES.t;
   let h = await lpHTML(l, p, {preview: true, edit: true}); if (my !== ES.t) return;
@@ -10852,6 +11128,183 @@ function esVoltar() { esSent = false; esErr = []; SBR.tab = 'resumo'; go('briefi
 function esVerCliente() { esSent = false; esErr = []; go('cliente'); }
 /* modo da página do cliente: sem menu lateral */
 (function () { const g = go; go = function (page) { document.body.classList.toggle('es-solo', page === 'cliente'); return g.apply(this, arguments); }; })();
+
+</script>
+<script>
+/* ===== Biblioteca de referências: prints e imagens de sites e layouts que você admira.
+   Ficam salvas (mesma biblioteca de imagens do app, com kind 'referencia') e podem ser abertas numa gaveta ao lado da edição,
+   lado a lado ou sobrepostas à página com transparência. Use só referências para estudo de estrutura: não copie textos, logos ou fotos. ===== */
+const REF = {q: '', tag: ''};
+const refList = () => libList().filter(i => i.kind === 'referencia');
+const refTags = () => [...new Set(refList().flatMap(i => (i.tags || []).filter(t => t !== 'referencia')))].sort((a, b) => a.localeCompare(b, 'pt'));
+const refFiltered = () => refList().filter(i => (!REF.q || (i.name + ' ' + (i.tags || []).join(' ') + ' ' + (i.prompt || '')).toLowerCase().includes(REF.q.toLowerCase())) && (!REF.tag || (i.tags || []).includes(REF.tag)));
+async function refUpload(files, tags) {
+  const imgs = [...files].filter(f => /^image\//.test(f.type)); if (!imgs.length) { toast('Escolha imagens (PNG, JPG ou WebP).'); return 0; } let n = 0;
+  for (const f of imgs.slice(0, 40)) { try { await libAddBlob(f, {name: f.name.replace(/\.[^.]+$/, '').slice(0, 80) || 'Referência', tags: ['referencia'].concat(tags || []), kind: 'referencia'}); n++; } catch (e) { toast(f.name + ': ' + e.message); } }
+  if (n) toast(n + ' referência(s) salva(s) na biblioteca.'); if (ui.page === 'refs') renderRefs(); if (typeof esRefRefresh === 'function') esRefRefresh(); return n;
+}
+function refSet(id, k, v) { const it = libItem(id); if (!it) return; if (k === 'tags') it.tags = ['referencia'].concat(String(v).split(',').map(x => x.trim().slice(0, 40)).filter(Boolean)).slice(0, 10); else if (k === 'name') it.name = String(v).slice(0, 120) || 'Referência'; else if (k === 'note') it.prompt = String(v).slice(0, 4000); persist(); }
+async function refDel(id) { const it = libItem(id); if (!it || !confirm('Excluir esta referência da biblioteca?')) return; state.imglib.items = libList().filter(x => x.id !== id); try { await imgDel(it.imgId); } catch (e) { /* o registro já saiu da lista */ } persist(); if (typeof ES !== 'undefined' && ES.ref && ES.ref.id === id) ES.ref.id = ''; if (ui.page === 'refs') renderRefs(); if (typeof esRefRefresh === 'function') esRefRefresh(); }
+async function refView(id) {
+  const it = libItem(id); if (!it) return; const b = await imgGet(it.imgId); if (!b) return; const u = URL.createObjectURL(b);
+  showModal(esc(it.name), `<img src="${u}" alt="" style="max-width:100%;max-height:75vh;display:block;margin:0 auto;border-radius:8px"><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`); $('modalBox').classList.add('wide');
+}
+function refCard(i) {
+  return `<div class="rf-card"><button class="rf-th" onclick="refView('${i.id}')" aria-label="Abrir ${esc(i.name)}"><img data-lib="${i.imgId}" alt=""></button><div class="rf-bd"><input value="${esc(i.name)}" onchange="refSet('${i.id}','name',this.value)" aria-label="Nome"><input value="${esc((i.tags || []).filter(t => t !== 'referencia').join(', '))}" placeholder="Etiquetas: saúde, topo grande…" onchange="refSet('${i.id}','tags',this.value);renderRefs()" aria-label="Etiquetas"><textarea rows="2" placeholder="O que chamou a atenção neste layout?" onchange="refSet('${i.id}','note',this.value)" aria-label="Anotação">${esc(i.prompt || '')}</textarea><div class="row-gap"><button class="btn sm" onclick="refView('${i.id}')">Abrir</button><button class="btn sm" onclick="refDel('${i.id}')">Excluir</button></div></div></div>`;
+}
+function renderRefs() {
+  const root = $('refsRoot'); if (!root) return; const l = refFiltered(), tags = refTags();
+  root.innerHTML = esHead('Referências', 'Suba os layouts que você admira. Eles ficam salvos e abrem ao lado da página quando você está editando um site.') +
+    `<div class="panel es-p rf-drop" id="rfDrop" ondragover="event.preventDefault();this.classList.add('on')" ondragleave="this.classList.remove('on')" ondrop="event.preventDefault();this.classList.remove('on');refUpload(event.dataTransfer.files)"><div><strong>Arraste imagens aqui</strong><div class="es-note">ou cole um print com Ctrl+V. PNG, JPG ou WebP.</div></div><label class="btn pri" style="cursor:pointer">Escolher imagens<input type="file" accept="image/*" multiple hidden onchange="refUpload(this.files);this.value=''"></label></div>
+    <div class="es-row" style="margin-bottom:12px"><input class="sbg-q" placeholder="Buscar por nome, etiqueta ou anotação" value="${esc(REF.q)}" oninput="REF.q=this.value;renderRefsGrid()" aria-label="Buscar referência"><div class="es-pages"><button class="chip${REF.tag ? '' : ' on'}" onclick="REF.tag='';renderRefs()">Todas</button>${tags.map(t => `<button class="chip${REF.tag === t ? ' on' : ''}" onclick="REF.tag='${esc(t).replace(/'/g, '&#39;')}';renderRefs()">${esc(t)}</button>`).join('')}</div></div>
+    <div id="rfGrid">${refGridHTML(l)}</div>`;
+  if (typeof libFill === 'function') libFill(root);
+}
+const refGridHTML = l => l.length ? `<div class="rf-grid">${l.map(refCard).join('')}</div>` : `<div class="panel es-empty">${refList().length ? 'Nenhuma referência com esse filtro.' : 'Nenhuma referência ainda. Suba prints de sites e layouts que você gosta: eles ficam aqui e abrem ao lado da página na hora de editar.'}</div>`;
+function renderRefsGrid() { const g = $('rfGrid'); if (g) { g.innerHTML = refGridHTML(refFiltered()); if (typeof libFill === 'function') libFill(g); } }
+/* colar print (Ctrl+V) na tela de referências ou com a gaveta aberta */
+document.addEventListener('paste', e => { if (ui.page !== 'refs' && !(typeof ES !== 'undefined' && ES.ref && ES.ref.open)) return; const fs = [...(e.clipboardData && e.clipboardData.files || [])].filter(f => /^image\//.test(f.type)); if (fs.length) { e.preventDefault(); refUpload(fs); } });
+
+</script>
+<script>
+/* ===== Mesa de trabalho do Desenvolvimento, no estilo dos editores de imagem (barra de opções em cima, ferramentas à esquerda, tela escura no centro,
+   painéis com abas à direita e barra de estado). Substitui o renderDev simples de estudio-shell.js. Inclui a gaveta de referências, Estilo e Layout. ===== */
+Object.assign(ES, {tool: 'sel', tabA: 'prop', tabB: 'cam', ref: {open: false, id: '', mode: 'side', op: 45, q: ''}, snap: null, deliver: true});
+const ES_FONTS = ['Poppins', 'Inter', 'Manrope', 'Sora', 'Fraunces', 'DM Serif Display', 'Playfair Display', 'Lora', 'Merriweather', 'Montserrat', 'Raleway', 'Nunito', 'Oswald', 'Anton'];
+const ES_LY = [['w', 'Largura do conteúdo', [['narrow', 'Estreita'], ['normal', 'Normal'], ['wide', 'Ampla']]], ['sh', 'Títulos das seções', [['left', 'À esquerda'], ['center', 'Centralizados']]], ['band', 'Faixas de fundo', [['alt', 'Alternadas'], ['tint', 'Cor da marca'], ['line', 'Só linhas'], ['none', 'Sem faixas']]],
+  ['ben', 'Benefícios', [['cards', 'Cartões'], ['rows', 'Linhas numeradas'], ['nums', 'Colunas']]], ['st', 'Plano em passos', [['cards', 'Cartões'], ['line', 'Linha do tempo']]], ['pr', 'Prova', [['cards', 'Cartões'], ['quote', 'Citação grande']]], ['dor', 'Problema', [['list', 'Lista'], ['cards', 'Cartões']]], ['faq', 'Dúvidas', [['acc', 'Sanfona estreita'], ['cols', 'Duas colunas']]]];
+const ES_TOOLS = [
+  ['sel', 'Selecionar seção (clique na página)', '<path d="M5 3l12 8-5.5 1.2L9 18z"/>'],
+  ['txt', 'Texto da seção selecionada', '<path d="M5 5h14M12 5v14M9 19h6"/>'],
+  ['img', 'Imagem da seção selecionada', '<rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/>'],
+  ['move', 'Mover seções (painel Camadas)', '<path d="M12 3v18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3"/>'],
+  ['eye', 'Ocultar ou mostrar a seção selecionada', '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>'],
+  ['style', 'Estilo: cores, fontes e cantos', '<path d="M12 3a9 9 0 100 18c1.4 0 2-1 1.5-2.2-.5-1.3.2-2.3 1.6-2.3H17a4 4 0 004-4c0-5-4-9.5-9-9.5z"/><circle cx="8" cy="11" r="1.1"/><circle cx="12" cy="7.5" r="1.1"/><circle cx="16" cy="11" r="1.1"/>'],
+  ['lay', 'Layout das seções', '<rect x="3.5" y="4" width="17" height="6" rx="1.5"/><rect x="3.5" y="13" width="7.5" height="7" rx="1.5"/><rect x="13" y="13" width="7.5" height="7" rx="1.5"/>'],
+  ['ref', 'Referências ao lado', '<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M5 17a3 3 0 013-3h11"/>'],
+  ['more', 'Mais ferramentas', '<circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/>']];
+const esSvg = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const esLay = l => (l.theme && l.theme.ly) || {};
+
+function esLayersHTML(l) {
+  if (!l) return ''; if (l.vis) return '<p class="ps-note">Esta página foi editada no editor visual. Edite as seções por lá (menu Mais).</p>';
+  return `<ul class="ps-lay">${l.blocks.map((b, i) => `<li draggable="true" data-bid="${b.id}" class="${b.on ? '' : 'off'}${ES.sel === b.id ? ' sel' : ''}" ondragstart="esDragStart(event,'${b.id}')" ondragover="event.preventDefault()" ondrop="esDrop(event,'${b.id}')"><button class="ps-eye" onclick="esToggle('${b.id}')" aria-label="${b.on ? 'Ocultar' : 'Mostrar'}">${b.on ? '●' : '○'}</button><span onclick="esSelect('${b.id}',true)">${esc((LP_BLOCK[b.t] || {}).label || b.t)}</span><button class="ps-mini" ${i === 0 ? 'disabled' : ''} onclick="esMove('${b.id}',-1)" aria-label="Subir">↑</button><button class="ps-mini" ${i === l.blocks.length - 1 ? 'disabled' : ''} onclick="esMove('${b.id}',1)" aria-label="Descer">↓</button></li>`).join('')}</ul>`;
+}
+function esStyleHTML(p, s, l) {
+  const th = (l && l.theme) || {}, t = SBT.find(x => x.id === s.style), col = (k, lab) => `<label class="ps-f"><span>${lab}</span><input type="color" value="${/^#[0-9a-f]{6}$/i.test(th[k] || '') ? th[k] : '#ffffff'}" oninput="esTheme('${k}',this.value)"></label>`;
+  const fnt = (k, lab) => `<label class="ps-f"><span>${lab}</span><select onchange="esTheme('${k}',this.value)">${[...new Set([th[k]].concat(ES_FONTS))].filter(Boolean).map(f => `<option${f === th[k] ? ' selected' : ''}>${esc(f)}</option>`).join('')}</select></label>`;
+  return `<label class="ps-f"><span>Template (visual)</span><select onchange="esSwap(this.value)"><option value="">${t ? '' : 'Personalizado'}</option>${SBT.map(x => `<option value="${x.id}"${x.id === s.style ? ' selected' : ''}>${esc(x.nome)} · ${esc(x.nicho)}</option>`).join('')}</select></label>
+    <div class="ps-grid2">${col('accent', 'Destaque')}${col('bg', 'Fundo')}${col('fg', 'Texto')}<label class="ps-f"><span>Modo escuro</span><input type="checkbox" ${th.dark ? 'checked' : ''} onchange="esTheme('dark',this.checked)"></label></div>
+    ${fnt('head', 'Fonte dos títulos')}${fnt('body', 'Fonte do texto')}
+    <label class="ps-f"><span>Cantos arredondados: ${th.rad == null ? 16 : th.rad}px</span><input type="range" min="0" max="32" value="${th.rad == null ? 16 : th.rad}" oninput="this.previousElementSibling.textContent='Cantos arredondados: '+this.value+'px';esTheme('rad',+this.value)"></label>
+    <label class="ps-f"><span>Peso dos títulos</span><select onchange="esTheme('hw',+this.value)">${[400, 500, 600, 700, 800].map(w => `<option value="${w}"${(th.hw || 800) === w ? ' selected' : ''}>${w}</option>`).join('')}</select></label>
+    <label class="ps-f"><span>Topo da página</span><select onchange="esTheme('hero',this.value)">${[['split', 'Foto ao lado'], ['center', 'Centralizado'], ['big', 'Título grande']].map(([v, n]) => `<option value="${v}"${(th.hero || 'split') === v ? ' selected' : ''}>${n}</option>`).join('')}</select></label>
+    <p class="ps-note">As mudanças valem para todas as páginas do site.</p>`;
+}
+const ES_LYDEF = {w: 'normal', sh: 'left', band: 'alt', ben: 'cards', st: 'cards', pr: 'cards', dor: 'list', faq: 'acc'};
+function esLayoutHTML(l) {
+  const y = esLay(l);
+  return `<div class="ps-row"><button class="btn sm pri" onclick="esRandom()">Sortear variação</button><button class="btn sm" ${ES.snap ? '' : 'disabled'} onclick="esUndoTheme()">Voltar ao anterior</button></div><p class="ps-note">O sorteio muda o layout (e o topo) e mantém textos, cores e fontes.</p>` +
+    ES_LY.map(([k, lab, opts]) => `<label class="ps-f"><span>${lab}</span><select onchange="esTheme('${k}',this.value,true)">${opts.map(([v, n]) => `<option value="${v}"${(y[k] || ES_LYDEF[k]) === v ? ' selected' : ''}>${n}</option>`).join('')}</select></label>`).join('');
+}
+function esPendHTML(p) { const pend = esPending(p); return pend.length ? `<div class="ps-pend">${pend.slice(0, 60).map(x => `<button onclick="esJump('${x.lid}','${x.bid}')" title="${esc(x.page + ' · ' + x.blk)}">${esc(x.m)}</button>`).join('')}</div>` + (pend.length > 60 ? `<p class="ps-note">e mais ${pend.length - 60}…</p>` : '') : '<p class="ps-note">Nada pendente.</p>'; }
+function esVendHTML(p, s) { const ck = esChecklist(p, s); return `<ul class="ps-cl">${ck.map(x => `<li class="${x[1] ? 'y' : 'n'}">${x[0]}</li>`).join('')}</ul><button class="btn sm" onclick="SBR.tab='form';go('briefing')">Completar no briefing</button>`; }
+function esDeliverHTML(s, l, ready) {
+  return `<div class="ps-col"><button class="btn sm" onclick="lpExport('${l ? l.id : ''}')">HTML desta página</button><button class="btn sm" onclick="siteExport('${s.id}')">ZIP do site (HTML)</button><button class="btn sm" onclick="wpElOpen('site','${s.id}')">Modelo do Elementor (.json)</button><button class="btn sm" onclick="wpGenerate('${s.id}','theme')">Tema de WordPress</button><button class="btn sm" onclick="wpGenerate('${s.id}','bundle')">Pacote WordPress completo</button><hr><button class="btn sm" ${ready ? '' : 'disabled title="Ligue a IA em Configurações"'} onclick="esAI()">Reescrever as páginas com IA</button><button class="btn sm" onclick="esRegen()">Refazer textos do briefing</button></div>`;
+}
+function esRightHTML(p, s, l) {
+  const pend = esPending(p), ck = esChecklist(p, s), n = ck.filter(x => x[1]).length, ready = typeof aiReady === 'function' && aiReady();
+  const tabs = (cur, set, list) => `<div class="ps-tabs">${list.map(([k, n2]) => `<button class="${cur === k ? 'on' : ''}" onclick="${set}('${k}')">${n2}</button>`).join('')}</div>`;
+  const A = ES.tabA === 'style' ? esStyleHTML(p, s, l) : ES.tabA === 'lay' ? esLayoutHTML(l) : '<div id="esEdit"></div>';
+  const B = ES.tabB === 'pend' ? esPendHTML(p) : ES.tabB === 'vend' ? esVendHTML(p, s) : esLayersHTML(l);
+  return `<section class="ps-pan">${tabs(ES.tabA, 'esTabA', [['prop', 'Propriedades'], ['style', 'Estilo'], ['lay', 'Layout']])}<div class="ps-pb">${A}</div></section>
+    <section class="ps-pan">${tabs(ES.tabB, 'esTabB', [['cam', 'Camadas'], ['pend', 'Pendências ' + pend.length], ['vend', 'Vendedor ' + n + '/' + ck.length]])}<div class="ps-pb">${B}</div></section>
+    <section class="ps-pan" id="esDeliver"><div class="ps-tabs"><button class="on" onclick="ES.deliver=!ES.deliver;esRight()">Entrega ${ES.deliver ? '▾' : '▸'}</button></div>${ES.deliver ? `<div class="ps-pb">${esDeliverHTML(s, l, ready)}</div>` : ''}</section>`;
+}
+function esRight() { const box = $('psRight'); if (!box) return; const p = curProject(), s = esSiteOf(p), l = esCur(p); box.innerHTML = esRightHTML(p, s, l); esBlockEditor(); }
+const esTabA = t => { ES.tabA = t; esRight(); }, esTabB = t => { ES.tabB = t; esRight(); };
+
+function renderDev() {
+  const root = $('devRoot'); if (!root) return; const p = curProject();
+  const head = esHead('Desenvolvimento', 'Clique em uma seção da página para editar. As marcas amarelas são dados que ainda faltam.');
+  if (!p) { root.innerHTML = esHead('Desenvolvimento', 'Aqui o site do cliente é editado.') + '<div class="panel es-empty">Crie um projeto para começar.<br><br><button class="btn pri" onclick="openWizard()">Novo projeto</button></div>'; return; }
+  const s = esSiteOf(p);
+  if (!s) { const hasBf = sbProgress(p)[0] > 0; root.innerHTML = head + `<div class="panel es-empty">Este projeto ainda não tem site.<br><br><button class="btn pri" onclick="go('${hasBf ? 'templates' : 'briefing'}')">${hasBf ? 'Escolher um template' : 'Ir ao briefing'}</button></div>`; return; }
+  ES.site = s.id; const pages = esPageOf(p), l = esCur(p); ES.page = l ? l.id : '';
+  const t = SBT.find(x => x.id === s.style), nb = l ? l.blocks.filter(b => b.on).length : 0;
+  root.innerHTML = head + `<div class="ps">
+    <div class="ps-opt"><div class="ps-pages">${pages.map(x => `<button class="${x.id === ES.page ? 'on' : ''}" onclick="esPage('${x.id}')">${esc(x.navLabel || x.name)}</button>`).join('')}</div><span class="ps-sp"></span>
+      <div class="ps-seg"><button class="${ES.device === 'desk' ? 'on' : ''}" onclick="ES.device='desk';esDevice()">Computador</button><button class="${ES.device === 'mob' ? 'on' : ''}" onclick="ES.device='mob';esDevice()">Celular</button></div>
+      <button class="ps-btn" onclick="esRandom()" title="Sorteia um layout diferente para o site">Sortear layout</button><button class="ps-btn" onclick="esRefToggle()">Referências</button></div>
+    <div class="ps-body"><div class="ps-tools" role="toolbar" aria-label="Ferramentas">${ES_TOOLS.map(([k, tt, d]) => `<button class="${ES.tool === k ? 'on' : ''}${k === 'ref' && ES.ref.open ? ' on' : ''}" title="${esc(tt)}" aria-label="${esc(tt)}" onclick="esTool('${k}')">${esSvg(d)}</button>`).join('')}</div>
+      <aside class="ps-ref" id="psRef" ${ES.ref.open ? '' : 'hidden'}></aside>
+      <div class="ps-canvas" id="psCanvas"><div class="ps-stage"><div class="es-frame${ES.device === 'mob' ? ' mob' : ''}" id="esFrameBox"><iframe id="esFrame" sandbox="allow-scripts" title="Prévia do site"></iframe><img class="ps-over" id="psOver" alt="" hidden></div></div></div>
+      <div class="ps-right" id="psRight"></div></div>
+    <div class="ps-status"><span>${esc(s.name)}${t ? ' · ' + esc(t.nome) : ''}</span><span>${l ? esc(l.navLabel || l.name) : ''} · ${nb} seções ativas</span><span id="psZoom"></span><span class="ps-sp"></span><span>${ES.sel ? 'Seção selecionada' : 'Nada selecionado'}</span></div></div>`;
+  esRight(); esFit(); esPreview(); esRefRefresh();
+}
+function esFit() {
+  const box = $('esFrameBox'), fr = $('esFrame'), st = box && box.parentElement; if (!box || !fr || !st) return; const H = Math.max(420, Math.round(st.clientHeight - 24)) || Math.round(window.innerHeight * 0.7);
+  const z = $('psZoom');
+  if (ES.device === 'mob') { fr.style.cssText = 'width:100%;height:' + H + 'px;transform:none'; box.style.height = H + 'px'; if (z) z.textContent = '390 px'; return; }
+  const W = st.clientWidth - 24, k = Math.min(1, W / 1060); fr.style.cssText = 'width:' + Math.round(W / k) + 'px;height:' + Math.round(H / k) + 'px;transform:scale(' + k + ');transform-origin:0 0'; box.style.height = H + 'px'; if (z) z.textContent = Math.round(k * 100) + '%';
+}
+function esDevice() { const b = $('esFrameBox'); if (b) b.classList.toggle('mob', ES.device === 'mob'); document.querySelectorAll('.ps-seg button').forEach((x, i) => x.classList.toggle('on', (i === 0) === (ES.device === 'desk'))); esFit(); }
+function esSelect(bid, scroll) {
+  ES.sel = bid; if (ES.tabA !== 'prop') { ES.tabA = 'prop'; esRight(); } else esBlockEditor();
+  document.querySelectorAll('.ps-lay li').forEach(li => li.classList.toggle('sel', li.dataset.bid === bid));
+  const fr = $('esFrame'); if (fr && fr.contentWindow) fr.contentWindow.postMessage({es: 'mark', id: bid, go: !!scroll}, '*');
+  const sb = document.querySelector('.ps-status span:last-child'); if (sb) sb.textContent = 'Seção selecionada';
+}
+/* ferramentas */
+function esTool(k) {
+  const p = curProject(), l = esCur(p), b = l && l.blocks.find(x => x.id === ES.sel);
+  if (k === 'ref') { esRefToggle(); return; }
+  if (k === 'more') { showModal('Mais ferramentas', `<div class="es-col"><button class="btn" onclick="closeModal();go('mesa')">Mesa de páginas (editor visual livre)</button><button class="btn" onclick="closeModal();esAdvanced()">Editor de blocos, SEO e publicação</button><button class="btn" onclick="closeModal();go('templates')">Banco de templates</button><button class="btn" onclick="closeModal();go('refs')">Biblioteca de referências</button></div><div class="modal-actions"><button class="btn" onclick="closeModal()">Fechar</button></div>`); return; }
+  ES.tool = k;
+  if (k === 'txt') { if (!b) { toast('Clique em uma seção da página primeiro.'); return; } ES.tabA = 'prop'; esRight(); const i = document.querySelector('#esEdit input,#esEdit textarea'); if (i) i.focus(); }
+  else if (k === 'img') { if (!b) { toast('Clique em uma seção da página primeiro.'); return; } const f = ((LP_BLOCK[b.t] || {}).fields || []).find(x => x[2] === 'img'); if (!f) { toast('Esta seção não tem imagem.'); return; } esImg(f[0]); }
+  else if (k === 'move') { ES.tabB = 'cam'; esRight(); }
+  else if (k === 'eye') { if (!b) { toast('Clique em uma seção da página primeiro.'); return; } esToggle(b.id); return; }
+  else if (k === 'style') { ES.tabA = 'style'; esRight(); }
+  else if (k === 'lay') { ES.tabA = 'lay'; esRight(); }
+  document.querySelectorAll('.ps-tools button').forEach((x, i) => x.classList.toggle('on', ES_TOOLS[i][0] === k || (ES_TOOLS[i][0] === 'ref' && ES.ref.open)));
+}
+/* arrastar camadas */
+let esDragId = '';
+function esDragStart(e, id) { esDragId = id; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', id); } catch (x) { /* navegadores antigos */ } }
+function esDrop(e, to) { e.preventDefault(); const l = esCur(curProject()); if (!l || !esDragId || esDragId === to) return; const a = l.blocks.findIndex(b => b.id === esDragId), z = l.blocks.findIndex(b => b.id === to); if (a < 0 || z < 0) return; const [m] = l.blocks.splice(a, 1); l.blocks.splice(z, 0, m); esDragId = ''; persist(); renderDev(); }
+/* estilo e layout (valem para todas as páginas do site) */
+function esTheme(k, v, ly) {
+  const p = curProject(); esPageOf(p).forEach(l => { const t = l.theme = Object.assign({}, l.theme); if (ly) t.ly = Object.assign({}, t.ly, {[k]: v}); else t[k] = v; });
+  const s = esSiteOf(p); if (s) s.style = ''; persist(); esPreviewLater();
+}
+function esSwap(tid) {
+  if (!tid) return; const p = curProject(), s = esSiteOf(p), t = SBT.find(x => x.id === tid), f = sbFacts(p); s.style = tid;
+  esPageOf(p).forEach(l => { l.theme = Object.assign({}, l.theme, sbThemeFor(t, f)); }); persist(); renderDev(); toast('Template ' + t.nome + ' aplicado. O texto foi mantido.');
+}
+function esRandom() {
+  const p = curProject(), pls = esPageOf(p); if (!pls.length) return; ES.snap = pls.map(l => JSON.stringify(l.theme));
+  const pk = a => a[Math.floor(Math.random() * a.length)], ly = {}; ES_LY.forEach(([k, , o]) => { ly[k] = pk(o)[0]; }), hero = pk(['split', 'center', 'big']), rad = pk([0, 4, 8, 12, 18, 24]);
+  pls.forEach(l => { l.theme = Object.assign({}, l.theme, {ly, hero, rad}); }); const s = esSiteOf(p); if (s) s.style = ''; persist(); if (ES.tabA === 'lay') esRight(); esPreviewLater(); toast('Variação sorteada. Use "Voltar ao anterior" para desfazer.');
+}
+function esUndoTheme() { const p = curProject(), pls = esPageOf(p); if (!ES.snap) return; pls.forEach((l, i) => { try { l.theme = JSON.parse(ES.snap[i]); } catch (e) { /* mantém */ } }); ES.snap = null; persist(); esRight(); esPreviewLater(); }
+/* referências ao lado da página */
+function esRefToggle() { ES.ref.open = !ES.ref.open; const a = $('psRef'); if (a) a.hidden = !ES.ref.open; document.querySelectorAll('.ps-tools button').forEach((x, i) => { if (ES_TOOLS[i][0] === 'ref') x.classList.toggle('on', ES.ref.open); }); esRefRefresh(); setTimeout(esFit, 30); }
+async function esRefRefresh() {
+  const a = $('psRef'), ov = $('psOver'); if (!a) return; if (!ES.ref.open) { a.innerHTML = ''; if (ov) ov.hidden = true; return; }
+  const all = refList().filter(i => !ES.ref.q || (i.name + ' ' + (i.tags || []).join(' ')).toLowerCase().includes(ES.ref.q.toLowerCase())), cur = libItem(ES.ref.id);
+  a.innerHTML = `<div class="ps-rh"><strong>Referências</strong><button class="ps-mini" onclick="esRefToggle()" aria-label="Fechar">×</button></div>
+    <div class="ps-rbar"><input placeholder="Buscar" value="${esc(ES.ref.q)}" oninput="ES.ref.q=this.value;esRefList()" aria-label="Buscar referência"><label class="btn sm" style="cursor:pointer">+ Subir<input type="file" accept="image/*" multiple hidden onchange="refUpload(this.files);this.value=''"></label></div>
+    <div class="ps-rlist" id="psRList">${all.length ? all.map(i => `<button class="${i.id === ES.ref.id ? 'on' : ''}" onclick="esRefPick('${i.id}')" title="${esc(i.name)}"><img data-lib="${i.imgId}" alt="${esc(i.name)}"></button>`).join('') : '<p class="ps-note">Nenhuma referência. Suba imagens (ou cole com Ctrl+V).</p>'}</div>
+    ${cur ? `<div class="ps-rview"><div class="ps-rmodes"><button class="${ES.ref.mode === 'side' ? 'on' : ''}" onclick="ES.ref.mode='side';esRefRefresh()">Lado a lado</button><button class="${ES.ref.mode === 'over' ? 'on' : ''}" onclick="ES.ref.mode='over';esRefRefresh()">Sobrepor</button></div>${ES.ref.mode === 'over' ? `<label class="ps-f"><span>Transparência: ${ES.ref.op}%</span><input type="range" min="10" max="90" value="${ES.ref.op}" oninput="ES.ref.op=+this.value;this.previousElementSibling.textContent='Transparência: '+this.value+'%';esOver()"></label>` : ''}<div class="ps-rimg"><img id="psRImg" alt="${esc(cur.name)}"></div>${cur.prompt ? `<p class="ps-note">${esc(cur.prompt)}</p>` : ''}</div>` : ''}`;
+  if (typeof libFill === 'function') libFill(a);
+  if (cur) { const b = await imgGet(cur.imgId); if (b) { ES.refUrl = URL.createObjectURL(b); const im = $('psRImg'); if (im) im.src = ES.refUrl; } }
+  esOver();
+}
+function esRefList() { esRefRefresh(); }
+function esRefPick(id) { ES.ref.id = id; esRefRefresh(); }
+function esOver() { const ov = $('psOver'); if (!ov) return; const on = ES.ref.open && ES.ref.mode === 'over' && ES.ref.id && ES.refUrl; ov.hidden = !on; if (on) { ov.src = ES.refUrl; ov.style.opacity = ES.ref.op / 100; } }
 
 </script>
 <script>
@@ -11022,6 +11475,15 @@ function railToggle(on) {
     q.client = 'Studio Raiz Pilates';
     bfStore(q).answers = {contato: {nome: 'Rafa', whatsapp: ''}, empresa: {nome: 'Studio Raiz Pilates', cidade: 'Belo Horizonte', diferenciais: 'Turmas de até quatro pessoas'}, publico: {quem: 'Adultos com dor nas costas e quem quer ganhar mobilidade'}, produtos: [{nome: 'Aula em grupo', tipo: 'Serviço', oque: 'Turma pequena com instrutor o tempo todo'}]};
     state.projects.push(p, q); state.activeProjectId = p.id; persist();
+    /* três referências de exemplo (desenhos de layout), para mostrar a gaveta de referências; as suas entram pela tela Referências */
+    const wire = (title, kind) => new Promise(res => { const c = document.createElement('canvas'); c.width = 900; c.height = 1100; const x = c.getContext('2d'); x.fillStyle = '#f4f4f1'; x.fillRect(0, 0, 900, 1100); x.fillStyle = '#d9d9d3';
+      const box = (a, b, w, h, t) => { x.fillStyle = '#d9d9d3'; x.fillRect(a, b, w, h); if (t) { x.fillStyle = '#555'; x.font = '600 22px sans-serif'; x.fillText(t, a + 16, b + 34); } };
+      x.fillStyle = '#222'; x.font = '700 30px sans-serif'; x.fillText(title, 40, 56); box(40, 90, 820, 40, 'Menu');
+      if (kind === 'a') { box(40, 150, 520, 300, 'Título grande + botão'); box(580, 150, 280, 300, 'Foto'); [0, 1, 2].forEach(i => box(40 + i * 280, 480, 260, 200, 'Benefício ' + (i + 1))); box(40, 710, 820, 160, 'Depoimento'); box(40, 900, 820, 120, 'Chamada final'); }
+      else if (kind === 'b') { box(40, 150, 820, 360, 'Título centralizado sobre foto'); [0, 1, 2, 3].forEach(i => box(40 + i * 208, 540, 196, 150, 'Passo ' + (i + 1))); box(40, 720, 400, 280, 'Foto'); box(460, 720, 400, 280, 'Texto + botão'); }
+      else { box(40, 150, 820, 90, 'Faixa de oferta'); box(40, 260, 400, 400, 'Foto grande'); box(460, 260, 400, 190, 'Texto'); box(460, 470, 400, 190, 'Lista de benefícios'); box(40, 690, 820, 120, 'Logos de clientes'); box(40, 840, 820, 200, 'Perguntas em duas colunas'); }
+      c.toBlob(res, 'image/png'); });
+    for (const [t, k] of [['Layout A: topo dividido', 'a'], ['Layout B: topo com foto de fundo', 'b'], ['Layout C: faixa de oferta', 'c']]) { try { await libAddBlob(await wire(t, k), {name: 'Exemplo · ' + t, tags: ['referencia', 'exemplo'], kind: 'referencia', prompt: 'Desenho de exemplo da demonstração. Suba os seus prints na tela Referências.'}); } catch (e) { /* segue sem as referências de exemplo */ } }
     await sbCreateSite('aurora');
     ES.sel = ''; go('home'); toast('Demonstração com dois clientes de exemplo. Abra o primeiro para ver o site pronto.');
   }, 400);

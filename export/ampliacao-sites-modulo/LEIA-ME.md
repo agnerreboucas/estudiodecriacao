@@ -1,7 +1,7 @@
-# Módulo de Criação de Sites e Landing Pages (versão 1.2.0)
+# Módulo de Criação de Sites e Landing Pages (versão 1.3.0)
 
 Este é **só o módulo de sites** do Ampliação Studio, separado para virar um produto novo.
-Ele abre sozinho, no formato do **Estúdio de Sites**: **Início**, **Briefing do cliente**, **Banco de templates**, **Desenvolvimento**, **Mesa de páginas**, **Imagens** e **Configurações**. A página do cliente (formulário de 11 partes) abre em **Briefing → Ver como o cliente vê**.
+Ele abre sozinho, no formato do **Estúdio de Sites**: **Início**, **Briefing do cliente**, **Banco de templates**, **Desenvolvimento**, **Referências**, **Mesa de páginas**, **Imagens** e **Configurações**. A página do cliente (formulário de 11 partes) abre em **Briefing → Ver como o cliente vê**.
 Não vem nenhum projeto, cliente ou fonte licenciada junto: o app começa vazio.
 
 ## Do briefing ao site
@@ -11,6 +11,12 @@ Não vem nenhum projeto, cliente ou fonte licenciada junto: o app começa vazio.
 3. **Banco de templates:** galeria com busca, filtros e prévia, já com o texto e a cor do cliente. Todo template segue a estrutura **StoryBrand** (o cliente é o herói, a empresa é o guia): promessa, problema, guia, plano em 3 passos, oferta e prazo, prova, objeções, chamada final.
 4. **Desenvolvimento:** a página aparece ao lado das ferramentas. Clique em qualquer seção para editar o texto (ou use a lista de seções, que também liga, desliga e reordena). Computador e celular, troca de template sem perder o texto, lista de pendências ([CONFIRMAR]) e o checklist do vendedor consultivo. **Entregar:** HTML da página, ZIP do site, modelo do Elementor e tema/pacote de WordPress. Para mais controle: editor de blocos, editor visual e Mesa de páginas.
 5. **Criar site:** o BrandScript e o texto das páginas saem do briefing. O que o cliente não disse fica como **[CONFIRMAR]**; depoimento só entra se estiver marcado como autorizado. Com a IA ligada, dá para reescrever as páginas a partir do BrandScript.
+
+## Referências, mesa de trabalho e seus templates
+- **Referências:** suba prints e imagens de layouts que você admira (arraste, escolha ou cole com Ctrl+V). Ficam salvas, com nome, etiquetas e anotação. Na edição, a ferramenta **Referências** abre uma gaveta ao lado da página: **lado a lado** ou **sobreposta** com transparência.
+- **Desenvolvimento** tem a mesa de trabalho: barra de opções em cima, ferramentas à esquerda, página no centro e painéis à direita (Propriedades, **Estilo**, **Layout**, Camadas com arrastar, Pendências, Vendedor consultivo e Entrega). **Sortear variação** muda o layout e dá para voltar.
+- **Meus templates** (em Banco de templates): suba o ZIP do Envato (kit do Elementor, site em HTML ou tema de WordPress), JSON do Elementor ou HTML. Cada página vira uma página da Mesa de páginas. Pacotes só de fontes não são templates.
+- **Exportar** pela Mesa de páginas: HTML, ZIP, **Kit do Elementor (.zip)** e modelo do Elementor (.json), com **animação de entrada** (aparecer, subir, esquerda, zoom). Só widgets e contêineres grátis do Elementor.
 
 ## Como usar (3 jeitos)
 1. **Só para testar:** abra `index.html` no navegador. Funciona sem servidor (os dados ficam no navegador). A IA e o envio de leads não funcionam assim.
@@ -30,6 +36,9 @@ Veja o documento **PROJETO-EXECUTIVO** (enviado junto) para a lista completa.
 Anúncios, carrosséis, stories, vídeo, aprovação com o cliente, publicação em redes, painel de Performance e CRM. O formulário das páginas já envia os leads ao `api/leads.php`, mas a **tela que mostra os leads** está no Studio completo.
 
 ## Limites (ditos com honestidade)
+- O Kit do Elementor e as animações exportados **não foram abertos num Elementor de verdade**: o formato segue o dos kits que você enviou (manifest + modelos .json), mas só conferi o arquivo. As imagens dos kits do Envato são links do site de demonstração do autor.
+- Os modelos do estúdio têm layouts diferentes entre si (largura, faixas, benefícios, passos, prova, dúvidas, topo), mas todos partem dos mesmos blocos. A variedade maior vem dos templates que você sobe.
+- Templates subidos entram na Mesa de páginas com o texto do autor: o texto do briefing ainda não é aplicado neles automaticamente (use os comandos de IA da Mesa).
 - O agente de briefing e a reescrita das páginas com IA foram testados só com respostas simuladas. Sem IA ligada, o agente lê apenas linhas com rótulo (Nome:, Cidade:), telefone, e-mail, @ e links, e o texto das páginas sai de regras simples.
 - Os 19 templates do banco são estilos próprios (cores, fontes, cantos, layout do topo) sobre as 4 estruturas StoryBrand. Ainda não passaram por uma revisão de design com páginas reais de clientes.
 - O link do cliente e a Mesa de páginas dependem do servidor PHP; nada disso foi aberto num WordPress real.

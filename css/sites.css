@@ -27,9 +27,15 @@
 .sbg-fil{display:flex;flex-direction:column;gap:14px;align-items:flex-start}.sbg-fg{display:flex;flex-direction:column;gap:7px}
 .sbg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:10px}
 .sbg-card{border:1px solid var(--line,#ddd);border-radius:10px;overflow:hidden;background:var(--panel,#fff);display:flex;flex-direction:column}
-.sbg-th{position:relative;aspect-ratio:3/2.2;overflow:hidden;background:#e9e9e6;border-bottom:1px solid var(--line,#ddd)}
+.sbg-th{position:relative;aspect-ratio:3/4.4;overflow:hidden;background:#e9e9e6;border-bottom:1px solid var(--line,#ddd)}
 .sbg-ov{position:absolute;inset:0;z-index:2;display:flex;gap:8px;align-items:center;justify-content:center;background:rgba(10,12,18,.55);opacity:0;transition:opacity .15s}
 .sbg-card:hover .sbg-ov,.sbg-card:focus-within .sbg-ov{opacity:1}
 .sbg-tb{padding:9px 12px;display:flex;flex-direction:column;gap:1px}
 .sbg-pg{display:flex;gap:6px;justify-content:center;margin-top:16px}.sbg-pg button{min-width:32px;height:32px;border:1px solid var(--line,#ddd);background:var(--panel,#fff);border-radius:7px;cursor:pointer}.sbg-pg button.on{background:var(--fg,#111);color:var(--bg,#fff);border-color:var(--fg,#111)}
 @media(max-width:860px){.sbg-wrap{grid-template-columns:1fr}}
+
+.sbg-mine{background:#e9e9e6;display:grid;place-items:center}
+.sbg-ph{display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;text-align:center;padding:12px;height:100%}.sbg-ph span{display:flex;gap:4px}.sbg-ph i{width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
+.sb-kitp{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;max-height:60vh;overflow:auto}
+.sb-kp{border:1px solid var(--line,#ddd);background:var(--panel,#fff);border-radius:8px;padding:0;overflow:hidden;cursor:pointer;text-align:left;display:flex;flex-direction:column}.sb-kp:hover{border-color:var(--accent,#d9480f)}
+.sb-kp img{width:100%;aspect-ratio:4/3;object-fit:cover;object-position:top;display:block}.sb-kpn{display:block;aspect-ratio:4/3;background:#e9e9e6}.sb-kp b{padding:6px 8px;font-size:12.5px}
