@@ -79,11 +79,11 @@ function renderDev() {
   <div class="es-edit" id="esEdit"></div></div>`;
   esBlockEditor(); esFit(); esPreview();
 }
-/* computador: a página é desenhada com 1180px de largura e reduzida para caber na área; celular: 390px reais */
+/* computador: a página é desenhada com 1060px de largura e reduzida para caber na área; celular: 390px reais */
 function esFit() {
   const box = $('esFrameBox'), fr = $('esFrame'), st = box && box.parentElement; if (!box || !fr || !st) return; const H = Math.round(window.innerHeight * 0.78);
   if (ES.device === 'mob') { fr.style.cssText = 'width:100%;height:' + H + 'px;transform:none'; box.style.height = H + 'px'; return; }
-  const W = st.clientWidth - 30, k = Math.min(1, W / 1180); fr.style.cssText = 'width:' + Math.round(W / k) + 'px;height:' + Math.round(H / k) + 'px;transform:scale(' + k + ');transform-origin:0 0'; box.style.height = H + 'px';
+  const W = st.clientWidth - 30, k = Math.min(1, W / 1060); fr.style.cssText = 'width:' + Math.round(W / k) + 'px;height:' + Math.round(H / k) + 'px;transform:scale(' + k + ');transform-origin:0 0'; box.style.height = H + 'px';
 }
 window.addEventListener('resize', () => { if (ui.page === 'dev') esFit(); });
 const esDevice = () => { esFit(); const b = $('esFrameBox'); if (b) b.classList.toggle('mob', ES.device === 'mob'); document.querySelectorAll('.es-seg button').forEach((x, i) => x.classList.toggle('on', (i === 0) === (ES.device === 'desk'))); };
