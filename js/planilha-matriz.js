@@ -76,6 +76,78 @@ PM_DEF.caps = {name: 'LEGENDAS', cols: [
   {k: 'botaoAd', h: 'Botão do anúncio', w: 18, al: ['botaodoanuncio', 'botao', 'cta'], d: 'Anúncio de carrossel: texto do botão do Meta.'}]};
 PM_EX.car1 = [['(exemplo) 3 sinais de atenção', 'C001', 'Dia 01', 'Orgânico', 'Topo', '4:5', 'Saiba reconhecer os 3 sinais antes de decidir.', '#orientacao #direitos', '', '', '', '', 'Salvar e compartilhar', 'Os **3 sinais** que quase todo mundo ignora', 'Veja antes de assinar.', 'Sinal 1: a parcela muda sem aviso', 'Confira se o contrato prevê reajuste.', 'Sinal 2: ninguém explica o seguro', 'Descubra o que está embutido.', 'Quer ajuda para entender o seu caso?', 'Salve este carrossel e fale com a gente.']];
 PM_EX.caps = [['(exemplo) P001', 'Orgânico', 'Antes de assinar qualquer coisa, entenda o que está em jogo. Conte com a gente.', '#orientacao #direitos', '', '', '', ''], ['(exemplo) D01', 'Anúncio', '', '', 'Entenda a sua parcela', 'Antes de assinar, veja como a parcela é calculada. Atendimento sem compromisso.', 'Sem compromisso.', 'Saiba mais']];
+
+/* posts simples (uma imagem) e stories (um quadro por linha, vertical 9:16) */
+const PM_DATA_D = 'OPCIONAL. Quando a peça deve sair: 25/10/2026 ou 25/10/2026 09:00 (sem hora, entra às 09:00). A peça nasce como rascunho com essa data, sem agendar.';
+PM_DEF.post1 = {name: 'POSTS SIMPLES', cols: [
+  {k: 'codigo', h: 'Código', req: 1, w: 10, al: ['codigo', 'id', 'post'], d: 'Código do post (ex.: PS01). Entra no nome da peça e não pode repetir.'},
+  {k: 'data', h: 'Data de publicação', w: 20, al: ['datadepublicacao', 'data', 'dia'], d: PM_DATA_D},
+  {k: 'titulo', h: 'Título da arte', req: 1, w: 44, al: ['titulodaarte', 'titulo', 'headline'], d: 'O texto grande dentro da imagem. Até 120 caracteres para caber bem.'},
+  {k: 'apoio', h: 'Texto de apoio', w: 44, al: ['textodeapoio', 'apoio', 'subheadline'], d: 'A linha menor abaixo do título, dentro da imagem (até 200 caracteres).'},
+  {k: 'botao', h: 'Botão (CTA)', w: 20, al: ['botaocta', 'botao', 'cta'], d: 'OPCIONAL. Texto do botão da arte (ex.: Salve para ler depois). Em branco: sem botão. Escreva - para garantir arte sem botão.'},
+  {k: 'legenda', h: 'Legenda', w: 60, al: ['legenda'], d: 'A legenda da publicação (até 2.200 caracteres). Vai para a aba Publicação como rascunho.'},
+  {k: 'hashtags', h: 'Hashtags', w: 28, al: ['hashtags'], d: 'Hashtags da legenda (até 400 caracteres).'},
+  {k: 'formato', h: 'Formato', w: 11, al: ['formato', 'proporcao'], list: ['4:5', '1:1'], d: '4:5 (feed vertical, o padrão) ou 1:1 (quadrado).'},
+  {k: 'imagem', h: 'Imagem (nome na biblioteca)', w: 26, al: ['imagemnomenabiblioteca', 'imagem'], d: 'OPCIONAL. Nome de uma imagem já subida em Imagens. Em branco: arte só com texto.'},
+  {k: 'obs', h: 'Observações', w: 36, al: ['observacoes', 'observacao', 'obs'], d: 'OPCIONAL. Anotação interna para a equipe. Não vai para a arte nem para a legenda.'}]};
+PM_DEF.story = {name: 'STORIES', cols: [
+  {k: 'sequencia', h: 'Sequência', req: 1, w: 16, al: ['sequencia', 'codigo', 'id'], d: 'Nome ou código da sequência de stories (ex.: S01 ou Bastidores). Todos os quadros com a mesma sequência ficam juntos.'},
+  {k: 'quadro', h: 'Quadro', w: 8, al: ['quadro', 'ordem', 'n'], d: 'Número do quadro dentro da sequência: 1, 2, 3... Em branco: vale a ordem das linhas.'},
+  {k: 'data', h: 'Data de publicação', w: 20, al: ['datadepublicacao', 'data', 'dia'], d: PM_DATA_D},
+  {k: 'titulo', h: 'Título do story', req: 1, w: 44, al: ['titulodostory', 'titulo', 'headline'], d: 'O texto grande na tela do story (até 100 caracteres).'},
+  {k: 'apoio', h: 'Texto de apoio', w: 44, al: ['textodeapoio', 'apoio', 'subheadline'], d: 'A linha menor abaixo do título (até 200 caracteres).'},
+  {k: 'botao', h: 'Botão / sticker', w: 22, al: ['botaosticker', 'botao', 'sticker', 'cta'], d: 'OPCIONAL. A chamada do quadro (ex.: Arraste para cima, Responda a enquete, Link). Entra como botão na arte.'},
+  {k: 'imagem', h: 'Imagem (nome na biblioteca)', w: 26, al: ['imagemnomenabiblioteca', 'imagem'], d: 'OPCIONAL. Nome de uma imagem já subida em Imagens. Em branco: arte só com texto.'},
+  {k: 'obs', h: 'Observações', w: 36, al: ['observacoes', 'observacao', 'obs'], d: 'OPCIONAL. Anotação interna (ex.: gravar em vídeo, enquete, link do artigo). Não vai para a arte.'}]};
+PM_EX.post1 = [
+  ['(exemplo) PS01', '25/10/2026 09:00', 'Seu direito não vence no fim de semana', 'Entenda o prazo antes de assinar.', 'Salve para ler depois', 'Muita gente assina sem ler o prazo. Salve este post e volte nele antes de decidir.', '#orientacao #direitos', '4:5', '', 'Usar foto da equipe, se tiver'],
+  ['(exemplo) PS02', '27/10/2026', 'Mito ou verdade? Contrato de adesão', 'Três dúvidas respondidas em um minuto.', '-', 'Você já ouviu isso? Conta nos comentários qual dúvida você gostaria de ver aqui.', '#duvidas #contrato', '1:1', '', '']];
+PM_EX.story = [
+  ['(exemplo) S01', 1, '26/10/2026 08:00', 'Bom dia! Hoje tem dica rápida', 'Três quadros para você ver antes do almoço.', '', '', 'Gravar um vídeo curto de 5 segundos'],
+  ['(exemplo) S01', 2, '26/10/2026 08:00', 'Você sabia?', 'O prazo conta a partir da assinatura, não da entrega.', 'Responda a enquete', '', 'Enquete: Sabia / Não sabia'],
+  ['(exemplo) S01', 3, '26/10/2026 08:00', 'Quer ver o passo a passo?', 'O link está no destaque.', 'Arraste para cima', '', '']];
+/* data da planilha → ISO local; null se não deu para entender; '' se vazia */
+function pmDate(v) {
+  v = pmTrim(v); if (!v) return ''; const p2 = n => String(n).padStart(2, '0'); let m, y, mo, d, h = 9, mi = 0;
+  if ((m = v.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})(?:\s+(\d{1,2})[:h](\d{2}))?$/))) { d = +m[1]; mo = +m[2]; y = +m[3]; if (y < 100) y += 2000; if (m[4]) { h = +m[4]; mi = +m[5]; } }
+  else if ((m = v.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{1,2}):(\d{2}))?/))) { y = +m[1]; mo = +m[2]; d = +m[3]; if (m[4]) { h = +m[4]; mi = +m[5]; } }
+  else if (/^\d{5}(\.\d+)?$/.test(v)) { const dt = new Date(Math.round((+v - 25569) * 86400000)); y = dt.getUTCFullYear(); mo = dt.getUTCMonth() + 1; d = dt.getUTCDate(); const fr = +v % 1; if (fr) { const t = Math.round(fr * 1440); h = Math.floor(t / 60) % 24; mi = t % 60; } }
+  else return null;
+  if (mo < 1 || mo > 12 || d < 1 || d > 31 || h > 23 || mi > 59) return null; return soLocalISO(`${y}-${p2(mo)}-${p2(d)}`, `${p2(h)}:${p2(mi)}`);
+}
+function pmParseSingles(rows, def, issues, ctx, kind) {
+  const S = def.name, st = kind === 'story', out = [], seen = new Set(), count = {};
+  pmTable(rows, def, issues).forEach(r => {
+    const L = r.line, code = pmCut(st ? r.sequencia : r.codigo, 40, issues, S, L, st ? 'A sequência' : 'O código');
+    if (!code) { issues.push({sheet: S, line: L, level: 'erro', msg: st ? 'Falta a Sequência.' : 'Falta o Código.'}); return; }
+    if (!r.titulo) { issues.push({sheet: S, line: L, level: 'erro', msg: st ? 'Falta o Título do story.' : 'Falta o Título da arte.'}); return; }
+    const ck = pmNorm(code); count[ck] = (count[ck] || 0) + 1; const n = st ? (parseInt(r.quadro, 10) || count[ck]) : 0, key = ck + '|' + n;
+    if (seen.has(key)) { issues.push({sheet: S, line: L, level: 'erro', msg: st ? `O quadro ${n} da sequência ${code} aparece duas vezes. Esta linha ficou de fora.` : `O código ${code} aparece duas vezes. Esta linha ficou de fora.`}); return; } seen.add(key);
+    const h = pmCut(r.titulo, st ? 100 : 120, issues, S, L, st ? 'O título do story' : 'O título da arte'); if (h.length > (st ? 70 : 90)) issues.push({sheet: S, line: L, level: 'aviso', msg: `O título tem ${h.length} caracteres; acima de ${st ? 70 : 90} pode ficar apertado na arte.`});
+    let dt = ''; if (r.data) { dt = pmDate(r.data); if (dt === null) { issues.push({sheet: S, line: L, level: 'aviso', msg: `Não entendi a data "${r.data}" (use 25/10/2026 ou 25/10/2026 09:00). A peça entra sem data.`}); dt = ''; } }
+    let imgId = ''; if (r.imagem) { imgId = ctx.img(r.imagem); if (!imgId) issues.push({sheet: S, line: L, level: 'aviso', msg: `Não achei a imagem "${r.imagem}" na biblioteca; a arte fica só com texto.`}); }
+    const b = pmTrim(r.botao);
+    out.push({line: L, code, n, h, s: pmCut(r.apoio, 200, issues, S, L, 'O texto de apoio'), btn: b === '-' ? null : pmCut(b, 40, issues, S, L, 'O botão'), caption: st ? '' : pmCut(r.legenda, 2200, issues, S, L, 'A legenda'), hashtags: st ? '' : pmCut(r.hashtags, 400, issues, S, L, 'As hashtags'), fmt: !st && /1\s*:\s*1|quad/i.test(r.formato) ? '1:1' : '4:5', imgId, date: dt, obs: pmCut(r.obs, 300, issues, S, L, 'A observação')});
+  });
+  if (st) { const order = []; out.forEach(x => { if (!order.includes(pmNorm(x.code))) order.push(pmNorm(x.code)); }); out.sort((a, b) => order.indexOf(pmNorm(a.code)) - order.indexOf(pmNorm(b.code)) || a.n - b.n); }
+  return out;
+}
+const pmSingleName = (it, st) => (st ? `Stories · ${it.code} · quadro ${it.n}` : `Post · ${it.code} · ${it.h.slice(0, 50)}`).slice(0, 120);
+const pmHaveSingle = (p, it, st) => (p.design && p.design.sets || []).some(x => st ? x.name === pmSingleName(it, true) : String(x.name || '').startsWith(`Post · ${it.code} ·`));
+/* cada linha vira uma arte (Estúdio de Design) e um rascunho em Publicação; nada existente é alterado */
+async function pmBuildSingles(p, items, o, kind) {
+  const st = kind === 'story', c = {name: st ? 'Stories' : 'Posts', bank: cmpDraftBank(p, items.length), feedFmt: 'feed45', layout: 'auto', align: 'left', logo: !!o.adLogo && brandOf(p).logos.length > 0}; soMigrate();
+  for (const it of items) {
+    c.feedFmt = !st && it.fmt === '1:1' ? 'square' : 'feed45';
+    const q = {id: uid('pc'), name: it.code, stage: 'descoberta', h: it.h, s: it.s, btn: it.btn === null ? '' : (it.btn || ''), imgId: it.imgId || '', col: 0, on: {feed: true, vertical: st, horizontal: false}, sets: {feed: '', vertical: '', horizontal: ''}, lock: {feed: false, vertical: false, horizontal: false}};
+    const tk = cmpTk(p, c, q); await ensureFonts([tk.head.family, tk.body.family]); const m = cmpMaster(p, c, q); await ensureSetResources(m);
+    const set = st ? cmpResize(m, 'vertical', c) : m; set.name = pmSingleName(it, st); p.design.sets.push(set);
+    const fm = st ? 'story' : 'imagem', mp = KS.networks.MIDIA_PADRAO[fm] || {count: 1, aspectRatio: '4:5', fileSizeMb: 2}, post = soNewPost({format: fm});
+    Object.assign(post, {title: (st ? `Story ${it.code} · quadro ${it.n}` : it.h).slice(0, 80), caption: st ? '' : [it.caption, it.hashtags].filter(Boolean).join('\n\n'), media: Object.assign({}, mp, {count: 1, aspectRatio: st ? '9:16' : it.fmt}), setId: set.id, scheduledFor: it.date || null, requiresApproval: true});
+    soHist(post, '', 'rascunho', 'criada pela planilha');
+  }
+}
+
 /* ---------- texto: normalização para comparar cabeçalhos e valores ---------- */
 const pmNorm = s => String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '');
 const pmTrim = s => String(s == null ? '' : s).replace(/\u00a0/g, ' ').trim();
@@ -163,6 +235,12 @@ function pmBuildMatrix(kind, rowsOverride) {
     const def = Object.assign({}, PM_DEF.car1, {cols: PM_DEF.car1.cols.concat(pmSlideCols(10))});
     sheets.push(readme('Ampliação Studio · Matriz de carrosséis (um por linha)', ['1. Um carrossel por linha. O slide 1 é a capa e o último slide preenchido vira a chamada final com o botão. De 3 a 20 slides: para passar de 10, continue o padrão das colunas (Slide 11, Slide 11 texto...).', '2. "Slide N" é o título do slide (o que vai grande na arte) e "Slide N texto" é o apoio. Se você só tem uma frase por slide, preencha só "Slide N".', '3. Orgânico usa Legenda e Hashtags; Anúncio usa Título do anúncio, Texto principal e Descrição.', '4. No Studio: Carrosséis → Criar a partir de planilha. Escolha o estilo e respeite o brand book (logo, fonte e cores do Kit de marca) se quiser.'], [def]));
     sheets.push(dataSheet(def, PM_EX.car1.map(r => r.concat(Array(Math.max(0, def.cols.length - r.length)).fill('')))));
+  } else if (kind === 'post1' || kind === 'story') {
+    const st = kind === 'story', def = PM_DEF[kind];
+    sheets.push(readme(st ? 'Ampliação Studio · Matriz de stories' : 'Ampliação Studio · Matriz de posts simples', st
+      ? ['1. Uma linha por quadro de story (tela vertical 9:16). Quadros com a mesma Sequência ficam juntos; a coluna Quadro dá a ordem (1, 2, 3...).', '2. Título do story é o texto grande da tela; Texto de apoio é a linha menor; Botão / sticker é a chamada do quadro (ex.: Arraste para cima).', '3. Cada quadro vira uma arte no Estúdio de Design e um rascunho em Publicação (formato story), com a data de publicação, se você preencher.']
+      : ['1. Uma linha por post (uma imagem). O Título da arte e o Texto de apoio vão dentro da imagem; a Legenda e as Hashtags vão para a publicação.', '2. Formato: 4:5 (feed vertical, padrão) ou 1:1 (quadrado). Botão em branco = sem botão na arte.', '3. Cada post vira uma arte no Estúdio de Design e um rascunho em Publicação, com a data de publicação, se você preencher. Nada é agendado sozinho.'], [def]));
+    sheets.push(dataSheet(def, rowsOverride || PM_EX[kind]));
   } else {
     sheets.push(readme('Ampliação Studio · Matriz de carrosséis (POSTS e SLIDES)', ['1. A aba POSTS é a visão estratégica (uma linha por post). A aba SLIDES é a produção (uma linha por slide, de 3 a 20 por post). Só a aba SLIDES é indispensável.', '2. Cada post vira um carrossel. A frase de cada slide entra como título; a capa é o slide 1 e o último slide vira a chamada final com o botão.', '3. A aba LEGENDAS traz a legenda e as hashtags (orgânico) ou o título, o texto principal e a descrição (anúncio) de cada post. Coluna Post = código do post.', '4. A referência visual e o termo de busca de cada slide ficam ao lado do texto no editor, com botão de busca no Google Imagens.', '5. As abas LINHA EDITORIAL, CLUSTERS e CALENDÁRIO são seu planejamento: ficam no arquivo e o Studio não as lê.', '6. Se um post já foi importado (mesmo código e título), ele é ignorado numa nova importação, para não duplicar.'], [PM_DEF.posts, PM_DEF.slides, PM_DEF.caps]));
     sheets.push(dataSheet(PM_DEF.posts, PM_EX.posts)); sheets.push(dataSheet(PM_DEF.slides, PM_EX.slides)); sheets.push(dataSheet(PM_DEF.caps, PM_EX.caps.slice(0, 1)));
@@ -176,7 +254,7 @@ function pmBuildMatrix(kind, rowsOverride) {
   f('xl/styles.xml', PM_STYLES); sheets.forEach((s, i) => f(`xl/worksheets/sheet${i + 1}.xml`, s.xml));
   return makeZip(files);
 }
-const PM_FILES = {ads: 'matriz-anuncios-ampliacao-studio.xlsx', car: 'matriz-carrosseis-posts-slides-ampliacao-studio.xlsx', car1: 'matriz-carrosseis-um-por-linha-ampliacao-studio.xlsx'};
+const PM_FILES = {post1: 'matriz-posts-simples-ampliacao-studio.xlsx', story: 'matriz-stories-ampliacao-studio.xlsx', ads: 'matriz-anuncios-ampliacao-studio.xlsx', car: 'matriz-carrosseis-posts-slides-ampliacao-studio.xlsx', car1: 'matriz-carrosseis-um-por-linha-ampliacao-studio.xlsx'};
 function pmDownload(kind) { download(PM_FILES[kind], pmBuildMatrix(kind), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); toast('Matriz baixada. Preencha e envie de volta aqui.'); }
 
 
@@ -185,6 +263,7 @@ const PM_SLIDE_COL = /^slide(\d{1,2})(titulo|headline|texto|subheadline|subtitul
 function pmSniff(rows) {
   for (let i = 0; i < Math.min(rows.length, 15); i++) {
     const h = new Set((rows[i] || []).map(v => pmNorm(String(v).replace(/\*/g, ''))).filter(Boolean)), arr = [...h];
+    if (h.has('titulodostory')) return 'story'; if (h.has('titulodaarte')) return 'post1';
     if (h.has('headline') && h.has('fase')) return 'ads'; if (h.has('slide') && h.has('textodoslide')) return 'slides'; if (h.has('post') && (h.has('headlinecapa') || h.has('tipoestrategico'))) return 'posts';
     if (arr.some(x => PM_SLIDE_COL.test(x)) && ['carrossel', 'nomedocarrossel', 'nome', 'codigo', 'post', 'id'].some(k => h.has(k))) return 'car1';
     if (['post', 'codigo', 'id', 'carrossel', 'nome'].some(k => h.has(k)) && ['legenda', 'hashtags', 'textoprincipal', 'descricao', 'titulodoanuncio', 'textodoanuncio'].some(k => h.has(k))) return 'caps';
@@ -289,16 +368,17 @@ function pmMergeCaps(rows, def, cars, camps, issues) {
   return hit;
 }
 function pmParseWorkbook(sheets, ctx) {
-  const issues = [], ads = [], used = []; let posts = null, slides = null, car1 = null, caps = null;
-  sheets.forEach(sh => { const k = pmSniff(sh.rows); if (k === 'ads') ads.push(sh); else if (k === 'posts' && !posts) posts = sh; else if (k === 'slides' && !slides) slides = sh; else if (k === 'car1' && !car1) car1 = sh; else if (k === 'caps' && !caps) caps = sh; });
+  const issues = [], ads = [], used = [], singles = [], stories = []; let posts = null, slides = null, car1 = null, caps = null;
+  sheets.forEach(sh => { const k = pmSniff(sh.rows); if (k === 'ads') ads.push(sh); else if (k === 'post1') singles.push(sh); else if (k === 'story') stories.push(sh); else if (k === 'posts' && !posts) posts = sh; else if (k === 'slides' && !slides) slides = sh; else if (k === 'car1' && !car1) car1 = sh; else if (k === 'caps' && !caps) caps = sh; });
   const camp = []; ads.forEach(sh => { used.push(sh.name); pmParseAds(sh.rows, Object.assign({}, PM_DEF.ads, {name: sh.name}), issues, ctx).forEach(g => camp.push(g)); });
   let car = [];
   if (slides) { used.push(slides.name); if (posts) used.push(posts.name); car = pmParseCar(posts ? posts.rows : null, Object.assign({}, PM_DEF.posts, {name: posts ? posts.name : 'POSTS'}), slides.rows, Object.assign({}, PM_DEF.slides, {name: slides.name}), issues); }
   else if (posts) issues.push({sheet: posts.name, line: 1, level: 'erro', msg: 'Achei a aba de posts, mas não a aba SLIDES (com o texto de cada slide). Os carrosséis não foram lidos.'});
   if (car1) { used.push(car1.name); car = car.concat(pmParseCarRows(car1.rows, Object.assign({}, PM_DEF.car1, {name: car1.name}), issues)); }
   if (caps) { used.push(caps.name); pmMergeCaps(caps.rows, Object.assign({}, PM_DEF.caps, {name: caps.name}), car, camp, issues); }
-  if (!ads.length && !posts && !slides && !car1) issues.push({sheet: '', line: 0, level: 'erro', msg: 'Não reconheci nenhuma aba. Para anúncios preciso das colunas Fase e Headline; para carrosséis, da aba SLIDES (Post, Slide, Texto do slide) ou de uma aba com Carrossel e Slide 1, Slide 2... Use as matrizes baixadas aqui.'});
-  return {campaigns: camp, carousels: car, issues, used};
+  const sg = [], sy = []; singles.forEach(sh => { used.push(sh.name); pmParseSingles(sh.rows, Object.assign({}, PM_DEF.post1, {name: sh.name}), issues, ctx, 'post1').forEach(x => sg.push(x)); }); stories.forEach(sh => { used.push(sh.name); pmParseSingles(sh.rows, Object.assign({}, PM_DEF.story, {name: sh.name}), issues, ctx, 'story').forEach(x => sy.push(x)); });
+  if (!ads.length && !posts && !slides && !car1 && !singles.length && !stories.length) issues.push({sheet: '', line: 0, level: 'erro', msg: 'Não reconheci nenhuma aba. Para anúncios preciso das colunas Fase e Headline; para carrosséis, da aba SLIDES (Post, Slide, Texto do slide) ou de uma aba com Carrossel e Slide 1, Slide 2...; para posts simples, de Código e Título da arte; para stories, de Sequência e Título do story. Use as planilhas baixadas aqui.'});
+  return {campaigns: camp, carousels: car, singles: sg, stories: sy, issues, used};
 }
 
 /* ---------- criação (nada existente é alterado) ---------- */
@@ -334,21 +414,24 @@ async function pmImport() {
   const o = {campName: PM.campName.trim(), adLook: PM.adLook, adLogo: PM.adLogo, carLook: PM.carLook, carTpl: PM.carTpl, carWhere: PM.carWhere, carStyle: PM.carStyle};
   if (created) { o.adLook = ''; if (o.carLook !== 'brand') o.carLook = ''; o.carStyle = ''; }
   const have = new Set(p ? p.carousels.map(x => (x.src && x.src.code || '') + '|' + x.name) : []), fresh = plan.carousels.filter(it => !have.has(it.code + '|' + it.name)), skipped = plan.carousels.length - fresh.length;
-  const nAds = plan.campaigns.reduce((a, c) => a + c.rows.length, 0), total = nAds + fresh.length; if (!total) { toast(skipped ? 'Todos esses carrosséis já foram importados.' : 'Não há nada válido para importar.'); return; }
+  const freshP = plan.singles.filter(it => !(p && pmHaveSingle(p, it, false))), freshS = plan.stories.filter(it => !(p && pmHaveSingle(p, it, true))), skippedS = (plan.singles.length - freshP.length) + (plan.stories.length - freshS.length);
+  const nAds = plan.campaigns.reduce((a, c) => a + c.rows.length, 0), total = nAds + fresh.length + freshP.length + freshS.length; if (!total) { toast(skipped || skippedS ? 'Tudo isso já foi importado antes.' : 'Não há nada válido para importar.'); return; }
   if (plan.campaigns.some(g => !g.name) && !o.campName) { PM.error = 'Dê um nome para a campanha dos anúncios.'; pmRender(); return; }
   if (created) { const nm = PM.newName.trim() || o.campName || 'Novo projeto'; p = newProject(nm.slice(0, 80), 'Criado a partir de planilha'); state.projects.push(p); state.activeProjectId = p.id; if (typeof updateContextUI === 'function') updateContextUI(); }
-  PM.busy = true; PM.error = ''; PM.result = null; pmRender(); const res = {camp: 0, pieces: 0, car: 0, skipped, projectName: p.name, created};
+  PM.busy = true; PM.error = ''; PM.result = null; pmRender(); const res = {camp: 0, pieces: 0, car: 0, posts: 0, stories: 0, skipped, skippedS, projectName: p.name, created};
   try {
     let done = 0;
     for (const g of plan.campaigns) { await pmBuildCampaign(p, g, o); res.camp++; res.pieces += g.rows.length; done += g.rows.length; toast(`Montando as artes… ${done}/${nAds}`); }
     if (fresh.length) { const cars = fresh.map(it => pmBuildCarousel(p, it, o)); p.carousels = cars.concat(p.carousels).slice(0, 600); res.car = cars.length; carHome.page = 0; carHome.q = ''; carHome.day = ''; }
+    if (freshP.length) { toast(`Montando os posts simples… ${freshP.length}`); await pmBuildSingles(p, freshP, o, 'post1'); res.posts = freshP.length; }
+    if (freshS.length) { toast(`Montando os stories… ${freshS.length}`); await pmBuildSingles(p, freshS, o, 'story'); res.stories = freshS.length; }
     persist(); PM.result = res; PM.plan = null; PM.fileName = ''; PM.dest = 'cur'; toast('Importação concluída.');
   } catch (e) { persist(); PM.error = 'A importação parou no meio: ' + (e && e.message || e) + '. O que já foi criado ficou salvo no projeto; confira antes de enviar de novo.'; }
   PM.busy = false; pmRender();
 }
 
 /* ---------- tela ---------- */
-const PM = {plan: null, fileName: '', busy: false, result: null, error: '', mode: '', dest: 'cur', newName: '', campName: '', adLook: '', adLogo: true, carLook: 'brand', carTpl: 'foto', carWhere: 'title', carStyle: ''};
+const PM = {ex: 'ads', plan: null, fileName: '', busy: false, result: null, error: '', mode: '', dest: 'cur', newName: '', campName: '', adLook: '', adLogo: true, carLook: 'brand', carTpl: 'foto', carWhere: 'title', carStyle: ''};
 /* botão "Subir tabela": abre o seletor de arquivo na hora, em qualquer tela; ao escolher, abre a prévia da importação já com a tabela lida */
 function pmQuick(mode) {
   let inp = document.getElementById('pmQuickIn');
@@ -369,28 +452,50 @@ function pmSet(k, v) { PM[k] = v; if (k === 'campName' || k === 'newName') retur
 function pmRender() {
   const root = $('planilhaRoot'); if (!root) return; const cur = curProject(), plan = PM.plan, R = PM.result, dest = !cur ? 'new' : PM.dest, p = dest === 'new' ? null : cur, mode = PM.mode;
   const nAds = plan ? plan.campaigns.reduce((a, c) => a + c.rows.length, 0) : 0, nSl = plan ? plan.carousels.reduce((a, c) => a + c.n, 0) : 0, nCar = plan ? plan.carousels.length : 0;
-  const have = p ? new Set(p.carousels.map(x => (x.src && x.src.code || '') + '|' + x.name)) : new Set(), dup = plan ? plan.carousels.filter(it => have.has(it.code + '|' + it.name)).length : 0, nTot = nAds + nCar - dup;
+  const nPo = plan ? plan.singles.length : 0, nSt = plan ? plan.stories.length : 0, dupP = plan && p ? plan.singles.filter(it => pmHaveSingle(p, it, false)).length : 0, dupS = plan && p ? plan.stories.filter(it => pmHaveSingle(p, it, true)).length : 0;
+  const have = p ? new Set(p.carousels.map(x => (x.src && x.src.code || '') + '|' + x.name)) : new Set(), dup = plan ? plan.carousels.filter(it => have.has(it.code + '|' + it.name)).length : 0, nTot = nAds + nCar - dup + (nPo - dupP) + (nSt - dupS);
   const errs = plan ? plan.issues.filter(i => i.level === 'erro') : [], warns = plan ? plan.issues.filter(i => i.level === 'aviso') : [], nAd = plan ? plan.carousels.filter(c => pmObj(c.obj, !!(c.ad.titulo || c.ad.texto || c.ad.descricao), !!c.caption) === 'anuncio').length : 0, nCap = plan ? plan.carousels.filter(c => c.caption).length : 0;
   const sel = (cur, opts, cb) => `<select onchange="${cb}">${opts.map(([v, l]) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
-  const tab = (k, l) => `<button class="btn sm ${mode === k ? 'dark' : ''}" onclick="pmSet('mode','${k}')">${l}</button>`, showA = mode !== 'car', showC = mode !== 'ads';
+  const tab = (k, l) => `<button class="btn sm ${mode === k ? 'dark' : ''}" onclick="pmSet('mode','${k}')">${l}</button>`, showA = ['', 'ads'].includes(mode), showC = ['', 'car'].includes(mode), showP = ['', 'post1'].includes(mode), showS = ['', 'story'].includes(mode);
   const styles = p ? lyStyles(p) : [];
-  root.innerHTML = `<div class="page-head"><div><h1>Criar a partir de planilha</h1><p class="sub">Suba um planejamento inteiro de uma vez: anúncios (ID, Fase, Headline, Texto Principal, Descrição...) ou carrosséis (um por linha, ou POSTS e SLIDES), com legendas. Funciona num projeto que já existe ou cria um projeto novo só com a planilha.</p></div></div>
-  <div class="row-gap" style="margin-bottom:10px">${tab('', 'Tudo')}${tab('ads', 'Anúncios')}${tab('car', 'Carrosséis')}</div>
-  <div class="panel"><h3 style="margin-top:0">1 · Matrizes (opcional)</h3><p style="font-size:13px;margin:0 0 10px">Já tem a planilha pronta? Pule para o passo 2: o Studio lê o seu arquivo como está. Para partir do formato em branco, baixe a matriz:</p>
-    <div class="row-gap" style="flex-wrap:wrap">${showA ? '<button class="btn" onclick="pmDownload(\'ads\')">⬇ Anúncios (.xlsx)</button>' : ''}${showC ? '<button class="btn" onclick="pmDownload(\'car1\')">⬇ Carrosséis, um por linha (.xlsx)</button><button class="btn" onclick="pmDownload(\'car\')">⬇ Carrosséis, POSTS + SLIDES + LEGENDAS (.xlsx)</button>' : ''}</div></div>
+  root.innerHTML = `<div class="page-head"><div><h1>Criar a partir de planilha</h1><p class="sub">Suba um planejamento inteiro de uma vez: anúncios (ID, Fase, Headline, Texto Principal, Descrição...), carrosséis (um por linha, ou POSTS e SLIDES), posts simples ou stories, com legendas. Funciona num projeto que já existe ou cria um projeto novo só com a planilha.</p></div></div>
+  <div class="row-gap" style="margin-bottom:10px">${tab('', 'Tudo')}${tab('ads', 'Anúncios')}${tab('car', 'Carrosséis')}${tab('post1', 'Posts simples')}${tab('story', 'Stories')}</div>
+  <div class="panel"><h3 style="margin-top:0">1 · Matrizes (opcional)</h3><p style="font-size:13px;margin:0 0 10px">Já tem a planilha pronta? Pule para o passo 2: o Studio lê o seu arquivo como está. Para partir do formato certo, baixe a matriz do que vai produzir. Cada uma já traz linhas de exemplo (começam com “(exemplo)” e são ignoradas) e uma aba LEIA-ME com o que colocar em cada coluna.</p>
+    <div class="row-gap" style="flex-wrap:wrap">${showA ? '<button class="btn" onclick="pmDownload(\'ads\')">⬇ Anúncios (.xlsx)</button>' : ''}${showC ? '<button class="btn" onclick="pmDownload(\'car1\')">⬇ Carrosséis, um por linha (.xlsx)</button><button class="btn" onclick="pmDownload(\'car\')">⬇ Carrosséis, POSTS + SLIDES + LEGENDAS (.xlsx)</button>' : ''}${showP ? '<button class="btn" onclick="pmDownload(\'post1\')">⬇ Posts simples (.xlsx)</button>' : ''}${showS ? '<button class="btn" onclick="pmDownload(\'story\')">⬇ Stories (.xlsx)</button>' : ''}</div></div>
+  ${pmExamples(mode)}
   <div class="panel" style="margin-top:14px"><h3 style="margin-top:0">2 · Escolha o destino e envie a planilha preenchida</h3>
     <div class="field"><label class="pm-radio"><input type="radio" name="pmDest" ${dest === 'cur' ? 'checked' : ''} ${cur ? '' : 'disabled'} onchange="pmSet('dest','cur')"> No projeto aberto: <b>${esc(cur ? cur.name : 'nenhum projeto aberto')}</b>${cur && state.projects.length > 1 ? ` <a href="#" onclick="openModal('context');return false">trocar</a>` : ''}</label>
       <label class="pm-radio"><input type="radio" name="pmDest" ${dest === 'new' ? 'checked' : ''} onchange="pmSet('dest','new')"> ＋ Criar um projeto novo a partir da planilha</label>${dest === 'new' ? `<input value="${esc(PM.newName)}" oninput="PM.newName=this.value" placeholder="Nome do novo projeto" style="max-width:360px;margin-top:4px">` : ''}</div>
     <p class="muted" style="font-size:12.5px;margin:0 0 10px">Tudo entra como <b>novo e em rascunho</b>. Nada que já existe é alterado ou apagado. Não precisa ter pré-projeto nem briefing.</p>
     <div class="row-gap" style="flex-wrap:wrap"><label class="btn ${PM.busy ? '' : 'orange'}" style="cursor:pointer">Escolher a planilha (.xlsx)<input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="pmPick(this)" ${PM.busy ? 'disabled' : ''}></label>${PM.fileName ? `<span class="muted" style="font-size:12.5px">${esc(PM.fileName)}</span><button class="btn sm" onclick="pmClear()" ${PM.busy ? 'disabled' : ''}>Limpar</button>` : ''}</div>
     ${PM.error ? `<p style="color:#b42318;font-size:13px;margin:10px 0 0">${esc(PM.error)}</p>` : ''}
-    ${plan ? `<div class="cards" style="margin-top:14px">${nAds || !nCar ? `<div class="card"><div class="label">Anúncios</div><div class="metric">${nAds}</div><small class="muted">em ${plan.campaigns.length} campanha(s) · ${nAds * 3} artes</small></div>` : ''}${nCar || !nAds ? `<div class="card"><div class="label">Carrosséis</div><div class="metric">${nCar}</div><small class="muted">${nSl} slides${nCar ? ` · ${nCap} com legenda${nAd ? ` · ${nAd} como anúncio` : ''}` : ''}${dup ? ` · ${dup} já importado(s), serão ignorados` : ''}</small></div>` : ''}</div>
+    ${plan ? `<div class="cards" style="margin-top:14px">${nAds || !(nCar || nPo || nSt) ? `<div class="card"><div class="label">Anúncios</div><div class="metric">${nAds}</div><small class="muted">em ${plan.campaigns.length} campanha(s) · ${nAds * 3} artes</small></div>` : ''}${nCar || !(nAds || nPo || nSt) ? `<div class="card"><div class="label">Carrosséis</div><div class="metric">${nCar}</div><small class="muted">${nSl} slides${nCar ? ` · ${nCap} com legenda${nAd ? ` · ${nAd} como anúncio` : ''}` : ''}${dup ? ` · ${dup} já importado(s), serão ignorados` : ''}</small></div>` : ''}${nPo ? `<div class="card"><div class="label">Posts simples</div><div class="metric">${nPo}</div><small class="muted">${nPo - dupP} novo(s) · ${plan.singles.filter(x => x.date).length} com data${dupP ? ` · ${dupP} já importado(s)` : ''}</small></div>` : ''}${nSt ? `<div class="card"><div class="label">Stories</div><div class="metric">${nSt}</div><small class="muted">${new Set(plan.stories.map(x => pmNorm(x.code))).size} sequência(s) · ${nSt - dupS} novo(s)${dupS ? ` · ${dupS} já importado(s)` : ''}</small></div>` : ''}</div>
       ${nAds ? `<div class="panel" style="margin-top:12px;background:#faf8f3"><b>Anúncios</b><div class="form-grid" style="margin-top:8px">${plan.campaigns.some(g => !g.name) ? `<div class="field"><label>Nome da campanha</label><input value="${esc(PM.campName)}" oninput="PM.campName=this.value" placeholder="Ex.: Laboratório de Luz"></div>` : ''}${p ? `<div class="field"><label>Layout e cores</label>${sel(PM.adLook, [['', 'Padrão do Studio (cores do Kit de marca)']].concat(p.campaigns.map(c => [c.id, 'Copiar da campanha: ' + c.name])), "pmSet('adLook',this.value)")}</div>` : ''}<div class="field"><label class="ins inl" style="display:block;margin-top:22px"><input type="checkbox" ${PM.adLogo ? 'checked' : ''} onchange="pmSet('adLogo',this.checked)"> Logo do Kit de marca na arte</label></div></div><small class="muted block">${esc(brandLine(p))} As artes usam as cores e a fonte do Kit de marca. Cada peça guarda ID, Ângulo, Texto Principal e Descrição.</small></div>` : ''}
       ${nCar ? `<div class="panel" style="margin-top:12px;background:#faf8f3"><b>Carrosséis</b><div class="form-grid" style="margin-top:8px"><div class="field"><label>Identidade visual</label>${sel(PM.carLook, [['brand', 'Respeitar o brand book (logo, fonte e cores do Kit de marca)'], ['', 'Padrão do Studio']].concat(p ? p.carousels.map(c => [c.id, 'Copiar do carrossel: ' + c.name]) : []), "pmSet('carLook',this.value)")}</div>${p && PM.carLook !== '' ? `<div class="field"><label>Estilo</label>${sel(PM.carStyle, [['', 'Automático (Kit de marca, se existir)']].concat(styles.map(s => [s.id, s.name])), "pmSet('carStyle',this.value)")}</div>` : ''}${PM.carLook === 'brand' || PM.carLook === '' ? `<div class="field"><label>Modelo (layout)</label>${sel(PM.carTpl, CAR_TPL.map(t => [t.id, t.name]), "pmSet('carTpl',this.value)")}</div>` : ''}${plan.carousels.some(c => c.items.every(i => !i.text2)) ? `<div class="field"><label>Frase de cada slide (formato POSTS/SLIDES) entra como</label>${sel(PM.carWhere, [['title', 'Título do slide (recomendado)'], ['body', 'Parágrafo do slide']], "pmSet('carWhere',this.value)")}</div>` : ''}</div><small class="muted block">${PM.carLook === 'brand' ? esc(brandLine(p)) + ' Usa o logo como avatar, o nome do projeto, a fonte do título e a cor de destaque. Os modelos têm fundos próprios (claro ou escuro).' : 'Para já nascerem com o seu @ e as suas cores, crie antes 1 carrossel, ajuste e escolha-o aqui. Depois dá para usar "Aplicar a todos…" no editor.'}</small></div>` : ''}
+      ${nPo || nSt ? `<div class="panel" style="margin-top:12px;background:#faf8f3"><b>${nPo && nSt ? 'Posts simples e Stories' : nPo ? 'Posts simples' : 'Stories'}</b>${nAds ? '' : `<div class="form-grid" style="margin-top:8px"><div class="field"><label class="ins inl" style="display:block"><input type="checkbox" ${PM.adLogo ? 'checked' : ''} onchange="pmSet('adLogo',this.checked)"> Logo do Kit de marca na arte</label></div></div>`}<small class="muted block" style="margin-top:6px">${esc(brandLine(p))} Cada linha vira uma arte no Estúdio de Design e um <b>rascunho</b> em Publicação${plan.singles.concat(plan.stories).some(x => x.date) ? ' (com a data que você informou, sem agendar)' : ''}. Nada é publicado nem agendado sozinho.</small></div>` : ''}
       ${errs.length ? `<p style="font-size:13px;margin:12px 0 4px"><b>${errs.length} linha(s) com erro</b> ficam de fora. Corrija na planilha e envie de novo, ou importe só o que está certo.</p>` : ''}
       ${plan.issues.length ? `<div class="table-wrap" style="max-height:260px;overflow:auto;margin-top:6px"><table class="tbl"><thead><tr><th>Aba</th><th>Linha</th><th></th><th>O que aconteceu</th></tr></thead><tbody>${plan.issues.slice(0, 120).map(i => `<tr><td>${esc(i.sheet)}</td><td>${i.line || ''}</td><td><b style="color:${i.level === 'erro' ? '#b42318' : '#b7791f'}">${i.level === 'erro' ? 'Erro' : 'Aviso'}</b></td><td>${esc(i.msg)}</td></tr>`).join('')}</tbody></table></div>${plan.issues.length > 120 ? `<small class="muted">Mostrando 120 de ${plan.issues.length}.</small>` : ''}` : (nTot > 0 ? '<p style="font-size:13px;margin:12px 0 0">Nenhum problema encontrado.</p>' : '')}
       <div class="row-gap" style="margin-top:12px"><button class="btn dark" onclick="pmImport()" ${nTot <= 0 || PM.busy ? 'disabled' : ''}>${PM.busy ? 'Importando…' : nTot > 0 ? `${dest === 'new' ? 'Criar projeto e importar' : 'Importar'} ${nTot} item(ns) válido(s)` : 'Nada novo para importar'}</button>${warns.length ? `<small class="muted">${warns.length} aviso(s): o item entra, com o ajuste descrito.</small>` : ''}</div>` : ''}
-    ${R ? `<div class="panel" style="margin-top:14px;background:#f1f8f3"><b>Pronto.</b> ${R.created ? `Projeto novo <b>${esc(R.projectName)}</b> criado` : `Criado em <b>${esc(R.projectName)}</b>`}: ${R.camp} campanha(s) com ${R.pieces} anúncio(s) e ${R.car} carrossel(éis)${R.skipped ? `. ${R.skipped} carrossel(éis) já existiam e foram ignorados` : ''}.<div class="row-gap" style="margin-top:8px;flex-wrap:wrap">${R.camp ? `<button class="btn sm" onclick="go('campaigns')">Ver campanhas</button>` : ''}${R.car ? `<button class="btn sm" onclick="go('carrosseis')">Ver carrosséis</button>` : ''}</div></div>` : ''}
+    ${R ? `<div class="panel" style="margin-top:14px;background:#f1f8f3"><b>Pronto.</b> ${R.created ? `Projeto novo <b>${esc(R.projectName)}</b> criado` : `Criado em <b>${esc(R.projectName)}</b>`}: ${[R.camp ? `${R.camp} campanha(s) com ${R.pieces} anúncio(s)` : '', R.car ? `${R.car} carrossel(éis)` : '', R.posts ? `${R.posts} post(s) simples` : '', R.stories ? `${R.stories} quadro(s) de stories` : ''].filter(Boolean).join(', ')}${R.skipped || R.skippedS ? `. ${(R.skipped || 0) + (R.skippedS || 0)} item(ns) já existiam e foram ignorados` : ''}.<div class="row-gap" style="margin-top:8px;flex-wrap:wrap">${R.camp ? `<button class="btn sm" onclick="go('campaigns')">Ver campanhas</button>` : ''}${R.car ? `<button class="btn sm" onclick="go('carrosseis')">Ver carrosséis</button>` : ''}${R.posts || R.stories ? `<button class="btn sm" onclick="go('design')">Ver no Estúdio de Design</button><button class="btn sm" onclick="soUI.tab='quadro';go('publishingHub')">Ver rascunhos em Publicação</button>` : ''}</div></div>` : ''}
   </div>`;
+}
+
+/* ---------- tabelas de exemplo na tela ---------- */
+const PM_EX_TABS = [['ads', 'Anúncios'], ['car1', 'Carrosséis (um por linha)'], ['car', 'Carrosséis (POSTS + SLIDES)'], ['post1', 'Posts simples'], ['story', 'Stories']];
+function pmExView(k) {
+  const strip = v => String(v == null ? '' : v).replace(/^\(\s*exemplo\s*\)\s*/i, ''), fix = (cols, rows) => ({cols, rows: rows.map(r => r.slice(0, cols.length).concat(Array(Math.max(0, cols.length - r.length)).fill('')).map(strip))});
+  if (k === 'ads') return {note: 'Uma linha por anúncio. Fase e Headline são obrigatórias. Cada linha vira uma peça nas 3 medidas (feed, vertical e horizontal).', sheets: [Object.assign({title: 'Aba ANÚNCIOS', def: PM_DEF.ads}, fix(PM_DEF.ads.cols, PM_EX.ads))]};
+  if (k === 'car1') { const cols = PM_DEF.car1.cols.concat([{h: 'Slide 1'}, {h: 'Slide 1 texto'}, {h: 'Slide 2'}, {h: 'Slide 2 texto'}, {h: 'Slide 3'}, {h: 'Slide 3 texto'}, {h: '… até Slide 20'}]); return {note: 'Um carrossel por linha, de 3 a 20 slides. O slide 1 é a capa e o último vira a chamada final. Orgânico usa Legenda e Hashtags; anúncio usa Título, Texto principal e Descrição.', sheets: [Object.assign({title: 'Aba CARROSSÉIS', def: PM_DEF.car1}, fix(cols, PM_EX.car1.map(r => r.slice(0, PM_DEF.car1.cols.length + 6))))]}; }
+  if (k === 'car') { const pk = ['post', 'dia', 'tema', 'tipo', 'capa', 'objetivo'], pc = PM_DEF.posts.cols.filter(c => pk.includes(c.k)), pi = pc.map(c => PM_DEF.posts.cols.indexOf(c)); return {note: 'A aba SLIDES é a produção (uma linha por slide, de 3 a 20 por post) e é a única indispensável. POSTS traz a visão estratégica e LEGENDAS traz a legenda de cada post.', sheets: [Object.assign({title: 'Aba POSTS (resumo)', def: PM_DEF.posts}, fix(pc, PM_EX.posts.map(r => pi.map(i => r[i])))), Object.assign({title: 'Aba SLIDES', def: PM_DEF.slides}, fix(PM_DEF.slides.cols, PM_EX.slides.slice(0, 4))), Object.assign({title: 'Aba LEGENDAS', def: PM_DEF.caps}, fix(PM_DEF.caps.cols, PM_EX.caps.slice(0, 2)))]}; }
+  if (k === 'post1') return {note: 'Uma linha por post de uma imagem. O título e o apoio vão dentro da arte; a legenda e as hashtags vão para a publicação como rascunho.', sheets: [Object.assign({title: 'Aba POSTS SIMPLES', def: PM_DEF.post1}, fix(PM_DEF.post1.cols, PM_EX.post1))]};
+  return {note: 'Uma linha por quadro de story (tela vertical). Quadros com a mesma Sequência ficam juntos, na ordem da coluna Quadro.', sheets: [Object.assign({title: 'Aba STORIES', def: PM_DEF.story}, fix(PM_DEF.story.cols, PM_EX.story))]};
+}
+function pmExamples(mode) {
+  const tabs = PM_EX_TABS.filter(([k]) => !mode || (mode === 'ads' ? k === 'ads' : mode === 'car' ? k === 'car1' || k === 'car' : k === mode)), cur = tabs.some(t => t[0] === PM.ex) ? PM.ex : (tabs[0] || [])[0] || 'ads', V = pmExView(cur), th = c => `<th style="white-space:nowrap;${c.req ? 'background:#ffe9d6;color:#9a3d00' : ''}">${esc(c.h)}${c.req ? ' *' : ''}</th>`;
+  return `<div class="panel" style="margin-top:14px"><div class="section-row"><div><h3 style="margin:0">Tabela de exemplo: veja como preencher</h3><p class="muted" style="margin:2px 0 0;font-size:12.5px">Os cabeçalhos laranja com * são obrigatórios. Não mude o nome das abas nem dos cabeçalhos. As linhas “(exemplo)” da matriz baixada são ignoradas na importação.</p></div></div>
+    <div class="row-gap" style="margin:10px 0;flex-wrap:wrap">${tabs.map(([k, l]) => `<button class="btn sm ${cur === k ? 'dark' : ''}" onclick="pmSet('ex','${k}')">${l}</button>`).join('')}<button class="btn sm" onclick="pmDownload('${cur}')" style="margin-left:auto">⬇ Baixar esta matriz</button></div>
+    <p style="font-size:13px;margin:0 0 8px">${esc(V.note)}</p>
+    ${V.sheets.map(sh => `<div style="margin-bottom:14px"><b style="font-size:13px">${esc(sh.title)}</b><div class="table-wrap" style="margin-top:4px;overflow-x:auto"><table class="tbl"><thead><tr>${sh.cols.map(th).join('')}</tr></thead><tbody>${sh.rows.map(r => `<tr>${r.map(v => `<td style="min-width:90px;max-width:260px;white-space:normal;word-break:break-word;font-size:12.5px;vertical-align:top">${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+      <details style="margin-top:6px"><summary style="cursor:pointer;font-size:12.5px;color:#555">O que colocar em cada coluna</summary><div class="table-wrap" style="margin-top:6px"><table class="tbl"><thead><tr><th>Coluna</th><th>Obrigatória</th><th>O que colocar</th><th>Valores aceitos</th></tr></thead><tbody>${sh.def.cols.map(c => `<tr><td style="white-space:nowrap"><b>${esc(c.h)}</b></td><td>${c.req ? 'Sim' : 'Não'}</td><td style="font-size:12.5px">${esc(c.d || '')}</td><td style="font-size:12.5px">${esc((c.list || []).join(' · '))}</td></tr>`).join('')}</tbody></table></div></details></div>`).join('')}</div>`;
 }
 function renderPlanilha() { pmRender(); }

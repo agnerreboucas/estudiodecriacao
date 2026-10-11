@@ -119,3 +119,9 @@ A tela é o portal de aprovação, o mesmo que o cliente abre, em modo equipe.
 - **Menu do portal:** Início (todas as peças, com filtros por status), Anúncios (por fase da jornada), Feed, Stories e Reels e Correções (o que foi decidido ou mudado, com antes e depois e o botão Marcar como aplicada).
 - **Barra do Studio:** *Enviar ao cliente* (escolha as peças, o prazo e o @), *Copiar link*, *PDF*, *Arquivo único*, *Fila da equipe* (o que a equipe precisa conferir) e *Prontas para publicar* (com o botão Agendar).
 - Antes do envio você vê a prévia da equipe. Depois do envio, as decisões do cliente aparecem no mesmo portal.
+
+## Subir tabela (em lote)
+- Escolha o formato que vai produzir (Anúncios, Carrosséis, **Posts simples** ou **Stories**) e veja a **Tabela de exemplo**: os cabeçalhos laranja são obrigatórios, e em "O que colocar em cada coluna" há a explicação de cada campo.
+- Baixe a matriz do formato, preencha (as linhas "(exemplo)" são ignoradas), escolha o destino e envie. O Studio mostra uma prévia antes de importar e avisa o que está errado.
+- Posts simples e stories viram artes no Estúdio de Design e **rascunhos** em Publicação, com a data que você informar. Nada é agendado sozinho.
+

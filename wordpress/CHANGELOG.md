@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 1.15.0
+- **Subir tabela (em lote): tabela de exemplo na tela e dois formatos novos.** A tela ganhou o painel **Tabela de exemplo: veja como preencher**, com uma aba para cada formato (Anúncios, Carrosséis um por linha, Carrosséis POSTS + SLIDES, **Posts simples** e **Stories**): mostra os cabeçalhos certos (obrigatórios em laranja), linhas já preenchidas e, em "O que colocar em cada coluna", a explicação de cada campo e os valores aceitos. Há botão para baixar a matriz de cada formato.
+- **Posts simples** (uma imagem): colunas Código, Data de publicação, Título da arte, Texto de apoio, Botão (CTA), Legenda, Hashtags, Formato (4:5 ou 1:1), Imagem e Observações. Cada linha vira uma arte no Estúdio de Design e um **rascunho** em Publicação, com a legenda e a data (sem agendar).
+- **Stories** (um quadro por linha, vertical 9:16): Sequência, Quadro, Data de publicação, Título do story, Texto de apoio, Botão / sticker, Imagem e Observações. Quadros da mesma sequência ficam juntos.
+- A data aceita 25/10/2026 ou 25/10/2026 09:00. Código repetido, data que não dá para entender e imagem que não existe viram aviso na prévia. Importar o mesmo arquivo de novo não duplica nada. Os posts e stories importados já aparecem na Aprovação como Feed e Stories.
+
 ## 1.14.1
 - Tela **Subir tabela (em lote)**: as opções de destino (projeto aberto / projeto novo) estavam com as bolinhas soltas no meio da tela e o texto miúdo; agora ficam alinhadas e legíveis.
 
