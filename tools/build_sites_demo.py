@@ -4,7 +4,7 @@ Antes, rode python3 tools/build_sites_module.py (ele monta export/ampliacao-site
 import re, pathlib
 root = pathlib.Path(__file__).resolve().parent.parent
 mod = root / 'export' / 'ampliacao-sites-modulo'
-html = (mod / 'index.html').read_text()
+html = (mod / 'app.html').read_text()
 def css(m): return '<style>\n' + (mod / m.group(1).split('?')[0]).read_text() + '\n</style>'
 html = re.sub(r'<link rel="stylesheet" href="(css/[^"]+)">', css, html)
 def js(path): return '<script>\n' + (mod / path).read_text().replace('</script>', '<\\/script>') + '\n</script>'

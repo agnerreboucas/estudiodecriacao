@@ -69,6 +69,14 @@ return [
     /* Prévia do site para o cliente aprovar: subdomínio automático https://CODIGO.preview.suaagencia.com.br (precisa de DNS curinga; ver preview.htaccess.sample). Sem isso o link usa /api/preview.php/CODIGO/. */
     // 'PREVIEW_DOMAIN' => 'preview.suaagencia.com.br',
 
+    /* Plataforma de clientes (planos mensais). Ligue para vender o acesso: cada cliente cria conta, paga e usa o próprio espaço. Desligada = uma senha só (uso próprio). */
+    // 'PLATFORM_MODE' => true,
+    // 'BILLING_WEBHOOK_SECRET' => '',      // 16+ caracteres; o meio de pagamento (ou Make/Zapier) chama api/cobranca.php com este segredo
+    // 'BILLING_GRACE_DAYS' => 3,           // dias de tolerância depois do vencimento antes de bloquear a conta
+    // 'TRIAL_DAYS' => 0,                   // dias de teste grátis ao criar a conta (0 = só entra depois de pagar)
+    // 'PAY_LINKS' => ['inicial' => 'https://…', 'profissional' => 'https://…', 'ilimitado' => 'https://…'],   // link de pagamento (assinatura mensal) de cada plano
+    // 'PLANS' => [['id' => 'inicial', 'name' => 'Inicial', 'price' => 190, 'sites' => 10], ['id' => 'profissional', 'name' => 'Profissional', 'price' => 250, 'sites' => 25], ['id' => 'ilimitado', 'name' => 'Ilimitado', 'price' => 390, 'sites' => null]],
+
     /* Onde guardar workspace e leads. Ideal: pasta FORA do public_html */
     // 'DATA_DIR' => '/home/USUARIO/studio-data',
 ];

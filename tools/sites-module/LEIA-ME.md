@@ -53,3 +53,10 @@ No Desenvolvimento, aba **Fluxo** (painel da direita): menu do site, para onde c
 - **Modelo: landing page + obrigado**: sem menu, botões levam ao formulário. **Modelo: site institucional**: Início, Serviços, Sobre e Contato ligados.
 - Cada seção tem "Para onde o botão leva" (aba Propriedades). Os links são guardados por página: se você trocar nome, ordem ou endereço, continuam certos.
 - Na **Mesa de páginas**: botão **Links** (mapa, links quebrados, páginas soltas), campo de link com a lista das páginas e "Montar o menu com as páginas".
+
+## Vender por assinatura (v2.0.0)
+1. Suba a pasta toda. A raiz (`index.html`) é a página de vendas; o estúdio abre em `app.html`.
+2. Copie `api/config.sample.php` para `api/config.php` e defina: `'PLATFORM_MODE' => true`, `'BILLING_WEBHOOK_SECRET'` (16+ caracteres), `'PAY_LINKS'` (um link de pagamento por plano: inicial, profissional, ilimitado) e, se quiser, `'TRIAL_DAYS'`.
+3. Abra `admin.html` e crie a senha do dono. É por ali que você vê clientes, receita e libera pagamentos.
+4. No seu gateway (Mercado Pago, Asaas, Stripe, Hotmart, Kiwify…), aponte o aviso de pagamento para `api/cobranca.php` com o cabeçalho `X-Webhook-Secret`. Sem isso, use "+30 dias" no painel ao receber.
+5. Preencha os trechos [CONFIRMAR] de `termos.html` e `privacidade.html` com um advogado.

@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/_lib.php';
-require_auth();
+require_auth(); if (platform_on()) require_owner();
 $tok = (string) cfg('META_ACCESS_TOKEN', ''); $acct = preg_replace('/\D/', '', (string) cfg('META_AD_ACCOUNT_ID', ''));
 if ($tok === '' || $acct === '') fail('Meta Ads não configurado (META_ACCESS_TOKEN e META_AD_ACCOUNT_ID)', 503);
 $since = $_GET['since'] ?? date('Y-m-d', strtotime('-30 days')); $until = $_GET['until'] ?? date('Y-m-d');

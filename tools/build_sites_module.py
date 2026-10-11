@@ -3,7 +3,7 @@
 Copia os arquivos necessários, monta um index.html enxuto e corrige o roteador (core.js) para as telas que existem."""
 import re, shutil, pathlib, zipfile, sys
 root = pathlib.Path(__file__).resolve().parent.parent
-VERSION = '1.9.0'
+VERSION = '2.0.0'
 out = root / 'export' / 'ampliacao-sites-modulo'
 if out.exists(): shutil.rmtree(out)
 (out / 'js').mkdir(parents=True); (out / 'css').mkdir(); (out / 'api').mkdir()
@@ -12,7 +12,7 @@ SCRIPTS = ['util','icons','wizard','store','integrations','ai-prefs','core','des
   'skills-text','skills-ui','doc-import','acc','mz-core','mz-presets','mz-editor','mz-actions','mz-panels','mz-modals','mz-export','mz-elementor-in','mz-ai','mz-free','mz-links','mz-fonts','mz-drag','mz-design','mz-aiimg','mz-themes',
   'leads-ui','site-ui','briefing-form','briefing-google','briefing-ui','identidade-data','sites-briefing','sites-templates','estudio-shell','sites-fluxo','sites-preview','aula-engine','mz-aula','mz-aula-blocks','aula-ui','refs','estudio-ps','mesa-skin','sites-boot','nav','responsive']
 CSS = ['base','bulk','studio','responsive','menu','mesa','mesa-dark','sites','estudio','aula']
-API = ['.htaccess','_lib.php','_dispatch.php','ai.php','analyze.php','auth.php','config.sample.php','image.php','keys.php','leads.php','lp.php','models.php','status.php','workspace.php','briefing.php','preview.php']
+API = ['.htaccess','_lib.php','_dispatch.php','ai.php','analyze.php','auth.php','config.sample.php','image.php','keys.php','leads.php','lp.php','models.php','status.php','workspace.php','briefing.php','preview.php','conta.php','plataforma.php','cobranca.php']
 for s in SCRIPTS:
     src = root / 'js' / (s + '.js')
     if src.exists(): shutil.copy(src, out / 'js' / src.name)
@@ -38,16 +38,21 @@ t = t.replace("g.fillStyle = '#f2f2f5';", "const DK = document.body.classList.co
 pn.write_text(t)
 mp = (out / 'js' / 'mz-panels.js'); mp.write_text(mp.read_text().replace('Voltar ao Studio (Esc sem seleção)', 'Voltar (Esc sem seleção)').replace('>← Studio<', '>← Voltar<'))
 shutil.copy(root / 'tools' / 'sites-module' / 'sites-boot.js', out / 'js' / 'sites-boot.js')
+shutil.copy(root / 'tools' / 'sites-module' / 'conta-ui.js', out / 'js' / 'conta-ui.js')
 tags = ''.join('<script src="js/%s.js"></script>\n' % x for x in SCRIPTS if x != 'sites-boot') 
 # ordem: arquivos do Studio, ajustes do módulo, app.js
 idx = [re.search(r'js/([\w-]+)\.js', l).group(1) for l in (root / 'index.html').read_text().splitlines() if '<script src="js/' in l]
-order = [x for x in idx if x in SCRIPTS and x not in ('sites-boot','app','nav','responsive','acc','sites-briefing','sites-templates','estudio-shell','sites-fluxo','refs','estudio-ps','mesa-skin')] + ['sites-briefing', 'sites-templates', 'estudio-shell', 'sites-fluxo', 'sites-preview', 'aula-ui', 'refs', 'estudio-ps', 'mesa-skin', 'sites-boot', 'app'] + [x for x in ('acc','nav','responsive') if x in SCRIPTS]
+order = [x for x in idx if x in SCRIPTS and x not in ('sites-boot','app','nav','responsive','acc','sites-briefing','sites-templates','estudio-shell','sites-fluxo','refs','estudio-ps','mesa-skin')] + ['sites-briefing', 'sites-templates', 'estudio-shell', 'sites-fluxo', 'sites-preview', 'aula-ui', 'refs', 'estudio-ps', 'mesa-skin', 'sites-boot', 'conta-ui', 'app'] + [x for x in ('acc','nav','responsive') if x in SCRIPTS]
 tags = ''.join('<script src="js/%s.js"></script>\n' % x for x in order)
-(out / 'index.html').write_text((root / 'tools' / 'sites-module' / 'index.html').read_text().replace('<!--SCRIPTS-->', tags))
+(out / 'app.html').write_text((root / 'tools' / 'sites-module' / 'index.html').read_text().replace('<!--SCRIPTS-->', tags))
 print('ok', out)
 (out / 'fonts').mkdir(); (out / 'fonts' / 'manifest.json').write_text('{"families": []}\n')
 
 shutil.copy(root / 'briefing.html', out / 'briefing.html')
+# vitrine pública + área do cliente
+shutil.copy(root / 'tools' / 'sites-module' / 'landing.html', out / 'index.html')
+for f in ('entrar.html','admin.html','termos.html','privacidade.html','plat.css'): shutil.copy(root / 'tools' / 'sites-module' / f, out / f)
+shutil.copytree(root / 'tools' / 'sites-module' / 'assets', out / 'assets')
 shutil.copy(root / 'tools' / 'sites-module' / 'preview.htaccess.sample', out / 'preview.htaccess.sample')
 shutil.copy(root / 'tools' / 'sites-module' / 'LEIA-ME.md', out / 'LEIA-ME.md')
 shutil.copy(root / 'THIRD_PARTY.md', out / 'THIRD_PARTY.md')

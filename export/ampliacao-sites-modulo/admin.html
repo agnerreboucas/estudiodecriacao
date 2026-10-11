@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Painel do dono · Estúdio de Sites</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="plat.css"></head><body>
+<div class="pl-top"><a class="pl-logo" href="index.html"><i>E</i>Painel do dono</a><span class="sp"></span><a class="l" href="app.html">Abrir o estúdio</a><a class="l" href="#" onclick="out();return false">Sair</a></div>
+<div class="pl-wrap" id="root"><div class="pl-card"><p class="sub">Carregando…</p></div></div>
+<script>
+const $=id=>document.getElementById(id), esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR'), when=t=>t?new Date(t*1000).toLocaleDateString('pt-BR'):'—';
+async function call(url,body){const o=body?{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'fetch'},body:JSON.stringify(body)}:{};const r=await fetch(url,o);let j={};try{j=await r.json()}catch(e){}if(!r.ok||j.ok===false){const e=new Error(j.error||j.message||'Erro '+r.status);e.code=r.status;throw e}return j}
+let D=null,FILTER='';
+function gate(setup,msg){$('root').className='pl-wrap';$('root').innerHTML=`<div class="pl-card"><h1>${setup?'Criar senha do dono':'Entrar como dono'}</h1><p class="sub">${setup?'É a primeira vez. Crie a senha que dá acesso a este painel e às chaves de IA.':'Use a senha do dono (não é a de cliente).'}</p><div class="pl-err" id="err" ${msg?'style="display:block"':''}>${esc(msg||'')}</div>
+<form onsubmit="return enter(event,${setup})">${setup?'':''}<div class="pl-f"><label>Senha${setup?' (mínimo 8 caracteres)':''}</label><input id="pw" type="password" required minlength="${setup?8:1}" autocomplete="${setup?'new-password':'current-password'}"></div>${setup?'<div class="pl-f"><label>Código de instalação (se você definiu SETUP_CODE)</label><input id="cd"></div>':''}<button class="pl-b">${setup?'Criar e entrar':'Entrar'}</button></form></div>`}
+async function enter(ev,setup){ev.preventDefault();try{await call('api/auth.php',setup?{action:'setup',password:$('pw').value,code:$('cd').value}:{action:'login',password:$('pw').value});load()}catch(e){gate(setup,e.message)}return false}
+async function out(){try{await call('api/auth.php',{action:'logout'})}catch(e){}load()}
+async function load(){try{D=await call('api/plataforma.php?action=clientes');draw()}catch(e){
+  if(e.code===401||e.code===403){let st={};try{st=(await call('api/status.php')).platform||{}}catch(x){}gate(st.on&&!st.adminDefined)}else $('root').innerHTML='<div class="pl-card"><h1>Indisponível</h1><p class="sub">'+esc(e.message)+'</p><p class="pl-note">Ligue <code>PLATFORM_MODE</code> no <code>api/config.php</code>.</p></div>'}}
+function draw(){const r=D.resumo,pc=r.porSituacao,rows=D.clientes.filter(c=>!FILTER||c.state===FILTER);$('root').className='pl-wrap wide';
+$('root').innerHTML=`<div class="pl-kpis"><div class="pl-kpi"><small>Receita mensal (ativos)</small><b>${brl(r.mrr)}</b></div><div class="pl-kpi"><small>Clientes</small><b>${r.total}</b></div><div class="pl-kpi"><small>Ativos</small><b>${pc.ativa||0}</b></div><div class="pl-kpi"><small>Aguardando pagamento</small><b>${pc.pendente||0}</b></div><div class="pl-kpi"><small>Atrasados</small><b>${pc.atrasada||0}</b></div></div>
+<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">${['','ativa','pendente','atrasada','suspensa','cancelada'].map(f=>`<button class="pl-b sm ${FILTER===f?'':'line'}" onclick="FILTER='${f}';draw()">${f||'Todos'}</button>`).join('')}</div>
+<div style="overflow:auto"><table class="pl-t"><tr><th>Cliente</th><th>Plano</th><th>Sites</th><th>Situação</th><th>Pago até</th><th>Ações</th></tr>
+${rows.map(c=>`<tr><td><b>${esc(c.name)}</b><br><small style="color:var(--mut)">${esc(c.email)}${c.notes?' · '+esc(c.notes):''}</small></td><td>${esc(c.planName)}${c.wantPlan?'<br><small>pede: '+esc(c.wantPlan)+'</small>':''}${c.courtesy?'<br><small>cortesia</small>':''}</td><td>${c.sites}/${c.sitesLimit==null?'∞':c.sitesLimit}</td><td><span class="pl-st ${c.state}">${c.state}</span></td><td>${when(c.paidUntil)}</td>
+<td><div class="pl-act"><button class="pl-b sm line" onclick="act('${c.id}','set',{addDays:30})">+30 dias</button><button class="pl-b sm line" onclick="plan('${c.id}')">Plano</button><button class="pl-b sm line" onclick="act('${c.id}','set',{status:'${c.status==='suspensa'?'ativa':'suspensa'}'})">${c.status==='suspensa'?'Reativar':'Suspender'}</button><button class="pl-b sm line" onclick="note('${c.id}')">Nota</button><button class="pl-b sm line" onclick="pw('${c.id}')">Nova senha</button><button class="pl-b sm red" onclick="del('${c.id}','${esc(c.name).replace(/'/g,'')}')">Excluir</button></div></td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--mut);padding:26px">Nenhum cliente nesta lista.</td></tr>'}</table></div>
+<div class="pl-box"><h3 style="margin-bottom:8px">Como o pagamento libera o cliente</h3><p>Crie um link de pagamento recorrente em Mercado Pago, Asaas, Stripe, Hotmart ou Kiwify e cole em <code>PAY_LINKS</code> no <code>api/config.php</code>. Para liberar sozinho, configure no gateway um aviso (webhook) para:</p><pre>${esc(location.origin+location.pathname.replace(/[^/]*$/,''))}api/cobranca.php
+Cabeçalho: X-Webhook-Secret: (seu BILLING_WEBHOOK_SECRET)
+Corpo: {"event":"paid","email":"cliente@exemplo.com","days":30}</pre><p class="pl-note">Eventos: <code>paid</code>, <code>late</code>, <code>canceled</code>, <code>refunded</code>. Sem webhook, use o botão <b>+30 dias</b> ao receber o pagamento.</p></div>`}
+async function act(id,a,x){try{await call('api/plataforma.php',Object.assign({action:a,id},x));load()}catch(e){alert(e.message)}}
+function plan(id){const p=prompt('Plano: '+D.plans.map(p=>p.id).join(', '));if(p)act(id,'set',{plan:p.trim()})}
+function note(id){const n=prompt('Nota sobre o cliente:');if(n!==null)act(id,'set',{notes:n})}
+function pw(id){const n=prompt('Nova senha para o cliente (mínimo 8 caracteres):');if(n)act(id,'resetpw',{password:n})}
+function del(id,n){if(confirm('Excluir a conta de '+n+'? Os sites dele continuam no servidor, mas ele perde o acesso.'))act(id,'delete')}
+load();
+</script></body></html>

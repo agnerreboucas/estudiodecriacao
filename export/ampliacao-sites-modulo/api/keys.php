@@ -3,7 +3,7 @@
    GET  → {keys: {NOME: {configured, source: 'config'|'app'|''}}, editable}   (nunca devolve o valor)
    POST {name, value} grava · POST {name, clear:true} remove (só as gravadas pelo app; as de config.php só se editam lá) */
 require __DIR__ . '/_lib.php';
-require_auth();
+require_auth(); if (platform_on()) require_owner();
 $file = keys_file();
 $stored = is_file($file) ? (json_decode((string) @file_get_contents($file), true) ?: []) : [];
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') {

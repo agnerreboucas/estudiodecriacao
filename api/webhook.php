@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/_lib.php';
-require_auth();
+require_auth(); if (platform_on()) require_owner();
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') fail('Use POST', 405);
 require_json_write();
 $url = (string) cfg('WEBHOOK_URL', '');

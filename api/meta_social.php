@@ -166,7 +166,7 @@ if ($action === 'oauth_callback') {
 }
 
 /* ---------- equipe (logada) ---------- */
-require_auth();
+require_auth(); if (platform_on()) require_owner();
 if ($action === 'status' || $action === '') {
     $c = mt_conn(); $app = (string) cfg('META_APP_ID', '') !== '' && (string) cfg('META_APP_SECRET', '') !== '';
     json_out(['ok' => true, 'connected' => $c['token'] !== '' && ($c['page_id'] !== '' || $c['ig_id'] !== ''), 'dry' => mt_dry($c), 'source' => $c['source'], 'page_id' => $c['page_id'], 'page_name' => $c['page_name'], 'ig_id' => $c['ig_id'], 'ig_username' => $c['ig_username'], 'oauth' => $app, 'pending' => is_file(mt_dir() . '/pending.json'), 'cron' => (string) cfg('META_CRON_KEY', '') !== '', 'cronUrl' => mt_base_url() . '?action=run&key=' . ((string) cfg('META_CRON_KEY', '') !== '' ? '<META_CRON_KEY>' : '(defina META_CRON_KEY)'), 'lastRun' => (string) @file_get_contents(mt_dir() . '/lastrun.txt'), 'graph' => mt_graph_base(), 'https' => strpos(mt_base_url(), 'https://') === 0]);

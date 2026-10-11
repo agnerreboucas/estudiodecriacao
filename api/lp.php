@@ -12,7 +12,7 @@ if ($method === 'OPTIONS') { http_response_code(204); exit; }
 $file = data_dir() . '/lp_stats.json';
 
 if ($method === 'GET') {
-    require_auth();
+    require_auth(); if (platform_on()) require_owner();   // plataforma: os contatos de todos os clientes ficam num arquivo só; só o dono lê
     if (($_GET['action'] ?? '') !== 'stats') fail('action inválida', 422);
     $ids = array_values(array_filter(array_map('trim', explode(',', (string) ($_GET['ids'] ?? ''))), fn($i) => preg_match('/^[\w-]{1,60}$/', $i)));
     $all = is_file($file) ? (json_decode((string) @file_get_contents($file), true) ?: []) : [];

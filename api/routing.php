@@ -3,7 +3,7 @@
    GET → configuração atual (URLs voltam só como "configurado"), últimas linhas do log; POST → grava. */
 require __DIR__ . '/_lib.php';
 require __DIR__ . '/_dispatch.php';
-require_auth();
+require_auth(); if (platform_on()) require_owner();
 $f = routing_file();
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') {
     $r = routing_cfg(); $log = is_file(data_dir() . '/leads_dispatch.log') ? array_slice(file(data_dir() . '/leads_dispatch.log', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES), -12) : [];

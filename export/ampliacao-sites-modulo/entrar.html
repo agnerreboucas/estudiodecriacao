@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Entrar · Estúdio de Sites</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="plat.css"></head><body>
+<div class="pl-top"><a class="pl-logo" href="index.html"><i>E</i>Estúdio de Sites</a><span class="sp"></span><a class="l" href="index.html">← Voltar ao site</a></div>
+<div class="pl-wrap"><div class="pl-card" id="box"><p class="sub">Carregando…</p></div>
+<p class="pl-note" style="text-align:center">Dúvidas? Veja os <a href="termos.html">termos de uso</a> e a <a href="privacidade.html">política de privacidade</a>. · <a href="admin.html">Sou o dono</a></p></div>
+<script>
+const $=id=>document.getElementById(id), esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR');
+let PLANS=[], ACC=null, TRIAL=0, TAB=location.hash==='#criar'?'criar':'entrar';
+const Q=new URLSearchParams(location.search), WANT=Q.get('plano');
+async function api(a,body){const o=body?{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'fetch'},body:JSON.stringify(body)}:{};const r=await fetch('api/conta.php'+(body?'':'?action='+a),o);let j={};try{j=await r.json()}catch(e){}if(!r.ok||j.ok===false)throw new Error(j.error||j.message||'Não consegui falar com o servidor ('+r.status+').');return j}
+function err(m){const e=$('err');if(e){e.textContent=m;e.style.display=m?'block':'none'}}
+function planRadios(sel){return '<div class="pl-plans">'+PLANS.map(p=>`<label><input type="radio" name="plan" value="${p.id}" ${p.id===sel?'checked':''}><div><b>${esc(p.name)}</b><small>${p.sites==null?'Sites ilimitados':'Até '+p.sites+' sites'}</small></div><span>${brl(p.price)}/mês</span></label>`).join('')+'</div>'}
+function view(){
+  if(ACC)return account();
+  const sel=WANT&&PLANS.find(p=>p.id===WANT)?WANT:(PLANS[1]||PLANS[0]||{}).id;
+  $('box').innerHTML=`<h1>${TAB==='criar'?'Criar conta':'Entrar'}</h1><p class="sub">${TAB==='criar'?'Escolha o plano e comece. Você pode trocar de plano depois.':'Acesse o seu estúdio.'}</p>
+  <div class="pl-tabs"><button class="${TAB==='entrar'?'on':''}" onclick="TAB='entrar';view()">Já tenho conta</button><button class="${TAB==='criar'?'on':''}" onclick="TAB='criar';view()">Criar conta</button></div><div class="pl-err" id="err"></div>
+  <form onsubmit="return enviar(event)">${TAB==='criar'?`<div class="pl-f"><label>Seu nome</label><input id="nm" autocomplete="name" required></div>`:''}
+  <div class="pl-f"><label>E-mail</label><input id="em" type="email" autocomplete="email" required></div>
+  <div class="pl-f"><label>Senha${TAB==='criar'?' (mínimo 8 caracteres)':''}</label><input id="pw" type="password" autocomplete="${TAB==='criar'?'new-password':'current-password'}" required minlength="${TAB==='criar'?8:1}"></div>
+  ${TAB==='criar'?planRadios(sel)+`<label class="pl-chk"><input type="checkbox" id="ac"><span>Li e aceito os <a href="termos.html" target="_blank">termos de uso</a> e a <a href="privacidade.html" target="_blank">política de privacidade</a>.</span></label>`:''}
+  <button class="pl-b" id="sb">${TAB==='criar'?(TRIAL>0?'Começar teste grátis de '+TRIAL+' dias':'Criar conta'):'Entrar'}</button></form>`;
+}
+async function enviar(ev){ev.preventDefault();err('');const b=$("sb");b.disabled=true;try{
+  const body=TAB==='criar'?{action:'signup',name:$('nm').value,email:$('em').value,password:$('pw').value,plan:(document.querySelector('[name=plan]:checked')||{}).value,accept:$('ac').checked}:{action:'login',email:$('em').value,password:$('pw').value};
+  const j=await api('x',body);ACC=j.account;afterAuth();}catch(e){err(e.message);b.disabled=false}return false}
+function afterAuth(){if(ACC&&ACC.state==='ativa'){location.href='app.html';return}view()}
+function when(t){return t?new Date(t*1000).toLocaleDateString('pt-BR'):'—'}
+const MSG={pendente:'Falta o primeiro pagamento para liberar o estúdio.',atrasada:'O pagamento do mês não foi confirmado. Regularize para voltar a usar.',suspensa:'A conta está suspensa. Fale com o suporte.',cancelada:'A conta foi cancelada. Para voltar, faça o pagamento de um plano.'};
+function account(){const a=ACC,pct=a.sitesLimit?Math.min(100,Math.round(a.sites*100/a.sitesLimit)):0;
+  $('box').innerHTML=`<h1>Olá, ${esc(a.name.split(' ')[0])}</h1><p class="sub">${esc(a.email)}</p>
+  <p><span class="pl-st ${a.state}">${a.state==='ativa'?'Conta ativa':a.state==='pendente'?'Aguardando pagamento':a.state==='atrasada'?'Pagamento atrasado':a.state==='suspensa'?'Suspensa':'Cancelada'}</span></p>
+  ${a.state!=='ativa'?`<p style="margin:14px 0">${MSG[a.state]||''}</p>`:''}
+  <dl class="pl-kv"><dt>Plano</dt><dd>${esc(a.planName)} · ${brl(a.price)}/mês</dd><dt>Sites</dt><dd>${a.sites} de ${a.sitesLimit==null?'ilimitados':a.sitesLimit}${a.sitesLimit?`<div class="pl-bar"><i style="width:${pct}%"></i></div>`:''}</dd><dt>Pago até</dt><dd>${a.courtesy?'Cortesia':when(a.paidUntil)}</dd>${a.wantPlan?`<dt>Troca pedida</dt><dd>${esc(a.wantPlanName)} (vale após o pagamento)</dd>`:''}</dl>
+  <div class="pl-err" id="err"></div>
+  ${a.state==='ativa'?`<a class="pl-b" href="app.html">Abrir o estúdio</a>`:(a.payUrl?`<a class="pl-b" href="${esc(a.payUrl)}" target="_blank" rel="noopener">Pagar ${brl(a.wantPrice||a.price)} agora</a><p class="pl-note">Depois de pagar, a liberação é automática. Se demorar, volte aqui e atualize.</p><button class="pl-b line" style="margin-top:10px" onclick="refresh()">Já paguei, atualizar</button>`:`<p class="pl-note" style="margin:0 0 10px">O link de pagamento ainda não foi configurado. Fale com o suporte para pagar.</p><button class="pl-b line" onclick="refresh()">Atualizar</button>`)}
+  <hr style="border:0;border-top:1px solid var(--line);margin:22px 0"><h3 style="font-size:17px;margin-bottom:10px">Mudar de plano</h3>${planRadios(a.wantPlan||a.plan)}<button class="pl-b line" onclick="chPlan()">Pedir troca</button>
+  <div style="display:flex;gap:10px;margin-top:18px"><button class="pl-b line sm" onclick="chPw()">Trocar senha</button><button class="pl-b line sm" onclick="out()">Sair</button></div>`}
+async function refresh(){try{const j=await api('me');ACC=j.account;afterAuth()}catch(e){err(e.message)}}
+async function chPlan(){err('');try{const j=await api('x',{action:'plan',plan:(document.querySelector('[name=plan]:checked')||{}).value});ACC=j.account;account()}catch(e){err(e.message)}}
+async function chPw(){const o=prompt('Senha atual:');if(!o)return;const n=prompt('Nova senha (mínimo 8 caracteres):');if(!n)return;try{await api('x',{action:'password',old:o,new:n});alert('Senha trocada.')}catch(e){alert(e.message)}}
+async function out(){try{await api('x',{action:'logout'})}catch(e){}ACC=null;TAB='entrar';view()}
+(async()=>{try{const p=await api('plans');PLANS=p.plans;TRIAL=p.trialDays||0;const m=await api('me');ACC=m.account}catch(e){$('box').innerHTML='<h1>Indisponível</h1><p class="sub">'+esc(e.message)+'</p>';return}
+ if(ACC&&ACC.state==='ativa'&&!Q.get('conta')){location.href='app.html';return}view()})();
+</script></body></html>

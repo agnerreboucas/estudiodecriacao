@@ -20,7 +20,7 @@ if ($method === 'GET' && ($_GET['hub_mode'] ?? $_GET['hub.mode'] ?? '') === 'sub
 
 /* Listagem (somente logado) */
 if ($method === 'GET') {
-    require_auth();
+    require_auth(); if (platform_on()) require_owner();   // plataforma: os contatos de todos os clientes ficam num arquivo só; só o dono lê
     $project = (string) ($_GET['project'] ?? '');
     $leads = [];
     if (is_file($store)) foreach (file($store, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
