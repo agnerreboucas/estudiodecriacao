@@ -360,3 +360,6 @@
 .tpl-th{height:170px}.sec-th.tpl-th iframe{width:1280px;height:900px;transform:scale(.185);transform-origin:0 0;pointer-events:none;background:#fff;border:0}
 
 .cs-batch{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;margin-bottom:10px;border:1px dashed var(--accent,#e8590c);border-radius:12px;background:#fff8f3}.cs-batch b{font-size:13px}.cs-batch small{font-size:11.5px}
+
+/* opções de destino (radio) na tela Subir tabela */
+.field label.pm-radio{display:flex;align-items:center;gap:9px;font-size:14px;color:#111;text-transform:none;letter-spacing:0;font-weight:500;margin:7px 0;cursor:pointer}.pm-radio input[type=radio]{width:auto;margin:0;flex:none}.pm-radio a{margin-left:4px}

@@ -630,6 +630,9 @@ button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #1112;out
 
 .cs-batch{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;margin-bottom:10px;border:1px dashed var(--accent,#e8590c);border-radius:12px;background:#fff8f3}.cs-batch b{font-size:13px}.cs-batch small{font-size:11.5px}
 
+/* opções de destino (radio) na tela Subir tabela */
+.field label.pm-radio{display:flex;align-items:center;gap:9px;font-size:14px;color:#111;text-transform:none;letter-spacing:0;font-weight:500;margin:7px 0;cursor:pointer}.pm-radio input[type=radio]{width:auto;margin:0;flex:none}.pm-radio a{margin-left:4px}
+
 </style>
 <style>
 /* ===== Responsivo: tablet (≤1024px) e celular (≤640px). Menu sanduíche = gaveta lateral com os nomes dos módulos. ===== */
@@ -26684,8 +26687,8 @@ function pmRender() {
   <div class="panel"><h3 style="margin-top:0">1 · Matrizes (opcional)</h3><p style="font-size:13px;margin:0 0 10px">Já tem a planilha pronta? Pule para o passo 2: o Studio lê o seu arquivo como está. Para partir do formato em branco, baixe a matriz:</p>
     <div class="row-gap" style="flex-wrap:wrap">${showA ? '<button class="btn" onclick="pmDownload(\'ads\')">⬇ Anúncios (.xlsx)</button>' : ''}${showC ? '<button class="btn" onclick="pmDownload(\'car1\')">⬇ Carrosséis, um por linha (.xlsx)</button><button class="btn" onclick="pmDownload(\'car\')">⬇ Carrosséis, POSTS + SLIDES + LEGENDAS (.xlsx)</button>' : ''}</div></div>
   <div class="panel" style="margin-top:14px"><h3 style="margin-top:0">2 · Escolha o destino e envie a planilha preenchida</h3>
-    <div class="field"><label class="ins inl" style="display:block;margin:4px 0"><input type="radio" name="pmDest" ${dest === 'cur' ? 'checked' : ''} ${cur ? '' : 'disabled'} onchange="pmSet('dest','cur')"> No projeto aberto: <b>${esc(cur ? cur.name : 'nenhum projeto aberto')}</b>${cur && state.projects.length > 1 ? ` <a href="#" onclick="openModal('context');return false">trocar</a>` : ''}</label>
-      <label class="ins inl" style="display:block;margin:4px 0"><input type="radio" name="pmDest" ${dest === 'new' ? 'checked' : ''} onchange="pmSet('dest','new')"> ＋ Criar um projeto novo a partir da planilha</label>${dest === 'new' ? `<input value="${esc(PM.newName)}" oninput="PM.newName=this.value" placeholder="Nome do novo projeto" style="max-width:360px;margin-top:4px">` : ''}</div>
+    <div class="field"><label class="pm-radio"><input type="radio" name="pmDest" ${dest === 'cur' ? 'checked' : ''} ${cur ? '' : 'disabled'} onchange="pmSet('dest','cur')"> No projeto aberto: <b>${esc(cur ? cur.name : 'nenhum projeto aberto')}</b>${cur && state.projects.length > 1 ? ` <a href="#" onclick="openModal('context');return false">trocar</a>` : ''}</label>
+      <label class="pm-radio"><input type="radio" name="pmDest" ${dest === 'new' ? 'checked' : ''} onchange="pmSet('dest','new')"> ＋ Criar um projeto novo a partir da planilha</label>${dest === 'new' ? `<input value="${esc(PM.newName)}" oninput="PM.newName=this.value" placeholder="Nome do novo projeto" style="max-width:360px;margin-top:4px">` : ''}</div>
     <p class="muted" style="font-size:12.5px;margin:0 0 10px">Tudo entra como <b>novo e em rascunho</b>. Nada que já existe é alterado ou apagado. Não precisa ter pré-projeto nem briefing.</p>
     <div class="row-gap" style="flex-wrap:wrap"><label class="btn ${PM.busy ? '' : 'orange'}" style="cursor:pointer">Escolher a planilha (.xlsx)<input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="pmPick(this)" ${PM.busy ? 'disabled' : ''}></label>${PM.fileName ? `<span class="muted" style="font-size:12.5px">${esc(PM.fileName)}</span><button class="btn sm" onclick="pmClear()" ${PM.busy ? 'disabled' : ''}>Limpar</button>` : ''}</div>
     ${PM.error ? `<p style="color:#b42318;font-size:13px;margin:10px 0 0">${esc(PM.error)}</p>` : ''}
