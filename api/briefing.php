@@ -33,7 +33,13 @@ function bf_files_clean(string $t, $list): array {
 }
 function bf_get(array $a, string $path): string { $c = $a; foreach (explode('.', $path) as $k) { if (!is_array($c) || !isset($c[$k])) return ''; $c = $c[$k]; } return is_scalar($c) ? (string) $c : ''; }
 function bf_summary(array $r): string {
-    $a = $r['answers'] ?? []; $prods = []; foreach (($a['produtos'] ?? []) as $p) if (is_array($p) && ($p['nome'] ?? '') !== '') $prods[] = $p['nome'];
+    $a = $r['answers'] ?? [];
+    if (($r['kind'] ?? '') === 'marca') {
+        $I = is_array($a['identidade'] ?? null) ? $a['identidade'] : [];
+        return "Formulário da Marca recebido: " . ($r['name'] ?? '') . "\nRespondido por: " . bf_get($a, 'contato.nome')
+            . "\nValores: " . (is_array($I['valores'] ?? null) ? implode(', ', $I['valores']) : '') . "\nAtitudes: " . (is_array($I['atitudes'] ?? null) ? implode(', ', $I['atitudes']) : '')
+            . "\n\nAbra o projeto no Studio → Marca e arquétipo → Formulário do cliente → Importar respostas.";
+    } $prods = []; foreach (($a['produtos'] ?? []) as $p) if (is_array($p) && ($p['nome'] ?? '') !== '') $prods[] = $p['nome'];
     return "Briefing recebido: " . ($r['name'] ?? '') . "\nEmpresa: " . bf_get($a, 'empresa.nome') . "\nResponsável: " . bf_get($a, 'contato.nome') . " · WhatsApp " . bf_get($a, 'contato.whatsapp') . " · " . bf_get($a, 'contato.email')
         . "\nSite: " . bf_get($a, 'empresa.site') . " · Instagram: " . bf_get($a, 'empresa.instagram') . "\nProdutos e serviços: " . ($prods ? implode('; ', $prods) : '(nenhum informado)')
         . "\nMetas: " . bf_get($a, 'marketing.metas') . "\n\nAbra o projeto no Studio → Pré-Projeto → Briefing do cliente → Importar respostas.";
@@ -50,7 +56,7 @@ if ($method === 'GET') {
     }
     if (!rate_limit('bfget:' . client_ip(), 120, 3600)) fail('Muitos acessos. Tente mais tarde.', 429);
     $r = bf_read($t); if (!$r || !empty($r['revoked'])) fail('Este link não está mais ativo. Peça um novo ao seu contato.', 404);
-    json_out(['ok' => true, 'name' => $r['name'] ?? '', 'status' => $r['status'] ?? 'rascunho', 'answers' => $r['answers'] ?? new stdClass, 'updatedAt' => $r['updatedAt'] ?? '', 'submittedAt' => $r['submittedAt'] ?? '']);
+    json_out(['ok' => true, 'kind' => $r['kind'] ?? 'briefing', 'name' => $r['name'] ?? '', 'status' => $r['status'] ?? 'rascunho', 'answers' => $r['answers'] ?? new stdClass, 'updatedAt' => $r['updatedAt'] ?? '', 'submittedAt' => $r['submittedAt'] ?? '']);
 }
 if ($method !== 'POST') fail('Use GET ou POST', 405);
 require_json_write();
@@ -65,8 +71,16 @@ if (in_array($action, ['save', 'submit'], true)) {
     if (strlen(json_encode($a)) > 300000) fail('Respostas grandes demais.', 413);
     $r['answers'] = $a; $r['updatedAt'] = date('c');
     if ($action === 'submit') {
-        $miss = []; foreach ([['empresa.nome', 'nome da empresa'], ['contato.nome', 'seu nome'], ['contato.whatsapp', 'seu WhatsApp']] as [$p, $l]) if (trim(bf_get($a, $p)) === '') $miss[] = $l;
-        $hasProd = false; foreach (($a['produtos'] ?? []) as $p) if (is_array($p) && trim((string) ($p['nome'] ?? '')) !== '') $hasProd = true; if (!$hasProd) $miss[] = 'pelo menos um produto ou serviço';
+        $miss = [];
+        if (($r['kind'] ?? '') === 'marca') {
+            if (trim(bf_get($a, 'contato.nome')) === '') $miss[] = 'seu nome';
+            $I = is_array($a['identidade'] ?? null) ? $a['identidade'] : [];
+            if (!is_array($I['valores'] ?? null) || count($I['valores']) < 1) $miss[] = 'pelo menos um valor';
+            if (!is_array($I['atitudes'] ?? null) || count($I['atitudes']) < 1) $miss[] = 'pelo menos uma atitude';
+        } else {
+            foreach ([['empresa.nome', 'nome da empresa'], ['contato.nome', 'seu nome'], ['contato.whatsapp', 'seu WhatsApp']] as [$p, $l]) if (trim(bf_get($a, $p)) === '') $miss[] = $l;
+            $hasProd = false; foreach (($a['produtos'] ?? []) as $p) if (is_array($p) && trim((string) ($p['nome'] ?? '')) !== '') $hasProd = true; if (!$hasProd) $miss[] = 'pelo menos um produto ou serviço';
+        }
         if (empty($a['aceite'])) $miss[] = 'a autorização de uso das informações';
         if ($miss) fail('Falta preencher: ' . implode(', ', $miss) . '.', 422, ['missing' => $miss]);
         $first = ($r['status'] ?? '') !== 'enviado'; $r['status'] = 'enviado'; $r['submittedAt'] = date('c'); $r['revisions'] = (int) ($r['revisions'] ?? 0) + 1;
@@ -75,7 +89,7 @@ if (in_array($action, ['save', 'submit'], true)) {
     if ($action === 'submit') {
         @file_put_contents(data_dir() . '/briefings.jsonl', json_encode(['at' => date('c'), 'project' => $r['project'] ?? '', 'name' => $r['name'] ?? '', 'answers' => $a], JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX);
         try {
-            $rt = routing_cfg(); $subject = ($first ? 'Briefing recebido: ' : 'Briefing atualizado: ') . ($r['name'] ?? '');
+            $rt = routing_cfg(); $subject = (($r['kind'] ?? '') === 'marca' ? ($first ? 'Formulário da Marca recebido: ' : 'Formulário da Marca atualizado: ') : ($first ? 'Briefing recebido: ' : 'Briefing atualizado: ')) . ($r['name'] ?? '');
             if ($rt['managers']) dispatch_log('email briefing ' . (dispatch_mail($rt['managers'], $subject, bf_summary($r), $rt['from']) ? 'ok' : 'falhou'));
             if ($rt['sheetsUrl'] !== '') { [$code, , $err] = http_json($rt['sheetsUrl'], ['Content-Type: application/json'], ['type' => 'briefing', 'project' => $r['project'] ?? '', 'name' => $r['name'] ?? '', 'at' => date('c'), 'text' => bf_summary($r), 'answers' => $a], 8); dispatch_log('planilha briefing HTTP ' . $code); }
         } catch (Throwable $e) { dispatch_log('briefing erro: ' . $e->getMessage()); }
@@ -103,8 +117,8 @@ require_auth();
 if ($action === 'create') {
     $project = preg_replace('/[^\w\-]/', '', (string) ($b['project'] ?? '')); $name = mb_substr(trim((string) ($b['name'] ?? '')), 0, 120);
     if ($project === '' || $name === '') fail('Informe o projeto e o nome.', 422);
-    $t = bin2hex(random_bytes(12));
-    if (!bf_write($t, ['t' => $t, 'project' => $project, 'name' => $name, 'status' => 'rascunho', 'answers' => new stdClass, 'created' => date('c')])) fail('Não consegui gravar (permissão da pasta api/data).', 500);
+    $t = bin2hex(random_bytes(12)); $kind = ($b['kind'] ?? '') === 'marca' ? 'marca' : 'briefing';
+    if (!bf_write($t, ['t' => $t, 'kind' => $kind, 'project' => $project, 'name' => $name, 'status' => 'rascunho', 'answers' => new stdClass, 'created' => date('c')])) fail('Não consegui gravar (permissão da pasta api/data).', 500);
     json_out(['ok' => true, 't' => $t]);
 }
 if (in_array($action, ['get', 'revoke'], true)) {
@@ -114,7 +128,7 @@ if (in_array($action, ['get', 'revoke'], true)) {
 }
 if ($action === 'list') {
     $project = preg_replace('/[^\w\-]/', '', (string) ($b['project'] ?? '')); $out = [];
-    foreach (glob(bf_dir() . '/*.json') ?: [] as $f) { $r = json_decode((string) @file_get_contents($f), true); if (is_array($r) && empty($r['revoked']) && ($project === '' || ($r['project'] ?? '') === $project)) $out[] = ['t' => $r['t'] ?? '', 'name' => $r['name'] ?? '', 'status' => $r['status'] ?? 'rascunho', 'updatedAt' => $r['updatedAt'] ?? '', 'submittedAt' => $r['submittedAt'] ?? '', 'created' => $r['created'] ?? '']; }
+    foreach (glob(bf_dir() . '/*.json') ?: [] as $f) { $r = json_decode((string) @file_get_contents($f), true); if (is_array($r) && empty($r['revoked']) && ($project === '' || ($r['project'] ?? '') === $project)) $out[] = ['t' => $r['t'] ?? '', 'kind' => $r['kind'] ?? 'briefing', 'name' => $r['name'] ?? '', 'status' => $r['status'] ?? 'rascunho', 'updatedAt' => $r['updatedAt'] ?? '', 'submittedAt' => $r['submittedAt'] ?? '', 'created' => $r['created'] ?? '']; }
     json_out(['ok' => true, 'links' => $out]);
 }
 fail('Ação desconhecida.', 422);

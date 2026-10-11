@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 1.16.0
+- **Marca explicada.** O passo "Seu arquétipo" agora começa com **O que é um arquétipo?** (em português simples) e explica os três papéis: **principal** (manda no tom e no visual), **secundário** (tempera o principal) e **terciário** (um toque de apoio). Cada um aparece com a afinidade (%) e um cartão completo: quem é, características, atitudes, o que deseja e teme, como se comunica (com frases de exemplo), palavras que usa e evita, e **como influencia o seu trabalho** (texto, visual e conteúdo). O secundário agora pode ser qualquer arquétipo; o terciário é o próximo mais forte.
+- **PDFs.** Botão **Guia dos 12 arquétipos (PDF)** (todos os arquétipos com atitudes, características, tom de voz e comunicação) e **Relatório da marca (PDF)** (as respostas da marca + os três arquétipos explicados). O guia também está pronto em `docs/Guia-dos-12-arquetipos.pdf`.
+- **Marcas clicáveis.** Cada marca citada (e as que você admira) abre uma janela com o arquétipo, o que observar na comunicação e quatro atalhos: site oficial, Instagram, campanhas no YouTube e os anúncios que ela roda na Biblioteca de Anúncios da Meta. Os links abrem a busca no navegador; o Studio não lê os sites.
+- **Formulário da Marca para o cliente** (`marca.html`): botão **Enviar para o cliente preencher** na aba Marca e arquétipo. Cria um link ligado ao projeto; o cliente responde pelo celular (valores, atitudes, tom, arquétipo com explicação, voz, marcas que admira), salva sozinho e envia. Três formatos: **projeto** (Importar respostas para este projeto), **planilha** (.xlsx e CSV, em branco ou preenchida; o cliente também baixa a dele; **Importar planilha preenchida** lê de volta) e **nuvem** (as respostas ficam no servidor no link, mesmo com a página fechada). O mesmo `api/briefing.php` guarda os dois tipos de link (`kind: marca`).
+
 ## 1.15.2
 - **Subir tabela: caixa para colar o texto CSV sempre visível.** Na tela há agora uma área grande, com borda pontilhada, "Ou cole o texto CSV aqui" (antes ficava escondida num item recolhido). Cole o texto (com a linha de cabeçalho), clique em **Ler o texto colado** e veja a prévia; **Limpar o texto** esvazia a caixa.
 

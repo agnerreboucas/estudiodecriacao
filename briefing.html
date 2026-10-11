@@ -152,7 +152,7 @@ button{font:inherit;cursor:pointer}.btn{border:1.5px solid #111;background:#fff;
   if (!/^[a-f0-9]{24}$/.test(T)) { root.innerHTML = '<div class="err"><h2>Link inválido</h2><p>Peça um novo link do briefing ao seu contato.</p></div>'; return; }
   api(null, true).then(function (r) {
     if (!r.ok) { root.innerHTML = '<div class="err"><h2>Não foi possível abrir</h2><p>' + esc(r.error || 'Link inválido.') + '</p></div>'; return; }
-    info = r; A = bfMigrate(r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers) ? r.answers : {}); sent = r.status === 'enviado'; document.title = 'Briefing' + (r.name ? ' · ' + r.name : ''); render(false);
+    if (r.kind === 'marca') { location.replace('marca.html?t=' + encodeURIComponent(T)); return; } info = r; A = bfMigrate(r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers) ? r.answers : {}); sent = r.status === 'enviado'; document.title = 'Briefing' + (r.name ? ' · ' + r.name : ''); render(false);
   }, function () { root.innerHTML = '<div class="err"><h2>Sem conexão</h2><p>Não consegui falar com o servidor. Tente de novo em instantes.</p></div>'; });
 })();
 </script>

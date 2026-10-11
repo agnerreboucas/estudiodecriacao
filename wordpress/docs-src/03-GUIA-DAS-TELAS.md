@@ -105,6 +105,8 @@ Menu **5 · Mostrar ao cliente → Aprovação de arte**.
 
 ## Marca e arquétipo, Produtos e serviços (aba do projeto)
 - **Marca e arquétipo:** escolha valores (5 a 7), depois atitudes; o Studio mostra o arquétipo mais próximo, marcas parecidas e o tom. No passo 4 defina o que a marca fala e não fala, o que admira e repudia, e as palavras que usa e que **nunca** usa. No resumo, "Enviar para o Brand/Voice Brain" copia isso para o Voice Brain.
+- **Entenda o arquétipo:** o passo 3 explica o que é um arquétipo e o papel do **principal**, do **secundário** e do **terciário**. Abra cada um para ver características, atitudes, como se comunica e como influencia o seu trabalho. Clique no nome de uma marca para ver o site, o Instagram, as campanhas e os anúncios dela. Os botões **Guia dos arquétipos (PDF)** e **Relatório da marca (PDF)** abrem o documento (use Imprimir → Salvar como PDF).
+- **Enviar para o cliente preencher:** no topo da aba, **Criar link para o cliente**. Mande o link (há botão de WhatsApp). Depois use **Ver se o cliente respondeu** e **Importar respostas para este projeto**. Também dá para baixar a **planilha** (em branco ou preenchida) e **importar a planilha preenchida** que o cliente devolver.
 - **Produtos e serviços:** cadastre cada produto (ou cole a lista de uma vez). Quanto mais completa a ficha, melhor a oferta, o anúncio e a página. O Studio só usa o que você preencheu e não inventa o resto.
 
 ## Formulário do cliente (link do briefing)
