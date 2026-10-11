@@ -66,6 +66,9 @@ return [
     /* Radar de concorrentes: a leitura de sites bloqueia endereços internos. Só ligue em testes locais. */
     // 'ANALYZE_ALLOW_PRIVATE' => false,
 
+    /* Prévia do site para o cliente aprovar: subdomínio automático https://CODIGO.preview.suaagencia.com.br (precisa de DNS curinga; ver preview.htaccess.sample). Sem isso o link usa /api/preview.php/CODIGO/. */
+    // 'PREVIEW_DOMAIN' => 'preview.suaagencia.com.br',
+
     /* Onde guardar workspace e leads. Ideal: pasta FORA do public_html */
     // 'DATA_DIR' => '/home/USUARIO/studio-data',
 ];

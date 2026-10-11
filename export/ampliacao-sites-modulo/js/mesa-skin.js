@@ -27,29 +27,55 @@ const MZS = [
 function mzsAct(k) {
   if (k === 'sel') { if (MZ.free) mzFreeToggle(); if (MZ.draw && MZ.draw.on) mzDrawToggle(false); }
   else if (k === 'free') mzFreeToggle(); else if (k === 'draw') mzDrawToggle(); else if (k === 'ai') mzAiToggle();
-  else if (k.startsWith('lt:')) mzLeftTab(k.slice(3));
+  else if (k.startsWith('lt:')) mskToggle('l', k.slice(3));
   else if (k === 'zin') mzZoom(0.1); else if (k === 'zout') mzZoom(-0.1); else if (k === 'fit') mzZoomFit();
   else if (k === 'prev') mzModalPreview(); else if (k === 'ds') mzModalDs(); else if (k === 'ver') mzModalVersions();
   mzsState();
 }
 function mzsState() {
-  document.querySelectorAll('.mz-strip button').forEach(b => { const k = b.dataset.k; b.classList.toggle('on', k === 'free' ? !!MZ.free : k === 'draw' ? !!(MZ.draw && MZ.draw.on) : k === 'sel' ? !MZ.free && !(MZ.draw && MZ.draw.on) : k === 'ai' ? (document.getElementById('mzAiBar') || {style: {display: 'none'}}).style.display !== 'none' : k.startsWith('lt:') ? MZ.left === k.slice(3) : false); });
+  document.querySelectorAll('.mz-strip button').forEach(b => { const k = b.dataset.k; b.classList.toggle('on', k === 'free' ? !!MZ.free : k === 'draw' ? !!(MZ.draw && MZ.draw.on) : k === 'sel' ? !MZ.free && !(MZ.draw && MZ.draw.on) : k === 'ai' ? (document.getElementById('mzAiBar') || {style: {display: 'none'}}).style.display !== 'none' : k.startsWith('lt:') ? MSK.open.l && MZ.left === k.slice(3) : false); });
+  document.querySelectorAll('.mz-rail button').forEach(b => b.classList.toggle('on', MSK.open.r && MZ.tab === b.dataset.rt));
 }
+/* ---------- painéis recolhidos: esquerda e direita abrem sobre a tela só quando você clica e fecham sozinhos ---------- */
+const MSK = {open: {l: false, r: false}, pin: {l: false, r: false}};
+try { const p = JSON.parse(localStorage.getItem('mzs_pin') || '{}'); MSK.pin.l = !!p.l; MSK.pin.r = !!p.r; } catch (e) { /* sem preferência salva */ }
+function mskApply() {
+  const b = document.querySelector('.mz-body'); if (!b) return;
+  ['l', 'r'].forEach(k => { b.classList.toggle('mz-' + k + 'o', MSK.open[k]); b.classList.toggle('mz-' + k + 'p', MSK.open[k] && MSK.pin[k]); });
+  mzsState(); clearTimeout(MSK.t); MSK.t = setTimeout(() => { if (MZ.open) { if (MZ.fit) mzLayoutFrames(); mzOverlayAll(); mzRulers && mzRulers(); } }, 60);
+}
+function mskToggle(side, tab) {
+  const cur = side === 'l' ? MZ.left : MZ.tab; if (MSK.open[side] && cur === tab) { MSK.open[side] = false; mskApply(); return; }
+  if (side === 'l') mzLeftTab(tab); else mzRightTab(tab); MSK.open[side] = true; mskApply();
+}
+function mskClose(side) { MSK.open[side] = false; mskApply(); }
+function mskPin(side) { MSK.pin[side] = !MSK.pin[side]; try { localStorage.setItem('mzs_pin', JSON.stringify(MSK.pin)); } catch (e) { /* ok */ } mskApply(); }
+function mskBuild() {
+  const body = document.querySelector('.mz-body'); if (!body || body.querySelector('.mz-rail')) return;
+  const head = (side, title) => `<div class="mzs-dh"><b>${title}</b><span class="mz-sp"></span><button onclick="mskPin('${side}')" title="Fixar: o painel passa a ocupar espaço em vez de ficar por cima" aria-label="Fixar painel">📌</button><button onclick="mskClose('${side}')" title="Recolher (Esc)" aria-label="Recolher painel">✕</button></div>`;
+  const L = body.querySelector('.mz-left'), R = body.querySelector('.mz-right'); if (L) L.insertAdjacentHTML('afterbegin', head('l', 'Biblioteca e camadas')); if (R) R.insertAdjacentHTML('afterbegin', head('r', 'Propriedades'));
+  const rail = document.createElement('nav'); rail.className = 'mz-rail'; rail.setAttribute('aria-label', 'Painel de propriedades');
+  rail.innerHTML = MZ_TABS.map(([k, n]) => `<button data-rt="${k}" title="${esc(n)}" onclick="mskToggle('r','${k}')"><span>${esc(n)}</span></button>`).join(''); body.appendChild(rail);
+  document.addEventListener('keydown', e => { if (e.key !== 'Escape' || !MZ.open || !(MSK.open.l || MSK.open.r) || e.target.closest && e.target.closest('input,textarea,select,[contenteditable]')) return; MSK.open.l = MSK.open.r = false; mskApply(); e.stopImmediatePropagation(); e.preventDefault(); }, true);
+  MSK.open.l = MSK.open.r = false; mskApply();
+}
+/* a gaveta solta fica transparente enquanto você arrasta algo da biblioteca para a tela (mesmo caso do corpo da página) */
 function mzsBuild() {
   const body = document.querySelector('.mz-body'); if (!body || body.querySelector('.mz-strip')) return;
   const nav = document.createElement('nav'); nav.className = 'mz-strip'; nav.setAttribute('aria-label', 'Ferramentas');
   nav.innerHTML = MZS.map(t => t === '|' ? '<hr>' : `<button data-k="${t[0]}" title="${esc(t[1])}" aria-label="${esc(t[1])}" onclick="mzsAct('${t[0]}')">${mzsSvg(t[2])}</button>`).join('');
-  body.insertBefore(nav, body.firstChild); mzsState();
+  body.insertBefore(nav, body.firstChild); mskBuild(); mzsState();
 }
 /* abrir e fechar: classe escura no corpo e faixa de ferramentas */
 (function () {
   const open0 = mzOpen, close0 = mzClose, tab0 = mzLeftTab;
   mzOpen = function () { document.body.classList.add('mz-dark'); const r = open0.apply(this, arguments); if (MZ.open) mzsBuild(); else document.body.classList.remove('mz-dark'); return r; };
   mzClose = async function () { const r = await close0.apply(this, arguments); if (!MZ.open) { document.body.classList.remove('mz-dark', 'mz-refwide'); MRF.on = false; } return r; };
-  mzLeftTab = function (k) { tab0.apply(this, arguments); mzsState(); mzRefWide(); };
+  mzLeftTab = function (k) { tab0.apply(this, arguments); if (!MSK.open.l && document.querySelector('.mz-rail')) { MSK.open.l = true; mskApply(); } mzsState(); mzRefWide(); };
   const aiT = mzAiToggle; mzAiToggle = function () { const r = aiT.apply(this, arguments); mzsState(); return r; };
   const fr = mzFreeToggle; mzFreeToggle = function () { const r = fr.apply(this, arguments); mzsState(); return r; };
   const dr = mzDrawToggle; mzDrawToggle = function () { const r = dr.apply(this, arguments); mzsState(); return r; };
+  const ins0 = window.mzInsertSpec; if (ins0) window.mzInsertSpec = mzInsertSpec = function () { const r = ins0.apply(this, arguments); if (!MSK.pin.l && MSK.open.l && document.querySelector('.mz-rail')) { MSK.open.l = false; mskApply(); } return r; };
   const ref0 = window.mzRefreshLeft; window.mzRefreshLeft = function () { if (MZ.left === 'refs') { mzRefPanel(); return; } ref0.apply(this, arguments); };
 })();
 /* ---------- aba Referências ---------- */

@@ -1,7 +1,5 @@
 /* Ajustes à mão do visual escuro da Mesa (o mesa-dark.css é gerado) */
 body.mz-dark .mz-app{background:#2b2b2b}
-body.mz-dark .mz-body{grid-template-columns:46px 290px minmax(0,1fr) 320px}
-body.mz-dark.mz-refwide .mz-body{grid-template-columns:46px 560px minmax(0,1fr) 320px}
 body.mz-dark .mz-strip{background:#3a3a3a;border-right:1px solid #1d1d1d;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;overflow-y:auto}
 body.mz-dark .mz-strip button{width:36px;height:36px;border:0;background:transparent;color:#cfcfcf;border-radius:6px;cursor:pointer;display:grid;place-items:center}
 body.mz-dark .mz-strip button:hover{background:#4c4c4c}
@@ -23,3 +21,22 @@ body.mz-dark .mz-app .btn{background:#4a4a4a;border-color:#666;color:#eee}body.m
 body.mz-dark .mz-app textarea,body.mz-dark .mz-app select,body.mz-dark .mz-app input[type=text],body.mz-dark .mz-app input[type=number],body.mz-dark .mz-app input:not([type]){background:#262626;color:#e6e6e6;border-color:#555}
 /* barra de cima mais compacta: com Links e Fontes ela passava de 1500 px */
 body.mz-dark .mz-top{gap:4px}body.mz-dark .mz-top .mz-btn-i{padding:6px 7px}body.mz-dark .mz-title select{max-width:120px}
+
+/* ===== painéis recolhidos (esquerda e direita abrem por cima da tela) ===== */
+body.mz-dark .mz-body{position:relative;--lw:0px;--rw:0px;grid-template-columns:46px var(--lw) minmax(0,1fr) var(--rw) 40px;grid-template-rows:minmax(0,1fr)}
+body.mz-dark .mz-body.mz-lp{--lw:290px}body.mz-dark .mz-body.mz-rp{--rw:320px}
+body.mz-dark.mz-refwide .mz-body.mz-lp{--lw:560px}
+body.mz-dark .mz-strip{grid-column:1;grid-row:1}body.mz-dark .mz-left{grid-column:2;grid-row:1}body.mz-dark .mz-center{grid-column:3;grid-row:1;min-width:0}body.mz-dark .mz-right{grid-column:4;grid-row:1}
+body.mz-dark .mz-left,body.mz-dark .mz-right{position:absolute;top:0;bottom:0;z-index:40;width:290px;visibility:hidden;opacity:0;transition:opacity .14s,transform .14s;box-shadow:0 10px 40px rgba(0,0,0,.55);border:1px solid #1d1d1d}
+body.mz-dark .mz-left{left:46px;transform:translateX(-14px)}body.mz-dark .mz-right{right:40px;width:320px;transform:translateX(14px)}
+body.mz-dark.mz-refwide .mz-left{width:560px}
+body.mz-dark .mz-body.mz-lo .mz-left,body.mz-dark .mz-body.mz-ro .mz-right{visibility:visible;opacity:1;transform:none}
+body.mz-dark .mz-body.mz-lp .mz-left,body.mz-dark .mz-body.mz-rp .mz-right{position:relative;left:auto;right:auto;width:auto;box-shadow:none;border-width:0 1px 0 0;z-index:auto}
+body.mz-dark .mz-body.mz-rp .mz-right{border-width:0 0 0 1px}
+body.mz-dark.mz-dragging .mz-body:not(.mz-lp) .mz-left,body.mz-dark.mz-dragging .mz-body:not(.mz-rp) .mz-right{opacity:.2;pointer-events:none}
+body.mz-dark .mz-rail{grid-column:5;grid-row:1;display:flex;flex-direction:column;gap:2px;padding:6px 0;background:#242424;border-left:1px solid #1d1d1d;overflow:hidden}
+body.mz-dark .mz-rail button{writing-mode:vertical-rl;transform:rotate(180deg);background:none;border:0;border-radius:0;color:#b9b9b9;padding:14px 0;font-size:12px;letter-spacing:.03em;cursor:pointer;width:40px}
+body.mz-dark .mz-rail button:hover{background:#333;color:#fff}body.mz-dark .mz-rail button.on{background:#d9480f;color:#fff}
+body.mz-dark .mzs-dh{display:flex;align-items:center;gap:4px;padding:6px 8px;border-bottom:1px solid #1d1d1d;font-size:12px;color:#ddd;flex:none}
+body.mz-dark .mzs-dh .mz-sp{flex:1}body.mz-dark .mzs-dh button{background:none;border:0;color:#bbb;cursor:pointer;padding:3px 6px;border-radius:4px;font-size:13px}body.mz-dark .mzs-dh button:hover{background:#3a3a3a;color:#fff}
+body.mz-dark .mz-body.mz-lp .mzs-dh button:first-of-type,body.mz-dark .mz-body.mz-rp .mz-right .mzs-dh button:first-of-type{color:#ff6a18}

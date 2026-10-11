@@ -39,7 +39,7 @@ const MZ_ED_CSS = `html{overflow:hidden}body{margin:0;min-height:100vh;cursor:de
 .ov-dim{position:absolute;background:#2f6bff;color:#fff;font:600 calc(10px*var(--u))/1 system-ui;padding:calc(3px*var(--u)) calc(6px*var(--u));border-radius:calc(4px*var(--u));white-space:nowrap}
 .ov-h{position:absolute;width:calc(10px*var(--u));height:calc(10px*var(--u));background:#fff;border:calc(1.5px*var(--u)) solid #2f6bff;border-radius:calc(2px*var(--u));pointer-events:auto!important;transform:translate(-50%,-50%)}
 .ov-pad{position:absolute;background:rgba(120,190,100,.28)}.ov-mar{position:absolute;background:rgba(246,178,107,.28)}.ov-drop{position:absolute;background:#ff3d7f;box-shadow:0 0 0 calc(1px*var(--u)) #fff}.ov-in{position:absolute;border:calc(2px*var(--u)) solid #ff3d7f;background:rgba(255,61,127,.08)}
-.ov-g{position:absolute;background:#e83e8c;opacity:.8}`;
+.ov-g{position:absolute;background:#e83e8c;opacity:.8}.ov-ml{position:absolute;background:#ff3b30}.ov-mt{position:absolute;background:#ff3b30;color:#fff;font:700 calc(10px*var(--u))/1 system-ui;padding:calc(2px*var(--u)) calc(5px*var(--u));border-radius:calc(3px*var(--u));transform:translate(-50%,-50%);white-space:nowrap}.ov-al{position:absolute;background:#ff2ea6}.ov-in{border-style:dashed!important;background:rgba(255,106,24,.10)!important;border-color:#ff6a18!important}.ov-inl{position:absolute;background:#ff6a18;color:#fff;font:700 calc(10px*var(--u))/1 system-ui;padding:calc(3px*var(--u)) calc(7px*var(--u));border-radius:calc(3px*var(--u)) calc(3px*var(--u)) 0 0;white-space:nowrap}`;
 function mzFrameHtml(bp) {
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=${MZ_BP[bp]}"><link id="mzFonts" rel="stylesheet"><style id="mzPg"></style><style>${MZ_ED_CSS}</style></head><body><div id="mzRootEl"></div><div id="mzOv"></div></body></html>`;
 }
@@ -114,6 +114,7 @@ function mzOverlay(fr) {
   mzOvEl(fr, 'ov-box', r); const lab = mzOvEl(fr, 'ov-lab', null, `${mzEsc(n.name || MZ_NAMES[n.type] || n.type)}${n.locked ? ' 🔒' : ''}`); lab.style.left = r.left + 'px'; lab.style.top = (r.top - 20 * u) + 'px';
   const dm = mzOvEl(fr, 'ov-dim', null, `${Math.round(r.width)} × ${Math.round(r.height)}`); dm.style.left = (r.left + r.width / 2) + 'px'; dm.style.top = (r.bottom + 8 * u) + 'px'; dm.style.transform = 'translateX(-50%)';
   if (!n.locked && f.parent && !fr.dragging) { [['nw', 0, 0], ['n', .5, 0], ['ne', 1, 0], ['e', 1, .5], ['se', 1, 1], ['s', .5, 1], ['sw', 0, 1], ['w', 0, .5]].forEach(([k, fx, fy]) => { const h = mzOvEl(fr, 'ov-h'); h.dataset.h = k; h.style.left = (r.left + r.width * fx) + 'px'; h.style.top = (r.top + r.height * fy) + 'px'; h.style.cursor = {n: 'ns-resize', s: 'ns-resize', e: 'ew-resize', w: 'ew-resize', nw: 'nwse-resize', se: 'nwse-resize', ne: 'nesw-resize', sw: 'nesw-resize'}[k]; }); }
+  if (typeof mzMeasureDraw === 'function') mzMeasureDraw(fr, f);
 }
 
 /* ---------- seleção ---------- */
@@ -123,7 +124,7 @@ function mzHoverSet(id) { if (MZ.hover === id) return; MZ.hover = id; mzOverlayA
 /* ---------- eventos do quadro ---------- */
 function mzBindFrame(fr) {
   const d = fr.doc, win = d.defaultView; d.addEventListener('pointerdown', e => { if (MZ.draw && MZ.draw.on && e.button === 0) { e.preventDefault(); e.stopImmediatePropagation(); mzDrawStart(fr, e); } }, true);
-  d.addEventListener('pointermove', e => { if (MZ.drag || MZ.editing) return; const t = mzNodeAt(fr, e.clientX, e.clientY); mzHoverSet(t ? t.dataset.n : ''); });
+  d.addEventListener('pointermove', e => { if (!!e.altKey !== !!MZ.alt && !MZ.drag) { MZ.alt = !!e.altKey; mzOverlayAll(); } if (MZ.drag || MZ.editing) return; const t = mzNodeAt(fr, e.clientX, e.clientY); mzHoverSet(t ? t.dataset.n : ''); });
   d.addEventListener('pointerleave', () => { if (!MZ.drag) mzHoverSet(''); });
   d.addEventListener('pointerdown', e => {
     if (e.button !== 0 && e.button !== 2) return; MZ.menuClose && mzMenuClose();
@@ -171,18 +172,18 @@ function mzDropAt(fr, x, y, item) {
   return {parent: cont, index: realIdx, line};
 }
 function mzDropDraw(fr, drop) {
-  mzOverlay(fr); if (!drop) return; if (drop.line) mzOvEl(fr, 'ov-drop', drop.line); else if (drop.rect) mzOvEl(fr, 'ov-in', drop.rect); else if (drop.parent) { const r = mzRectOf(mzElOf(fr, drop.parent.id)); if (r) mzOvEl(fr, 'ov-in', r); }
+  mzOverlay(fr); if (!drop) return; if (typeof mzInHL === 'function') mzInHL(fr, drop.parent); if (drop.line) mzOvEl(fr, 'ov-drop', drop.line); else if (drop.rect && !(drop.parent && drop.parent.type !== 'page')) mzOvEl(fr, 'ov-in', drop.rect);
 }
 function mzDragMove(fr, x, y, e) {
   const dr = MZ.drag; if (!dr) return; if (!dr.on) { if (Math.hypot(x - dr.x0, y - dr.y0) < 5) return; dr.on = true; fr.dragging = true; mzGhost(true, dr.label || 'Mover'); }
   const f = mzFind(mzRoot(), dr.id); if (dr.kind === 'move' && f && !dr.freed) { dr.freed = true; if (e && e.altKey && f.parent && f.node.type !== 'page') { const c = mzFresh(f.node); c.name = f.node.name ? f.node.name + ' (cópia)' : ''; f.parent.children.splice(f.idx + 1, 0, c); mzRenderNowSync(); dr.id = c.id; MZ.sel = c.id; dr.dup = true; }
     const f2 = mzFind(mzRoot(), dr.id); if (MZ.free && f2) mzFreeConvert(fr, dr, f2); }
-  if (dr.kind === 'move' && f) { const st = mzStyleAt(f.node, MZ.bp); if (st.position === 'absolute' || st.position === 'fixed') { dr.free = true; const dx = (x - dr.x0), dy = (y - dr.y0); if (!dr.base) dr.base = {l: parseFloat(st.left) || 0, t: parseFloat(st.top) || 0}; const o = mzStyleSet(f.node, MZ.bp); o.left = Math.round(dr.base.l + dx) + 'px'; o.top = Math.round(dr.base.t + dy) + 'px'; mzRenderNow(); return; } }
+  if (dr.kind === 'move' && f) { const st = mzStyleAt(f.node, MZ.bp); if (st.position === 'absolute' || st.position === 'fixed') { dr.free = true; const dx = (x - dr.x0), dy = (y - dr.y0); if (!dr.base) dr.base = {l: parseFloat(st.left) || 0, t: parseFloat(st.top) || 0}; const sn = typeof mzSnapDelta === 'function' && !(e && e.ctrlKey) ? mzSnapDelta(fr, dr, dx, dy) : [0, 0], o = mzStyleSet(f.node, MZ.bp); o.left = Math.round(dr.base.l + dx + sn[0]) + 'px'; o.top = Math.round(dr.base.t + dy + sn[1]) + 'px'; if (typeof mzFreeTarget === 'function') mzFreeTarget(fr, dr, f, x, y); mzRenderNow(); return; } }
   const item = dr.kind === 'move' ? f.node : {type: dr.type, id: ''}; dr.drop = mzDropAt(fr, x, y, item); mzDropDraw(fr, dr.drop);
 }
 function mzDragEnd(fr, x, y, e) {
   const dr = MZ.drag; MZ.drag = null; fr.dragging = false; mzGhost(false); if (!dr || !dr.on) { mzOverlay(fr); return; }
-  if (dr.free) { mzCommit({panels: true}); return; } const drop = dr.drop; if (!drop) { mzOverlay(fr); return; }
+  if (dr.free) { if (dr.into && typeof mzFreeInto === 'function') mzFreeInto(fr, dr); else mzCommit({panels: true}); return; } const drop = dr.drop; if (!drop) { mzOverlay(fr); return; }
   if (dr.kind === 'move') mzMoveNode(dr.id, drop.parent.id, drop.index); mzOverlayAll();
 }
 let MZ_GHOST = null;

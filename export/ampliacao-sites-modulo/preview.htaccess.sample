@@ -1,0 +1,10 @@
+# Subdomínio automático para a prévia do cliente (opcional).
+# 1) No DNS da sua hospedagem crie um registro curinga:  *.preview.suaagencia.com.br  →  mesmo servidor do Estúdio.
+# 2) No painel da hospedagem, aponte o subdomínio curinga para a MESMA pasta do Estúdio (onde está a pasta api/).
+# 3) Em api/config.php acrescente:   'PREVIEW_DOMAIN' => 'preview.suaagencia.com.br',
+# 4) Copie as linhas abaixo para o .htaccess da pasta do Estúdio (raiz, ao lado de index.html).
+# Cada link vira  https://CODIGO.preview.suaagencia.com.br/  e abre o site funcionando. Sem isso, o link usa o endereço direto
+# https://SEU-DOMINIO/api/preview.php/CODIGO/index.html , que também funciona.
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^[a-f0-9]{16}\.preview\.suaagencia\.com\.br$ [NC]
+RewriteRule ^(.*)$ api/preview.php?f=$1 [L,QSA]

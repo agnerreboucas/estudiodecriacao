@@ -91,12 +91,18 @@ async function siteGenAll() {
 async function siteGenOne(id) { const p = curProject(), s = siteCur(), l = p.landings.find(x => x.id === id); if (!siteBSText(s)) { toast('Preencha o BrandScript antes.'); return; } lpUI.busy = 'one'; renderLandings(); try { await siteGenPage(s, l); persist(); toast('Página reescrita.'); } catch (e) { toast(eErr(e)); } lpUI.busy = ''; renderLandings(); }
 
 /* ---------- exportação ---------- */
-async function siteExport(id) {
-  const p = curProject(), s = p.sites.find(x => x.id === id), pages = p.landings.filter(l => l.siteId === id); if (!pages.length) { toast('O site não tem páginas.'); return; }
-  const pend = pages.reduce((n, l) => n + lpPending(l), 0); if (pend) toast(`Atenção: ${pend} item(ns) ainda como [CONFIRMAR].`); toast('Montando o ZIP…');
+/* arquivos do site (HTML de cada página, imagens, obrigado.html): usado pelo ZIP e pelo link de prévia do cliente */
+async function siteBuildFiles(id) {
+  const p = curProject(), s = p.sites.find(x => x.id === id), pages = p.landings.filter(l => l.siteId === id); if (!pages.length) return null;
   const enc = new TextEncoder(), files = []; const imgSeen = new Set(); for (const l of pages) { const ex = lpExtractImgs(await lpHTML(l, p)); files.push({name: lpFile(l), data: enc.encode(ex.html)}); ex.files.forEach(f => { if (!imgSeen.has(f.name)) { imgSeen.add(f.name); files.push(f); } }); }
   const seen = new Set(); for (const l of pages) for (const a of await lpAssets(l, p)) if (!seen.has(a.name)) { seen.add(a.name); files.push(a); }
   { const hf = l => l.blocks.some(b => b.t === 'form' && b.on), tl = pages.find(l => hf(l) && ((l.thanks || {}).mode === 'page' || !l.thanks)) || pages.find(l => (l.thanks || {}).mode === 'page' || !l.thanks); if (tl && pages.some(l => (l.thanks || {}).mode !== 'none' && (l.thanks || {}).mode !== 'url' && (l.blocks.some(b => b.t === 'form' && b.on) || (l.vis && JSON.stringify(l.vis).includes('"t":"form"'))))) files.push({name: 'obrigado.html', data: enc.encode(await lpThanksHTML(tl, p))}); }
   if (!files.some(f => f.name === 'index.html')) files[0] = {name: 'index.html', data: files[0].data};
+  return {s, p, pages, files};
+}
+async function siteExport(id) {
+  const p0 = curProject(), pages0 = p0.landings.filter(l => l.siteId === id); if (!pages0.length) { toast('O site não tem páginas.'); return; }
+  const pend = pages0.reduce((n, l) => n + lpPending(l), 0); if (pend) toast(`Atenção: ${pend} item(ns) ainda como [CONFIRMAR].`); toast('Montando o ZIP…');
+  const B = await siteBuildFiles(id), s = B.s, pages = B.pages, files = B.files;
   download(slug(s.name) + '-site.zip', makeZip(files), 'application/zip'); pages.forEach(l => { l.status = 'Exportada'; }); persist();
 }

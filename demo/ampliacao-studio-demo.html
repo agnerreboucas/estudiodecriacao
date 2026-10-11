@@ -1529,7 +1529,7 @@ const LK_TO = v => { v = String(v || '').slice(0, 400); return /^(page:[\w-]{1,4
 function normalizeSites(x) {
   const str = (v, n) => String(v == null ? '' : v).slice(0, n), sid = v => /^[\w-]{1,60}$/.test(String(v || ''));
   return (Array.isArray(x) ? x : []).filter(s => s && sid(s.id)).slice(0, 50).map(s => { const b = s.bs || {}, o = (k, n) => str(b[k], n);
-    return {id: s.id, name: str(s.name, 120) || 'Site', tpl: str(s.tpl, 30), style: str(s.style, 30), productId: sid(s.productId) ? s.productId : '', brief: str(s.brief, 8000), brand: str(s.brand, 80), headerCta: str(s.headerCta, 40), headerTo: LK_TO(s.headerTo), navMode: s.navMode === 'cta' ? 'cta' : 'full', menu: (Array.isArray(s.menu) ? s.menu : []).slice(0, 12).map(m => m && str(m.label, 40) && LK_TO(m.to) ? {id: sid(m.id) ? m.id : uid('mn'), label: str(m.label, 40), to: LK_TO(m.to)} : null).filter(Boolean), footer: str(s.footer, 400), contact: str(s.contact, 300), desc: str(s.desc, 300), baseUrl: seoBase(s.baseUrl), ogImgId: sid(s.ogImgId) ? s.ogImgId : '', faviconImgId: sid(s.faviconImgId) ? s.faviconImgId : '',
+    return {id: s.id, name: str(s.name, 120) || 'Site', tpl: str(s.tpl, 30), style: str(s.style, 30), productId: sid(s.productId) ? s.productId : '', brief: str(s.brief, 8000), brand: str(s.brand, 80), headerCta: str(s.headerCta, 40), headerTo: LK_TO(s.headerTo), previewT: /^[a-f0-9]{16}$/.test(s.previewT || '') ? s.previewT : '', previewUrl: /^https?:\/\/[^\s"'<>]{1,300}$/.test(s.previewUrl || '') ? s.previewUrl : '', navMode: s.navMode === 'cta' ? 'cta' : 'full', menu: (Array.isArray(s.menu) ? s.menu : []).slice(0, 12).map(m => m && str(m.label, 40) && LK_TO(m.to) ? {id: sid(m.id) ? m.id : uid('mn'), label: str(m.label, 40), to: LK_TO(m.to)} : null).filter(Boolean), footer: str(s.footer, 400), contact: str(s.contact, 300), desc: str(s.desc, 300), baseUrl: seoBase(s.baseUrl), ogImgId: sid(s.ogImgId) ? s.ogImgId : '', faviconImgId: sid(s.faviconImgId) ? s.faviconImgId : '',
       bs: {who: o('who', 800), wants: o('wants', 800), external: o('external', 800), internal: o('internal', 800), philosophical: o('philosophical', 800), empathy: o('empathy', 800), authority: o('authority', 1200), step1: o('step1', 400), step2: o('step2', 400), step3: o('step3', 400), agreement: o('agreement', 800), direct: o('direct', 200), transitional: o('transitional', 300), failure: o('failure', 1000), success: o('success', 1000), identity: o('identity', 600)}, created: str(s.created, 40) || new Date().toISOString()}; });
 }
 /* Campanhas: peças × medidas (feed, vertical, horizontal), bancos de variações e plano de teste, tudo com limites fixos */
@@ -24153,7 +24153,7 @@ const MZ_ED_CSS = `html{overflow:hidden}body{margin:0;min-height:100vh;cursor:de
 .ov-dim{position:absolute;background:#2f6bff;color:#fff;font:600 calc(10px*var(--u))/1 system-ui;padding:calc(3px*var(--u)) calc(6px*var(--u));border-radius:calc(4px*var(--u));white-space:nowrap}
 .ov-h{position:absolute;width:calc(10px*var(--u));height:calc(10px*var(--u));background:#fff;border:calc(1.5px*var(--u)) solid #2f6bff;border-radius:calc(2px*var(--u));pointer-events:auto!important;transform:translate(-50%,-50%)}
 .ov-pad{position:absolute;background:rgba(120,190,100,.28)}.ov-mar{position:absolute;background:rgba(246,178,107,.28)}.ov-drop{position:absolute;background:#ff3d7f;box-shadow:0 0 0 calc(1px*var(--u)) #fff}.ov-in{position:absolute;border:calc(2px*var(--u)) solid #ff3d7f;background:rgba(255,61,127,.08)}
-.ov-g{position:absolute;background:#e83e8c;opacity:.8}`;
+.ov-g{position:absolute;background:#e83e8c;opacity:.8}.ov-ml{position:absolute;background:#ff3b30}.ov-mt{position:absolute;background:#ff3b30;color:#fff;font:700 calc(10px*var(--u))/1 system-ui;padding:calc(2px*var(--u)) calc(5px*var(--u));border-radius:calc(3px*var(--u));transform:translate(-50%,-50%);white-space:nowrap}.ov-al{position:absolute;background:#ff2ea6}.ov-in{border-style:dashed!important;background:rgba(255,106,24,.10)!important;border-color:#ff6a18!important}.ov-inl{position:absolute;background:#ff6a18;color:#fff;font:700 calc(10px*var(--u))/1 system-ui;padding:calc(3px*var(--u)) calc(7px*var(--u));border-radius:calc(3px*var(--u)) calc(3px*var(--u)) 0 0;white-space:nowrap}`;
 function mzFrameHtml(bp) {
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=${MZ_BP[bp]}"><link id="mzFonts" rel="stylesheet"><style id="mzPg"></style><style>${MZ_ED_CSS}</style></head><body><div id="mzRootEl"></div><div id="mzOv"></div></body></html>`;
 }
@@ -24228,6 +24228,7 @@ function mzOverlay(fr) {
   mzOvEl(fr, 'ov-box', r); const lab = mzOvEl(fr, 'ov-lab', null, `${mzEsc(n.name || MZ_NAMES[n.type] || n.type)}${n.locked ? ' 🔒' : ''}`); lab.style.left = r.left + 'px'; lab.style.top = (r.top - 20 * u) + 'px';
   const dm = mzOvEl(fr, 'ov-dim', null, `${Math.round(r.width)} × ${Math.round(r.height)}`); dm.style.left = (r.left + r.width / 2) + 'px'; dm.style.top = (r.bottom + 8 * u) + 'px'; dm.style.transform = 'translateX(-50%)';
   if (!n.locked && f.parent && !fr.dragging) { [['nw', 0, 0], ['n', .5, 0], ['ne', 1, 0], ['e', 1, .5], ['se', 1, 1], ['s', .5, 1], ['sw', 0, 1], ['w', 0, .5]].forEach(([k, fx, fy]) => { const h = mzOvEl(fr, 'ov-h'); h.dataset.h = k; h.style.left = (r.left + r.width * fx) + 'px'; h.style.top = (r.top + r.height * fy) + 'px'; h.style.cursor = {n: 'ns-resize', s: 'ns-resize', e: 'ew-resize', w: 'ew-resize', nw: 'nwse-resize', se: 'nwse-resize', ne: 'nesw-resize', sw: 'nesw-resize'}[k]; }); }
+  if (typeof mzMeasureDraw === 'function') mzMeasureDraw(fr, f);
 }
 
 /* ---------- seleção ---------- */
@@ -24237,7 +24238,7 @@ function mzHoverSet(id) { if (MZ.hover === id) return; MZ.hover = id; mzOverlayA
 /* ---------- eventos do quadro ---------- */
 function mzBindFrame(fr) {
   const d = fr.doc, win = d.defaultView; d.addEventListener('pointerdown', e => { if (MZ.draw && MZ.draw.on && e.button === 0) { e.preventDefault(); e.stopImmediatePropagation(); mzDrawStart(fr, e); } }, true);
-  d.addEventListener('pointermove', e => { if (MZ.drag || MZ.editing) return; const t = mzNodeAt(fr, e.clientX, e.clientY); mzHoverSet(t ? t.dataset.n : ''); });
+  d.addEventListener('pointermove', e => { if (!!e.altKey !== !!MZ.alt && !MZ.drag) { MZ.alt = !!e.altKey; mzOverlayAll(); } if (MZ.drag || MZ.editing) return; const t = mzNodeAt(fr, e.clientX, e.clientY); mzHoverSet(t ? t.dataset.n : ''); });
   d.addEventListener('pointerleave', () => { if (!MZ.drag) mzHoverSet(''); });
   d.addEventListener('pointerdown', e => {
     if (e.button !== 0 && e.button !== 2) return; MZ.menuClose && mzMenuClose();
@@ -24285,18 +24286,18 @@ function mzDropAt(fr, x, y, item) {
   return {parent: cont, index: realIdx, line};
 }
 function mzDropDraw(fr, drop) {
-  mzOverlay(fr); if (!drop) return; if (drop.line) mzOvEl(fr, 'ov-drop', drop.line); else if (drop.rect) mzOvEl(fr, 'ov-in', drop.rect); else if (drop.parent) { const r = mzRectOf(mzElOf(fr, drop.parent.id)); if (r) mzOvEl(fr, 'ov-in', r); }
+  mzOverlay(fr); if (!drop) return; if (typeof mzInHL === 'function') mzInHL(fr, drop.parent); if (drop.line) mzOvEl(fr, 'ov-drop', drop.line); else if (drop.rect && !(drop.parent && drop.parent.type !== 'page')) mzOvEl(fr, 'ov-in', drop.rect);
 }
 function mzDragMove(fr, x, y, e) {
   const dr = MZ.drag; if (!dr) return; if (!dr.on) { if (Math.hypot(x - dr.x0, y - dr.y0) < 5) return; dr.on = true; fr.dragging = true; mzGhost(true, dr.label || 'Mover'); }
   const f = mzFind(mzRoot(), dr.id); if (dr.kind === 'move' && f && !dr.freed) { dr.freed = true; if (e && e.altKey && f.parent && f.node.type !== 'page') { const c = mzFresh(f.node); c.name = f.node.name ? f.node.name + ' (cópia)' : ''; f.parent.children.splice(f.idx + 1, 0, c); mzRenderNowSync(); dr.id = c.id; MZ.sel = c.id; dr.dup = true; }
     const f2 = mzFind(mzRoot(), dr.id); if (MZ.free && f2) mzFreeConvert(fr, dr, f2); }
-  if (dr.kind === 'move' && f) { const st = mzStyleAt(f.node, MZ.bp); if (st.position === 'absolute' || st.position === 'fixed') { dr.free = true; const dx = (x - dr.x0), dy = (y - dr.y0); if (!dr.base) dr.base = {l: parseFloat(st.left) || 0, t: parseFloat(st.top) || 0}; const o = mzStyleSet(f.node, MZ.bp); o.left = Math.round(dr.base.l + dx) + 'px'; o.top = Math.round(dr.base.t + dy) + 'px'; mzRenderNow(); return; } }
+  if (dr.kind === 'move' && f) { const st = mzStyleAt(f.node, MZ.bp); if (st.position === 'absolute' || st.position === 'fixed') { dr.free = true; const dx = (x - dr.x0), dy = (y - dr.y0); if (!dr.base) dr.base = {l: parseFloat(st.left) || 0, t: parseFloat(st.top) || 0}; const sn = typeof mzSnapDelta === 'function' && !(e && e.ctrlKey) ? mzSnapDelta(fr, dr, dx, dy) : [0, 0], o = mzStyleSet(f.node, MZ.bp); o.left = Math.round(dr.base.l + dx + sn[0]) + 'px'; o.top = Math.round(dr.base.t + dy + sn[1]) + 'px'; if (typeof mzFreeTarget === 'function') mzFreeTarget(fr, dr, f, x, y); mzRenderNow(); return; } }
   const item = dr.kind === 'move' ? f.node : {type: dr.type, id: ''}; dr.drop = mzDropAt(fr, x, y, item); mzDropDraw(fr, dr.drop);
 }
 function mzDragEnd(fr, x, y, e) {
   const dr = MZ.drag; MZ.drag = null; fr.dragging = false; mzGhost(false); if (!dr || !dr.on) { mzOverlay(fr); return; }
-  if (dr.free) { mzCommit({panels: true}); return; } const drop = dr.drop; if (!drop) { mzOverlay(fr); return; }
+  if (dr.free) { if (dr.into && typeof mzFreeInto === 'function') mzFreeInto(fr, dr); else mzCommit({panels: true}); return; } const drop = dr.drop; if (!drop) { mzOverlay(fr); return; }
   if (dr.kind === 'move') mzMoveNode(dr.id, drop.parent.id, drop.index); mzOverlayAll();
 }
 let MZ_GHOST = null;
@@ -25366,6 +25367,79 @@ async function mzModalFonts(auto) {
 /* aviso depois de usar uma página de tema: só abre a janela se faltar alguma fonte */
 async function mzFontsWatch() {
   try { const fams = mzFontsUsed(); await mzFontsPrepare(fams); const st = await Promise.all(fams.map(mzFontCheck)); const bad = fams.filter((f, i) => st[i] === 'missing'); if (bad.length) { toast('Faltam fontes: ' + bad.join(', ') + '. Abrindo a lista…'); mzModalFonts(true); } } catch (e) { /* sem aviso */ }
+}
+
+</script>
+<script>
+/* ===== Mesa: medidas, alinhamento e soltar dentro de contêiner =====
+   • Ao arrastar um elemento (modo livre): mostra em vermelho a distância em px até o vizinho mais próximo em cada direção (ou até a borda do contêiner),
+     linhas rosa quando as bordas ou o centro alinham com outro elemento, e "imã" de 5 px para alinhar (segure Ctrl para arrastar sem imã).
+   • Segurando Alt com um elemento selecionado e passando o mouse sobre outro: mostra a distância entre os dois.
+   • O contêiner que vai receber o elemento fica com a borda laranja tracejada e a etiqueta "Dentro de: …". Soltar com a marca visível coloca o elemento dentro dele. */
+const mzNameOf = n => n.name || (typeof MZ_NAMES !== 'undefined' && MZ_NAMES[n.type]) || n.type;
+function mzParentRect(fr, par) {
+  const el = par && par.type !== 'page' ? mzElOf(fr, par.id) : null, r = el && mzRectOf(el); if (r) return r;
+  const root = fr.doc.getElementById('mzRootEl'); return {left: 0, top: 0, right: fr.doc.documentElement.clientWidth, bottom: root ? root.scrollHeight : 0, width: fr.doc.documentElement.clientWidth, height: root ? root.scrollHeight : 0};
+}
+function mzCandRects(fr, f) {
+  const out = []; (f.parent ? f.parent.children : []).forEach(k => { if (k.id === f.node.id || k.hidden) return; const r = mzRectOf(mzElOf(fr, k.id)); if (r && r.width + r.height > 0) out.push(r); }); return out;
+}
+/* ímã: devolve o deslocamento extra (dx, dy) que encosta as bordas/centro em vizinhos ou no contêiner */
+function mzSnapDelta(fr, dr, dx, dy) {
+  const f = mzFind(mzRoot(), dr.id); if (!f) return [0, 0];
+  if (!dr.r0) { dr.r0 = mzRectOf(mzElOf(fr, dr.id)); dr.cand = mzCandRects(fr, f).concat([mzParentRect(fr, f.parent)]); } if (!dr.r0) return [0, 0];
+  const thr = 5 / (fr.z || 1), T = {l: dr.r0.left + dx, r: dr.r0.right + dx, t: dr.r0.top + dy, b: dr.r0.bottom + dy}; T.cx = (T.l + T.r) / 2; T.cy = (T.t + T.b) / 2; let bx = 0, by = 0, bxa = thr + 1, bya = thr + 1;
+  dr.cand.forEach(c => {
+    [c.left, (c.left + c.right) / 2, c.right].forEach(cv => [T.l, T.cx, T.r].forEach(tv => { const d = cv - tv; if (Math.abs(d) <= thr && Math.abs(d) < bxa) { bxa = Math.abs(d); bx = d; } }));
+    [c.top, (c.top + c.bottom) / 2, c.bottom].forEach(cv => [T.t, T.cy, T.b].forEach(tv => { const d = cv - tv; if (Math.abs(d) <= thr && Math.abs(d) < bya) { bya = Math.abs(d); by = d; } }));
+  });
+  return [bx, by];
+}
+/* qual contêiner vai receber o elemento se soltar agora (só quando é diferente do atual) */
+function mzFreeTarget(fr, dr, f, x, y) {
+  const drop = mzDropAt(fr, x, y, f.node); dr.into = drop && drop.parent && drop.parent.type !== 'page' && f.parent && drop.parent.id !== f.parent.id && drop.parent.id !== f.node.id ? drop : null;
+}
+function mzInHL(fr, par) {
+  if (!par || par.type === 'page') return; const r = mzRectOf(mzElOf(fr, par.id)); if (!r) return; const u = 1 / (fr.z || 1);
+  mzOvEl(fr, 'ov-in', r); const t = mzOvEl(fr, 'ov-inl', null, 'Dentro de: ' + mzEsc(mzNameOf(par))); t.style.left = r.left + 'px'; t.style.top = (r.top - 17 * u) + 'px';
+}
+function mzFreeInto(fr, dr) {
+  const f = mzFind(mzRoot(), dr.id), pf = mzFind(mzRoot(), dr.into.parent.id); if (!f || !pf) { mzCommit({panels: true}); return; }
+  const el = mzElOf(fr, dr.id), pel = mzElOf(fr, pf.node.id), r = mzRectOf(el), pr = pel && mzRectOf(pel); if (!r || !pr) { mzCommit({panels: true}); return; }
+  const cs = fr.doc.defaultView.getComputedStyle(pel), bl = parseFloat(cs.borderLeftWidth) || 0, bt = parseFloat(cs.borderTopWidth) || 0, ps = mzStyleAt(pf.node, 'd');
+  if (!ps.position || ps.position === 'static') mzStyleSet(pf.node, 'd').position = 'relative';
+  const o = mzStyleSet(f.node, MZ.bp); o.left = Math.round(r.left - pr.left - bl) + 'px'; o.top = Math.round(r.top - pr.top - bt) + 'px';
+  mzMoveNode(dr.id, pf.node.id, pf.node.children.length); toast('Dentro de “' + mzNameOf(pf.node) + '”.');
+}
+/* ---------- desenho das medidas ---------- */
+function mzMeasureDraw(fr, f) {
+  const dr = MZ.drag, u = 1 / (fr.z || 1); let R = null, cands = [], par = null, mode = '';
+  if (dr && dr.kind === 'move' && dr.free && dr.on && dr.fr === fr && dr.id === MZ.sel) { R = mzRectOf(mzElOf(fr, MZ.sel)); cands = mzCandRects(fr, f); par = mzParentRect(fr, f.parent); mode = 'drag'; if (dr.into) mzInHL(fr, dr.into.parent); }
+  else if (MZ.alt && MZ.hover && MZ.hover !== MZ.sel && !MZ.drag) {
+    R = mzRectOf(mzElOf(fr, MZ.sel)); const H = mzRectOf(mzElOf(fr, MZ.hover)); if (!R || !H) return; mode = 'alt';
+    const inside = H.left <= R.left && H.right >= R.right && H.top <= R.top && H.bottom >= R.bottom; if (inside) par = H; else cands = [H];
+  }
+  if (!R || !mode) return;
+  const line = (x1, y1, x2, y2, val) => { const h = y1 === y2, d = mzOvEl(fr, 'ov-ml', {left: Math.min(x1, x2), top: Math.min(y1, y2), width: h ? Math.abs(x2 - x1) : u, height: h ? u : Math.abs(y2 - y1)}); const t = mzOvEl(fr, 'ov-mt', null, String(Math.round(val))); t.style.left = (x1 + x2) / 2 + 'px'; t.style.top = (y1 + y2) / 2 + 'px'; return d; };
+  const cx = (R.left + R.right) / 2, cy = (R.top + R.bottom) / 2, ov = (a0, a1, b0, b1) => [Math.max(a0, b0), Math.min(a1, b1)];
+  let L = null, Rt = null, T = null, B = null;   // vizinho mais próximo em cada direção
+  cands.forEach(c => {
+    const vo = ov(R.top, R.bottom, c.top, c.bottom), ho = ov(R.left, R.right, c.left, c.right);
+    if (vo[1] > vo[0]) { if (c.right <= R.left + .5 && (!L || c.right > L.c.right)) L = {c, a: vo}; if (c.left >= R.right - .5 && (!Rt || c.left < Rt.c.left)) Rt = {c, a: vo}; }
+    if (ho[1] > ho[0]) { if (c.bottom <= R.top + .5 && (!T || c.bottom > T.c.bottom)) T = {c, a: ho}; if (c.top >= R.bottom - .5 && (!B || c.top < B.c.top)) B = {c, a: ho}; }
+  });
+  const ym = a => (a[0] + a[1]) / 2, P = par;
+  if (L) line(L.c.right, ym(L.a), R.left, ym(L.a), R.left - L.c.right); else if (P && R.left - P.left >= 1) line(P.left, cy, R.left, cy, R.left - P.left);
+  if (Rt) line(R.right, ym(Rt.a), Rt.c.left, ym(Rt.a), Rt.c.left - R.right); else if (P && P.right - R.right >= 1) line(R.right, cy, P.right, cy, P.right - R.right);
+  if (T) line(ym(T.a), T.c.bottom, ym(T.a), R.top, R.top - T.c.bottom); else if (P && R.top - P.top >= 1) line(cx, P.top, cx, R.top, R.top - P.top);
+  if (B) line(ym(B.a), R.bottom, ym(B.a), B.c.top, B.c.top - R.bottom); else if (P && P.bottom - R.bottom >= 1) line(cx, R.bottom, cx, P.bottom, P.bottom - R.bottom);
+  if (mode === 'drag') {   // alinhamentos
+    const all = cands.concat(par ? [par] : []), tol = 1.2 * u, seenX = new Set(), seenY = new Set();
+    all.forEach(c => {
+      [[R.left, c.left], [R.left, c.right], [R.right, c.left], [R.right, c.right], [cx, (c.left + c.right) / 2]].forEach(([a, b]) => { if (Math.abs(a - b) <= tol && !seenX.has(Math.round(b))) { seenX.add(Math.round(b)); const t0 = Math.min(R.top, c.top), t1 = Math.max(R.bottom, c.bottom); mzOvEl(fr, 'ov-al', {left: b, top: t0, width: u, height: t1 - t0}); } });
+      [[R.top, c.top], [R.top, c.bottom], [R.bottom, c.top], [R.bottom, c.bottom], [cy, (c.top + c.bottom) / 2]].forEach(([a, b]) => { if (Math.abs(a - b) <= tol && !seenY.has(Math.round(b))) { seenY.add(Math.round(b)); const l0 = Math.min(R.left, c.left), l1 = Math.max(R.right, c.right); mzOvEl(fr, 'ov-al', {left: l0, top: b, width: l1 - l0, height: u}); } });
+    });
+  }
 }
 
 </script>
@@ -27976,13 +28050,19 @@ async function siteGenAll() {
 async function siteGenOne(id) { const p = curProject(), s = siteCur(), l = p.landings.find(x => x.id === id); if (!siteBSText(s)) { toast('Preencha o BrandScript antes.'); return; } lpUI.busy = 'one'; renderLandings(); try { await siteGenPage(s, l); persist(); toast('Página reescrita.'); } catch (e) { toast(eErr(e)); } lpUI.busy = ''; renderLandings(); }
 
 /* ---------- exportação ---------- */
-async function siteExport(id) {
-  const p = curProject(), s = p.sites.find(x => x.id === id), pages = p.landings.filter(l => l.siteId === id); if (!pages.length) { toast('O site não tem páginas.'); return; }
-  const pend = pages.reduce((n, l) => n + lpPending(l), 0); if (pend) toast(`Atenção: ${pend} item(ns) ainda como [CONFIRMAR].`); toast('Montando o ZIP…');
+/* arquivos do site (HTML de cada página, imagens, obrigado.html): usado pelo ZIP e pelo link de prévia do cliente */
+async function siteBuildFiles(id) {
+  const p = curProject(), s = p.sites.find(x => x.id === id), pages = p.landings.filter(l => l.siteId === id); if (!pages.length) return null;
   const enc = new TextEncoder(), files = []; const imgSeen = new Set(); for (const l of pages) { const ex = lpExtractImgs(await lpHTML(l, p)); files.push({name: lpFile(l), data: enc.encode(ex.html)}); ex.files.forEach(f => { if (!imgSeen.has(f.name)) { imgSeen.add(f.name); files.push(f); } }); }
   const seen = new Set(); for (const l of pages) for (const a of await lpAssets(l, p)) if (!seen.has(a.name)) { seen.add(a.name); files.push(a); }
   { const hf = l => l.blocks.some(b => b.t === 'form' && b.on), tl = pages.find(l => hf(l) && ((l.thanks || {}).mode === 'page' || !l.thanks)) || pages.find(l => (l.thanks || {}).mode === 'page' || !l.thanks); if (tl && pages.some(l => (l.thanks || {}).mode !== 'none' && (l.thanks || {}).mode !== 'url' && (l.blocks.some(b => b.t === 'form' && b.on) || (l.vis && JSON.stringify(l.vis).includes('"t":"form"'))))) files.push({name: 'obrigado.html', data: enc.encode(await lpThanksHTML(tl, p))}); }
   if (!files.some(f => f.name === 'index.html')) files[0] = {name: 'index.html', data: files[0].data};
+  return {s, p, pages, files};
+}
+async function siteExport(id) {
+  const p0 = curProject(), pages0 = p0.landings.filter(l => l.siteId === id); if (!pages0.length) { toast('O site não tem páginas.'); return; }
+  const pend = pages0.reduce((n, l) => n + lpPending(l), 0); if (pend) toast(`Atenção: ${pend} item(ns) ainda como [CONFIRMAR].`); toast('Montando o ZIP…');
+  const B = await siteBuildFiles(id), s = B.s, pages = B.pages, files = B.files;
   download(slug(s.name) + '-site.zip', makeZip(files), 'application/zip'); pages.forEach(l => { l.status = 'Exportada'; }); persist();
 }
 
