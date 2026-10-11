@@ -1,0 +1,5 @@
+# Nunca expor configuração nem bibliotecas por acesso direto
+<FilesMatch "^(config(\.sample)?\.php|_lib\.php)$">
+  Require all denied
+</FilesMatch>
+Options -Indexes

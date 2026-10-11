@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111111">
+<title>Estúdio de Sites e Landing Pages</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/studio.css">
+<link rel="stylesheet" href="css/responsive.css">
+<link rel="stylesheet" href="css/menu.css">
+<link rel="stylesheet" href="css/bulk.css">
+<link rel="stylesheet" href="css/mesa.css">
+</head>
+<body>
+<div class="app">
+<div class="rail-back" id="railBack" onclick="railToggle(false)"></div>
+<aside class="rail" id="rail" aria-label="Menu principal">
+  <div class="logo">S</div>
+  <nav class="rail-nav">
+    <button data-page="projects" title="Projetos"><span data-ico="folder"></span><span class="rail-lb">Projetos</span></button>
+    <button class="active" data-page="landings" title="Sites e landing pages"><span data-ico="globe"></span><span class="rail-lb">Sites e landing pages</span></button>
+    <button data-page="mesa" title="Mesa de páginas"><span data-ico="layout"></span><span class="rail-lb">Mesa de páginas</span></button>
+    <button data-page="biblioteca" title="Imagens"><span data-ico="image"></span><span class="rail-lb">Imagens</span></button>
+  </nav>
+  <div class="rail-bottom">
+    <button data-page="settings" title="Configurações"><span data-ico="settings"></span><span class="rail-lb">Configurações</span></button>
+    <button type="button" class="rail-mini-btn" id="railMini" title="Recolher o menu" onclick="railMini()">◀ <span class="rail-lb2">Recolher</span></button>
+  </div>
+</aside>
+<main class="main">
+<header class="topbar">
+  <button class="top-btn burger" id="burger" onclick="railToggle()" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-btns"><button class="top-btn" id="navBack" onclick="navBack()" title="Voltar" disabled>‹ Voltar</button><button class="top-btn" id="navFwd" onclick="navFwd()" title="Avançar" disabled>Avançar ›</button></div>
+  <button class="top-btn" onclick="go('settings');setTimeout(()=>{const e=$('integracoesRoot');if(e)e.scrollIntoView()},80)" title="Chaves das APIs">🔌 APIs</button>
+  <button class="top-btn sync-badge local" id="syncBadge" onclick="syncBadgeClick()">● Local</button>
+  <span id="credits" hidden>0</span>
+</header>
+<section id="page-home" class="page"><div class="subpage"><div class="masonry" id="homeGallery"></div><button id="contextButton" hidden></button><small id="contextHint" hidden></small></div></section>
+<section id="page-projects" class="page"><div class="subpage">
+  <div class="page-head"><div><h1>Projetos</h1><p>Cada projeto é um cliente ou negócio. Os sites e landing pages ficam dentro dele.</p></div></div>
+  <div id="projectsBar" style="margin:0 0 10px;display:flex;justify-content:flex-end"></div>
+  <div class="project-grid" id="projectsGrid"></div></div></section>
+<section id="page-landings" class="page active"><div class="subpage dz-wide" id="landingsRoot"></div></section>
+<section id="page-mesa" class="page"><div class="subpage" id="mesaRoot"></div></section>
+<section id="page-biblioteca" class="page"><div class="subpage dz-wide" id="bibliotecaRoot"></div></section>
+<section id="page-settings" class="page"><div class="subpage" id="settingsRoot"></div></section>
+</main>
+</div>
+<div class="modal-back" id="modalBack" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalBox"></div></div>
+<div class="overlay" id="overlay"><div class="overlay-bar"><strong id="overlayTitle"></strong><div class="row-gap"><button class="btn sm" onclick="overlayDownload()">⬇ Baixar HTML</button><button class="btn sm" onclick="overlayPrint()">Imprimir / PDF</button><button class="btn sm dark" onclick="closeOverlay()">Fechar</button></div></div><iframe id="overlayFrame" title="Pré-visualização" allow="fullscreen"></iframe></div>
+<input type="file" id="importFile" accept="application/json,.json,.ampliacao,.zip" hidden onchange="if(this.files[0])importFile(this.files[0]);this.value=''">
+<div class="toast" id="toast"></div>
+<script src="js/util.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/store.js"></script>
+<script src="js/integrations.js"></script>
+<script src="js/ai-prefs.js"></script>
+<script src="js/core.js"></script>
+<script src="js/present.js"></script>
+<script src="js/design-data.js"></script>
+<script src="js/logo-fonts.js"></script>
+<script src="js/design-engine.js"></script>
+<script src="js/design-brand.js"></script>
+<script src="js/design-layouts.js"></script>
+<script src="js/fonts-mine.js"></script>
+<script src="js/ai-layout.js"></script>
+<script src="js/integracoes.js"></script>
+<script src="js/imglib.js"></script>
+<script src="js/editorial-skill.js"></script>
+<script src="js/editorial.js"></script>
+<script src="js/editorial-ent.js"></script>
+<script src="js/landing.js"></script>
+<script src="js/landing-ui.js"></script>
+<script src="js/builder.js"></script>
+<script src="js/builder-ui.js"></script>
+<script src="js/sections.js"></script>
+<script src="js/tpl-import.js"></script>
+<script src="js/tpl-ui.js"></script>
+<script src="js/wp-theme-php.js"></script>
+<script src="js/wp-theme.js"></script>
+<script src="js/wp-elementor.js"></script>
+<script src="js/pacote.js"></script>
+<script src="js/skills-text.js"></script>
+<script src="js/skills-ui.js"></script>
+<script src="js/doc-import.js"></script>
+<script src="js/mz-core.js"></script>
+<script src="js/mz-presets.js"></script>
+<script src="js/mz-editor.js"></script>
+<script src="js/mz-actions.js"></script>
+<script src="js/mz-panels.js"></script>
+<script src="js/mz-modals.js"></script>
+<script src="js/mz-export.js"></script>
+<script src="js/mz-elementor-in.js"></script>
+<script src="js/mz-ai.js"></script>
+<script src="js/mz-free.js"></script>
+<script src="js/mz-design.js"></script>
+<script src="js/mz-aiimg.js"></script>
+<script src="js/mz-themes.js"></script>
+<script src="js/bulk.js"></script>
+<script src="js/leads-ui.js"></script>
+<script src="js/site-ui.js"></script>
+<script src="js/sites-boot.js"></script>
+<script src="js/app.js"></script>
+<script src="js/acc.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/responsive.js"></script>
+
+</body>
+</html>

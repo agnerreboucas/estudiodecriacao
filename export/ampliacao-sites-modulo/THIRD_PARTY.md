@@ -1,0 +1,22 @@
+# Componentes de terceiros
+
+## Lucide (ícones)
+`js/logo-icons.js` contém ícones derivados do pacote **lucide-static** (https://lucide.dev), licença **ISC**.
+
+> Copyright (c) 2026 Lucide Icons and Contributors
+>
+> Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+>
+> THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+O arquivo é gerado por `tools/build_icons.js` (seleção por categoria e rótulos em português).
+
+## Phosphor Icons
+`js/logo-icons.js` também contém ícones selecionados do pacote **@phosphor-icons/core** (https://phosphoricons.com), licença **MIT**.
+
+> MIT License. Copyright (c) 2023 Phosphor Icons
+>
+> Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## Simple Icons (logotipos de redes sociais e apps)
+`js/logo-icons.js` contém também logotipos do pacote **simple-icons** (https://simpleicons.org), dedicados ao domínio público (**CC0 1.0**), e alguns logotipos do Phosphor (MIT). Os logotipos são **marcas registradas dos seus respectivos donos**; a licença CC0 cobre os arquivos, não a marca. No Laboratório do Logo eles só entram nos logos quando a categoria “Redes sociais e apps” é marcada, e são pensados para indicar presença (“Siga-nos”), não para servir de símbolo de outra marca.

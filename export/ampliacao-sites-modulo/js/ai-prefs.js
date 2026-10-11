@@ -1,0 +1,13 @@
+/* Escolha da IA: provedor e nível (modelo) para texto e imagem. A lista vem do servidor (api/models.php → status.php → catalog). */
+function aiPrefs() { return state.aiPrefs || (state.aiPrefs = normalizeAiPrefs()); }
+const aiCatalog = () => (typeof API !== 'undefined' && API.status && API.status.catalog) || null;
+function aiPrefSet(k, v) { const P = aiPrefs(); P[k] = String(v || '').replace(/[^\w.:\/-]/g, '').slice(0, 80); if (k === 'textProvider') P.textModel = ''; if (k === 'imgProvider') P.imgModel = ''; persist(); aiPickersRefresh(); }
+function aiPickerHtml(kind, compact) {
+  const C = aiCatalog(), P = aiPrefs(); if (!C) return `<p class="muted" style="font-size:12px;margin:0">${compact ? '' : 'A escolha de IA aparece quando o Studio está conectado ao servidor (com as chaves configuradas).'}</p>`;
+  const img = kind === 'image', grp = img ? C.image : C.text, ok = grp.providers.filter(p => p.configured), cur = (img ? P.imgProvider : P.textProvider) || grp.default, pv = ok.find(p => p.id === cur) || ok[0];
+  if (!pv) return `<p class="muted" style="font-size:12px;margin:0">${img ? 'Imagem' : 'Texto'}: nenhuma chave configurada no servidor.</p>`;
+  const mdl = (img ? P.imgModel : P.textModel) || pv.default, sel = (id, opts, val, on, lab) => `<label class="ai-pk"><span>${lab}</span><select id="${id}" onchange="${on}">${opts}</select></label>`;
+  const pOpts = ok.map(p => `<option value="${p.id}" ${p.id === pv.id ? 'selected' : ''}>${esc(p.name)}</option>`).join(''), mOpts = pv.models.map(m => `<option value="${esc(m.id)}" ${m.id === mdl ? 'selected' : ''}>${esc(m.name)}</option>`).join('');
+  return `<div class="ai-pkrow"><b class="ai-pkt">${img ? '🖼 Imagem' : '✍ Texto e Mesa'}</b>${ok.length > 1 ? sel('', pOpts, '', `aiPrefSet('${img ? 'imgProvider' : 'textProvider'}',this.value)`, 'IA') : `<span class="ai-pk"><span>IA</span><b>${esc(pv.name)}</b></span>`}${sel('', mOpts, '', `aiPrefSet('${img ? 'imgModel' : 'textModel'}',this.value)`, 'Nível / modelo')}${img && pv.id === 'openai' ? sel('', ['low', 'medium', 'high'].map(q => `<option value="${q}" ${P.imgQuality === q ? 'selected' : ''}>${{low: 'Rascunho (barato)', medium: 'Média', high: 'Alta (cara)'}[q]}</option>`).join(''), '', `aiPrefSet('imgQuality',this.value)`, 'Qualidade') : ''}</div>${compact ? '' : (img && pv.id === 'magnific' ? '<small class="muted">Magnific: integração ainda não validada com chave real; se falhar, use GPT Image.</small>' : '')}`;
+}
+function aiPickersRefresh() { document.querySelectorAll('.ai-pickbox').forEach(b => { b.innerHTML = aiPickerHtml(b.dataset.kind, b.dataset.compact === '1'); }); }
