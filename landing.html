@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ampliação Studio — do briefing ao site, numa mesa só</title>
+<meta name="description" content="Suba o documento do projeto e o Studio monta marca, anúncios, posts, stories, carrossel e site. Edite na mesa escura e gere a mesma arte em todos os tamanhos.">
+<style>
+:root{--bg:#06140f;--bg2:#0b1f17;--card:#102a1f;--line:#1d4533;--tx:#e9f5ee;--mut:#9bb8a8;--ac:#4ade80;--ac2:#bbf7d0;--ink:#04120b}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
+.w{max-width:1160px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:20;background:rgba(6,20,15,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .w{display:flex;align-items:center;gap:22px;height:62px}
+.logo{font-weight:800;letter-spacing:-.02em;font-size:18px}.logo i{font-style:normal;color:var(--ac)}
+nav a.l{color:var(--mut);font-size:14px}nav a.l:hover{color:var(--tx)}.sp{flex:1}
+.btn{display:inline-block;padding:11px 20px;border-radius:999px;font-weight:700;font-size:15px;border:1px solid var(--line);color:var(--tx)}
+.btn.p{background:var(--ac);color:var(--ink);border-color:var(--ac)}.btn.p:hover{background:var(--ac2)}
+.hero{padding:84px 0 40px;text-align:center;background:radial-gradient(900px 400px at 50% -80px,#14532d 0,transparent 70%)}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:5px 14px;color:var(--ac2);font-size:13px;background:var(--bg2)}
+h1{font-size:clamp(34px,6vw,64px);line-height:1.04;letter-spacing:-.035em;margin:20px auto 18px;max-width:900px}
+h1 em{font-style:normal;color:var(--ac)}
+.lead{color:var(--mut);font-size:19px;max-width:690px;margin:0 auto 28px}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.shot{margin:48px auto 0;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.55);background:#000}
+section{padding:76px 0}section.alt{background:var(--bg2);border-block:1px solid var(--line)}
+h2{font-size:clamp(28px,4vw,44px);letter-spacing:-.03em;line-height:1.1;margin:0 0 12px}
+.sub{color:var(--mut);max-width:680px;margin:0 0 36px;font-size:17px}
+.center{text-align:center}.center .sub{margin-inline:auto}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;counter-reset:s}
+.step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+.step:before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--ac);color:var(--ink);font-weight:800;margin-bottom:12px}
+.step b{display:block;font-size:17px;margin-bottom:4px}.step span{color:var(--mut);font-size:14.5px}
+.split{display:grid;grid-template-columns:1fr 1.25fr;gap:44px;align-items:center}
+.split.r{grid-template-columns:1.25fr 1fr}.split.r .tx{order:2}
+.tx ul{padding:0;margin:18px 0 0;list-style:none;display:grid;gap:10px}
+.tx li{padding-left:28px;position:relative;color:var(--mut)}.tx li:before{content:"✓";position:absolute;left:0;color:var(--ac);font-weight:800}
+.tx li b{color:var(--tx)}
+.img{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#000}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.f{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}.f h3{margin:0 0 6px;font-size:18px}.f p{margin:0;color:var(--mut);font-size:14.5px}.f .i{font-size:24px;margin-bottom:8px}
+.soon{border-style:dashed;opacity:.85}.soon h3:after{content:"em breve";font-size:11px;font-weight:700;margin-left:8px;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--ac2);vertical-align:middle}
+.honest{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 26px;color:var(--mut);font-size:14.5px}.honest b{color:var(--tx)}
+.final{text-align:center;padding:90px 0;background:radial-gradient(700px 300px at 50% 100%,#14532d 0,transparent 70%)}
+footer{border-top:1px solid var(--line);padding:26px 0;color:var(--mut);font-size:13.5px}
+@media(max-width:860px){nav .w{gap:12px}nav .btn{padding:9px 14px;font-size:14px}.split,.split.r{grid-template-columns:1fr;gap:24px}.split.r .tx{order:0}nav a.l{display:none}section{padding:56px 0}.hero{padding-top:56px}}
+</style>
+</head>
+<body>
+<nav><div class="w"><a class="logo" href="#">Ampliação<i>.</i>Studio</a><span class="sp"></span><a class="l" href="#fluxo">Como funciona</a><a class="l" href="#mesa">A mesa</a><a class="l" href="#tamanhos">Tamanhos</a><a class="l" href="#recursos">Recursos</a><a class="btn p" href="demo/ampliacao-studio-demo.html">Demonstração</a></div></nav>
+
+<header class="hero"><div class="w">
+  <span class="tag">Marketing orientado por projeto</span>
+  <h1>Do briefing ao site, <em>numa mesa só</em>.</h1>
+  <p class="lead">Suba o documento do projeto. O Studio monta a marca, os anúncios, os posts, os stories, o carrossel e as páginas do site, com as informações do próprio cliente. Cada etapa continua sua para corrigir e ampliar.</p>
+  <div class="cta"><a class="btn p" href="demo/ampliacao-studio-demo.html">Abrir a demonstração</a><a class="btn" href="#fluxo">Ver como funciona</a></div>
+  <div class="shot"><img src="landing/editor-mesa.png" alt="Mesa de edição escura com camadas, réguas, propriedades e páginas" width="1440" height="860"></div>
+</div></header>
+
+<section id="fluxo"><div class="w center">
+  <h2>Quatro passos, sem recomeçar nada</h2>
+  <p class="sub">O documento do projeto vira o ponto de partida de tudo. Nada é inventado: o que não foi informado fica marcado como falta.</p>
+  <div class="steps" style="text-align:left">
+    <div class="step"><b>Suba o documento</b><span>Word, Markdown ou texto, ou use a Ficha completa. Também dá para mandar o link ao cliente preencher.</span></div>
+    <div class="step"><b>Gere o que falta</b><span>A Esteira completa marca, produtos, campanha, posts, stories, carrossel e site a partir das respostas.</span></div>
+    <div class="step"><b>Edite na mesa</b><span>Camadas, réguas, texto, formas, logo e fotos. O editor salva sozinho.</span></div>
+    <div class="step"><b>Gere os outros tamanhos</b><span>De uma arte pronta, crie feed, stories, anúncios, capas e medidas livres em px, mm ou polegadas.</span></div>
+  </div>
+</div></section>
+
+<section class="alt" id="mesa"><div class="w split">
+  <div class="tx"><h2>Uma mesa escura para criar</h2><p class="sub" style="margin-bottom:0">Área de trabalho parecida com as ferramentas de design que você já conhece, ligada ao seu projeto.</p>
+    <ul><li><b>Camadas</b> para mostrar, ocultar, travar, duplicar e reordenar.</li><li><b>Réguas e zoom</b> em px, mm ou polegadas.</li><li><b>Guias de sangria e área segura</b> para material impresso.</li><li><b>Páginas</b> numa tira embaixo, para carrosséis e apresentações.</li><li><b>Exportação</b> em PNG, PDF, PSD em camadas e PNG por camada.</li></ul></div>
+  <div class="img"><img src="landing/estudio-home.png" alt="Início do Estúdio de Design com os cartões Criar do zero, Navegar modelos, Composição com IA e Importar imagem"></div>
+</div></section>
+
+<section id="tamanhos"><div class="w split r">
+  <div class="img"><img src="landing/tamanhos.png" alt="Janela para gerar a arte em outros tamanhos, com pacotes de formatos"></div>
+  <div class="tx"><h2>Uma arte, todos os tamanhos</h2><p class="sub" style="margin-bottom:0">Depois que a primeira arte está pronta, um clique cria as outras versões, já ligadas à original.</p>
+    <ul><li><b>Pacotes prontos:</b> redes sociais, anúncios Meta, capas e banners, YouTube.</li><li><b>Medida livre</b> em px, mm ou polegadas, com DPI.</li><li><b>Versões ligadas:</b> aparecem no painel “Versões desta arte”.</li><li><b>Aprovação opcional:</b> só gera outras versões depois que a arte for aprovada.</li></ul></div>
+</div></section>
+
+<section class="alt"><div class="w split">
+  <div class="tx"><h2>Criar do zero ou a partir de um modelo</h2><p class="sub" style="margin-bottom:0">Escolha o tipo de design, a marca e o formato. Ou navegue pelos modelos de layout e pelas artes do projeto.</p>
+    <ul><li><b>Imagem estática</b> para redes e anúncios.</li><li><b>Impressão</b> com formatos em mm ou polegadas e guias de sangria.</li><li><b>Composição com IA</b> quando a IA está ligada.</li><li><b>Importar imagem</b> (PNG, JPG, SVG) como arte editável.</li></ul></div>
+  <div class="img"><img src="landing/criar-do-zero.png" alt="Tela dividida: navegar modelos ou criar do zero"></div>
+</div></section>
+
+<section><div class="w split r">
+  <div class="img"><img src="landing/esteira.png" alt="Esteira do projeto com etapas e progresso"></div>
+  <div class="tx"><h2>A Esteira do projeto</h2><p class="sub" style="margin-bottom:0">Um caminho completo do documento até o site. Cada etapa mostra se está pronta ou falta algo.</p>
+    <ul><li><b>Gerar tudo que falta</b> sem sobrescrever o que você já fez.</li><li><b>Corrigir e acrescentar</b> a qualquer momento: novos stories, anúncios, posts, páginas.</li><li><b>Só fatos do projeto:</b> a geração sem IA usa apenas o que foi respondido.</li></ul></div>
+</div></section>
+
+<section class="alt"><div class="w split">
+  <div class="tx"><h2>Marca, arquétipo e voz</h2><p class="sub" style="margin-bottom:0">Valores, atitudes, arquétipo (12), e a voz da marca. O cliente responde por um link e você recebe no projeto, em planilha ou na nuvem.</p>
+    <ul><li><b>Guia dos 12 arquétipos</b> em PDF.</li><li><b>Marcas parecidas</b> clicáveis, com comunicação e site.</li><li><b>Três formatos</b> de resposta: projeto, planilha e nuvem.</li></ul></div>
+  <div class="img"><img src="landing/identity.png" alt="Marca e arquétipo: envio para o cliente e passos de valores, atitudes, arquétipo e voz"></div>
+</div></section>
+
+<section><div class="w split r">
+  <div class="img"><img src="landing/sites.png" alt="Sites e landing pages por produto"></div>
+  <div class="tx"><h2>Sites e landing pages</h2><p class="sub" style="margin-bottom:0">A página nasce dos benefícios e das características de cada produto, com variações A/B e exportação em HTML.</p>
+    <ul><li><b>Mesa de páginas</b> com três telas lado a lado (computador, tablet e celular).</li><li><b>Formulário</b> que envia o lead ao seu servidor.</li></ul></div>
+</div></section>
+
+<section class="alt" id="recursos"><div class="w">
+  <div class="center"><h2>Tudo no mesmo projeto</h2><p class="sub">Cada peça sai com a mesma marca, o mesmo público e o mesmo texto de base.</p></div>
+  <div class="grid">
+    <div class="f"><div class="i">📄</div><h3>Ficha completa</h3><p>Todas as perguntas do projeto em tela, planilha e PDF.</p></div>
+    <div class="f"><div class="i">⚡</div><h3>Fábrica de variações</h3><p>Textos × estilos × layouts a partir de uma peça.</p></div>
+    <div class="f"><div class="i">✅</div><h3>Aprovação do cliente</h3><p>Link com prazo, decisão por peça e correções.</p></div>
+    <div class="f"><div class="i">📅</div><h3>Calendário e publicação</h3><p>Agende as peças aprovadas e publique pela Meta.</p></div>
+    <div class="f"><div class="i">📈</div><h3>Performance</h3><p>Métricas reais e pesos aprendidos para os próximos conceitos.</p></div>
+    <div class="f"><div class="i">📦</div><h3>Módulos separados</h3><p>Sites e Marca também existem como módulos independentes.</p></div>
+    <div class="f soon"><div class="i">🎞</div><h3>Design animado</h3><p>HTML5, MP4 e GIF.</p></div>
+    <div class="f soon"><div class="i">🧩</div><h3>Importar Photoshop e Figma</h3><p>Hoje: exporte para PSD, PNG e SVG e importe imagens.</p></div>
+  </div>
+  <div class="honest" style="margin-top:28px"><b>Combinado claro:</b> a IA é opcional e sempre gera texto editável. O PDF e o PSD saem em RGB (não há CMYK real). O tema escuro vale para o Estúdio e a mesa; o resto do sistema segue claro. Os prints acima vêm da demonstração, com dados fictícios.</div>
+</div></section>
+
+<section class="final"><div class="w"><h2>Veja funcionando</h2><p class="sub" style="margin-inline:auto">A demonstração abre com duplo clique, sem servidor e sem cadastro.</p><div class="cta"><a class="btn p" href="demo/ampliacao-studio-demo.html">Abrir a demonstração</a></div></div></section>
+<footer><div class="w">© Ampliação Studio · Marketing orientado por projeto</div></footer>
+</body></html>

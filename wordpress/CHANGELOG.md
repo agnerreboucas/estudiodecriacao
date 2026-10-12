@@ -1,5 +1,14 @@
 # Histórico de versões
 
+## 1.19.0
+- **Editor em "mesa escura".** Ao abrir uma arte, o Estúdio ocupa a tela toda: barra de cima (voltar, nome, desfazer, texto, forma, logo, imagem, foto, vídeo, zoom, **Tamanhos**, **Variações**, **Salvar ▾ Gerar**), **Camadas** à esquerda (mostrar, ocultar, travar, duplicar, ordenar), **réguas** em px, mm ou polegadas, propriedades à direita e **páginas** numa tira embaixo. Camada oculta some do desenho e camada travada não é arrastada.
+- **Uma arte, todos os tamanhos.** Botão **⤢ Tamanhos**: pacotes (redes sociais, anúncios Meta, capas e banners, YouTube) ou escolha item a item, mais **medida livre em px, mm ou polegadas** com DPI. Cada tamanho vira uma arte **ligada à original**, listada no painel **Versões desta arte**.
+- **Aprovação opcional.** Na tela do Estúdio dá para exigir que a arte seja **aprovada** antes de gerar outros tamanhos e variações (selo "✔ Aprovada" na barra).
+- **Criar do zero (tela dividida).** Navegar modelos × criar do zero: tipo (imagem estática ou impressão), marca, formato predefinido ou personalizado, nome e páginas. Impressão já abre com guias de **sangria** e **área segura** (só aparecem na mesa). "Animada" aparece como em breve.
+- **Importar imagem** (PNG, JPG, WebP, SVG) como arte editável e cartões de entrada no início do Estúdio.
+- **Página de apresentação do produto:** `landing.html` (com prints reais da demonstração em `landing/`).
+- Correção: o Estúdio não quebra mais quando uma campanha antiga não tem peças.
+
 ## 1.18.0
 - **Subir o documento do projeto → a Ficha completa se preenche.** O botão **Subir documento do projeto** (em Projetos e na Ficha) aceita Word (.docx), PDF, texto, Markdown, HTML e RTF, e pode **criar um projeto novo** a partir do documento. Três leitores: (1) pelo formato do **template** da ficha (pergunta → resposta, ☑ nas escolhas), que agora também é baixado em **Word (.docx)** e **Markdown**; (2) com a **IA** ligada, um documento livre é lido e as perguntas são preenchidas só com o que está escrito; (3) o leitor de seções que já existia (Produtos, Público, Dores, Tom de voz…). Antes de aplicar, uma tela mostra o que foi entendido. **Nada que já estava respondido é apagado** (opção de substituir, se quiser).
 - **Esteira do projeto (aba nova).** Depois do documento, **Gerar tudo que falta** completa o projeto até o site, na ordem: base (marca, produtos, materiais e públicos) → pré-projeto (IA) → **campanha de anúncios** (5 fases, 15 anúncios e as artes) → **posts simples e stories** (rascunhos em Publicação) → **carrosséis** → **site** (modelo StoryBrand pelo tipo de produto, BrandScript preenchido com os fatos; com IA, as páginas são escritas). Tudo com os fatos informados: nada é inventado, o que falta fica em branco ou como [CONFIRMAR]. Rodar de novo só cria o que ainda não existe.

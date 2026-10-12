@@ -47,7 +47,7 @@ function bkDelProjects(ids) {
   bkUndo(`${ps.length} ${bkPlural(ps.length, 'projeto excluído', 'projetos excluídos')}.`, () => { bkReinsert(state.projects, rmP); bkReinsert(state.creatives, rmC); if (prev && projectById(prev)) state.activeProjectId = prev; persist(); bkRefresh(); toast('Restaurado.'); });
 }
 /* ---- Peças do Design ---- */
-const bkCmpSetIds = p => new Set((p.campaigns || []).flatMap(c => c.pieces.flatMap(q => Object.values(q.sets))).filter(Boolean));
+const bkCmpSetIds = p => new Set((p.campaigns || []).flatMap(c => (c.pieces || []).flatMap(q => Object.values(q.sets || {}))).filter(Boolean));
 function bkDzBar(p) { const used = bkCmpSetIds(p); return bkBar('dz', p.design.sets.filter(s => !used.has(s.id)).map(s => s.id), 'renderDesign', 'bkDelSets()', 'peça'); }
 const bkDzTag = (p, s) => bkOn('dz') && bkCmpSetIds(p).has(s.id) ? '<span class="bk-lock" title="Faz parte de uma campanha: apague em Campanhas → Anúncios">campanha</span>' : bkChk('dz', s.id, 'renderDesign');
 function bkDelSets() {

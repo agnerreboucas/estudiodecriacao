@@ -211,9 +211,9 @@ function dzBindCanvas() {
       const w = L && LBOX[L.id].words.find(w => p.x >= w.x && p.x <= w.x + w.w && p.y >= w.y && p.y <= w.y + w.h);
       if (w) { const old = plainOf(L.content); L.content = toggleWordEm(L.content, w.ord); if (L.spans) L.spans = remapSpans(old, plainOf(L.content), L.spans); dz.sel = L.id; dzDraw(); dzCommit(); dzInspector(); dzSlidesPanel(); } return;
     }
-    const cur = dzLayer(), cb = cur && LBOX[cur.id], hh = cb && dzHandleAt(cur, cb, p);
+    const cur = dzLayer(), cb = cur && LBOX[cur.id], hh = cb && !cur.locked && dzHandleAt(cur, cb, p);
     if (hh) { dz.drag = {t: 'resize', h: hh.k, o: {x: cur.x, y: cur.y, w: cur.w, hh: cb.h, size: cur.size, ls: cur.ls, blur: cur.blur, spans: cur.spans ? JSON.parse(JSON.stringify(cur.spans)) : null, hb: cur.h}, ch: false}; return; }
-    const hit = [...s.layers].reverse().find(l => !l.hidden && LBOX[l.id] && p.x >= LBOX[l.id].x && p.x <= LBOX[l.id].x + LBOX[l.id].w && p.y >= LBOX[l.id].y && p.y <= LBOX[l.id].y + LBOX[l.id].h && !(l.role === 'overlay'));
+    const hit = [...s.layers].reverse().find(l => !l.hidden && !l.locked && LBOX[l.id] && p.x >= LBOX[l.id].x && p.x <= LBOX[l.id].x + LBOX[l.id].w && p.y >= LBOX[l.id].y && p.y <= LBOX[l.id].y + LBOX[l.id].h && !(l.role === 'overlay'));
     if (hit && e.altKey) {   // Alt + clique/arrasto: duplica o elemento e arrasta a cópia (o original fica no lugar)
       const c = JSON.parse(JSON.stringify(hit)); c.id = lid(); s.layers.splice(s.layers.indexOf(hit) + 1, 0, c); dz.sel = c.id; dz.range = null;
       dz.drag = {t: 'move', sx: p.x, sy: p.y, x: c.x, y: c.y, ch: true, dup: true, moved: false}; dzInspector(); dzDraw(); return;
