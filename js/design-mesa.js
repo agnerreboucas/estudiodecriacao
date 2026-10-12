@@ -28,7 +28,7 @@ function dzEditorShell(p, r) {
     <span class="dzm-sep"></span>
     <button class="dzm-ic ${dz.mode === 'emphasis' ? 'on' : ''}" onclick="dzModeEm()" title="Destacar palavras por clique">✦</button><button class="dzm-ic ${dz.mode === 'fmt' ? 'on' : ''}" onclick="dzModeFmt()" title="Formatar uma palavra (Shift estende)">✎</button>
     <span class="dzm-auto" id="dzAuto"></span><span class="dzm-grow"></span>
-    <select class="dzm-zoom" onchange="dzmZoom(this.value)" title="Zoom"><option value="fit" ${DZM.zoom ? '' : 'selected'}>Ajustar</option>${[25, 50, 75, 100, 150, 200].map(z => `<option value="${z}" ${DZM.zoom === z / 100 ? 'selected' : ''}>${z}%</option>`).join('')}</select>
+    <select class="dzm-zoom" onchange="dzmZoom(this.value)" title="Zoom"><option value="fit" ${DZM.zoom ? '' : 'selected'}>Ajustar</option>${[25, 50, 75, 100, 150, 200, 400].map(z => `<option value="${z}" ${DZM.zoom === z / 100 ? 'selected' : ''}>${z}%</option>`).join('')}</select>
     ${dzSet().approved ? '<span class="dzm-pill">✔ Aprovada</span>' : ''}<button class="dzm-btn acc" onclick="dzResizeOpen(dz.setId)" title="Gerar esta arte em outros tamanhos">⤢ Tamanhos</button>
     <button class="dzm-btn" onclick="dzVarOpen(dz.setId)" title="Gerar variações desta arte">⚡ Variações</button>
     <div class="dzm-gowrap"><button class="dzm-go" id="dzSaveBtn" onclick="dzSaveNow()" title="Salvar agora (o editor também salva sozinho)">Salvar</button><button class="dzm-go2" onclick="event.stopPropagation();dzmMenu()" title="Salvar e gerar">▾ Gerar</button>

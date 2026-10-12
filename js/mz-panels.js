@@ -102,7 +102,7 @@ function mzPageSettingsHtml() {
     <label class="mz-f"><span>Cor de fundo da página</span><input type="color" value="${pg.bg || '#ffffff'}" oninput="mzPageSet('${pg.id}','bg',this.value)"></label></div>
     <div class="mz-sec"><h5>Adaptar tela</h5><p class="mz-hint">Arrume no Desktop; um clique ajusta Tablet e Celular (empilha colunas, reduz títulos e espaços). Só preenche o que você ainda não ajustou.</p><button class="btn sm dark" onclick="mzAutoAdaptPage()">↺ Adaptar a página inteira</button></div>
     <div class="mz-sec"><h5>Guias</h5><p class="mz-hint">Arraste das réguas (topo e lateral) para criar. ${g.v.length + g.h.length} guia(s).</p><button class="btn sm" onclick="mzGuidesClear()">Limpar guias</button> <label class="mz-ck inline"><input type="checkbox" ${MZ.guides ? 'checked' : ''} onchange="MZ.guides=this.checked;mzOverlayAll()"> Mostrar</label></div>
-    <div class="mz-sec"><h5>Atalhos</h5><p class="mz-hint">Duplo clique: editar texto · Ctrl+D duplicar · Ctrl+C/V · Ctrl+G agrupar · Del excluir · [ ] ordem · Ctrl+Z/Y · Ctrl + roda: zoom · botão direito: menu</p></div>`;
+    <div class="mz-sec"><h5>Atalhos</h5><p class="mz-hint">Duplo clique: editar texto · Ctrl+D duplicar · Ctrl+C/V · Ctrl+G agrupar · Del excluir · [ ] ordem · Ctrl+Z/Y · Ctrl + roda: zoom · botão direito: menu</p><p class="mz-hint"><b>Como no Photoshop:</b> Espaço + arrastar move a prancheta · Z + clique aproxima · Z + Alt + clique afasta · Alt + roda: zoom no cursor · Ctrl + / −: zoom · Ctrl 0 ajusta · Ctrl 1 = 100%</p></div>`;
 }
 function mzGuidesClear() { mzPg().guides = {v: [], h: []}; mzTouch(); mzOverlayAll(); mzRefreshPanels(); }
 /* controles */

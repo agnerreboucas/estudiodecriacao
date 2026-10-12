@@ -1,5 +1,9 @@
 # Histórico de versões
 
+## 1.19.1
+- **Atalhos estilo Photoshop nas duas mesas** (Mesa de páginas dos sites e Mesa do Estúdio de Design dos posts): **Espaço** segurado + arrastar move a prancheta (mãozinha); **Z** + clique aproxima; **Z + Alt** + clique afasta; **Alt + roda do mouse** dá zoom no ponto do cursor; **Ctrl +** / **Ctrl −** zoom, **Ctrl 0** ajusta à tela, **Ctrl 1** vai a 100%. O zoom vai por degraus (25, 33, 50, 100, 125, 200 e 400%) e mantém parado o ponto onde você clicou. Não agem enquanto você digita. O zoom máximo subiu para 400%.
+- **Guia completo da Mesa** em `docs/MESA-FUNCOES.md` (barra de cima, painéis, abas da direita, trabalho na página, Design System, versões, importar e exportar, tabela de atalhos).
+
 ## 1.19.0
 - **Editor em "mesa escura".** Ao abrir uma arte, o Estúdio ocupa a tela toda: barra de cima (voltar, nome, desfazer, texto, forma, logo, imagem, foto, vídeo, zoom, **Tamanhos**, **Variações**, **Salvar ▾ Gerar**), **Camadas** à esquerda (mostrar, ocultar, travar, duplicar, ordenar), **réguas** em px, mm ou polegadas, propriedades à direita e **páginas** numa tira embaixo. Camada oculta some do desenho e camada travada não é arrastada.
 - **Uma arte, todos os tamanhos.** Botão **⤢ Tamanhos**: pacotes (redes sociais, anúncios Meta, capas e banners, YouTube) ou escolha item a item, mais **medida livre em px, mm ou polegadas** com DPI. Cada tamanho vira uma arte **ligada à original**, listada no painel **Versões desta arte**.

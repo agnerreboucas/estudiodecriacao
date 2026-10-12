@@ -4,6 +4,9 @@ O menu lateral do Studio segue a ordem real de trabalho: **do cliente à venda**
 
 > Regra de ouro: tudo o que o Studio escreve é **rascunho editável**. O que estiver entre colchetes, como `[CONFIRMAR]`, é uma decisão sua. O Studio nunca inventa dado clínico, financeiro ou jurídico.
 
+## Atalhos das mesas (como no Photoshop)
+Na Mesa de páginas e na mesa do Estúdio: **Espaço** segurado + arrastar move a prancheta; **Z** + clique aproxima; **Z + Alt** + clique afasta; **Alt + roda do mouse** dá zoom no cursor; **Ctrl +** e **Ctrl −** mudam o zoom; **Ctrl 0** ajusta à tela; **Ctrl 1** vai a 100%. O zoom vai até 400%. Os atalhos não agem enquanto você digita.
+
 ## Início
 Caixa de pedido ("Peça ao Ampliação Studio...") e atalhos: **Criar projeto, anúncio, vídeo, post, carrossel, planejar feed, grid, site/landing, Stories, sequência de Stories**. Mostra as criações recentes.
 
