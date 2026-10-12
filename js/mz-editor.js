@@ -79,7 +79,7 @@ function mzPaint() {
 }
 function mzSetBp(bp) { MZ.bp = bp; Object.values(MZ.frames).forEach(f => f.wrap.classList.toggle('on', f.bp === bp)); if (MZ.view === 'one') { mzBuildFrames(); } else mzOverlayAll(); document.querySelectorAll('[data-mzbp]').forEach(b => b.classList.toggle('on', b.dataset.mzbp === bp)); mzRefreshPanels(); }
 function mzSetView(v) { MZ.view = v; document.querySelectorAll('[data-mzview]').forEach(b => b.classList.toggle('on', b.dataset.mzview === v)); mzBuildFrames(); }
-function mzZoom(d) { MZ.fit = false; MZ.zoom = Math.max(0.2, Math.min(2, (mzZ() + d))); mzLayoutFrames(); mzOverlayAll(); }
+function mzZoom(d) { MZ.fit = false; MZ.zoom = Math.max(0.2, Math.min(4, (mzZ() + d))); mzLayoutFrames(); mzOverlayAll(); }
 function mzZoomFit() { MZ.fit = true; mzLayoutFrames(); mzOverlayAll(); }
 
 /* ---------- utilitários de DOM ---------- */
@@ -141,7 +141,7 @@ function mzBindFrame(fr) {
   d.addEventListener('dblclick', e => { const t = mzNodeAt(fr, e.clientX, e.clientY); if (t) mzStartEdit(fr, t.dataset.n); });
   d.addEventListener('contextmenu', e => { e.preventDefault(); const t = mzNodeAt(fr, e.clientX, e.clientY); if (t && MZ.sel !== t.dataset.n) mzSelect(t.dataset.n); const b = fr.ifr.getBoundingClientRect(), z = fr.z || 1; mzMenuOpen(b.left + e.clientX * z, b.top + e.clientY * z); });
   d.addEventListener('click', e => { const a = e.target.closest && e.target.closest('a'); if (a) e.preventDefault(); });
-  d.addEventListener('keydown', mzKey); d.addEventListener('wheel', e => { if (e.ctrlKey) { e.preventDefault(); mzZoom(e.deltaY < 0 ? 0.05 : -0.05); } }, {passive: false});
+  d.addEventListener('keydown', mzKey); if (typeof mzKeysBind === 'function') mzKeysBind(d); d.addEventListener('wheel', e => { if (e.ctrlKey) { e.preventDefault(); mzZoom(e.deltaY < 0 ? 0.05 : -0.05); } }, {passive: false});
 }
 function mzSetBpQuiet(bp) { MZ.bp = bp; Object.values(MZ.frames).forEach(f => f.wrap.classList.toggle('on', f.bp === bp)); document.querySelectorAll('[data-mzbp]').forEach(b => b.classList.toggle('on', b.dataset.mzbp === bp)); mzRefreshPanels(); }
 

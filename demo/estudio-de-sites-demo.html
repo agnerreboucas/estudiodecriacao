@@ -8889,7 +8889,7 @@ function mzPaint() {
 }
 function mzSetBp(bp) { MZ.bp = bp; Object.values(MZ.frames).forEach(f => f.wrap.classList.toggle('on', f.bp === bp)); if (MZ.view === 'one') { mzBuildFrames(); } else mzOverlayAll(); document.querySelectorAll('[data-mzbp]').forEach(b => b.classList.toggle('on', b.dataset.mzbp === bp)); mzRefreshPanels(); }
 function mzSetView(v) { MZ.view = v; document.querySelectorAll('[data-mzview]').forEach(b => b.classList.toggle('on', b.dataset.mzview === v)); mzBuildFrames(); }
-function mzZoom(d) { MZ.fit = false; MZ.zoom = Math.max(0.2, Math.min(2, (mzZ() + d))); mzLayoutFrames(); mzOverlayAll(); }
+function mzZoom(d) { MZ.fit = false; MZ.zoom = Math.max(0.2, Math.min(4, (mzZ() + d))); mzLayoutFrames(); mzOverlayAll(); }
 function mzZoomFit() { MZ.fit = true; mzLayoutFrames(); mzOverlayAll(); }
 
 /* ---------- utilitários de DOM ---------- */
@@ -8951,7 +8951,7 @@ function mzBindFrame(fr) {
   d.addEventListener('dblclick', e => { const t = mzNodeAt(fr, e.clientX, e.clientY); if (t) mzStartEdit(fr, t.dataset.n); });
   d.addEventListener('contextmenu', e => { e.preventDefault(); const t = mzNodeAt(fr, e.clientX, e.clientY); if (t && MZ.sel !== t.dataset.n) mzSelect(t.dataset.n); const b = fr.ifr.getBoundingClientRect(), z = fr.z || 1; mzMenuOpen(b.left + e.clientX * z, b.top + e.clientY * z); });
   d.addEventListener('click', e => { const a = e.target.closest && e.target.closest('a'); if (a) e.preventDefault(); });
-  d.addEventListener('keydown', mzKey); d.addEventListener('wheel', e => { if (e.ctrlKey) { e.preventDefault(); mzZoom(e.deltaY < 0 ? 0.05 : -0.05); } }, {passive: false});
+  d.addEventListener('keydown', mzKey); if (typeof mzKeysBind === 'function') mzKeysBind(d); d.addEventListener('wheel', e => { if (e.ctrlKey) { e.preventDefault(); mzZoom(e.deltaY < 0 ? 0.05 : -0.05); } }, {passive: false});
 }
 function mzSetBpQuiet(bp) { MZ.bp = bp; Object.values(MZ.frames).forEach(f => f.wrap.classList.toggle('on', f.bp === bp)); document.querySelectorAll('[data-mzbp]').forEach(b => b.classList.toggle('on', b.dataset.mzbp === bp)); mzRefreshPanels(); }
 
@@ -9524,7 +9524,7 @@ function renderMesaLauncher() {
   if (!p.mesa) p.mesa = normalizeMesa({}); if (!state.mesaLib) state.mesaLib = normalizeMesaLib({});
   const m = p.mesa; const pages = (m && m.pages) || [];
   r.innerHTML = hubHead('Mesa de páginas', 'Edite sites e landing pages arrastando e soltando, com Design System, versões e exportação para o Elementor, HTML ou ZIP.', `<button class="btn dark" onclick="mzOpen()">Abrir a mesa</button>`) +
-    `<div class="panel"><div class="mz-launch"><div><h3 style="margin:0 0 6px">Como funciona</h3><ol class="mz-ol"><li>Escolha um modelo ou comece em branco. A mesa já puxa oferta, público, dores, logo, cores e fontes do projeto <b>${esc(p.name)}</b>.</li><li>Arraste elementos e blocos, edite o texto com duplo clique e ajuste Estilo e Layout à direita.</li><li>Veja Desktop, Tablet e Mobile lado a lado; o que você muda no tablet ou celular só vale ali.</li><li>Salve versões, aprove e exporte para o Elementor (grátis), HTML ou ZIP.</li></ol><p class="muted" style="font-size:12.5px">Este módulo convive com <b>Sites e landing pages</b> (formulário). Nada daquele módulo foi alterado.</p></div>
+    `<div class="panel"><div class="mz-launch"><div><h3 style="margin:0 0 6px">Como funciona</h3><ol class="mz-ol"><li>Escolha um modelo ou comece em branco. A mesa já puxa oferta, público, dores, logo, cores e fontes do projeto <b>${esc(p.name)}</b>.</li><li>Arraste elementos e blocos, edite o texto com duplo clique e ajuste Estilo e Layout à direita.</li><li>Veja Desktop, Tablet e Mobile lado a lado; o que você muda no tablet ou celular só vale ali.</li><li>Salve versões, aprove e exporte para o Elementor (grátis), HTML ou ZIP.</li></ol><h3 style="margin:14px 0 6px">Atalhos</h3><p class="muted" style="font-size:12.5px;line-height:1.7"><b>Espaço</b> segurado + arrastar: move a prancheta · <b>Z</b> segurado + clique: aproxima · <b>Z + Alt</b> + clique: afasta · <b>Alt + roda</b>: zoom no cursor · <b>Ctrl + / −</b>: zoom · <b>Ctrl 0</b>: ajustar · <b>Ctrl 1</b>: 100%</p><p class="muted" style="font-size:12.5px">Este módulo convive com <b>Sites e landing pages</b> (formulário). Nada daquele módulo foi alterado.</p></div>
       <div class="mz-launch-b"><button class="btn dark" onclick="mzOpen()">Abrir a mesa${pages.length ? ' (' + pages.length + ' página' + (pages.length > 1 ? 's' : '') + ')' : ''}</button><button class="btn" onclick="mzOpenImport()">⬆ Importar (Elementor, HTML, JSON)</button><button class="btn" onclick="mzThOpen()">🎁 Subir tema (Envato, ZIP)</button></div></div></div>` +
     (pages.length ? `<div class="panel"><h3 style="margin-top:0">Páginas do site</h3><div class="list">${pages.map(pg => `<div class="list-item"><div><strong>${esc(pg.name)}${pg.home ? ' · início' : ''}</strong><small>/${esc(pg.slug)} · ${pg.kind === 'campaign' ? 'campanha' : 'página'}${pg.priv ? ' · privada' : ''}</small></div><button class="btn sm" onclick="mzOpen('${pg.id}')">Abrir</button></div>`).join('')}</div></div>` : `<div class="panel"><h3 style="margin-top:0">Comece por um modelo</h3><div class="mz-tpls">${MZ_TEMPLATES.map(t => `<button class="mz-tpl" onclick="mzStartTpl('${t.id}')"><b>${t.name}</b><small>${t.desc}</small></button>`).join('')}<button class="mz-tpl" onclick="mzStartTpl('blank')"><b>Em branco</b><small>Comece do zero</small></button></div></div>`);
 }
@@ -10141,6 +10141,65 @@ function mzMeasureDraw(fr, f) {
     });
   }
 }
+
+</script>
+<script>
+/* Atalhos de navegação da Mesa, no estilo do Photoshop.
+   Espaço (segurado) + arrastar = mover a prancheta (mão).  Z (segurado) + clique = aproxima; Z + Alt + clique = afasta.
+   Alt + roda do mouse = zoom no ponto do cursor.  Ctrl + / Ctrl − = zoom, Ctrl 0 = ajustar, Ctrl 1 = 100%.
+   Funciona com o foco na Mesa ou dentro do site (iframe). Não age enquanto você digita um texto. */
+const MZK = {space: false, z: false, alt: false, ov: null, pan: null};
+const MZK_STEPS = [0.2, 0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 3, 4];
+const mzkCv = () => document.getElementById('mzCanvas');
+function mzkSetZoom(z, cx, cy) {   // zoom mantendo o ponto (cx, cy) da tela parado
+  const cv = mzkCv(); if (!cv) return; const old = mzZ(), nz = Math.max(0.2, Math.min(4, z)); if (Math.abs(nz - old) < 0.001) return;
+  const r = cv.getBoundingClientRect(); if (cx == null) { cx = r.left + r.width / 2; cy = r.top + r.height / 2; }
+  const px = (cv.scrollLeft + cx - r.left) / old, py = (cv.scrollTop + cy - r.top) / old;
+  MZ.fit = false; MZ.zoom = nz; mzLayoutFrames(); mzOverlayAll();
+  cv.scrollLeft = px * nz - (cx - r.left); cv.scrollTop = py * nz - (cy - r.top); if (typeof mzRulers === 'function') mzRulers();
+}
+function mzkStep(dir, cx, cy) {   // próximo degrau da escala (25%, 33%, 50%, 100%, 200%…)
+  const z = mzZ(); let t = z;
+  if (dir > 0) t = MZK_STEPS.find(s => s > z + 0.005) || z; else t = [...MZK_STEPS].reverse().find(s => s < z - 0.005) || z;
+  mzkSetZoom(t, cx, cy);
+}
+function mzkCursor() { if (!MZK.ov) return; MZK.ov.style.cursor = MZK.pan ? 'grabbing' : MZK.space ? 'grab' : MZK.alt ? 'zoom-out' : 'zoom-in'; }
+function mzkOverlay(on) {
+  if (!on) { if (MZK.ov) { MZK.ov.remove(); MZK.ov = null; } return; }
+  if (MZK.ov || !mzkCv()) return;
+  const r = mzkCv().getBoundingClientRect(), o = document.createElement('div'); o.className = 'mz-keyov';
+  o.style.cssText = `position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:9000;touch-action:none`;
+  o.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    if (MZK.space) { const cv = mzkCv(); MZK.pan = {x: e.clientX, y: e.clientY, sl: cv.scrollLeft, st: cv.scrollTop}; try { o.setPointerCapture(e.pointerId); } catch (x) { /* ok */ } mzkCursor(); }
+    else if (MZK.z) { e.altKey || MZK.alt ? mzkStep(-1, e.clientX, e.clientY) : mzkStep(1, e.clientX, e.clientY); }
+  });
+  o.addEventListener('pointermove', e => { const p = MZK.pan; if (!p) return; const cv = mzkCv(); cv.scrollLeft = p.sl - (e.clientX - p.x); cv.scrollTop = p.st - (e.clientY - p.y); if (typeof mzRulers === 'function') mzRulers(); });
+  const end = () => { if (MZK.pan) { MZK.pan = null; mzkCursor(); } }; o.addEventListener('pointerup', end); o.addEventListener('pointercancel', end);
+  o.addEventListener('wheel', e => { e.preventDefault(); if (e.altKey || e.ctrlKey) mzkStep(e.deltaY < 0 ? 1 : -1, e.clientX, e.clientY); else { const cv = mzkCv(); cv.scrollLeft += e.deltaX; cv.scrollTop += e.deltaY; } }, {passive: false});
+  document.body.appendChild(o); MZK.ov = o; mzkCursor();
+}
+function mzkSync() { mzkOverlay(MZK.space || MZK.z); mzkCursor(); }
+function mzkReset() { MZK.space = MZK.z = MZK.alt = false; MZK.pan = null; mzkOverlay(false); }
+function mzkDown(e) {
+  if (!MZ.open || MZ.editing || mzTyping(e)) return; const k = e.key, mod = e.ctrlKey || e.metaKey;
+  if (mod && !e.altKey && (k === '+' || k === '=' )) { e.preventDefault(); mzkStep(1); return; }
+  if (mod && !e.altKey && (k === '-' || k === '_')) { e.preventDefault(); mzkStep(-1); return; }
+  if (mod && k === '0') { e.preventDefault(); mzZoomFit(); return; }
+  if (mod && k === '1') { e.preventDefault(); mzkSetZoom(1); return; }
+  if (mod || (e.altKey && !MZK.z)) { if (k === 'Alt') MZK.alt = true; return; }
+  if (k === 'Alt') { MZK.alt = true; if (MZK.z) { e.preventDefault(); mzkCursor(); } return; }
+  if (k === ' ' || e.code === 'Space') { e.preventDefault(); if (!e.repeat) { MZK.space = true; mzkSync(); } return; }
+  if ((k === 'z' || k === 'Z') && !e.shiftKey) { e.preventDefault(); if (!e.repeat) { MZK.z = true; mzkSync(); } return; }
+}
+function mzkUp(e) {
+  const k = e.key; if (k === ' ' || e.code === 'Space') { MZK.space = false; MZK.pan = null; } if (k === 'z' || k === 'Z') MZK.z = false; if (k === 'Alt') MZK.alt = false;
+  mzkSync();
+}
+function mzKeysBind(d) { d.addEventListener('keydown', mzkDown, true); d.addEventListener('keyup', mzkUp, true); }
+mzKeysBind(document);
+window.addEventListener('blur', mzkReset);
+document.addEventListener('visibilitychange', () => { if (document.hidden) mzkReset(); });
 
 </script>
 <script>
