@@ -170,10 +170,22 @@ function drawText(ctx, L) {
   });
   ctx.restore(); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: lay.h, words}; return lay;
 }
-/* formas: retângulo (com cantos), elipse e arco (janela com topo redondo) */
+/* formas: retângulo (com cantos), elipse, arco (janela com topo redondo), triângulo, losango, hexágono, estrela, seta, balão, linha e anel.
+   Todas desenhadas na caixa x,y,w,h da camada (por isso também recortam fotos e aceitam gradiente, contorno e rotação). */
+const DZ_SHAPES = ['rect', 'ellipse', 'arch', 'triangle', 'diamond', 'hexagon', 'star', 'arrow', 'bubble', 'line', 'ring'];
+const DZ_POLY = {
+  triangle: [[.5, 0], [1, 1], [0, 1]], diamond: [[.5, 0], [1, .5], [.5, 1], [0, .5]], hexagon: [[.25, 0], [.75, 0], [1, .5], [.75, 1], [.25, 1], [0, .5]],
+  arrow: [[0, .3], [.58, .3], [.58, 0], [1, .5], [.58, 1], [.58, .7], [0, .7]],
+  star: Array.from({length: 10}, (_, i) => { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? .21 : .5; return [.5 + r * Math.cos(a), .5 + r * Math.sin(a)]; })
+};
 function shapePath(ctx, L) {
-  if (L.shape === 'ellipse') { ctx.beginPath(); ctx.ellipse(L.x + L.w / 2, L.y + L.h / 2, L.w / 2, L.h / 2, 0, 0, Math.PI * 2); }
-  else if (L.shape === 'arch') { const r = L.w / 2; ctx.beginPath(); ctx.moveTo(L.x, L.y + L.h); ctx.lineTo(L.x, L.y + r); ctx.arc(L.x + r, L.y + r, r, Math.PI, 0); ctx.lineTo(L.x + L.w, L.y + L.h); ctx.closePath(); }
+  const sh = L.shape, poly = DZ_POLY[sh];
+  if (sh === 'ellipse') { ctx.beginPath(); ctx.ellipse(L.x + L.w / 2, L.y + L.h / 2, L.w / 2, L.h / 2, 0, 0, Math.PI * 2); }
+  else if (sh === 'ring') { const cx = L.x + L.w / 2, cy = L.y + L.h / 2, t = Math.min(.9, Math.max(.05, +L.ringW || .22)); ctx.beginPath(); ctx.ellipse(cx, cy, L.w / 2, L.h / 2, 0, 0, Math.PI * 2); ctx.moveTo(cx + L.w / 2 * (1 - t), cy); ctx.ellipse(cx, cy, L.w / 2 * (1 - t), L.h / 2 * (1 - t), 0, 0, Math.PI * 2); }
+  else if (sh === 'arch') { const r = L.w / 2; ctx.beginPath(); ctx.moveTo(L.x, L.y + L.h); ctx.lineTo(L.x, L.y + r); ctx.arc(L.x + r, L.y + r, r, Math.PI, 0); ctx.lineTo(L.x + L.w, L.y + L.h); ctx.closePath(); }
+  else if (poly) { ctx.beginPath(); poly.forEach(([px, py], i) => { const X = L.x + px * L.w, Y = L.y + py * L.h; if (i) ctx.lineTo(X, Y); else ctx.moveTo(X, Y); }); ctx.closePath(); }
+  else if (sh === 'bubble') { const bh = L.h * .8; rr(ctx, L.x, L.y, L.w, bh, L.radius == null ? Math.min(L.w, bh) * .2 : L.radius); ctx.moveTo(L.x + L.w * .16, L.y + bh - 2); ctx.lineTo(L.x + L.w * .1, L.y + L.h); ctx.lineTo(L.x + L.w * .36, L.y + bh - 2); ctx.closePath(); }
+  else if (sh === 'line') rr(ctx, L.x, L.y, L.w, L.h, Math.min(L.w, L.h) / 2);
   else rr(ctx, L.x, L.y, L.w, L.h, L.radius);
 }
 let GRAIN_PAT = null;
@@ -183,9 +195,9 @@ function grainFill(ctx) {
 }
 function drawRect(ctx, L) {
   ctx.save(); ctx.globalAlpha = L.opacity == null ? 1 : L.opacity; shapePath(ctx, L);
-  if (L.grad) { const a = (L.grad.a || 0) * Math.PI / 180, cx = L.x + L.w / 2, cy = L.y + L.h / 2, d = Math.abs(L.w * Math.sin(a)) / 2 + Math.abs(L.h * Math.cos(a)) / 2, g = ctx.createLinearGradient(cx - Math.sin(a) * d, cy + Math.cos(a) * d, cx + Math.sin(a) * d, cy - Math.cos(a) * d); g.addColorStop(0, L.grad.c1); g.addColorStop(1, L.grad.c2); ctx.fillStyle = g; ctx.fill(); }
-  else if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(); }
-  if (L.grain) { ctx.save(); ctx.clip(); ctx.globalAlpha = (L.opacity == null ? 1 : L.opacity) * L.grain; ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = grainFill(ctx); ctx.fillRect(L.x, L.y, L.w, L.h); ctx.restore(); }
+  if (L.grad) { const a = (L.grad.a || 0) * Math.PI / 180, cx = L.x + L.w / 2, cy = L.y + L.h / 2, d = Math.abs(L.w * Math.sin(a)) / 2 + Math.abs(L.h * Math.cos(a)) / 2, g = ctx.createLinearGradient(cx - Math.sin(a) * d, cy + Math.cos(a) * d, cx + Math.sin(a) * d, cy - Math.cos(a) * d); g.addColorStop(0, L.grad.c1); g.addColorStop(1, L.grad.c2); ctx.fillStyle = g; ctx.fill(L.shape === 'ring' ? 'evenodd' : 'nonzero'); }
+  else if (L.fill) { ctx.fillStyle = L.fill; ctx.fill(L.shape === 'ring' ? 'evenodd' : 'nonzero'); }
+  if (L.grain) { ctx.save(); ctx.clip(L.shape === 'ring' ? 'evenodd' : 'nonzero'); ctx.globalAlpha = (L.opacity == null ? 1 : L.opacity) * L.grain; ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = grainFill(ctx); ctx.fillRect(L.x, L.y, L.w, L.h); ctx.restore(); }
   if (L.stroke && L.strokeW) { ctx.lineWidth = L.strokeW; ctx.strokeStyle = L.stroke; ctx.stroke(); } ctx.restore();
 }
 const IMGS = new Map();   // imgId → ImageBitmap
@@ -236,9 +248,44 @@ function drawVideoLayer(ctx, L) {
   ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = `600 ${Math.max(14, Math.round(s * 0.05))}px Inter, system-ui, sans-serif`; ctx.textBaseline = 'alphabetic'; ctx.fillText(String(L.name || 'Vídeo').slice(0, 60), x + s * 0.05, y + h - s * 0.05);
   ctx.restore(); LBOX[L.id] = {x, y, w, h};
 }
+/* desenho à mão (pincéis): traços guardados em L.strokes, com pontos relativos à camada (L.bw × L.bh é o tamanho original da caixa).
+   Tipos de traço: pen (caneta), marker (marcador), spray (aerógrafo) e erase (borracha, apaga só dentro deste desenho). */
+function dzSmooth(g, p) {
+  g.beginPath(); g.moveTo(p[0][0], p[0][1]);
+  if (p.length < 3) { for (let i = 1; i < p.length; i++) g.lineTo(p[i][0], p[i][1]); return; }
+  for (let i = 1; i < p.length - 1; i++) g.quadraticCurveTo(p[i][0], p[i][1], (p[i][0] + p[i + 1][0]) / 2, (p[i][1] + p[i + 1][1]) / 2);
+  g.lineTo(p[p.length - 1][0], p[p.length - 1][1]);
+}
+function dzPaintStroke(g, st) {
+  const p = st.p; if (!p || !p.length) return; g.save(); const s = Math.max(1, +st.s || 8), o = st.o == null ? 1 : st.o;
+  if (st.k === 'erase') { g.globalCompositeOperation = 'destination-out'; g.strokeStyle = g.fillStyle = '#000'; g.globalAlpha = o; }
+  else { g.strokeStyle = g.fillStyle = st.c || '#111111'; g.globalAlpha = o; }
+  if (st.k === 'spray') {
+    let seed = (st.seed >>> 0) || 1; const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }, n = Math.max(3, Math.round(s * .8)); let total = 0; g.globalAlpha = Math.min(1, o * .55); g.beginPath();
+    for (const q of p) { for (let i = 0; i < n && total < 60000; i++, total++) { const a = rnd() * 6.2832, r = s / 2 * Math.sqrt(rnd()), rad = Math.max(.6, s * .03); g.moveTo(q[0] + Math.cos(a) * r + rad, q[1] + Math.sin(a) * r); g.arc(q[0] + Math.cos(a) * r, q[1] + Math.sin(a) * r, rad, 0, 6.2832); } }
+    g.fill(); g.restore(); return;
+  }
+  g.lineCap = st.k === 'marker' ? 'square' : 'round'; g.lineJoin = 'round'; g.lineWidth = st.k === 'marker' ? s * 1.5 : s;
+  if (p.length === 1) { g.beginPath(); g.arc(p[0][0], p[0][1], g.lineWidth / 2, 0, 6.2832); g.fill(); } else { dzSmooth(g, p); g.stroke(); }
+  g.restore();
+}
+function drawStrokeLayer(ctx, L) {
+  const bw = L.bw || L.w || 1, bh = L.bh || L.h || 1, sx = L.w / bw, sy = L.h / bh, strokes = Array.isArray(L.strokes) ? L.strokes : [];
+  const paint = g => { g.save(); g.translate(L.x, L.y); g.scale(sx, sy); strokes.forEach(st => dzPaintStroke(g, st)); g.restore(); };
+  if (strokes.some(st => st.k === 'erase')) {
+    const off = document.createElement('canvas'); off.width = ctx.canvas.width; off.height = ctx.canvas.height; const g = off.getContext('2d'); g.setTransform(ctx.getTransform()); paint(g);
+    ctx.save(); const m = ctx.getTransform(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha *= L.opacity == null ? 1 : L.opacity; ctx.drawImage(off, 0, 0); ctx.setTransform(m); ctx.restore();
+  } else { ctx.save(); ctx.globalAlpha *= L.opacity == null ? 1 : L.opacity; paint(ctx); ctx.restore(); }
+  LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h};
+}
 function drawLayer(ctx, L) {
   if (L.hidden) return;
-  const draw = () => { if (L.type === 'path') drawPathLayer(ctx, L); else if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') { drawRect(ctx, L); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h}; } else if (L.type === 'image') drawImageLayer(ctx, L); else if (L.type === 'video') drawVideoLayer(ctx, L); };
+  const draw = () => {
+    const fx = L.type !== 'image' && L.shadow && L.shadow.c, bl = L.blend && L.blend !== 'normal' && L.blend;
+    if (fx || bl) { ctx.save(); if (bl) ctx.globalCompositeOperation = bl; if (fx) { ctx.shadowColor = L.shadow.c; ctx.shadowBlur = +L.shadow.b || 0; ctx.shadowOffsetX = +L.shadow.x || 0; ctx.shadowOffsetY = +L.shadow.y || 0; } }
+    if (L.type === 'path') drawPathLayer(ctx, L); else if (L.type === 'text') drawText(ctx, L); else if (L.type === 'rect') { drawRect(ctx, L); LBOX[L.id] = {x: L.x, y: L.y, w: L.w, h: L.h}; } else if (L.type === 'image') drawImageLayer(ctx, L); else if (L.type === 'video') drawVideoLayer(ctx, L); else if (L.type === 'draw') drawStrokeLayer(ctx, L);
+    if (fx || bl) ctx.restore();
+  };
   if (!L.rot) return draw();
   const h = L.type === 'text' ? layoutText(L).h : L.h, cx = L.x + L.w / 2, cy = L.y + h / 2;
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(L.rot * Math.PI / 180); ctx.translate(-cx, -cy); draw(); ctx.restore();

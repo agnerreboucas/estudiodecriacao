@@ -16,7 +16,7 @@ function dzAddImage() {
     let bmp; try { bmp = await createImageBitmap(file); } catch (e) { toast('Não consegui ler essa imagem. Use PNG, JPG, WebP ou GIF.'); return; }
     const id = uid('img'); await imgPut(id, file); IMGS.set(id, bmp);
     const f = dzSet().format, r = bmp.width / bmp.height; let w = Math.min(f.w * 0.7, bmp.width), h = w / r; if (h > f.h * 0.7) { h = f.h * 0.7; w = h * r; }
-    const L = IM('photo', {x: Math.round((f.w - w) / 2), y: Math.round((f.h - h) / 2), w: Math.round(w), h: Math.round(h), imgId: id, radius: 0}); L.role = 'image'; L.name = file.name;
+    const L = IM('photo', {x: Math.round((f.w - w) / 2), y: Math.round((f.h - h) / 2), w: Math.round(w), h: Math.round(h), imgId: id, radius: 0}); L.role = 'image'; L.name = file.name; L.free = true;
     dzSlide().layers.push(L); dz.sel = L.id; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel(); toast('Imagem inserida. Arraste, use as alças dos cantos para redimensionar.');
   });
 }
@@ -38,7 +38,7 @@ async function dzVideoAdd() {
   if (url && !videoEmbed(url)) { toast('Link inválido. Use um endereço que comece com http:// ou https://'); return; }
   let fileId = ''; if (VD_FILE) { fileId = uid('vid'); await imgPut(fileId, VD_FILE); }
   const f = dzSet().format, w = Math.round(f.w * 0.5), h = Math.round(w * 9 / 16), off = 40 * dzSlide().layers.filter(l => l.type === 'video').length;
-  const L = {id: lid(), type: 'video', role: 'video', x: Math.round((f.w - w) / 2) + off, y: Math.round((f.h - h) / 2) + off, w, h, url: fileId ? '' : url, fileId, fileName: VD_FILE ? VD_FILE.name : '', name: name || (VD_FILE ? VD_FILE.name : (videoEmbed(url) || {}).host || 'Vídeo'), opacity: 1};
+  const L = {id: lid(), type: 'video', role: 'video', x: Math.round((f.w - w) / 2) + off, y: Math.round((f.h - h) / 2) + off, w, h, url: fileId ? '' : url, fileId, free: true, fileName: VD_FILE ? VD_FILE.name : '', name: name || (VD_FILE ? VD_FILE.name : (videoEmbed(url) || {}).host || 'Vídeo'), opacity: 1};
   VD_FILE = null; closeModal(); dzSlide().layers.push(L); dz.sel = L.id; dzCommit(); dzInspector(); dzDraw(); dzSlidesPanel();
 }
 function dzVideoInspector(L, geo, acts) {

@@ -9,9 +9,9 @@ if out.exists(): shutil.rmtree(out)
 (out / 'js').mkdir(parents=True); (out / 'css').mkdir(); (out / 'api').mkdir()
 SCRIPTS = ['util','icons','store','integrations','ai-prefs','core','design-data','logo-fonts','present','design-engine','design-brand','design-layouts','ai-layout','fonts-mine','imglib','bulk','ofertas','integracoes',
   'editorial-skill','editorial','editorial-ent','landing','landing-ui','builder','builder-ui','sections','tpl-import','tpl-ui','wp-theme-php','wp-theme','wp-elementor','pacote',
-  'skills-text','skills-ui','doc-import','acc','mz-core','mz-presets','mz-editor','mz-actions','mz-panels','mz-modals','mz-export','mz-elementor-in','mz-ai','mz-free','mz-design','mz-aiimg','mz-themes','atalhos-mesa',
+  'skills-text','skills-ui','doc-import','acc','mz-core','mz-presets','mz-editor','mz-actions','mz-panels','mz-modals','mz-export','mz-elementor-in','mz-ai','mz-free','mz-design','mz-aiimg','mz-themes','mz-aula','mz-links','mz-refs','mz-ui','atalhos-mesa',
   'leads-ui','site-ui','sites-boot','nav','responsive']
-CSS = ['base','bulk','studio','responsive','menu','mesa']
+CSS = ['base','bulk','studio','responsive','menu','mesa','mesa-escura']
 API = ['.htaccess','_lib.php','_dispatch.php','ai.php','analyze.php','auth.php','config.sample.php','image.php','keys.php','leads.php','lp.php','models.php','status.php','workspace.php']
 for s in SCRIPTS:
     src = root / 'js' / (s + '.js')

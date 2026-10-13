@@ -177,7 +177,7 @@ async function mzThPayload(id) {
 }
 async function mzThUsePage(th, pid) {
   try { const P = await mzThPayload(th), pg = P.pages.find(p => p.id === pid); if (!pg) return; const m = mzM(); if (m.pages.length >= MZ_LIMITS.pages) { toast('Limite de páginas atingido.'); return; }
-    const root = mzFresh(pg.root), c = mzNormPage({id: mzId(), name: pg.name, slug: mzUniqueSlug(mzSlug(pg.name)), root}); c.id = mzId(); c.home = false; m.pages.push(c); persist(); mzPageOpen(c.id); toast('Página “' + pg.name + '” do tema aberta. Troque textos e imagens pelos do projeto.'); } catch (e) { toast(e.message); }
+    const root = mzFresh(pg.root), c = mzNormPage({id: mzId(), name: pg.name, slug: mzUniqueSlug(mzSlug(pg.name)), root}); c.id = mzId(); c.home = false; m.pages.push(c); persist(); mzPageOpen(c.id); toast('Página “' + pg.name + '” do tema aberta. Troque textos e imagens pelos do projeto.'); if (typeof mzFontsAfterImport === 'function') setTimeout(mzFontsAfterImport, 700); } catch (e) { toast(e.message); }
 }
 function mzThSection(th, sid) { const P = MZTH.cache.get(th); const s = P && P.sections.find(x => x.id === sid); return s ? mzFresh(s.root) : null; }
 async function mzThApply(th) {

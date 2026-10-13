@@ -249,7 +249,7 @@ function dzResize(L, d, p, free) {
   const fx = left ? o.x + o.w : o.x, fy = top ? o.y + b.h : o.y;               // âncora = lado/canto oposto (fica parado)
   let nw = o.w, nh = b.h;
   if (left || right) nw = Math.max(isT ? 60 : 20, left ? fx - q.x : q.x - fx);
-  if (top || bot) nh = Math.max(20, top ? fy - q.y : q.y - fy);
+  if (top || bot) nh = Math.max(L.shape === 'line' ? 2 : 20, top ? fy - q.y : q.y - fy);
   if (corner && (!free || isT)) {                                              // proporcional
     const kk = Math.max(isT ? .15 : 20 / Math.min(o.w, b.h), Math.max(nw / o.w, nh / b.h));
     nw = o.w * kk; nh = b.h * kk;
@@ -315,6 +315,7 @@ function dzInspector() {
   else if (L.type === 'rect') el.innerHTML = `<h3>Forma <small class="muted">${esc(L.role)}</small></h3><div class="ins-row">${col('fill', 'Cor')}${col('stroke', 'Borda')}</div>${rg('radius', 'Cantos', 0, 400, 1)}${rg('strokeW', 'Espessura da borda', 0, 30, 1)}${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
   else if (L.type === 'path') el.innerHTML = `<h3>Símbolo <small class="muted">${esc(L.role)}</small></h3><div class="ins-row">${col('fill', 'Cor')}${col('stroke', 'Contorno')}</div>${rg('opacity', 'Opacidade', 0, 1, 0.05)}<h4>Posição e tamanho</h4>${geo}<h4>Camada</h4>${acts}`;
   else if (L.type === 'video') el.innerHTML = dzVideoInspector(L, geo, acts);
+  else if (L.type === 'draw') el.innerHTML = dzDrawInspector(L, geo, acts, rg);
   else if (L.role === 'logo') el.innerHTML = dzLogoInspector(L, geo, acts, rg);
   else el.innerHTML = `<h3>Foto</h3><button class="btn sm dark" onclick="dzPickPhoto()">${L.imgId ? 'Trocar foto' : 'Enviar foto'}</button> <button class="btn sm" onclick="dzLibPhoto()">📚 Biblioteca</button> <button class="btn sm" onclick="dzStockPhoto()" title="Banco de imagens (Magnific)">🔎 Banco</button> ${L.imgId && stockReady() ? '<button class="btn sm" onclick="dzUpscalePhoto()" title="Aumentar a resolução (Magnific)">⤴ Melhorar</button>' : ''}<button class="btn sm" onclick="dzGenPhoto()" title="${imageReady() ? 'Gerar com IA' : 'Configure OPENAI_API_KEY no servidor'}">✦ Gerar com IA</button> ${L.imgId ? '<button class="btn sm" onclick="dzProp(\'imgId\',\'\')">Remover</button>' : ''}
     <label class="ins">Tratamento (${PHOTO_STYLES.length} estilos)<select onchange="dzPhotoStyle(this.value)"><option value="">Sem tratamento</option>${PHOTO_STYLES.map(x => `<option value="${x.id}" ${L.filter === x.filter && L.ovColor === x.ovColor ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>

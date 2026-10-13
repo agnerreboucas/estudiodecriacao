@@ -380,6 +380,44 @@ function normalizeMesaThemes(x) {
     pages: (Array.isArray(t.pages) ? t.pages : []).slice(0, 60).filter(p => p && id(p.id)).map(p => ({id: id(p.id), name: nm(p.name, 80), th: id(p.th)})), sections: (Array.isArray(t.sections) ? t.sections : []).slice(0, 200).filter(p => p && id(p.id)).map(p => ({id: id(p.id), name: nm(p.name, 80), n: Math.max(0, Math.min(2000, +p.n || 0)), th: id(p.th)})),
     imgs: (Array.isArray(t.imgs) ? t.imgs : []).slice(0, 600).map(id).filter(Boolean), notes: (Array.isArray(t.notes) ? t.notes : []).slice(0, 12).map(n => nm(n, 240))}));
 }
+/* Estúdio de Design: valida os campos novos da mesa (formas, desenho à mão, sombra, mistura, grupos, guias, versões, biblioteca da arte, referência).
+   Não mexe no resto: as camadas antigas passam como estão. */
+const DZ_SHAPE_IDS = ['rect', 'ellipse', 'arch', 'triangle', 'diamond', 'hexagon', 'star', 'arrow', 'bubble', 'line', 'ring'], DZ_BLEND_IDS = ['multiply', 'screen', 'overlay', 'darken', 'lighten', 'soft-light', 'hard-light', 'difference', 'color-dodge', 'color-burn'];
+function normalizeDzLayer(L) {
+  if (!L || typeof L !== 'object') return null; const num = (v, d, lo, hi) => { v = +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; }, hexOk = v => /^#[0-9a-f]{3,8}$/i.test(String(v)) || /^rgba?\([\d.,\s%]+\)$/i.test(String(v));
+  if (!safeId(L.id)) L.id = uid('L');
+  if (L.shape != null && !DZ_SHAPE_IDS.includes(L.shape)) delete L.shape;
+  if (L.blend != null && !DZ_BLEND_IDS.includes(L.blend)) delete L.blend;
+  if (L.shadow != null) { const h = L.shadow; L.shadow = h && typeof h === 'object' && hexOk(h.c) ? {x: num(h.x, 0, -400, 400), y: num(h.y, 0, -400, 400), b: num(h.b, 0, 0, 400), c: String(h.c)} : undefined; if (!L.shadow) delete L.shadow; }
+  if (L.group != null) { if (safeId(L.group)) L.group = String(L.group); else delete L.group; }
+  if (L.origin != null && !safeId(L.origin)) delete L.origin;
+  if (L.name != null) L.name = String(L.name).slice(0, 60);
+  if (L.free != null) L.free = !!L.free; if (L.ringW != null) L.ringW = num(L.ringW, .22, .05, .9);
+  if (L.type === 'draw') {
+    L.x = num(L.x, 0, -20000, 20000); L.y = num(L.y, 0, -20000, 20000); L.w = num(L.w, 1, 1, 20000); L.h = num(L.h, 1, 1, 20000); L.bw = num(L.bw, L.w, 1, 20000); L.bh = num(L.bh, L.h, 1, 20000); L.opacity = num(L.opacity, 1, 0, 1);
+    L.strokes = (Array.isArray(L.strokes) ? L.strokes : []).slice(0, 600).map(st => st && typeof st === 'object' ? {k: ['pen', 'marker', 'spray', 'erase'].includes(st.k) ? st.k : 'pen', c: hexOk(st.c) ? String(st.c) : '#111111', s: num(st.s, 8, 1, 400), o: num(st.o, 1, 0, 1), seed: Math.floor(num(st.seed, 1, 0, 4294967295)),
+      p: (Array.isArray(st.p) ? st.p : []).slice(0, 6000).filter(q => Array.isArray(q) && isFinite(+q[0]) && isFinite(+q[1])).map(q => [Math.round(num(q[0], 0, -100000, 100000) * 10) / 10, Math.round(num(q[1], 0, -100000, 100000) * 10) / 10])} : null).filter(st => st && st.p.length);
+  }
+  return L;
+}
+function normalizeDzSlides(arr, max) {
+  return (Array.isArray(arr) ? arr : []).filter(sl => sl && typeof sl === 'object' && Array.isArray(sl.layers)).slice(0, max || 60).map(sl => { if (!safeId(sl.id)) sl.id = uid('S'); sl.layers = sl.layers.map(normalizeDzLayer).filter(Boolean); return sl; });
+}
+function normalizeDzSet(set) {
+  if (!set || typeof set !== 'object') return null; const str = (v, n) => String(v == null ? '' : v).slice(0, n), num = (v, d, lo, hi) => { v = +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+  if (Array.isArray(set.slides)) set.slides = normalizeDzSlides(set.slides, 120);
+  if (set.guides && typeof set.guides === 'object') { const g = set.guides; g.lines = (Array.isArray(g.lines) ? g.lines : []).filter(l => l && (l.a === 'v' || l.a === 'h') && isFinite(+l.p)).slice(0, 80).map(l => ({a: l.a, p: Math.round(num(l.p, 0, -20000, 20000))})); }
+  else if (set.guides != null) delete set.guides;
+  if (set.versions != null) set.versions = (Array.isArray(set.versions) ? set.versions : []).filter(v => v && typeof v === 'object' && Array.isArray(v.slides)).slice(-25).map(v => ({id: safeId(v.id) ? v.id : uid('ver'), name: str(v.name, 60) || 'Versão', at: str(v.at, 40), approved: !!v.approved, auto: !!v.auto, slides: normalizeDzSlides(v.slides, 120)}));
+  if (set.refImg != null) { const r = set.refImg; set.refImg = r && typeof r === 'object' && safeId(r.imgId) ? {imgId: r.imgId, opacity: num(r.opacity, .4, .05, 1), on: r.on !== false, name: str(r.name, 80)} : undefined; if (!set.refImg) delete set.refImg; }
+  if (set.tk && typeof set.tk === 'object') { if (set.tk.margin != null) set.tk.margin = Math.round(num(set.tk.margin, 90, 0, 1000)); }
+  return set;
+}
+function normalizeDzDesign(d) {
+  if (!d || typeof d !== 'object') return d; d.sets = (Array.isArray(d.sets) ? d.sets : []).map(normalizeDzSet).filter(Boolean);
+  d.lib = (Array.isArray(d.lib) ? d.lib : []).filter(c => c && typeof c === 'object' && Array.isArray(c.layers)).slice(0, 80).map(c => ({id: safeId(c.id) ? c.id : uid('cp'), name: String(c.name || 'Componente').slice(0, 60), w: Math.max(1, +c.w || 1), h: Math.max(1, +c.h || 1), layers: c.layers.slice(0, 40).map(normalizeDzLayer).filter(Boolean)}));
+  return d;
+}
 function normalize(s) {
   const base = seedState();
   if (!s || typeof s !== 'object' || !Array.isArray(s.projects)) return base;
@@ -392,7 +430,7 @@ function normalize(s) {
   s.templates = (Array.isArray(s.templates) ? s.templates : []).filter(t => t && typeof t === 'object' && Array.isArray(t.slides) && t.format).map(t => { if (!safeId(t.id)) t.id = uid('tp'); t.kind = t.kind === 'deck' ? 'deck' : 'set'; t.name = String(t.name || 'Modelo').slice(0, 80); return t; });
   s.projects = s.projects.filter(p => p && typeof p === 'object').map(p => {
     if (!safeId(p.id)) p.id = uid('p');
-    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.identity = normalizeIdentity(q.identity); q.ficha = normalizeFicha(q.ficha); q.intake = normalizeIntake(q.intake); delete q.socialhub; q.campaigns = normalizeCampaigns(q.campaigns); q.engine = normalizeEngine(q.engine); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); q.portal = normalizePortal(q.portal); q.mesa = typeof normalizeMesa === 'function' ? normalizeMesa(q.mesa) : (q.mesa || {}); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); return q;
+    const q = mergeDefaults(p, newProject(p.name || 'Projeto', p.desc)); q.ebooks = normalizeEbooks(q.ebooks); q.layouts = normalizeLayouts(q.layouts); q.motor = normalizeMotor(q.motor); q.cover = normalizeCover(q.cover); q.kdp = normalizeKdp(q.kdp); q.editorial = normalizeEditorial(q.editorial); q.carousel = normalizeCarousel(q.carousel); q.carousels = normalizeCarousels(q.carousels, q.carousel); q.feeds = normalizeFeeds(q.feeds); q.grids = normalizeGrids(q.grids); q.social = normalizeSocial(q.social); q.landings = normalizeLandings(q.landings); q.products = normalizeProducts(q.products); q.identity = normalizeIdentity(q.identity); q.ficha = normalizeFicha(q.ficha); q.intake = normalizeIntake(q.intake); delete q.socialhub; q.campaigns = normalizeCampaigns(q.campaigns); q.engine = normalizeEngine(q.engine); if (q.video && typeof q.video === 'object') q.video.scripts = normalizeVideoScripts(q.video.scripts); q.stories = normalizeStories(q.stories); q.portal = normalizePortal(q.portal); q.mesa = typeof normalizeMesa === 'function' ? normalizeMesa(q.mesa) : (q.mesa || {}); if (q.pre) q.pre.journey = migrateJourney(q.pre.journey); q.sites = normalizeSites(q.sites); q.design = normalizeDzDesign(q.design); return q;
   });
   s.creatives = (Array.isArray(s.creatives) ? s.creatives : []).filter(c => c && typeof c === 'object').map(c => {
     if (!safeId(c.id)) c.id = uid('c');

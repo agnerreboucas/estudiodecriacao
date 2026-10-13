@@ -26,7 +26,8 @@ function packBits(src) {
 function packPlane(plane, w, h) { const rows = []; let total = 0; for (let y = 0; y < h; y++) { const r = packBits(plane.subarray(y * w, (y + 1) * w)); rows.push(r); total += r.length; } return {rows, total}; }
 const ROLE_NAME = {title: 'Título', body: 'Texto', kicker: 'Chamada', 'cta-text': 'Texto do botão', 'cta-fill': 'Botão', 'accent-fill': 'Destaque', photo: 'Foto', overlay: 'Película', brand: 'Marca', muted: 'Apoio', panel: 'Painel'};
 function layerName(L) {
-  const base = ROLE_NAME[L.role] || (L.type === 'text' ? 'Texto' : L.type === 'image' ? 'Foto' : 'Forma');
+  if (L.type !== 'text' && L.name) return String(L.name).slice(0, 40);
+  const base = ROLE_NAME[L.role] || (L.type === 'text' ? 'Texto' : L.type === 'image' ? 'Foto' : L.type === 'draw' ? 'Desenho' : 'Forma');
   return L.type === 'text' ? `${base}: ${String(L.content).replace(/\*\*/g, '').replace(/\s+/g, ' ').slice(0, 24)}` : base;
 }
 function renderLayerData(L, box) {

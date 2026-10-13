@@ -5,6 +5,7 @@
 function scaleSlide(s, kx, ky) {
   const k = Math.min(kx, ky);
   s.layers.forEach(l => {
+    if (l.shadow) l.shadow = Object.assign({}, l.shadow, {x: Math.round((l.shadow.x || 0) * k), y: Math.round((l.shadow.y || 0) * k), b: Math.round((l.shadow.b || 0) * k)});
     if (l.type === 'path') { l.x = Math.round(l.x * kx); l.y = Math.round(l.y * ky); l.w = Math.round(l.w * kx); l.h = Math.round(l.h * ky); return; }
     if (l.role === 'logo') { const cx = (l.x + l.w / 2) * kx, cy = (l.y + l.h / 2) * ky; l.w = Math.round(l.w * k); l.h = Math.round(l.h * k); l.x = Math.round(Math.max(0, cx - l.w / 2)); l.y = Math.round(Math.max(0, cy - l.h / 2)); return; }
     l.x = Math.round(l.x * kx); l.y = Math.round(l.y * ky); l.w = Math.round(l.w * kx); if (l.blur) l.blur = Math.round(l.blur * k * 10) / 10; if (l.strokeW) l.strokeW = Math.max(1, Math.round(l.strokeW * k));
@@ -63,9 +64,9 @@ function slideCopy(sl) {
 function resizeSlide(sl, from, to, tk) {
   if (sl.isLogo || sl.keep) return fitLogoSlide(sl, from, to);
   const rf = from.w / from.h, rt = to.w / to.h, rel = rt / rf, wf = isWide(from), wt = isWide(to);
-  if ((wf === wt) && rel >= (wt ? 0.8 : 0.7) && rel <= (wt ? 1.25 : 1.45)) return scaleSlide(cloneSlide(sl), to.w / from.w, to.h / from.h);
+  if ((wf === wt) && rel >= (wt ? 0.8 : 0.7) && rel <= (wt ? 1.25 : 1.45)) { const c = cloneSlide(sl); c.origin = sl.id; c.layers.forEach((l, i) => { l.origin = sl.layers[i].id; }); return scaleSlide(c, to.w / from.w, to.h / from.h); }
   if (sl.pm && typeof palette === 'function') { const pl = palette(tk, sl.pm); tk = Object.assign({}, tk, {bg: pl.bg, fg: pl.fg, accent: pl.acc, muted: pl.mut}); }
-  const cp = slideCopy(sl), photoFull = cp.photo && cp.photo.w >= from.w * 0.95 && cp.photo.h >= from.h * 0.95;
+  const used = {}, cp = slideCopy(sl), photoFull = cp.photo && cp.photo.w >= from.w * 0.95 && cp.photo.h >= from.h * 0.95;
   const layout = !cp.photo ? 'none' : photoFull ? 'full' : 'auto';
   const copy = {kicker: cp.kicker, title: cp.title || 'Título', sub: cp.sub, button: cp.button};
   const out = slideAd(tk, copy, to, cp.brand, layout);
@@ -75,8 +76,22 @@ function resizeSlide(sl, from, to, tk) {
   if (cp.photo) { const P = out.layers.find(l => l.type === 'image' && l.role === 'photo'); if (P) Object.assign(P, {imgId: cp.photo.imgId, filter: cp.photo.filter, ovColor: cp.photo.ovColor, ovMode: cp.photo.ovMode, brief: cp.photo.brief, fx: cp.photo.fx, fy: cp.photo.fy}); }
   const lg = sl.layers.find(l => l.type === 'image' && l.role === 'logo');
   if (lg) { const k = Math.min(to.w / from.w, to.h / from.h), w = Math.round(lg.w * k), h = Math.round(lg.h * k), cx = (lg.x + lg.w / 2) / from.w, cy = (lg.y + lg.h / 2) / from.h; out.layers.push(Object.assign(cloneSlide({layers: [lg]}).layers[0], {w, h, x: Math.round(Math.min(Math.max(0, cx * to.w - w / 2), to.w - w)), y: Math.round(Math.min(Math.max(0, cy * to.h - h / 2), to.h - h))})); }
-  out.bg = sl.bg || tk.bg;
+  out.bg = sl.bg || tk.bg; out.origin = sl.id;
+  out.layers.forEach(l => { const m = sl.layers.find(x => x.role === l.role && x.type === l.type && !(x.id in used)); if (m && l.role && l.role !== 'logo') { l.origin = m.id; used[m.id] = 1; } });
+  carryFree(sl, out, from, to);
   return out;
+}
+/* camadas livres (formas, desenhos, elementos da mesa) não têm papel no modelo: na reconstrução elas vão junto, em escala uniforme e na mesma posição relativa */
+function carryFree(sl, out, from, to) {
+  const k = Math.min(to.w / from.w, to.h / from.h), r = v => Math.round(v * k * 10) / 10;
+  sl.layers.filter(l => l.free).forEach(l => {
+    const c = JSON.parse(JSON.stringify(l)), h0 = l.type === 'text' ? layoutText(l).h : l.h; c.id = lid(); c.origin = l.id;
+    const cx = (l.x + l.w / 2) / from.w, cy = (l.y + h0 / 2) / from.h; c.w = Math.max(2, Math.round(l.w * k));
+    if (l.type === 'text') { c.size = Math.max(8, r(l.size)); if (l.ls) c.ls = r(l.ls); if (l.blur) c.blur = r(l.blur); if (l.spans) c.spans.forEach(sp => { if (sp.st.size) sp.st.size = r(sp.st.size); }); } else { c.h = Math.max(2, Math.round(h0 * k)); if (l.radius) c.radius = Math.round(l.radius * k); }
+    if (l.strokeW) c.strokeW = Math.max(1, Math.round(l.strokeW * k)); if (l.shadow) c.shadow = Object.assign({}, l.shadow, {x: r(l.shadow.x || 0), y: r(l.shadow.y || 0), b: r(l.shadow.b || 0)});
+    const ch = c.type === 'text' ? layoutText(c).h : c.h; c.x = Math.round(Math.min(Math.max(0, cx * to.w - c.w / 2), Math.max(0, to.w - c.w))); c.y = Math.round(Math.min(Math.max(0, cy * to.h - ch / 2), Math.max(0, to.h - ch)));
+    out.layers.push(c);
+  });
 }
 /* fontes já precisam estar carregadas (use ensureSetResources antes) */
 function resizeSetSync(set, to, name) {

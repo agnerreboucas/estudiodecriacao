@@ -4,6 +4,9 @@ O menu lateral do Studio segue a ordem real de trabalho: **do cliente à venda**
 
 > Regra de ouro: tudo o que o Studio escreve é **rascunho editável**. O que estiver entre colchetes, como `[CONFIRMAR]`, é uma decisão sua. O Studio nunca inventa dado clínico, financeiro ou jurídico.
 
+## As duas mesas (sites e posts)
+Tanto a **Mesa de páginas** quanto a **mesa do Estúdio** têm trilho de ferramentas à esquerda, camadas, biblioteca, assets, referências, guias arrastáveis das réguas, imãs com distância em pixels, versões (até 25), sistema de design e painel da direita em abas (Conteúdo, Estilo, Layout, Avançado, Responsivo). Nos sites há também **Links** (mapa e verificador), **Fontes**, blocos e navegação de **Aula**. Nos posts há **Pincel** e **Borracha**, 11 formas e o botão **Tamanhos**. A tecla **?** mostra todos os atalhos. Lista completa em `docs/MESA-FUNCOES.md`.
+
 ## Atalhos das mesas (como no Photoshop)
 Na Mesa de páginas e na mesa do Estúdio: **Espaço** segurado + arrastar move a prancheta; **Z** + clique aproxima; **Z + Alt** + clique afasta; **Alt + roda do mouse** dá zoom no cursor; **Ctrl +** e **Ctrl −** mudam o zoom; **Ctrl 0** ajusta à tela; **Ctrl 1** vai a 100%. O zoom vai até 400%. Os atalhos não agem enquanto você digita.
 

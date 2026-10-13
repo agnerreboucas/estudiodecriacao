@@ -12,6 +12,8 @@ const MZ_PROPS = ('display flexDirection flexWrap justifyContent alignItems alig
 const MZ_PROPSET = new Set(MZ_PROPS);
 const MZ_INNER = new Set(['display', 'flexDirection', 'flexWrap', 'justifyContent', 'alignItems', 'alignContent', 'gap', 'rowGap', 'columnGap', 'gridTemplateColumns', 'gridTemplateRows', 'gridAutoFlow', 'placeItems']);
 const MZ_PX = new Set(['top', 'right', 'bottom', 'left', 'width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight', 'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft', 'padding', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'gap', 'rowGap', 'columnGap', 'fontSize', 'borderRadius', 'borderWidth', 'letterSpacing', 'flexBasis']);
+/* extensões: novos tipos de elemento (mz-aula.js) entram aqui; CSS e JS extras vão em todo HTML gerado */
+const MZ_EXT = {types: {}, css: '', js: ''};
 const MZ_LIMITS = {nodes: 3000, depth: 14, kids: 250, text: 20000, versions: 25, pages: 40, comps: 60, lib: 200};
 const mzId = () => 'n' + Math.random().toString(36).slice(2, 9);
 const mzKebab = k => k.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
@@ -22,7 +24,7 @@ function mzDsDefault() {
   return {colors: {primary: '#111111', secondary: '#5d6068', accent: '#e4572e', background: '#ffffff', text: '#111111', muted: '#6b7280', success: '#16a34a', warning: '#d97706', error: '#dc2626'}, extra: [], fonts: {heading: 'Poppins', body: 'Inter'},
     type: {h1: {size: 56, weight: 800, lh: 1.05, ls: -1}, h2: {size: 40, weight: 700, lh: 1.12, ls: -0.5}, h3: {size: 26, weight: 700, lh: 1.2, ls: 0}, body: {size: 17, weight: 400, lh: 1.6, ls: 0}, small: {size: 14, weight: 400, lh: 1.5, ls: 0}, button: {size: 16, weight: 700, lh: 1.2, ls: 0}},
     space: {xs: 4, sm: 8, md: 16, lg: 32, xl: 64, xxl: 96}, radius: {sm: 6, md: 12, lg: 24}, border: {width: 1, color: '#e4e4ea'},
-    shadow: {sm: '0 1px 2px rgba(0,0,0,.08)', md: '0 8px 24px -8px rgba(0,0,0,.22)', lg: '0 24px 60px -20px rgba(0,0,0,.35)'}, width: 1140};
+    shadow: {sm: '0 1px 2px rgba(0,0,0,.08)', md: '0 8px 24px -8px rgba(0,0,0,.22)', lg: '0 24px 60px -20px rgba(0,0,0,.35)'}, width: 1140, gfonts: [], custom: []};
 }
 const mzHex = v => /^#[0-9a-f]{6}$/i.test(String(v || ''));
 const mzFont = v => String(v || '').replace(/[^\w \-]/g, '').trim().slice(0, 60);
@@ -36,7 +38,10 @@ function mzNormDs(x) {
   Object.keys(D.radius).forEach(k => { D.radius[k] = num(x.radius && x.radius[k], D.radius[k], 0, 200); });
   if (x.border) { D.border.width = num(x.border.width, 1, 0, 20); if (mzHex(x.border.color)) D.border.color = x.border.color; }
   Object.keys(D.shadow).forEach(k => { const s = x.shadow && x.shadow[k]; if (typeof s === 'string' && /^[\w\s#%.,()\-]{0,120}$/.test(s)) D.shadow[k] = s; });
-  D.width = num(x.width, 1140, 600, 2400); return D;
+  D.width = num(x.width, 1140, 600, 2400);
+  D.gfonts = [...new Set((Array.isArray(x.gfonts) ? x.gfonts : []).map(mzFont).filter(f => /^[A-Za-z][\w ]{1,38}$/.test(f)))].slice(0, 20);
+  D.custom = (Array.isArray(x.custom) ? x.custom : []).slice(0, 12).map(c => { if (!c || typeof c !== 'object') return null; const fam = mzFont(c.family), im = /^[\w-]{1,80}$/.test(String(c.imgId || '')) ? String(c.imgId) : ''; return fam && im ? {id: /^[\w-]{1,40}$/.test(String(c.id || '')) ? String(c.id) : mzId(), family: fam, imgId: im, weight: [100, 200, 300, 400, 500, 600, 700, 800, 900].includes(+c.weight) ? +c.weight : 400, italic: !!c.italic, fmt: ['woff2', 'woff', 'ttf', 'otf'].includes(c.fmt) ? c.fmt : 'ttf'} : null; }).filter(Boolean);
+  return D;
 }
 /* tokens → CSS (variáveis e classes de tipografia). Trocou o token, todas as páginas mudam. */
 function mzDsCss(ds) {
@@ -58,6 +63,7 @@ function mzDsFromBrand(p) {
 const MZ_TYPO_DEFAULT = {heading: 'h2', text: 'body', button: 'button', badge: 'small', list: 'body', menu: 'body', input: 'body', accordion: 'body', tabs: 'body', table: 'body', timeline: 'body', countdown: 'h3', checkbox: 'body', radio: 'body'};
 function mzNode(type, props, style, children, extra) {
   const n = Object.assign({id: mzId(), type, name: '', props: props || {}, style: {d: {}, t: {}, m: {}}, children: children || [], hidden: false, locked: false, cls: '', htmlId: '', attrs: {}, css: '', anim: {type: '', dur: 600, delay: 0}, vis: {d: true, t: true, m: true, from: '', to: '', param: ''}, typo: ''}, extra || {});
+  if (MZ_EXT.types[type]) n.props = mzNormProps(type, n.props);
   if (style) { if (style.d || style.t || style.m) n.style = {d: Object.assign({}, style.d), t: Object.assign({}, style.t), m: Object.assign({}, style.m)}; else n.style.d = Object.assign({}, style); }
   return n;
 }
@@ -138,6 +144,7 @@ function mzNormProps(type, p) {
   else if (type === 'section' || type === 'container') { o.boxed = !!p.boxed; o.w = (+p.w || 0) ? Math.max(300, Math.min(2400, +p.w)) : 0; o.tag = ['section', 'header', 'footer', 'main', 'div'].includes(p.tag) ? p.tag : (type === 'section' ? 'section' : 'div'); }
   else if (type === 'link') { o.href = MZ_URL(p.href); o.newTab = !!p.newTab; }
   else if (type === 'form') { o.action = MZ_URL(p.action); o.thanks = MZ_URL(p.thanks); o.source = S(p.source, 60); }
+  else if (MZ_EXT.types[type]) return MZ_EXT.types[type].norm(p, {S, id, items, url: MZ_URL, rich: mzRich});
   return o;
 }
 function mzNormNode(x, depth, ctr) {
@@ -155,16 +162,22 @@ function mzNormNode(x, depth, ctr) {
 }
 function mzNormPage(x) {
   x = x && typeof x === 'object' ? x : {}; const root = mzNormNode(x.root) || mzNode('page'); root.type = 'page'; const sl = String(x.slug || '').toLowerCase().replace(/[^a-z0-9-/]/g, '').slice(0, 60);
-  return {id: /^[\w-]{1,40}$/.test(x.id || '') ? x.id : mzId(), name: MZ_STR(x.name, 60) || 'Página', slug: sl, home: !!x.home, priv: !!x.priv, kind: x.kind === 'campaign' ? 'campaign' : 'page', seo: {title: MZ_STR(x.seo && x.seo.title, 120), desc: MZ_STR(x.seo && x.seo.desc, 300)}, bg: mzHex(x.bg) ? x.bg : '', guides: {v: (x.guides && Array.isArray(x.guides.v) ? x.guides.v : []).slice(0, 40).map(Number).filter(isFinite), h: (x.guides && Array.isArray(x.guides.h) ? x.guides.h : []).slice(0, 40).map(Number).filter(isFinite)}, root};
+  return {id: /^[\w-]{1,40}$/.test(x.id || '') ? x.id : mzId(), name: MZ_STR(x.name, 60) || 'Página', slug: sl, home: !!x.home, priv: !!x.priv, kind: x.kind === 'campaign' ? 'campaign' : 'page', nav: ['h', 'v', 'map'].includes(x.nav) ? x.nav : '', seo: {title: MZ_STR(x.seo && x.seo.title, 120), desc: MZ_STR(x.seo && x.seo.desc, 300)}, bg: mzHex(x.bg) ? x.bg : '', guides: {v: (x.guides && Array.isArray(x.guides.v) ? x.guides.v : []).slice(0, 40).map(Number).filter(isFinite), h: (x.guides && Array.isArray(x.guides.h) ? x.guides.h : []).slice(0, 40).map(Number).filter(isFinite)}, root};
 }
 function normalizeMesa(x) {
-  x = x && typeof x === 'object' ? x : {}; const out = {v: 1, rev: Math.max(0, Math.round(+x.rev) || 0), cur: '', ds: mzNormDs(x.ds), pages: [], comps: [], versions: [], favs: []};
+  x = x && typeof x === 'object' ? x : {}; const out = {v: 1, rev: Math.max(0, Math.round(+x.rev) || 0), cur: '', ds: mzNormDs(x.ds), pages: [], comps: [], versions: [], favs: [], refs: []};
   out.pages = (Array.isArray(x.pages) ? x.pages : []).slice(0, MZ_LIMITS.pages).map(mzNormPage);
   if (out.pages.length && !out.pages.some(p => p.home)) out.pages[0].home = true; else { let seen = false; out.pages.forEach(p => { if (p.home) { if (seen) p.home = false; seen = true; } }); }
   out.comps = (Array.isArray(x.comps) ? x.comps : []).slice(0, MZ_LIMITS.comps).map(c => { const r = mzNormNode(c && c.root); return r ? {id: /^[\w-]{1,40}$/.test(c.id || '') ? c.id : mzId(), name: MZ_STR(c.name, 60) || 'Componente', root: r} : null; }).filter(Boolean);
   out.versions = (Array.isArray(x.versions) ? x.versions : []).slice(0, MZ_LIMITS.versions).filter(v => v && typeof v.data === 'string' && v.data.length < 400000).map(v => ({id: /^[\w-]{1,40}$/.test(v.id || '') ? v.id : mzId(), name: MZ_STR(v.name, 80), ts: MZ_STR(v.ts, 40), approved: !!v.approved, auto: !!v.auto, data: v.data}));
+  out.refs = (Array.isArray(x.refs) ? x.refs : []).slice(0, 60).map(mzNormRef).filter(Boolean);
   out.favs = (Array.isArray(x.favs) ? x.favs : []).slice(0, 60).filter(f => /^(el|pre|lib):[\w-]{1,60}$/.test(String(f))); out.cur = out.pages.some(p => p.id === x.cur) ? x.cur : (out.pages[0] ? out.pages[0].id : '');
   return out;
+}
+/* referências: layouts que a pessoa admira (só para estudar a estrutura) */
+function mzNormRef(r) {
+  if (!r || typeof r !== 'object') return null; const url = /^https?:\/\//i.test(String(r.url || '').trim()) ? MZ_URL(r.url) : '', name = MZ_STR(r.name, 80).trim();
+  if (!name && !url) return null; return {id: /^[\w-]{1,40}$/.test(String(r.id || '')) ? String(r.id) : mzId(), name: name || url.replace(/^https?:\/\/(www\.)?/i, '').slice(0, 60), url, imgId: /^[\w-]{1,80}$/.test(String(r.imgId || '')) ? String(r.imgId) : '', notes: MZ_STR(r.notes, 1500), ts: MZ_STR(r.ts, 40)};
 }
 function normalizeMesaLib(x) {
   const items = (x && Array.isArray(x.items) ? x.items : []).slice(0, MZ_LIMITS.lib).map(i => { const r = mzNormNode(i && i.root); return r && ['section', 'component', 'block', 'page'].includes(i.kind) ? {id: /^[\w-]{1,40}$/.test(i.id || '') ? i.id : mzId(), kind: i.kind, name: MZ_STR(i.name, 60) || 'Item', root: r, ts: MZ_STR(i.ts, 40), from: MZ_STR(i.from, 80)} : null; }).filter(Boolean);
@@ -192,17 +205,19 @@ function mzNodeHtml(n, ctx, root) {
   const tag = (t, inner, extra) => { const c = cls.slice(); if (!MZ_CONT.includes(n.type) && !inner && ed) c.push('mz-void'); return `<${t} class="${c.join(' ')}" ${at.join(' ')}${extra ? ' ' + extra : ''}>${inner == null ? '' : inner}</${t}>`; };
   const kids = () => (n.children || []).map(c => mzNodeHtml(c, ctx)).join('');
   const img = id => ctx.img ? ctx.img(id) : '';
+  const lk = h => ctx.href && !ed ? ctx.href(h) : h, lkh = h => ctx.href && !ed && h ? String(h).replace(/href="([^"]*)"/g, (m, u) => 'href="' + mzEsc(ctx.href(u.replace(/&amp;/g, '&'))) + '"') : h;
+  if (MZ_EXT.types[n.type]) return MZ_EXT.types[n.type].html(n, {ctx, ed, cls, at, P, img, lk, lkh, esc: mzEsc, rich: mzRich});
   switch (n.type) {
     case 'page': return `<div class="${cls.join(' ')} mz-page" ${at.join(' ')}>${kids()}</div>`;
     case 'section': case 'container': { const t = P.tag || (n.type === 'section' ? 'section' : 'div'); if (P.boxed) return `<${t} class="${cls.join(' ')} mz-boxed" ${at.join(' ')}><div class="mz-in">${kids()}</div></${t}>`; return `<${t} class="${cls.join(' ')}" ${at.join(' ')}>${kids()}</${t}>`; }
     case 'column': case 'div': return `<div class="${cls.join(' ')}" ${at.join(' ')}>${kids()}</div>`;
-    case 'form': return `<form class="${cls.join(' ')} mz-form" ${at.join(' ')} ${ed ? 'onsubmit="return false"' : `data-leads="${mzEsc(P.action)}" data-thanks="${mzEsc(P.thanks)}" data-source="${mzEsc(P.source)}" novalidate`}>${kids()}</form>`;
-    case 'link': return `<a class="${cls.join(' ')}" ${at.join(' ')} href="${ed ? '#' : mzEsc(P.href || '#')}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${kids()}</a>`;
+    case 'form': return `<form class="${cls.join(' ')} mz-form" ${at.join(' ')} ${ed ? 'onsubmit="return false"' : `data-leads="${mzEsc(P.action)}" data-thanks="${mzEsc(lk(P.thanks))}" data-source="${mzEsc(P.source)}" novalidate`}>${kids()}</form>`;
+    case 'link': return `<a class="${cls.join(' ')}" ${at.join(' ')} href="${ed ? '#' : mzEsc(lk(P.href || '#'))}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${kids()}</a>`;
     case 'heading': return `<h${P.level || 2} class="${cls.join(' ')}" ${at.join(' ')}>${P.html && P.hOf === P.text ? P.html : mzEsc(P.text).replace(/\n/g, '<br>')}</h${P.level || 2}>`;
-    case 'text': return `<div class="${cls.join(' ')}" ${at.join(' ')}>${P.html}</div>`;
-    case 'image': case 'logo': { const u = P.imgId ? img(P.imgId) : P.src; const im = u ? `<img src="${mzEsc(u)}" alt="${mzEsc(P.alt)}" ${ed ? 'draggable="false"' : 'loading="lazy"'}>` : '<span class="mz-ph">Imagem</span>'; return `<div class="${cls.join(' ')} mz-img" ${at.join(' ')}>${P.href && !ed ? `<a href="${mzEsc(P.href)}">${im}</a>` : im}${P.ovC ? `<span class="mz-ov" style="background:${P.ovC};mix-blend-mode:${P.ovM}"></span>` : ''}</div>`; }
+    case 'text': return `<div class="${cls.join(' ')}" ${at.join(' ')}>${lkh(P.html)}</div>`;
+    case 'image': case 'logo': { const u = P.imgId ? img(P.imgId) : P.src; const im = u ? `<img src="${mzEsc(u)}" alt="${mzEsc(P.alt)}" ${ed ? 'draggable="false"' : 'loading="lazy"'}>` : '<span class="mz-ph">Imagem</span>'; return `<div class="${cls.join(' ')} mz-img" ${at.join(' ')}>${P.href && !ed ? `<a href="${mzEsc(lk(P.href))}">${im}</a>` : im}${P.ovC ? `<span class="mz-ov" style="background:${P.ovC};mix-blend-mode:${P.ovM}"></span>` : ''}</div>`; }
     case 'video': { const v = mzVideoEmbed(P.url); let inner = '<span class="mz-ph">Cole o endereço do vídeo</span>'; if (v && v.iframe) inner = ed ? `<div class="mz-vph">▶ Vídeo</div>` : `<iframe src="${mzEsc(v.iframe)}" loading="lazy" allowfullscreen title="Vídeo"></iframe>`; else if (v && v.file) inner = ed ? `<div class="mz-vph">▶ Vídeo</div>` : `<video src="${mzEsc(v.file)}" controls playsinline${P.poster ? ` poster="${mzEsc(img(P.poster))}"` : ''}></video>`; return `<div class="${cls.join(' ')} mz-video" ${at.join(' ')} style="aspect-ratio:${P.ratio}">${inner}</div>`; }
-    case 'button': return `<a class="${cls.join(' ')} mz-btn mz-btn-${P.variant}" ${at.join(' ')} href="${ed ? '#' : mzEsc(P.href || '#')}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${mzEsc(P.text)}</a>`;
+    case 'button': return `<a class="${cls.join(' ')} mz-btn mz-btn-${P.variant}" ${at.join(' ')} href="${ed ? '#' : mzEsc(lk(P.href || '#'))}"${P.newTab && !ed ? ' target="_blank" rel="noopener"' : ''}>${mzEsc(P.text)}</a>`;
     case 'icon': return `<span class="${cls.join(' ')} mz-icon" ${at.join(' ')} style="font-size:${P.size}px">${mzIcon(P.name, '1em')}</span>`;
     case 'svg': return `<div class="${cls.join(' ')} mz-svg" ${at.join(' ')}>${P.svg || '<span class="mz-ph">SVG</span>'}</div>`;
     case 'list': { const t = P.ordered ? 'ol' : 'ul'; return `<${t} class="${cls.join(' ')} mz-list${P.icon ? ' mz-list-i' : ''}" ${at.join(' ')}>${P.items.map(i => `<li>${P.icon ? `<span class="mz-li">${mzIcon(P.icon, 18)}</span>` : ''}<span>${mzEsc(i)}</span></li>`).join('')}</${t}>`; }
@@ -211,10 +226,10 @@ function mzNodeHtml(n, ctx, root) {
     case 'spacer': return `<div class="${cls.join(' ')} mz-spacer" ${at.join(' ')}></div>`;
     case 'input': { const lab = P.label ? `<span class="mz-lab">${mzEsc(P.label)}${P.required ? ' *' : ''}</span>` : ''; let f; if (P.kind === 'textarea') f = `<textarea name="${P.name}" placeholder="${mzEsc(P.placeholder)}" rows="4"${P.required ? ' required' : ''}></textarea>`; else if (P.kind === 'select') f = `<select name="${P.name}"${P.required ? ' required' : ''}>${P.options.map(o => `<option>${mzEsc(o)}</option>`).join('')}</select>`; else f = `<input type="${P.kind}" name="${P.name}" placeholder="${mzEsc(P.placeholder)}"${P.required ? ' required' : ''}>`; return `<label class="${cls.join(' ')} mz-field" ${at.join(' ')}>${lab}${f}</label>`; }
     case 'checkbox': case 'radio': return `<label class="${cls.join(' ')} mz-check" ${at.join(' ')}><input type="${n.type}" name="${P.name}" value="${mzEsc(P.value)}"${P.required ? ' required' : ''}><span>${mzEsc(P.label)}</span></label>`;
-    case 'menu': return `<nav class="${cls.join(' ')} mz-menu" ${at.join(' ')}><ul>${P.items.map(i => `<li><a href="${ed ? '#' : mzEsc(i.href)}">${mzEsc(i.label)}</a></li>`).join('')}</ul></nav>`;
+    case 'menu': return `<nav class="${cls.join(' ')} mz-menu" ${at.join(' ')}><ul>${P.items.map(i => `<li><a href="${ed ? '#' : mzEsc(lk(i.href))}">${mzEsc(i.label)}</a></li>`).join('')}</ul></nav>`;
     case 'badge': return `<span class="${cls.join(' ')} mz-badge" ${at.join(' ')}>${mzEsc(P.text)}</span>`;
-    case 'accordion': return `<div class="${cls.join(' ')} mz-acc" ${at.join(' ')}>${P.items.map((i, k) => `<details${k === 0 && ed ? ' open' : ''}><summary>${mzEsc(i.q)}</summary><div class="mz-acc-a">${i.a}</div></details>`).join('')}</div>`;
-    case 'tabs': return `<div class="${cls.join(' ')} mz-tabs" ${at.join(' ')}><div class="mz-tabs-h" role="tablist">${P.items.map((i, k) => `<button type="button" class="${k === 0 ? 'on' : ''}" data-tab="${k}">${mzEsc(i.t)}</button>`).join('')}</div>${P.items.map((i, k) => `<div class="mz-tabs-p${k === 0 ? ' on' : ''}" data-pane="${k}">${i.c}</div>`).join('')}</div>`;
+    case 'accordion': return `<div class="${cls.join(' ')} mz-acc" ${at.join(' ')}>${P.items.map((i, k) => `<details${k === 0 && ed ? ' open' : ''}><summary>${mzEsc(i.q)}</summary><div class="mz-acc-a">${lkh(i.a)}</div></details>`).join('')}</div>`;
+    case 'tabs': return `<div class="${cls.join(' ')} mz-tabs" ${at.join(' ')}><div class="mz-tabs-h" role="tablist">${P.items.map((i, k) => `<button type="button" class="${k === 0 ? 'on' : ''}" data-tab="${k}">${mzEsc(i.t)}</button>`).join('')}</div>${P.items.map((i, k) => `<div class="mz-tabs-p${k === 0 ? ' on' : ''}" data-pane="${k}">${lkh(i.c)}</div>`).join('')}</div>`;
     case 'countdown': return `<div class="${cls.join(' ')} mz-cd" ${at.join(' ')} data-t="${mzEsc(P.date)}" data-done="${mzEsc(P.done)}">${['dias', 'horas', 'min', 'seg'].map(l => `<div><b>0</b><small>${l}</small></div>`).join('')}</div>`;
     case 'table': return `<div class="${cls.join(' ')} mz-tbl" ${at.join(' ')}><table>${P.rows.map((r, i) => `<tr>${r.map(c => i === 0 ? `<th>${mzEsc(c)}</th>` : `<td>${mzEsc(c)}</td>`).join('')}</tr>`).join('')}</table></div>`;
     case 'gallery': return `<div class="${cls.join(' ')} mz-gal" ${at.join(' ')} style="--mz-cols:${P.cols}">${P.imgs.map(i => `<img src="${mzEsc(img(i))}" alt="" ${ed ? 'draggable="false"' : 'loading="lazy"'}>`).join('') || '<span class="mz-ph">Galeria</span>'}</div>`;
@@ -260,15 +275,19 @@ d.querySelectorAll('form.mz-form').forEach(function(f){f.addEventListener('submi
 /* CSS completo de uma árvore: variáveis do DS + base + regras por breakpoint (desktop primeiro; t ≤1024px; m ≤767px) */
 function mzTreeCss(root, ds, ctx) {
   ctx.seen = new Set(); const c = mzNodeCss(root, ctx);
-  return mzDsCss(ds) + MZ_BASE_CSS + c.d + (c.t ? `@media (max-width:1024px){${c.t}}` : '') + (c.m ? `@media (max-width:767px){${c.m}}` : '');
+  return mzDsCss(ds) + mzFontFaceCss(ds, ctx.img) + MZ_BASE_CSS + MZ_EXT.css + c.d + (c.t ? `@media (max-width:1024px){${c.t}}` : '') + (c.m ? `@media (max-width:767px){${c.m}}` : '');
+}
+/* fontes enviadas pela pessoa: @font-face com o arquivo (blob na mesa, data: no HTML, caminho no ZIP) */
+function mzFontFaceCss(ds, urlFn) {
+  return (ds.custom || []).map(c => { const u = urlFn ? urlFn(c.imgId) : ''; if (!u) return ''; return `@font-face{font-family:'${c.family}';src:url('${String(u).replace(/'/g, '%27')}') format('${({woff2: 'woff2', woff: 'woff', ttf: 'truetype', otf: 'opentype'})[c.fmt] || 'truetype'}');font-weight:${c.weight};font-style:${c.italic ? 'italic' : 'normal'};font-display:swap}`; }).join('');
 }
 const MZ_FONT_LIST = ['Poppins', 'Inter', 'Montserrat', 'Roboto', 'Open Sans', 'Lato', 'Playfair Display', 'Merriweather', 'Raleway', 'Nunito', 'DM Sans', 'Work Sans', 'Oswald', 'Bebas Neue', 'Lora', 'Space Grotesk'];
 function mzTreeFonts(root, set) { set = set || new Set(); const take = v => { String(v || '').replace(/['"]?([A-Z][\w ]{1,38})['"]?\s*(?:,|$)/g, (m, f) => { if (!/^(Arial|Helvetica|Georgia|Times|Courier|Verdana|Tahoma|Trebuchet|Impact)/i.test(f)) set.add(f.trim()); return m; }); };
   mzWalk(root, n => { ['d', 't', 'm'].forEach(b => { const f = n.style && n.style[b] && n.style[b].fontFamily; if (f) take(String(f).split(',')[0]); }); const h = n.props && (n.props.html || ''); if (h) String(h).replace(/font-family:\s*([^;"]+)/gi, (m, f) => { take(f.split(',')[0]); return m; }); }); return set; }
-const mzFontsUrl = (ds, root) => { const s = new Set([ds.fonts.heading, ds.fonts.body]); if (root) mzTreeFonts(root, s); const f = [...s].filter(x => /^[A-Za-z][\w ]{1,38}$/.test(x) && (MZ_FONT_LIST.includes(x) || (root && x !== 'system-ui' && x !== 'sans-serif' && x !== 'serif'))); return f.length ? 'https://fonts.googleapis.com/css2?' + f.map(x => 'family=' + x.replace(/ /g, '+') + ':wght@300;400;500;600;700;800;900').join('&') + '&display=swap' : ''; };
+const mzFontsUrl = (ds, root) => { const s = new Set([ds.fonts.heading, ds.fonts.body].concat(ds.gfonts || [])), cu = new Set((ds.custom || []).map(c => c.family)); if (root) mzTreeFonts(root, s); const f = [...s].filter(x => !cu.has(x) && /^[A-Za-z][\w ]{1,38}$/.test(x) && (MZ_FONT_LIST.includes(x) || (ds.gfonts || []).includes(x) || (root && x !== 'system-ui' && x !== 'sans-serif' && x !== 'serif'))); return f.length ? 'https://fonts.googleapis.com/css2?' + f.map(x => 'family=' + x.replace(/ /g, '+') + ':wght@300;400;500;600;700;800;900').join('&') + '&display=swap' : ''; };
 /* documento completo (saída: HTML, preview, exportação) */
 function mzDoc(m, page, o) {
-  o = o || {}; const ctx = {mode: 'out', comps: m.comps, img: o.img || (() => '')}, body = mzNodeHtml(page.root, ctx), css = mzTreeCss(page.root, m.ds, ctx), fu = mzFontsUrl(m.ds, page.root);
+  o = o || {}; const ctx = {mode: 'out', comps: m.comps, img: o.img || (() => ''), href: o.href}, body = mzNodeHtml(page.root, ctx), css = mzTreeCss(page.root, m.ds, ctx), fu = mzFontsUrl(m.ds, page.root);
   const seo = page.seo || {}, title = seo.title || page.name;
-  return `<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${mzEsc(title)}</title>\n${seo.desc ? `<meta name="description" content="${mzEsc(seo.desc)}">\n` : ''}${page.priv ? '<meta name="robots" content="noindex,nofollow">\n' : ''}${fu ? `<link rel="stylesheet" href="${fu}">\n` : ''}${o.cssFile ? `<link rel="stylesheet" href="${o.cssFile}">` : `<style>\n${css}\n</style>`}\n</head>\n<body>\n${body}\n<script>${MZ_RUNTIME}</script>\n</body>\n</html>`;
+  return `<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${mzEsc(title)}</title>\n${seo.desc ? `<meta name="description" content="${mzEsc(seo.desc)}">\n` : ''}${page.priv ? '<meta name="robots" content="noindex,nofollow">\n' : ''}${fu ? `<link rel="stylesheet" href="${fu}">\n` : ''}${o.cssFile ? `<link rel="stylesheet" href="${o.cssFile}">` : `<style>\n${css}\n</style>`}\n</head>\n<body${page.nav ? ` data-nav="${page.nav}"` : ''}>\n${body}\n<script>${MZ_RUNTIME}</script>\n${MZ_EXT.js ? `<script>${MZ_EXT.js}</script>\n` : ''}${o.extraScript ? `<script>${o.extraScript}</script>\n` : ''}</body>\n</html>`;
 }

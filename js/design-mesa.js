@@ -2,7 +2,7 @@
    páginas embaixo, menu "Salvar e gerar"). Reaproveita todos os recursos do editor que já existia (camadas, texto por palavra, fotos, logos, vídeos, estilos,
    exportações, variações e tamanhos). Carregado depois de design-ui.js: redefine a casca do editor, o encaixe do palco e o painel de páginas. */
 const DZM = {zoom: null};
-const dzmLabel = L => {
+let dzmLabel = L => {
   const plain = t => String(t || '').replace(/\*\*/g, '').replace(/\s+/g, ' ').trim();
   if (L.type === 'text') return {ic: 'T', nm: plain(L.content).slice(0, 34) || 'Texto', sub: L.role || 'texto'};
   if (L.type === 'rect') return {ic: '▭', nm: 'Forma', sub: L.role || ''};
@@ -11,6 +11,7 @@ const dzmLabel = L => {
   if (L.role === 'logo') return {ic: '◉', nm: 'Logo', sub: ''};
   return {ic: '▣', nm: 'Foto', sub: L.role || 'imagem'};
 };
+/* (a casca nova do editor, com trilho de ferramentas e painéis em abas, está em design-ferramentas.js e substitui esta) */
 function dzEditorShell(p, r) {
   const s = dzSet(), back = dz.fromBook ? '‹ Voltar ao e-book' : '‹ Voltar';
   const extra = (typeof gridUI !== 'undefined' && gridUI.from ? '<button class="dzm-btn" onclick="gridBack()">‹ Grid</button>' : '') + (typeof feedUI !== 'undefined' && feedUI.from && feedUI.id ? '<button class="dzm-btn" onclick="feedUI.from=false;go(\'feed\')">‹ Feed</button>' : '');
