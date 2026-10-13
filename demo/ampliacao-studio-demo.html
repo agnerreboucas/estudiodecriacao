@@ -30270,7 +30270,7 @@ async function fdRead() {
   const T = fdParse(text), K = docParse(text); let A = null, via = [], err = '';
   if (T.count) via.push('formato do template');
   if (typeof aiReady === 'function' && aiReady()) { try { A = await fdAI(text); via.push('IA'); } catch (e) { err = e.message; } }
-  const KA = fdFromK(K); via.push('leitor de seções');
+  const strong = T.count >= 15, KA = strong ? {} : fdFromK(K); if (!strong) via.push('leitor de seções'); /* documento no formato do template: o leitor de seções só traria ruído */
   let ans = fpMerge(fpMerge({}, KA), A || {}); ans = fpMerge(ans, T.answers);
   FD.res = {T, A, K, ans, via, err}; fdReview();
 }
@@ -30293,7 +30293,7 @@ async function fdConfirm(build) {
   }
   const st = fpSt(p); st.answers = FD.replace && FD.target === 'cur' ? fpMerge(st.answers, r.ans) : fdFillEmpty(st.answers, r.ans); st.updatedAt = new Date().toISOString();
   const br = p.brief || (p.brief = {}), doc = br.doc || (br.doc = {name: '', at: '', text: '', prev: {}}); doc.name = FD.name.slice(0, 120); doc.at = new Date().toISOString(); doc.text = String(FD.text).slice(0, 60000);
-  FD.icpDoc = FD.icp && r.K.icps.length ? r.K : null; persist(); closeModal(); FP.open = {}; setActiveProject(p.id);
+  FD.icpDoc = FD.icp && r.K.icps.length && !(r.T && r.T.count >= 15) ? r.K : null; persist(); closeModal(); FP.open = {}; setActiveProject(p.id);
   if (build && typeof esAutoRun === 'function') { ui.tab = 'esteira'; go('project'); await esAutoRun({icpDoc: FD.icpDoc}); return; }
   if (FD.icpDoc && typeof docApply === 'function') { try { docApply(p, FD.icpDoc, {banks: true}); persist(); } catch (e) { /* os públicos são um extra */ } }
   ui.tab = 'ficha'; go('project'); toast('Documento levado para a ficha. Confira as respostas e clique em Aplicar ao projeto.');

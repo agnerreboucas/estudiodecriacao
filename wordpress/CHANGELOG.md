@@ -1,5 +1,9 @@
 # Histórico de versões
 
+## 1.20.1
+- **Modelo de projeto completo (exemplo preenchido).** `docs/Modelo-Projeto-Completo-EXEMPLO.docx` (também .md e .pdf): um projeto fictício inteiro (clínica de nutrição "Equilíbrio Nutrição") com **todas as 98 perguntas** da Ficha respondidas, 3 produtos/serviços, 3 concorrentes, 3 depoimentos, marca, tom de voz e marketing. Está no mesmo formato do template: serve de **referência** do nível de detalhe que cada campo pede e pode ser subido em **Subir documento do projeto** para ver o Studio montar o projeto, a campanha, as artes, os carrosséis e o site. Tudo é exemplo (nomes, preços e depoimentos inventados, marcados como tal).
+- **Documento no formato do template agora é lido só pelo leitor exato.** Antes, o leitor de seções rodava junto e podia criar produtos e públicos a mais. Agora, quando o documento traz 15 ou mais respostas no formato do template, só ele vale.
+
 ## 1.20.0
 - **Mesa de páginas (sites) com todas as funções do guia da Mesa.** Visual escuro estilo Figma/Photoshop com **trilho de 16 ícones** à esquerda (Esc recolhe o painel, 📌 fixa). Barra de cima nova: **Links** (mapa de links entre as páginas, atualizar os menus de todas as páginas, verificador de links quebrados com "Corrigir para…") e **Fontes** (fontes usadas, instalar do Google, enviar arquivo, trocar no site inteiro, aviso de fonte faltando depois de importar HTML ou tema), indicador **Salvo hh:mm** e **Ctrl+S**.
 - **Referências** (aba nova): layouts que você admira, com nome, link, imagem e anotações, só para estudar.
