@@ -1,8 +1,8 @@
 /* Gera o MODELO DE PROJETO COMPLETO (exemplo fictício) nos formatos Word e Markdown, no mesmo formato do template da Ficha.
-   Uso: servidor estático na porta 8093 e `NODE_PATH=$(npm root -g) node tools/modelo-projeto/build.js`.
+   Uso: node build.js [arquivo-json-sem-extensão] [nome-de-saída]. Servidor estático na porta 8093 e `NODE_PATH=$(npm root -g) node tools/modelo-projeto/build.js`.
    Depois confere que o Studio lê o arquivo de volta e preenche todas as respostas (viagem de ida e volta). */
 const {chromium} = require('playwright'), fs = require('fs'), path = require('path');
-const R = path.resolve(__dirname, '..', '..'), ans = JSON.parse(fs.readFileSync(path.join(__dirname, 'exemplo.json'), 'utf8'));
+const R = path.resolve(__dirname, '..', '..'), SRC = process.argv[2] || 'exemplo', OUT = process.argv[3] || 'Modelo-Projeto-Completo-EXEMPLO', ans = JSON.parse(fs.readFileSync(path.join(__dirname, SRC + '.json'), 'utf8'));
 (async () => {
   const b = await chromium.launch({executablePath: '/opt/pw-browsers/chromium', args: ['--no-sandbox']}), pg = await b.newPage();
   await pg.goto('http://127.0.0.1:8093/index.html'); await pg.waitForTimeout(1000);
@@ -12,7 +12,7 @@ const R = path.resolve(__dirname, '..', '..'), ans = JSON.parse(fs.readFileSync(
   }, ans);
   let docx;
   if (r.isBlob) { const buf = await pg.evaluate(async a => { const bl = fdDocx(a, false); return Array.from(new Uint8Array(await bl.arrayBuffer())); }, ans); docx = Buffer.from(buf); } else docx = Buffer.from(r.bytes);
-  fs.writeFileSync(path.join(R, 'docs', 'Modelo-Projeto-Completo-EXEMPLO.md'), r.md); fs.writeFileSync(path.join(R, 'docs', 'Modelo-Projeto-Completo-EXEMPLO.docx'), docx);
+  fs.writeFileSync(path.join(R, 'docs', OUT + '.md'), r.md); fs.writeFileSync(path.join(R, 'docs', OUT + '.docx'), docx);
   // ida e volta: tudo o que foi escrito tem de voltar igual
   const got = r.parsed.answers || r.parsed.ans || r.parsed; let miss = [], total = 0;
   const norm = v => (Array.isArray(v) ? v.slice().sort().join('; ') : String(v == null ? '' : v)).replace(/\s+/g, ' ').trim();
